@@ -6,6 +6,7 @@ try {
     
     require('bootstrap');
     require('admin-lte');
+    require('datatables.net-bs4')(window, $);
 } catch (e) {}
 
 /**
