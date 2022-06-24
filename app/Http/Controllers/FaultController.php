@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Fault;
+use App\Models\Suburb;
+use App\Models\City;
 use Illuminate\Http\Request;
+use DB;
 
 class FaultController extends Controller
 {
@@ -24,9 +27,22 @@ class FaultController extends Controller
      */
     public function create()
     {
-        return view('faults.create');
+        $city = City::all();
+        return view('faults.create',compact('city'));
     }
 
+    public function findSuburb(Request $req,$id)
+    {
+        $suburb = Suburb::where('city_id',$id)
+        ->pluck("suburb","id");
+        return json_encode($suburb);
+    }
+    public function findPop(Request $req,$id)
+    {
+        $pop = Pop::where('suburb_id',$id)
+        ->pluck("pop","id");
+        return json_encode($pop);
+    }
     /**
      * Store a newly created resource in storage.
      *

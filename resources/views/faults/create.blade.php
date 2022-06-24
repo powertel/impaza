@@ -6,15 +6,9 @@ Faults
 
 @section('content')
 <section class="content">
-<div class="page-header">
-    <div class="container-fluid">
-      <div class="float-end">
-
-    </div>
-  </div>
     <div class="container-fluid justify-content-center">
         <div class="card-header">
-            <h3 class="card-title">{{_('Create Fault')}}</h3>
+            <h3 class="card-title">{{_('Add Fault')}}</h3>
             <div class="float-end">
                  <a type="button" class="btn grey btn-outline-secondary" href="javascript:history.back()">{{ __('Back') }}</a>
             </div>
@@ -25,7 +19,7 @@ Faults
                 <div class="row g-2">
                     <div class="mb-3 col-md-6">
                         <label for="customerName" class="form-label">Customer Name </label>
-                        <select class="form-select"formControlName="customer_id" (change)="getLink($event)">
+                        <select class="form-select"formControlName="customer_id">
                             <option value="0" >Select Customer Name</option>
                             <option></option>
                         </select>  
@@ -55,21 +49,22 @@ Faults
                     </div>
                     <div class="mb-3 col-md-2">
                         <label for="city" class="form-label">Fault Locale</label>
-                        <select  class="form-select">
-                            <option value="0" >Select City/Town</option>
-                            <optio></option>
+                        <select  class="form-select" name="city">
+                            <option selected="false" >Select City/Town</option>
+                            @foreach($city as $city)
+                            <option value="{{ $city->id}}">{{ $city->city }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="mb-3 col-md-2">
                         <label for="suburb" class="form-label">Suburb</label>
-                        <select  class="form-select"> 
-                            <option>Select Suburb</option>
-                            <option></option>
+                        <select   class="form-select" name="suburb">
+                            <option selected="false" >Select Suburb</option>
                         </select>
                     </div>
                     <div class="mb-3 col-md-2">
                         <label for="pop" class="form-label">POP</label>
-                        <select  class="form-select">
+                        <select id="pop" name="pop"  class="form-select">
                             <option>Select Pop</option>
                             <option></option>
                         </select>
@@ -204,4 +199,120 @@ Faults
     </div> -->
 
 </section>
+@endsection
+
+@section('scripts')
+<script>
+        jQuery(document).ready(function()
+        {
+            jQuery('select[name="city"]').on('change',function(){
+                var CityID =jQuery(this).val();
+                if(CityID)
+                {
+                    jQuery.ajax({
+                        url : '/getSuburb/' +CityID,
+                        type: "GET",
+                        dataType: "json",
+                        success:function(data)
+                        {
+                            jQuery('select[name="suburb"]').empty();
+                            jQuery.each(data,function(key,value){
+                                $('select[name="suburb"]').append('<option value="'+ key+'">'+ value +'</option>');
+                            });
+                        }
+                    });
+                }
+                else
+                {
+                    $('select[name="suburb"]').empty();
+                }
+            });
+
+            jQuery('select[name="suburb"]').on('change',function(){
+                var suburbID =jQuery(this).val();
+                if(subrubID)
+                {
+                    jQuery.ajax({
+                        url : '/getPop/' +suburbID,
+                        type: "GET",
+                        dataType: "json",
+                        success:function(data)
+                        {
+                            jQuery('select[name="pop"]').empty();
+                            jQuery.each(data,function(key,value){
+                                $('select[name="pop"]').append('<option value="'+ key+'">'+ value +'</option>');
+                            });
+                        }
+                    });
+                }
+                else
+                {
+                    $('select[name="pop"]').empty();
+                }
+            });
+        });
+        
+    </script> 
+
+   <!--  <script type="text/javascript">
+	$(document).ready(function(){
+
+		$(document).on('change','.productcategory',function(){
+
+
+			var cat_id=$(this).val();
+
+			var div=$(this).parent();
+
+			var op=" ";
+
+			$.ajax({
+				type:'get',
+				url:'{!!URL::to('findProductName')!!}',
+				data:{'id':cat_id},
+				success:function(data){
+
+					op+='<option value="0" selected disabled>chose product</option>';
+					for(var i=0;i<data.length;i++){
+					op+='<option value="'+data[i].id+'">'+data[i].productname+'</option>';
+				   }
+
+				   div.find('.productname').html(" ");
+				   div.find('.productname').append(op);
+				},
+				error:function(){
+
+				}
+			});
+		});
+
+		$(document).on('change','.productname',function () {
+			var prod_id=$(this).val();
+
+			var a=$(this).parent();
+			console.log(prod_id);
+			var op="";
+			$.ajax({
+				type:'get',
+				url:'{!!URL::to('findPrice')!!}',
+				data:{'id':prod_id},
+				dataType:'json',
+				success:function(data){
+					console.log("price");
+					console.log(data.price);
+
+					a.find('.prod_price').val(data.price);
+
+				},
+				error:function(){
+
+				}
+			});
+
+
+		});
+
+	});
+</script> 
+ -->
 @endsection

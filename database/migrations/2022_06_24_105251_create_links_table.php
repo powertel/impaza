@@ -13,9 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('faults', function (Blueprint $table) {
-            $table->id();
+        Schema::create('links', function (Blueprint $table) {
+            $table->increments('id');
+            $table->unsignedInteger('customer_id');
+            $table->string('linkName');
             $table->timestamps();
+            $table->foreign('customer_id')
+                    ->references('id')
+                    ->on('customers');
         });
     }
 
@@ -26,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('faults');
+        Schema::dropIfExists('links');
     }
 };
