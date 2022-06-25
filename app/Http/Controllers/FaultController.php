@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Fault;
 use App\Models\Suburb;
 use App\Models\City;
+use App\Models\Pop;
+use App\Models\Customer;
+use App\Models\Link;
 use Illuminate\Http\Request;
 use DB;
 
@@ -17,7 +20,9 @@ class FaultController extends Controller
      */
     public function index()
     {
-        return view('faults.index');
+        $faults = Fault::latest()->paginate(10);
+        return view('faults.index',compact('faults'))
+        ->with('i');
     }
 
     /**
@@ -28,20 +33,29 @@ class FaultController extends Controller
     public function create()
     {
         $city = City::all();
-        return view('faults.create',compact('city'));
+        $customer = Customer::all();
+        return view('faults.create',compact('customer','city'));
     }
 
-    public function findSuburb(Request $req,$id)
+    public function findSuburb($id)
     {
         $suburb = Suburb::where('city_id',$id)
         ->pluck("suburb","id");
-        return json_encode($suburb);
+        return response()->json($suburb);
     }
-    public function findPop(Request $req,$id)
+
+    public function findPop($id)
     {
         $pop = Pop::where('suburb_id',$id)
         ->pluck("pop","id");
-        return json_encode($pop);
+        return response()->json($pop);
+    }
+
+    public function findLink($id)
+    {
+        $link = Link::where('customer_id',$id)
+        ->pluck("linkName","id");
+        return response()->json($link);
     }
     /**
      * Store a newly created resource in storage.
@@ -51,7 +65,9 @@ class FaultController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        Fault::create($request->all());
+    
+        return redirect()->route('faults.index');
     }
 
     /**
@@ -60,9 +76,9 @@ class FaultController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Fault $fault)
     {
-        //
+        return view('faults.show',compact('fault'));
     }
 
     /**
@@ -71,9 +87,9 @@ class FaultController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Fault $fault)
     {
-        //
+        return view('faults.edit',compact('fault'));
     }
 
     /**

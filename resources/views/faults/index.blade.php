@@ -8,6 +8,8 @@ Faults
 <section class="content">
 
 <div class="card">
+
+    <!--Card Header-->
     <div class="card-header">
         <h3 class="card-title">{{_('Faults')}}</h3>
         <div class="card-tools">
@@ -16,36 +18,38 @@ Faults
     </div>
     <!-- /.card-header -->
     <div class="card-body table-responsive p-0">
-        <table class="table table-hover">
+        <table  class="table table-striped">
             <thead>
                 <tr>
-                <th>Fault Id</th>
-                    <th>Customer Name</th>
+                    <th>No.</th>
+                    <th>Contact Name</th>
                     <th>Account Manager</th>
                     <th>Link Name</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
+                @foreach ($faults as $fault)
                  <tr >
-                    <td>1</td>
-                    <td>ZB Bank</td>
-                    <td>Freedom</td>
-                    <td>ZB_ANGWA_ZB</td>
+                    <td>{{ ++$i }}</td>
+                    <td>{{ $fault->contactName }}</td>
+                    <td>{{ $fault->accountManager }}</td>
+                    <td>{{ $fault->linkName }}</td>
                     <td class="table-action" style="width: 90px;">
                         <div class="dropdown">
                             <a href="#"  data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-ellipsis-h"></i>
                             </a>
                             <div class="dropdown-menu dropdown-menu-end">
-                                <a href="{{ route('faults.create') }}" class="dropdown-item btn btn-info" >Assess</a>
-                                <a href="{{ route('faults.create') }}" class="dropdown-item" >View</a>
+                                <a href="{{ route('faults.edit',$fault->id) }}" class="dropdown-item btn btn-info" >Assess</a>
+                                <a href="{{ route('faults.show',$fault->id) }}" class="dropdown-item" >View</a>
                 
                             </div>
                         </div>
                     </td>
                 </tr>
-            </tbody>
+                @endforeach
+            </tbody> 
         </table>
     </div>
     <!-- /.card-body -->

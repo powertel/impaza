@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FaultController;
-use App\Http\Controllers\DropdownController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,5 +22,6 @@ Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::resource('faults', FaultController::class);
-Route::get('getSuburb/{id}', [FaultController::class,'findSuburb']);
-Route::get('getPop/{id}', [FaultController::class,'findPop']);
+Route::get('suburb/{id}', [FaultController::class,'findSuburb'])->name('suburb');
+Route::get('pop/{id}', [FaultController::class,'findPop'])->name('pop');
+Route::get('link/{id}', [FaultController::class,'findLink'])->name('link');
