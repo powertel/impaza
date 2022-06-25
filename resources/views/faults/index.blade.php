@@ -11,7 +11,7 @@ Faults
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">{{_('Faults')}}</h3>
+        <h3 class="card-title" style="text-transform: uppercase; font-family: Times New Roman, Times, serif;">{{_('Faults')}}</h3>
         <div class="card-tools">
             <a  class="btn btn-primary" href="{{ route('faults.create') }}"><i class="fas fa-plus-circle"></i>{{_('Add Fault')}} </a>
         </div>

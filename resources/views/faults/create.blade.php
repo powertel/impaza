@@ -10,7 +10,7 @@ Faults
         <div class="card card-primary  w-100">
             <div class="card-header">
                 <h3 class="card-title">
-                    <h3 class="text-center uppercase" style="text-transform: uppercase;">{{_('Create Fault')}}</h3> 
+                    <h3 class="text-center" style="text-transform: uppercase;font-family: Times New Roman, Times, serif;">{{_('Create Fault')}}</h3> 
                 </h3>
             </div>
             <div class="card-body">
