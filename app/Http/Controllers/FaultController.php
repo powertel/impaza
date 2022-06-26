@@ -91,7 +91,10 @@ class FaultController extends Controller
     {
         $city = City::all();
         $customer = Customer::all();
-        return view('faults.edit',compact('city','customer','city'));
+        $suburb = Suburb::all();
+        $pop = Pop::all();
+        $link = Link::all();
+        return view('faults.edit',compact('fault','customer','city','suburb','pop','link'));
     }
 
     /**

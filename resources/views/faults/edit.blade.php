@@ -22,7 +22,7 @@ Faults
                             <select class="custom-select " name="customerName">
                                 <option selected disabled >Select Customer Name</option>
                                 @foreach($customer as $customer)
-{{-- {{$customer->id==$fault->id? 'selected':''}} --}}<option value="{{ $customer->id}}" selected >{{ $customer->customerName }}</option>
+{{-- {{$customer->id==$fault->id? 'selected':''}} --}}<option value="{{ $customer->id}}" {{$customer->id==1? 'selected':''}}>{{ $customer->customerName }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -59,13 +59,17 @@ Faults
                         <div class="mb-3 col-md-2">
                             <label for="suburb" class="form-label">Suburb</label>
                             <select   class="custom-select" name="suburb">
-                                <option selected disabled>Select Suburb</option>
+                                @foreach($suburb as $suburb)
+{{-- {{$customer->id==$fault->id? 'selected':''}} --}}<option value="{{ $suburb->city_id}}" selected >{{ $suburb->suburb }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="mb-3 col-md-2">
                             <label for="pop" class="form-label">POP</label>
                             <select  class="custom-select " name="pop" >
-                                <option selected disabled>Select Pop</option>
+                                @foreach($pop as $pop)
+{{-- {{$customer->id==$fault->id? 'selected':''}} --}}<option value="{{ $pop->suburb_id}}" selected >{{ $pop->pop }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -78,7 +82,9 @@ Faults
                         <div class="mb-3 col-md-6">
                             <label for="linkName" class="form-label">Link</label>
                             <select class="custom-select " name="linkName">
-                                <option selected disabled>Select Link</option>
+                                @foreach($link as $link)
+{{-- {{$customer->id==$fault->id? 'selected':''}} --}}<option value="{{ $link->customer_id}}" selected >{{ $link->linkName }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
