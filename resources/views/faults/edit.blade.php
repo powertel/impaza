@@ -14,18 +14,23 @@ Faults
                 </h3>
             </div>
             <div class="card-body">
-                <form action="" method="POST">
+                <form action="{{ route('faults.store') }}" method="POST">
                     @csrf
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="customerName" class="form-label">Customer Name </label>
-                            <select class="custom-select" value="{{ $fault->customerName }}"  name="customerName"></select>
+                            <select class="custom-select " name="customerName">
+                                <option selected disabled >Select Customer Name</option>
+                                @foreach($customer as $customer)
+{{-- {{$customer->id==$fault->id? 'selected':''}} --}}<option value="{{ $customer->id}}" selected >{{ $customer->customerName }}</option>
+                                @endforeach
+                            </select>
                         </div>
-            
+
                         <div class="mb-3 col-md-6">
                             <label for="serviceType" class="form-label">Service Type</label>
-                            <select value="{{ $fault->serviceType }}" type="text"  class="custom-select " name="serviceType">
-                                <option selected>Choose</option>
+                            <select type="text"  class="custom-select " name="serviceType">
+                                <option></option>
                                 <option>VOIP</option>
                                 <option>VPN</option>
                                 <option>INTERNET</option>
@@ -41,21 +46,25 @@ Faults
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="contactName" class="form-label">Contact Name</label>
-                            <input type="text" class="form-control"  value="{{ $fault->contactName }}" name="contactName">
+                            <input type="text" class="form-control" name="contactName">
                         </div>
                         <div class="mb-3 col-md-2">
                             <label for="city" class="form-label">Fault Locale</label>
-                            <select  class="custom-select" value="{{ $fault->city }}" name="city"></select>
+                            <select  class="custom-select " name="city">
+                                @foreach($city as $city)
+                                <option value="{{ $city->id}}" @selected(true)>{{ $city->city }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="mb-3 col-md-2">
                             <label for="suburb" class="form-label">Suburb</label>
-                            <select   class="custom-select" value="{{ $fault->suburb }}" name="suburb">
+                            <select   class="custom-select" name="suburb">
                                 <option selected disabled>Select Suburb</option>
                             </select>
                         </div>
                         <div class="mb-3 col-md-2">
                             <label for="pop" class="form-label">POP</label>
-                            <select  class="custom-select" value="{{ $fault->pop }}" name="pop" >
+                            <select  class="custom-select " name="pop" >
                                 <option selected disabled>Select Pop</option>
                             </select>
                         </div>
@@ -64,11 +73,11 @@ Faults
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="phone" class="form-label">Phone Number</label>
-                            <input type="text" class="form-control"  value="{{ $fault->phoneNumber }}" name="phoneNumber">
+                            <input type="text" class="form-control" name="phoneNumber">
                         </div>
                         <div class="mb-3 col-md-6">
                             <label for="linkName" class="form-label">Link</label>
-                            <select class="custom-select " value="{{ $fault->linkName }}" name="linkName">
+                            <select class="custom-select " name="linkName">
                                 <option selected disabled>Select Link</option>
                             </select>
                         </div>
@@ -76,11 +85,11 @@ Faults
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="email" class="form-label">Email AddressS</label>
-                            <input type="email" class="form-control" value="{{ $fault->contactEmail }}" name="contactEmail">
+                            <input type="email" class="form-control" name="contactEmail">
                         </div>
                         <div class="mb-3 col-md-6">
                             <label for="suspectedRfo" class="form-label">Suspected Reason For Outage</label>
-                            <select  class="custom-select " value="{{ $fault->suspectedRfo }}" name="suspectedRfo">
+                            <select  class="custom-select " name="suspectedRfo">
                                 <option>Choose</option>
                                 <option>No fx Light</option>
                                 <option>No PON Light</option>
@@ -94,12 +103,12 @@ Faults
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="adress" class="form-label">Address</label>
-                            <input type="text" class="form-control"  value="{{ $fault->address }}" name="address">
+                            <input type="text" class="form-control"  name="address">
                         </div>
                         <div class="mb-3 col-md-6">
                             <label for="serviceAtrr" class="form-label">Service Attribute</label>
-                            <select  class="custom-select " value="{{ $fault->serviceAttribute }}" name="serviceAttribute">
-                                <option selected value="{{ $fault->serviceAttribute }}"></option>
+                            <select  class="custom-select "  name="serviceAttribute">
+                                <option>Choose</option>
                                 <option>Port</option>
                                 <option>VPN</option>
                             </select>
@@ -109,12 +118,12 @@ Faults
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="accManager" class="form-label">Account Manager</label>
-                            <input type="text" class="form-control"  value="{{ $fault->accountManger }}" name="accountManager">
+                            <input type="text" class="form-control"  name="accountManager">
                         </div>
     
                         <div class="mb-3 col-md-6">
                             <label for="remarks" class="form-label">Remarks</label>
-                            <textarea name="remarks" class="form-control" value="{{ $fault->remarks }}" rows="1" ></textarea>
+                            <textarea name="remarks" class="form-control" rows="1" ></textarea>
                         </div>
     
                     </div>

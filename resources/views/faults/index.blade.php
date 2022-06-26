@@ -42,8 +42,8 @@ Faults
                             </a>
                             <div class="dropdown-menu dropdown-menu-end">
                                 <a href="{{ route('faults.edit',$fault->id) }}" class="dropdown-item btn btn-info" >Assess</a>
-                                <a href="{{ route('faults.show',$fault->id) }}" class="dropdown-item" >View</a>
-                
+                                <a href="{{ route('faults.show',$fault->id) }}" class="dropdown-item btn btn-info" >View</a>
+            
                             </div>
                         </div>
                     </td>
