@@ -39,7 +39,6 @@ Faults
                                 <option>CDMA VOICE</option>
                                 <option>CDMA VOICE</option>
                                 <option>E-VENDING</option>
-                                <option value="">0777430323</option>
                             </select>
                         </div>
                     </div>
