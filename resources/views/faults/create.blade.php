@@ -26,7 +26,7 @@ Faults
                                 @endforeach
                             </select>
                         </div>
-            
+
                         <div class="mb-3 col-md-6">
                             <label for="serviceType" class="form-label">Service Type</label>
                             <select type="text"  class="custom-select " name="serviceType">
@@ -39,6 +39,7 @@ Faults
                                 <option>CDMA VOICE</option>
                                 <option>CDMA VOICE</option>
                                 <option>E-VENDING</option>
+                                <option value="">0777430323</option>
                             </select>
                         </div>
                     </div>
