@@ -20,7 +20,13 @@ class FaultController extends Controller
      */
     public function index()
     {
-        $faults = Fault::latest()->paginate(10);
+        $faults = DB::table('faults')
+                ->leftjoin('customers','faults.customer_id','=','customers.id')
+                ->leftjoin('links','faults.link_id','=','links.id')
+                ->orderBy('faults.created_at', 'desc')
+                ->get(['faults.id','customers.customerName','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
+                'faults.accountManager','faults.suspectedRfo','links.linkName'
+                ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
         return view('faults.index',compact('faults'))
         ->with('i');
     }
@@ -56,7 +62,7 @@ class FaultController extends Controller
         $link = Link::where('customer_id',$id)
         ->pluck("linkName","id");
         return response()->json($link);
-    }
+    }   
     /**
      * Store a newly created resource in storage.
      *
@@ -76,8 +82,21 @@ class FaultController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Fault $fault)
+    public function show($id)
     {
+        $fault = DB::table('faults')
+                ->leftjoin('customers','faults.customer_id','=','customers.id')
+                ->leftjoin('links','faults.link_id','=','links.id')
+                ->leftjoin('cities','faults.city_id','=','cities.id')
+                ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
+                ->leftjoin('pops','faults.pop_id','=','pops.id')
+                ->where('faults.id','=',$id)
+                ->get(['faults.id','customers.customerName','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
+                'faults.accountManager','cities.city','suburbs.suburb','pops.pop','faults.suspectedRfo','links.linkName'
+                ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.remarks','faults.created_at'])
+                ->first();
+
+               //dd($fault);
         return view('faults.show',compact('fault'));
     }
 
@@ -87,14 +106,28 @@ class FaultController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Fault $fault)
+    public function edit($id)
     {
-        $city = City::all();
-        $customer = Customer::all();
-        $suburb = Suburb::all();
-        $pop = Pop::all();
-        $link = Link::all();
-        return view('faults.edit',compact('fault','customer','city','suburb','pop','link'));
+        $fault = DB::table('faults')
+            ->leftjoin('customers','faults.customer_id','=','customers.id')
+            ->leftjoin('links','faults.link_id','=','links.id')
+            ->leftjoin('cities','faults.city_id','=','cities.id')
+            ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
+            ->leftjoin('pops','faults.pop_id','=','pops.id')
+            ->where('faults.id','=',$id)
+            ->get(['faults.id','faults.customer_id','customers.customerName','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
+            'faults.accountManager','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo','faults.link_id','links.linkName'
+            ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.remarks','faults.created_at'])
+            ->first();
+
+            $cities = City::all();
+            $customers = Customer::all();
+            $suburbs = Suburb::all();
+            $pops = Pop::all();
+            $links = Link::all();
+    
+        return view('faults.edit',compact('fault','customers','cities','suburbs','pops','links'));
+
     }
 
     /**

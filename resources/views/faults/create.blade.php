@@ -15,11 +15,11 @@ Faults
             </div>
             <div class="card-body">
                 <form action="{{ route('faults.store') }}" method="POST">
-                    @csrf
+                {{ csrf_field() }}
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="customerName" class="form-label">Customer Name </label>
-                            <select class="custom-select " name="customerName">
+                            <select id="customer" class="custom-select " name="customer_id">
                                 <option selected disabled >Select Customer Name</option>
                                 @foreach($customer as $customer)
                                     <option value="{{ $customer->id}}">{{ $customer->customerName }}</option>
@@ -50,7 +50,7 @@ Faults
                         </div>
                         <div class="mb-3 col-md-2">
                             <label for="city" class="form-label">Fault Locale</label>
-                            <select  class="custom-select " name="city">
+                            <select id="city" class="custom-select " name="city_id">
                                 <option selected disabled  >Select City/Town</option>
                                 @foreach($city as $city)
                                 <option value="{{ $city->id}}">{{ $city->city }}</option>
@@ -59,13 +59,13 @@ Faults
                         </div>
                         <div class="mb-3 col-md-2">
                             <label for="suburb" class="form-label">Suburb</label>
-                            <select   class="custom-select" name="suburb">
+                            <select id="suburb"  class="custom-select" name="suburb_id">
                                 <option selected disabled>Select Suburb</option>
                             </select>
                         </div>
                         <div class="mb-3 col-md-2">
                             <label for="pop" class="form-label">POP</label>
-                            <select  class="custom-select " name="pop" >
+                            <select id="pop"  class="custom-select " name="pop_id" >
                                 <option selected disabled>Select Pop</option>
                             </select>
                         </div>
@@ -78,14 +78,14 @@ Faults
                         </div>
                         <div class="mb-3 col-md-6">
                             <label for="linkName" class="form-label">Link</label>
-                            <select class="custom-select " name="linkName">
+                            <select id="link" class="custom-select " name="link_id" >
                                 <option selected disabled>Select Link</option>
                             </select>
                         </div>
                     </div>
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
-                            <label for="email" class="form-label">Email AddressS</label>
+                            <label for="email" class="form-label">Email Address</label>
                             <input type="email" class="form-control" placeholder="email" name="contactEmail">
                         </div>
                         <div class="mb-3 col-md-6">
@@ -142,85 +142,85 @@ Faults
 @endsection
 
 @section('scripts')
- <script type="text/javascript">
-        jQuery(document).ready(function()
-        {
-            jQuery('select[name="city"]').on('change',function(){
-                var CityID =jQuery(this).val();
-                if(CityID)
-                {
-                    //call suburb on city
-                    jQuery.ajax({
-                        url : '/suburb/' +CityID,
-                        type: "GET",
-                        dataType: "json",
-                        success:function(data)
-                        {
-                            jQuery('select[name="suburb"]').html('<option  selected Disabled>Select Suburb</option>');
-                            jQuery.each(data,function(key,value){
-                                $('select[name="suburb"]').append('<option value="'+ key+'">'+ value +'</option>');
-                            });
-                        }
-                    });
-                }
-                else
-                {
-                    $('select[name="suburb"]').html('<option value="">Select Suburb</option>');
-                }
-            });
-
-            jQuery('select[name="suburb"]').on('change',function(){
-                var suburbID =jQuery(this).val();
-                if(suburbID)
-                {
-                    //select pop on suburb
-                    jQuery.ajax({
-                        url : '/pop/' +suburbID,
-                        type: "GET",
-                        dataType: "json",
-                        success:function(data)
-                        {
-                            jQuery('select[name="pop"]').html('<option selected Disabled>Select Pop</option>');
-                            jQuery.each(data,function(key,value){
-                                $('select[name="pop"]').append('<option value="'+ key+'">'+ value +'</option>');
-                            });
-                        }
-                    });
-                }
-                else
-                {
-                    $('select[name="pop"]').html('<option value="">Select Pop</option>');
-                }
-            });
-        });
-    </script>
 
 <script type="text/javascript">
-    jQuery(document).ready(function()
-    {
-        jQuery('select[name="customerName"]').on('change',function(){
-            var customerID =jQuery(this).val();
-            if(customerID)
-            {
-                //call link on customer
-                jQuery.ajax({
-                    url : '/link/' +customerID,
-                    type: "GET",
-                    dataType: "json",
-                    success:function(data)
-                    {
-                        jQuery('select[name="linkName"]').html('<option selected Disabled>Select Link</option>');
-                        jQuery.each(data,function(key,value){
-                            $('select[name="linkName"]').append('<option value="'+ key+'">'+ value +'</option>');
+    $('#city').change(function () {
+        var CityID = $(this).val();
+        if (CityID) {
+            $.ajax({
+                url : '/suburb/' +CityID,
+                type: "GET",
+                dataType: "json",
+                success: function (res) {
+                    if (res) {
+                        $("#suburb").empty();
+                        $("#pop").empty();
+                        $("#suburb").append('<option  selected Disabled>Select Suburb</option>');
+                        $("#pop").append('<option  selected Disabled>Select Pop</option>');
+                        $.each(res, function (key, value) {
+                            $("#suburb").append('<option value="' + key + '">' + value + '</option>');
                         });
+
+                    } else {
+                        $("#suburb").empty();
                     }
-                });
-            }
-            else
-            {
-                $('select[name="linkName"]').html('<option value="">Select Link</option>');
-            }
-        });
+                }
+            });
+        } else {
+            $("#suburb").empty();
+            $("#city").empty();
+        }
+    });
+    $('#suburb').on('change', function () {
+        var suburbID = $(this).val();
+        if (suburbID) {
+            $.ajax({
+                url : '/pop/' +suburbID,
+                type: "GET",
+                dataType: "json",
+                success: function (res) {
+                    if (res) {
+                        $("#pop").empty();
+                        $("#pop").append('<option  selected Disabled>Select Pop</option>');
+                        $.each(res, function (key, value) {
+                            $("#pop").append('<option value="' + key + '">' + value + '</option>');
+                        });
+
+                    } else {
+                        $("#pop").empty();
+                    }
+                }
+            });
+        } else {
+            $("#pop").empty();
+        }
+    });
+</script>
+
+<script type="text/javascript">
+    $('#customer').change(function () {
+        var customerID = $(this).val();
+        if (customerID) {
+            $.ajax({
+                type: "GET",
+                url : '/link/' +customerID,
+                dataType: "json",
+                success: function (res) {
+                    if (res) {
+                        $("#link").empty();
+                        $("#link").append('<option  selected Disabled>Select Link</option>');
+                        $.each(res, function (key, value) {
+                            $("#link").append('<option value="' + key + '">' + value + '</option>');
+                        });
+
+                    } else {
+                        $("#link").empty();
+                    }
+                }
+            });
+        } else {
+            $("#link").empty();
+        }
     });
 </script>
 

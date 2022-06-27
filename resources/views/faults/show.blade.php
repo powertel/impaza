@@ -16,61 +16,69 @@ Faults
             <div class="card-body">
                 <div class="row g-2">
                     <div class="col">
+                        <strong>Customer Name</strong>
+                        <p class="text-muted">{{ $fault->customerName }}</p>
+                    </div>
+
+                    <div class="col">
+                        <strong>Service Type</strong>
+                        <p class="text-muted">{{ $fault->serviceType }}</p>
+                    </div>
+                </div>
+                <hr>
+                <div class="row g-2">
+                    <div class="col-md-6">
                         <strong>Contact Name</strong>
                         <p class="text-muted">{{ $fault->contactName }}</p>
                     </div>
 
-                    <div class="col">
-                        <strong>Contact Email</strong>
-                        <p class="text-muted">{{ $fault->contactEmail }}</p>
+                    <div class="col-md-2">
+                        <strong>Fault Locale</strong>
+                        <p class="text-muted">{{ $fault->city }}</p>
+                    </div>
+                    <div class="col-md-2">
+                        <strong>Suburb</strong>
+                        <p class="text-muted">{{ $fault->suburb }}</p>
+                    </div>
+                    <div class="col-md-2">
+                        <strong>Pop</strong>
+                        <p class="text-muted">{{ $fault->pop }}</p>
                     </div>
                 </div>
                 <hr>
                 <div class="row g-2">
                     <div class="col">
-                        <strong>Contact Name</strong>
-                        <p class="text-muted">{{ $fault->contactName }}</p>
+                        <strong>Phone Number</strong>
+                        <p class="text-muted">{{ $fault->phoneNumber }}</p>
                     </div>
 
                     <div class="col">
-                        <strong>Contact Email</strong>
-                        <p class="text-muted">{{ $fault->contactEmail }}</p>
+                        <strong>Link</strong>
+                        <p class="text-muted">{{ $fault->linkName }}</p>
                     </div>
                 </div>
                 <hr>
                 <div class="row g-2">
                     <div class="col">
-                        <strong>Contact Name</strong>
-                        <p class="text-muted">{{ $fault->contactName }}</p>
+                        <strong>Email Address</strong>
+                        <p class="text-muted">{{ $fault->contactEmail }}</p>
                     </div>
 
                     <div class="col">
-                        <strong>Contact Email</strong>
-                        <p class="text-muted">{{ $fault->contactEmail }}</p>
+                        <strong>Reason For Outage</strong>
+                        <p class="text-muted">{{ $fault->suspectedRfo }}</p>
                     </div>
                 </div>
                 <hr>
                 <div class="row g-2">
                     <div class="col">
-                        <strong>Contact Name</strong>
-                        <p class="text-muted">{{ $fault->contactName }}</p>
+                        <strong>Physica Address</strong>
+                        <p class="text-muted">{{ $fault->address }}</p>
                     </div>
 
                     <div class="col">
-                        <strong>Contact Email</strong>
-                        <p class="text-muted">{{ $fault->contactEmail }}</p>
-                    </div>
-                </div>
-                <hr>
-                <div class="row g-2">
-                    <div class="col">
-                        <strong>Contact Name</strong>
-                        <p class="text-muted">{{ $fault->contactName }}</p>
-                    </div>
-
-                    <div class="col">
-                        <strong>Contact Email</strong>
-                        <p class="text-muted">{{ $fault->contactEmail }}</p>
+                        <strong>Service Attribute</strong>
+                        <p class="text-muted">{{ $fault->serviceAttribute }}</p>
                     </div>
                 </div>
                 <hr>
@@ -81,8 +89,8 @@ Faults
                     </div>
 
                     <div class="col">
-                        <strong>Contact Email</strong>
-                        <p class="text-muted">{{ $fault->contactEmail }}</p>
+                        <strong>Remarks</strong>
+                        <p class="text-muted">{{ $fault->remarks }}</p>
                     </div>
                 </div>
                 <div class="card-footer">

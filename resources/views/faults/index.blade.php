@@ -22,6 +22,7 @@ Faults
             <thead>
                 <tr>
                     <th>No.</th>
+                    <th>Customer Name</th>
                     <th>Contact Name</th>
                     <th>Account Manager</th>
                     <th>Link Name</th>
@@ -32,6 +33,7 @@ Faults
                 @foreach ($faults as $fault)
                  <tr >
                     <td>{{ ++$i }}</td>
+                    <td>{{ $fault->customerName }}</td>
                     <td>{{ $fault->contactName }}</td>
                     <td>{{ $fault->accountManager }}</td>
                     <td>{{ $fault->linkName }}</td>
