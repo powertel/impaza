@@ -37,16 +37,9 @@ Faults
                     <td>{{ $fault->contactName }}</td>
                     <td>{{ $fault->accountManager }}</td>
                     <td>{{ $fault->linkName }}</td>
-                    <td class="table-action" style="width: 90px;">
-                        <div class="dropdown">
-                            <a href="#"  data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-ellipsis-h"></i>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-end">
-                                <a href="{{ route('faults.edit',$fault->id) }}" class="dropdown-item btn btn-info" >Assess</a>
-                                <a href="{{ route('faults.show',$fault->id) }}" class="dropdown-item btn btn-info" >View</a>
-            
-                            </div>
+                    <td>
+                                <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-xs btn-danger" style="padding:0px 2px; color:#fff;" >Assess</a>
+                                <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-xs btn-success" style="padding:0px 2px; color:#fff;" >View</a>
                         </div>
                     </td>
                 </tr>

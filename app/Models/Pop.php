@@ -13,4 +13,9 @@ class Pop extends Model
     {
         return $this->belongsTo(Suburb::class);
     }
+
+    public function fault()
+    {
+        return $this->hasOne(Fault::class);
+    }
 }

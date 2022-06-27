@@ -32,9 +32,18 @@ class Fault extends Model
         'status',
     ];
 
-
-    public function cities(){
-        return $this->hasMany(City::class);
+    public function city()
+    {
+        return $this->belongsTo(City::class);
     }
 
+    public function suburb()
+    {
+        return $this->belongsTo(Suburb::class);
+    }
+
+    public function pop()
+    {
+        return $this->belongsTo(Pop::class);
+    }
 }

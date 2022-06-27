@@ -18,4 +18,9 @@ class Suburb extends Model
     {
         return $this->hasMany(Pop::class);
     }
+
+    public function fault()
+    {
+        return $this->hasOne(Fault::class);
+    }
 }

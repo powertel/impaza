@@ -14,17 +14,13 @@ class City extends Model
         return $this->hasMany(Suburb::class);
     }
 
-    public function fault(){
-        return $this->belongsTo(Fault::class);
-    }
-
     public function pops()
     {
         return $this -> hasManyThrough(Pop::class, Suburb::class);
     }
 
-    public function faults()
+    public function fault()
     {
-        return $this -> hasManyThrough(Fault::class, Suburb::class ,Pop::class);
+        return $this->hasOne(Fault::class);
     }
 }

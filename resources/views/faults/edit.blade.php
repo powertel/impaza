@@ -14,7 +14,8 @@ Faults
                 </h3>
             </div>
             <div class="card-body">
-                <form action="{{ route('faults.store') }}" method="POST">
+                <form  action="{{ route('faults.store', $fault->id ) }}" method="POST">
+
                     {{ method_field('PUT') }}
                     {{ csrf_field() }}
                     <div class="row g-2">
@@ -33,7 +34,7 @@ Faults
                         <div class="mb-3 col-md-6">
                             <label for="serviceType" class="form-label">Service Type</label>
                             <select type="text"  class="custom-select " value="{{$fault->serviceType}}" name="serviceType">
-                                <option></option>
+                            <option selected="selected">{{ $fault->serviceType }}</option>
                                 <option>VOIP</option>
                                 <option>VPN</option>
                                 <option>INTERNET</option>
@@ -56,7 +57,7 @@ Faults
                             <select  class="custom-select" id="city" name="city_id">
                                 <option selected="selected" value="{{ $fault->city_id}}">{{ $fault->city }}</option>
                                 @foreach($cities as $city)
-                                    @unless ($city->id ===$fault->city_id)
+                                    @unless($city->id ===$fault->city_id)
                                         <option value="{{ $city->id}}">{{ $city->city }}</option>
                                     @endunless
                                 @endforeach
@@ -67,9 +68,11 @@ Faults
                             <select   class="custom-select" id="suburb" name="suburb_id">
                              <option selected="selected" value="{{ $fault->suburb_id}}">{{ $fault->suburb }}</option>
                                 @foreach($suburbs as $suburb)
-                                    @unless ($suburb->id ===$fault->suburb_id)
-                                        <option value="{{ $city->id}}">{{ $city->city }}</option>
-                                    @endunless
+                                    @if ($suburb->city_id === $fault->city_id)
+                                        @unless($suburb->id ===$fault->suburb_id)
+                                            <option value="{{ $suburb->id}}">{{ $suburb->suburb }}</option>
+                                        @endunless                                    
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
@@ -78,9 +81,11 @@ Faults
                             <select  class="custom-select" id="pop" name="pop_id" >
                                 <option selected="selected" value="{{ $fault->pop_id}}">{{ $fault->pop }}</option>
                                 @foreach($pops as $pop)
-                                    @unless ($pop->id ===$fault->pop_id)
-                                        <option value="{{ $pop->id}}">{{ $pop->pop }}</option>
-                                    @endunless
+                                    @if($pop->suburb_id === $fault->suburb_id)
+                                        @unless($pop->id ===$fault->pop_id)
+                                            <option value="{{ $pop->id}}">{{ $pop->pop }}</option>
+                                        @endunless                                        
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
@@ -96,9 +101,11 @@ Faults
                             <select class="custom-select" id="link" name="link_id">
                             <option selected="selected" value="{{ $fault->link_id}}">{{ $fault->linkName }}</option>
                                 @foreach($links as $link)
-                                    @unless ($link->id ===$fault->link_id)
-                                        <option value="{{ $link->id}}">{{ $link->linkName }}</option>
-                                    @endunless
+                                    @if ($link->customer_id === $fault->customer_id)
+                                        @unless ($link->id ===$fault->link_id)
+                                            <option value="{{ $link->id}}">{{ $link->linkName }}</option>
+                                        @endunless                                        
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
@@ -111,7 +118,7 @@ Faults
                         <div class="mb-3 col-md-6">
                             <label for="suspectedRfo" class="form-label">Suspected Reason For Outage</label>
                             <select  class="custom-select " value="{{$fault->suspectedRfo}}" name="suspectedRfo">
-                                <option>Choose</option>
+                            <option selected="selected">{{ $fault->suspectedRfo }}</option>
                                 <option>No fx Light</option>
                                 <option>No PON Light</option>
                                 <option>BTS Down</option>
@@ -129,7 +136,7 @@ Faults
                         <div class="mb-3 col-md-6">
                             <label for="serviceAtrr" class="form-label">Service Attribute</label>
                             <select  class="custom-select " value="{{$fault->serviceAttribute}}"  name="serviceAttribute">
-                                <option>Choose</option>
+                            <option selected="selected">{{ $fault->serviceAttribute }}</option>
                                 <option>Port</option>
                                 <option>VPN</option>
                             </select>
@@ -144,7 +151,7 @@ Faults
     
                         <div class="mb-3 col-md-6">
                             <label for="remarks" class="form-label">Remarks</label>
-                            <textarea name="remarks" class="form-control" value="{{$fault->remarks}}" rows="1" ></textarea>
+                            <textarea name="remarks" class="form-control"  rows="1" >{{$fault->remarks}}</textarea>
                         </div>
     
                     </div>
@@ -163,7 +170,7 @@ Faults
 
 @section('scripts')
 <script type="text/javascript">
-    $('#city').change(function () {
+    $('#city').on('change', function () {
         var CityID = $(this).val();
         if (CityID) {
             $.ajax({
@@ -217,12 +224,36 @@ Faults
 </script>
 
 <script type="text/javascript">
-    $('#customer').change(function () {
+/*     $('#customer').change(function () {
         var customerID = $(this).val();
         if (customerID) {
             $.ajax({
                 type: "GET",
                 url : '/link/' +customerID,
+                dataType: "json",
+                success: function (res) {
+                    if (res) {
+                        $("#link").empty();
+                        $("#link").append('<option  selected Disabled>Select Link</option>');
+                        $.each(res, function (key, value) {
+                            $("#link").append('<option value="' + key + '">' + value + '</option>');
+                        });
+
+                    } else {
+                        $("#link").empty();
+                    }
+                }
+            });
+        } else {
+            $("#link").empty();
+        }
+    }); */
+    $('#customer').on('change', function () {
+        var customerID = $(this).val();
+        if (customerID) {
+            $.ajax({
+                url : '/link/' +customerID,
+                type: "GET",
                 dataType: "json",
                 success: function (res) {
                     if (res) {
