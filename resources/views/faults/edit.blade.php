@@ -14,10 +14,9 @@ Faults
                 </h3>
             </div>
             <div class="card-body">
-                <form  action="{{ route('faults.store', $fault->id ) }}" method="POST">
-
-                    {{ method_field('PUT') }}
-                    {{ csrf_field() }}
+                <form  action="{{ route('faults.update', $fault->id ) }}" method="POST">
+                    @csrf
+                    @method('PUT')
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="customerName" class="form-label">Customer Name </label>
@@ -163,6 +162,16 @@ Faults
                 </form> 
             </div> 
         </div>
+        <div class="card card-primary  w-50">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <h3 class="text-center" style="text-transform: uppercase;font-family: Times New Roman, Times, serif;">{{_('Remarks')}}</h3> 
+                </h3>
+            </div>
+            <div class="card-body">
+
+            </div> 
+        </div>
     </div>
  
 </section>
@@ -170,7 +179,7 @@ Faults
 
 @section('scripts')
 <script type="text/javascript">
-    $('#city').on('change', function () {
+    $('#city').on('change',function () {
         var CityID = $(this).val();
         if (CityID) {
             $.ajax({
@@ -224,36 +233,12 @@ Faults
 </script>
 
 <script type="text/javascript">
-/*     $('#customer').change(function () {
+    $('#customer').on('change',function () {
         var customerID = $(this).val();
         if (customerID) {
             $.ajax({
                 type: "GET",
                 url : '/link/' +customerID,
-                dataType: "json",
-                success: function (res) {
-                    if (res) {
-                        $("#link").empty();
-                        $("#link").append('<option  selected Disabled>Select Link</option>');
-                        $.each(res, function (key, value) {
-                            $("#link").append('<option value="' + key + '">' + value + '</option>');
-                        });
-
-                    } else {
-                        $("#link").empty();
-                    }
-                }
-            });
-        } else {
-            $("#link").empty();
-        }
-    }); */
-    $('#customer').on('change', function () {
-        var customerID = $(this).val();
-        if (customerID) {
-            $.ajax({
-                url : '/link/' +customerID,
-                type: "GET",
                 dataType: "json",
                 success: function (res) {
                     if (res) {

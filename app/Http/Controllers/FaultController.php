@@ -140,12 +140,9 @@ class FaultController extends Controller
     public function update(Request $request, $id)
     {
         $fault = Fault::find($id);
-        if(is_null($fault))
-        {
-            return response()->json(["message" => "fault not found"],404);
-        }
         $fault ->update($request->all());
-        return redirect(route('faults.index'));
+        return redirect(route('faults.index'))
+        ->with('success','Product updated successfully');;
     }
 
     /**

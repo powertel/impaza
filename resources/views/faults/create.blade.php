@@ -144,7 +144,7 @@ Faults
 @section('scripts')
 
 <script type="text/javascript">
-    $('#city').change(function () {
+    $('#city').on('change',function () {
         var CityID = $(this).val();
         if (CityID) {
             $.ajax({
@@ -198,7 +198,7 @@ Faults
 </script>
 
 <script type="text/javascript">
-    $('#customer').change(function () {
+    $('#customer').on('change',function () {
         var customerID = $(this).val();
         if (customerID) {
             $.ajax({
