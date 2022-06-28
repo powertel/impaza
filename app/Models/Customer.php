@@ -9,6 +9,10 @@ class Customer extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'customerName',
+    ];
+
     public function links()
     {
         return $this->hasMany(Link::class);

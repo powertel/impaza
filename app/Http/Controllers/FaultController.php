@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Models\Fault;
 use App\Models\Suburb;
 use App\Models\City;
 use App\Models\Pop;
 use App\Models\Customer;
 use App\Models\Link;
-use Illuminate\Http\Request;
 use DB;
 
 class FaultController extends Controller
