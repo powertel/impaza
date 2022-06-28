@@ -15,17 +15,20 @@ Link
                 </h3>
             </div>
             <div class="card-body">
-                <form action="{{ route('links.store') }}" method="POST">
-                {{ csrf_field() }}
+                <form action="{{ route('links.update', $link->id ) }}" method="POST">
+                    @csrf
+                    @method('PUT')
                     
                     <div class="form-group row">
                         <label for="customer" class="col-sm-2 col-form-label">Customer</label>
                         <div class="col-sm-10">
                             <label for="customerName" class="form-label">Customer Name </label>
-                            <select id="customer" class="custom-select " name="customer_id">
-                                <option selected disabled >Select Customer Name</option>
-                                @foreach($customer as $customer)
-                                    <option value="{{ $customer->id}}">{{ $customer->customerName }}</option>
+                            <select class="custom-select" id="customer" name="customer_id">
+                                <option selected="selected" value="{{ $link->customer_id}}">{{ $link->customerName }}</option>
+                                @foreach($customers as $customer)
+                                    @unless ($customer->id ===$link->customer_id)
+                                        <option value="{{ $customer->id}}">{{ $customer->customerName }}</option>
+                                    @endunless
                                 @endforeach
                             </select>
                         </div>
@@ -33,7 +36,7 @@ Link
                     <div class="form-group row">
                         <label for="link" class="col-sm-2 col-form-label">Link</label>
                         <div class="col-sm-10">
-                            <input type="text" class="form-control" name="linkName" placeholder="Link Name">
+                            <input type="text" class="form-control" name="linkName" value="{{ $link->linkName}}">
                         </div>
                     </div>
            

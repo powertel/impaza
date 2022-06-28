@@ -19,7 +19,7 @@ class LinkController extends Controller
         $links = DB::table('links')
             ->leftjoin('customers','links.customer_id','=','customers.id')
             ->orderBy('links.created_at', 'desc')
-            ->get(['links.linkName','customers.customerName']);
+            ->get(['links.id','links.linkName','customers.customerName']);
         return view('links.index',compact('links'))
         ->with('i');
     }
@@ -57,10 +57,10 @@ class LinkController extends Controller
     public function show($id)
     {
         $link = DB::table('links')
-                ->leftjoin('customers','link.customer_id','=','customers.id')
-                ->where('links.id','=',$id)
-                ->get(['links.id','links.linkName','customers.customerName'])
-                ->first();
+            ->leftjoin('customers','links.customer_id','=','customers.id')
+            ->where('links.id','=',$id)
+            ->get(['links.id','links.linkName','links.customer_id','customers.customerName'])
+            ->first();
         return view('links.show',compact('link'));
     }
 
@@ -75,9 +75,9 @@ class LinkController extends Controller
         $link = DB::table('links')
                 ->leftjoin('customers','links.customer_id','=','customers.id')
                 ->where('links.id','=',$id)
-                ->get(['links.id','links.linkName','customers.customerName'])
+                ->get(['links.id','links.linkName','links.customer_id','customers.customerName'])
                 ->first();
-        $customers = Customer::all();
+                $customers = Customer::all();
         return view('links.edit',compact('link','customers'));
     }
 
@@ -91,7 +91,7 @@ class LinkController extends Controller
     public function update(Request $request, $id)
     {
         $link = Link::find($id);
-        $Link ->update($request->all());
+        $link ->update($request->all());
         return redirect(route('links.index'))
         ->with('success','Product updated successfully');
     }
