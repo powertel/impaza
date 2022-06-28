@@ -9,6 +9,11 @@ class Link extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'customer_id',
+        'linkName',
+    ];
+
     public function customer()
     {
         return $this->belongsTo(Customer::class);

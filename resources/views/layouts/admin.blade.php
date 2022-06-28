@@ -112,11 +112,17 @@
                                   </a>
                               </li>
                               <li class="nav-item">
-                                <a href="{{ route('customers.index') }}" class="nav-link">
-                                  <i class="nav-icon fas fa-table"></i>
-                                  <p>Customers</p>
+                                    <a href="{{ route('customers.index') }}" class="nav-link">
+                                    <i class="nav-icon fas fa-table"></i>
+                                    <p>Customers</p>
+                                    </a>
+                              </li>
+                              <li class="nav-item">
+                                <a href="{{ route('links.index') }}" class="nav-link">
+                                <i class="nav-icon fas fa-table"></i>
+                                <p>Links</p>
                                 </a>
-                            </li>
+                          </li>
                             </ul>
                         </li>
                         <li  class="nav-item">
