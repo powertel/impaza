@@ -5,12 +5,14 @@ Faults
 @endsection
 
 @section('content')
+@include('partials.css')
+@include('partials.css')
 <section class="content">
     <div class="col d-flex justify-content-center">
-        <div class="card card-primary w-100">
+        <div class="card w-100">
             <div class="card-header">
                 <h3 class="card-title">
-                    <h3 class="text-center" style="text-transform: uppercase;font-family: Times New Roman, Times, serif;">{{_('View Details')}}</h3> 
+                  {{_('View Details')}}
                 </h3>
             </div>
             <div class="card-body">
@@ -94,7 +96,8 @@ Faults
                     </div>
                 </div>
                 <div class="card-footer">
-                    <a type="button" class="btn btn-danger" href="javascript:history.back()">{{ __('Back') }}</a>
+                    <a type="button" class="btn btn-danger" href="{{ route('faults.index') }}">{{ __('Close') }}</a>
+                    <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-danger">Assess</a>
                 </div>
             </div> 
         </div>

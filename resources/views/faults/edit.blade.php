@@ -5,13 +5,12 @@ Faults
 @endsection
 
 @section('content')
+    @include('partials.css')
 <section class="content">
     <div class="col d-flex justify-content-center">
-        <div class="card card-primary  w-100">
+        <div class="card  w-100">
             <div class="card-header">
-                <h3 class="card-title">
-                    <h3 class="text-center" style="text-transform: uppercase;font-family: Times New Roman, Times, serif;">{{_('Assess Fault')}}</h3> 
-                </h3>
+                <h3 class="card-title">{{_('Assess Fault')}}</h3>
             </div>
             <div class="card-body">
                 <form  action="{{ route('faults.update', $fault->id ) }}" method="POST">
@@ -156,17 +155,15 @@ Faults
                     </div>
         
                     <div class="card-footer">
-                        <a type="button" class="btn btn-danger" href="javascript:history.back()">{{ __('Cancel') }}</a>
+                        <a type="button" class="btn btn-danger" href="{{ route('faults.index') }}">{{ __('Cancel') }}</a>
                         <button type="submit" class="btn btn-success float-right">{{ __('Save') }}</button>
                     </div>
                 </form> 
             </div> 
         </div>
-        <div class="card card-primary  w-50">
+        <div class="card  w-50">
             <div class="card-header">
-                <h3 class="card-title">
-                    <h3 class="text-center" style="text-transform: uppercase;font-family: Times New Roman, Times, serif;">{{_('Remarks')}}</h3> 
-                </h3>
+                <h3 class="card-title">{{_('Remarks')}}</h3>
             </div>
             <div class="card-body">
 
@@ -178,85 +175,5 @@ Faults
 @endsection
 
 @section('scripts')
-<script type="text/javascript">
-    $('#city').on('change',function () {
-        var CityID = $(this).val();
-        if (CityID) {
-            $.ajax({
-                url : '/suburb/' +CityID,
-                type: "GET",
-                dataType: "json",
-                success: function (res) {
-                    if (res) {
-                        $("#suburb").empty();
-                        $("#pop").empty();
-                        $("#suburb").append('<option  selected Disabled>Select Suburb</option>');
-                        $("#pop").append('<option  selected Disabled>Select Pop</option>');
-                        $.each(res, function (key, value) {
-                            $("#suburb").append('<option value="' + key + '">' + value + '</option>');
-                        });
-
-                    } else {
-                        $("#suburb").empty();
-                    }
-                }
-            });
-        } else {
-            $("#suburb").empty();
-            $("#city").empty();
-        }
-    });
-    $('#suburb').on('change', function () {
-        var suburbID = $(this).val();
-        if (suburbID) {
-            $.ajax({
-                url : '/pop/' +suburbID,
-                type: "GET",
-                dataType: "json",
-                success: function (res) {
-                    if (res) {
-                        $("#pop").empty();
-                        $("#pop").append('<option  selected Disabled>Select Pop</option>');
-                        $.each(res, function (key, value) {
-                            $("#pop").append('<option value="' + key + '">' + value + '</option>');
-                        });
-
-                    } else {
-                        $("#pop").empty();
-                    }
-                }
-            });
-        } else {
-            $("#pop").empty();
-        }
-    });
-</script>
-
-<script type="text/javascript">
-    $('#customer').on('change',function () {
-        var customerID = $(this).val();
-        if (customerID) {
-            $.ajax({
-                type: "GET",
-                url : '/link/' +customerID,
-                dataType: "json",
-                success: function (res) {
-                    if (res) {
-                        $("#link").empty();
-                        $("#link").append('<option  selected Disabled>Select Link</option>');
-                        $.each(res, function (key, value) {
-                            $("#link").append('<option value="' + key + '">' + value + '</option>');
-                        });
-
-                    } else {
-                        $("#link").empty();
-                    }
-                }
-            });
-        } else {
-            $("#link").empty();
-        }
-    });
-</script>
-
+    @include('partials.scripts')
 @endsection

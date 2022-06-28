@@ -4,13 +4,16 @@
 Faults
 @endsection
 
+
+
 @section('content')
+@include('partials.css')
 <section class="content">
     <div class="col d-flex justify-content-center">
-        <div class="card card-primary  w-100">
+        <div class="card w-100">
             <div class="card-header">
                 <h3 class="card-title">
-                    <h3 class="text-center" style="text-transform: uppercase;font-family: Times New Roman, Times, serif;">{{_('Create Fault')}}</h3> 
+                    {{_('Log Fault')}}
                 </h3>
             </div>
             <div class="card-body">
@@ -28,17 +31,9 @@ Faults
                         </div>
 
                         <div class="mb-3 col-md-6">
-                            <label for="serviceType" class="form-label">Service Type</label>
-                            <select type="text"  class="custom-select " name="serviceType">
-                                <option selected>Choose</option>
-                                <option>VOIP</option>
-                                <option>VPN</option>
-                                <option>INTERNET</option>
-                                <option>CARRIER SERVICE</option>
-                                <option>POWERTRACK</option>
-                                <option>CDMA VOICE</option>
-                                <option>CDMA VOICE</option>
-                                <option>E-VENDING</option>
+                            <label for="linkName" class="form-label">Link</label>
+                            <select id="link" class="custom-select " name="link_id" >
+                                <option selected disabled>Select Link</option>
                             </select>
                         </div>
                     </div>
@@ -76,12 +71,22 @@ Faults
                             <label for="phone" class="form-label">Phone Number</label>
                             <input type="text" class="form-control"  placeholder="Phone Number" name="phoneNumber">
                         </div>
+                        
                         <div class="mb-3 col-md-6">
-                            <label for="linkName" class="form-label">Link</label>
-                            <select id="link" class="custom-select " name="link_id" >
-                                <option selected disabled>Select Link</option>
+                            <label for="serviceType" class="form-label">Service Type</label>
+                            <select type="text"  class="custom-select " name="serviceType">
+                                <option selected>Choose</option>
+                                <option>VOIP</option>
+                                <option>VPN</option>
+                                <option>INTERNET</option>
+                                <option>CARRIER SERVICE</option>
+                                <option>POWERTRACK</option>
+                                <option>CDMA VOICE</option>
+                                <option>CDMA VOICE</option>
+                                <option>E-VENDING</option>
                             </select>
                         </div>
+  
                     </div>
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
@@ -142,87 +147,5 @@ Faults
 @endsection
 
 @section('scripts')
-
-<script type="text/javascript">
-    $('#city').on('change',function () {
-        var CityID = $(this).val();
-        if (CityID) {
-            $.ajax({
-                url : '/suburb/' +CityID,
-                type: "GET",
-                dataType: "json",
-                success: function (res) {
-                    if (res) {
-                        $("#suburb").empty();
-                        $("#pop").empty();
-                        $("#suburb").append('<option  selected Disabled>Select Suburb</option>');
-                        $("#pop").append('<option  selected Disabled>Select Pop</option>');
-                        $.each(res, function (key, value) {
-                            $("#suburb").append('<option value="' + key + '">' + value + '</option>');
-                        });
-
-                    } else {
-                        $("#suburb").empty();
-                    }
-                }
-            });
-        } else {
-            $("#suburb").empty();
-            $("#city").empty();
-        }
-    });
-    $('#suburb').on('change', function () {
-        var suburbID = $(this).val();
-        if (suburbID) {
-            $.ajax({
-                url : '/pop/' +suburbID,
-                type: "GET",
-                dataType: "json",
-                success: function (res) {
-                    if (res) {
-                        $("#pop").empty();
-                        $("#pop").append('<option  selected Disabled>Select Pop</option>');
-                        $.each(res, function (key, value) {
-                            $("#pop").append('<option value="' + key + '">' + value + '</option>');
-                        });
-
-                    } else {
-                        $("#pop").empty();
-                    }
-                }
-            });
-        } else {
-            $("#pop").empty();
-        }
-    });
-</script>
-
-<script type="text/javascript">
-    $('#customer').on('change',function () {
-        var customerID = $(this).val();
-        if (customerID) {
-            $.ajax({
-                type: "GET",
-                url : '/link/' +customerID,
-                dataType: "json",
-                success: function (res) {
-                    if (res) {
-                        $("#link").empty();
-                        $("#link").append('<option  selected Disabled>Select Link</option>');
-                        $.each(res, function (key, value) {
-                            $("#link").append('<option value="' + key + '">' + value + '</option>');
-                        });
-
-                    } else {
-                        $("#link").empty();
-                    }
-                }
-            });
-        } else {
-            $("#link").empty();
-        }
-    });
-</script>
-
-
+    @include('partials.scripts')
 @endsection
