@@ -3,11 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Customer;
-use App\Models\Link;
-use DB;
 
-class CustomerController extends Controller
+class LinkController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,11 +13,7 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $customers = DB::table('customers')
-                ->orderBy('customers.created_at', 'desc')
-                ->get();
-        return view('customers.index',compact('customers'))
-        ->with('i');
+        //
     }
 
     /**
@@ -30,7 +23,7 @@ class CustomerController extends Controller
      */
     public function create()
     {
-        return view('customers.create');
+        //
     }
 
     /**
@@ -41,9 +34,7 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-        Customer::create($request->all());
-    
-        return redirect()->route('customers.index');
+        //
     }
 
     /**
@@ -54,11 +45,7 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
-        $customer = DB::table('customers')
-                ->where('customers.id','=',$id)
-                ->get()
-                ->first();
-        return view('customers.show',compact('customer'));
+        //
     }
 
     /**
@@ -69,11 +56,7 @@ class CustomerController extends Controller
      */
     public function edit($id)
     {
-        $customer = DB::table('customers')
-                ->where('customers.id','=',$id)
-                ->get()
-                ->first();
-        return view('customers.edit',compact('customer'));
+        //
     }
 
     /**
@@ -85,10 +68,7 @@ class CustomerController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $customer = Customer::find($id);
-        $customer ->update($request->all());
-        return redirect(route('customers.index'))
-        ->with('success','Product updated successfully');
+        //
     }
 
     /**

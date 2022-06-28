@@ -32,8 +32,8 @@ Customers
                     <td>{{++$i}}</td>
                     <td>{{ $customer->customerName}}</td>
                     <td>
-                        <a  class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
-                        <a  class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
+                        <a href="{{ route('customers.edit',$customer->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
+                        <a href="{{ route('customers.show',$customer->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
                     </td>
                 </tr>
                 @endforeach

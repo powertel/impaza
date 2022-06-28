@@ -142,7 +142,7 @@ class FaultController extends Controller
         $fault = Fault::find($id);
         $fault ->update($request->all());
         return redirect(route('faults.index'))
-        ->with('success','Product updated successfully');;
+        ->with('success','Product updated successfully');
     }
 
     /**
