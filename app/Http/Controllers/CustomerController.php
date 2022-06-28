@@ -16,7 +16,11 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        return view('customers.index');
+        $customers = DB::table('customers')
+                ->orderBy('customers.created_at', 'desc')
+                ->get();
+        return view('customers.index',compact('customers'))
+        ->with('i');
     }
 
     /**
