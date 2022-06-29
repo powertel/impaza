@@ -21,20 +21,24 @@ Fault
                 {{ csrf_field() }}
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
-                            <label for="customerName" class="form-label">Customer Name </label>
+                            <label for="customer" class="form-label">Customer Name </label>
                             <select id="customer" class="custom-select " name="customer_id">
-                                <option selected disabled >Select Customer Name</option>
+                                <option selected disabled >Select Customer</option>
                                 @foreach($customer as $customer)
-                                    <option value="{{ $customer->id}}">{{ $customer->customerName }}</option>
+                                    <option value="{{ $customer->id}}">{{ $customer->customer }}</option>
                                 @endforeach
                             </select>
                         </div>
 
                         <div class="mb-3 col-md-6">
-                            <label for="linkName" class="form-label">Link</label>
-                            <select id="link" class="custom-select " name="link_id" >
-                                <option selected disabled>Select Link</option>
+                            <label for="linkName" class="form-label">City/Town</label>
+                            <select id="city" class="custom-select " name="city_id">
+                                <option selected disabled  >Select City/Town</option>
+                                @foreach($city as $city)
+                                <option value="{{ $city->id}}">{{ $city->city }}</option>
+                                @endforeach
                             </select>
+
                         </div>
                     </div>
             
@@ -44,18 +48,15 @@ Fault
                             <input type="text" class="form-control"  placeholder="Contact Name" name="contactName">
                         </div>
                         <div class="mb-3 col-md-2">
-                            <label for="city" class="form-label">Fault Locale</label>
-                            <select id="city" class="custom-select " name="city_id">
-                                <option selected disabled  >Select City/Town</option>
-                                @foreach($city as $city)
-                                <option value="{{ $city->id}}">{{ $city->city }}</option>
-                                @endforeach
+                            <label for="city" class="form-label">Location</label>
+                            <select id="suburb"  class="custom-select" name="suburb_id">
+                                <option selected disabled>Select Suburb</option>
                             </select>
                         </div>
                         <div class="mb-3 col-md-2">
-                            <label for="suburb" class="form-label">Suburb</label>
-                            <select id="suburb"  class="custom-select" name="suburb_id">
-                                <option selected disabled>Select Suburb</option>
+                            <label for="suburb" class="form-label">Link</label>
+                            <select id="link" class="custom-select " name="link_id" >
+                                <option selected disabled>Select Link</option>
                             </select>
                         </div>
                         <div class="mb-3 col-md-2">

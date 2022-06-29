@@ -15,12 +15,10 @@ return new class extends Migration
     {
         Schema::create('pops', function (Blueprint $table) {
             $table->increments('id');
+            $table->unsignedInteger('city_id');
             $table->unsignedInteger('suburb_id');
             $table->string('pop');
             $table->timestamps();
-            $table->foreign('suburb_id')
-                    ->references('id')
-                    ->on('suburbs');
         });
     }
 

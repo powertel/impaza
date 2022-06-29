@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-Customer
+Pop
 @endsection
 
 @section('content')
@@ -11,26 +11,20 @@ Customer
         <div class="card w-50">
             <div class="card-header">
                 <h3 class="card-title">
-                    {{_('Update customer')}}
+                    {{_('Update Pop')}}
                 </h3>
             </div>
             <div class="card-body">
-                <form action="{{ route('customers.update', $customer->id ) }}" method="POST">
+                <form action="{{ route('pops.update', $pop->id ) }}" method="POST">
                     @csrf
                     @method('PUT')
-                    <div class="form-group row">
-                        <label for="customer" class="col-sm-2 col-form-label">Customer</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" name="customer"  value="{{ $customer->customer}}">
-                        </div>
-                    </div>
                     <div class="form-group row">
                         <label for="city" class="col-sm-2 col-form-label">City/Town</label>
                         <div class="col-sm-10">
                             <select class="custom-select" id="city" name="city_id">
-                                <option selected="selected" value="{{ $customer->city_id}}">{{ $customer->city }}</option>
+                                <option selected="selected" value="{{ $pop->city_id}}">{{ $pop->city }}</option>
                                 @foreach($cities as $city)
-                                    @unless ($city->id ===$customer->city_id)
+                                    @unless ($city->id ===$pop->city_id)
                                         <option value="{{ $city->id}}">{{ $city->city }}</option>
                                     @endunless
                                 @endforeach
@@ -41,10 +35,10 @@ Customer
                         <label for="location" class="col-sm-2 col-form-label">Location</label>
                         <div class="col-sm-10">
                         <select   class="custom-select" id="suburb" name="suburb_id">
-                             <option selected="selected" value="{{ $customer->suburb_id}}">{{ $customer->suburb }}</option>
+                             <option selected="selected" value="{{ $pop->suburb_id}}">{{ $pop->suburb }}</option>
                                 @foreach($suburbs as $suburb)
-                                    @if ($suburb->city_id === $customer->city_id)
-                                        @unless($suburb->id ===$customer->suburb_id)
+                                    @if ($suburb->city_id === $pop->city_id)
+                                        @unless($suburb->id ===$pop->suburb_id)
                                             <option value="{{ $suburb->id}}">{{ $suburb->suburb }}</option>
                                         @endunless                                    
                                     @endif
@@ -55,23 +49,7 @@ Customer
                     <div class="form-group row">
                         <label for="pop" class="col-sm-2 col-form-label">Pop</label>
                         <div class="col-sm-10">
-                            <select  class="custom-select" id="pop" name="pop_id" >
-                                <option selected="selected" value="{{ $customer->pop_id}}">{{ $customer->pop }}</option>
-                                @foreach($pops as $pop)
-                                    @if($pop->suburb_id === $customer->suburb_id)
-                                        @unless($pop->id ===$customer->pop_id)
-                                            <option value="{{ $pop->id}}">{{ $pop->pop }}</option>
-                                        @endunless                                        
-                                    @endif
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group row">
-                        <label for="link" class="col-sm-2 col-form-label">Link</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" name="link"  value="{{ $customer->link}}">
+                            <input type="text" class="form-control" name="pop" value="{{ $pop->pop}}">
                         </div>
                     </div>
            

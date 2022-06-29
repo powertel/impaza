@@ -9,6 +9,11 @@ class Suburb extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'city_id',
+        'suburb',
+    ];
+
     public function city()
     {
         return $this->belongsTo(City::class);

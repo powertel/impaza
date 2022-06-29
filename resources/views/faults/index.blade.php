@@ -17,12 +17,12 @@ Faults
         </div>
     </div>
     <!-- /.card-header -->
-    <div class="card-body table-responsive p-0">
+    <div class="card-body">
         <table  class="table table-striped">
             <thead>
                 <tr>
                     <th>No.</th>
-                    <th>Customer Name</th>
+                    <th>Customer</th>
                     <th>Contact Name</th>
                     <th>Account Manager</th>
                     <th>Link Name</th>
@@ -33,10 +33,10 @@ Faults
                 @foreach ($faults as $fault)
                  <tr >
                     <td>{{ ++$i }}</td>
-                    <td>{{ $fault->customerName }}</td>
+                    <td>{{ $fault->customer }}</td>
                     <td>{{ $fault->contactName }}</td>
                     <td>{{ $fault->accountManager }}</td>
-                    <td>{{ $fault->linkName }}</td>
+                    <td>{{ $fault->link }}</td>
                     <td>
                                 <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Assess</a>
                                 <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>

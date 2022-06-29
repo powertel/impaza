@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-Link
+Pop
 @endsection
 
 @section('content')
@@ -18,21 +18,28 @@ Link
             <div class="card-body">
                 <div class="row g-2">
                     <div class="col">
-                        <strong>Customer Name</strong>
-                        <p class="text-muted">{{ $link->customer }}</p>
+                        <strong>City/Town</strong>
+                        <p class="text-muted">{{ $pop->city }}</p>
                     </div>
                 </div>
                 <hr>
                 <div class="row g-2">
                     <div class="col">
-                        <strong>link Name</strong>
-                        <p class="text-muted">{{ $link->link }}</p>
+                        <strong>Location</strong>
+                        <p class="text-muted">{{ $pop->suburb }}</p>
+                    </div>
+                </div>
+                <hr>
+                <div class="row g-2">
+                    <div class="col">
+                        <strong>Pop</strong>
+                        <p class="text-muted">{{ $pop->pop }}</p>
                     </div>
                 </div>
                 <div class="card-footer">
-                    <a type="button" class="btn btn-danger" href="{{ route('links.index') }}">{{ __('Close') }}</a>
+                    <a type="button" class="btn btn-danger" href="{{ route('pops.index') }}">{{ __('Close') }}</a>
                 </div>
-            </div> 
+            </div>
         </div>
     </div>
  

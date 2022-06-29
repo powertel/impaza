@@ -2,6 +2,10 @@
     .card {
         margin-right:4px;
     }
+
+    .p-0 {
+    padding: 10px !important;
+}
     .card-header {
         background-color: aliceblue;
     }

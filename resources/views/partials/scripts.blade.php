@@ -52,7 +52,15 @@ $('#city').on('change',function () {
     });
 </script>
 
+
+
 <script type="text/javascript">
+    $('#customer').on('change',function () {
+
+    });
+</script>
+
+<!-- <script type="text/javascript">
     $('#customer').on('change',function () {
         var customerID = $(this).val();
         if (customerID) {
@@ -62,14 +70,14 @@ $('#city').on('change',function () {
                 dataType: "json",
                 success: function (res) {
                     if (res) {
-                        $("#link").empty();
-                        $("#link").append('<option  selected Disabled>Select Link</option>');
+                        $("#links").empty();
+                        $("#links").append('<option  selected Disabled>Select Link</option>');
                         $.each(res, function (key, value) {
                             $("#link").append('<option value="' + key + '">' + value + '</option>');
                         });
 
                     } else {
-                        $("#link").empty();
+                        $("#links").empty();
                     }
                 }
             });
@@ -77,4 +85,4 @@ $('#city').on('change',function () {
             $("#link").empty();
         }
     });
-</script>
+</script> -->

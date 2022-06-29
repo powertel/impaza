@@ -10,8 +10,11 @@ class Link extends Model
     use HasFactory;
 
     protected $fillable = [
-        'customer_id',
-        'linkName',
+        'link',
+        'city_id',
+        'suburb_id',
+        'pop_id',
+        'customer_id'
     ];
 
     public function customer()

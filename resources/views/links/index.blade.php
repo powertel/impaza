@@ -17,13 +17,16 @@ links
         </div>
     </div>
     <!-- /.card-header -->
-    <div class="card-body table-responsive p-0">
+    <div class="card-body">
         <table  class="table table-striped">
             <thead>
                 <tr>
                     <th>No.</th>
-                    <th>Customer Name</th>
-                    <th>link Name</th>
+                    <th>Customer</th>
+                    <th>City/Town</th>
+                    <th>Location</th>
+                    <th>Pop</th>
+                    <th>link</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -31,8 +34,11 @@ links
                 @foreach ($links as $link)
                  <tr >
                     <td>{{++$i}}</td>
-                    <td>{{ $link->customerName}}</td>
-                    <td>{{ $link->linkName}}</td>
+                    <td>{{ $link->customer}}</td>
+                    <td>{{ $link->city}}</td>
+                    <td>{{ $link->suburb}}</td>
+                    <td>{{ $link->pop}}</td>
+                    <td>{{ $link->link}}</td>
                     <td>
                         <a href="{{ route('links.edit',$link->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
                         <a href="{{ route('links.show',$link->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>

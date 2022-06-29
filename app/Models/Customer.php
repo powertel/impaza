@@ -10,7 +10,10 @@ class Customer extends Model
     use HasFactory;
 
     protected $fillable = [
-        'customerName',
+        'customer',
+        'city_id',
+        'suburb_id',
+        'pop_id',
     ];
 
     public function links()

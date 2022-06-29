@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-Customer
+City
 @endsection
 
 @section('content')
@@ -18,17 +18,13 @@ Customer
             <div class="card-body">
                 <div class="row g-2">
                     <div class="col">
-                        <strong>Customer</strong>
-                        <p class="text-muted">{{ $customer->customer }}</p>
-                        <p class="text-muted">{{ $customer->city }}</p>
-                        <p class="text-muted">{{ $customer->suburb }}</p>
-                        <p class="text-muted">{{ $customer->pop}}</p>
-                        <p class="text-muted">{{ $customer->link }}</p>
+                        <strong>City/Town</strong>
+                        <p class="text-muted">{{ $city->city }}</p>
                     </div>
                 </div>
                 <hr>
                 <div class="card-footer">
-                    <a type="button" class="btn btn-danger" href="{{ route('customers.index') }}">{{ __('Close') }}</a>
+                    <a type="button" class="btn btn-danger" href="{{ route('cities.index') }}">{{ __('Close') }}</a>
                 </div>
             </div> 
         </div>

@@ -20,10 +20,10 @@ Fault
                         <div class="mb-3 col-md-6">
                             <label for="customerName" class="form-label">Customer Name </label>
                             <select class="custom-select" id="city" name="customer_id">
-                                <option selected="selected" value="{{ $fault->customer_id}}">{{ $fault->customerName }}</option>
+                                <option selected="selected" value="{{ $fault->customer_id}}">{{ $fault->customer }}</option>
                                 @foreach($customers as $customer)
                                     @unless ($customer->id ===$fault->customer_id)
-                                        <option value="{{ $customer->id}}">{{ $customer->customerName }}</option>
+                                        <option value="{{ $customer->id}}">{{ $customer->customer }}</option>
                                     @endunless
                                 @endforeach
                             </select>

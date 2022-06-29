@@ -112,17 +112,35 @@
                                   </a>
                               </li>
                               <li class="nav-item">
+                                    <a href="{{ route('cities.index') }}" class="nav-link">
+                                    <i class="nav-icon fas fa-table"></i>
+                                    <p>Cities</p>
+                                    </a>
+                              </li>
+                              <li class="nav-item">
+                                    <a href="{{ route('locations.index') }}" class="nav-link">
+                                    <i class="nav-icon fas fa-table"></i>
+                                    <p>Locations</p>
+                                    </a>
+                              </li>
+                              <li class="nav-item">
+                                    <a href="{{ route('pops.index') }}" class="nav-link">
+                                    <i class="nav-icon fas fa-table"></i>
+                                    <p>Pops</p>
+                                    </a>
+                              </li>
+                              <li class="nav-item">
                                     <a href="{{ route('customers.index') }}" class="nav-link">
                                     <i class="nav-icon fas fa-table"></i>
                                     <p>Customers</p>
                                     </a>
                               </li>
                               <li class="nav-item">
-                                <a href="{{ route('links.index') }}" class="nav-link">
-                                <i class="nav-icon fas fa-table"></i>
-                                <p>Links</p>
-                                </a>
-                          </li>
+                                    <a href="{{ route('links.index') }}" class="nav-link">
+                                    <i class="nav-icon fas fa-table"></i>
+                                    <p>Links</p>
+                                    </a>
+                              </li>
                             </ul>
                         </li>
                         <li  class="nav-item">

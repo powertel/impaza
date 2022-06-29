@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Suburb;
+use App\Models\City;
+use App\Models\Pop;
 use App\Models\Customer;
 use App\Models\Link;
 use DB;
@@ -18,8 +21,11 @@ class LinkController extends Controller
     {
         $links = DB::table('links')
             ->leftjoin('customers','links.customer_id','=','customers.id')
+            ->leftjoin('cities','customers.city_id','=','cities.id')
+            ->leftjoin('suburbs','customers.suburb_id','=','suburbs.id')
+            ->leftjoin('pops','customers.pop_id','=','pops.id')
             ->orderBy('links.created_at', 'desc')
-            ->get(['links.id','links.linkName','customers.customerName']);
+            ->get(['links.id','links.link','customers.customer','cities.city','pops.pop','suburbs.suburb']);
         return view('links.index',compact('links'))
         ->with('i');
     }
@@ -32,7 +38,8 @@ class LinkController extends Controller
     public function create()
     {
         $customer = Customer::all();
-        return view('links.create',compact('customer'));
+        $city = City::all();
+        return view('links.create',compact('customer','city'));
     }
 
     /**
@@ -59,7 +66,7 @@ class LinkController extends Controller
         $link = DB::table('links')
             ->leftjoin('customers','links.customer_id','=','customers.id')
             ->where('links.id','=',$id)
-            ->get(['links.id','links.linkName','links.customer_id','customers.customerName'])
+            ->get(['links.id','links.link','links.customer_id','customers.customer'])
             ->first();
         return view('links.show',compact('link'));
     }
@@ -75,7 +82,7 @@ class LinkController extends Controller
         $link = DB::table('links')
                 ->leftjoin('customers','links.customer_id','=','customers.id')
                 ->where('links.id','=',$id)
-                ->get(['links.id','links.linkName','links.customer_id','customers.customerName'])
+                ->get(['links.id','links.link','links.customer_id','customers.customer'])
                 ->first();
                 $customers = Customer::all();
         return view('links.edit',compact('link','customers'));
@@ -93,7 +100,7 @@ class LinkController extends Controller
         $link = Link::find($id);
         $link ->update($request->all());
         return redirect(route('links.index'))
-        ->with('success','Product updated successfully');
+        ->with('success','Link updated successfully');
     }
 
     /**

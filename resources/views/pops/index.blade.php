@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-Customers
+Pops
 @endsection
 
 @section('content')
@@ -11,8 +11,9 @@ Customers
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title" style="text-transform: uppercase; font-family: Times New Roman, Times, serif;">{{_('Customers')}}</h3>
+        <h3 class="card-title" style="text-transform: uppercase; font-family: Times New Roman, Times, serif;">{{_('Pops')}}</h3>
         <div class="card-tools">
+            <a  class="btn btn-primary" href="{{ route('pops.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Pop')}} </a>
             <a  class="btn btn-primary" href="{{ route('customers.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Customer')}} </a>
         </div>
     </div>
@@ -22,26 +23,22 @@ Customers
             <thead>
                 <tr>
                     <th>No.</th>
-                    <th>Customer</th>
-                    <th>City</th>
+                    <th>City/Town</th>
                     <th>Location</th>
                     <th>Pop</th>
-                    <th>Link</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($customers as $customer)
+                @foreach ($pops as $pop)
                  <tr >
                     <td>{{++$i}}</td>
-                    <td>{{ $customer->customer}}</td>
-                    <td>{{ $customer->city}}</td>
-                    <td>{{ $customer->suburb}}</td>
-                    <td>{{ $customer->pop}}</td>
-                    <td>{{ $customer->link}}</td>
+                    <td>{{ $pop->city}}</td>
+                    <td>{{ $pop->suburb}}</td>
+                    <td>{{ $pop->pop}}</td>
                     <td>
-                        <a href="{{ route('customers.edit',$customer->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
-                        <a href="{{ route('customers.show',$customer->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
+                        <a href="{{ route('pops.edit',$pop->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
+                        <a href="{{ route('pops.show',$pop->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
                     </td>
                 </tr>
                 @endforeach

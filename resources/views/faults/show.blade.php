@@ -19,7 +19,7 @@ Fault
                 <div class="row g-2">
                     <div class="col">
                         <strong>Customer Name</strong>
-                        <p class="text-muted">{{ $fault->customerName }}</p>
+                        <p class="text-muted">{{ $fault->customer }}</p>
                     </div>
 
                     <div class="col">

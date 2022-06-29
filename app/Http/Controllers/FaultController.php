@@ -24,8 +24,8 @@ class FaultController extends Controller
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
                 ->leftjoin('links','faults.link_id','=','links.id')
                 ->orderBy('faults.created_at', 'desc')
-                ->get(['faults.id','customers.customerName','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
-                'faults.accountManager','faults.suspectedRfo','links.linkName'
+                ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
+                'faults.accountManager','faults.suspectedRfo','links.link'
                 ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
         return view('faults.index',compact('faults'))
         ->with('i');
@@ -60,7 +60,7 @@ class FaultController extends Controller
     public function findLink($id)
     {
         $link = Link::where('customer_id',$id)
-        ->pluck("linkName","id");
+        ->pluck("link","id");
         return response()->json($link);
     }   
     /**
@@ -91,8 +91,8 @@ class FaultController extends Controller
                 ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
                 ->leftjoin('pops','faults.pop_id','=','pops.id')
                 ->where('faults.id','=',$id)
-                ->get(['faults.id','customers.customerName','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
-                'faults.accountManager','cities.city','suburbs.suburb','pops.pop','faults.suspectedRfo','links.linkName'
+                ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
+                'faults.accountManager','cities.city','suburbs.suburb','pops.pop','faults.suspectedRfo','links.link'
                 ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.remarks','faults.created_at'])
                 ->first();
 
@@ -115,8 +115,8 @@ class FaultController extends Controller
             ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
             ->leftjoin('pops','faults.pop_id','=','pops.id')
             ->where('faults.id','=',$id)
-            ->get(['faults.id','faults.customer_id','customers.customerName','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
-            'faults.accountManager','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo','faults.link_id','links.linkName'
+            ->get(['faults.id','faults.customer_id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
+            'faults.accountManager','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo','faults.link_id','links.link'
             ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.remarks','faults.created_at'])
             ->first();
 
@@ -142,7 +142,7 @@ class FaultController extends Controller
         $fault = Fault::find($id);
         $fault ->update($request->all());
         return redirect(route('faults.index'))
-        ->with('success','Product updated successfully');
+        ->with('success','Fault updated successfully');
     }
 
     /**
