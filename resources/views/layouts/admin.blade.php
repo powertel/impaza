@@ -106,7 +106,7 @@
                                   </a>
                               </li>
                               <li class="nav-item">
-                                  <a href="#" class="nav-link">
+                                  <a href="{{ route('departments.index') }}" class="nav-link">
                                     <i class="nav-icon fas fa-table"></i>
                                     <p>Department</p>
                                   </a>
@@ -208,14 +208,14 @@
                 </div><!-- /.container-fluid -->
             </div>
             <!-- /.content-header -->
-           <!-- Main content -->
-           <div class="content">
+
+              <!-- /Main Content-->
+              <div class="content">
                 <div class="col-md-6">
 
-                </div><!-- /.container-fluid -->
+                </div>
                 @yield('content')
-            </div>
-            <!-- /.content -->
+              </div>
         </div>
         <!-- /.content-wrapper -->
 
