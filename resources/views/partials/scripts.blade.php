@@ -59,30 +59,3 @@ $('#city').on('change',function () {
 
     });
 </script>
-
-<!-- <script type="text/javascript">
-    $('#customer').on('change',function () {
-        var customerID = $(this).val();
-        if (customerID) {
-            $.ajax({
-                type: "GET",
-                url : '/link/' +customerID,
-                dataType: "json",
-                success: function (res) {
-                    if (res) {
-                        $("#links").empty();
-                        $("#links").append('<option  selected Disabled>Select Link</option>');
-                        $.each(res, function (key, value) {
-                            $("#link").append('<option value="' + key + '">' + value + '</option>');
-                        });
-
-                    } else {
-                        $("#links").empty();
-                    }
-                }
-            });
-        } else {
-            $("#link").empty();
-        }
-    });
-</script> -->

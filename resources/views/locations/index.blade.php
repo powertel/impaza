@@ -48,3 +48,6 @@ Locations
  
 </section>
 @endsection
+@section('scripts')
+    @include('partials.scripts')
+@endsection
