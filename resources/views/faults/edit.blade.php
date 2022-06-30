@@ -19,7 +19,7 @@ Fault
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="customerName" class="form-label">Customer Name </label>
-                            <select class="custom-select" id="city" name="customer_id">
+                            <select class="custom-select" id="customer" name="customer_id">
                                 <option selected="selected" value="{{ $fault->customer_id}}">{{ $fault->customer }}</option>
                                 @foreach($customers as $customer)
                                     @unless ($customer->id ===$fault->customer_id)
@@ -30,7 +30,7 @@ Fault
                         </div>
 
                         <div class="mb-3 col-md-6">
-                            <label for="ciy" class="form-label">City/Town</label>
+                            <label for="city" class="form-label">City/Town</label>
                             <select  class="custom-select" id="city" name="city_id">
                                 <option selected="selected" value="{{ $fault->city_id}}">{{ $fault->city }}</option>
                                 @foreach($cities as $city)
@@ -177,5 +177,5 @@ Fault
 @endsection
 
 @section('scripts')
-    @include('partials.scripts')
+    @include('partials.faults')
 @endsection
