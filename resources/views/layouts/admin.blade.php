@@ -9,9 +9,6 @@
 
     <title>@yield('title')</title>
 
-    <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}" defer></script>
-
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
@@ -34,44 +31,26 @@
             </ul>
             <!-- Right navbar links -->
             <ul class="navbar-nav ml-auto">
-                <li class="dropdown notification-list topbar-dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                        {{ Auth::user()->name }} <span class="caret"></span>
+              <li class="dropdown notification-list topbar-dropdown">
+                    <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+                        <i class="fa fa-user" style="color: rgb(35, 157, 233);"></i> &nbsp;
+                        <span class="align-middle d-none d-sm-inline-block" style="font-weight: 700; color: rgb(35, 157, 233);"> {{ Auth::user()->name }}</span> <i class="mdi mdi-chevron-down d-none d-sm-inline-block align-middle"></i>
                     </a>
-
-
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="{{ route('logout') }}"
-                           onclick="event.preventDefault();
-                                         document.getElementById('logout-form').submit();">
-                            {{ __('Logout') }}
-                        </a>
-
-
-                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                            @csrf
-                        </form>
-                    </div>
-                </li>
+                  <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated topbar-dropdown-menu profile-dropdown">
+                    
+                      <!-- item-->
+                      <a  class="dropdown-item notify-item" href="{{ route('logout') }}"
+                                onclick="event.preventDefault();
+                                              document.getElementById('logout-form').submit();">
+                                  {{ __('Logout') }}
+                          <i class="mdi mdi-logout me-1"></i>
+                      </a>
+                      <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                  @csrf
+                      </form>
+                  </div>
+              </li>
             </ul>
-
-            <ul class="navbar-nav ml-auto">
-            <li class="dropdown notification-list topbar-dropdown">
-            <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
-                <i class="fa fa-user" style="color: rgb(35, 157, 233);"></i> &nbsp;
-                <span class="align-middle d-none d-sm-inline-block" style="font-weight: 700; color: rgb(35, 157, 233);"> {{ Auth::user()->name }}</span> <i class="mdi mdi-chevron-down d-none d-sm-inline-block align-middle"></i>
-            </a>
-            <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated topbar-dropdown-menu profile-dropdown">
-               
-                <!-- item-->
-                <a href="javascript:void(0);" class="dropdown-item notify-item">
-                    <i class="mdi mdi-logout me-1"></i>
-                    <span>Logout</span>
-                </a>
-            </div>
-        </li>
-            </ul>
-            
         </nav>
         <!-- /.navbar -->
 
@@ -94,7 +73,7 @@
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
+                            <a href="{{ route('home') }}"  class="nav-link">
                                 <i class="nav-icon fas fa-chalkboard"></i>
                                 <p>Dashboard</p>
                             </a>
@@ -110,18 +89,10 @@
                             <ul class="nav nav-treeview">
                               <li class="nav-item">
                                   <a  class="nav-link">
-                                      <i class="nav-icon fas fa-copy"></i>
-                                      <p>Faults</p>
-                                  </a>
-                              </li>
-                              <li class="nav-item">
-                              <li class="nav-item">
-                                  <a  class="nav-link">
                                       <i class="nav-icon fas fa-user"></i>
                                       <p>Users</p>
                                   </a>
                               </li>
-                              <li class="nav-item">
                               <li class="nav-item">
                                   <a  class="nav-link">
                                       <i class="fas fa-bomb nav-icon"></i>
@@ -140,8 +111,44 @@
                                     <p>Department</p>
                                   </a>
                               </li>
+                              <li class="nav-item">
+                                    <a href="{{ route('cities.index') }}" class="nav-link">
+                                    <i class="nav-icon fas fa-table"></i>
+                                    <p>Cities</p>
+                                    </a>
+                              </li>
+                              <li class="nav-item">
+                                    <a href="{{ route('locations.index') }}" class="nav-link">
+                                    <i class="nav-icon fas fa-table"></i>
+                                    <p>Locations</p>
+                                    </a>
+                              </li>
+                              <li class="nav-item">
+                                    <a href="{{ route('pops.index') }}" class="nav-link">
+                                    <i class="nav-icon fas fa-table"></i>
+                                    <p>Pops</p>
+                                    </a>
+                              </li>
+                              <li class="nav-item">
+                                    <a href="{{ route('customers.index') }}" class="nav-link">
+                                    <i class="nav-icon fas fa-table"></i>
+                                    <p>Customers</p>
+                                    </a>
+                              </li>
+                              <li class="nav-item">
+                                    <a href="{{ route('links.index') }}" class="nav-link">
+                                    <i class="nav-icon fas fa-table"></i>
+                                    <p>Links</p>
+                                    </a>
+                              </li>
                             </ul>
                         </li>
+                        <li  class="nav-item">
+                                  <a href="{{ route('faults.index') }}" class="nav-link">
+                                      <i class="nav-icon fas fa-copy"></i>
+                                      <p>Faults</p>
+                                  </a>
+                              </li>
                         <li class="nav-item">
                             <a  class="nav-link">
                                 <i class="nav-icon fas fa-plus-square"></i>
@@ -201,6 +208,7 @@
                 </div><!-- /.container-fluid -->
             </div>
             <!-- /.content-header -->
+
               <!-- /Main Content-->
               <div class="content">
                 <div class="col-md-6">
@@ -214,10 +222,26 @@
     <!-- Main Footer -->
       <footer class="main-footer">
         <!-- Default to the left -->
-        <strong>Copyright &copy; 2022 <a>POWERTEL</a>.</strong> All rights reserved.
+        <strong>Copyright &copy; <?php echo date('Y') ?> <a>POWERTEL</a>.</strong> All rights reserved.
       </footer>
     </div>
     <!-- ./wrapper -->
+
+        <!-- Scripts -->
+
+        <script src="{{ asset('js/app.js') }}"></script>
+
+        <script>
+
+        $(function () {
+            $('table').DataTable({
+                processing: true,
+                serverSide: false
+            });
+        });
+
+        </script>
+                @yield('scripts')
     </body>
 
 </html>
