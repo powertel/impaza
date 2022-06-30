@@ -56,7 +56,7 @@ Fault
 
                     <div class="col">
                         <strong>Link</strong>
-                        <p class="text-muted">{{ $fault->linkName }}</p>
+                        <p class="text-muted">{{ $fault->link }}</p>
                     </div>
                 </div>
                 <hr>

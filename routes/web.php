@@ -32,5 +32,5 @@ Route::resource('locations', LocationController::class);
 Route::resource('links', LinkController::class);
 Route::resource('pops', PopController::class);
 Route::get('suburb/{id}', [FaultController::class,'findSuburb'])->name('suburb');
-Route::get('pop/{id}', [FaultController::class,'findPop'])->name('pop');
 Route::get('link/{id}', [FaultController::class,'findLink'])->name('link');
+Route::get('pop/{id}', [FaultController::class,'findPop'])->name('pop');

@@ -20,12 +20,8 @@ class CustomerController extends Controller
     public function index()
     {
         $customers = DB::table('customers')
-                ->leftjoin('cities','customers.city_id','=','cities.id')
-                ->leftjoin('suburbs','customers.suburb_id','=','suburbs.id')
-                ->leftjoin('pops','customers.pop_id','=','pops.id')
-                ->leftjoin('links','customers.id','=','links.customer_id')
                 ->orderBy('customers.created_at', 'desc')
-                ->get(['customers.id','customers.customer','cities.city','links.link','pops.pop','suburbs.suburb']);
+                ->get(['customers.id','customers.customer']);
         return view('customers.index',compact('customers'))
         ->with('i');
     }

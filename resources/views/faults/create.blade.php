@@ -148,5 +148,5 @@ Fault
 @endsection
 
 @section('scripts')
-    @include('partials.scripts')
+    @include('partials.faults')
 @endsection

@@ -30,18 +30,16 @@ Fault
                         </div>
 
                         <div class="mb-3 col-md-6">
-                            <label for="serviceType" class="form-label">Service Type</label>
-                            <select type="text"  class="custom-select " value="{{$fault->serviceType}}" name="serviceType">
-                            <option selected="selected">{{ $fault->serviceType }}</option>
-                                <option>VOIP</option>
-                                <option>VPN</option>
-                                <option>INTERNET</option>
-                                <option>CARRIER SERVICE</option>
-                                <option>POWERTRACK</option>
-                                <option>CDMA VOICE</option>
-                                <option>CDMA VOICE</option>
-                                <option>E-VENDING</option>
+                            <label for="ciy" class="form-label">City/Town</label>
+                            <select  class="custom-select" id="city" name="city_id">
+                                <option selected="selected" value="{{ $fault->city_id}}">{{ $fault->city }}</option>
+                                @foreach($cities as $city)
+                                    @unless($city->id ===$fault->city_id)
+                                        <option value="{{ $city->id}}">{{ $city->city }}</option>
+                                    @endunless
+                                @endforeach
                             </select>
+
                         </div>
                     </div>
             
@@ -51,18 +49,7 @@ Fault
                             <input type="text" class="form-control" value="{{$fault->contactName}}" name="contactName">
                         </div>
                         <div class="mb-3 col-md-2">
-                            <label for="city" class="form-label">Fault Locale</label>
-                            <select  class="custom-select" id="city" name="city_id">
-                                <option selected="selected" value="{{ $fault->city_id}}">{{ $fault->city }}</option>
-                                @foreach($cities as $city)
-                                    @unless($city->id ===$fault->city_id)
-                                        <option value="{{ $city->id}}">{{ $city->city }}</option>
-                                    @endunless
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3 col-md-2">
-                            <label for="suburb" class="form-label">Suburb</label>
+                            <label for="city" class="form-label">Location</label>
                             <select   class="custom-select" id="suburb" name="suburb_id">
                              <option selected="selected" value="{{ $fault->suburb_id}}">{{ $fault->suburb }}</option>
                                 @foreach($suburbs as $suburb)
@@ -70,6 +57,19 @@ Fault
                                         @unless($suburb->id ===$fault->suburb_id)
                                             <option value="{{ $suburb->id}}">{{ $suburb->suburb }}</option>
                                         @endunless                                    
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3 col-md-2">
+                            <label for="suburb" class="form-label">Link</label>
+                            <select class="custom-select" id="link" name="link_id">
+                            <option selected="selected" value="{{ $fault->link_id}}">{{ $fault->link}}</option>
+                                @foreach($links as $link)
+                                    @if ($link->customer_id === $fault->customer_id)
+                                        @unless ($link->id ===$fault->link_id)
+                                            <option value="{{ $link->id}}">{{ $link->link }}</option>
+                                        @endunless                                        
                                     @endif
                                 @endforeach
                             </select>
@@ -86,6 +86,7 @@ Fault
                                     @endif
                                 @endforeach
                             </select>
+
                         </div>
                     </div>
             
@@ -95,16 +96,17 @@ Fault
                             <input type="text" class="form-control" value="{{$fault->phoneNumber}}" name="phoneNumber">
                         </div>
                         <div class="mb-3 col-md-6">
-                            <label for="linkName" class="form-label">Link</label>
-                            <select class="custom-select" id="link" name="link_id">
-                            <option selected="selected" value="{{ $fault->link_id}}">{{ $fault->linkName }}</option>
-                                @foreach($links as $link)
-                                    @if ($link->customer_id === $fault->customer_id)
-                                        @unless ($link->id ===$fault->link_id)
-                                            <option value="{{ $link->id}}">{{ $link->linkName }}</option>
-                                        @endunless                                        
-                                    @endif
-                                @endforeach
+                            <label for="service" class="form-label">Service Type</label>
+                            <select type="text"  class="custom-select " value="{{$fault->serviceType}}" name="serviceType">
+                                <option selected="selected">{{ $fault->serviceType }}</option>
+                                <option>VOIP</option>
+                                <option>VPN</option>
+                                <option>INTERNET</option>
+                                <option>CARRIER SERVICE</option>
+                                <option>POWERTRACK</option>
+                                <option>CDMA VOICE</option>
+                                <option>CDMA VOICE</option>
+                                <option>E-VENDING</option>
                             </select>
                         </div>
                     </div>

@@ -14,6 +14,7 @@ Customers
         <h3 class="card-title" style="text-transform: uppercase; font-family: Times New Roman, Times, serif;">{{_('Customers')}}</h3>
         <div class="card-tools">
             <a  class="btn btn-primary" href="{{ route('customers.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Customer')}} </a>
+            <a  class="btn btn-primary" href="{{ route('links.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Link')}} </a>
         </div>
     </div>
     <!-- /.card-header -->
@@ -23,10 +24,6 @@ Customers
                 <tr>
                     <th>No.</th>
                     <th>Customer</th>
-                    <th>City</th>
-                    <th>Location</th>
-                    <th>Pop</th>
-                    <th>Link</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -35,10 +32,6 @@ Customers
                  <tr >
                     <td>{{++$i}}</td>
                     <td>{{ $customer->customer}}</td>
-                    <td>{{ $customer->city}}</td>
-                    <td>{{ $customer->suburb}}</td>
-                    <td>{{ $customer->pop}}</td>
-                    <td>{{ $customer->link}}</td>
                     <td>
                         <a href="{{ route('customers.edit',$customer->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
                         <a href="{{ route('customers.show',$customer->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>

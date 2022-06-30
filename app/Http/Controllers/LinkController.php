@@ -21,9 +21,9 @@ class LinkController extends Controller
     {
         $links = DB::table('links')
             ->leftjoin('customers','links.customer_id','=','customers.id')
-            ->leftjoin('cities','customers.city_id','=','cities.id')
-            ->leftjoin('suburbs','customers.suburb_id','=','suburbs.id')
-            ->leftjoin('pops','customers.pop_id','=','pops.id')
+            ->leftjoin('cities','links.city_id','=','cities.id')
+            ->leftjoin('suburbs','links.suburb_id','=','suburbs.id')
+            ->leftjoin('pops','links.pop_id','=','pops.id')
             ->orderBy('links.created_at', 'desc')
             ->get(['links.id','links.link','customers.customer','cities.city','pops.pop','suburbs.suburb']);
         return view('links.index',compact('links'))
