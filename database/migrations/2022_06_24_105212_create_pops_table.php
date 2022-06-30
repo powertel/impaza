@@ -19,6 +19,12 @@ return new class extends Migration
             $table->unsignedInteger('suburb_id');
             $table->string('pop');
             $table->timestamps();
+            $table->foreign('city_id')
+                    ->references('id')
+                    ->on('cities');
+            $table->foreign('suburb_id')
+                    ->references('id')
+                    ->on('suburbs');
         });
     }
 

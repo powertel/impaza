@@ -33,9 +33,53 @@ Link
                         </div>
                     </div>
                     <div class="form-group row">
+                        <label for="city" class="col-sm-2 col-form-label">City/Town</label>
+                        <div class="col-sm-10">
+                            <select class="custom-select" id="city" name="city_id">
+                                <option selected="selected" value="{{ $link->city_id}}">{{ $link->city }}</option>
+                                @foreach($cities as $city)
+                                    @unless ($city->id ===$link->city_id)
+                                        <option value="{{ $city->id}}">{{ $city->city }}</option>
+                                    @endunless
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="location" class="col-sm-2 col-form-label">Location</label>
+                        <div class="col-sm-10">
+                        <select   class="custom-select" id="suburb" name="suburb_id">
+                             <option selected="selected" value="{{ $link->suburb_id}}">{{ $link->suburb }}</option>
+                                @foreach($suburbs as $suburb)
+                                    @if ($suburb->city_id === $link->city_id)
+                                        @unless($suburb->id ===$link->suburb_id)
+                                            <option value="{{ $suburb->id}}">{{ $suburb->suburb }}</option>
+                                        @endunless                                    
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="pop" class="col-sm-2 col-form-label">Pop</label>
+                        <div class="col-sm-10">
+                            <select  class="custom-select" id="pop" name="pop_id" >
+                                <option selected="selected" value="{{ $link->pop_id}}">{{ $link->pop }}</option>
+                                @foreach($pops as $pop)
+                                    @if($pop->suburb_id === $link->suburb_id)
+                                        @unless($pop->id ===$link->pop_id)
+                                            <option value="{{ $pop->id}}">{{ $pop->pop }}</option>
+                                        @endunless                                        
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
                         <label for="link" class="col-sm-2 col-form-label">Link</label>
                         <div class="col-sm-10">
-                            <input type="text" class="form-control" name="link" value="{{ $link->link}}">
+                            <input type="text" class="form-control" name="link"  value="{{ $link->link}}">
                         </div>
                     </div>
            
@@ -47,6 +91,7 @@ Link
             </div> 
         </div>
     </div>
+           
  
 </section>
 @endsection
