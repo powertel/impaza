@@ -21,7 +21,9 @@ use App\Http\Controllers\DepartmentController;
 |
 */
 
-
+Route::get('/', function () {
+    return view('auth.login');
+});
 
 Auth::routes();
 
