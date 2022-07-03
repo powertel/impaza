@@ -9,10 +9,15 @@ use App\Models\City;
 use App\Models\Pop;
 use App\Models\Customer;
 use App\Models\Link;
+use App\Models\Remark;
 use DB;
 
 class FaultController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(['auth'])->only(['store', 'destroy']);
+    }
     /**
      * Display a listing of the resource.
      *
@@ -71,9 +76,35 @@ class FaultController extends Controller
      */
     public function store(Request $request)
     {
-        Fault::create($request->all());
-    
-        return redirect()->route('faults.index');
+        //Fault::create($request->all());
+
+        DB::beginTransaction();
+        try{
+            $fault = Fault::create($request->all());
+            $remark = Remark::create(
+                [
+                    'fault_id'=> $fault->id,
+                    'user_id' => $request->user()->id,
+                    'remark' => $request['remark'],
+                ]
+            );
+          //  $request->user()->posts()->create($request->only('body'));
+            if($fault&&$remark)
+            {
+                DB::commit();
+            }
+            else
+            {
+                DB::rollback();
+            }
+            return redirect()->route('faults.index');
+        }
+
+        catch(Exception $ex)
+        {
+            DB::rollback();
+        }
+
     }
 
     /**
@@ -90,10 +121,11 @@ class FaultController extends Controller
                 ->leftjoin('cities','faults.city_id','=','cities.id')
                 ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
                 ->leftjoin('pops','faults.pop_id','=','pops.id')
+                ->leftjoin('remarks','remarks.fault_id','=','faults.id')
                 ->where('faults.id','=',$id)
                 ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
                 'faults.accountManager','cities.city','suburbs.suburb','pops.pop','faults.suspectedRfo','links.link'
-                ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.remarks','faults.created_at'])
+                ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
                 ->first();
 
                //dd($fault);
@@ -114,10 +146,11 @@ class FaultController extends Controller
             ->leftjoin('cities','faults.city_id','=','cities.id')
             ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
             ->leftjoin('pops','faults.pop_id','=','pops.id')
+            ->leftjoin('remarks','remarks.fault_id','=','faults.id')
             ->where('faults.id','=',$id)
             ->get(['faults.id','faults.customer_id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
             'faults.accountManager','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo','faults.link_id','links.link'
-            ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.remarks','faults.created_at'])
+            ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
             ->first();
 
             $cities = City::all();
@@ -125,8 +158,9 @@ class FaultController extends Controller
             $suburbs = Suburb::all();
             $pops = Pop::all();
             $links = Link::all();
+            $remarks= Remark::all();
     
-        return view('faults.edit',compact('fault','customers','cities','suburbs','pops','links'));
+        return view('faults.edit',compact('fault','customers','cities','suburbs','pops','links','remarks'));
 
     }
 

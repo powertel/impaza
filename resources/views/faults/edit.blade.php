@@ -149,11 +149,6 @@ Fault
                             <input type="text" class="form-control" value="{{$fault->accountManager}}" name="accountManager">
                         </div>
     
-                        <div class="mb-3 col-md-6">
-                            <label for="remarks" class="form-label">Remarks</label>
-                            <textarea name="remarks" class="form-control"  rows="1" >{{$fault->remarks}}</textarea>
-                        </div>
-    
                     </div>
         
                     <div class="card-footer">
@@ -168,8 +163,35 @@ Fault
                 <h3 class="card-title">{{_('Remarks')}}</h3>
             </div>
             <div class="card-body">
-
+                <ul class="list-group">
+                    <div class="comments">
+                        @foreach($remarks as $remark)
+                            @if ($remark->fault_id === $fault->id)
+                                <li class="list-group-item">
+                                    <strong>
+                                        {{$remark->created_at->diffForHumans()}}
+                                    </strong>
+                                        {{$remark->remark}} 
+                                </li>   
+                            @endif
+                        @endforeach
+                    </div>                    
+                </ul>
+                <div class="callout callout-danger">
+                    <h5>I am a danger callout!</h5>
+                    <p>There is a problem that we need to fix. A wonderful serenity has taken possession of my entire
+                    soul,
+                    like these sweet mornings of spring which I enjoy with my whole heart.</p>
+                </div>
             </div> 
+
+            <div class="card-footer">
+                <form action="">
+                    <div class="form-group">
+                        <textarea name="remark" class="form-control" placeholder="Enter Your Remarks"></textarea>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
  
