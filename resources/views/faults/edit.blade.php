@@ -162,34 +162,20 @@ Fault
             <div class="card-header">
                 <h3 class="card-title">{{_('Remarks')}}</h3>
             </div>
-            <div class="card-body">
-{{--                 <ul class="list-group">
-                    <div class="comments">
-                        @foreach($remarks as $remark)
-                            @if ($remark->fault_id === $fault->id)
-                                <li class="list-group-item">
-                                    @if($remark->user)
-                                        {{ $remark->user->name}}
-                                    @endif
-
-                                    <strong>
-                                      Added Remark  {{$remark->created_at->diffForHumans()}}
-                                    </strong>
-                                        {{$remark->remark}} 
-                                </li>   
-                            @endif
-                        @endforeach
-                    </div>                    
-                </ul> --}}
+            <div class="card-body" style="height: 0px; overflow-y: auto">
                 @foreach($remarks as $remark)
                 @if ($remark->fault_id === $fault->id)
-                <div class="callout callout-success">
+                <div class="callout callout-info">
                     @if($remark->user)
-                    <h5>{{ $remark->user->name}}</h5>
+                    <h5 class="font-weight-bold">{{ $remark->user->name}}</h5>
                     @endif
-                    <strong>
+
+                    <h4 class="text-muted text-sm">
+                        <strong>
                         Added Remark  {{$remark->created_at->diffForHumans()}}
-                      </strong>
+                       </strong>
+                    </h4>
+
                     <p>{{$remark->remark}} </p>
                 </div>
                 @endif

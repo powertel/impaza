@@ -161,7 +161,7 @@ class FaultController extends Controller
             $remarks= Remark::all();
     
         return view('faults.edit',compact('fault','customers','cities','suburbs','pops','links','remarks'));
-
+        
     }
 
     /**
