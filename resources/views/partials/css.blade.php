@@ -19,5 +19,8 @@
     .card-title{
     color: blue;
     }
-    /* style="text-transform: uppercase;font-family: Times New Roman, Times, serif;" */
+/*     .card-scroll {
+        max-height: 50%;
+        overflow-y: auto;
+    } */
 </style>

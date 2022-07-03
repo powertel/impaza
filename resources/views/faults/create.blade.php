@@ -130,7 +130,7 @@ Fault
     
                         <div class="mb-3 col-md-6">
                             <label for="remarks" class="form-label">Remarks</label>
-                            <textarea name="remarks" class="form-control" placeholder="Enter any additional comments" rows="1" ></textarea>
+                            <textarea name="remark" class="form-control" placeholder="Enter any additional comments" rows="1" ></textarea>
                         </div>
     
                     </div>

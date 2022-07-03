@@ -92,7 +92,7 @@ Fault
 
                     <div class="col">
                         <strong>Remarks</strong>
-                        <p class="text-muted">{{ $fault->remarks }}</p>
+                        <p class="text-muted">{{ $fault->remark }}</p>
                     </div>
                 </div>
                 <div class="card-footer">

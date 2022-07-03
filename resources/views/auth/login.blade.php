@@ -50,14 +50,11 @@
                 </div>
   
                 <div class="col-4">
-                    <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+                    <button type="submit" class="btn btn-primary btn-block">login</button>
                 </div>
 
             </div>
         </form>
-        <p class="mb-0">
-            <a href="{{route('register')}}" class="text-center">Create new account</a>
-        </p>
     </div>
     <!-- /.login-card-body -->
   </div>

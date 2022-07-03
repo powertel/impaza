@@ -30,11 +30,7 @@ return new class extends Migration
             $table->string('serviceAttribute');
             $table->string('faultType')->nullable();
             $table->string('priorityLevel')->nullable();
-            $table->string('assigned_department')->nullable();
-            $table->string('created_by')->nullable();
             $table->integer('status_id')->nullable();
-            $table->string('remarks');
-            $table->string('status');
             $table->timestamps();
         });
     }

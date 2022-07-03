@@ -28,8 +28,7 @@ class Fault extends Model
         'suspectedRfo',
         'serviceType',
         'serviceAttribute',
-        'remarks',
-        'status',
+
     ];
 
     public function city()
@@ -45,5 +44,10 @@ class Fault extends Model
     public function pop()
     {
         return $this->belongsTo(Pop::class);
+    }
+
+    public function remarks()
+    {
+        return $this->hasMany(Remark::class);
     }
 }
