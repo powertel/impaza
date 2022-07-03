@@ -122,8 +122,13 @@ Fault
             
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
-                            <label for="accManager" class="form-label">Account Manager</label>
-                            <input type="text" class="form-control"  placeholder="Address" name="accountManager">
+                            <label for="accountManager" class="form-label">Service Attribute</label>
+                            <select id="accountManager" class="custom-select " name="accountManager_id">
+                                <option selected disabled >Select Account Manager</option>
+                                @foreach($accountManager as $acc_manager)
+                                    <option value="{{ $acc_manager->id}}">{{ $acc_manager->accountManager }}</option>
+                                @endforeach
+                            </select>
                         </div>
     
                         <div class="mb-3 col-md-6">
