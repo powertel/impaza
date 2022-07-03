@@ -36,12 +36,12 @@ Route::resource('cities', CityController::class);
 Route::resource('locations', LocationController::class);
 Route::resource('links', LinkController::class);
 Route::resource('pops', PopController::class);
-//Route::resource('faults', RemarkController::class);
+Route::post('faults/{fault}/remarks', [RemarkController::class,'store']);
 Route::get('suburb/{id}', [FaultController::class,'findSuburb'])->name('suburb');
 Route::get('link/{id}', [FaultController::class,'findLink'])->name('link');
 Route::get('pop/{id}', [FaultController::class,'findPop'])->name('pop');
 
  
 Route::resource('/departments', DepartmentController::class);
-Route::post('/faults/{fault}/remarks', [RemarkController::class,'store']);
+
 

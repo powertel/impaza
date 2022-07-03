@@ -163,26 +163,37 @@ Fault
                 <h3 class="card-title">{{_('Remarks')}}</h3>
             </div>
             <div class="card-body">
-                <ul class="list-group">
+{{--                 <ul class="list-group">
                     <div class="comments">
                         @foreach($remarks as $remark)
                             @if ($remark->fault_id === $fault->id)
                                 <li class="list-group-item">
+                                    @if($remark->user)
+                                        {{ $remark->user->name}}
+                                    @endif
+
                                     <strong>
-                                        {{$remark->created_at->diffForHumans()}}
+                                      Added Remark  {{$remark->created_at->diffForHumans()}}
                                     </strong>
                                         {{$remark->remark}} 
                                 </li>   
                             @endif
                         @endforeach
                     </div>                    
-                </ul>
-                <div class="callout callout-danger">
-                    <h5>I am a danger callout!</h5>
-                    <p>There is a problem that we need to fix. A wonderful serenity has taken possession of my entire
-                    soul,
-                    like these sweet mornings of spring which I enjoy with my whole heart.</p>
+                </ul> --}}
+                @foreach($remarks as $remark)
+                @if ($remark->fault_id === $fault->id)
+                <div class="callout callout-success">
+                    @if($remark->user)
+                    <h5>{{ $remark->user->name}}</h5>
+                    @endif
+                    <strong>
+                        Added Remark  {{$remark->created_at->diffForHumans()}}
+                      </strong>
+                    <p>{{$remark->remark}} </p>
                 </div>
+                @endif
+                @endforeach
             </div> 
 
             <div class="card-footer">
