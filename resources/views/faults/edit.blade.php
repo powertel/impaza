@@ -186,9 +186,13 @@ Fault
             </div> 
 
             <div class="card-footer">
-                <form action="">
+                <form action="/faults/{{$fault->id}}/remarks" method="POST">
+                    {{ csrf_field() }}
                     <div class="form-group">
-                        <textarea name="remark" class="form-control" placeholder="Enter Your Remarks"></textarea>
+                        <textarea name="remark" class="form-control" placeholder="Enter Your Remarks" rows="1"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-success float-right">{{ __('Add Remark') }}</button>
                     </div>
                 </form>
             </div>
