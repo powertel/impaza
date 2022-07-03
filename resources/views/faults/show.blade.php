@@ -23,8 +23,8 @@ Fault
                     </div>
 
                     <div class="col">
-                        <strong>Service Type</strong>
-                        <p class="text-muted">{{ $fault->serviceType }}</p>
+                        <strong>City/Town</strong>
+                        <p class="text-muted">{{ $fault->city }}</p>
                     </div>
                 </div>
                 <hr>
@@ -35,12 +35,12 @@ Fault
                     </div>
 
                     <div class="col-md-2">
-                        <strong>Fault Locale</strong>
-                        <p class="text-muted">{{ $fault->city }}</p>
+                        <strong>Location</strong>
+                        <p class="text-muted">{{ $fault->suburb }}</p>
                     </div>
                     <div class="col-md-2">
-                        <strong>Suburb</strong>
-                        <p class="text-muted">{{ $fault->suburb }}</p>
+                        <strong>Link</strong>
+                        <p class="text-muted">{{ $fault->link }}</p>
                     </div>
                     <div class="col-md-2">
                         <strong>Pop</strong>
@@ -55,8 +55,8 @@ Fault
                     </div>
 
                     <div class="col">
-                        <strong>Link</strong>
-                        <p class="text-muted">{{ $fault->link }}</p>
+                        <strong>Service Type</strong>
+                        <p class="text-muted">{{ $fault->serviceType }}</p>
                     </div>
                 </div>
                 <hr>
@@ -89,16 +89,35 @@ Fault
                         <strong>Account Manager</strong>
                         <p class="text-muted">{{ $fault->accountManager }}</p>
                     </div>
-
-                    <div class="col">
-                        <strong>Remarks</strong>
-                        <p class="text-muted">{{ $fault->remark }}</p>
-                    </div>
                 </div>
                 <div class="card-footer">
                     <a type="button" class="btn btn-danger" href="{{ route('faults.index') }}">{{ __('Close') }}</a>
                     <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-danger">Assess</a>
                 </div>
+            </div> 
+        </div>
+        <div class="card  w-50">
+            <div class="card-header">
+                <h3 class="card-title">{{_('Remarks')}}</h3>
+            </div>
+            <div class="card-body" style="height: 0px; overflow-y: auto">
+                @foreach($remarks as $remark)
+                @if ($remark->fault_id === $fault->id)
+                <div class="callout callout-info">
+                    @if($remark->user)
+                    <h5 class="font-weight-bold">{{ $remark->user->name}}</h5>
+                    @endif
+
+                    <h4 class="text-muted text-sm">
+                        <strong>
+                        Added Remark  {{$remark->created_at->diffForHumans()}}
+                       </strong>
+                    </h4>
+
+                    <p>{{$remark->remark}} </p>
+                </div>
+                @endif
+                @endforeach
             </div> 
         </div>
     </div>

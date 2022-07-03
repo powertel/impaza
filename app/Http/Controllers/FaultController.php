@@ -123,13 +123,13 @@ class FaultController extends Controller
                 ->leftjoin('pops','faults.pop_id','=','pops.id')
                 ->leftjoin('remarks','remarks.fault_id','=','faults.id')
                 ->where('faults.id','=',$id)
-                ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
-                'faults.accountManager','cities.city','suburbs.suburb','pops.pop','faults.suspectedRfo','links.link'
+                ->get(['faults.id','faults.customer_id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
+                'faults.accountManager','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo','faults.link_id','links.link'
                 ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
                 ->first();
 
-               //dd($fault);
-        return view('faults.show',compact('fault'));
+               $remarks= Remark::all();
+        return view('faults.show',compact('fault','remarks'));
     }
 
     /**
