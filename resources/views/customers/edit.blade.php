@@ -19,14 +19,14 @@ Customer
                     @csrf
                     @method('PUT')
                     <div class="form-group row">
-                        <label for="customer" class="col-sm-2 col-form-label">Customer</label>
-                        <div class="col-sm-10">
+                        <label for="customer" class="col-sm-3  col-form-label">Customer</label>
+                        <div class="col-sm-9">
                             <input type="text" class="form-control" name="customer"  value="{{ $customer->customer}}">
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="city" class="col-sm-2 col-form-label">City/Town</label>
-                        <div class="col-sm-10">
+                        <label for="city" class="col-sm-3  col-form-label">City/Town</label>
+                        <div class="col-sm-9">
                             <select class="custom-select" id="city" name="city_id">
                                 <option selected="selected" value="{{ $customer->city_id}}">{{ $customer->city }}</option>
                                 @foreach($cities as $city)
@@ -38,8 +38,8 @@ Customer
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="location" class="col-sm-2 col-form-label">Location</label>
-                        <div class="col-sm-10">
+                        <label for="location" class="col-sm-3  col-form-label">Location</label>
+                        <div class="col-sm-9">
                         <select   class="custom-select" id="suburb" name="suburb_id">
                              <option selected="selected" value="{{ $customer->suburb_id}}">{{ $customer->suburb }}</option>
                                 @foreach($suburbs as $suburb)
@@ -53,8 +53,8 @@ Customer
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="pop" class="col-sm-2 col-form-label">Pop</label>
-                        <div class="col-sm-10">
+                        <label for="pop" class="col-sm-3  col-form-label">Pop</label>
+                        <div class="col-sm-9">
                             <select  class="custom-select" id="pop" name="pop_id" >
                                 <option selected="selected" value="{{ $customer->pop_id}}">{{ $customer->pop }}</option>
                                 @foreach($pops as $pop)
@@ -69,8 +69,8 @@ Customer
                     </div>
 
                     <div class="form-group row">
-                        <label for="link" class="col-sm-2 col-form-label">Link</label>
-                        <div class="col-sm-10">
+                        <label for="link" class="col-sm-3  col-form-label">Link</label>
+                        <div class="col-sm-9">
                             <input type="text" class="form-control" name="link"  value="{{ $customer->link}}">
                         </div>
                     </div>

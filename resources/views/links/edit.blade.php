@@ -20,8 +20,8 @@ Link
                     @method('PUT')
                     
                     <div class="form-group row">
-                        <label for="customer" class="col-sm-2 col-form-label">Customer</label>
-                        <div class="col-sm-10">
+                        <label for="customer" class="col-sm-3 col-form-label">Customer</label>
+                        <div class="col-sm-9">
                             <select class="custom-select" id="customer" name="customer_id">
                                 <option selected="selected" value="{{ $link->customer_id}}">{{ $link->customer }}</option>
                                 @foreach($customers as $customer)
@@ -33,8 +33,8 @@ Link
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="city" class="col-sm-2 col-form-label">City/Town</label>
-                        <div class="col-sm-10">
+                        <label for="city" class="col-sm-3 col-form-label">City/Town</label>
+                        <div class="col-sm-9">
                             <select class="custom-select" id="city" name="city_id">
                                 <option selected="selected" value="{{ $link->city_id}}">{{ $link->city }}</option>
                                 @foreach($cities as $city)
@@ -46,8 +46,8 @@ Link
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="location" class="col-sm-2 col-form-label">Location</label>
-                        <div class="col-sm-10">
+                        <label for="location" class="col-sm-3 col-form-label">Location</label>
+                        <div class="col-sm-9">
                         <select   class="custom-select" id="suburb" name="suburb_id">
                              <option selected="selected" value="{{ $link->suburb_id}}">{{ $link->suburb }}</option>
                                 @foreach($suburbs as $suburb)
@@ -61,8 +61,8 @@ Link
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="pop" class="col-sm-2 col-form-label">Pop</label>
-                        <div class="col-sm-10">
+                        <label for="pop" class="col-sm-3 col-form-label">Pop</label>
+                        <div class="col-sm-9">
                             <select  class="custom-select" id="pop" name="pop_id" >
                                 <option selected="selected" value="{{ $link->pop_id}}">{{ $link->pop }}</option>
                                 @foreach($pops as $pop)
@@ -77,8 +77,8 @@ Link
                     </div>
 
                     <div class="form-group row">
-                        <label for="link" class="col-sm-2 col-form-label">Link</label>
-                        <div class="col-sm-10">
+                        <label for="link" class="col-sm-3 col-form-label">Link</label>
+                        <div class="col-sm-9">
                             <input type="text" class="form-control" name="link"  value="{{ $link->link}}">
                         </div>
                     </div>

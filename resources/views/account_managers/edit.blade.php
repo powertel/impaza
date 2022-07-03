@@ -19,8 +19,8 @@ Account Manager
                     @csrf
                     @method('PUT')
                     <div class="form-group row">
-                        <label for="account_manager" class="col-sm-2 col-form-label">Account Manager</label>
-                        <div class="col-sm-10">
+                        <label for="account_manager" class="col-sm-4 col-form-label">Account Manager</label>
+                        <div class="col-sm-8">
                             <input type="text" class="form-control" name="accountManager" value="{{$acc_manager->accountManager }}">
                         </div>
                     </div>

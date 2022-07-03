@@ -11,7 +11,7 @@ Link
         <div class="card w-50">
             <div class="card-header">
                 <h3 class="card-title">
-                    {{_('Create Link')}}
+                    {{_('Create Link')}} 
                 </h3>
             </div>
             <div class="card-body">
@@ -19,8 +19,8 @@ Link
                 {{ csrf_field() }}
                     
                     <div class="form-group row">
-                        <label for="customer" class="col-sm-2 col-form-label">Customer</label>
-                        <div class="col-sm-10">
+                        <label for="customer" class="col-sm-3 col-form-label">Customer</label>
+                        <div class="col-sm-9">
                             <select id="customer" class="custom-select " name="customer_id">
                                 <option selected disabled >Select Customer Name</option>
                                 @foreach($customer as $customer)
@@ -30,8 +30,8 @@ Link
                         </div>
                     </div>
                     <div class="form-group row">
-                    <label for="city" class="col-sm-2 col-form-label">City/Town</label>
-                    <div class="col-sm-10">
+                    <label for="city" class="col-sm-3 col-form-label">City/Town</label>
+                    <div class="col-sm-9">
                         <select id="city" class="custom-select " name="city_id">
                             <option selected disabled >Select city name</option>
                             @foreach($city as $city)
@@ -42,8 +42,8 @@ Link
                 </div>
 
                 <div class="form-group row">
-                    <label for="location" class="col-sm-2 col-form-label">Location</label>
-                    <div class="col-sm-10">
+                    <label for="location" class="col-sm-3 col-form-label">Location</label>
+                    <div class="col-sm-9">
                     <select id="suburb"  class="custom-select" name="suburb_id">
                         <option selected disabled>Select Suburb</option>
                      </select>
@@ -51,8 +51,8 @@ Link
                 </div>
 
                 <div class="form-group row">
-                    <label for="pop" class="col-sm-2 col-form-label">Pop</label>
-                    <div class="col-sm-10">
+                    <label for="pop" class="col-sm-3 col-form-label">Pop</label>
+                    <div class="col-sm-9">
                         <select id="pop"  class="custom-select " name="pop_id" >
                             <option selected disabled>Select Pop</option>
                         </select>
@@ -60,8 +60,8 @@ Link
                 </div>
 
                 <div class="form-group row">
-                    <label for="pop" class="col-sm-2 col-form-label">Link</label>
-                    <div class="col-sm-10">
+                    <label for="pop" class="col-sm-3 col-form-label">Link</label>
+                    <div class="col-sm-9">
                         <input type="text" class="form-control" name="link" placeholder="Link Name">
                     </div>
                 </div>
