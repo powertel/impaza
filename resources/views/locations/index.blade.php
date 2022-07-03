@@ -11,10 +11,10 @@ Locations
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title" style="text-transform: uppercase; font-family: Times New Roman, Times, serif;">{{_('Locations')}}</h3>
+        <h3 class="card-title">{{_('Locations')}}</h3>
         <div class="card-tools">
-            <a  class="btn btn-primary" href="{{ route('locations.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create location')}} </a>
-            <a  class="btn btn-primary" href="{{ route('pops.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Pop')}} </a>
+            <a  class="btn btn-primary btn-sm" href="{{ route('locations.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create location')}} </a>
+            <a  class="btn btn-primary btn-sm" href="{{ route('pops.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Pop')}} </a>
         </div>
     </div>
     <!-- /.card-header -->

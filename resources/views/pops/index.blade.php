@@ -5,16 +5,17 @@ Pops
 @endsection
 
 @section('content')
+    @include('partials.css')
 <section class="content">
 
 <div class="card">
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title" style="text-transform: uppercase; font-family: Times New Roman, Times, serif;">{{_('Pops')}}</h3>
+        <h3 class="card-title">{{_('Pops')}}</h3>
         <div class="card-tools">
-            <a  class="btn btn-primary" href="{{ route('pops.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Pop')}} </a>
-            <a  class="btn btn-primary" href="{{ route('customers.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Customer')}} </a>
+            <a  class="btn btn-primary btn-sm" href="{{ route('pops.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Pop')}} </a>
+            <a  class="btn btn-primary btn-sm" href="{{ route('customers.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Customer')}} </a>
         </div>
     </div>
     <!-- /.card-header -->

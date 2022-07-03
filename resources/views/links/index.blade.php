@@ -11,9 +11,9 @@ links
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title" style="text-transform: uppercase; font-family: Times New Roman, Times, serif;">{{_('Links')}}</h3>
+        <h3 class="card-title">{{_('Links')}}</h3>
         <div class="card-tools">
-            <a  class="btn btn-primary" href="{{ route('links.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Link')}} </a>
+            <a  class="btn btn-primary btn-sm" href="{{ route('links.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Link')}} </a>
         </div>
     </div>
     <!-- /.card-header -->

@@ -27,7 +27,7 @@ City
            
                     <div class="card-footer">
                         <a type="button" class="btn btn-danger" href="javascript:history.back()">{{ __('Cancel') }}</a>
-                        <button type="submit" class="btn btn-success float-right">{{ __('Save') }}</button>
+                        <button type="submit" class="btn btn-success btn-sm float-right">{{ __('Save') }}</button>
                     </div>
                 </form> 
             </div> 

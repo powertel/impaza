@@ -6,7 +6,6 @@ Fault
 
 @section('content')
 @include('partials.css')
-@include('partials.css')
 <section class="content">
     <div class="col d-flex justify-content-center">
         <div class="card w-100">
@@ -18,81 +17,81 @@ Fault
             <div class="card-body">
                 <div class="row g-2">
                     <div class="col">
-                        <strong>Customer Name</strong>
+                        <strong>CUSTOMER</strong>
                         <p class="text-muted">{{ $fault->customer }}</p>
                     </div>
 
                     <div class="col">
-                        <strong>City/Town</strong>
+                        <strong>CITY/TOWN</strong>
                         <p class="text-muted">{{ $fault->city }}</p>
                     </div>
                 </div>
                 <hr>
                 <div class="row g-2">
                     <div class="col-md-6">
-                        <strong>Contact Name</strong>
+                        <strong>CONTACT NAME</strong>
                         <p class="text-muted">{{ $fault->contactName }}</p>
                     </div>
 
                     <div class="col-md-2">
-                        <strong>Location</strong>
+                        <strong>LOCATION</strong>
                         <p class="text-muted">{{ $fault->suburb }}</p>
                     </div>
                     <div class="col-md-2">
-                        <strong>Link</strong>
+                        <strong>LINK</strong>
                         <p class="text-muted">{{ $fault->link }}</p>
                     </div>
                     <div class="col-md-2">
-                        <strong>Pop</strong>
+                        <strong>POP</strong>
                         <p class="text-muted">{{ $fault->pop }}</p>
                     </div>
                 </div>
                 <hr>
                 <div class="row g-2">
                     <div class="col">
-                        <strong>Phone Number</strong>
+                        <strong>PHONE NUMBER</strong>
                         <p class="text-muted">{{ $fault->phoneNumber }}</p>
                     </div>
 
                     <div class="col">
-                        <strong>Service Type</strong>
+                        <strong>SERVICE TYPE</strong>
                         <p class="text-muted">{{ $fault->serviceType }}</p>
                     </div>
                 </div>
                 <hr>
                 <div class="row g-2">
                     <div class="col">
-                        <strong>Email Address</strong>
+                        <strong>EMAIL ADDRESS</strong>
                         <p class="text-muted">{{ $fault->contactEmail }}</p>
                     </div>
 
                     <div class="col">
-                        <strong>Reason For Outage</strong>
+                        <strong>REASON FOR OUTAGE</strong>
                         <p class="text-muted">{{ $fault->suspectedRfo }}</p>
                     </div>
                 </div>
                 <hr>
                 <div class="row g-2">
                     <div class="col">
-                        <strong>Physica Address</strong>
+                        <strong>PHYSICAL ADDRESS</strong>
                         <p class="text-muted">{{ $fault->address }}</p>
                     </div>
 
                     <div class="col">
-                        <strong>Service Attribute</strong>
+                        <strong>SERVICE ATTRIBUTE</strong>
                         <p class="text-muted">{{ $fault->serviceAttribute }}</p>
                     </div>
                 </div>
                 <hr>
                 <div class="row g-2">
                     <div class="col">
-                        <strong>Account Manager</strong>
+                        <strong>ACCOUNT MANAGER</strong>
                         <p class="text-muted">{{ $fault->accountManager }}</p>
                     </div>
                 </div>
                 <div class="card-footer">
-                    <a type="button" class="btn btn-danger" href="{{ route('faults.index') }}">{{ __('Close') }}</a>
-                    <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-danger">Assess</a>
+                    <a type="button" class="btn btn-danger btn-sm" href="{{ route('faults.index') }}">{{ __('Close') }}</a>
+                    <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-success btn-sm float-right">Assess</a>
                 </div>
             </div> 
         </div>

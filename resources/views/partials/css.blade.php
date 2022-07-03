@@ -11,14 +11,10 @@
     }
 
     .card-header .card-title {
-        width: 100%;
         text-transform: uppercase;
        
     }
 
-    .card-title{
-    color: blue;
-    }
 /*     .card-scroll {
         max-height: 50%;
         overflow-y: auto;

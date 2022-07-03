@@ -152,8 +152,8 @@ Fault
                     </div>
         
                     <div class="card-footer">
-                        <a type="button" class="btn btn-danger" href="{{ route('faults.index') }}">{{ __('Cancel') }}</a>
-                        <button type="submit" class="btn btn-success float-right">{{ __('Save') }}</button>
+                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('faults.index') }}">{{ __('Cancel') }}</a>
+                        <button type="submit" class="btn btn-success btn-sm float-right">{{ __('Save') }}</button>
                     </div>
                 </form> 
             </div> 
@@ -189,7 +189,7 @@ Fault
                         <textarea name="remark" class="form-control" placeholder="Enter Your Remarks" rows="1"></textarea>
                     </div>
                     <div class="form-group">
-                        <button type="submit" class="btn btn-success float-right">{{ __('Add Remark') }}</button>
+                        <button type="submit" class="btn btn-success btn-sm float-right">{{ __('Add Remark') }}</button>
                     </div>
                 </form>
             </div>
