@@ -19,8 +19,8 @@ Location
                 {{ csrf_field() }}
         
                 <div class="form-group row">
-                        <label for="city" class="col-sm-2 col-form-label">City/Town</label>
-                        <div class="col-sm-10">
+                        <label for="city" class="col-sm-3 col-form-label">City/Town</label>
+                        <div class="col-sm-9">
                             <select id="city" class="custom-select " name="city_id">
                                 <option selected disabled >Select city name</option>
                                 @foreach($city as $city)
@@ -30,8 +30,8 @@ Location
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="suburb" class="col-sm-2 col-form-label">Location</label>
-                        <div class="col-sm-10">
+                        <label for="suburb" class="col-sm-3 col-form-label">Location</label>
+                        <div class="col-sm-9">
                             <input type="text" class="form-control" name="suburb" placeholder="Location">
                         </div>
                     </div>

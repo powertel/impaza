@@ -10,6 +10,7 @@ use App\Http\Controllers\LinkController;
 use App\Http\Controllers\PopController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\RemarkController;
+use App\Http\Controllers\AccountManagerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +37,7 @@ Route::resource('cities', CityController::class);
 Route::resource('locations', LocationController::class);
 Route::resource('links', LinkController::class);
 Route::resource('pops', PopController::class);
+Route::resource('account_managers', AccountManagerController::class);
 Route::post('faults/{fault}/remarks', [RemarkController::class,'store']);
 Route::get('suburb/{id}', [FaultController::class,'findSuburb'])->name('suburb');
 Route::get('link/{id}', [FaultController::class,'findLink'])->name('link');

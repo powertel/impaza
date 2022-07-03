@@ -14,6 +14,7 @@
         text-transform: uppercase;
        
     }
+    
 
 /*     .card-scroll {
         max-height: 50%;

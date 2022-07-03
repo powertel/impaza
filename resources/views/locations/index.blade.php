@@ -5,6 +5,7 @@ Locations
 @endsection
 
 @section('content')
+    @include('partials.css')
 <section class="content">
 
 <div class="card">

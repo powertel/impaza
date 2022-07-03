@@ -19,8 +19,8 @@ Pop
                     @csrf
                     @method('PUT')
                     <div class="form-group row">
-                        <label for="city" class="col-sm-2 col-form-label">City/Town</label>
-                        <div class="col-sm-10">
+                        <label for="city" class="col-sm-3 col-form-label">City/Town</label>
+                        <div class="col-sm-9 ">
                             <select class="custom-select" id="city" name="city_id">
                                 <option selected="selected" value="{{ $pop->city_id}}">{{ $pop->city }}</option>
                                 @foreach($cities as $city)
@@ -32,8 +32,8 @@ Pop
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="location" class="col-sm-2 col-form-label">Location</label>
-                        <div class="col-sm-10">
+                        <label for="location" class="col-sm-3 col-form-label">Location</label>
+                        <div class="col-sm-9 ">
                         <select   class="custom-select" id="suburb" name="suburb_id">
                              <option selected="selected" value="{{ $pop->suburb_id}}">{{ $pop->suburb }}</option>
                                 @foreach($suburbs as $suburb)
@@ -47,8 +47,8 @@ Pop
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="pop" class="col-sm-2 col-form-label">Pop</label>
-                        <div class="col-sm-10">
+                        <label for="pop" class="col-sm-3 col-form-label">Pop</label>
+                        <div class="col-sm-9 ">
                             <input type="text" class="form-control" name="pop" value="{{ $pop->pop}}">
                         </div>
                     </div>

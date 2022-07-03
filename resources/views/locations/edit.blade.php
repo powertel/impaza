@@ -19,8 +19,8 @@ Location
                     @csrf
                     @method('PUT')
                     <div class="form-group row">
-                        <label for="city" class="col-sm-2 col-form-label">city</label>
-                        <div class="col-sm-10">
+                        <label for="city" class="col-sm-3 col-form-label">city</label>
+                        <div class="col-sm-9">
                             <select class="custom-select" id="city" name="city_id">
                                 <option selected="selected" value="{{ $location->city_id}}">{{ $location->city }}</option>
                                 @foreach($cities as $city)
@@ -33,8 +33,8 @@ Location
                     </div>
                     
                     <div class="form-group row">
-                        <label for="location" class="col-sm-2 col-form-label">Location</label>
-                        <div class="col-sm-10">
+                        <label for="location" class="col-sm-3 col-form-label">Location</label>
+                        <div class="col-sm-9">
                             <input type="text" class="form-control" name="suburb" value="{{ $location->suburb}}">
                         </div>
                     </div>

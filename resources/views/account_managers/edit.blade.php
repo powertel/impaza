@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-City
+Account Manager
 @endsection
 
 @section('content')
@@ -11,17 +11,17 @@ City
         <div class="card w-50">
             <div class="card-header">
                 <h3 class="card-title">
-                    {{_('Create City')}}
+                    {{_('Update Account Manager')}}
                 </h3>
             </div>
             <div class="card-body">
-                <form action="{{ route('cities.store') }}" method="POST">
-                {{ csrf_field() }}
-        
+                <form action="{{ route('account_managers.update', $acc_manager->id ) }}" method="POST">
+                    @csrf
+                    @method('PUT')
                     <div class="form-group row">
-                        <label for="city" class="col-sm-3 col-form-label">City/Town</label>
-                        <div class="col-sm-9">
-                            <input type="text"  class="form-control" name="city" placeholder="City Name">
+                        <label for="account_manager" class="col-sm-2 col-form-label">Account Manager</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" name="accountManager" value="{{$acc_manager->accountManager }}">
                         </div>
                     </div>
            

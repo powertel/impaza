@@ -112,6 +112,12 @@
                                   </a>
                               </li>
                               <li class="nav-item">
+                                  <a href="{{ route('account_managers.index') }}" class="nav-link">
+                                    <i class="nav-icon fas fa-user"></i>
+                                    <p>Account Managers</p>
+                                  </a>
+                              </li>
+                              <li class="nav-item">
                                     <a href="{{ route('cities.index') }}" class="nav-link">
                                     <i class="nav-icon fas fa-table"></i>
                                     <p>Cities</p>

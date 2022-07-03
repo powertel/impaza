@@ -20,7 +20,7 @@ return new class extends Migration
             $table->integer('phoneNumber');
             $table->string('contactEmail');
             $table->string('address');
-            $table->string('accountManager');
+            $table->unsignedInteger('accountManager_id');
             $table->unsignedInteger('city_id');
             $table->unsignedInteger('suburb_id');
             $table->unsignedInteger('pop_id');
