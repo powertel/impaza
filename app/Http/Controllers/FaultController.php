@@ -164,8 +164,9 @@ class FaultController extends Controller
             $pops = Pop::all();
             $links = Link::all();
             $remarks= Remark::all();
+            $accountManagers = AccountManager::all();
     
-        return view('faults.edit',compact('fault','customers','cities','suburbs','pops','links','remarks'));
+        return view('faults.edit',compact('fault','customers','cities','suburbs','pops','links','remarks','accountManagers'));
         
     }
 

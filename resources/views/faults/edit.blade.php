@@ -145,8 +145,15 @@ Fault
             
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
-                            <label for="accManager" class="form-label">Account Manager</label>
-                            <input type="text" class="form-control" value="{{$fault->accountManager}}" name="accountManager">
+                            <label for="accountManager" class="form-label">Account Manager</label>
+                            <select class="custom-select" id="accountManager" name="accountManager_id">
+                                <option selected="selected" value="{{ $fault->accountManager_id}}">{{ $fault->accountManager }}</option>
+                                @foreach($accountManagers as $acc_manager)
+                                    @unless ($acc_manager->id ===$fault->accountManager_id)
+                                        <option value="{{ $acc_manager->id}}">{{ $acc_manager->accountManager }}</option>
+                                    @endunless
+                                @endforeach
+                            </select>
                         </div>
     
                     </div>
