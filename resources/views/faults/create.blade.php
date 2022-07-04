@@ -122,7 +122,7 @@ Fault
             
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
-                            <label for="accountManager" class="form-label">Service Attribute</label>
+                            <label for="accountManager" class="form-label">Account Manager</label>
                             <select id="accountManager" class="custom-select " name="accountManager_id">
                                 <option selected disabled >Select Account Manager</option>
                                 @foreach($accountManager as $acc_manager)
