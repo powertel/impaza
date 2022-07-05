@@ -100,7 +100,8 @@ class FaultController extends Controller
             {
                 DB::rollback();
             }
-            return redirect()->route('faults.index');
+            return redirect()->route('faults.index')
+            ->with('success', 'Fault Created');
         }
 
         catch(Exception $ex)
@@ -182,7 +183,7 @@ class FaultController extends Controller
         $fault = Fault::find($id);
         $fault ->update($request->all());
         return redirect(route('faults.index'))
-        ->with('success','Fault updated successfully');
+        ->with('success','Fault Updated');
     }
 
     /**

@@ -22,6 +22,11 @@ Account Manager
                         <label for="account_manager" class="col-sm-4 col-form-label">Account Manager</label>
                         <div class="col-sm-8">
                             <input type="text" class="form-control" name="accountManager" value="{{$acc_manager->accountManager }}">
+                            @error ('accountManager')
+                                <div class="alert-danger">
+                                     {{$message }}
+                                </div>                                
+                            @enderror
                         </div>
                     </div>
            

@@ -41,9 +41,14 @@ class CityController extends Controller
      */
     public function store(Request $request)
     {
+
+        request()->validate([
+            'city' => 'required',
+        ]);
         City::create($request->all());
     
-        return redirect()->route('cities.index');
+        return redirect()->route('cities.index')
+         ->with('success','City Created.');
     }
 
     /**
@@ -85,10 +90,14 @@ class CityController extends Controller
      */
     public function update(Request $request, $id)
     {
+
+        request()->validate([
+            'city' => 'required',
+        ]);
         $city = City::find($id);
         $city ->update($request->all());
         return redirect(route('cities.index'))
-        ->with('success','City updated successfully');
+        ->with('success','City Updated');
     }
 
     /**

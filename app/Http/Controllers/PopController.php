@@ -47,7 +47,9 @@ class PopController extends Controller
     {
         Pop::create($request->all());
     
-        return redirect()->route('pops.index');
+        return redirect()->route('pops.index')
+         ->with('success','Department')
+         ->with('success','Pop Created');
     }
 
     /**
@@ -98,7 +100,7 @@ class PopController extends Controller
         $pop = Pop::find($id);
         $pop ->update($request->all());
         return redirect(route('pops.index'))
-        ->with('success','Location updated successfully');
+        ->with('success','Pop Updated');
     }
 
     /**

@@ -45,7 +45,8 @@ class LocationController extends Controller
     {
         Suburb::create($request->all());
     
-        return redirect()->route('locations.index');
+        return redirect()->route('locations.index')
+        ->with('success','Location Created');
     }
 
     /**
@@ -93,7 +94,7 @@ class LocationController extends Controller
         $location = Suburb::find($id);
         $location ->update($request->all());
         return redirect(route('locations.index'))
-        ->with('success','Location updated successfully');
+        ->with('success','Location Updated');
     }
 
     /**

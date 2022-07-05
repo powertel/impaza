@@ -22,6 +22,11 @@ City
                         <label for="city" class="col-sm-3 col-form-label">City/Town</label>
                         <div class="col-sm-9">
                             <input type="text"  class="form-control" name="city" placeholder="City Name">
+                            @error('city')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
                         </div>
                     </div>
            

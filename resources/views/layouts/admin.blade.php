@@ -217,9 +217,8 @@
 
               <!-- /Main Content-->
               <div class="content">
-                <div class="col-md-6">
-
-                </div>
+       
+                @include('partials.alerts')
                 @yield('content')
               </div>
         </div>

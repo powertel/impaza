@@ -41,9 +41,42 @@ class AccountManagerController extends Controller
      */
     public function store(Request $request)
     {
-        AccountManager::create($request->all());
-    
-        return redirect()->route('account_managers.index');
+
+        request()->validate([
+            'accountManager' => 'required|string|unique:account_managers'
+        ]);
+
+        $acc_manager = AccountManager::create($request->all());
+
+        
+        if($acc_manager)
+        {
+            return redirect()->route('account_managers.index')
+            ->with('success','Department Created.');
+        }
+        else
+        {
+            return back()->with('fail','Something went wrong');
+        }
+
+/*         $request -> validate([
+            'accountManager' => 'required|string|unique:account_managers'
+        ]);
+
+        $acc_manager = new AccountManager();
+        $acc_manager -> accountManager = $request -> accountManager;
+
+        $res = $acc_manager ->save();
+
+        if($res)
+        {
+            return redirect()->route('account_managers.index')
+            ->with('success','Department Created.');
+        }
+        else
+        {
+            return back()->with('fail','Something went wrong');
+        } */
     }
 
     /**
@@ -85,10 +118,14 @@ class AccountManagerController extends Controller
      */
     public function update(Request $request, $id)
     {
+        request()->validate([
+            'accountManager' => 'required',
+        ]);
+        
         $acc_manager = AccountManager::find($id);
         $acc_manager ->update($request->all());
         return redirect(route('account_managers.index'))
-        ->with('success','Account Manager updated successfully');
+        ->with('success','Account Manager Updated');
     }
 
     /**

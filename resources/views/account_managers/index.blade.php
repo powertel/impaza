@@ -14,7 +14,7 @@ Account Managers
     <div class="card-header">
         <h3 class="card-title">{{_('Account Manager')}}</h3>
         <div class="card-tools">
-            <a  class="btn btn-primary btn-sm" href="{{ route('account_managers.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Accoun Manger')}} </a>
+            <a  class="btn btn-primary btn-sm" href="{{ route('account_managers.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Account Manager')}} </a>
             <a  class="btn btn-primary btn-sm" href="{{ route('customers.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Customer')}} </a>
         </div>
     </div>

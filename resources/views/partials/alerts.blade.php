@@ -3,7 +3,7 @@
 
     <div class="alert alert-success alert-block">
 
-        <button type="button" class="close" data-dismiss="alert">×</button>
+        <button type="button" class="close" data-bs-dismiss="alert">×</button>
 
         <i class="icon fas fa-check"></i> {{ $message }}
 
@@ -16,7 +16,7 @@
 
     <div class="alert alert-danger alert-block">
 
-        <button type="button" class="close" data-dismiss="alert">×</button>
+        <button type="button" class="close" data-bs-dismiss="alert">×</button>
 
         <i class="icon fas fa-ban"></i> {{ $message }}
 
@@ -29,7 +29,7 @@
 
     <div class="alert alert-warning alert-block">
 
-        <button type="button" class="close" data-dismiss="alert">×</button>
+        <button type="button" class="close" data-bs-dismiss="alert">×</button>
 
         <i class="icon fas fa-exclamation-triangle"></i> {{ $message }}
 
@@ -42,7 +42,7 @@
 
     <div class="alert alert-info alert-block">
 
-        <button type="button" class="close" data-dismiss="alert">×</button>
+        <button type="button" class="close" data-bs-dismiss="alert">×</button>
 
         <i class="icon fas fa-info"></i> {{ $message }}
 
@@ -50,22 +50,7 @@
 
     @endif
 
-    @if ($errors->any())
 
-    <div class="alert alert-danger">
-
-        <button type="button" class="close" data-dismiss="alert">×</button>
-
-        <i class="icon fas fa-ban"></i> Please check the form below for errors
-        <ul>
-            @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-
-    </div>
-
-    @endif
 
 
 </div>

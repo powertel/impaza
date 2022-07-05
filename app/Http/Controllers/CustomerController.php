@@ -75,7 +75,8 @@ class CustomerController extends Controller
             {
                 DB::rollback();
             }
-            return redirect()->route('customers.index');
+            return redirect()->route('customers.index')
+             ->with('success','Customer Created.');
         }
 
         catch(Exception $ex)
@@ -166,7 +167,7 @@ class CustomerController extends Controller
                 DB::rollback();
             }
             return redirect(route('customers.index'))
-            ->with('success','Customer updated successfully');
+            ->with('success','Customer Updated');
         }
         catch(Exception $ex)
         {

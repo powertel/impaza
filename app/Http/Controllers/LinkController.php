@@ -52,7 +52,8 @@ class LinkController extends Controller
     {
         Link::create($request->all());
     
-        return redirect()->route('links.index');
+        return redirect()->route('links.index')
+        ->with('success','Link Created');
     }
 
     /**
@@ -109,7 +110,7 @@ class LinkController extends Controller
         $link = Link::find($id);
         $link ->update($request->all());
         return redirect(route('links.index'))
-        ->with('success','Link updated successfully');
+        ->with('success','Link Updated');
     }
 
     /**

@@ -94,7 +94,7 @@ class DepartmentController extends Controller
         $department->update($request->all());
       
         return redirect()->route('departments.index')
-                        ->with('success','Department updated successfully');
+                        ->with('success','Department Updated');
     }
 
     /**
@@ -108,7 +108,7 @@ class DepartmentController extends Controller
         $department->delete();
        
         return redirect()->route('departments.index')
-                        ->with('success','Department deleted successfully');
+                        ->with('success','Department Deleted');
     }
 
 }
