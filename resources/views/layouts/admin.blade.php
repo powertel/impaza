@@ -150,11 +150,23 @@
                             </ul>
                         </li>
                         <li  class="nav-item">
-                                  <a href="{{ route('faults.index') }}" class="nav-link">
-                                      <i class="nav-icon fas fa-copy"></i>
-                                      <p>Faults</p>
-                                  </a>
-                              </li>
+                            <a href="{{ route('faults.index') }}" class="nav-link">
+                                <i class="nav-icon fas fa-copy"></i>
+                                <p>Faults</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a  class="nav-link">
+                                <i class="nav-icon fas fa-plus-square"></i>
+                                <p>Finance</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a  class="nav-link">
+                                <i class="nav-icon fas fa-plus-square"></i>
+                                <p>Permits</p>
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <a  class="nav-link">
                                 <i class="nav-icon fas fa-plus-square"></i>

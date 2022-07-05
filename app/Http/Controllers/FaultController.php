@@ -83,6 +83,23 @@ class FaultController extends Controller
 
         DB::beginTransaction();
         try{
+            request()->validate([
+                'city_id' => 'required',
+                'customer_id'=> 'required',
+                'contactName'=> 'required',
+                'phoneNumber'=> 'required',
+                'contactEmail'=> 'required',
+                'address'=> 'required',
+                'accountManager_id'=> 'required',
+                'city_id'=> 'required',
+                'suburb_id'=> 'required',
+                'pop_id'=> 'required',
+                'link_id'=> 'required',
+                'suspectedRfo'=> 'required',
+                'serviceType'=> 'required',
+                'serviceAttribute'=> 'required',
+                'remark'=> 'required'
+            ]);
             $fault = Fault::create($request->all());
             $remark = Remark::create(
                 [

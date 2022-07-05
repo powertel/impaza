@@ -44,6 +44,11 @@ Fault
                         <div class="mb-3 col-md-6">
                             <label for="contactName" class="form-label">Contact Name</label>
                             <input type="text" class="form-control"  placeholder="Contact Name" name="contactName">
+                            @error ('contactName')
+                                <div class="alert-danger">
+                                     {{$message }}
+                                </div>                                
+                            @enderror
                         </div>
                         <div class="mb-3 col-md-2">
                             <label for="city" class="form-label">Location</label>
@@ -69,6 +74,11 @@ Fault
                         <div class="mb-3 col-md-6">
                             <label for="phone" class="form-label">Phone Number</label>
                             <input type="text" class="form-control"  placeholder="Phone Number" name="phoneNumber">
+                            @error ('phoneNumber')
+                                <div class="alert-danger">
+                                     {{$message }}
+                                </div>                                
+                            @enderror
                         </div>
                         
                         <div class="mb-3 col-md-6">
@@ -91,6 +101,11 @@ Fault
                         <div class="mb-3 col-md-6">
                             <label for="email" class="form-label">Email Address</label>
                             <input type="email" class="form-control" placeholder="email" name="contactEmail">
+                            @error ('contactEmail')
+                                <div class="alert-danger">
+                                     {{$message }}
+                                </div>                                
+                            @enderror
                         </div>
                         <div class="mb-3 col-md-6">
                             <label for="suspectedRfo" class="form-label">Suspected Reason For Outage</label>
@@ -109,6 +124,11 @@ Fault
                         <div class="mb-3 col-md-6">
                             <label for="adress" class="form-label">Address</label>
                             <input type="text" class="form-control"  placeholder="Address" name="address">
+                            @error ('address')
+                                <div class="alert-danger">
+                                     {{$message }}
+                                </div>                                
+                            @enderror
                         </div>
                         <div class="mb-3 col-md-6">
                             <label for="serviceAtrr" class="form-label">Service Attribute</label>
@@ -134,6 +154,11 @@ Fault
                         <div class="mb-3 col-md-6">
                             <label for="remarks" class="form-label">Remarks</label>
                             <textarea name="remark" class="form-control" placeholder="Enter any additional comments" rows="1" ></textarea>
+                            @error ('remark')
+                                <div class="alert-danger">
+                                     {{$message }}
+                                </div>                                
+                            @enderror
                         </div>
     
                     </div>
