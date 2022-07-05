@@ -15,9 +15,9 @@
        
     }
     
+     .card-footer .btn {
+        margin: 13px 12px 12px 10px;        
+     }
 
-/*     .card-scroll {
-        max-height: 50%;
-        overflow-y: auto;
-    } */
+
 </style>
