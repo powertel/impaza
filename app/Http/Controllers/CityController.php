@@ -43,12 +43,22 @@ class CityController extends Controller
     {
 
         request()->validate([
-            'city' => 'required',
+            'city' => 'required|string|unique:cities'
         ]);
-        City::create($request->all());
+
+        $city = City::create($request->all());
+
+        if($city)
+        {
+            return redirect()->route('cities.index')
+            ->with('success','City Created.');
+        }
+        else
+        {
+            return back()->with('fail','Something went wrong');
+        }
     
-        return redirect()->route('cities.index')
-         ->with('success','City Created.');
+
     }
 
     /**
@@ -92,12 +102,22 @@ class CityController extends Controller
     {
 
         request()->validate([
-            'city' => 'required',
+            'city' => 'required|string|unique:cities'
         ]);
+        
         $city = City::find($id);
         $city ->update($request->all());
-        return redirect(route('cities.index'))
-        ->with('success','City Updated');
+
+        if($city)
+        {
+            return redirect(route('cities.index'))
+            ->with('success','City Updated');
+        }
+        else
+        {
+            return back()->with('fail','Something went wrong');
+        }
+
     }
 
     /**

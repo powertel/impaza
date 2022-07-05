@@ -45,11 +45,25 @@ class PopController extends Controller
      */
     public function store(Request $request)
     {
-        Pop::create($request->all());
+
+        request()->validate([
+            'city_id' => 'required',
+            'suburb_id' => 'required',
+            'pop' => 'required|string|unique:pops'
+        ]);
+        $pop = Pop::create($request->all());
+
+        if($pop)
+        {
+            return redirect()->route('pops.index')
+            ->with('success','Pop Created');
+        }
+        else
+        {
+            return back()->with('fail','Something went wrong');
+        }
     
-        return redirect()->route('pops.index')
-         ->with('success','Department')
-         ->with('success','Pop Created');
+
     }
 
     /**
@@ -97,10 +111,25 @@ class PopController extends Controller
      */
     public function update(Request $request, $id)
     {
+
+        request()->validate([
+            'city_id' => 'required',
+            'suburb_id' => 'required',
+            'pop' => 'required|string|unique:pops'
+        ]);
         $pop = Pop::find($id);
         $pop ->update($request->all());
-        return redirect(route('pops.index'))
-        ->with('success','Pop Updated');
+
+        if($pop)
+        {
+            return redirect(route('pops.index'))
+            ->with('success','Pop Updated');
+        }
+        else
+        {
+            return back()->with('fail','Something went wrong');
+        }
+
     }
 
     /**

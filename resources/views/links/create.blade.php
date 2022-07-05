@@ -63,6 +63,11 @@ Link
                     <label for="pop" class="col-sm-3 col-form-label">Link</label>
                     <div class="col-sm-9">
                         <input type="text" class="form-control" name="link" placeholder="Link Name">
+                        @error ('link')
+                            <div class="alert-danger">
+                                    {{$message }}
+                            </div>                                
+                        @enderror
                     </div>
                 </div>
 

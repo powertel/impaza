@@ -22,6 +22,11 @@ Customer
                         <label for="customer" class="col-sm-3  col-form-label">Customer</label>
                         <div class="col-sm-9">
                             <input type="text" class="form-control" name="customer"  value="{{ $customer->customer}}">
+                            @error ('customer')
+                                <div class="alert-danger">
+                                     {{$message }}
+                                </div>                                
+                            @enderror
                         </div>
                     </div>
                     <div class="form-group row">
@@ -72,11 +77,16 @@ Customer
                         <label for="link" class="col-sm-3  col-form-label">Link</label>
                         <div class="col-sm-9">
                             <input type="text" class="form-control" name="link"  value="{{ $customer->link}}">
+                            @error ('link')
+                                <div class="alert-danger">
+                                     {{$message }}
+                                </div>                                
+                            @enderror
                         </div>
                     </div>
            
                     <div class="card-footer">
-                        <a type="button" class="btn btn-danger btn-sm" href="javascript:history.back()">{{ __('Cancel') }}</a>
+                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('customers.index') }}">{{ __('Cancel') }}</a>
                         <button type="submit" class="btn btn-success btn-sm float-right">{{ __('Save') }}</button>
                     </div>
                 </form> 

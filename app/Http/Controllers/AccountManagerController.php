@@ -119,13 +119,22 @@ class AccountManagerController extends Controller
     public function update(Request $request, $id)
     {
         request()->validate([
-            'accountManager' => 'required',
+            'accountManager' => 'required|string|unique:account_managers'
         ]);
         
         $acc_manager = AccountManager::find($id);
         $acc_manager ->update($request->all());
-        return redirect(route('account_managers.index'))
-        ->with('success','Account Manager Updated');
+        
+        if($acc_manager)
+        {
+            return redirect(route('account_managers.index'))
+            ->with('success','Account Manager Updated');
+        }
+        else
+        {
+            return back()->with('fail','Something went wrong');
+        }
+
     }
 
     /**

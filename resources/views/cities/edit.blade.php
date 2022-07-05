@@ -22,11 +22,16 @@ City
                         <label for="city" class="col-sm-2 col-form-label">City/Town</label>
                         <div class="col-sm-10">
                             <input type="text" class="form-control" name="city" value="{{$city->city }}">
+                            @error ('city')
+                                <div class="alert-danger">
+                                     {{$message }}
+                                </div>                                
+                            @enderror
                         </div>
                     </div>
            
                     <div class="card-footer">
-                        <a type="button" class="btn btn-danger" href="javascript:history.back()">{{ __('Cancel') }}</a>
+                        <a type="button" class="btn btn-danger" href="{{ route('cities.index' ) }}">{{ __('Cancel') }}</a>
                         <button type="submit" class="btn btn-success btn-sm float-right">{{ __('Save') }}</button>
                     </div>
                 </form> 

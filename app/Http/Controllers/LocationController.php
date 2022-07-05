@@ -43,10 +43,22 @@ class LocationController extends Controller
      */
     public function store(Request $request)
     {
-        Suburb::create($request->all());
-    
-        return redirect()->route('locations.index')
-        ->with('success','Location Created');
+        request()->validate([
+            'city_id' => 'required',
+            'suburb' => 'required|string|unique:suburbs'
+        ]);
+        $location = Suburb::create($request->all());
+        
+        if($location)
+        {
+            return redirect()->route('locations.index')
+            ->with('success','Location Created');
+        }
+        else
+        {
+            return back()->with('fail','Something went wrong');
+        }
+
     }
 
     /**
@@ -91,10 +103,24 @@ class LocationController extends Controller
      */
     public function update(Request $request, $id)
     {
+        request()->validate([
+            'city_id' => 'required',
+            'suburb' => 'required|string|unique:suburbs'
+        ]);
+
         $location = Suburb::find($id);
         $location ->update($request->all());
-        return redirect(route('locations.index'))
-        ->with('success','Location Updated');
+
+        if($location)
+        {
+            return redirect(route('locations.index'))
+            ->with('success','Location Updated');
+        }
+        else
+        {
+            return back()->with('fail','Something went wrong');
+        }
+
     }
 
     /**

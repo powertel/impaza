@@ -50,10 +50,25 @@ class LinkController extends Controller
      */
     public function store(Request $request)
     {
-        Link::create($request->all());
+        request()->validate([
+            'city_id' => 'required',
+            'suburb_id' => 'required',
+            'pop_id' => 'required',
+            'customer_id' => 'required',
+            'link' => 'required|string|unique:links'
+        ]);
+        $link = Link::create($request->all());
+
+        if($link)
+        {
+            return redirect()->route('links.index')
+            ->with('success','Link Created');
+        }
+        else
+        {
+            return back()->with('fail','Something went wrong');
+        }
     
-        return redirect()->route('links.index')
-        ->with('success','Link Created');
     }
 
     /**

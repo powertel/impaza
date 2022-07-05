@@ -36,6 +36,11 @@ Location
                         <label for="location" class="col-sm-3 col-form-label">Location</label>
                         <div class="col-sm-9">
                             <input type="text" class="form-control" name="suburb" value="{{ $location->suburb}}">
+                            @error ('suburb')
+                                <div class="alert-danger">
+                                     {{$message }}
+                                </div>                                
+                            @enderror
                         </div>
                     </div>
            

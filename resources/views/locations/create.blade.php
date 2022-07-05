@@ -33,11 +33,16 @@ Location
                         <label for="suburb" class="col-sm-3 col-form-label">Location</label>
                         <div class="col-sm-9">
                             <input type="text" class="form-control" name="suburb" placeholder="Location">
+                            @error ('suburb')
+                                <div class="alert-danger">
+                                     {{$message }}
+                                </div>                                
+                            @enderror
                         </div>
                     </div>
            
                     <div class="card-footer">
-                        <a type="button" class="btn btn-danger btn-sm" href="javascript:history.back()">{{ __('Cancel') }}</a>
+                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('locations.index' ) }}">{{ __('Cancel') }}</a>
                         <button type="submit" class="btn btn-success btn-sm float-right">{{ __('Save') }}</button>
                     </div>
                 </form> 
