@@ -16,7 +16,8 @@
     }
     
      .card-footer .btn {
-        margin: 13px 12px 12px 10px;        
+        margin: 13px 12px 12px 10px;  
+        float:right;
      }
 
 

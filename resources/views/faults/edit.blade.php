@@ -155,7 +155,6 @@ Fault
                                 @endforeach
                             </select>
                         </div>
-    
                     </div>
         
                     <div class="card-footer">
