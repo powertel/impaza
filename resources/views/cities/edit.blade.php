@@ -31,7 +31,9 @@ City
                     </div>
            
                     <div class="card-footer">
+
                         <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
+
                         <a type="button" class="btn btn-danger btn-sm" href="{{ route('cities.index' ) }}">{{ __('Cancel') }}</a>
                     </div>
                 </form> 
