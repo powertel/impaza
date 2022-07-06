@@ -9,18 +9,7 @@
                     {{_('Update Department')}}
                 </h3>
             </div>
-
-            @if ($errors->any())
-            <div class="alert alert-danger">
-                <strong>Whoops!</strong> There were some problems with your selection.<br><br>
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-            @endif
-
+            
             <div class="card-body">
                 <form  action="{{ route('departments.update',$department->id) }}" method="POST">
                     @csrf
@@ -30,7 +19,13 @@
                         <label for="department" class="col-sm-3 col-form-label">Department</label>
                         <div class="col-sm-9">
                             <input type="text"  class="form-control" name="department" value="{{ $department->department }}">
+                            @error ('department')
+                            <div class="alert-danger">
+                                 {{$message }}
+                            </div>                                
+                            @enderror
                         </div>
+
                     </div>
            
                     <div class="card-footer">

@@ -15,17 +15,6 @@ Department
                 </h3>
             </div>
 
-            @if ($errors->any())
-            <div class="alert alert-danger">
-                <strong>Whoops!</strong> There were some problems with your selection.<br><br>
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-            @endif
-
             <div class="card-body">
                 <form action="{{ route('departments.store') }}" method="POST">
                 {{ csrf_field() }}
@@ -34,6 +23,11 @@ Department
                         <label for="department" class="col-sm-3 col-form-label">Department</label>
                         <div class="col-sm-9">
                             <input type="text"  class="form-control" name="department" placeholder="Department Name">
+                            @error ('department')
+                            <div class="alert-danger">
+                                 {{$message }}
+                            </div>                                
+                        @enderror
                         </div>
                     </div>
            
