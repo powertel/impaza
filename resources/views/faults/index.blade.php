@@ -40,7 +40,8 @@ Faults
                     <td>{{ $fault->link }}</td>
                     <td>
                                 <a href="{{ route('assessments.edit',$fault->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Assess</a>
-                                <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
+                                <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
+                                <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >View</a>
                         </div>
                     </td>
                 </tr>
