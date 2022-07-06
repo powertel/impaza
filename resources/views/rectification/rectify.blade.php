@@ -14,7 +14,6 @@ Rectify
             </div>
             <div class="card-body">
                 <form>
-
                     <div class="form-group row">
                         <label for="department" class="col-sm-3 col-form-label">Customer</label>
                         <div class="col-sm-9">

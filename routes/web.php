@@ -13,6 +13,8 @@ use App\Http\Controllers\RemarkController;
 use App\Http\Controllers\AccountManagerController;
 use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\RectificationController;
+use App\Http\Controllers\Permit\PermitController;
+use App\Http\Controllers\Permit\RequestPermitController;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,6 +44,8 @@ Route::resource('pops', PopController::class);
 Route::resource('account_managers', AccountManagerController::class);
 Route::resource('assessments', AssessmentController::class);
 Route::resource('rectify', RectificationController::class);
+Route::resource('request-permits', PermitController::class);
+Route::resource('permits', RequestPermitController::class);
 Route::post('faults/{fault}/remarks', [RemarkController::class,'store']);
 Route::get('suburb/{id}', [FaultController::class,'findSuburb'])->name('suburb');
 Route::get('link/{id}', [FaultController::class,'findLink'])->name('link');

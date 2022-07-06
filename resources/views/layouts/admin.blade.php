@@ -79,7 +79,7 @@
                             </a>
                         </li>
                         <li class="nav-item has-treeview">
-                            <a href="#" class="nav-link active">
+                            <a href="#" class="nav-link">
                                 <i class="nav-icon fas fa-cogs"></i>
                                 <p>
                                     Configurations
@@ -161,11 +161,28 @@
                                 <p>Finance</p>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a  class="nav-link">
-                                <i class="nav-icon fas fa-plus-square"></i>
-                                <p>Permits</p>
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-rocket"></i>
+                                <p>
+                                    Permits
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
                             </a>
+                            <ul class="nav nav-treeview">
+                              <li class="nav-item">
+                                <a  class="nav-link" href="{{ route('permits.index') }}">
+                                    <i class="nav-icon 	fas fa-check-circle"></i>
+                                    <p>Approved Permits</p>
+                                </a>
+                              </li>
+                              <li class="nav-item">
+                                <a  class="nav-link" href="{{ route('request-permits.index') }}">
+                                    <i class="nav-icon fas fa-plus-square"></i>
+                                    <p>Requested Permits</p>
+                                </a>
+                              </li>
+                            </ul>
                         </li>
                         <li class="nav-item">
                             <a  class="nav-link">

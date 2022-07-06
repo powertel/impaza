@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-Locations
+Requested Permits
 @endsection
 
 @section('content')
@@ -12,10 +12,10 @@ Locations
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">{{_('Locations')}}</h3>
+        <h3 class="card-title">{{_('Requested Permits')}}</h3>
         <div class="card-tools">
-            <a  class="btn btn-primary btn-sm" href="{{ route('locations.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create location')}} </a>
-            <a  class="btn btn-primary btn-sm" href="{{ route('pops.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Pop')}} </a>
+<!--             <a  class="btn btn-primary btn-sm" href="{{ route('locations.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create location')}} </a>
+            <a  class="btn btn-primary btn-sm" href="{{ route('pops.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Pop')}} </a> -->
         </div>
     </div>
     <!-- /.card-header -->
@@ -23,24 +23,29 @@ Locations
         <table  class="table table-striped">
             <thead>
                 <tr>
-                    <th>No.</th>
-                    <th>City</th>
-                    <th>location</th>
+                    <th>ID</th>
+                    <th>Fault ID</th>
+                    <td>PTW Numnber</td>
+                    <th>Customer Name</th>
+                    <th>Date of Request</th>
+                    <th>Technician</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($locations as $location)
-                 <tr >
-                    <td>{{++$i}}</td>
-                    <td>{{ $location->city}}</td>
-                    <td>{{ $location->suburb}}</td>
-                    <td>
-                        <a href="{{ route('locations.edit',$location->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
-                        <a href="{{ route('locations.show',$location->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
-                    </td>
-                </tr>
-                @endforeach
+
+            <tr>
+                <td>1</td>
+                <td>653276</td>
+                <td>1213313</td>
+                <th>Zb Bank</th>
+                <th>05/05/43</th>
+                <th>Freedom</th>
+                <td>
+                    <a href="">Delete</a>
+                </td>
+            </tr>
+
             </tbody> 
         </table>
     </div>
