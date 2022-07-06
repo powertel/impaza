@@ -6,7 +6,6 @@ City
 
 @section('content')
 @include('partials.css')
-@include('partials.css')
 <section class="content">
     <div class="col d-flex justify-content-center">
         <div class="card w-50">
@@ -24,7 +23,7 @@ City
                 </div>
                 <hr>
                 <div class="card-footer">
-                    <a type="button" class="btn btn-danger" href="{{ route('cities.index') }}">{{ __('Close') }}</a>
+                    <a type="button" class="btn btn-danger btn-sm" href="{{ route('cities.index') }}">{{ __('Close') }}</a>
                 </div>
             </div> 
         </div>

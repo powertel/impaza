@@ -1,26 +1,51 @@
 @extends('layouts.admin')
+
+@section('title')
+Departments
+@endsection
+
 @section('content')
-<section class="content">
-    <div class="card card-primary">
-        <div class="card-header">
-        <h3 class="card-title">Departments</h3>
+@include('partials.css')
+<section class="content" >
+<div class="card" >
+    <div class="card-header">
+        <h3 class="card-title">{{_('Departments')}}</h3>
+        <div class="card-tools">
+            <a  class="btn btn-primary btn-sm" href="{{ route('departments.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create New Department')}} </a>
         </div>
-        
-        
-        <form>
-        <div class="card-body">
-        <div class="form-group">
-        <label for="exampleInputEmail1">Email address</label>
-        <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
-        </div>
-       
-        <div class="card-footer">
-        <button type="submit" class="btn btn-primary">Submit</button>
-        <button type="submit" class="btn btn-danger float-right">Cancel</button>
-        
-        </div>
-        </form>
-        </div>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+        <table  class="table table-striped">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Department</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($departments as $department)
+                <tr >
+                    <td>{{++$i}}</td>
+                    <td>{{ $department->department}}</td>
+                    <td>
+                        <form  action="{{ route('departments.destroy',$department->id) }}"  method="POST">
+                            <a href="{{ route('departments.edit',$department->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Edit</a>
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody> 
+        </table>
+    </div>
+    <!-- /.card-body -->
+</div>
+    
+            
 </section>
 
 @endsection

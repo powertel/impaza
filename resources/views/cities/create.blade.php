@@ -19,15 +19,20 @@ City
                 {{ csrf_field() }}
         
                     <div class="form-group row">
-                        <label for="city" class="col-sm-2 col-form-label">City/Town</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" name="city" placeholder="City Name">
+                        <label for="city" class="col-sm-3 col-form-label">City/Town</label>
+                        <div class="col-sm-9">
+                            <input type="text"  class="form-control" name="city" placeholder="City Name">
+                            @error ('city')
+                                <div class="alert-danger">
+                                     {{$message }}
+                                </div>                                
+                            @enderror
                         </div>
                     </div>
            
                     <div class="card-footer">
-                        <a type="button" class="btn btn-danger" href="javascript:history.back()">{{ __('Cancel') }}</a>
-                        <button type="submit" class="btn btn-success float-right">{{ __('Save') }}</button>
+                        <button type="submit" class="btn btn-success btn-sm float-right">{{ __('Save') }}</button>
+                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('cities.index' ) }}">{{ __('Cancel') }}</a>
                     </div>
                 </form> 
             </div> 

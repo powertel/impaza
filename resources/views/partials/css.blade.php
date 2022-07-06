@@ -11,16 +11,14 @@
     }
 
     .card-header .card-title {
-        width: 100%;
         text-transform: uppercase;
        
     }
+    
+     .card-footer .btn {
+        margin: 13px 12px 12px 10px;  
+        float:right;
+     }
 
-    .card-title{
-    color: blue;
-    }
-/*     .card-scroll {
-        max-height: 50%;
-        overflow-y: auto;
-    } */
+
 </style>

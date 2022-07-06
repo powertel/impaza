@@ -5,15 +5,16 @@ Faults
 @endsection
 
 @section('content')
+@include('partials.css')
 <section class="content">
 
 <div class="card">
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title" style="text-transform: uppercase; font-family: Times New Roman, Times, serif;">{{_('Faults')}}</h3>
+        <h3 class="card-title">{{_('Faults')}}</h3>
         <div class="card-tools">
-            <a  class="btn btn-primary" href="{{ route('faults.create') }}"><i class="fas fa-plus-circle"></i>{{_('Log Fault')}} </a>
+            <a  class="btn btn-primary btn-sm" href="{{ route('faults.create') }}"><i class="fas fa-plus-circle"></i>{{_('Log Fault')}} </a>
         </div>
     </div>
     <!-- /.card-header -->
@@ -38,7 +39,7 @@ Faults
                     <td>{{ $fault->accountManager }}</td>
                     <td>{{ $fault->link }}</td>
                     <td>
-                                <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Assess</a>
+                                <a href="{{ route('assessments.edit',$fault->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Assess</a>
                                 <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
                         </div>
                     </td>

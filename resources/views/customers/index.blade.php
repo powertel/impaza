@@ -5,16 +5,16 @@ Customers
 @endsection
 
 @section('content')
+@include('partials.css')
 <section class="content">
 
 <div class="card">
-
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title" style="text-transform: uppercase; font-family: Times New Roman, Times, serif;">{{_('Customers')}}</h3>
+        <h3 class="card-title">{{_('Customers')}}</h3>
         <div class="card-tools">
-            <a  class="btn btn-primary" href="{{ route('customers.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Customer')}} </a>
-            <a  class="btn btn-primary" href="{{ route('links.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Link')}} </a>
+            <a  class="btn btn-primary btn-sm" href="{{ route('customers.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Customer')}} </a>
+            <a  class="btn btn-primary btn-sm" href="{{ route('links.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Link')}} </a>
         </div>
     </div>
     <!-- /.card-header -->

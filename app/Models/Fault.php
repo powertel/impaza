@@ -20,7 +20,7 @@ class Fault extends Model
         'phoneNumber',
         'contactEmail',
         'address',
-        'accountManager',
+        'accountManager_id',
         'city_id',
         'suburb_id',
         'pop_id',

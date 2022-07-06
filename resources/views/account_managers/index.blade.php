@@ -1,20 +1,20 @@
 @extends('layouts.admin')
 
 @section('title')
-Pops
+Account Managers
 @endsection
 
 @section('content')
-    @include('partials.css')
+@include('partials.css')
 <section class="content">
 
 <div class="card">
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">{{_('Pops')}}</h3>
+        <h3 class="card-title">{{_('Account Manager')}}</h3>
         <div class="card-tools">
-            <a  class="btn btn-primary btn-sm" href="{{ route('pops.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Pop')}} </a>
+            <a  class="btn btn-primary btn-sm" href="{{ route('account_managers.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Account Manager')}} </a>
             <a  class="btn btn-primary btn-sm" href="{{ route('customers.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Customer')}} </a>
         </div>
     </div>
@@ -24,22 +24,18 @@ Pops
             <thead>
                 <tr>
                     <th>No.</th>
-                    <th>City/Town</th>
-                    <th>Location</th>
-                    <th>Pop</th>
+                    <th>Account Manager</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($pops as $pop)
+                @foreach ($account_managers as $acc_manager)
                  <tr >
                     <td>{{++$i}}</td>
-                    <td>{{ $pop->city}}</td>
-                    <td>{{ $pop->suburb}}</td>
-                    <td>{{ $pop->pop}}</td>
+                    <td>{{ $acc_manager->accountManager}}</td>
                     <td>
-                        <a href="{{ route('pops.edit',$pop->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
-                        <a href="{{ route('pops.show',$pop->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
+                        <a href="{{ route('account_managers.edit',$acc_manager->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
+                        <a href="{{ route('account_managers.show',$acc_manager->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
                     </td>
                 </tr>
                 @endforeach

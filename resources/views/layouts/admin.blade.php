@@ -112,6 +112,12 @@
                                   </a>
                               </li>
                               <li class="nav-item">
+                                  <a href="{{ route('account_managers.index') }}" class="nav-link">
+                                    <i class="nav-icon fas fa-user"></i>
+                                    <p>Account Managers</p>
+                                  </a>
+                              </li>
+                              <li class="nav-item">
                                     <a href="{{ route('cities.index') }}" class="nav-link">
                                     <i class="nav-icon fas fa-table"></i>
                                     <p>Cities</p>
@@ -144,11 +150,23 @@
                             </ul>
                         </li>
                         <li  class="nav-item">
-                                  <a href="{{ route('faults.index') }}" class="nav-link">
-                                      <i class="nav-icon fas fa-copy"></i>
-                                      <p>Faults</p>
-                                  </a>
-                              </li>
+                            <a href="{{ route('faults.index') }}" class="nav-link">
+                                <i class="nav-icon fas fa-copy"></i>
+                                <p>Faults</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a  class="nav-link">
+                                <i class="nav-icon fas fa-plus-square"></i>
+                                <p>Finance</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a  class="nav-link">
+                                <i class="nav-icon fas fa-plus-square"></i>
+                                <p>Permits</p>
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <a  class="nav-link">
                                 <i class="nav-icon fas fa-plus-square"></i>
@@ -211,9 +229,8 @@
 
               <!-- /Main Content-->
               <div class="content">
-                <div class="col-md-6">
-
-                </div>
+       
+                @include('partials.alerts')
                 @yield('content')
               </div>
         </div>

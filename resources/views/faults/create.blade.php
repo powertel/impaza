@@ -4,8 +4,6 @@
 Fault
 @endsection
 
-
-
 @section('content')
 @include('partials.css')
 <section class="content">
@@ -46,6 +44,11 @@ Fault
                         <div class="mb-3 col-md-6">
                             <label for="contactName" class="form-label">Contact Name</label>
                             <input type="text" class="form-control"  placeholder="Contact Name" name="contactName">
+                            @error ('contactName')
+                                <div class="alert-danger">
+                                     {{$message }}
+                                </div>                                
+                            @enderror
                         </div>
                         <div class="mb-3 col-md-2">
                             <label for="city" class="form-label">Location</label>
@@ -71,6 +74,11 @@ Fault
                         <div class="mb-3 col-md-6">
                             <label for="phone" class="form-label">Phone Number</label>
                             <input type="text" class="form-control"  placeholder="Phone Number" name="phoneNumber">
+                            @error ('phoneNumber')
+                                <div class="alert-danger">
+                                     {{$message }}
+                                </div>                                
+                            @enderror
                         </div>
                         
                         <div class="mb-3 col-md-6">
@@ -93,6 +101,11 @@ Fault
                         <div class="mb-3 col-md-6">
                             <label for="email" class="form-label">Email Address</label>
                             <input type="email" class="form-control" placeholder="email" name="contactEmail">
+                            @error ('contactEmail')
+                                <div class="alert-danger">
+                                     {{$message }}
+                                </div>                                
+                            @enderror
                         </div>
                         <div class="mb-3 col-md-6">
                             <label for="suspectedRfo" class="form-label">Suspected Reason For Outage</label>
@@ -111,6 +124,11 @@ Fault
                         <div class="mb-3 col-md-6">
                             <label for="adress" class="form-label">Address</label>
                             <input type="text" class="form-control"  placeholder="Address" name="address">
+                            @error ('address')
+                                <div class="alert-danger">
+                                     {{$message }}
+                                </div>                                
+                            @enderror
                         </div>
                         <div class="mb-3 col-md-6">
                             <label for="serviceAtrr" class="form-label">Service Attribute</label>
@@ -124,20 +142,30 @@ Fault
             
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
-                            <label for="accManager" class="form-label">Account Manager</label>
-                            <input type="text" class="form-control"  placeholder="Address" name="accountManager">
+                            <label for="accountManager" class="form-label">Account Manager</label>
+                            <select id="accountManager" class="custom-select " name="accountManager_id">
+                                <option selected disabled >Select Account Manager</option>
+                                @foreach($accountManager as $acc_manager)
+                                    <option value="{{ $acc_manager->id}}">{{ $acc_manager->accountManager }}</option>
+                                @endforeach
+                            </select>
                         </div>
     
                         <div class="mb-3 col-md-6">
                             <label for="remarks" class="form-label">Remarks</label>
                             <textarea name="remark" class="form-control" placeholder="Enter any additional comments" rows="1" ></textarea>
+                            @error ('remark')
+                                <div class="alert-danger">
+                                     {{$message }}
+                                </div>                                
+                            @enderror
                         </div>
     
                     </div>
         
                     <div class="card-footer">
-                        <a type="button" class="btn btn-danger" href="javascript:history.back()">{{ __('Cancel') }}</a>
-                        <button type="submit" class="btn btn-success float-right">{{ __('Save') }}</button>
+                        <a type="button" class="btn btn-danger btn-sm" href="javascript:history.back()">{{ __('Cancel') }}</a>
+                        <button type="submit" class="btn btn-success btn-sm float-right">{{ __('Save') }}</button>
                     </div>
                 </form> 
             </div> 

@@ -19,8 +19,8 @@ Location
                     @csrf
                     @method('PUT')
                     <div class="form-group row">
-                        <label for="city" class="col-sm-2 col-form-label">city</label>
-                        <div class="col-sm-10">
+                        <label for="city" class="col-sm-3 col-form-label">city</label>
+                        <div class="col-sm-9">
                             <select class="custom-select" id="city" name="city_id">
                                 <option selected="selected" value="{{ $location->city_id}}">{{ $location->city }}</option>
                                 @foreach($cities as $city)
@@ -33,15 +33,20 @@ Location
                     </div>
                     
                     <div class="form-group row">
-                        <label for="location" class="col-sm-2 col-form-label">Location</label>
-                        <div class="col-sm-10">
+                        <label for="location" class="col-sm-3 col-form-label">Location</label>
+                        <div class="col-sm-9">
                             <input type="text" class="form-control" name="suburb" value="{{ $location->suburb}}">
+                            @error ('suburb')
+                                <div class="alert-danger">
+                                     {{$message }}
+                                </div>                                
+                            @enderror
                         </div>
                     </div>
            
                     <div class="card-footer">
-                        <a type="button" class="btn btn-danger" href="javascript:history.back()">{{ __('Cancel') }}</a>
-                        <button type="submit" class="btn btn-success float-right">{{ __('Save') }}</button>
+                        <a type="button" class="btn btn-danger btn-sm" href="javascript:history.back()">{{ __('Cancel') }}</a>
+                        <button type="submit" class="btn btn-success btn-sm float-right">{{ __('Save') }}</button>
                     </div>
                 </form> 
             </div> 

@@ -46,9 +46,19 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
 
+
        // dd($request->all());
         DB::beginTransaction();
         try{
+
+            request()->validate([
+                'city_id' => 'required',
+                'suburb_id' => 'required',
+                'pop_id' => 'required',
+                'customer' => 'required|string|unique:customers',
+                'link' => 'required|string|unique:links'
+            ]);
+
             $customer=  Customer::create(
                 [
                     'customer' => $request['customer'],
@@ -75,7 +85,8 @@ class CustomerController extends Controller
             {
                 DB::rollback();
             }
-            return redirect()->route('customers.index');
+            return redirect()->route('customers.index')
+             ->with('success','Customer Created.');
         }
 
         catch(Exception $ex)
@@ -138,6 +149,14 @@ class CustomerController extends Controller
     {
         DB::beginTransaction();
         try{
+            request()->validate([
+                'city_id' => 'required',
+                'suburb_id' => 'required',
+                'pop_id' => 'required',
+                'customer' => 'required|string|unique:customers',
+                'link' => 'required'
+            ]);
+            
             $customer = Customer::find($id);
             $link = Link::find($id);
             $customer ->update(
@@ -166,7 +185,7 @@ class CustomerController extends Controller
                 DB::rollback();
             }
             return redirect(route('customers.index'))
-            ->with('success','Customer updated successfully');
+            ->with('success','Customer Updated');
         }
         catch(Exception $ex)
         {

@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Customer;
-use App\Models\City;
+use App\Models\AccountManager;
 use DB;
 
-class CityController extends Controller
+class AccountManagerController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,10 +16,10 @@ class CityController extends Controller
      */
     public function index()
     {
-        $cities = DB::table('cities')
-                ->orderBy('cities.created_at', 'desc')
+        $account_managers = DB::table('account_managers')
+                ->orderBy('account_managers.created_at', 'desc')
                 ->get();
-        return view('cities.index',compact('cities'))
+        return view('account_managers.index',compact('account_managers'))
         ->with('i');
     }
 
@@ -30,7 +30,7 @@ class CityController extends Controller
      */
     public function create()
     {
-        return view('cities.create');
+        return view('account_managers.create');
     }
 
     /**
@@ -43,22 +43,40 @@ class CityController extends Controller
     {
 
         request()->validate([
-            'city' => 'required|string|unique:cities'
+            'accountManager' => 'required|string|unique:account_managers'
         ]);
 
-        $city = City::create($request->all());
+        $acc_manager = AccountManager::create($request->all());
 
-        if($city)
+        
+        if($acc_manager)
         {
-            return redirect()->route('cities.index')
-            ->with('success','City Created.');
+            return redirect()->route('account_managers.index')
+            ->with('success','Department Created.');
         }
         else
         {
             return back()->with('fail','Something went wrong');
         }
-    
 
+/*         $request -> validate([
+            'accountManager' => 'required|string|unique:account_managers'
+        ]);
+
+        $acc_manager = new AccountManager();
+        $acc_manager -> accountManager = $request -> accountManager;
+
+        $res = $acc_manager ->save();
+
+        if($res)
+        {
+            return redirect()->route('account_managers.index')
+            ->with('success','Department Created.');
+        }
+        else
+        {
+            return back()->with('fail','Something went wrong');
+        } */
     }
 
     /**
@@ -69,11 +87,11 @@ class CityController extends Controller
      */
     public function show($id)
     {
-        $city = DB::table('cities')
-                ->where('cities.id','=',$id)
+        $acc_manager = DB::table('account_managers')
+                ->where('account_managers.id','=',$id)
                 ->get()
                 ->first();
-        return view('cities.show',compact('city'));
+        return view('account_managers.show',compact('acc_manager'));
     }
 
     /**
@@ -84,11 +102,11 @@ class CityController extends Controller
      */
     public function edit($id)
     {
-        $city = DB::table('cities')
-                ->where('cities.id','=',$id)
+        $acc_manager = DB::table('account_managers')
+                ->where('account_managers.id','=',$id)
                 ->get()
                 ->first();
-        return view('cities.edit',compact('city'));
+        return view('account_managers.edit',compact('acc_manager'));
     }
 
     /**
@@ -100,18 +118,17 @@ class CityController extends Controller
      */
     public function update(Request $request, $id)
     {
-
         request()->validate([
-            'city' => 'required|string|unique:cities'
+            'accountManager' => 'required|string|unique:account_managers'
         ]);
         
-        $city = City::find($id);
-        $city ->update($request->all());
-
-        if($city)
+        $acc_manager = AccountManager::find($id);
+        $acc_manager ->update($request->all());
+        
+        if($acc_manager)
         {
-            return redirect(route('cities.index'))
-            ->with('success','City Updated');
+            return redirect(route('account_managers.index'))
+            ->with('success','Account Manager Updated');
         }
         else
         {

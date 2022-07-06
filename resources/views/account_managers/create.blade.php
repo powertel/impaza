@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-City
+Account Manager
 @endsection
 
 @section('content')
@@ -11,18 +11,17 @@ City
         <div class="card w-50">
             <div class="card-header">
                 <h3 class="card-title">
-                    {{_('Update City')}}
+                    {{_('Create Account Manager')}}
                 </h3>
             </div>
             <div class="card-body">
-                <form action="{{ route('cities.update', $city->id ) }}" method="POST">
-                    @csrf
-                    @method('PUT')
+                <form action="{{ route('account_managers.store') }}" method="POST">
+                {{ csrf_field() }}
                     <div class="form-group row">
-                        <label for="city" class="col-sm-2 col-form-label">City/Town</label>
-                        <div class="col-sm-10">
-                            <input type="text" class="form-control" name="city" value="{{$city->city }}">
-                            @error ('city')
+                        <label for="account_manger" class="col-sm-4 col-form-label">Account Manager</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" name="accountManager" placeholder="Account Manager">
+                            @error ('accountManager')
                                 <div class="alert-danger">
                                      {{$message }}
                                 </div>                                
@@ -31,8 +30,8 @@ City
                     </div>
            
                     <div class="card-footer">
+                        <a type="button" class="btn btn-danger" href="{{ route('account_managers.index' ) }}">{{ __('Cancel') }}</a>
                         <button type="submit" class="btn btn-success btn-sm float-right">{{ __('Save') }}</button>
-                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('cities.index' ) }}">{{ __('Cancel') }}</a>
                     </div>
                 </form> 
             </div> 

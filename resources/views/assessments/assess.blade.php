@@ -14,11 +14,9 @@ Fault
             </div>
             <div class="card-body">
                 <form  action="{{ route('faults.update', $fault->id ) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <div class="row g-2">
+                ``<div class="row g-2">
                         <div class="mb-3 col-md-6">
-                            <label for="customerName" class="form-label">Customer Name </label>
+                        <label for="customerName" class="form-label">Customer Name </label>
                             <select class="custom-select" id="customer" name="customer_id">
                                 <option selected="selected" value="{{ $fault->customer_id}}">{{ $fault->customer }}</option>
                                 @foreach($customers as $customer)
@@ -29,7 +27,7 @@ Fault
                             </select>
                         </div>
 
-                        <div class="mb-3 col-md-6">
+                        <div class="mb-3 col-md-2">
                             <label for="city" class="form-label">City/Town</label>
                             <select  class="custom-select" id="city" name="city_id">
                                 <option selected="selected" value="{{ $fault->city_id}}">{{ $fault->city }}</option>
@@ -39,29 +37,9 @@ Fault
                                     @endunless
                                 @endforeach
                             </select>
-
                         </div>
-                    </div>
-            
-                    <div class="row g-2">
-                        <div class="mb-3 col-md-6">
-                            <label for="contactName" class="form-label">Contact Name</label>
-                            <input type="text" class="form-control" value="{{$fault->contactName}}" name="contactName">
-                        </div>
-                        <div class="mb-3 col-md-2">
-                            <label for="city" class="form-label">Location</label>
-                            <select   class="custom-select" id="suburb" name="suburb_id">
-                             <option selected="selected" value="{{ $fault->suburb_id}}">{{ $fault->suburb }}</option>
-                                @foreach($suburbs as $suburb)
-                                    @if ($suburb->city_id === $fault->city_id)
-                                        @unless($suburb->id ===$fault->suburb_id)
-                                            <option value="{{ $suburb->id}}">{{ $suburb->suburb }}</option>
-                                        @endunless                                    
-                                    @endif
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3 col-md-2">
+                    
+                        <div class="mb-3 col-md-4">
                             <label for="suburb" class="form-label">Link</label>
                             <select class="custom-select" id="link" name="link_id">
                             <option selected="selected" value="{{ $fault->link_id}}">{{ $fault->link}}</option>
@@ -74,75 +52,8 @@ Fault
                                 @endforeach
                             </select>
                         </div>
-                        <div class="mb-3 col-md-2">
-                            <label for="pop" class="form-label">POP</label>
-                            <select  class="custom-select" id="pop" name="pop_id" >
-                                <option selected="selected" value="{{ $fault->pop_id}}">{{ $fault->pop }}</option>
-                                @foreach($pops as $pop)
-                                    @if($pop->suburb_id === $fault->suburb_id)
-                                        @unless($pop->id ===$fault->pop_id)
-                                            <option value="{{ $pop->id}}">{{ $pop->pop }}</option>
-                                        @endunless                                        
-                                    @endif
-                                @endforeach
-                            </select>
-
-                        </div>
                     </div>
-            
-                    <div class="row g-2">
-                        <div class="mb-3 col-md-6">
-                            <label for="phone" class="form-label">Phone Number</label>
-                            <input type="text" class="form-control" value="{{$fault->phoneNumber}}" name="phoneNumber">
-                        </div>
-                        <div class="mb-3 col-md-6">
-                            <label for="service" class="form-label">Service Type</label>
-                            <select type="text"  class="custom-select " value="{{$fault->serviceType}}" name="serviceType">
-                                <option selected="selected">{{ $fault->serviceType }}</option>
-                                <option>VOIP</option>
-                                <option>VPN</option>
-                                <option>INTERNET</option>
-                                <option>CARRIER SERVICE</option>
-                                <option>POWERTRACK</option>
-                                <option>CDMA VOICE</option>
-                                <option>CDMA VOICE</option>
-                                <option>E-VENDING</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row g-2">
-                        <div class="mb-3 col-md-6">
-                            <label for="email" class="form-label">Email Address</label>
-                            <input type="email" class="form-control" value="{{$fault->contactEmail}}" name="contactEmail">
-                        </div>
-                        <div class="mb-3 col-md-6">
-                            <label for="suspectedRfo" class="form-label">Suspected Reason For Outage</label>
-                            <select  class="custom-select " value="{{$fault->suspectedRfo}}" name="suspectedRfo">
-                            <option selected="selected">{{ $fault->suspectedRfo }}</option>
-                                <option>No fx Light</option>
-                                <option>No PON Light</option>
-                                <option>BTS Down</option>
-                                <option>Node Down</option>
-                                <option>Unknown</option>
-                            </select>
-                        </div>
-                    </div>
-            
-                    <div class="row g-2">
-                        <div class="mb-3 col-md-6">
-                            <label for="adress" class="form-label">Address</label>
-                            <input type="text" class="form-control" value="{{$fault->address}}" name="address">
-                        </div>
-                        <div class="mb-3 col-md-6">
-                            <label for="serviceAtrr" class="form-label">Service Attribute</label>
-                            <select  class="custom-select " value="{{$fault->serviceAttribute}}"  name="serviceAttribute">
-                            <option selected="selected">{{ $fault->serviceAttribute }}</option>
-                                <option>Port</option>
-                                <option>VPN</option>
-                            </select>
-                        </div>
-                    </div>
-            
+        
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="accountManager" class="form-label">Account Manager</label>
@@ -155,11 +66,132 @@ Fault
                                 @endforeach
                             </select>
                         </div>
+
+                        <div class="mb-3 col">
+                            <label for="city" class="form-label">Location</label>
+                            <select   class="custom-select" id="suburb" name="suburb_id">
+                             <option selected="selected" value="{{ $fault->suburb_id}}">{{ $fault->suburb }}</option>
+                                @foreach($suburbs as $suburb)
+                                    @if ($suburb->city_id === $fault->city_id)
+                                        @unless($suburb->id ===$fault->suburb_id)
+                                            <option value="{{ $suburb->id}}">{{ $suburb->suburb }}</option>
+                                        @endunless                                    
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3 col">
+                            <label for="pop" class="form-label">POP</label>
+                            <select  class="custom-select" id="pop" name="pop_id" >
+                                <option selected="selected" value="{{ $fault->pop_id}}">{{ $fault->pop }}</option>
+                                @foreach($pops as $pop)
+                                    @if($pop->suburb_id === $fault->suburb_id)
+                                        @unless($pop->id ===$fault->pop_id)
+                                            <option value="{{ $pop->id}}">{{ $pop->pop }}</option>
+                                        @endunless                                        
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
         
+                    <div class="row g-2">
+                        <div class="mb-3 col-md-6">
+                        <label for="suspectedRfo" class="form-label">Suspected RFO</label>
+                            <select  class="custom-select " value="{{$fault->suspectedRfo}}" name="suspectedRfo">
+                            <option selected="selected">{{ $fault->suspectedRfo }}</option>
+                                <option>No fx Light</option>
+                                <option>No PON Light</option>
+                                <option>BTS Down</option>
+                                <option>Node Down</option>
+                                <option>Unknown</option>
+                            </select>
+                        </div>
+                
+                        <div class="mb-3 col-md-6">
+                        <label for="service" class="form-label">Service Type</label>
+                            <select type="text"  class="custom-select " value="{{$fault->serviceType}}" name="serviceType">
+                                <option selected="selected">{{ $fault->serviceType }}</option>
+                                <option>VOIP</option>
+                                <option>VPN</option>
+                                <option>INTERNET</option>
+                                <option>CARRIER SERVICE</option>
+                                <option>POWERTRACK</option>
+                                <option>CDMA VOICE</option>
+                                <option>CDMA VOICE</option>
+                                <option>E-VENDING</option>
+                            </select>
+                        </div>
+
+                    </div>
+        
+                    <div class="row g-2">
+                        <div class="mb-3 col-md-2">
+                            <label for="faultType" class="form-label">Fault Type</label>
+                            <select type="text"  class="custom-select " value="{{$fault->serviceType}}" name="faultType">
+                                <option selected="selected">Select Fault Type</option>
+                                <option>Carrier/Mux</option>
+                                <option>logical</option>
+                                <option>Cable</option>
+                                <option>Power</option>
+                                <option>Active Equipments</option>
+                            </select>
+                        </div>
+                        <div class="mb-3 col-md-4">
+                            <label for="rfo" class="form-label">Confirmed RFO</label>
+                            <select type="text"  class="custom-select " value="{{$fault->serviceType}}" name="confirmedRfo">
+                                <option selected="selected">Select RFO</option>
+                                <option>Faulty Mux</option>
+                                <option>Faulty Board</option>
+                                <option>Power Fault</option>
+                                <option>UTP fault</option>
+                                <option>Patch lead fault</option>
+                                <option>UG cable fault</option>
+                                <option>Burn Cables</option>
+                                <option>FAS</option>
+                                <option>Power Outage</option>
+                                <option>Backbone fault</option>
+                                <option>Faulty Switch</option>
+                                <option>Fault Router</option>
+                                <option>Fault Chassis</option>
+                                <option>Converter Faulty</option>
+                                <option>Faulty SW/Port</option>
+                                <option>CPE Faulty</option>
+                            </select>
+                        </div>
+                        <div class="mb-3 col-md-6">
+                            <label for="actDepartment" class="form-label">Actioning Department</label>
+                            <select id="actDepartment" class="form-select" name="department">
+                                <option>Select</option>
+                                <option>NOC</option>
+                                <option>implementation</option>
+                                <option>Operations</option>
+                                <option>HR</option>
+                                <option>Finace</option>
+                                <option>Stores</option>
+                                <option>Marketing</option>
+                                <option>Procurement</option>
+                            </select>
+                        </div>                
+                    </div>
+                    <div class="row g-2">
+                        <div class="mb-3 col-md-6">
+                            <label for="priorityLevel" class="form-label">Priority Level</label>
+                            <select id="priorityLevel" class="form-select" name="priorityLevel">
+                                <option>Select</option>
+                                <option>Low</option>
+                                <option>Medium</option>
+                                <option>High</option>
+                                <option>Critical</option>
+                            </select>
+                        </div>                
+                    </div>
+                    
                     <div class="card-footer">
-                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('faults.index') }}">{{ __('Cancel') }}</a>
-                        <button type="submit" class="btn btn-success btn-sm float-right">{{ __('Save') }}</button>
+                        <button type="submit" class="btn btn-success btn-sm " >{{ __('Save') }}</button>
+                        <button type="button" class="btn btn-secondary btn-sm" >Revoke</button>   
+                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('faults.index') }}" >{{ __('Cancel') }}</a>           
+                       
                     </div>
                 </form> 
             </div> 

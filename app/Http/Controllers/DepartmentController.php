@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Department;
 use Illuminate\Http\Request;
+use DB;
 
 class DepartmentController extends Controller
 {
@@ -13,7 +15,13 @@ class DepartmentController extends Controller
      */
     public function index()
     {
-       return view('departments.index');
+
+        $departments = DB::table('departments')
+                ->orderBy('departments.created_at', 'desc')
+                ->get();
+
+        return view('departments.index', compact('departments'))
+        ->with('i');
     }
 
     /**
@@ -23,7 +31,7 @@ class DepartmentController extends Controller
      */
     public function create()
     {
-        //
+        return view('departments.create');
     }
 
     /**
@@ -34,51 +42,73 @@ class DepartmentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $this->validate($request,[
+            'department' => 'required',
+
+        ]);
+
+        //dd($request->all());
+    Department::create($request->all());
+       
+        return redirect()->route('departments.index')
+                        ->with('success','Department created successfully.');
+        
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Models\Department  $department
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Department $department)
     {
-        //
+        return view('departments.show',compact('department'));
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Models\Department  $department
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Department $department)
     {
-        //
+        return view('departments.edit',compact('department'));
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\Models\Department  $department
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Department $department)
     {
-        //
+        $request->validate([
+            'department' => 'required',
+            
+        ]);
+      
+        $department->update($request->all());
+      
+        return redirect()->route('departments.index')
+                        ->with('success','Department Updated');
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Models\Department  $department
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Department $department)
     {
-        //
+        $department->delete();
+       
+        return redirect()->route('departments.index')
+                        ->with('success','Department Deleted');
     }
+
 }

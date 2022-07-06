@@ -6,7 +6,6 @@ Pop
 
 @section('content')
 @include('partials.css')
-@include('partials.css')
 <section class="content">
     <div class="col d-flex justify-content-center">
         <div class="card w-50">
@@ -18,26 +17,23 @@ Pop
             <div class="card-body">
                 <div class="row g-2">
                     <div class="col">
-                        <strong>City/Town</strong>
+                        <strong>CITY/TOWN</strong>
                         <p class="text-muted">{{ $pop->city }}</p>
                     </div>
-                </div>
-                <hr>
-                <div class="row g-2">
                     <div class="col">
-                        <strong>Location</strong>
+                        <strong>LOCATION</strong>
                         <p class="text-muted">{{ $pop->suburb }}</p>
                     </div>
                 </div>
-                <hr>
+
                 <div class="row g-2">
                     <div class="col">
-                        <strong>Pop</strong>
+                        <strong>POP</strong>
                         <p class="text-muted">{{ $pop->pop }}</p>
                     </div>
                 </div>
                 <div class="card-footer">
-                    <a type="button" class="btn btn-danger" href="{{ route('pops.index') }}">{{ __('Close') }}</a>
+                    <a type="button" class="btn btn-danger btn-sm" href="{{ route('pops.index') }}">{{ __('Close') }}</a>
                 </div>
             </div>
         </div>
