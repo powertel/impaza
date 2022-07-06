@@ -30,8 +30,8 @@ Account Manager
                     </div>
            
                     <div class="card-footer">
-                        <a type="button" class="btn btn-danger" href="{{ route('account_managers.index' ) }}">{{ __('Cancel') }}</a>
-                        <button type="submit" class="btn btn-success btn-sm float-right">{{ __('Save') }}</button>
+                        <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
+                        <a type="button" class="btn btn-danger btn-sm"href="{{ route('account_managers.index' ) }}">{{ __('Cancel') }}</a>
                     </div>
                 </form> 
             </div> 

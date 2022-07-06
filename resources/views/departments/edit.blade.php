@@ -9,7 +9,7 @@
                     {{_('Update Department')}}
                 </h3>
             </div>
-            
+
             <div class="card-body">
                 <form  action="{{ route('departments.update',$department->id) }}" method="POST">
                     @csrf
@@ -20,17 +20,24 @@
                         <div class="col-sm-9">
                             <input type="text"  class="form-control" name="department" value="{{ $department->department }}">
                             @error ('department')
-                            <div class="alert-danger">
-                                 {{$message }}
-                            </div>                                
+
+                                <div class="alert-danger">
+                                     {{$message }}
+                                </div>                                
+                              
+
                             @enderror
                         </div>
 
                     </div>
            
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-success btn-sm float-right">{{ __('Save') }}</button>
-                        <a type="button" class="btn btn-danger btn-sm" href="javascript:history.back()">{{ __('Cancel') }}</a>
+
+                        <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
+                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('departments.index') }}">{{ __('Cancel') }}</a>
+
+                        
+
                     </div>
                 </form> 
             </div> 

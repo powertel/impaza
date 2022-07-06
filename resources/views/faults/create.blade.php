@@ -164,8 +164,8 @@ Fault
                     </div>
         
                     <div class="card-footer">
+                        <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
                         <a type="button" class="btn btn-danger btn-sm" href="javascript:history.back()">{{ __('Cancel') }}</a>
-                        <button type="submit" class="btn btn-success btn-sm float-right">{{ __('Save') }}</button>
                     </div>
                 </form> 
             </div> 
