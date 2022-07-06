@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-Fault
+Assess
 @endsection
 
 @section('content')
@@ -10,7 +10,7 @@ Fault
     <div class="col d-flex justify-content-center">
         <div class="card  w-100">
             <div class="card-header">
-                <h3 class="card-title">{{_('Assess Fault')}}</h3>
+                <h3 class="card-title">{{_('Fault Assesment')}}</h3>
             </div>
             <div class="card-body">
                 <form  action="{{ route('faults.update', $fault->id ) }}" method="POST">
