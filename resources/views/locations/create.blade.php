@@ -42,8 +42,8 @@ Location
                     </div>
            
                     <div class="card-footer">
-                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('locations.index' ) }}">{{ __('Cancel') }}</a>
                         <button type="submit" class="btn btn-success btn-sm float-right">{{ __('Save') }}</button>
+                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('locations.index' ) }}">{{ __('Cancel') }}</a>
                     </div>
                 </form> 
             </div> 

@@ -79,7 +79,7 @@
                             </a>
                         </li>
                         <li class="nav-item has-treeview">
-                            <a href="#" class="nav-link active">
+                            <a href="#" class="nav-link">
                                 <i class="nav-icon fas fa-cogs"></i>
                                 <p>
                                     Configurations
@@ -89,7 +89,7 @@
                             <ul class="nav nav-treeview">
                               <li class="nav-item">
                                   <a  class="nav-link">
-                                      <i class="nav-icon fas fa-user"></i>
+                                      <i class="nav-icon fas fa-user-cog"></i>
                                       <p>Users</p>
                                   </a>
                               </li>
@@ -107,7 +107,7 @@
                               </li>
                               <li class="nav-item">
                                   <a href="{{ route('departments.index') }}" class="nav-link">
-                                    <i class="nav-icon fas fa-table"></i>
+                                    <i class="nav-icon fas fa-book-reader"></i>
                                     <p>Department</p>
                                   </a>
                               </li>
@@ -119,31 +119,31 @@
                               </li>
                               <li class="nav-item">
                                     <a href="{{ route('cities.index') }}" class="nav-link">
-                                    <i class="nav-icon fas fa-table"></i>
+                                    <i class="nav-icon fas fa-city"></i>
                                     <p>Cities</p>
                                     </a>
                               </li>
                               <li class="nav-item">
                                     <a href="{{ route('locations.index') }}" class="nav-link">
-                                    <i class="nav-icon fas fa-table"></i>
+                                    <i class="nav-icon fas fa-location"></i>
                                     <p>Locations</p>
                                     </a>
                               </li>
                               <li class="nav-item">
                                     <a href="{{ route('pops.index') }}" class="nav-link">
-                                    <i class="nav-icon fas fa-table"></i>
+                                    <i class="nav-icon fas fa-bullseye"></i>
                                     <p>Pops</p>
                                     </a>
                               </li>
                               <li class="nav-item">
                                     <a href="{{ route('customers.index') }}" class="nav-link">
-                                    <i class="nav-icon fas fa-table"></i>
+                                    <i class="nav-icon fas fa-address-card"></i>
                                     <p>Customers</p>
                                     </a>
                               </li>
                               <li class="nav-item">
                                     <a href="{{ route('links.index') }}" class="nav-link">
-                                    <i class="nav-icon fas fa-table"></i>
+                                    <i class="nav-icon fas fa-street-view"></i>
                                     <p>Links</p>
                                     </a>
                               </li>
@@ -151,25 +151,42 @@
                         </li>
                         <li  class="nav-item">
                             <a href="{{ route('faults.index') }}" class="nav-link">
-                                <i class="nav-icon fas fa-copy"></i>
+                                <i class="nav-icon fas fa-exclamation-triangle"></i>
                                 <p>Faults</p>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a  class="nav-link">
-                                <i class="nav-icon fas fa-plus-square"></i>
+                                <i class="nav-icon fas fa-money-check-alt"></i>
                                 <p>Finance</p>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a  class="nav-link">
-                                <i class="nav-icon fas fa-plus-square"></i>
-                                <p>Permits</p>
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon fas fa-rocket"></i>
+                                <p>
+                                    Permits
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
                             </a>
+                            <ul class="nav nav-treeview">
+                              <li class="nav-item">
+                                <a  class="nav-link" href="{{ route('permits.index') }}">
+                                    <i class="nav-icon 	fas fa-check-circle"></i>
+                                    <p>Approved Permits</p>
+                                </a>
+                              </li>
+                              <li class="nav-item">
+                                <a  class="nav-link" href="{{ route('request-permits.index') }}">
+                                    <i class="nav-icon fas fa-plus-square"></i>
+                                    <p>Requested Permits</p>
+                                </a>
+                              </li>
+                            </ul>
                         </li>
                         <li class="nav-item">
                             <a  class="nav-link">
-                                <i class="nav-icon fas fa-plus-square"></i>
+                                <i class="nav-icon 	fas fa-wrench"></i>
                                 <p>Materials</p>
                             </a>
                         </li>
@@ -182,7 +199,7 @@
 
                         <li class="nav-item">
                             <a  class="nav-link">
-                              <i class="fas fa-file nav-icon"></i>
+                              <i class="nav-icon fas fa-file-export"></i>
                               <p>Reports</p>
                             </a>
                         </li>

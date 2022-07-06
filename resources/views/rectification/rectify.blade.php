@@ -8,51 +8,47 @@ Rectify
     @include('partials.css')
 <section class="content">
     <div class="col d-flex justify-content-center">
-        <div class="card  w-100">
+        <div class="card  w-50">
             <div class="card-header">
                 <h3 class="card-title">{{_('Fault Rectification')}}</h3>
             </div>
             <div class="card-body">
-                <form  action="{{ route('faults.update', $fault->id ) }}" method="POST">
-                ``<div class="row g-2">
-                        <div class="mb-3 col-md-6">
-                        <label for="customerName" class="form-label">Customer Name </label>
-                            <select class="custom-select" id="customer" name="customer_id">
-                                <option selected="selected" value="{{ $fault->customer_id}}">{{ $fault->customer }}</option>
-                                @foreach($customers as $customer)
-                                    @unless ($customer->id ===$fault->customer_id)
-                                        <option value="{{ $customer->id}}">{{ $customer->customer }}</option>
-                                    @endunless
-                                @endforeach
-                            </select>
+                <form>
+                    <div class="form-group row">
+                        <label for="department" class="col-sm-3 col-form-label">Customer</label>
+                        <div class="col-sm-9">
+                            <input type="text"  class="form-control" name="customer" value="{{ $fault->customer }}" disabled>
                         </div>
+                    </div>
 
-                        <div class="mb-3 col-md-2">
-                            <label for="city" class="form-label">City/Town</label>
-                            <select  class="custom-select" id="city" name="city_id">
-                                <option selected="selected" value="{{ $fault->city_id}}">{{ $fault->city }}</option>
-                                @foreach($cities as $city)
-                                    @unless($city->id ===$fault->city_id)
-                                        <option value="{{ $city->id}}">{{ $city->city }}</option>
-                                    @endunless
-                                @endforeach
-                            </select>
+                    <div class="form-group row">
+                        <label for="department" class="col-sm-3 col-form-label">Link</label>
+                        <div class="col-sm-9">
+                            <input type="text"  class="form-control" name="link" value="{{ $fault->link }}" disabled>
                         </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="clear" class="col-sm-3 col-form-label">Restored</label>
+                        <div class="col-sm-9 form-check ">
+                            <input type="checkbox" class="form-check-input">
+                        </div>
+                    </div>
                     
-    
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-success btn-sm " >{{ __('Save') }}</button>
-                        <button type="button" class="btn btn-secondary btn-sm" >Revoke</button>   
+                        <button type="submit" class="btn btn-success btn-sm " >{{ __('Clear') }}</button>  
                         <a type="button" class="btn btn-danger btn-sm" href="{{ route('faults.index') }}" >{{ __('Cancel') }}</a>           
                     </div>
                 </form> 
             </div> 
         </div>
+    </div>
+    <div class="col d-flex justify-content-center">
         <div class="card  w-50">
             <div class="card-header">
                 <h3 class="card-title">{{_('Remarks')}}</h3>
             </div>
-            <div class="card-body" style="height: 0px; overflow-y: auto">
+            <div class="card-body" style="height: 250px; overflow-y: auto">
                 @foreach($remarks as $remark)
                 @if ($remark->fault_id === $fault->id)
                 <div class="callout callout-info">
@@ -85,7 +81,6 @@ Rectify
             </div>
         </div>
     </div>
- 
 </section>
 @endsection
 

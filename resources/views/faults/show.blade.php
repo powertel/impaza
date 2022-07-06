@@ -90,8 +90,8 @@ Fault
                     </div>
                 </div>
                 <div class="card-footer">
+                    <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-success btn-sm">Assess</a>
                     <a type="button" class="btn btn-danger btn-sm" href="{{ route('faults.index') }}">{{ __('Close') }}</a>
-                    <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-success btn-sm float-right">Assess</a>
                 </div>
             </div> 
         </div>
