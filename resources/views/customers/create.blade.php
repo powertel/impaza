@@ -21,7 +21,7 @@ Customer
                 <div class="form-group row">
                         <label for="customer" class="col-sm-3 col-form-label">Customer</label>
                         <div class="col-sm-9 ">
-                            <input type="text" class="form-control" name="customer" placeholder="Customer Name">
+                            <input type="text" class="form-control" name="customer" placeholder="Customer Name" value="{{ old('accountManager') }}">
                             @error ('customer')
                                 <div class="alert-danger">
                                      {{$message }}
@@ -32,7 +32,7 @@ Customer
                 <div class="form-group row">
                     <label for="city" class="col-sm-3 col-form-label">City/Town</label>
                     <div class="col-sm-9 ">
-                        <select id="city" class="custom-select " name="city_id">
+                        <select id="city" class="custom-select " name="city_id" value="{{ old('city_id') }}">
                             <option selected disabled >Select city name</option>
                             @foreach($city as $city)
                                 <option value="{{ $city->id}}">{{ $city->city}}</option>
@@ -44,7 +44,7 @@ Customer
                 <div class="form-group row">
                     <label for="location" class="col-sm-3 col-form-label">Location</label>
                     <div class="col-sm-9 ">
-                    <select id="suburb"  class="custom-select" name="suburb_id">
+                    <select id="suburb"  class="custom-select" name="suburb_id" value="{{ old('suburb_id') }}" >
                         <option selected disabled>Select Suburb</option>
                      </select>
                     </div>
@@ -53,7 +53,7 @@ Customer
                 <div class="form-group row">
                     <label for="pop" class="col-sm-3 col-form-label">Pop</label>
                     <div class="col-sm-9 ">
-                        <select id="pop"  class="custom-select " name="pop_id" >
+                        <select id="pop"  class="custom-select " name="pop_id" value="{{ old('pop_id') }}" >
                             <option selected disabled>Select Pop</option>
                         </select>
                     </div>
@@ -62,7 +62,7 @@ Customer
                 <div class="form-group row">
                     <label for="pop" class="col-sm-3 col-form-label">Link</label>
                     <div class="col-sm-9 ">
-                        <input type="text" class="form-control" name="link" placeholder="Link Name">
+                        <input type="text" class="form-control" name="link" placeholder="Link Name" value="{{ old('link') }}">
                         @error ('link')
                                 <div class="alert-danger">
                                      {{$message }}

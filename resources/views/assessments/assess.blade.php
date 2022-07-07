@@ -128,7 +128,7 @@ Assess
                     <div class="row g-2">
                         <div class="mb-3 col-md-2">
                             <label for="faultType" class="form-label">Fault Type</label>
-                            <select type="text"  class="custom-select " value="{{$fault->serviceType}}" name="faultType">
+                            <select type="text"  class="custom-select "  name="faultType" value="{{ old('faultType') }}">
                                 <option selected="selected">Select Fault Type</option>
                                 <option>Carrier/Mux</option>
                                 <option>logical</option>
@@ -139,7 +139,7 @@ Assess
                         </div>
                         <div class="mb-3 col-md-4">
                             <label for="rfo" class="form-label">Confirmed RFO</label>
-                            <select type="text"  class="custom-select " value="{{$fault->serviceType}}" name="confirmedRfo">
+                            <select type="text"  class="custom-select "  name="confirmedRfo" value="{{ old('confirmedRfo') }}">
                                 <option selected="selected">Select RFO</option>
                                 <option>Faulty Mux</option>
                                 <option>Faulty Board</option>
@@ -161,7 +161,7 @@ Assess
                         </div>
                         <div class="mb-3 col-md-6">
                             <label for="actDepartment" class="form-label">Actioning Department</label>
-                            <select id="actDepartment" class="form-select" name="department">
+                            <select id="actDepartment" class="form-select" name="department" value="{{ old('department') }}" >
                                 <option>Select</option>
                                 <option>NOC</option>
                                 <option>implementation</option>
@@ -177,7 +177,7 @@ Assess
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="priorityLevel" class="form-label">Priority Level</label>
-                            <select id="priorityLevel" class="form-select" name="priorityLevel">
+                            <select id="priorityLevel" class="form-select" name="priorityLevel" value="{{ old('priorityLevel') }}">
                                 <option>Select</option>
                                 <option>Low</option>
                                 <option>Medium</option>
