@@ -47,8 +47,11 @@ class FaultController extends Controller
     {
         $city = City::all();
         $customer = Customer::all();
+        $location = Suburb::all();
+        $link = Link::all();
+        $pop = Pop::all();
         $accountManager = AccountManager::all();
-        return view('faults.create',compact('customer','city','accountManager'));
+        return view('faults.create',compact('customer','city','accountManager','location','link','pop'));
     }
 
     public function findSuburb($id)

@@ -21,7 +21,7 @@ Pop
                 <div class="form-group row">
                     <label for="city" class="col-sm-3 col-form-label">City/Town</label>
                     <div class="col-sm-9">
-                        <select id="city" class="custom-select " name="city_id">
+                        <select id="city" class="custom-select " name="city_id" value="{{ old('city_id') }}">
                             <option selected disabled >Select city name</option>
                             @foreach($city as $city)
                                 <option value="{{ $city->id}}">{{ $city->city}}</option>
@@ -32,7 +32,7 @@ Pop
                 <div class="form-group row">
                     <label for="location" class="col-sm-3 col-form-label">Location</label>
                     <div class="col-sm-9">
-                    <select id="suburb"  class="custom-select" name="suburb_id">
+                    <select id="suburb"  class="custom-select" name="suburb_id" value="{{ old('suburb_id') }}">
                         <option selected disabled>Select Suburb</option>
                      </select>
                     </div>
@@ -40,7 +40,7 @@ Pop
                 <div class="form-group row">
                     <label for="pop" class="col-sm-3 col-form-label">Pop</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" name="pop" placeholder="Pop Name">
+                        <input type="text" class="form-control" name="pop" placeholder="Pop Name" value="{{ old('pop') }}">
                         @error ('pop')
                                 <div class="alert-danger">
                                      {{$message }}

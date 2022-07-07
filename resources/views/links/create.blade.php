@@ -21,10 +21,14 @@ Link
                     <div class="form-group row">
                         <label for="customer" class="col-sm-3 col-form-label">Customer</label>
                         <div class="col-sm-9">
-                            <select id="customer" class="custom-select " name="customer_id">
+                            <select id="customer" class="custom-select  @error('customer_id') is-invalid @enderror" name="customer_id" value="{{ old('customer_id') }}">
                                 <option selected disabled >Select Customer Name</option>
                                 @foreach($customer as $customer)
-                                    <option value="{{ $customer->id}}">{{ $customer->customer }}</option>
+                                    @if (old('customer_id')==$customer->id)
+                                        <option value="{{ $customer->id}}" selected>{{ $customer->customer }}</option>
+                                    @else
+                                        <option value="{{ $customer->id}}">{{ $customer->customer }}</option>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
@@ -32,42 +36,51 @@ Link
                     <div class="form-group row">
                     <label for="city" class="col-sm-3 col-form-label">City/Town</label>
                     <div class="col-sm-9">
-                        <select id="city" class="custom-select " name="city_id">
-                            <option selected disabled >Select city name</option>
-                            @foreach($city as $city)
-                                <option value="{{ $city->id}}">{{ $city->city}}</option>
-                            @endforeach
-                        </select>
+                    <select id="city" class="custom-select @error('city_id') is-invalid @enderror" name="city_id">
+                        <option selected disabled  >Select City/Town</option>
+                        @foreach($city as $city)
+                            @if (old('city_id')==$city->id)
+                                <option value="{{ $city->id}}" selected>{{ $city->city }}</option>
+                            @else
+                                <option value="{{ $city->id}}">{{ $city->city }}</option>
+                            @endif
+                        @endforeach
+                    </select>
                     </div>
                 </div>
 
                 <div class="form-group row">
                     <label for="location" class="col-sm-3 col-form-label">Location</label>
                     <div class="col-sm-9">
-                    <select id="suburb"  class="custom-select" name="suburb_id">
+                    <select id="suburb"  class="custom-select @error('suburb_id') is-invalid @enderror" name="suburb_id">
                         <option selected disabled>Select Suburb</option>
-                     </select>
+                        @foreach($location as $location)
+                            @if (old('suburb_id')==$location->id)
+                                <option value="{{ $location->id}}" selected>{{ $location->suburb }}</option>
+                            @endif
+                        @endforeach
+                    </select>
                     </div>
                 </div>
 
                 <div class="form-group row">
                     <label for="pop" class="col-sm-3 col-form-label">Pop</label>
                     <div class="col-sm-9">
-                        <select id="pop"  class="custom-select " name="pop_id" >
-                            <option selected disabled>Select Pop</option>
-                        </select>
+                    <select id="pop"  class="custom-select @error('pop_id') is-invalid @enderror" name="pop_id">
+                        <option selected disabled>Select Pop</option>
+                        @foreach($pop as $pop)
+                            @if (old('pop_id')==$pop->id)
+                                <option value="{{ $pop->id}}" selected>{{ $pop->pop }}</option>
+                            @endif
+                        @endforeach
+                    </select>
                     </div>
                 </div>
 
                 <div class="form-group row">
                     <label for="pop" class="col-sm-3 col-form-label">Link</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" name="link" placeholder="Link Name">
-                        @error ('link')
-                            <div class="alert-danger">
-                                    {{$message }}
-                            </div>                                
-                        @enderror
+                        <input type="text" class="form-control  @error('link') is-invalid @enderror" name="link" placeholder="Link Name" value="{{ old('link') }}">
                     </div>
                 </div>
 

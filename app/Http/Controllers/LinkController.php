@@ -37,9 +37,12 @@ class LinkController extends Controller
      */
     public function create()
     {
-        $customer = Customer::all();
         $city = City::all();
-        return view('links.create',compact('customer','city'));
+        $customer = Customer::all();
+        $location = Suburb::all();
+        $link = Link::all();
+        $pop = Pop::all();
+        return view('links.create',compact('customer','city','location','link','pop'));
     }
 
     /**

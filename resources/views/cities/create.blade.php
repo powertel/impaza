@@ -21,12 +21,7 @@ City
                     <div class="form-group row">
                         <label for="city" class="col-sm-3 col-form-label">City/Town</label>
                         <div class="col-sm-9">
-                            <input type="text"  class="form-control" name="city" placeholder="City Name" value="{{ old('city') }}">
-                            @error ('city')
-                                <div class="alert-danger">
-                                     {{$message }}
-                                </div>                                
-                            @enderror
+                            <input type="text"  class="form-control @error('city') is-invalid @enderror" name="city" placeholder="City Name" value="{{ old('city') }}">
                         </div>
                     </div>
            

@@ -20,12 +20,7 @@ Account Manager
                     <div class="form-group row">
                         <label for="account_manger" class="col-sm-4 col-form-label">Account Manager</label>
                         <div class="col-sm-8">
-                            <input type="text" class="form-control" name="accountManager" placeholder="Account Manager" value="{{ old('accountManager') }}">
-                            @error ('accountManager')
-                                <div class="alert-danger">
-                                     {{$message }}
-                                </div>                                
-                            @enderror
+                            <input type="text" class="form-control @error('accountManager') is-invalid @enderror" name="accountManager" placeholder="Account Manager" value="{{ old('accountManager') }}">
                         </div>
                     </div>
            

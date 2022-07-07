@@ -34,7 +34,11 @@ class CustomerController extends Controller
     public function create()
     {
         $city = City::all();
-        return view('customers.create',compact('city'));
+        $customer = Customer::all();
+        $location = Suburb::all();
+        $link = Link::all();
+        $pop = Pop::all();
+        return view('customers.create',compact('city','location','link','pop'));
     }
 
     /**

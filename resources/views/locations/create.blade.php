@@ -21,7 +21,7 @@ Location
                 <div class="form-group row">
                         <label for="city" class="col-sm-3 col-form-label">City/Town</label>
                         <div class="col-sm-9">
-                            <select id="city" class="custom-select " name="city_id">
+                            <select id="city" class="custom-select " name="city_id" value="{{ old('city_id') }}">
                                 <option selected disabled >Select city name</option>
                                 @foreach($city as $city)
                                     <option value="{{ $city->id}}">{{ $city->city}}</option>
@@ -32,7 +32,7 @@ Location
                     <div class="form-group row">
                         <label for="suburb" class="col-sm-3 col-form-label">Location</label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" name="suburb" placeholder="Location">
+                            <input type="text" class="form-control" name="suburb" placeholder="Location" value="{{ old('suburb') }}">
                             @error ('suburb')
                                 <div class="alert-danger">
                                      {{$message }}
