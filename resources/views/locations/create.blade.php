@@ -21,23 +21,22 @@ Location
                 <div class="form-group row">
                         <label for="city" class="col-sm-3 col-form-label">City/Town</label>
                         <div class="col-sm-9">
-                            <select id="city" class="custom-select " name="city_id" value="{{ old('city_id') }}">
-                                <option selected disabled >Select city name</option>
-                                @foreach($city as $city)
-                                    <option value="{{ $city->id}}">{{ $city->city}}</option>
-                                @endforeach
-                            </select>
+                        <select id="city" class="custom-select @error('city_id') is-invalid @enderror" name="city_id">
+                            <option selected disabled  >Select City/Town</option>
+                            @foreach($city as $city)
+                                @if (old('city_id')==$city->id)
+                                    <option value="{{ $city->id}}" selected>{{ $city->city }}</option>
+                                @else
+                                    <option value="{{ $city->id}}">{{ $city->city }}</option>
+                                @endif
+                            @endforeach
+                        </select>
                         </div>
                     </div>
                     <div class="form-group row">
                         <label for="suburb" class="col-sm-3 col-form-label">Location</label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" name="suburb" placeholder="Location" value="{{ old('suburb') }}">
-                            @error ('suburb')
-                                <div class="alert-danger">
-                                     {{$message }}
-                                </div>                                
-                            @enderror
+                            <input type="text" class="form-control @error('suburb') is-invalid @enderror" name="suburb" placeholder="Location" value="{{ old('suburb') }}">
                         </div>
                     </div>
            

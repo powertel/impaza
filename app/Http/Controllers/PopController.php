@@ -34,7 +34,9 @@ class PopController extends Controller
     public function create()
     {
         $city = City::all();
-        return view('pops.create',compact('city'));
+        $location = Suburb::all();
+        $pop = Pop::all();
+        return view('pops.create',compact('city','location'));
     }
 
     /**
