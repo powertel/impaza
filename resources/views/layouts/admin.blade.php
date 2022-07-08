@@ -177,7 +177,7 @@
                                 </a>
                               </li>
                               <li class="nav-item">
-                                <a  class="nav-link" href="{{ route('request-permits.index') }}">
+                                <a  class="nav-link" href="{{ route('request-permit.index') }}">
                                     <i class="nav-icon fas fa-plus-square"></i>
                                     <p>Requested Permits</p>
                                 </a>

@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\Permit;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Fault;
 use App\Models\Suburb;
@@ -14,7 +13,7 @@ use App\Models\Remark;
 use App\Models\AccountManager;
 use DB;
 
-class RequestPermitController extends Controller
+class AssignController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -23,7 +22,7 @@ class RequestPermitController extends Controller
      */
     public function index()
     {
-        return view('permits.requested-permits.index');
+        //
     }
 
     /**
@@ -88,7 +87,8 @@ class RequestPermitController extends Controller
         $remarks= Remark::all();
         $accountManagers = AccountManager::all();
 
-    return view('permits.requested-permits.request',compact('fault','customers','cities','suburbs','pops','links','remarks','accountManagers'));
+        return view('assign.assign',compact('fault','customers','cities','suburbs','pops','links','remarks','accountManagers'));
+    
     }
 
     /**
@@ -113,5 +113,4 @@ class RequestPermitController extends Controller
     {
         //
     }
-    
 }
