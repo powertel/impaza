@@ -43,7 +43,7 @@ class DepartmentController extends Controller
     public function store(Request $request)
     {
         $this->validate($request,[
-            'department' => 'required',
+            'department' => 'required|string|unique:departments',
 
         ]);
 

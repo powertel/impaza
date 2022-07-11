@@ -17,7 +17,7 @@ $('#city').on('change',function () {
                         });
 
                     } else {
-                        $("#suburb").empty();
+                        $("#suburb").append('<option value="' + key + '">' + value + '</option>');
                     }
                 }
             });

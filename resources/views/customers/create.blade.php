@@ -21,7 +21,7 @@ Customer
                 <div class="form-group row">
                         <label for="customer" class="col-sm-3 col-form-label">Customer</label>
                         <div class="col-sm-9 ">
-                            <input type="text" class="form-control" name="customer" placeholder="Customer Name">
+                            <input type="text" class="form-control @error('customer') is-invalid @enderror" name="customer" placeholder="Customer Name" value="{{ old('customer') }}">
                             @error ('customer')
                                 <div class="alert-danger">
                                      {{$message }}
@@ -32,10 +32,14 @@ Customer
                 <div class="form-group row">
                     <label for="city" class="col-sm-3 col-form-label">City/Town</label>
                     <div class="col-sm-9 ">
-                        <select id="city" class="custom-select " name="city_id">
+                        <select id="city" class="custom-select @error('city_id') is-invalid @enderror" name="city_id">
                             <option selected disabled >Select city name</option>
                             @foreach($city as $city)
-                                <option value="{{ $city->id}}">{{ $city->city}}</option>
+                                    @if (old('city_id')==$city->id)
+                                        <option value="{{ $city->id}}" selected>{{ $city->city }}</option>
+                                    @else
+                                        <option value="{{ $city->id}}">{{ $city->city }}</option>
+                                    @endif
                             @endforeach
                         </select>
                     </div>
@@ -44,8 +48,13 @@ Customer
                 <div class="form-group row">
                     <label for="location" class="col-sm-3 col-form-label">Location</label>
                     <div class="col-sm-9 ">
-                    <select id="suburb"  class="custom-select" name="suburb_id">
+                    <select id="suburb"  class="custom-select @error('suburb_id') is-invalid @enderror" name="suburb_id">
                         <option selected disabled>Select Suburb</option>
+                        @foreach($location as $location)
+                                @if (old('suburb_id')==$location->id)
+                                    <option value="{{ $location->id}}" selected>{{ $location->suburb }}</option>
+                                @endif
+                        @endforeach
                      </select>
                     </div>
                 </div>
@@ -53,8 +62,13 @@ Customer
                 <div class="form-group row">
                     <label for="pop" class="col-sm-3 col-form-label">Pop</label>
                     <div class="col-sm-9 ">
-                        <select id="pop"  class="custom-select " name="pop_id" >
+                        <select id="pop"  class="custom-select  @error('pop_id') is-invalid @enderror " name="pop_id" value="{{ old('pop_id') }}" >
                             <option selected disabled>Select Pop</option>
+                            @foreach($pop as $pop)
+                                @if (old('pop_id')==$pop->id)
+                                    <option value="{{ $pop->id}}" selected>{{ $pop->pop }}</option>
+                                @endif
+                            @endforeach
                         </select>
                     </div>
                 </div>
@@ -62,11 +76,11 @@ Customer
                 <div class="form-group row">
                     <label for="pop" class="col-sm-3 col-form-label">Link</label>
                     <div class="col-sm-9 ">
-                        <input type="text" class="form-control" name="link" placeholder="Link Name">
-                        @error ('link')
-                                <div class="alert-danger">
-                                     {{$message }}
-                                </div>                                
+                        <input type="text" class="form-control  @error('link') is-invalid @enderror" name="link" placeholder="Link Name" value="{{ old('link') }}">
+                        @error ('customer')
+                            <div class="alert-danger">
+                                    {{$message }}
+                            </div>                                
                         @enderror
                     </div>
                 </div>
