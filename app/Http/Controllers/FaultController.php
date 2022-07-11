@@ -70,7 +70,7 @@ class FaultController extends Controller
         $link = Link::where('customer_id',$id)
         ->pluck("link","id");
         return response()->json($link);
-    }   
+    }
     /**
      * Store a newly created resource in storage.
      *
@@ -183,9 +183,9 @@ class FaultController extends Controller
             $links = Link::all();
             $remarks= Remark::all();
             $accountManagers = AccountManager::all();
-    
+
         return view('faults.edit',compact('fault','customers','cities','suburbs','pops','links','remarks','accountManagers'));
-        
+
     }
 
     /**

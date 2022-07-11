@@ -15,6 +15,9 @@ use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\RectificationController;
 use App\Http\Controllers\Permit\PermitController;
 use App\Http\Controllers\Permit\RequestPermitController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\RoleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,7 +54,29 @@ Route::get('suburb/{id}', [FaultController::class,'findSuburb'])->name('suburb')
 Route::get('link/{id}', [FaultController::class,'findLink'])->name('link');
 Route::get('pop/{id}', [FaultController::class,'findPop'])->name('pop');
 
- 
+//Users
+Route::resource('user',UserController::class);
+Route::get('/profile',[UserController::class,'profile'])->name('user.profile');
+Route::post('/profile',[UserController::class,'postProfile'])->name('user.postProfile');
+
+//Permisions
+Route::resource('permission',PermissionController::class);
+
+//Roles
+Route::resource('role',RoleController::class);
+
+//Departments
 Route::resource('/departments', DepartmentController::class);
+
+/// axios requests
+
+Route::get('/getAllPermission',[PermissionController::class,'getAllPermissions']);
+Route::post('/postRole',[RoleController::class,'store']);
+
+/////////////axios create user
+Route::post('/account/create', 'UserController@store');
+Route::put('/account/update/{id}', 'UserController@update');
+Route::delete('/delete/user/{id}', 'UserController@delete');
+Route::get('/search/user', 'UserController@search');
 
 
