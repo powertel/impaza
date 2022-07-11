@@ -37,7 +37,7 @@
                         <span class="align-middle d-none d-sm-inline-block" style="font-weight: 700; color: rgb(35, 157, 233);"> {{ Auth::user()->name }}</span> <i class="mdi mdi-chevron-down d-none d-sm-inline-block align-middle"></i>
                     </a>
                   <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated topbar-dropdown-menu profile-dropdown">
-                    
+
                       <!-- item-->
                       <a  class="dropdown-item notify-item" href="{{ route('logout') }}"
                                 onclick="event.preventDefault();
@@ -88,19 +88,19 @@
                             </a>
                             <ul class="nav nav-treeview">
                               <li class="nav-item">
-                                  <a  class="nav-link">
+                                  <a  class="nav-link" href="{{ route('user.index') }}">
                                       <i class="nav-icon fas fa-user-cog"></i>
                                       <p>Users</p>
                                   </a>
                               </li>
                               <li class="nav-item">
-                                  <a  class="nav-link">
+                                  <a  class="nav-link" href="{{ route('role.index') }}">
                                       <i class="fas fa-bomb nav-icon"></i>
                                       <p>Roles</p>
                                   </a>
                               </li>
                               <li class="nav-item">
-                                  <a   class="nav-link">
+                                  <a   class="nav-link" href="{{ route('permission.index') }}">
                                       <i class="fas fa-users-cog nav-icon"></i>
                                       <p>Permissions</p>
                                   </a>
@@ -150,6 +150,12 @@
                             </ul>
                         </li>
                         <li  class="nav-item">
+                            <a href="{{ route('user.profile') }}" class="nav-link">
+                                <i class="nav-icon fas fa-user"></i>
+                                <p>Profile</p>
+                            </a>
+                        </li>
+                        <li  class="nav-item">
                             <a href="{{ route('faults.index') }}" class="nav-link">
                                 <i class="nav-icon fas fa-exclamation-triangle"></i>
                                 <p>Faults</p>
@@ -190,12 +196,7 @@
                                 <p>Materials</p>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a  class="nav-link">
-                              <i class="nav-icon fas fa-user"></i>
-                              <p>Profile</p>
-                            </a>
-                        </li>
+
 
                         <li class="nav-item">
                             <a  class="nav-link">
@@ -246,7 +247,7 @@
 
               <!-- /Main Content-->
               <div class="content">
-       
+
                 @include('partials.alerts')
                 @yield('content')
               </div>
