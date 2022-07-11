@@ -100,4 +100,11 @@ class RoleController extends Controller
     {
         //
     }
+
+    public function getAll(){
+        $roles = $this->role->all();
+        return response()->json([
+            'roles' => $roles
+        ], 200);
+    }
 }
