@@ -17,14 +17,14 @@ User
             <div class="card-body">
                 <div class="row g-2">
                     <div class="col">
-                        <strong>Name</strong>
-                        <p class="text-muted">{{ $user->name }}</p>
+                        <strong>Name:</strong>
+                        {{ $user->name }}
                     </div>
                 </div>
                 <div class="row g-2">
                 <div class="col">
-                        <strong>Email</strong>
-                        <p class="text-muted">{{ $user->email }}</p>
+                        <strong>Email:</strong>
+                        {{ $user->email }}
                     </div>
                 </div>
                 <div class="row g-2">
