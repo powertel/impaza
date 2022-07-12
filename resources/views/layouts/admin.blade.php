@@ -78,6 +78,7 @@
                                 <p>Dashboard</p>
                             </a>
                         </li>
+                        @can('user-list')
                         <li class="nav-item has-treeview">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fas fa-cogs"></i>
@@ -148,19 +149,24 @@
                                     </a>
                               </li>
                             </ul>
-                        </li>
+                        </li>                            
+                        @endcan
+
                         <li  class="nav-item">
                             <a href="{{ route('user.profile') }}" class="nav-link">
                                 <i class="nav-icon fas fa-user"></i>
                                 <p>Profile</p>
                             </a>
                         </li>
+                        @can('fault-list')
                         <li  class="nav-item">
                             <a href="{{ route('faults.index') }}" class="nav-link">
                                 <i class="nav-icon fas fa-exclamation-triangle"></i>
                                 <p>Faults</p>
                             </a>
-                        </li>
+                        </li>                            
+                        @endcan
+
                         <li class="nav-item">
                             <a  class="nav-link">
                                 <i class="nav-icon fas fa-money-check-alt"></i>
