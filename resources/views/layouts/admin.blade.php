@@ -90,74 +90,91 @@
 
                             <ul class="nav nav-treeview">
                                 @can('user-list')
-                              <li class="nav-item">
-                                  <a  class="nav-link" href="{{ route('users.index') }}">
-                                      <i class="nav-icon fas fa-user-cog"></i>
-                                      <p>Users</p>
-                                  </a>
-                              </li>                                
+                                <li class="nav-item">
+                                    <a  class="nav-link" href="{{ route('users.index') }}">
+                                        <i class="nav-icon fas fa-user-cog"></i>
+                                        <p>Users</p>
+                                    </a>
+                                </li>                                
                                 @endcan
 
-                              @can('role-list')
-                              <li class="nav-item">
-                                  <a  class="nav-link" href="{{ route('roles.index') }}">
-                                      <i class="fas fa-bomb nav-icon"></i>
-                                      <p>Roles</p>
-                                  </a>
-                              </li>                                  
-                              @endcan
+                                @can('role-list')
+                                <li class="nav-item">
+                                    <a  class="nav-link" href="{{ route('roles.index') }}">
+                                        <i class="fas fa-bomb nav-icon"></i>
+                                        <p>Roles</p>
+                                    </a>
+                                </li>                                  
+                                @endcan
 
-                              <li class="nav-item">
-                                  <a   class="nav-link" href="{{ route('permission.index') }}">
-                                      <i class="fas fa-users-cog nav-icon"></i>
-                                      <p>Permissions</p>
-                                  </a>
-                              </li>
-                              <li class="nav-item">
-                                  <a href="{{ route('departments.index') }}" class="nav-link">
-                                    <i class="nav-icon fas fa-book-reader"></i>
-                                    <p>Department</p>
-                                  </a>
-                              </li>
-                              @can('account-manager-list')
-                              <li class="nav-item">
-                                  <a href="{{ route('account_managers.index') }}" class="nav-link">
-                                    <i class="nav-icon fas fa-user"></i>
-                                    <p>Account Managers</p>
-                                  </a>
-                              </li>
-                              @endcan
+                                <li class="nav-item">
+                                    <a   class="nav-link" href="{{ route('permission.index') }}">
+                                        <i class="fas fa-users-cog nav-icon"></i>
+                                        <p>Permissions</p>
+                                    </a>
+                                </li>
+                                @can('department-list')
+                                <li class="nav-item">
+                                    <a href="{{ route('departments.index') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-book-reader"></i>
+                                        <p>Department</p>
+                                    </a>
+                                </li>                                  
+                                @endcan
 
-                              <li class="nav-item">
-                                    <a href="{{ route('cities.index') }}" class="nav-link">
-                                    <i class="nav-icon fas fa-city"></i>
-                                    <p>Cities</p>
+                                @can('account-manager-list')
+                                <li class="nav-item">
+                                    <a href="{{ route('account_managers.index') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-user"></i>
+                                        <p>Account Managers</p>
                                     </a>
-                              </li>
-                              <li class="nav-item">
-                                    <a href="{{ route('locations.index') }}" class="nav-link">
-                                    <i class="nav-icon fas fa-location"></i>
-                                    <p>Locations</p>
-                                    </a>
-                              </li>
-                              <li class="nav-item">
-                                    <a href="{{ route('pops.index') }}" class="nav-link">
-                                    <i class="nav-icon fas fa-bullseye"></i>
-                                    <p>Pops</p>
-                                    </a>
-                              </li>
-                              <li class="nav-item">
-                                    <a href="{{ route('customers.index') }}" class="nav-link">
-                                    <i class="nav-icon fas fa-address-card"></i>
-                                    <p>Customers</p>
-                                    </a>
-                              </li>
-                              <li class="nav-item">
-                                    <a href="{{ route('links.index') }}" class="nav-link">
-                                    <i class="nav-icon fas fa-street-view"></i>
-                                    <p>Links</p>
-                                    </a>
-                              </li>
+                                </li>
+                                @endcan
+
+                                @can('city-list')
+                                <li class="nav-item">
+                                        <a href="{{ route('cities.index') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-city"></i>
+                                        <p>Cities</p>
+                                        </a>
+                                </li>                                  
+                                @endcan
+
+                                @can('location-list')
+                                <li class="nav-item">
+                                        <a href="{{ route('locations.index') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-location"></i>
+                                        <p>Locations</p>
+                                        </a>
+                                </li>                                  
+                                @endcan
+
+                                @can('pop-list')
+                                <li class="nav-item">
+                                        <a href="{{ route('pops.index') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-bullseye"></i>
+                                        <p>Pops</p>
+                                        </a>
+                                </li>                                
+                                @endcan
+
+                                @can('customer-list')
+                                <li class="nav-item">
+                                        <a href="{{ route('customers.index') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-address-card"></i>
+                                        <p>Customers</p>
+                                        </a>
+                                </li>                                
+                                @endcan
+
+                                @can('link-list')
+                                <li class="nav-item">
+                                        <a href="{{ route('links.index') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-street-view"></i>
+                                        <p>Links</p>
+                                        </a>
+                                </li>                                
+                                @endcan
                             </ul>
                         </li>                            
                         @endcan
