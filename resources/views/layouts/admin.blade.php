@@ -88,13 +88,13 @@
                             </a>
                             <ul class="nav nav-treeview">
                               <li class="nav-item">
-                                  <a  class="nav-link" href="{{ route('user.index') }}">
+                                  <a  class="nav-link" href="{{ route('users.index') }}">
                                       <i class="nav-icon fas fa-user-cog"></i>
                                       <p>Users</p>
                                   </a>
                               </li>
                               <li class="nav-item">
-                                  <a  class="nav-link" href="{{ route('role.index') }}">
+                                  <a  class="nav-link" href="{{ route('roles.index') }}">
                                       <i class="fas fa-bomb nav-icon"></i>
                                       <p>Roles</p>
                                   </a>

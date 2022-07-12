@@ -38,7 +38,8 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
+Route::resource('users', UserController::class);
+Route::resource('roles', RoleController::class);
 Route::resource('faults', FaultController::class);
 Route::resource('customers', CustomerController::class);
 Route::resource('cities', CityController::class);
@@ -64,8 +65,6 @@ Route::post('/profile',[UserController::class,'postProfile'])->name('user.postPr
 //Permisions
 Route::resource('permission',PermissionController::class);
 
-//Roles
-Route::resource('role',RoleController::class);
 
 //Departments
 Route::resource('/departments', DepartmentController::class);
