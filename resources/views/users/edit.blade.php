@@ -47,7 +47,7 @@ User
                 <div class="form-group row">
                     <label for="confirm-password" class="col-sm-3 col-form-label">Confrim Password</label>
                     <div class="col-sm-9">
-                        {!! Form::select('roles[]', $roles,[], array('class' => 'custom-select')) !!}
+                    {!! Form::select('roles[]', $roles,$userRole, array('class' => 'form-control')) !!}
                     </div>
                 </div>
         
