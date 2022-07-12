@@ -33,19 +33,19 @@ User
                 <div class="form-group row">
                     <label for="password" class="col-sm-3 col-form-label">Password</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control @error('password') is-invalid @enderror" name="password" placeholder="Password">
+                        <input type="password" class="form-control @error('password') is-invalid @enderror" name="password" placeholder="Password">
                     </div>
                 </div>
 
                 <div class="form-group row">
                     <label for="confirm-password" class="col-sm-3 col-form-label">Confrim Password</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control @error('confirm-password') is-invalid @enderror" name="confirm-password" placeholder="Confirm Ppassword">
+                        <input type="password" class="form-control @error('confirm-password') is-invalid @enderror" name="confirm-password" placeholder="Confirm Ppassword">
                     </div>
                 </div>
 
                 <div class="form-group row">
-                    <label for="confirm-password" class="col-sm-3 col-form-label">Confrim Password</label>
+                    <label for="confirm-password" class="col-sm-3 col-form-label">Role</label>
                     <div class="col-sm-9">
                         {!! Form::select('roles[]', $roles,[], array('class' => 'custom-select')) !!}
                     </div>
