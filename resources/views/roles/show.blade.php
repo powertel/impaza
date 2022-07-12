@@ -17,8 +17,8 @@ Role
             <div class="card-body">
                 <div class="row g-2">
                     <div class="col">
-                        <strong>Name:</strong>
-                       {{ $role->name }}
+                        <strong>Name</strong>
+                        {{ $role->name }}</p>
                     </div>
                 </div>
                 
@@ -27,7 +27,7 @@ Role
                         <strong>Permissions:</strong>
                         @if(!empty($rolePermissions))
                             @foreach($rolePermissions as $p)
-                                <label class="btn btn-sm" role="button">{{ $p->name }},</label>
+                                <label class="label label-success">{{ $p->name }},</label>
                             @endforeach
                         @endif
                     </div>
