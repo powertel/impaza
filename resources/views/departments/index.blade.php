@@ -11,7 +11,9 @@ Departments
     <div class="card-header">
         <h3 class="card-title">{{_('Departments')}}</h3>
         <div class="card-tools">
+            @can('department-create')
             <a  class="btn btn-primary btn-sm" href="{{ route('departments.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create New Department')}} </a>
+            @endcan
         </div>
     </div>
     <!-- /.card-header -->
@@ -31,10 +33,16 @@ Departments
                     <td>{{ $department->department}}</td>
                     <td>
                         <form  action="{{ route('departments.destroy',$department->id) }}"  method="POST">
+                            @can('department-edit')
                             <a href="{{ route('departments.edit',$department->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Edit</a>
+                            @endcan
+                            
                             @csrf
                             @method('DELETE')
+                            @can('department-delete')
                             <button type="submit" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;">Delete</button>
+                            @endcan
+                            
                         </form>
                     </td>
                 </tr>

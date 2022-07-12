@@ -14,8 +14,12 @@ Locations
     <div class="card-header">
         <h3 class="card-title">{{_('Locations')}}</h3>
         <div class="card-tools">
+            @can('location-create')
             <a  class="btn btn-primary btn-sm" href="{{ route('locations.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create location')}} </a>
+            @endcan
+            @can('pop-create')
             <a  class="btn btn-primary btn-sm" href="{{ route('pops.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Pop')}} </a>
+            @endcan
         </div>
     </div>
     <!-- /.card-header -->
@@ -36,7 +40,9 @@ Locations
                     <td>{{ $location->city}}</td>
                     <td>{{ $location->suburb}}</td>
                     <td>
+                        @can('location-edit')
                         <a href="{{ route('locations.edit',$location->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
+                        @endcan
                         <a href="{{ route('locations.show',$location->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
                     </td>
                 </tr>

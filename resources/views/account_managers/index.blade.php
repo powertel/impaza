@@ -37,7 +37,7 @@ Account Managers
                     <td>{{ $acc_manager->accountManager}}</td>
                     <td>
                         <form action="{{ route('account_managers.destroy',$acc_manager->id) }}" method="POST">
-                        <a href="{{ route('account_managers.show',$acc_manager->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
+                            <a href="{{ route('account_managers.show',$acc_manager->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
                             @can('account-manager-edit')
                             <a href="{{ route('account_managers.edit',$acc_manager->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
                             @endcan

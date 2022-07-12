@@ -16,7 +16,10 @@ Customers
             @can('customer-create')
             <a  class="btn btn-primary btn-sm" href="{{ route('customers.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Customer')}} </a>
             @endcan
-            <a  class="btn btn-primary btn-sm" href="{{ route('links.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Link')}} </a>
+            @can('link-create')
+                <a  class="btn btn-primary btn-sm" href="{{ route('links.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Link')}} </a>
+            @endcan
+            
         </div>
     </div>
     <!-- /.card-header -->
@@ -31,12 +34,24 @@ Customers
             </thead>
             <tbody>
                 @foreach ($customers as $customer)
-                 <tr >
+                 <tr>
                     <td>{{++$i}}</td>
                     <td>{{ $customer->customer}}</td>
                     <td>
+                    <form action="{{ route('customers.destroy',$customer->id) }}" method="POST">
+                    <a href="{{ route('customers.show',$customer->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
+                        @can('account-manager-edit')
                         <a href="{{ route('customers.edit',$customer->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
-                        <a href="{{ route('customers.show',$customer->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
+                        @endcan
+
+                        @csrf
+                        @method('DELETE')
+                        @can('customer-delete')
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        @endcan
+                    </form>
+                       
+                        
                     </td>
                 </tr>
                 @endforeach

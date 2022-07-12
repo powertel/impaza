@@ -13,7 +13,10 @@ links
     <div class="card-header">
         <h3 class="card-title">{{_('Links')}}</h3>
         <div class="card-tools">
+            @can('link-create')
             <a  class="btn btn-primary btn-sm" href="{{ route('links.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Link')}} </a>
+            @endcan
+            
         </div>
     </div>
     <!-- /.card-header -->
@@ -40,8 +43,20 @@ links
                     <td>{{ $link->pop}}</td>
                     <td>{{ $link->link}}</td>
                     <td>
-                        <a href="{{ route('links.edit',$link->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
+                    <form action="{{ route('links.destroy',$link->id) }}" method="POST">
                         <a href="{{ route('links.show',$link->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
+                        @can('account-manager-edit')
+                        <a href="{{ route('links.edit',$link->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
+                        @endcan
+
+                        @csrf
+                        @method('DELETE')
+                        @can('link-delete')
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                        @endcan
+                    </form>
+                        
+                        
                     </td>
                 </tr>
                 @endforeach
