@@ -15,9 +15,12 @@ use DB;
 
 class FaultController extends Controller
 {
-    public function __construct()
+    function __construct()
     {
-        $this->middleware(['auth'])->only(['store', 'destroy']);
+         $this->middleware('permission:fault-list|fault-create|fault-edit|fault-delete', ['only' => ['index','store']]);
+         $this->middleware('permission:fault-create', ['only' => ['create','store']]);
+         $this->middleware('permission:fault-edit', ['only' => ['edit','update']]);
+         $this->middleware('permission:fault-delete', ['only' => ['destroy']]);
     }
     /**
      * Display a listing of the resource.

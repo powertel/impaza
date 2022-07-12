@@ -14,7 +14,10 @@ Faults
     <div class="card-header">
         <h3 class="card-title">{{_('Faults')}}</h3>
         <div class="card-tools">
-            <a  class="btn btn-primary btn-sm" href="{{ route('faults.create') }}"><i class="fas fa-plus-circle"></i>{{_('Log Fault')}} </a>
+            @can('fault-create')
+                <a  class="btn btn-primary btn-sm" href="{{ route('faults.create') }}"><i class="fas fa-plus-circle"></i>{{_('Log Fault')}} </a>
+            @endcan
+            
         </div>
     </div>
     <!-- /.card-header -->
@@ -44,7 +47,9 @@ Faults
                                 <a href="{{ route('assign.edit',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Assign</a>
                                 <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Re-Assign</a>
                                 <a href="{{ route('request-permit.edit',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Request-Permit</a>
+                                @can('fault-edit')
                                 <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Edit</a>
+                                @endcan
                                 <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
                         </div>
                     </td>
