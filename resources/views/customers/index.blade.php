@@ -13,7 +13,9 @@ Customers
     <div class="card-header">
         <h3 class="card-title">{{_('Customers')}}</h3>
         <div class="card-tools">
+            @can('customer-create')
             <a  class="btn btn-primary btn-sm" href="{{ route('customers.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Customer')}} </a>
+            @endcan
             <a  class="btn btn-primary btn-sm" href="{{ route('links.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Link')}} </a>
         </div>
     </div>

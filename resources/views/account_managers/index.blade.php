@@ -14,8 +14,10 @@ Account Managers
     <div class="card-header">
         <h3 class="card-title">{{_('Account Manager')}}</h3>
         <div class="card-tools">
+            @can('account-manager-create')
             <a  class="btn btn-primary btn-sm" href="{{ route('account_managers.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Account Manager')}} </a>
-            <a  class="btn btn-primary btn-sm" href="{{ route('customers.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Customer')}} </a>
+            @endcan
+
         </div>
     </div>
     <!-- /.card-header -->
@@ -34,8 +36,18 @@ Account Managers
                     <td>{{++$i}}</td>
                     <td>{{ $acc_manager->accountManager}}</td>
                     <td>
-                        <a href="{{ route('account_managers.edit',$acc_manager->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
+                        <form action="{{ route('account_managers.destroy',$acc_manager->id) }}" method="POST">
                         <a href="{{ route('account_managers.show',$acc_manager->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
+                            @can('account-manager-edit')
+                            <a href="{{ route('account_managers.edit',$acc_manager->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
+                            @endcan
+
+                            @csrf
+                            @method('DELETE')
+                            @can('account-manager-delete')
+                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            @endcan
+                        </form>
                     </td>
                 </tr>
                 @endforeach
