@@ -36,26 +36,31 @@ Route::get('/', function () {
 });
 
 Auth::routes();
-
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-Route::resource('users', UserController::class);
-Route::resource('roles', RoleController::class);
-Route::resource('faults', FaultController::class);
-Route::resource('customers', CustomerController::class);
-Route::resource('cities', CityController::class);
-Route::resource('locations', LocationController::class);
-Route::resource('links', LinkController::class);
-Route::resource('pops', PopController::class);
-Route::resource('account_managers', AccountManagerController::class);
-Route::resource('assessments', AssessmentController::class);
-Route::resource('rectify', RectificationController::class);
-Route::resource('assign', AssignController::class);
-Route::resource('permits', PermitController::class);
-Route::resource('request-permit', RequestPermitController::class);
-Route::post('faults/{fault}/remarks', [RemarkController::class,'store']);
-Route::get('suburb/{id}', [FaultController::class,'findSuburb'])->name('suburb');
-Route::get('link/{id}', [FaultController::class,'findLink'])->name('link');
-Route::get('pop/{id}', [FaultController::class,'findPop'])->name('pop');
+
+Route::group(['middleware' => ['auth']], function() {
+    Route::resource('users', UserController::class);
+    Route::resource('roles', RoleController::class);
+    Route::resource('faults', FaultController::class);
+    Route::resource('customers', CustomerController::class);
+    Route::resource('cities', CityController::class);
+    Route::resource('locations', LocationController::class);
+    Route::resource('links', LinkController::class);
+    Route::resource('pops', PopController::class);
+    Route::resource('account_managers', AccountManagerController::class);
+    Route::resource('assessments', AssessmentController::class);
+    Route::resource('rectify', RectificationController::class);
+    Route::resource('assign', AssignController::class);
+    Route::resource('permits', PermitController::class);
+    Route::resource('request-permit', RequestPermitController::class);
+    Route::post('faults/{fault}/remarks', [RemarkController::class,'store']);
+    Route::get('suburb/{id}', [FaultController::class,'findSuburb'])->name('suburb');
+    Route::get('link/{id}', [FaultController::class,'findLink'])->name('link');
+    Route::get('pop/{id}', [FaultController::class,'findPop'])->name('pop');
+    
+});
+
+
 
 //Users
 Route::resource('user',UserController::class);

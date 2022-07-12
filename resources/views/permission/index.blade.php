@@ -5,7 +5,7 @@
 @endsection
 
 @section('content')
-<div class="container">
+<section class="content">
     <div class="card">
         <div class="card-header">
         <h3 class="card-title">Permission Table</h3>
@@ -14,7 +14,7 @@
         </div>
         </div>
 
-        <div class="card-body table-responsive p-0">
+        <div class="card-body">
          <table class="table table-hover text-nowrap">
         <thead>
              <tr>
@@ -47,5 +47,5 @@
         </div>
 
         </div>
-</div>
+</section>
 @endsection

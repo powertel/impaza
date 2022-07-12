@@ -21,12 +21,6 @@ class UserController extends Controller
         $users = User::all();
         return view('users.index',compact('users'))
         ->with('i');
-/*         $users = DB::table('users')
-        ->orderBy('users.created_at', 'desc')
-        ->get();
-        return view('users.index',compact('users'))
-        ->with('i'); */
-
     }
     /**
      * Show the form for creating a new resource.
