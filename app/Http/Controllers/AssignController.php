@@ -15,6 +15,10 @@ use DB;
 
 class AssignController extends Controller
 {
+    function __construct()
+    {
+         $this->middleware('permission:assign-fault', ['only' => ['edit','update']]); 
+    }
     /**
      * Display a listing of the resource.
      *

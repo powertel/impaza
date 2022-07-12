@@ -11,10 +11,10 @@ class AccountManagerController extends Controller
 {    
     function __construct()
     {
-         
-         $this->middleware('permission:role-create', ['only' => ['create','store']]);
-         $this->middleware('permission:role-edit', ['only' => ['edit','update']]);
-         $this->middleware('permission:role-delete', ['only' => ['destroy']]);
+         $this->middleware('permission:account-manager-list|account-manager-create|account-manager-edit|account-manager-delete', ['only' => ['index','store']]);
+         $this->middleware('permission:account-manager-create', ['only' => ['create','store']]);
+         $this->middleware('permission:account-manager-edit', ['only' => ['edit','update']]);
+         $this->middleware('permission:account-manager-delete', ['only' => ['destroy']]);
     }
     /**
      * Display a listing of the resource.

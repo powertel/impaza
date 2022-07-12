@@ -15,6 +15,13 @@ use DB;
 
 class RectificationController extends Controller
 {
+    function __construct()
+    {
+         $this->middleware('permission:rectify-list|rectify-create|rectify-edit|rectify-delete', ['only' => ['index','store']]);
+         $this->middleware('permission:rectify-create', ['only' => ['create','store']]);
+         $this->middleware('permission:rectify-fault', ['only' => ['edit','update']]);
+         $this->middleware('permission:rectify-delete', ['only' => ['destroy']]);
+    }
     /**
      * Display a listing of the resource.
      *

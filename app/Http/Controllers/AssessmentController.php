@@ -15,6 +15,11 @@ use DB;
 
 class AssessmentController extends Controller
 {
+
+    function __construct()
+    {
+         $this->middleware('permission:fault-assessment', ['only' => ['edit','update']]);
+    }
     /**
      * Display a listing of the resource.
      *

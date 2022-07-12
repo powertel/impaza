@@ -12,6 +12,14 @@ use DB;
 
 class LinkController extends Controller
 {
+
+    function __construct()
+    {
+         $this->middleware('permission:link-list|link-create|link-edit|link-delete', ['only' => ['index','store']]);
+         $this->middleware('permission:link-create', ['only' => ['create','store']]);
+         $this->middleware('permission:link-edit', ['only' => ['edit','update']]);
+         $this->middleware('permission:link-delete', ['only' => ['destroy']]);
+    }
     /**
      * Display a listing of the resource.
      *
