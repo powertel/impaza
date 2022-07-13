@@ -107,12 +107,15 @@
                                 </li>                                  
                                 @endcan
 
+                                @can('permissions')
                                 <li class="nav-item">
                                     <a   class="nav-link" href="{{ route('permission.index') }}">
                                         <i class="fas fa-users-cog nav-icon"></i>
                                         <p>Permissions</p>
                                     </a>
-                                </li>
+                                </li>                                    
+                                @endcan
+
                                 @can('department-list')
                                 <li class="nav-item">
                                     <a href="{{ route('departments.index') }}" class="nav-link">
@@ -194,12 +197,17 @@
                         </li>                            
                         @endcan
 
+                        @can('finance')
                         <li class="nav-item">
                             <a  class="nav-link">
                                 <i class="nav-icon fas fa-money-check-alt"></i>
                                 <p>Finance</p>
                             </a>
-                        </li>
+                        </li>                            
+                        @endcan
+
+
+                        @can('permit-list')
                         <li class="nav-item has-treeview">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fas fa-rocket"></i>
@@ -222,21 +230,28 @@
                                 </a>
                               </li>
                             </ul>
-                        </li>
+                        </li>                            
+                        @endcan
+
+                        @can('materials')
                         <li class="nav-item">
                             <a  class="nav-link">
                                 <i class="nav-icon 	fas fa-wrench"></i>
                                 <p>Materials</p>
                             </a>
-                        </li>
+                        </li>                            
+                        @endcan
 
 
+                        @can('reports')
                         <li class="nav-item">
                             <a  class="nav-link">
                               <i class="nav-icon fas fa-file-export"></i>
                               <p>Reports</p>
                             </a>
-                        </li>
+                        </li>                            
+                        @endcan
+
 
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('logout') }}"

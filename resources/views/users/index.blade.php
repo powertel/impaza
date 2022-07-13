@@ -45,15 +45,15 @@ Users
                     </td>
                     <td>
                         <form action="{{ route('users.destroy',$user->id) }}" method="POST">
-                            <a class="btn btn-info btn-sm" href="{{ route('users.show',$user->id) }}">View</a>
+                            <a class="btn btn-info btn-sm" style="padding:0px 2px; color:#fff;" href="{{ route('users.show',$user->id) }}">View</a>
                             @can('user-edit')
-                            <a class="btn btn-primary btn-sm" href="{{ route('users.edit',$user->id) }}">Edit</a>   
+                            <a class="btn btn-primary btn-sm" style="padding:0px 2px; color:#fff;" href="{{ route('users.edit',$user->id) }}">Edit</a>   
                             @endcan
 
                             @csrf
                             @method('DELETE')
                             @can('user-delete')
-                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            <button type="submit" class="btn btn-danger btn-sm" style="padding:0px 2px; color:#fff;">Delete</button>
                             @endcan
                         </form>
                     </td>
