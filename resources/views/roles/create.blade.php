@@ -27,13 +27,23 @@ Role
                 <div class="form-group row">
                     <label for="email" class="col-sm-3 col-form-label">Permissions</label>
                     <div class="col-sm-9">
-                        @foreach($permission as $value)
+<!--                         @foreach($permission as $value)
                             <label>{{ Form::checkbox('permission[]', $value->id, false, array('class' => 'name')) }}
                             {{ $value->name }}</label>
-                        @endforeach
+                        @endforeach -->
+                        <div class="col">
+                          <div  class="form-control" style="height: 500px; overflow: auto;">
+                              @foreach($permission as $value)
+                              <ul type = "square">
+                              <label>{{ Form::checkbox('permission[]', $value->id, false, array('class' => 'name')) }} 
+                                <strong>{{ $value->name }}</strong></label>
+                              </ul>
+                              @endforeach
+                          </div>
+                        </div>
                     </div>
                 </div>
-        
+
                 <div class="card-footer">
                     <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
                     <a type="button" class="btn btn-danger btn-sm" href="{{ route('roles.index') }}">{{ __('Cancel') }}</a>
@@ -46,5 +56,13 @@ Role
 </section>
 @endsection
 @section('scripts')
-    @include('partials.scripts')
+<script>
+$(document).ready(function () {
+    $('#example').DataTable({
+        paging: false,
+        ordering: false,
+        info: false,
+    });
+});
+</script>
 @endsection
