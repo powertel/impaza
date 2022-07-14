@@ -28,6 +28,7 @@ class Fault extends Model
         'suspectedRfo',
         'serviceType',
         'serviceAttribute',
+        'section_id'
 
     ];
 

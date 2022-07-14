@@ -232,7 +232,34 @@
                             </ul>
                         </li>                            
                         @endcan
+                        
+                        @can('my-fault-list')
+                        <li class="nav-item">
+                            <a  class="nav-link" href="{{ route('my_faults.index') }}">
+                                <i class="nav-icon 	fas fa-satellite-dish"></i>
+                                <p>My Faults</p>
+                            </a>
+                        </li>                            
+                        @endcan
 
+                        @can('department-faults-list')
+                        <li class="nav-item">
+                            <a  class="nav-link"  href="{{ route('department_faults.index') }}">
+                                <i class="nav-icon 	fas fa-satellite"></i>
+                                <p>Department Faults</p>
+                            </a>
+                        </li>                            
+                        @endcan
+
+                        @can('assign-fault-list')
+                        <li class="nav-item">
+                            <a  class="nav-link"  href="{{ route('assign.index') }}">
+                                <i class="nav-icon 	fas fa-server"></i>
+                                <p>Assign Faults</p>
+                            </a>
+                        </li>
+                        @endcan
+                            
                         @can('materials')
                         <li class="nav-item">
                             <a  class="nav-link">

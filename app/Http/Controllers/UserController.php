@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Department;
+use App\Models\Section;
+use App\Models\Position;
 use Spatie\Permission\Models\Role;
 use DB;
 use Hash;
@@ -25,11 +28,14 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::all();
+        $users = User::join('departments','users.department_id','=','departments.id')
+                ->leftjoin('sections','users.section_id','=','sections.id')
+                ->leftjoin('positions','users.position_id','=','positions.id')
+                ->get(['users.id','users.name','users.email','users.department_id','users.position_id','users.section_id','sections.section','departments.department','positions.position']);
         return view('users.index',compact('users'))
         ->with('i');
     }
-    /**
+    /** 
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
@@ -37,7 +43,10 @@ class UserController extends Controller
     public function create()
     {
         $roles = Role::pluck('name','name')->all();
-        return view('users.create',compact('roles'));
+        $department = Department::all();
+        $section = Section::all();
+        $position = Position::all();
+        return view('users.create',compact('roles','department','section','position'));
     }
 
     /**
@@ -52,6 +61,9 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|same:confirm-password',
+            'department_id' => 'required',
+            'section_id' => 'required',
+            'position_id' => 'required',
             'roles' => 'required'
         ]);
     
@@ -85,11 +97,20 @@ class UserController extends Controller
      */
     public function edit($id)
     {
-        $user = User::find($id);
+        $user = User::leftjoin('departments','users.department_id','=','departments.id')
+                ->leftjoin('sections','users.section_id','=','sections.id')
+                ->leftjoin('positions','users.position_id','=','positions.id')
+                ->where('users.id','=',$id)
+                ->get(['users.id','users.name','users.email','users.department_id','users.position_id','users.section_id','sections.section','departments.department','positions.position'])
+                ->first();
+//dd($user);
         $roles = Role::pluck('name','name')->all();
         $userRole = $user->roles->pluck('name','name')->all();
+        $department = Department::all();
+        $section = Section::all();
+        $position = Position::all();
     
-        return view('users.edit',compact('user','roles','userRole'));
+        return view('users.edit',compact('user','roles','userRole','department','section','position'));
     }
 
     /**

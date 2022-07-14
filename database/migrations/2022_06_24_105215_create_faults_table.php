@@ -28,9 +28,10 @@ return new class extends Migration
             $table->string('suspectedRfo');
             $table->string('serviceType');
             $table->string('serviceAttribute');
+            $table->unsignedInteger('section_id')->nullable();
             $table->string('faultType')->nullable();
             $table->string('priorityLevel')->nullable();
-            $table->integer('status_id')->nullable();
+            $table->unsignedInteger('status_id')->nullable();
             $table->timestamps();
         });
     }

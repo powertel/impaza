@@ -3,9 +3,9 @@
 @section('title')
 Departments
 @endsection
-
-@section('content')
 @include('partials.css')
+@section('content')
+
 <section class="content" >
 <div class="card" >
     <div class="card-header">
@@ -13,6 +13,8 @@ Departments
         <div class="card-tools">
             @can('department-create')
             <a  class="btn btn-primary btn-sm" href="{{ route('departments.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create New Department')}} </a>
+            <a  class="btn btn-primary btn-sm" href="{{ route('sections.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create New Section')}} </a>
+            <a  class="btn btn-primary btn-sm" href="{{ route('positions.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create New Position')}} </a>
             @endcan
         </div>
     </div>

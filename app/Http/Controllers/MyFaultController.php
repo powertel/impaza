@@ -13,12 +13,14 @@ use App\Models\Remark;
 use App\Models\AccountManager;
 use DB;
 
-class AssignController extends Controller
+class MyFaultController extends Controller
 {
     function __construct()
     {
-        $this->middleware('permission:assign-fault-list|assign-fault-create|assign-fault-edit|assign-fault-delete', ['only' => ['index','store']]);
-         $this->middleware('permission:assign-fault', ['only' => ['edit','update']]); 
+         $this->middleware('permission:my-fault-list|my-fault-create|my-fault-edit|my-fault-delete', ['only' => ['index','store']]);
+         $this->middleware('permission:my-fault-create', ['only' => ['create','store']]);
+         $this->middleware('permission:my-fault-edit', ['only' => ['edit','update']]);
+         $this->middleware('permission:my-fault-delete', ['only' => ['destroy']]);
     }
     /**
      * Display a listing of the resource.
@@ -35,7 +37,7 @@ class AssignController extends Controller
                 ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
                 'account_managers.accountManager','faults.suspectedRfo','links.link'
                 ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
-        return view('assign.index',compact('faults'))
+        return view('my_faults.index',compact('faults'))
         ->with('i');
     }
 
@@ -79,30 +81,7 @@ class AssignController extends Controller
      */
     public function edit($id)
     {
-        $fault = DB::table('faults')
-        ->leftjoin('customers','faults.customer_id','=','customers.id')
-        ->leftjoin('links','faults.link_id','=','links.id')
-        ->leftjoin('cities','faults.city_id','=','cities.id')
-        ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
-        ->leftjoin('pops','faults.pop_id','=','pops.id')
-        ->leftjoin('remarks','remarks.fault_id','=','faults.id')
-        ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
-        ->where('faults.id','=',$id)
-        ->get(['faults.id','faults.customer_id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
-        'account_managers.accountManager','faults.accountManager_id','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo','faults.link_id','links.link'
-        ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
-        ->first();
-
-        $cities = City::all();
-        $customers = Customer::all();
-        $suburbs = Suburb::all();
-        $pops = Pop::all();
-        $links = Link::all();
-        $remarks= Remark::all();
-        $accountManagers = AccountManager::all();
-
-        return view('assign.assign',compact('fault','customers','cities','suburbs','pops','links','remarks','accountManagers'));
-    
+        //
     }
 
     /**

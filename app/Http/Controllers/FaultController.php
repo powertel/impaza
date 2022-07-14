@@ -93,7 +93,7 @@ class FaultController extends Controller
                 'city_id' => 'required',
                 'customer_id'=> 'required',
                 'contactName'=> 'required',
-                'phoneNumber'=> 'required',
+                'phoneNumber'=> 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
                 'contactEmail'=> 'required',
                 'address'=> 'required',
                 'accountManager_id'=> 'required',
@@ -106,7 +106,11 @@ class FaultController extends Controller
                 'serviceAttribute'=> 'required',
                 'remark'=> 'required'
             ]);
-            $fault = Fault::create($request->all());
+
+            $req = $request->all();
+            $req['section_id'] = 1;
+
+            $fault = Fault::create($req);
             $remark = Remark::create(
                 [
                     'fault_id'=> $fault->id,

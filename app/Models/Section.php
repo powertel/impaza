@@ -5,21 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Department extends Model
+class Section extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'department',
+        'department_id',
+        'section',
     ];
 
-    public function sections()
+    public function department()
     {
-        return $this->hasMany(Section::class);
+        return $this->belongsTo(Department::class);
     }
 
     public function positions()
     {
-        return $this -> hasManyThrough(Position::class, Section::class);
+        return $this->hasMany(Position::class);
     }
 }
