@@ -27,18 +27,20 @@ class DepartmentFaultController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $req)
     {
         $faults = DB::table('faults')
+                ->leftjoin('sections','faults.section_id','=','sections.id')
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
                 ->leftjoin('links','faults.link_id','=','links.id')
                 ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
                 ->orderBy('faults.created_at', 'desc')
-                ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
+                ->where('sections.id','=',1)
+                ->get(['faults.id','sections.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
                 'account_managers.accountManager','faults.suspectedRfo','links.link'
                 ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
-        return view('department_faults.index',compact('faults'))
-        ->with('i');
+                return view('department_faults.index',compact('faults'))
+                ->with('i');
     }
 
     /**
@@ -70,7 +72,7 @@ class DepartmentFaultController extends Controller
      */
     public function show($id)
     {
-        //
+     //
     }
 
     /**
@@ -105,5 +107,21 @@ class DepartmentFaultController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function getSections(Request $req)
+    {
+        $faults = DB::table('faults')
+        ->leftjoin('sections','faults.section_id','=','sections.id')
+        ->leftjoin('customers','faults.customer_id','=','customers.id')
+        ->leftjoin('links','faults.link_id','=','links.id')
+        ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
+        ->orderBy('faults.created_at', 'desc')
+        ->where('sections.id','=',2)
+        ->get(['faults.id','sections.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
+        'account_managers.accountManager','faults.suspectedRfo','links.link'
+        ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
+        return view('department_faults.index',compact('faults'))
+        ->with('i');
     }
 }

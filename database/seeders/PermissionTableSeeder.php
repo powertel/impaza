@@ -74,7 +74,8 @@ class PermissionTableSeeder extends Seeder
             'finance',
             'permit-list',
             'materials',
-            'reports'
+            'reports',
+            'assessement-fault-list'
          ];
        
          foreach ($permissions as $permission) {

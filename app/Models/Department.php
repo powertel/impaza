@@ -22,4 +22,5 @@ class Department extends Model
     {
         return $this -> hasManyThrough(Position::class, Section::class);
     }
+
 }

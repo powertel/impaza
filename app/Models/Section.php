@@ -23,4 +23,9 @@ class Section extends Model
     {
         return $this->hasMany(Position::class);
     }
+
+    public function faults()
+    {
+        return $this->hasMany(Fault::class);
+    }
 }

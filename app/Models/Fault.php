@@ -51,4 +51,9 @@ class Fault extends Model
     {
         return $this->hasMany(Remark::class);
     }
+
+    public function section()
+    {
+        return $this->hasMany(Section::class);
+    }
 }

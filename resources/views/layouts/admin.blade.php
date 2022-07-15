@@ -251,6 +251,15 @@
                         </li>                            
                         @endcan
 
+                        @can('assessement-fault-list')
+                        <li class="nav-item">
+                            <a  class="nav-link"  href="{{ route('assessments.index') }}">
+                                <i class="nav-icon 	fas fa-server"></i>
+                                <p>Assess Faults</p>
+                            </a>
+                        </li>
+                        @endcan
+
                         @can('assign-fault-list')
                         <li class="nav-item">
                             <a  class="nav-link"  href="{{ route('assign.index') }}">
