@@ -72,7 +72,7 @@ Route::group(['middleware' => ['auth']], function() {
 });
 
 
-//Route::get('department-faults', [DepartmentFaultController::class,'getSections'])->name('department-faults');
+Route::get('department-faults', [DepartmentFaultController::class,'getSections'])->name('department-faults');
 //Users
 Route::get('/profile',[UserController::class,'profile'])->name('user.profile');
 Route::post('/profile',[UserController::class,'postProfile'])->name('user.postProfile');

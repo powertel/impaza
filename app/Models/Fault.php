@@ -28,8 +28,10 @@ class Fault extends Model
         'suspectedRfo',
         'serviceType',
         'serviceAttribute',
-        'section_id'
-
+        'status_id',
+        'confirmedRfo',
+        'faultType',
+        'priorityLevel'
     ];
 
     public function city()
@@ -52,8 +54,9 @@ class Fault extends Model
         return $this->hasMany(Remark::class);
     }
 
-    public function section()
+    //relationship of section and faults
+    public function sections()
     {
-        return $this->hasMany(Section::class);
+        return $this->belongsToMany(Section::class);
     }
 }

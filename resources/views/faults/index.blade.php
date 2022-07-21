@@ -30,6 +30,7 @@ Faults
                     <th>Contact Name</th>
                     <th>Account Manager</th>
                     <th>Link Name</th>
+                    <th>Status</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -41,6 +42,7 @@ Faults
                     <td>{{ $fault->contactName }}</td>
                     <td>{{ $fault->accountManager }}</td>
                     <td>{{ $fault->link }}</td>
+                    <td>{{ $fault->description }}</td>
                     <td>
                         @can('fault-assessment')
                             <a href="{{ route('assessments.edit',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Assess</a>

@@ -13,8 +13,10 @@ Assess
                 <h3 class="card-title">{{_('Fault Assesment')}}</h3>
             </div>
             <div class="card-body">
-                <form  action="{{ route('faults.update', $fault->id ) }}" method="POST">
-                ``<div class="row g-2">
+                <form  action="{{ route('assessments.update', $fault->id ) }}" method="POST">
+                @csrf
+                    @method('PUT')
+                <div class="row g-2">
                         <div class="mb-3 col-md-6">
                         <label for="customerName" class="form-label">Customer Name </label>
                             <select class="custom-select" id="customer" name="customer_id">
@@ -161,16 +163,15 @@ Assess
                         </div>
                         <div class="mb-3 col-md-6">
                             <label for="actDepartment" class="form-label">Actioning Department</label>
-                            <select id="actDepartment" class="form-select" name="department" value="{{ old('department') }}" >
-                                <option>Select</option>
-                                <option>NOC</option>
-                                <option>implementation</option>
-                                <option>Operations</option>
-                                <option>HR</option>
-                                <option>Finace</option>
-                                <option>Stores</option>
-                                <option>Marketing</option>
-                                <option>Procurement</option>
+                            <select id="section" class="custom-select @error('section_id') is-invalid @enderror" name="section_id">
+                                <option selected disabled  >Select Department</option>
+                                @foreach($sections as $section)
+                                    @if (old('section_id')==$section->id)
+                                        <option value="{{ $section->id}}" selected>{{ $section->section }}</option>
+                                    @else
+                                        <option value="{{ $section->id}}">{{ $section->section }}</option>
+                                    @endif
+                                @endforeach
                             </select>
                         </div>                
                     </div>

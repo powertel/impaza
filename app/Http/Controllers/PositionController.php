@@ -43,7 +43,7 @@ class PositionController extends Controller
         request()->validate([
             'department_id' => 'required',
             'section_id' => 'required',
-            'position' => 'required|string|unique:positions'
+            'position' => 'required'
         ]);
         $position = Position::create($request->all());
 

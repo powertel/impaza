@@ -11,6 +11,7 @@ use App\Models\Customer;
 use App\Models\Link;
 use App\Models\Remark;
 use App\Models\AccountManager;
+use App\Models\FaultSection;
 use DB;
 
 class FaultController extends Controller
@@ -33,9 +34,10 @@ class FaultController extends Controller
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
                 ->leftjoin('links','faults.link_id','=','links.id')
                 ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
+                ->leftjoin('statuses','faults.status_id','=','statuses.id')
                 ->orderBy('faults.created_at', 'desc')
                 ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
-                'account_managers.accountManager','faults.suspectedRfo','links.link'
+                'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description'
                 ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
         return view('faults.index',compact('faults'))
         ->with('i');
@@ -104,11 +106,13 @@ class FaultController extends Controller
                 'suspectedRfo'=> 'required',
                 'serviceType'=> 'required',
                 'serviceAttribute'=> 'required',
-                'remark'=> 'required'
+                'remark'=> 'required',
             ]);
 
             $req = $request->all();
-            $req['section_id'] = 1;
+            //I used the approach ye last time
+            //This is where i am creating the fault
+            $req['status_id'] = 1;
 
             $fault = Fault::create($req);
             $remark = Remark::create(
@@ -118,8 +122,15 @@ class FaultController extends Controller
                     'remark' => $request['remark'],
                 ]
             );
+
+            $fault_section = FaultSection::create(
+                [
+                    'fault_id'=> $fault->id,
+                    'section_id' => 1,
+                ]
+            );
           //  $request->user()->posts()->create($request->only('body'));
-            if($fault&&$remark)
+            if($fault && $remark && $fault_section)
             {
                 DB::commit();
             }

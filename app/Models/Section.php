@@ -23,9 +23,12 @@ class Section extends Model
     {
         return $this->hasMany(Position::class);
     }
-
+    
+    //relationship of section and faults
     public function faults()
     {
-        return $this->hasMany(Fault::class);
+        return $this->belongsToMany(Fault::class);
     }
+
+
 }
