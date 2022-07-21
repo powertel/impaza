@@ -11,6 +11,8 @@ use App\Models\Customer;
 use App\Models\Link;
 use App\Models\Remark;
 use App\Models\AccountManager;
+use App\Models\User;
+use App\Models\Section;
 use DB;
 
 class AssignController extends Controller
@@ -101,7 +103,13 @@ class AssignController extends Controller
         $remarks= Remark::all();
         $accountManagers = AccountManager::all();
 
-        return view('assign.assign',compact('fault','customers','cities','suburbs','pops','links','remarks','accountManagers'));
+        $technicians = DB::table('users')
+                    ->leftJoin('sections','users.section_id','=','sections.id')
+                    ->where('users.section_id','=',auth()->user()->section_id)
+                    ->get(['users.id','users.name']);
+                    //dd($technicians);
+
+        return view('assign.assign',compact('fault','customers','cities','suburbs','pops','links','remarks','accountManagers','technicians'));
     
     }
 
@@ -114,7 +122,16 @@ class AssignController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        
+        request()->validate([
+            'assignedTo'=> 'required',
+        ]);
+        $fault = Fault::find($id);
+        $req= $request->all();
+        $req['status_id'] = 3;
+        $fault ->update($req);
+        return redirect(route('department_faults.index'))
+        ->with('success','Fault Assigned');
     }
 
     /**

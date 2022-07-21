@@ -14,10 +14,6 @@ Department Faults
     <div class="card-header">
         <h3 class="card-title">{{_('Department Faults')}}</h3>
         <div class="card-tools">
-            @can('fault-create')
-                <a  class="btn btn-primary btn-sm" href="{{ route('faults.create') }}"><i class="fas fa-plus-circle"></i>{{_('Log Fault')}} </a>
-            @endcan
-            
         </div>
     </div>
     <!-- /.card-header -->
@@ -26,8 +22,10 @@ Department Faults
             <thead>
                 <tr>
                     <th>No.</th>
-                    <th>Contact Name</th>
-                    <th>Accounnt Manager</th>
+                    <th>Customer</th>
+                    <th>Account Manager</th>
+                    <th>Link Name</th>
+                    <th>Status</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -35,11 +33,21 @@ Department Faults
                 @foreach ( $faults as $fault )
                  <tr >
                     <td>{{ ++$i }}</td>
-                    <td>{{ $fault->contactName }}</td>
+                    <td>{{ $fault->customer }}</td>
                     <td>{{ $fault->accountManager }}</td>
+                    <td>{{ $fault->link }}</td>
+                    <td ><span style="color:red">{{ $fault->description }}</span></td>
                     <td>
+                        @can('fault-assessment')
+                            <a href="{{ route('assessments.edit',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Assess</a>
+                        @endcan
+                        @can('assign-fault')
+                        <a href="{{ route('assign.edit',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Assign</a>
+                        @endcan
+                        @can('re-assign-fault')
+                         <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Re-Assign</a>   
+                        @endcan
                         <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
-                        </div>
                     </td>
                 </tr>
                 @endforeach

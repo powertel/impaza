@@ -191,7 +191,7 @@ Assess
                     <div class="card-footer">
                         <button type="submit" class="btn btn-success btn-sm " >{{ __('Save') }}</button>
                         <button type="button" class="btn btn-secondary btn-sm" >Revoke</button>   
-                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('faults.index') }}" >{{ __('Cancel') }}</a>           
+                        <a type="button" class="btn btn-danger btn-sm" href="{{ url()->previous() }}" >{{ __('Cancel') }}</a>           
                        
                     </div>
                 </form> 

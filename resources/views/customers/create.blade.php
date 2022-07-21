@@ -87,7 +87,7 @@ Customer
 
                 <div class="card-footer">
                     <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
-                    <a type="button" class="btn btn-danger btn-sm" href="{{ route('customers.index') }}">{{ __('Cancel') }}</a>
+                    <a type="button" class="btn btn-danger btn-sm" href="{{ url()->previous() }}">{{ __('Cancel') }}</a>
                 </div>
                 </form> 
             </div> 

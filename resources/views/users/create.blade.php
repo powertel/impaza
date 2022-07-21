@@ -31,27 +31,6 @@ User
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label for="password" class="col-sm-3 col-form-label">Password</label>
-                    <div class="col-sm-9">
-                        <input type="password" class="form-control @error('password') is-invalid @enderror" name="password" placeholder="Password">
-                    </div>
-                </div>
-
-                <div class="form-group row">
-                    <label for="confirm-password" class="col-sm-3 col-form-label">Confirm Password</label>
-                    <div class="col-sm-9">
-                        <input type="password" class="form-control @error('confirm-password') is-invalid @enderror" name="confirm-password" placeholder="Confirm Ppassword">
-                    </div>
-                </div>
-
-                <div class="form-group row">
-                    <label for="confirm-password" class="col-sm-3 col-form-label">Role</label>
-                    <div class="col-sm-9">
-                        {!! Form::select('roles[]', $roles,[], array('class' => 'custom-select')) !!}
-                    </div>
-                </div>
-
-                <div class="form-group row">
                     <label for="department" class="col-sm-3 col-form-label">Department</label>
                     <div class="col-sm-9">
                     <select id="department" class="custom-select  @error('department_id') is-invalid @enderror" name="department_id" value="{{ old('department_id') }}">
@@ -94,6 +73,28 @@ User
                         </select>
                     </div>
                 </div>
+                
+                <div class="form-group row">
+                    <label for="confirm-password" class="col-sm-3 col-form-label">Role</label>
+                    <div class="col-sm-9">
+                        {!! Form::select('roles[]', $roles,[], array('class' => 'custom-select')) !!}
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="password" class="col-sm-3 col-form-label">Password</label>
+                    <div class="col-sm-9">
+                        <input type="password" class="form-control @error('password') is-invalid @enderror" name="password" placeholder="Password">
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="confirm-password" class="col-sm-3 col-form-label">Confirm Password</label>
+                    <div class="col-sm-9">
+                        <input type="password" class="form-control @error('confirm-password') is-invalid @enderror" name="confirm-password" placeholder="Confirm Ppassword">
+                    </div>
+                </div>
+
         
                 <div class="card-footer">
                     <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>

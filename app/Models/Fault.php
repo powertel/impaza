@@ -31,7 +31,9 @@ class Fault extends Model
         'status_id',
         'confirmedRfo',
         'faultType',
-        'priorityLevel'
+        'priorityLevel',
+        'assignedTo',
+        'user_id'
     ];
 
     public function city()

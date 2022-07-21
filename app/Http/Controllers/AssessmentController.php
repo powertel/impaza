@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
 use App\Models\Fault;
 use App\Models\Suburb;
 use App\Models\City;
@@ -203,7 +204,7 @@ class AssessmentController extends Controller
             {
                 DB::rollback();
             }
-            return redirect(route('faults.index'))
+            return redirect(route('department_faults.index')) 
             ->with('success','Fault Assessed');
         }
         catch(Exception $ex)

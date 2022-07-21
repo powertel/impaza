@@ -120,7 +120,7 @@
                                 <li class="nav-item">
                                     <a href="{{ route('departments.index') }}" class="nav-link">
                                         <i class="nav-icon fas fa-book-reader"></i>
-                                        <p>Department</p>
+                                        <p>Departments</p>
                                     </a>
                                 </li>                                  
                                 @endcan
@@ -250,25 +250,7 @@
                             </a>
                         </li>                            
                         @endcan
-
-                        @can('assessement-fault-list')
-                        <li class="nav-item">
-                            <a  class="nav-link"  href="{{ route('assessments.index') }}">
-                                <i class="nav-icon 	fas fa-server"></i>
-                                <p>Assess Faults</p>
-                            </a>
-                        </li>
-                        @endcan
-
-                        @can('assign-fault-list')
-                        <li class="nav-item">
-                            <a  class="nav-link"  href="{{ route('assign.index') }}">
-                                <i class="nav-icon 	fas fa-server"></i>
-                                <p>Assign Faults</p>
-                            </a>
-                        </li>
-                        @endcan
-                            
+                           
                         @can('materials')
                         <li class="nav-item">
                             <a  class="nav-link">

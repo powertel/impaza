@@ -3,9 +3,9 @@
 @section('title')
 Fault
 @endsection
-
-@section('content')
 @include('partials.css')
+@section('content')
+
 <section class="content">
     <div class="col d-flex justify-content-center">
         <div class="card w-100">
@@ -90,8 +90,13 @@ Fault
                     </div>
                 </div>
                 <div class="card-footer">
-                    <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-success btn-sm">Assess</a>
-                    <a type="button" class="btn btn-danger btn-sm" href="{{ route('faults.index') }}">{{ __('Close') }}</a>
+                    @can('fault-assessment')
+                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('assessments.edit',$fault->id) }}">Assess</a>
+                    @endcan
+                    @can('assign-fault')
+                    <a type="button" class="btn btn-danger btn-sm" href="{{ route('assign.edit',$fault->id) }}">Assign</a>
+                    @endcan
+                    <a type="button" class="btn btn-danger btn-sm" href="{{ url()->previous() }}">{{ __('Close') }}</a>
                 </div>
             </div> 
         </div>

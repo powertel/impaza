@@ -37,7 +37,7 @@ Rectify
                     
                     <div class="card-footer">
                         <button type="submit" class="btn btn-success btn-sm " >{{ __('Clear') }}</button>  
-                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('faults.index') }}" >{{ __('Cancel') }}</a>           
+                        <a type="button" class="btn btn-danger btn-sm" href="{{ url()->previous() }}">{{ __('Cancel') }}</a>           
                     </div>
                 </form> 
             </div> 

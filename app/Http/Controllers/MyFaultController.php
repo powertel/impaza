@@ -27,13 +27,16 @@ class MyFaultController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $req)
     {
         $faults = DB::table('faults')
+                 ->leftjoin('users','faults.assignedTo','=','users.id')
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
                 ->leftjoin('links','faults.link_id','=','links.id')
                 ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
+                ->leftjoin('statuses','faults.status_id','=','statuses.id')
                 ->orderBy('faults.created_at', 'desc')
+                ->where('users.id','=',auth()->user()->id)
                 ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
                 'account_managers.accountManager','faults.suspectedRfo','links.link'
                 ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);

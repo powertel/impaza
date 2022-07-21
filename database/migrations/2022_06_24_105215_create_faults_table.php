@@ -31,6 +31,7 @@ return new class extends Migration
             $table->string('serviceAttribute');
             $table->unsignedInteger('user_id')->nullable();
             $table->string('faultType')->nullable();
+            $table->unsignedInteger('assignedTo')->nullable();
             $table->string('priorityLevel')->nullable();
             $table->unsignedInteger('status_id')->nullable();
             $table->timestamps();
