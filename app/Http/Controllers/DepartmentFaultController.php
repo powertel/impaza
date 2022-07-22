@@ -38,7 +38,7 @@ class DepartmentFaultController extends Controller
                 ->leftjoin('links','faults.link_id','=','links.id')
                 ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
                 ->leftjoin('statuses','faults.status_id','=','statuses.id')
-                ->orderBy('faults.updated_at', 'asc')
+                ->orderBy('faults.created_at', 'desc')
                 ->where('users.id','=',auth()->user()->id)
                 ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
                 'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description'

@@ -150,8 +150,10 @@ class RectificationController extends Controller
     public function update(Request $request, $id)
     {
         $fault = Fault::find($id);
-        $fault ->update($request->all());
-        return redirect(route('faults.index'))
+        $req= $request->all();
+        $req['status_id'] = 4;
+        $fault ->update($req);
+        return redirect(route('my_faults.index'))
         ->with('success','Fault Restored');
     }
 

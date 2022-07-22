@@ -250,6 +250,24 @@
                             </a>
                         </li>                            
                         @endcan
+
+                        @can('chief-tech-clear-faults-list')
+                        <li class="nav-item">
+                            <a  class="nav-link"  href="{{ route('chief-tech-clear.index') }}">
+                                <i class="nav-icon 	fas fa-exclamation-triangle"></i>
+                                <p>Chief Tech Clear Faults</p>
+                            </a>
+                        </li>                            
+                        @endcan
+
+                        @can('noc-clear-faults-list')
+                        <li class="nav-item">
+                            <a  class="nav-link"  href="{{ route('noc-clear.index') }}">
+                                <i class="nav-icon 	fas fa-exclamation-triangle"></i>
+                                <p>Noc Clear Faults</p>
+                            </a>
+                        </li>                            
+                        @endcan
                            
                         @can('materials')
                         <li class="nav-item">

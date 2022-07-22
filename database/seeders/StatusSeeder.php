@@ -32,10 +32,6 @@ class StatusSeeder extends Seeder
                 'description' => 'fault is under rectification'
             ],
             [
-                'status_code' => 'RTD', 
-                'description' => 'fault has been rectified'
-            ],
-            [
                 'status_code' => 'CLT', 
                 'description' => 'fault has been cleared by tech'
             ],

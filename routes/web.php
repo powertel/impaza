@@ -23,7 +23,8 @@ use App\Http\Controllers\MyFaultController;
 use App\Http\Controllers\DepartmentFaultController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\PositionController;
-
+use App\Http\Controllers\ChiefTechClearFaultsController;
+use App\Http\Controllers\NocClearFaultsController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -58,6 +59,9 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('account_managers', AccountManagerController::class);
     Route::resource('assessments', AssessmentController::class);
     Route::resource('rectify', RectificationController::class);
+    Route::resource('assign', AssignController::class);
+    Route::resource('chief-tech-clear', ChiefTechClearFaultsController::class);
+    Route::resource('noc-clear', NocClearFaultsController::class);
     Route::resource('assign', AssignController::class);
     Route::resource('permits', PermitController::class);
     Route::resource('my_faults', MyFaultController::class);
