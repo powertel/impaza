@@ -44,7 +44,6 @@ Departments
                             @can('department-delete')
                             <button type="submit" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;">Delete</button>
                             @endcan
-                            
                         </form>
                     </td>
                 </tr>

@@ -36,7 +36,9 @@ Department Faults
                     <td>{{ $fault->customer }}</td>
                     <td>{{ $fault->accountManager }}</td>
                     <td>{{ $fault->link }}</td>
-                    <td ><span style="color:red">{{ $fault->description }}</span></td>
+                    <td style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? 'none' }};">
+                        <strong>{{$fault->description}}</strong> 
+                    </td>
                     <td>
                         @can('fault-assessment')
                             <a href="{{ route('assessments.edit',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Assess</a>

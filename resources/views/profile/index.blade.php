@@ -7,16 +7,14 @@ Profile
 @section('content')
 
 <section class="content">
-    <div class="">
-        <div class="row">
+    <div class="col d-flex justify-content-center">
+       
             <div class="col-md-3">
 
-                <div class="card card-primary card-outline">
+                <div class="card card-primary card-outline ">
                     <div class="card-body box-profile">
                         <div class="text-center">
                             <img style="width: 200px;" class="profile-user-img img-fluid img-circle" src="{{ asset('img/avatar.jpg') }}" alt="{{ auth()->user()->name . ' Photo' }}">
-
-
                         </div>
 
                         <h3 class="profile-username text-center" style="text-transform: uppercase">{{ auth()->user()->name }} </h3>
@@ -28,7 +26,7 @@ Profile
                 </div>
             </div>
             <div class="col-md-9">
-                <div class="card">
+                <div class="card ">
                     <div class="card-header">
                         <h4>Edit Profile</h4>
                     </div>
@@ -62,8 +60,8 @@ Profile
 
                                             <div class="form-group">
                                                 <label for="phone">Phone Number</label>
-                                                <input type="text" name="phone" id="phone" class="form-control @error('phone') is-invalid @enderror" placeholder="Phone Number" value="{{ auth()->user()->phone }}" required>
-                                                @error('phone')
+                                                <input type="text" name="phonenumber" id="phone" class="form-control @error('phone') is-invalid @enderror" placeholder="Phone Number" value="{{ auth()->user()->phonenumber }}" required>
+                                                @error('phonenumber')
                                                     <span class="invalid-feedback" role="alert">
                                                         <strong>{{ $message }}</strong>
                                                     </span>
@@ -86,7 +84,7 @@ Profile
                     </div>
                 </div>
             </div>
-        </div>
+       
     </div>
 </section>
 @endsection

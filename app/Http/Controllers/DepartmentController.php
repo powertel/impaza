@@ -165,12 +165,12 @@ class DepartmentController extends Controller
      * @param  \App\Models\Department  $department
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Department $department)
+    public function destroy($id)
     {
-        $department->delete();
        
+        Department::find($id)->delete();
         return redirect()->route('departments.index')
-                        ->with('success','Department Deleted');
+                        ->with('success','Department deleted successfully');
     }
 
 }

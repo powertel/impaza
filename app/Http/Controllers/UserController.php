@@ -172,7 +172,7 @@ class UserController extends Controller
         $this->validate($request,[
             'name'=>'required',
             'email'=>'required|email|unique:users,email,'.$user->id,
-            'phone'=>'required'
+            'phonenumber'=>'required'
 
         ]);
 
@@ -180,7 +180,7 @@ class UserController extends Controller
        $user->update([
         'name'=>$request->name,
         'email'=>$request->email,
-        'phone'=>$request->phone
+        'phonenumber'=>$request->phonenumber
        ]);
 
 

@@ -21,43 +21,43 @@ class StatusSeeder extends Seeder
         $statuses = [
             [
                 'status_code' => 'WAS', 
-                'description' => 'waiting for assessment'
+                'description' => 'Waiting for assessment'
             ],
             [
                 'status_code' => 'ASD', 
-                'description' => 'fault has been assessed',
+                'description' => 'Fault has been assessed',
             ],
             [
                 'status_code' => 'RTN', 
-                'description' => 'fault is under rectification'
+                'description' => 'Fault is under rectification'
             ],
             [
                 'status_code' => 'CLT', 
-                'description' => 'fault has been cleared by tech'
+                'description' => 'Fault has been cleared by Technician'
             ],
             [
                 'status_code' => 'CLC', 
-                'description' => 'fault has been cleared by CT'
+                'description' => 'Fault has been cleared by CT'
             ],
             [
                 'status_code' => 'CLN', 
-                'description' => 'fault has been cleard by NOC'
+                'description' => 'Fault has been cleared by NOC'
             ],
             [
                 'status_code' => 'REF', 
-                'description' => 'fault has been refered'
+                'description' => 'Fault has been refered'
             ],
             [
                 'status_code' => 'PRK ', 
-                'description' => 'fault has been parked'
+                'description' => 'Fault has been parked'
             ],
             [
                 'status_code' => 'RVK ', 
-                'description' => 'fault has been revoked'
+                'description' => 'Fault has been revoked'
             ],
             [
                 'status_code' => 'ESC', 
-                'description' => 'fault has been under escalated'
+                'description' => 'Fault has been under escalated'
             ]
         ];
         foreach($statuses as $status){

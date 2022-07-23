@@ -38,7 +38,7 @@ class NocClearFaultsController extends Controller
             ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
             ->leftjoin('statuses','faults.status_id','=','statuses.id')
             ->orderBy('faults.created_at', 'desc')
-            ->where('faults.status_id','=',4)
+            ->where('faults.status_id','=',5)
             ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
             'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description'
             ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
@@ -98,7 +98,13 @@ class NocClearFaultsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $fault = Fault::find($id);
+        $req= $request->all();
+        $req['status_id'] = 6;
+        $fault ->update($req);
+        
+        return redirect()->route('noc-clear.index')
+            ->with('success','Fault Has Been Cleared By Noc');
     }
 
     /**

@@ -13,4 +13,13 @@ class Status extends Model
         'status_code',
         'description',
     ];
+    const STATUS_COLOR = [
+        'Waiting for assessment'=>'  #ff8080',
+        'Fault has been assessed'=>'#90EE90',
+        'Fault is under rectification'=>'#FFFF00',
+        'Fault has been cleared by Technician'=>'#A9A9A9',
+        'Fault has been cleared by CT'=>'#ADFF2F',
+        'Fault has been cleared by NOC'=>'#4682B4'
+    ];
+
 }

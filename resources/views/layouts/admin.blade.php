@@ -181,13 +181,6 @@
                             </ul>
                         </li>                            
                         @endcan
-
-                        <li  class="nav-item">
-                            <a href="{{ route('user.profile') }}" class="nav-link">
-                                <i class="nav-icon fas fa-user"></i>
-                                <p>Profile</p>
-                            </a>
-                        </li>
                         @can('fault-list')
                         <li  class="nav-item">
                             <a href="{{ route('faults.index') }}" class="nav-link">
@@ -287,7 +280,12 @@
                             </a>
                         </li>                            
                         @endcan
-
+                        <li  class="nav-item">
+                            <a href="{{ route('user.profile') }}" class="nav-link">
+                                <i class="nav-icon fas fa-user"></i>
+                                <p>Profile</p>
+                            </a>
+                        </li>
 
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('logout') }}"
@@ -341,7 +339,10 @@
     <!-- Main Footer -->
       <footer class="main-footer">
         <!-- Default to the left -->
+        <div class="text-center">
         <strong>Copyright &copy; <?php echo date('Y') ?> <a>POWERTEL</a>.</strong> All rights reserved.
+        </div>
+
       </footer>
     </div>
     <!-- ./wrapper -->

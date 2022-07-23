@@ -30,26 +30,6 @@ User
                         <input type="text" class="form-control @error('email') is-invalid @enderror" name="email" value="{{$user->email }}"  value="{{ old('email') }}">
                     </div>
                 </div>
-                <div class="form-group row">
-                    <label for="password" class="col-sm-3 col-form-label">Password</label>
-                    <div class="col-sm-9">
-                        <input type="text" class="form-control @error('password') is-invalid @enderror" name="password" >
-                    </div>
-                </div>
-
-                <div class="form-group row">
-                    <label for="confirm-password" class="col-sm-3 col-form-label">Confirm Password</label>
-                    <div class="col-sm-9">
-                        <input type="text" class="form-control @error('confirm-password') is-invalid @enderror" name="confirm-password" >
-                    </div>
-                </div>
-
-                <div class="form-group row">
-                    <label for="confirm-password" class="col-sm-3 col-form-label">Confrim Password</label>
-                    <div class="col-sm-9">
-                    {!! Form::select('roles[]', $roles,$userRole, array('class' => 'form-control')) !!}
-                    </div>
-                </div>
 
                 <div class="form-group row">
                     <label for="department" class="col-sm-3 col-form-label">Department</label>
@@ -94,6 +74,27 @@ User
                                 @endif
                             @endforeach
                         </select>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="role" class="col-sm-3 col-form-label">Role</label>
+                    <div class="col-sm-9">
+                    {!! Form::select('roles[]', $roles,$userRole, array('class' => 'form-control')) !!}
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="password" class="col-sm-3 col-form-label">Password</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control @error('password') is-invalid @enderror" name="password" >
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="confirm-password" class="col-sm-3 col-form-label">Confirm Password</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control @error('confirm-password') is-invalid @enderror" name="confirm-password" >
                     </div>
                 </div>
         
