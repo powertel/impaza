@@ -3,9 +3,8 @@
 @section('title')
 Pops
 @endsection
-
+@include('partials.css')
 @section('content')
-    @include('partials.css')
 <section class="content">
 
 <div class="card">
@@ -14,8 +13,13 @@ Pops
     <div class="card-header">
         <h3 class="card-title">{{_('Pops')}}</h3>
         <div class="card-tools">
-            <a  class="btn btn-primary btn-sm" href="{{ route('pops.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Pop')}} </a>
-            <a  class="btn btn-primary btn-sm" href="{{ route('customers.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Customer')}} </a>
+            @can('pop-create')
+              <a  class="btn btn-primary btn-sm" href="{{ route('pops.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Pop')}} </a>  
+            @endcan
+            @can('customer-create')
+                <a  class="btn btn-primary btn-sm" href="{{ route('customers.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Customer')}} </a>
+            @endcan
+            
         </div>
     </div>
     <!-- /.card-header -->
@@ -38,7 +42,10 @@ Pops
                     <td>{{ $pop->suburb}}</td>
                     <td>{{ $pop->pop}}</td>
                     <td>
-                        <a href="{{ route('pops.edit',$pop->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
+                        @can('pop-edit')
+                           <a href="{{ route('pops.edit',$pop->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a> 
+                        @endcan
+                        
                         <a href="{{ route('pops.show',$pop->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
                     </td>
                 </tr>

@@ -11,10 +11,17 @@ use App\Models\Customer;
 use App\Models\Link;
 use App\Models\Remark;
 use App\Models\AccountManager;
+use App\Models\User;
+use App\Models\Section;
 use DB;
 
 class AssignController extends Controller
 {
+    function __construct()
+    {
+        $this->middleware('permission:assign-fault-list|assign-fault-create|assign-fault-edit|assign-fault-delete', ['only' => ['index','store']]);
+         $this->middleware('permission:assign-fault', ['only' => ['edit','update']]); 
+    }
     /**
      * Display a listing of the resource.
      *
@@ -22,7 +29,16 @@ class AssignController extends Controller
      */
     public function index()
     {
-        //
+        $faults = DB::table('faults')
+                ->leftjoin('customers','faults.customer_id','=','customers.id')
+                ->leftjoin('links','faults.link_id','=','links.id')
+                ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
+                ->orderBy('faults.created_at', 'desc')
+                ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
+                'account_managers.accountManager','faults.suspectedRfo','links.link'
+                ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
+        return view('assign.index',compact('faults'))
+        ->with('i');
     }
 
     /**
@@ -87,7 +103,13 @@ class AssignController extends Controller
         $remarks= Remark::all();
         $accountManagers = AccountManager::all();
 
-        return view('assign.assign',compact('fault','customers','cities','suburbs','pops','links','remarks','accountManagers'));
+        $technicians = DB::table('users')
+                    ->leftJoin('sections','users.section_id','=','sections.id')
+                    ->where('users.section_id','=',auth()->user()->section_id)
+                    ->get(['users.id','users.name']);
+                    //dd($technicians);
+
+        return view('assign.assign',compact('fault','customers','cities','suburbs','pops','links','remarks','accountManagers','technicians'));
     
     }
 
@@ -100,7 +122,16 @@ class AssignController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        
+        request()->validate([
+            'assignedTo'=> 'required',
+        ]);
+        $fault = Fault::find($id);
+        $req= $request->all();
+        $req['status_id'] = 3;
+        $fault ->update($req);
+        return redirect(route('department_faults.index'))
+        ->with('success','Fault Assigned');
     }
 
     /**

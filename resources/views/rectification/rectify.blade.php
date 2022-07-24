@@ -3,9 +3,8 @@
 @section('title')
 Rectify
 @endsection
-
+@include('partials.css')
 @section('content')
-    @include('partials.css')
 <section class="content">
     <div class="col d-flex justify-content-center">
         <div class="card  w-50">
@@ -13,7 +12,9 @@ Rectify
                 <h3 class="card-title">{{_('Fault Rectification')}}</h3>
             </div>
             <div class="card-body">
-                <form>
+            <form action="{{ route('rectify.update', $fault->id ) }}" method="POST">
+                @csrf
+                    @method('PUT')
                     <div class="form-group row">
                         <label for="department" class="col-sm-3 col-form-label">Customer</label>
                         <div class="col-sm-9">
@@ -28,16 +29,9 @@ Rectify
                         </div>
                     </div>
 
-                    <div class="form-group row">
-                        <label for="clear" class="col-sm-3 col-form-label">Restored</label>
-                        <div class="col-sm-9 form-check ">
-                            <input type="checkbox" class="form-check-input">
-                        </div>
-                    </div>
-                    
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-success btn-sm " >{{ __('Clear') }}</button>  
-                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('faults.index') }}" >{{ __('Cancel') }}</a>           
+                        <button type="submit" class="btn btn-success btn-sm " >{{ __('Restore') }}</button>  
+                        <a type="button" class="btn btn-danger btn-sm" href="{{ url()->previous() }}">{{ __('Cancel') }}</a>           
                     </div>
                 </form> 
             </div> 

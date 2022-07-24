@@ -3,9 +3,9 @@
 @section('title')
 Fault
 @endsection
-
-@section('content')
 @include('partials.css')
+@section('content')
+
 <section class="content">
     <div class="col d-flex justify-content-center">
         <div class="card w-100">
@@ -66,7 +66,7 @@ Fault
                     </div>
 
                     <div class="col">
-                        <strong>REASON FOR OUTAGE</strong>
+                        <strong>SUSPECTED REASON FOR OUTAGE</strong>
                         <p class="text-muted">{{ $fault->suspectedRfo }}</p>
                     </div>
                 </div>
@@ -78,20 +78,43 @@ Fault
                     </div>
 
                     <div class="col">
-                        <strong>SERVICE ATTRIBUTE</strong>
-                        <p class="text-muted">{{ $fault->serviceAttribute }}</p>
+                        <strong>ACCOUNT MANAGER</strong>
+                        <p class="text-muted">{{ $fault->accountManager }}</p>
+                    </div>
+                </div>
+                <hr>
+
+                <div class="row g-2">
+                    <div class="col">
+                        <strong>REASON FOR OUTAGE</strong>
+                        <p class="text-muted">{{ $fault->confirmedRfo }}</p>
+                    </div>
+
+                    <div class="col">
+                        <strong>FAULT TYPE</strong>
+                        <p class="text-muted">{{ $fault->faultType }}</p>
                     </div>
                 </div>
                 <hr>
                 <div class="row g-2">
                     <div class="col">
-                        <strong>ACCOUNT MANAGER</strong>
-                        <p class="text-muted">{{ $fault->accountManager }}</p>
+                        <strong>PRIORITY LEVEL</strong>
+                        <p class="text-muted">{{ $fault->priorityLevel }}</p>
                     </div>
                 </div>
+                <hr>
+
                 <div class="card-footer">
-                    <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-success btn-sm">Assess</a>
-                    <a type="button" class="btn btn-danger btn-sm" href="{{ route('faults.index') }}">{{ __('Close') }}</a>
+                    @can('fault-assessment')
+                        <a type="button" class="btn btn-primary btn-sm" href="{{ route('assessments.edit',$fault->id) }}">Assess</a>
+                    @endcan
+                    @can('assign-fault')
+                    <a type="button" class="btn btn-Success btn-sm" href="{{ route('assign.edit',$fault->id) }}">Assign</a>
+                    @endcan
+                    @can('rectify-fault')
+                        <a href="{{ route('rectify.edit',$fault->id) }}" class="btn btn-sm btn-secondary" style="padding:0px 2px; color:#fff;" >Rectify</a>
+                    @endcan
+                    <a type="button" class="btn btn-danger btn-sm" href="{{ url()->previous() }}">{{ __('Close') }}</a>
                 </div>
             </div> 
         </div>

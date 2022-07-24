@@ -9,6 +9,14 @@ use DB;
 
 class CityController extends Controller
 {
+
+    function __construct()
+    {
+         $this->middleware('permission:city-list|city-create|city-edit|city-delete', ['only' => ['index','store']]);
+         $this->middleware('permission:city-create', ['only' => ['create','store']]);
+         $this->middleware('permission:city-edit', ['only' => ['edit','update']]);
+         $this->middleware('permission:city-delete', ['only' => ['destroy']]);
+    }
     /**
      * Display a listing of the resource.
      *
@@ -128,6 +136,8 @@ class CityController extends Controller
      */
     public function destroy($id)
     {
-        //
+        City::find($id)->delete();
+        return redirect()->route('cities.index')
+                        ->with('success','City deleted successfully');
     }
 }

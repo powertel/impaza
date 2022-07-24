@@ -11,13 +11,17 @@ use App\Models\Customer;
 use App\Models\Link;
 use App\Models\Remark;
 use App\Models\AccountManager;
+use App\Models\FaultSection;
 use DB;
 
 class FaultController extends Controller
 {
-    public function __construct()
+    function __construct()
     {
-        $this->middleware(['auth'])->only(['store', 'destroy']);
+         $this->middleware('permission:fault-list|fault-create|fault-edit|fault-delete', ['only' => ['index','store']]);
+         $this->middleware('permission:fault-create', ['only' => ['create','store']]);
+         $this->middleware('permission:fault-edit', ['only' => ['edit','update']]);
+         $this->middleware('permission:fault-delete', ['only' => ['destroy']]);
     }
     /**
      * Display a listing of the resource.
@@ -30,9 +34,10 @@ class FaultController extends Controller
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
                 ->leftjoin('links','faults.link_id','=','links.id')
                 ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
+                ->leftjoin('statuses','faults.status_id','=','statuses.id')
                 ->orderBy('faults.created_at', 'desc')
                 ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
-                'account_managers.accountManager','faults.suspectedRfo','links.link'
+                'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description'
                 ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
         return view('faults.index',compact('faults'))
         ->with('i');
@@ -90,7 +95,7 @@ class FaultController extends Controller
                 'city_id' => 'required',
                 'customer_id'=> 'required',
                 'contactName'=> 'required',
-                'phoneNumber'=> 'required',
+                'phoneNumber'=> 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
                 'contactEmail'=> 'required',
                 'address'=> 'required',
                 'accountManager_id'=> 'required',
@@ -100,10 +105,15 @@ class FaultController extends Controller
                 'link_id'=> 'required',
                 'suspectedRfo'=> 'required',
                 'serviceType'=> 'required',
-                'serviceAttribute'=> 'required',
-                'remark'=> 'required'
+                'remark'=> 'required',
             ]);
-            $fault = Fault::create($request->all());
+
+            $req = $request->all();
+            //I used the approach ye last time
+            //This is where i am creating the fault
+            $req['status_id'] = 1;
+
+            $fault = Fault::create($req);
             $remark = Remark::create(
                 [
                     'fault_id'=> $fault->id,
@@ -111,8 +121,15 @@ class FaultController extends Controller
                     'remark' => $request['remark'],
                 ]
             );
+
+            $fault_section = FaultSection::create(
+                [
+                    'fault_id'=> $fault->id,
+                    'section_id' => 1,
+                ]
+            );
           //  $request->user()->posts()->create($request->only('body'));
-            if($fault&&$remark)
+            if($fault && $remark && $fault_section)
             {
                 DB::commit();
             }
@@ -150,7 +167,7 @@ class FaultController extends Controller
                 ->where('faults.id','=',$id)
                 ->get(['faults.id','faults.customer_id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
                 'account_managers.accountManager','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo','faults.link_id','links.link'
-                ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
+                ,'faults.serviceType','faults.confirmedRfo','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
                 ->first();
 
                $remarks= Remark::all();

@@ -3,9 +3,9 @@
 @section('title')
 Requested Permits
 @endsection
-
+@include('partials.css')
 @section('content')
-    @include('partials.css')
+   
 <section class="content">
 
 <div class="card">
@@ -14,8 +14,6 @@ Requested Permits
     <div class="card-header">
         <h3 class="card-title">{{_('Requested Permits')}}</h3>
         <div class="card-tools">
-<!--             <a  class="btn btn-primary btn-sm" href="{{ route('locations.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create location')}} </a>
-            <a  class="btn btn-primary btn-sm" href="{{ route('pops.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Pop')}} </a> -->
         </div>
     </div>
     <!-- /.card-header -->

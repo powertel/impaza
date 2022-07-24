@@ -3,9 +3,9 @@
 @section('title')
 Assess
 @endsection
-
+@include('partials.css')
 @section('content')
-    @include('partials.css')
+
 <section class="content">
     <div class="col d-flex justify-content-center">
         <div class="card  w-100">
@@ -13,8 +13,10 @@ Assess
                 <h3 class="card-title">{{_('Fault Assesment')}}</h3>
             </div>
             <div class="card-body">
-                <form  action="{{ route('faults.update', $fault->id ) }}" method="POST">
-                ``<div class="row g-2">
+                <form  action="{{ route('assessments.update', $fault->id ) }}" method="POST">
+                @csrf
+                    @method('PUT')
+                <div class="row g-2">
                         <div class="mb-3 col-md-6">
                         <label for="customerName" class="form-label">Customer Name </label>
                             <select class="custom-select" id="customer" name="customer_id">
@@ -126,63 +128,62 @@ Assess
                     </div>
         
                     <div class="row g-2">
-                        <div class="mb-3 col-md-2">
+                        <div class="mb-3 col-md-3">
                             <label for="faultType" class="form-label">Fault Type</label>
-                            <select type="text"  class="custom-select "  name="faultType" value="{{ old('faultType') }}">
-                                <option selected="selected">Select Fault Type</option>
-                                <option>Carrier/Mux</option>
-                                <option>logical</option>
-                                <option>Cable</option>
-                                <option>Power</option>
-                                <option>Active Equipments</option>
+                            <select type="text"  class="custom-select @error('faultType') is-invalid @enderror"  name="faultType">
+                                <option selected disabled>Select Fault Type</option>
+                                <option  value="Carrier/Mux"  @if (old('faultType') == "Carrier/Mux") {{ 'selected' }} @endif>Carrier/Mux</option>
+                                <option  value="logical"  @if (old('faultType') == "logical") {{ 'selected' }} @endif>logical</option>
+                                <option  value="Cable"  @if (old('faultType') == "Cable") {{ 'selected' }} @endif>Cable</option>
+                                <option  value="Power"  @if (old('faultType') == "Power") {{ 'selected' }} @endif>Power</option>
+                                <option  value="Active Equipments"  @if (old('faultType') == "Active Equipments") {{ 'selected' }} @endif>Active Equipments</option>
                             </select>
                         </div>
-                        <div class="mb-3 col-md-4">
+                        <div class="mb-3 col-md-3">
                             <label for="rfo" class="form-label">Confirmed RFO</label>
-                            <select type="text"  class="custom-select "  name="confirmedRfo" value="{{ old('confirmedRfo') }}">
-                                <option selected="selected">Select RFO</option>
-                                <option>Faulty Mux</option>
-                                <option>Faulty Board</option>
-                                <option>Power Fault</option>
-                                <option>UTP fault</option>
-                                <option>Patch lead fault</option>
-                                <option>UG cable fault</option>
-                                <option>Burn Cables</option>
-                                <option>FAS</option>
-                                <option>Power Outage</option>
-                                <option>Backbone fault</option>
-                                <option>Faulty Switch</option>
-                                <option>Fault Router</option>
-                                <option>Fault Chassis</option>
-                                <option>Converter Faulty</option>
-                                <option>Faulty SW/Port</option>
-                                <option>CPE Faulty</option>
+                            <select type="text" class="custom-select @error('confirmedRfo') is-invalid @enderror" name="confirmedRfo" >
+                                <option selected disabled>Select RFO</option>
+                                <option  value="Faulty Mux"  @if (old('confirmedRfo') == "Faulty Mux") {{ 'selected' }} @endif>Faulty Mux</option>
+                                <option  value="Faulty Board"  @if (old('confirmedRfo') == "Faulty Board") {{ 'selected' }} @endif>Faulty Board</option>
+                                <option  value="Power Fault"  @if (old('confirmedRfo') == "Power Fault") {{ 'selected' }} @endif>Power Fault</option>
+                                <option  value="UTP Fault"  @if (old('confirmedRfo') == "UTP Fault") {{ 'selected' }} @endif>UTP fault</option>
+                                <option  value="Patch Lead Fault"  @if (old('confirmedRfo') == "Patch Lead Fault") {{ 'selected' }} @endif>Patch lead Fault</option>
+                                <option  value="UG Cable Fault"  @if (old('confirmedRfo') == "UG Cable Fault") {{ 'selected' }} @endif>UG cable FFault</option>
+                                <option  value="Burnt Cables"  @if (old('confirmedRfo') == "Burnt Cables") {{ 'selected' }} @endif>Burnt Cables</option>
+                                <option  value="FAS"  @if (old('confirmedRfo') == "FAS") {{ 'selected' }} @endif>FAS</option>
+                                <option  value="Power Outage"  @if (old('confirmedRfo') == "Power Outage") {{ 'selected' }} @endif>Power Outage</option>
+                                <option  value="Backbone Fault"  @if (old('confirmedRfo') == "Backbone Fault") {{ 'selected' }} @endif>Backbone Fault</option>
+                                <option  value="Faulty Switch"  @if (old('confirmedRfo') == "Faulty Switch") {{ 'selected' }} @endif>Faulty Switch</option>
+                                <option  value="Faulty Router"  @if (old('confirmedRfo') == "Faulty Router") {{ 'selected' }} @endif>Faulty Router</option>
+                                <option  value="Faulty Chassis"  @if (old('confirmedRfo') == "Faulty Chassis") {{ 'selected' }} @endif>Faulty Chassis</option>
+                                <option  value="Converter Faulty"  @if (old('confirmedRfo') == "Converter Faulty") {{ 'selected' }} @endif>Converter Faulty</option>
+                                <option  value=" Faulty SW/Port"  @if (old('confirmedRfo') == " Faulty SW/Port") {{ 'selected' }} @endif>Faulty SW/Port</option>
+                                <option  value="CPE  Faulty"  @if (old('confirmedRfo') == "CPE  Faulty") {{ 'selected' }} @endif>CPE Faulty</option>
                             </select>
                         </div>
                         <div class="mb-3 col-md-6">
                             <label for="actDepartment" class="form-label">Actioning Department</label>
-                            <select id="actDepartment" class="form-select" name="department" value="{{ old('department') }}" >
-                                <option>Select</option>
-                                <option>NOC</option>
-                                <option>implementation</option>
-                                <option>Operations</option>
-                                <option>HR</option>
-                                <option>Finace</option>
-                                <option>Stores</option>
-                                <option>Marketing</option>
-                                <option>Procurement</option>
+                            <select id="section" class="custom-select @error('section_id') is-invalid @enderror" name="section_id">
+                                <option selected disabled  >Select Department</option>
+                                @foreach($sections as $section)
+                                    @if (old('section_id')==$section->id)
+                                        <option value="{{ $section->id}}" selected>{{ $section->section }}</option>
+                                    @else
+                                        <option value="{{ $section->id}}">{{ $section->section }}</option>
+                                    @endif
+                                @endforeach
                             </select>
                         </div>                
                     </div>
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="priorityLevel" class="form-label">Priority Level</label>
-                            <select id="priorityLevel" class="form-select" name="priorityLevel" value="{{ old('priorityLevel') }}">
-                                <option>Select</option>
-                                <option>Low</option>
-                                <option>Medium</option>
-                                <option>High</option>
-                                <option>Critical</option>
+                            <select id="priorityLevel"  class="custom-select @error('priorityLevel') is-invalid @enderror" name="priorityLevel">
+                                <option selected disabled>Select</option>
+                                <option  value="Low"  @if (old('priorityLevel') == "Low") {{ 'selected' }} @endif>Low</option>
+                                <option  value="Medium"  @if (old('priorityLevel') == "Medium") {{ 'selected' }} @endif>Medium</option>
+                                <option  value="High"  @if (old('priorityLevel') == "High") {{ 'selected' }} @endif>High</option>
+                                <option  value="Critical"  @if (old('priorityLevel') == "Critical") {{ 'selected' }} @endif>Critical</option>
                             </select>
                         </div>                
                     </div>
@@ -190,7 +191,7 @@ Assess
                     <div class="card-footer">
                         <button type="submit" class="btn btn-success btn-sm " >{{ __('Save') }}</button>
                         <button type="button" class="btn btn-secondary btn-sm" >Revoke</button>   
-                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('faults.index') }}" >{{ __('Cancel') }}</a>           
+                        <a type="button" class="btn btn-danger btn-sm" href="{{ url()->previous() }}" >{{ __('Cancel') }}</a>           
                        
                     </div>
                 </form> 

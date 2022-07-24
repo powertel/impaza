@@ -12,4 +12,15 @@ class Department extends Model
     protected $fillable = [
         'department',
     ];
+
+    public function sections()
+    {
+        return $this->hasMany(Section::class);
+    }
+
+    public function positions()
+    {
+        return $this -> hasManyThrough(Position::class, Section::class);
+    }
+
 }

@@ -78,6 +78,7 @@
                                 <p>Dashboard</p>
                             </a>
                         </li>
+                        @can('user-list')
                         <li class="nav-item has-treeview">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fas fa-cogs"></i>
@@ -86,87 +87,120 @@
                                     <i class="right fas fa-angle-left"></i>
                                 </p>
                             </a>
+
                             <ul class="nav nav-treeview">
-                              <li class="nav-item">
-                                  <a  class="nav-link" href="{{ route('user.index') }}">
-                                      <i class="nav-icon fas fa-user-cog"></i>
-                                      <p>Users</p>
-                                  </a>
-                              </li>
-                              <li class="nav-item">
-                                  <a  class="nav-link" href="{{ route('role.index') }}">
-                                      <i class="fas fa-bomb nav-icon"></i>
-                                      <p>Roles</p>
-                                  </a>
-                              </li>
-                              <li class="nav-item">
-                                  <a   class="nav-link" href="{{ route('permission.index') }}">
-                                      <i class="fas fa-users-cog nav-icon"></i>
-                                      <p>Permissions</p>
-                                  </a>
-                              </li>
-                              <li class="nav-item">
-                                  <a href="{{ route('departments.index') }}" class="nav-link">
-                                    <i class="nav-icon fas fa-book-reader"></i>
-                                    <p>Department</p>
-                                  </a>
-                              </li>
-                              <li class="nav-item">
-                                  <a href="{{ route('account_managers.index') }}" class="nav-link">
-                                    <i class="nav-icon fas fa-user"></i>
-                                    <p>Account Managers</p>
-                                  </a>
-                              </li>
-                              <li class="nav-item">
-                                    <a href="{{ route('cities.index') }}" class="nav-link">
-                                    <i class="nav-icon fas fa-city"></i>
-                                    <p>Cities</p>
+                                @can('user-list')
+                                <li class="nav-item">
+                                    <a  class="nav-link" href="{{ route('users.index') }}">
+                                        <i class="nav-icon fas fa-user-cog"></i>
+                                        <p>Users</p>
                                     </a>
-                              </li>
-                              <li class="nav-item">
-                                    <a href="{{ route('locations.index') }}" class="nav-link">
-                                    <i class="nav-icon fas fa-location"></i>
-                                    <p>Locations</p>
+                                </li>                                
+                                @endcan
+
+                                @can('role-list')
+                                <li class="nav-item">
+                                    <a  class="nav-link" href="{{ route('roles.index') }}">
+                                        <i class="fas fa-bomb nav-icon"></i>
+                                        <p>Roles</p>
                                     </a>
-                              </li>
-                              <li class="nav-item">
-                                    <a href="{{ route('pops.index') }}" class="nav-link">
-                                    <i class="nav-icon fas fa-bullseye"></i>
-                                    <p>Pops</p>
+                                </li>                                  
+                                @endcan
+
+                                @can('permissions')
+                                <li class="nav-item">
+                                    <a   class="nav-link" href="{{ route('permission.index') }}">
+                                        <i class="fas fa-users-cog nav-icon"></i>
+                                        <p>Permissions</p>
                                     </a>
-                              </li>
-                              <li class="nav-item">
-                                    <a href="{{ route('customers.index') }}" class="nav-link">
-                                    <i class="nav-icon fas fa-address-card"></i>
-                                    <p>Customers</p>
+                                </li>                                    
+                                @endcan
+
+                                @can('department-list')
+                                <li class="nav-item">
+                                    <a href="{{ route('departments.index') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-book-reader"></i>
+                                        <p>Departments</p>
                                     </a>
-                              </li>
-                              <li class="nav-item">
-                                    <a href="{{ route('links.index') }}" class="nav-link">
-                                    <i class="nav-icon fas fa-street-view"></i>
-                                    <p>Links</p>
+                                </li>                                  
+                                @endcan
+
+                                @can('account-manager-list')
+                                <li class="nav-item">
+                                    <a href="{{ route('account_managers.index') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-user"></i>
+                                        <p>Account Managers</p>
                                     </a>
-                              </li>
+                                </li>
+                                @endcan
+
+                                @can('city-list')
+                                <li class="nav-item">
+                                        <a href="{{ route('cities.index') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-city"></i>
+                                        <p>Cities</p>
+                                        </a>
+                                </li>                                  
+                                @endcan
+
+                                @can('location-list')
+                                <li class="nav-item">
+                                        <a href="{{ route('locations.index') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-location"></i>
+                                        <p>Locations</p>
+                                        </a>
+                                </li>                                  
+                                @endcan
+
+                                @can('pop-list')
+                                <li class="nav-item">
+                                        <a href="{{ route('pops.index') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-bullseye"></i>
+                                        <p>Pops</p>
+                                        </a>
+                                </li>                                
+                                @endcan
+
+                                @can('customer-list')
+                                <li class="nav-item">
+                                        <a href="{{ route('customers.index') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-address-card"></i>
+                                        <p>Customers</p>
+                                        </a>
+                                </li>                                
+                                @endcan
+
+                                @can('link-list')
+                                <li class="nav-item">
+                                        <a href="{{ route('links.index') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-street-view"></i>
+                                        <p>Links</p>
+                                        </a>
+                                </li>                                
+                                @endcan
                             </ul>
-                        </li>
-                        <li  class="nav-item">
-                            <a href="{{ route('user.profile') }}" class="nav-link">
-                                <i class="nav-icon fas fa-user"></i>
-                                <p>Profile</p>
-                            </a>
-                        </li>
+                        </li>                            
+                        @endcan
+                        @can('fault-list')
                         <li  class="nav-item">
                             <a href="{{ route('faults.index') }}" class="nav-link">
                                 <i class="nav-icon fas fa-exclamation-triangle"></i>
                                 <p>Faults</p>
                             </a>
-                        </li>
+                        </li>                            
+                        @endcan
+
+                        @can('finance')
                         <li class="nav-item">
                             <a  class="nav-link">
                                 <i class="nav-icon fas fa-money-check-alt"></i>
                                 <p>Finance</p>
                             </a>
-                        </li>
+                        </li>                            
+                        @endcan
+
+
+                        @can('permit-list')
                         <li class="nav-item has-treeview">
                             <a href="#" class="nav-link">
                                 <i class="nav-icon fas fa-rocket"></i>
@@ -189,19 +223,67 @@
                                 </a>
                               </li>
                             </ul>
-                        </li>
+                        </li>                            
+                        @endcan
+                        
+                        @can('my-fault-list')
+                        <li class="nav-item">
+                            <a  class="nav-link" href="{{ route('my_faults.index') }}">
+                                <i class="nav-icon 	fas fa-satellite-dish"></i>
+                                <p>My Faults</p>
+                            </a>
+                        </li>                            
+                        @endcan
+
+                        @can('department-faults-list')
+                        <li class="nav-item">
+                            <a  class="nav-link"  href="{{ route('department_faults.index') }}">
+                                <i class="nav-icon 	fas fa-satellite"></i>
+                                <p>Department Faults</p>
+                            </a>
+                        </li>                            
+                        @endcan
+
+                        @can('chief-tech-clear-faults-list')
+                        <li class="nav-item">
+                            <a  class="nav-link"  href="{{ route('chief-tech-clear.index') }}">
+                                <i class="nav-icon 	fas fa-exclamation-triangle"></i>
+                                <p>Chief Tech Clear Faults</p>
+                            </a>
+                        </li>                            
+                        @endcan
+
+                        @can('noc-clear-faults-list')
+                        <li class="nav-item">
+                            <a  class="nav-link"  href="{{ route('noc-clear.index') }}">
+                                <i class="nav-icon 	fas fa-exclamation-triangle"></i>
+                                <p>Noc Clear Faults</p>
+                            </a>
+                        </li>                            
+                        @endcan
+                           
+                        @can('materials')
                         <li class="nav-item">
                             <a  class="nav-link">
                                 <i class="nav-icon 	fas fa-wrench"></i>
                                 <p>Materials</p>
                             </a>
-                        </li>
+                        </li>                            
+                        @endcan
 
 
+                        @can('reports')
                         <li class="nav-item">
                             <a  class="nav-link">
                               <i class="nav-icon fas fa-file-export"></i>
                               <p>Reports</p>
+                            </a>
+                        </li>                            
+                        @endcan
+                        <li  class="nav-item">
+                            <a href="{{ route('user.profile') }}" class="nav-link">
+                                <i class="nav-icon fas fa-user"></i>
+                                <p>Profile</p>
                             </a>
                         </li>
 
@@ -257,7 +339,10 @@
     <!-- Main Footer -->
       <footer class="main-footer">
         <!-- Default to the left -->
+        <div class="text-center">
         <strong>Copyright &copy; <?php echo date('Y') ?> <a>POWERTEL</a>.</strong> All rights reserved.
+        </div>
+
       </footer>
     </div>
     <!-- ./wrapper -->
@@ -275,6 +360,51 @@
             });
         });
 
+        </script>
+        <script>
+            window.addEventListener('load', function()
+{
+    var xhr = null;
+
+    getXmlHttpRequestObject = function()
+    {
+        if(!xhr)
+        {               
+            // Create a new XMLHttpRequest object 
+            xhr = new XMLHttpRequest();
+        }
+        return xhr;
+    };
+
+    updateLiveData = function()
+    {
+        var now = new Date();
+        // Date string is appended as a query with live data 
+        // for not to use the cached version 
+        var url = 'livefeed.txt?' + now.getTime();
+        xhr = getXmlHttpRequestObject();
+        xhr.onreadystatechange = evenHandler;
+        // asynchronous requests
+        xhr.open("GET", url, true);
+        // Send the request over the network
+        xhr.send(null);
+    };
+
+    updateLiveData();
+
+    function evenHandler()
+    {
+        // Check response is ready or not
+        if(xhr.readyState == 4 && xhr.status == 200)
+        {
+            dataDiv = document.getElementById('liveData');
+            // Set current data text
+            dataDiv.innerHTML = xhr.responseText;
+            // Update the live data every 1 sec
+            setTimeout(updateLiveData(), 1000);
+        }
+    }
+});
         </script>
                 @yield('scripts')
     </body>

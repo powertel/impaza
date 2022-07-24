@@ -1,6 +1,7 @@
 @extends('layouts.admin')
-@section('content')
 @include('partials.css')
+@section('content')
+
 <section class="content">
     <div class="col d-flex justify-content-center">
         <div class="card w-50">

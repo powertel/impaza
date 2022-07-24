@@ -4,9 +4,23 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Department;
+use App\Models\Section;
+use App\Models\Position;
+use Spatie\Permission\Models\Role;
+use DB;
+use Hash;
+use Illuminate\Support\Arr;
 
 class UserController extends Controller
 {
+    function __construct()
+    {
+         $this->middleware('permission:user-list|user-create|user-edit|user-delete', ['only' => ['index','store']]);
+         $this->middleware('permission:user-create', ['only' => ['create','store']]);
+         $this->middleware('permission:user-edit', ['only' => ['edit','update']]);
+         $this->middleware('permission:user-delete', ['only' => ['destroy']]);
+    }
     /**
      * Display a listing of the resource.
      *
@@ -14,33 +28,25 @@ class UserController extends Controller
      */
     public function index()
     {
-        return view('user.index');
+        $users = User::join('departments','users.department_id','=','departments.id')
+                ->leftjoin('sections','users.section_id','=','sections.id')
+                ->leftjoin('positions','users.position_id','=','positions.id')
+                ->get(['users.id','users.name','users.email','users.department_id','users.position_id','users.section_id','sections.section','departments.department','positions.position']);
+        return view('users.index',compact('users'))
+        ->with('i');
     }
-
-    /**
+    /** 
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
      */
-
-    public function getAll(){
-        $users = User::latest()->get();
-        $users->transform(function($user){
-            $user->role = $user->getRoleNames()->first();
-            $user->userPermissions = $user->getPermissionNames();
-            return $user;
-        });
-
-        return response()->json([
-            'users' => $users
-        ], 200);
-
-
-    }
-
     public function create()
     {
-        //
+        $roles = Role::pluck('name','name')->all();
+        $department = Department::all();
+        $section = Section::all();
+        $position = Position::all();
+        return view('users.create',compact('roles','department','section','position'));
     }
 
     /**
@@ -52,29 +58,23 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $this->validate($request, [
-            'name' => 'required|string',
-            'phone' => 'required',
-            'password' => 'required|alpha_num|min:6',
-            'role' => 'required',
-            'email' => 'required|email|unique:users'
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|same:confirm-password',
+            'department_id' => 'required',
+            'section_id' => 'required',
+            'position_id' => 'required',
+            'roles' => 'required'
         ]);
-
-        $user = new User();
-
-        $user->name = $request->name;
-        $user->email = $request->email;
-        $user->phone = $request->phone;
-        $user->password = bcrypt($request->password);
-
-        $user->assignRole($request->role);
-
-        if($request->has('permissions')){
-            $user->givePermissionTo($request->permissions);
-        }
-
-        $user->save();
-
-        return response()->json("User Created", 200);
+    
+        $input = $request->all();
+        $input['password'] = Hash::make($input['password']);
+    
+        $user = User::create($input);
+        $user->assignRole($request->input('roles'));
+    
+        return redirect()->route('users.index')
+                        ->with('success','User created successfully');
     }
 
     /**
@@ -85,7 +85,13 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        //
+        $user = User::leftjoin('departments','users.department_id','=','departments.id')
+                ->leftjoin('sections','users.section_id','=','sections.id')
+                ->leftjoin('positions','users.position_id','=','positions.id')
+                ->where('users.id','=',$id)
+                ->get(['users.id','users.name','users.email','users.department_id','users.position_id','users.section_id','sections.section','departments.department','positions.position'])
+                ->first();
+        return view('users.show',compact('user'));
     }
 
     /**
@@ -96,7 +102,20 @@ class UserController extends Controller
      */
     public function edit($id)
     {
-        //
+        $user = User::leftjoin('departments','users.department_id','=','departments.id')
+                ->leftjoin('sections','users.section_id','=','sections.id')
+                ->leftjoin('positions','users.position_id','=','positions.id')
+                ->where('users.id','=',$id)
+                ->get(['users.id','users.name','users.email','users.department_id','users.position_id','users.section_id','sections.section','departments.department','positions.position'])
+                ->first();
+//dd($user);
+        $roles = Role::pluck('name','name')->all();
+        $userRole = $user->roles->pluck('name','name')->all();
+        $department = Department::all();
+        $section = Section::all();
+        $position = Position::all();
+    
+        return view('users.edit',compact('user','roles','userRole','department','section','position'));
     }
 
     /**
@@ -109,48 +128,27 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $this->validate($request, [
-            'name' => 'required|string',
-            'phone' => 'required',
-            'password' => 'nullable|alpha_num|min:6',
-            'role' => 'required',
-            'email' => 'required|email|unique:users,email,'.$id
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email,'.$id,
+            'password' => 'same:confirm-password',
+            'roles' => 'required'
         ]);
-
-        $user = User::findOrFail($id);
-
-        $user->name = $request->name;
-        $user->phone = $request->phone;
-        $user->email = $request->email;
-
-        if($request->has('password')){
-            $user->password = bcrypt($request->password);
+    
+        $input = $request->all();
+        if(!empty($input['password'])){ 
+            $input['password'] = Hash::make($input['password']);
+        }else{
+            $input = Arr::except($input,array('password'));    
         }
-
-
-        if($request->has('role')){
-            $userRole = $user->getRoleNames();
-            foreach($userRole as $role){
-                $user->removeRole($role);
-            }
-
-            $user->assignRole($request->role);
-        }
-
-        if($request->has('permissions')){
-            $userPermissions = $user->getPermissionNames();
-            foreach($userPermissions as $permssion){
-                $user->revokePermissionTo($permssion);
-            }
-
-            $user->givePermissionTo($request->permissions);
-        }
-
-
-        $user->save();
-
-        return response()->json('ok',200);
-
-
+    
+        $user = User::find($id);
+        $user->update($input);
+        DB::table('model_has_roles')->where('model_id',$id)->delete();
+    
+        $user->assignRole($request->input('roles'));
+    
+        return redirect()->route('users.index')
+                        ->with('success','User updated successfully');
 
     }
 
@@ -162,11 +160,9 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        $user = User::findOrFail($id);
-
-        $user->delete();
-
-        return response()->json('ok', 200);
+        User::find($id)->delete();
+        return redirect()->route('users.index')
+                        ->with('success','User deleted successfully');
     }
 
     //user profile
@@ -181,7 +177,7 @@ class UserController extends Controller
         $this->validate($request,[
             'name'=>'required',
             'email'=>'required|email|unique:users,email,'.$user->id,
-            'phone'=>'required'
+            'phonenumber'=>'required'
 
         ]);
 
@@ -189,7 +185,7 @@ class UserController extends Controller
        $user->update([
         'name'=>$request->name,
         'email'=>$request->email,
-        'phone'=>$request->phone
+        'phonenumber'=>$request->phonenumber
        ]);
 
 

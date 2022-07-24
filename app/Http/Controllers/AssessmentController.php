@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
 use App\Models\Fault;
 use App\Models\Suburb;
 use App\Models\City;
@@ -11,18 +12,37 @@ use App\Models\Customer;
 use App\Models\Link;
 use App\Models\Remark;
 use App\Models\AccountManager;
+use App\Models\Section;
+use App\Models\FaultSection;
 use DB;
 
 class AssessmentController extends Controller
 {
+
+    function __construct()
+    {
+         $this->middleware('permission:fault-assessment', ['only' => ['edit','update']]);
+    }
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $req)
     {
-        //
+        $user = auth()->user();
+        $faults = Section::find(auth()->user()->section_id)->faults()
+                ->leftJoin('users','fault_section.section_id','=','users.section_id')
+                ->leftjoin('customers','faults.customer_id','=','customers.id')
+                ->leftjoin('links','faults.link_id','=','links.id')
+                ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
+                ->orderBy('faults.created_at', 'desc')
+                ->where('users.id','=',auth()->user()->id)
+                ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
+                'account_managers.accountManager','faults.suspectedRfo','links.link'
+                ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
+        return view('assessments.index',compact('faults'))
+        ->with('i');
     }
 
     /**
@@ -144,8 +164,9 @@ class AssessmentController extends Controller
         $links = Link::all();
         $remarks= Remark::all();
         $accountManagers = AccountManager::all();
+        $sections = Section::all();
 
-    return view('assessments.assess',compact('fault','customers','cities','suburbs','pops','links','remarks','accountManagers'));
+    return view('assessments.assess',compact('fault','customers','cities','suburbs','pops','links','remarks','accountManagers','sections'));
     }
 
     /**
@@ -157,10 +178,43 @@ class AssessmentController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $fault = Fault::find($id);
-        $fault ->update($request->all());
-        return redirect(route('faults.index'))
-        ->with('success','Fault Assessed');
+        DB::beginTransaction();
+        try{
+            request()->validate([
+                'section_id'=> 'required',
+                'priorityLevel'=>'required',
+                'faultType'=>'required',
+                'confirmedRfo'=>'required'
+            ]);
+
+            $fault = Fault::find($id);
+            $req= $request->all();
+            $req['status_id'] = 2;
+            $fault ->update($req);
+
+            $fault_section = FaultSection::find($id);
+            $fault_section -> update(
+                [
+                    'fault_id'=> $fault->id,
+                    'section_id' => $request['section_id'],
+                ]
+            );
+            if($fault  && $fault_section)
+            {
+                DB::commit();
+            }
+            else
+            {
+                DB::rollback();
+            }
+            return redirect(route('department_faults.index')) 
+            ->with('success','Fault Assessed');
+        }
+        catch(Exception $ex)
+        {
+            DB::rollback();
+        }
+
     }
 
     /**

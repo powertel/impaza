@@ -10,6 +10,13 @@ use DB;
 
 class PopController extends Controller
 {
+    function __construct()
+    {
+         $this->middleware('permission:pop-list|pop-create|pop-edit|pop-delete', ['only' => ['index','store']]);
+         $this->middleware('permission:pop-create', ['only' => ['create','store']]);
+         $this->middleware('permission:pop-edit', ['only' => ['edit','update']]);
+         $this->middleware('permission:pop-delete', ['only' => ['destroy']]);
+    }
     /**
      * Display a listing of the resource.
      *

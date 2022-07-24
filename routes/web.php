@@ -19,7 +19,12 @@ use App\Http\Controllers\Permit\RequestPermitController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
-
+use App\Http\Controllers\MyFaultController;
+use App\Http\Controllers\DepartmentFaultController;
+use App\Http\Controllers\SectionController;
+use App\Http\Controllers\PositionController;
+use App\Http\Controllers\ChiefTechClearFaultsController;
+use App\Http\Controllers\NocClearFaultsController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -36,52 +41,45 @@ Route::get('/', function () {
 });
 
 Auth::routes();
-
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-Route::resource('faults', FaultController::class);
-Route::resource('customers', CustomerController::class);
-Route::resource('cities', CityController::class);
-Route::resource('locations', LocationController::class);
-Route::resource('links', LinkController::class);
-Route::resource('pops', PopController::class);
-Route::resource('account_managers', AccountManagerController::class);
-Route::resource('assessments', AssessmentController::class);
-Route::resource('rectify', RectificationController::class);
-Route::resource('assign', AssignController::class);
-Route::resource('permits', PermitController::class);
-Route::resource('request-permit', RequestPermitController::class);
-Route::post('faults/{fault}/remarks', [RemarkController::class,'store']);
-Route::get('suburb/{id}', [FaultController::class,'findSuburb'])->name('suburb');
-Route::get('link/{id}', [FaultController::class,'findLink'])->name('link');
-Route::get('pop/{id}', [FaultController::class,'findPop'])->name('pop');
+Route::group(['middleware' => ['auth']], function() {
+    Route::resource('users', UserController::class);
+    Route::resource('roles', RoleController::class);
+    Route::resource('permission',PermissionController::class);
+    Route::resource('departments', DepartmentController::class);
+    Route::resource('sections', SectionController::class);
+    Route::resource('positions', PositionController::class);
+    Route::resource('faults', FaultController::class);
+    Route::resource('customers', CustomerController::class);
+    Route::resource('cities', CityController::class);
+    Route::resource('locations', LocationController::class);
+    Route::resource('links', LinkController::class);
+    Route::resource('pops', PopController::class);
+    Route::resource('account_managers', AccountManagerController::class);
+    Route::resource('assessments', AssessmentController::class);
+    Route::resource('rectify', RectificationController::class);
+    Route::resource('assign', AssignController::class);
+    Route::resource('chief-tech-clear', ChiefTechClearFaultsController::class);
+    Route::resource('noc-clear', NocClearFaultsController::class);
+    Route::resource('assign', AssignController::class);
+    Route::resource('permits', PermitController::class);
+    Route::resource('my_faults', MyFaultController::class);
+    Route::resource('department_faults', DepartmentFaultController::class);
+    Route::resource('request-permit', RequestPermitController::class);
+    Route::post('faults/{fault}/remarks', [RemarkController::class,'store']);
+    Route::get('suburb/{id}', [FaultController::class,'findSuburb'])->name('suburb');
+    Route::get('link/{id}', [FaultController::class,'findLink'])->name('link');
+    Route::get('pop/{id}', [FaultController::class,'findPop'])->name('pop');
+    Route::get('section/{id}', [DepartmentController::class,'findSection'])->name('section');
+    Route::get('position/{id}', [DepartmentController::class,'findPosition'])->name('position');
+});
 
+
+Route::get('department-faults', [DepartmentFaultController::class,'getSections'])->name('department-faults');
 //Users
-Route::resource('user',UserController::class);
 Route::get('/profile',[UserController::class,'profile'])->name('user.profile');
 Route::post('/profile',[UserController::class,'postProfile'])->name('user.postProfile');
 
-//Permisions
-Route::resource('permission',PermissionController::class);
-
-//Roles
-Route::resource('role',RoleController::class);
-
-//Departments
-Route::resource('/departments', DepartmentController::class);
-
-/// axios requests
-
-Route::get('/getAllPermission',[PermissionController::class,'getAllPermissions']);
-Route::post('/postRole',[RoleController::class,'store']);
-Route::get("/getAllUsers", [UserController::class,"getAll"]);
-Route::get("/getAllRoles", [RoleController::class,"getAll"]);
-Route::get("/getAllPermissions", [PermissionController::class,'getAll']);
-
-/////////////axios create user
-Route::post('/account/create', [UserController::class,'store']);
-Route::put('/account/update/{id}', [UserController::class,'update']);
-Route::delete('/delete/user/{id}', [UserController::class,'delete']);
-Route::get('/search/user', [UserController::class,'search']);
 
 

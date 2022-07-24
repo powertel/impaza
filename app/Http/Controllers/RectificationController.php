@@ -15,6 +15,13 @@ use DB;
 
 class RectificationController extends Controller
 {
+    function __construct()
+    {
+         $this->middleware('permission:rectify-list|rectify-create|rectify-edit|rectify-delete', ['only' => ['index','store']]);
+         $this->middleware('permission:rectify-create', ['only' => ['create','store']]);
+         $this->middleware('permission:rectify-fault', ['only' => ['edit','update']]);
+         $this->middleware('permission:rectify-delete', ['only' => ['destroy']]);
+    }
     /**
      * Display a listing of the resource.
      *
@@ -143,8 +150,10 @@ class RectificationController extends Controller
     public function update(Request $request, $id)
     {
         $fault = Fault::find($id);
-        $fault ->update($request->all());
-        return redirect(route('faults.index'))
+        $req= $request->all();
+        $req['status_id'] = 4;
+        $fault ->update($req);
+        return redirect(route('my_faults.index'))
         ->with('success','Fault Restored');
     }
 

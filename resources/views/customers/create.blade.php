@@ -4,8 +4,9 @@
 Customer
 @endsection
 
-@section('content')
 @include('partials.css')
+@section('content')
+
 <section class="content">
     <div class="col d-flex justify-content-center">
         <div class="card w-50">
@@ -87,7 +88,7 @@ Customer
 
                 <div class="card-footer">
                     <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
-                    <a type="button" class="btn btn-danger btn-sm" href="{{ route('customers.index') }}">{{ __('Cancel') }}</a>
+                    <a type="button" class="btn btn-danger btn-sm" href="{{ url()->previous() }}">{{ __('Cancel') }}</a>
                 </div>
                 </form> 
             </div> 

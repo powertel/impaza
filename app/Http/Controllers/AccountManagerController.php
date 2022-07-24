@@ -8,7 +8,14 @@ use App\Models\AccountManager;
 use DB;
 
 class AccountManagerController extends Controller
-{
+{    
+    function __construct()
+    {
+         $this->middleware('permission:account-manager-list|account-manager-create|account-manager-edit|account-manager-delete', ['only' => ['index','store']]);
+         $this->middleware('permission:account-manager-create', ['only' => ['create','store']]);
+         $this->middleware('permission:account-manager-edit', ['only' => ['edit','update']]);
+         $this->middleware('permission:account-manager-delete', ['only' => ['destroy']]);
+    }
     /**
      * Display a listing of the resource.
      *
@@ -145,6 +152,8 @@ class AccountManagerController extends Controller
      */
     public function destroy($id)
     {
-        //
+        AccountManager::find($id)->delete();
+        return redirect()->route('account_managers.index')
+                        ->with('success','Account Manager deleted successfully');
     }
 }

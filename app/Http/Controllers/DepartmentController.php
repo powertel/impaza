@@ -2,12 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Department;
 use Illuminate\Http\Request;
+use App\Models\Department;
+use App\Models\Section;
+use App\Models\Position;
 use DB;
 
 class DepartmentController extends Controller
 {
+
+    function __construct()
+    {
+         $this->middleware('permission:department-list|department-create|department-edit|department-delete', ['only' => ['index','store']]);
+         $this->middleware('permission:department-create', ['only' => ['create','store']]);
+         $this->middleware('permission:department-edit', ['only' => ['edit','update']]);
+         $this->middleware('permission:department-delete', ['only' => ['destroy']]);
+    }
     /**
      * Display a listing of the resource.
      *
@@ -31,7 +41,22 @@ class DepartmentController extends Controller
      */
     public function create()
     {
-        return view('departments.create');
+        $department = Department::all();
+        return view('departments.create',compact('department'));
+    }
+
+    public function findSection($id)
+    {
+        $section = Section::where('department_id',$id)
+        ->pluck("section","id");
+        return response()->json($section);
+    }
+
+    public function findPosition($id)
+    {
+        $position = Position::where('section_id',$id)
+        ->pluck("position","id");
+        return response()->json($position);
     }
 
     /**
@@ -42,17 +67,54 @@ class DepartmentController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validate($request,[
-            'department' => 'required|string|unique:departments',
 
-        ]);
 
-        //dd($request->all());
-    Department::create($request->all());
+        DB::beginTransaction();
+        try{
+
+            request()->validate([
+    
+                'department' => 'required|string|unique:departments',
+                'section' => 'required|string|unique:sections',
+                'position' => 'required|string|unique:positions'
+            ]);
+
+            $department =  Department::create(
+                [
+                    'department' => $request['department'],
+                ]
+            );
+            $section = Section::create(
+                [
+                    'department_id' => $department->id,
+                    'section' => $request['section'],
+                ]
+            );
+            $position= Position::create(
+                [
+                    'section_id' => $section->id,
+                    'position' => $request['position'],
+                ]
+            );
+            
+            
+            if($department&&$section&&$position)
+            {
+                DB::commit();
+            }
+            else
+            {
+                DB::rollback();
+            }
+            return redirect()->route('departments.index')
+            ->with('success','Department created successfully.');
+        }
+
+        catch(Exception $ex)
+        {
+            DB::rollback();
+        }
        
-        return redirect()->route('departments.index')
-                        ->with('success','Department created successfully.');
-        
     }
 
     /**
@@ -103,12 +165,12 @@ class DepartmentController extends Controller
      * @param  \App\Models\Department  $department
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Department $department)
+    public function destroy($id)
     {
-        $department->delete();
        
+        Department::find($id)->delete();
         return redirect()->route('departments.index')
-                        ->with('success','Department Deleted');
+                        ->with('success','Department deleted successfully');
     }
 
 }
