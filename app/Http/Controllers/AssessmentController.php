@@ -182,6 +182,9 @@ class AssessmentController extends Controller
         try{
             request()->validate([
                 'section_id'=> 'required',
+                'priorityLevel'=>'required',
+                'faultType'=>'required',
+                'confirmedRfo'=>'required'
             ]);
 
             $fault = Fault::find($id);

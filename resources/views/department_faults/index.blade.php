@@ -43,10 +43,10 @@ Department Faults
                             <a href="{{ route('assessments.edit',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Assess</a>
                         @endcan
                         @can('assign-fault')
-                        <a href="{{ route('assign.edit',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Assign</a>
+                        <a href="{{ route('assign.edit',$fault->id) }}" class="btn btn-sm btn-primary" style="padding:0px 2px; color:#fff;" >Assign</a>
                         @endcan
                         @can('re-assign-fault')
-                         <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Re-Assign</a>   
+                         <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-sm btn-warning" style="padding:0px 2px; color:#fff;" >Re-Assign</a>   
                         @endcan
                         <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
                     </td>
