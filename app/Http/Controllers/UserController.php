@@ -85,7 +85,12 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        $user = User::find($id);
+        $user = User::leftjoin('departments','users.department_id','=','departments.id')
+                ->leftjoin('sections','users.section_id','=','sections.id')
+                ->leftjoin('positions','users.position_id','=','positions.id')
+                ->where('users.id','=',$id)
+                ->get(['users.id','users.name','users.email','users.department_id','users.position_id','users.section_id','sections.section','departments.department','positions.position'])
+                ->first();
         return view('users.show',compact('user'));
     }
 

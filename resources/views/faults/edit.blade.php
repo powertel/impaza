@@ -3,14 +3,14 @@
 @section('title')
 Fault
 @endsection
-
+@include('partials.css')
 @section('content')
-    @include('partials.css')
+
 <section class="content">
     <div class="col d-flex justify-content-center">
         <div class="card  w-100">
             <div class="card-header">
-                <h3 class="card-title">{{_('Assess Fault')}}</h3>
+                <h3 class="card-title">{{_('Edit Fault')}}</h3>
             </div>
             <div class="card-body">
                 <form  action="{{ route('faults.update', $fault->id ) }}" method="POST">
@@ -99,14 +99,13 @@ Fault
                             <label for="service" class="form-label">Service Type</label>
                             <select type="text"  class="custom-select " value="{{$fault->serviceType}}" name="serviceType">
                                 <option selected="selected">{{ $fault->serviceType }}</option>
-                                <option>VOIP</option>
-                                <option>VPN</option>
-                                <option>INTERNET</option>
-                                <option>CARRIER SERVICE</option>
-                                <option>POWERTRACK</option>
-                                <option>CDMA VOICE</option>
-                                <option>CDMA VOICE</option>
-                                <option>E-VENDING</option>
+                                <option value="VPN"  @if (old('serviceType') == "VPN") {{ 'selected' }} @endif>VPN</option>
+                                <option value="INTERNET" @if (old('serviceType') == "INTERNET") {{ 'selected' }} @endif>INTERNET</option>
+                                <option value="VOIP" @if (old('serviceType') == "VOIP") {{ 'selected' }} @endif>VOIP</option>
+                                <option value="CARRIER SERVICE" @if (old('serviceType') == "CARRIER SERVICE") {{ 'selected' }} @endif>CARRIER SERVICE</option>
+                                <option value="POWERTRACK" @if (old('serviceType') == "POWERTRACK") {{ 'selected' }} @endif>POWERTRACK</option>
+                                <option value="CDMA VOICE" @if (old('serviceType') == "CDMA VOICE") {{ 'selected' }} @endif>CDMA VOICE</option>
+                                <option value="E-VENDING" @if (old('serviceType') == "E-VENDING") {{ 'selected' }} @endif>E-VENDING</option>
                             </select>
                         </div>
                     </div>
@@ -118,12 +117,12 @@ Fault
                         <div class="mb-3 col-md-6">
                             <label for="suspectedRfo" class="form-label">Suspected Reason For Outage</label>
                             <select  class="custom-select " value="{{$fault->suspectedRfo}}" name="suspectedRfo">
-                            <option selected="selected">{{ $fault->suspectedRfo }}</option>
-                                <option>No fx Light</option>
-                                <option>No PON Light</option>
-                                <option>BTS Down</option>
-                                <option>Node Down</option>
-                                <option>Unknown</option>
+                                <option selected="selected">{{ $fault->suspectedRfo }}</option>
+                                <option value="No fx Light"  @if (old('suspectedRfo') == "No fx Light") {{ 'selected' }} @endif>No fx Light</option>
+                                <option value="No PON Light"  @if (old('suspectedRfo') == "No PON Light") {{ 'selected' }} @endif>No PON Light</option>
+                                <option value="BTS Down"  @if (old('suspectedRfo') == "BTS Down") {{ 'selected' }} @endif>BTS Down</option>
+                                <option value="Node Down"  @if (old('suspectedRfo') == "Node Down") {{ 'selected' }} @endif>Node Down</option>
+                                <option value="Unknown"  @if (old('suspectedRfo') == "Unknown") {{ 'selected' }} @endif>Unknown</option>
                             </select>
                         </div>
                     </div>
@@ -133,17 +132,6 @@ Fault
                             <label for="adress" class="form-label">Address</label>
                             <input type="text" class="form-control" value="{{$fault->address}}" name="address">
                         </div>
-                        <div class="mb-3 col-md-6">
-                            <label for="serviceAtrr" class="form-label">Service Attribute</label>
-                            <select  class="custom-select " value="{{$fault->serviceAttribute}}"  name="serviceAttribute">
-                            <option selected="selected">{{ $fault->serviceAttribute }}</option>
-                                <option>Port</option>
-                                <option>VPN</option>
-                            </select>
-                        </div>
-                    </div>
-            
-                    <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="accountManager" class="form-label">Account Manager</label>
                             <select class="custom-select" id="accountManager" name="accountManager_id">

@@ -3,7 +3,7 @@
 @section('title')
 Profile
 @endsection
-
+@include('partials.css')
 @section('content')
 
 <section class="content">
@@ -70,10 +70,9 @@ Profile
 
 
                                         </div>
-                                        <div class="col-12">
+                                        <div class="card-footer">
                                             <div class="form-group button">
                                                 <button type="submit" class="btn btn-primary"><i class="fas fa-user-edit"></i> Update Profile</button>
-                                                {{--  <a role="button" href="admin/index.html" class="bizwheel-btn theme-2">Login</a>  --}}
                                             </div>
                                         </div>
                                     </div>

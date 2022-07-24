@@ -3,9 +3,9 @@
 @section('title')
 Cities
 @endsection
-
-@section('content')
 @include('partials.css')
+@section('content')
+
 <section class="content">
 
 <div class="card">
@@ -46,11 +46,6 @@ Cities
                             <a href="{{ route('cities.edit',$city->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
                             @endcan
 
-                            @csrf
-                            @method('DELETE')
-                            @can('city-delete')
-                            <button type="submit" class="btn btn-danger btn-sm " style="padding:0px 2px; color:#fff;">Delete</button>
-                            @endcan
                         </form>
                         
                         

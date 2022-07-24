@@ -3,7 +3,7 @@
 @section('title')
  Create Permission
 @endsection
-
+@include('partials.css')
 @section('content')
 <div class="card card-primary">
     <div class="card-header">

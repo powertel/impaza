@@ -3,9 +3,9 @@
 @section('title')
 My Faults
 @endsection
-
-@section('content')
 @include('partials.css')
+@section('content')
+
 <section class="content">
 
 <div class="card">
@@ -44,6 +44,20 @@ My Faults
                         <strong>{{$fault->description}}</strong> 
                     </td>
                     <td>
+                    <form  action="{{ route('noc-clear.update',$fault->id) }}"  method="POST">  
+                        @csrf
+                        @method('PUT')
+                        @can('noc-clear-faults-clear')
+                        <button type="submit" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Clear</button>   
+                        @endcan
+                    </form>
+                    <form  action="{{ route('chief-tech-clear.update',$fault->id) }}"  method="POST">
+                            @csrf
+                            @method('PUT')
+                            @can('chief-tech-clear-faults-clear')
+                            <button type="submit" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Clear</button>   
+                            @endcan
+                     </form>
                         @can('rectify-fault')
                             <a href="{{ route('rectify.edit',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Rectify</a>
                         @endcan

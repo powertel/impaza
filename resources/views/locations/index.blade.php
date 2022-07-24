@@ -3,9 +3,8 @@
 @section('title')
 Locations
 @endsection
-
+@include('partials.css')
 @section('content')
-    @include('partials.css')
 <section class="content">
 
 <div class="card">

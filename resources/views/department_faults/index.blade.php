@@ -3,9 +3,8 @@
 @section('title')
 Department Faults
 @endsection
-
-@section('content')
 @include('partials.css')
+@section('content')
 <section class="content">
 
 <div class="card">

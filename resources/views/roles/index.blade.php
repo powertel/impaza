@@ -2,7 +2,7 @@
 @section('title')
 Roles
 @endsection
-
+@include('partials.css')
 @section('content')
 <div class="card">
     <div class="card-header">

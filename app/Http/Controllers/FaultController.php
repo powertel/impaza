@@ -105,7 +105,6 @@ class FaultController extends Controller
                 'link_id'=> 'required',
                 'suspectedRfo'=> 'required',
                 'serviceType'=> 'required',
-                'serviceAttribute'=> 'required',
                 'remark'=> 'required',
             ]);
 
@@ -168,7 +167,7 @@ class FaultController extends Controller
                 ->where('faults.id','=',$id)
                 ->get(['faults.id','faults.customer_id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
                 'account_managers.accountManager','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo','faults.link_id','links.link'
-                ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
+                ,'faults.serviceType','faults.confirmedRfo','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
                 ->first();
 
                $remarks= Remark::all();

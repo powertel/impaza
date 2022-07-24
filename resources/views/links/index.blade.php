@@ -3,10 +3,9 @@
 @section('title')
 links
 @endsection
-
+@include('partials.css')
 @section('content')
 <section class="content">
-@include('partials.css')
 <div class="card">
 
     <!--Card Header-->

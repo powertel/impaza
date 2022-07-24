@@ -3,9 +3,9 @@
 @section('title')
 User
 @endsection
-
-@section('content')
 @include('partials.css')
+@section('content')
+
 <section class="content">
     <div class="col d-flex justify-content-center">
         <div class="card w-50">
@@ -21,12 +21,35 @@ User
                         {{ $user->name }}
                     </div>
                 </div>
+                <hr>
                 <div class="row g-2">
-                <div class="col">
+                    <div class="col">
                         <strong>Email:</strong>
                         {{ $user->email }}
                     </div>
                 </div>
+                <hr>
+                <div class="row g-2">
+                    <div class="col">
+                        <strong>Department:</strong>
+                        {{ $user->department }}
+                    </div>
+                </div>
+                <hr>
+                 <div class="row g-2">
+                    <div class="col">
+                        <strong>Section:</strong>
+                        {{ $user->section }}
+                    </div>
+                </div>
+                <hr>
+                <div class="row g-2">
+                    <div class="col">
+                        <strong>Position:</strong>
+                        {{ $user->position }}
+                    </div>
+                </div>
+                <hr>
                 <div class="row g-2">
                     <div class="col">
                         <strong>Roles:</strong>

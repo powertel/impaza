@@ -3,9 +3,8 @@
 @section('title')
 Rectify
 @endsection
-
+@include('partials.css')
 @section('content')
-    @include('partials.css')
 <section class="content">
     <div class="col d-flex justify-content-center">
         <div class="card  w-50">

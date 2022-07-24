@@ -34,17 +34,9 @@ Departments
                     <td>{{++$i}}</td>
                     <td>{{ $department->department}}</td>
                     <td>
-                        <form  action="{{ route('departments.destroy',$department->id) }}"  method="POST">
                             @can('department-edit')
                             <a href="{{ route('departments.edit',$department->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Edit</a>
                             @endcan
-                            
-                            @csrf
-                            @method('DELETE')
-                            @can('department-delete')
-                            <button type="submit" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;">Delete</button>
-                            @endcan
-                        </form>
                     </td>
                 </tr>
                 @endforeach
