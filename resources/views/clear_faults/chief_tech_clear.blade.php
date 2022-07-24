@@ -40,7 +40,7 @@ Clear Faults
                         <strong>{{$fault->description}}</strong> 
                     </td>
                     <td>
-                        <form  action="{{ route('chief-tech-clear.update',$fault->id) }}"  method="POST">
+                        <form style="display:inline"  action="{{ route('chief-tech-clear.update',$fault->id) }}"  method="POST">
 
                             @csrf
                             @method('PUT')

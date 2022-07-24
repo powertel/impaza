@@ -41,8 +41,8 @@ Clear Faults
                         <strong>{{$fault->description}}</strong> 
                     </td>
 
-                    <td>
-                    <form  action="{{ route('noc-clear.update',$fault->id) }}"  method="POST">
+                     <td>
+                    <form style="display:inline"  action="{{ route('noc-clear.update',$fault->id) }}"  method="POST">
                         
                         @csrf
                         @method('PUT')
@@ -50,7 +50,8 @@ Clear Faults
                         <button type="submit" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Clear</button>   
                         @endcan
                         <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
-                    </form>
+                    </form> 
+                    </td>
                 </tr>
                 @endforeach
             </tbody> 
@@ -59,12 +60,5 @@ Clear Faults
     <!-- /.card-body -->
 </div>
  
-{{-- {{$section->section}}
-
-@foreach ($section -> faults as $fault )
-
-<span>{{$fault->contactName}}</span>
-    
-@endforeach --}}
 </section>
 @endsection

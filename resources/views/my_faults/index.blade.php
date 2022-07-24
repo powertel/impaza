@@ -44,14 +44,14 @@ My Faults
                         <strong>{{$fault->description}}</strong> 
                     </td>
                     <td>
-                    <form  action="{{ route('noc-clear.update',$fault->id) }}"  method="POST">  
+                    <form style="display:inline" action="{{ route('noc-clear.update',$fault->id) }}"  method="POST">  
                         @csrf
                         @method('PUT')
                         @can('noc-clear-faults-clear')
                         <button type="submit" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Clear</button>   
                         @endcan
                     </form>
-                    <form  action="{{ route('chief-tech-clear.update',$fault->id) }}"  method="POST">
+                    <form style="display:inline" action="{{ route('chief-tech-clear.update',$fault->id) }}"  method="POST">
                             @csrf
                             @method('PUT')
                             @can('chief-tech-clear-faults-clear')
@@ -65,7 +65,7 @@ My Faults
                         <a href="{{ route('request-permit.edit',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Request Permit</a>                            
                         @endcan
                         <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
-                        </div>
+                    
                     </td>
                 </tr>
                 @endforeach
