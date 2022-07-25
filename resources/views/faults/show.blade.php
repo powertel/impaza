@@ -111,9 +111,6 @@ Fault
                     @can('assign-fault')
                     <a type="button" class="btn btn-Success btn-sm" href="{{ route('assign.edit',$fault->id) }}">Assign</a>
                     @endcan
-                    @can('rectify-fault')
-                        <a href="{{ route('rectify.edit',$fault->id) }}" class="btn btn-sm btn-secondary" style="padding:0px 2px; color:#fff;" >Rectify</a>
-                    @endcan
                     <a type="button" class="btn btn-danger btn-sm" href="{{ url()->previous() }}">{{ __('Close') }}</a>
                 </div>
             </div> 

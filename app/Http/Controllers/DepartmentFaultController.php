@@ -40,8 +40,8 @@ class DepartmentFaultController extends Controller
                 ->leftjoin('statuses','faults.status_id','=','statuses.id')
                 ->orderBy('faults.created_at', 'desc')
                 ->where('users.id','=',auth()->user()->id)
-                ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
-                'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description'
+                ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
+                'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description','users.name'
                 ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
         return view('department_faults.index',compact('faults'))
         ->with('i');
