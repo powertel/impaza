@@ -40,7 +40,7 @@ My Faults
                     <td>{{ $fault->customer }}</td>
                     <td>{{ $fault->accountManager }}</td>
                     <td>{{ $fault->link }}</td>
-                    <td style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? 'none' }};" class="btn">
+                    <td style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? 'none' }};">
                         <strong>{{$fault->description}}</strong> 
                     </td>
                     <td>
