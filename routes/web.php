@@ -69,6 +69,10 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('my_faults', MyFaultController::class);
     Route::resource('department_faults', DepartmentFaultController::class);
     Route::resource('request-permit', RequestPermitController::class);
+
+    Route::put('disconnect/{id}/disconnect', [FinanceController::class,'disconnect'])->name('disconnect');
+    Route::put('reconnect/{id}/reconnect', [FinanceController::class,'reconnect'])->name('reconnect');
+
     Route::post('faults/{fault}/remarks', [RemarkController::class,'store']);
     Route::get('suburb/{id}', [FaultController::class,'findSuburb'])->name('suburb');
     Route::get('link/{id}', [FaultController::class,'findLink'])->name('link');
