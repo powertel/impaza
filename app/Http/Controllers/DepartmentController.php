@@ -27,7 +27,7 @@ class DepartmentController extends Controller
     {
 
         $departments = DB::table('departments')
-                ->orderBy('departments.created_at', 'desc')
+                ->orderBy('departments.department', 'asc')
                 ->get();
 
         return view('departments.index', compact('departments'))

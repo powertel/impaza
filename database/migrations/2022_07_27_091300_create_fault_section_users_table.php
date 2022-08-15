@@ -13,19 +13,21 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('remarks', function (Blueprint $table) {
-            $table->id();
-            //$table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->unsignedInteger('user_id');
+        Schema::create('fault_section_users', function (Blueprint $table) {
+            $table->increments('id');
             $table->unsignedInteger('fault_id');
-            $table->text('remark');
+            $table->unsignedInteger('section_id');
+            $table->unsignedInteger('user_id')->nullable();
             $table->timestamps();
             $table->foreign('fault_id')
-                    ->references('id')
-                    ->on('faults');
+                ->references('id')
+                ->on('faults');
+            $table->foreign('section_id')
+                ->references('id')
+                ->on('sections');
             $table->foreign('user_id')
-            ->references('id')
-            ->on('users');
+                ->references('id')
+                ->on('users');
         });
     }
 
@@ -36,6 +38,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('remarks');
+        Schema::dropIfExists('fault_section_users');
     }
 };

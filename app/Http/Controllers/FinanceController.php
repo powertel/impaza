@@ -10,15 +10,13 @@ use App\Models\Customer;
 use App\Models\Link;
 use DB;
 
-class LinkController extends Controller
+class FinanceController extends Controller
 {
 
     function __construct()
     {
-         $this->middleware('permission:link-list|link-create|link-edit|link-delete', ['only' => ['index','store']]);
-         $this->middleware('permission:link-create', ['only' => ['create','store']]);
-         $this->middleware('permission:link-edit', ['only' => ['edit','update']]);
-         $this->middleware('permission:link-delete', ['only' => ['destroy']]);
+         $this->middleware('permission:finance|finance-link-update', ['only' => ['index','store']]);
+         $this->middleware('permission:finance-link-update', ['only' => ['edit','update']]);
     }
     /**
      * Display a listing of the resource.
@@ -27,14 +25,15 @@ class LinkController extends Controller
      */
     public function index()
     {
-        $links = DB::table('links')
+        $finance_links = DB::table('links')
             ->leftjoin('customers','links.customer_id','=','customers.id')
             ->leftjoin('cities','links.city_id','=','cities.id')
             ->leftjoin('suburbs','links.suburb_id','=','suburbs.id')
             ->leftjoin('pops','links.pop_id','=','pops.id')
+            ->leftjoin('link_statuses','links.link_status','=','link_statuses.id')
             ->orderBy('cities.city', 'asc')
-            ->get(['links.id','links.link','customers.customer','cities.city','pops.pop','suburbs.suburb']);
-        return view('links.index',compact('links'))
+            ->get(['links.id','links.link','customers.customer','cities.city','pops.pop','suburbs.suburb','link_statuses.link_status']);
+        return view('finance.index',compact('finance_links'))
         ->with('i');
     }
 
@@ -45,15 +44,7 @@ class LinkController extends Controller
      */
     public function create()
     {
-        $city = City::all();
-        //$customer = Customer::all();
-        $customer = DB::table('customers')
-        ->orderBy('customers.customer', 'asc')
-        ->get();
-        $location = Suburb::all();
-        $link = Link::all();
-        $pop = Pop::all();
-        return view('links.create',compact('customer','city','location','link','pop'));
+        //
     }
 
     /**
@@ -64,27 +55,7 @@ class LinkController extends Controller
      */
     public function store(Request $request)
     {
-        request()->validate([
-            'city_id' => 'required',
-            'suburb_id' => 'required',
-            'pop_id' => 'required',
-            'customer_id' => 'required',
-            'link' => 'required|string|unique:links'
-        ]);
-        $req = $request->all();
-        $req['link_status'] = 1;
-        $link = Link::create($req);
-
-        if($link)
-        {
-            return redirect()->route('links.index')
-            ->with('success','Link Created');
-        }
-        else
-        {
-            return back()->with('fail','Something went wrong');
-        }
-    
+        //
     }
 
     /**
@@ -103,7 +74,7 @@ class LinkController extends Controller
                 ->where('links.id','=',$id)
                 ->get(['links.id','links.link','customers.customer','cities.city','pops.pop','suburbs.suburb'])
                 ->first();
-        return view('links.show',compact('link'));
+        return view('finance.show',compact('link'));
     }
 
     /**
@@ -115,18 +86,18 @@ class LinkController extends Controller
     public function edit($id)
     {
         $link = DB::table('links')
-                ->leftjoin('customers','links.customer_id','=','customers.id')
-                ->leftjoin('cities','links.city_id','=','cities.id')
-                ->leftjoin('suburbs','links.suburb_id','=','suburbs.id')
-                ->leftjoin('pops','links.pop_id','=','pops.id')
-                ->where('links.id','=',$id)
-                ->get(['links.id','links.link','links.customer_id','links.city_id','links.pop_id','links.suburb_id','customers.customer','cities.city','pops.pop','suburbs.suburb'])
-                ->first();
-                $customers = Customer::all();
-                $cities = City::all();
-                $suburbs = Suburb::all();
-                $pops = Pop::all();
-        return view('links.edit',compact('link','customers','cities','suburbs','pops',));
+        ->leftjoin('customers','links.customer_id','=','customers.id')
+        ->leftjoin('cities','links.city_id','=','cities.id')
+        ->leftjoin('suburbs','links.suburb_id','=','suburbs.id')
+        ->leftjoin('pops','links.pop_id','=','pops.id')
+        ->where('links.id','=',$id)
+        ->get(['links.id','links.link','links.customer_id','links.city_id','links.pop_id','links.suburb_id','customers.customer','cities.city','pops.pop','suburbs.suburb'])
+        ->first();
+        $customers = Customer::all();
+        $cities = City::all();
+        $suburbs = Suburb::all();
+        $pops = Pop::all();
+return view('finance.edit',compact('link','customers','cities','suburbs','pops',));
     }
 
     /**
@@ -138,9 +109,15 @@ class LinkController extends Controller
      */
     public function update(Request $request, $id)
     {
+        request()->validate([
+            'contract_number'=> 'required',
+        ]);
+
         $link = Link::find($id);
-        $link ->update($request->all());
-        return redirect(route('links.index'))
+        $req= $request->all();
+        $req['link_status'] = 2;
+        $link ->update($req);
+        return redirect(route('finance.index'))
         ->with('success','Link Updated');
     }
 

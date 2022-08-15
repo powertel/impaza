@@ -15,10 +15,12 @@ return new class extends Migration
     {
         Schema::create('links', function (Blueprint $table) {
             $table->increments('id');
+            $table->unsignedInteger('contract_number')->nullable();
             $table->unsignedInteger('suburb_id');
             $table->unsignedInteger('customer_id');
             $table->unsignedInteger('city_id');
             $table->unsignedInteger('pop_id');
+            $table->unsignedInteger('link_status');
             $table->string('link');
             $table->timestamps();
             $table->foreign('suburb_id')

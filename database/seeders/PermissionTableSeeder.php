@@ -72,6 +72,7 @@ class PermissionTableSeeder extends Seeder
             'my-fault-list',
             'permissions',
             'finance',
+            'finance-link-update',
             'permit-list',
             'materials',
             'reports',

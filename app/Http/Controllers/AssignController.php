@@ -13,6 +13,7 @@ use App\Models\Remark;
 use App\Models\AccountManager;
 use App\Models\User;
 use App\Models\Section;
+use App\Models\FaultSection;
 use DB;
 
 class AssignController extends Controller
@@ -143,5 +144,46 @@ class AssignController extends Controller
     public function destroy($id)
     {
         //
+    }
+    private function getLatestUserId(int $section_id): ?int
+    {
+        return FaultSection::where('section_id', $section_id)
+            ->latest('fault_id')
+            ->first()?->user_id;
+    }
+
+    private function getNextUserId(int $section_id, int $latestUserId): ?int
+    {
+        return DB::table('section_user')
+            ->where('section_id', $section_id)
+            ->where('user_id', ">", $latestUserId)
+            ->orderBy('user_id')
+            ->first()?->user_id;
+    }
+
+    private function getFirstUserId($section_id): ?int
+    {
+        return DB::table('section_user')
+            ->where('section_id', $section_id)
+            ->orderBy('user_id')
+            ->first()
+            ?->user_id;
+    }
+
+    public function getMeetingUserId(int $section_id): ?int
+    {
+        $latestUserId = $this->getLatestUserId($section_id);
+        if ($latestUserId === null) {
+            // First time the meeting is being held
+            return $this->getFirstUserId($section_id);
+        }
+
+        $nextUserId = $this->getNextUserId($section_id, $latestUserId);
+        if ($nextUserId === null) {
+            // All users have had their turn, starting over
+            return $this->getFirstUserId($section_id);
+        }
+
+        return $nextUserId;
     }
 }

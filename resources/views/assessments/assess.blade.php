@@ -240,4 +240,5 @@ Assess
 
 @section('scripts')
     @include('partials.faults')
+    @include('partials.assign')
 @endsection

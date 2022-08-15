@@ -25,6 +25,7 @@ use App\Http\Controllers\SectionController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\ChiefTechClearFaultsController;
 use App\Http\Controllers\NocClearFaultsController;
+use App\Http\Controllers\FinanceController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -64,6 +65,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('noc-clear', NocClearFaultsController::class);
     Route::resource('assign', AssignController::class);
     Route::resource('permits', PermitController::class);
+    Route::resource('finance', FinanceController::class);
     Route::resource('my_faults', MyFaultController::class);
     Route::resource('department_faults', DepartmentFaultController::class);
     Route::resource('request-permit', RequestPermitController::class);
@@ -80,6 +82,9 @@ Route::get('department-faults', [DepartmentFaultController::class,'getSections']
 //Users
 Route::get('/profile',[UserController::class,'profile'])->name('user.profile');
 Route::post('/profile',[UserController::class,'postProfile'])->name('user.postProfile');
+
+Route::get('getfaults', [FaultController::class,'faults'])->name('getfaults');
+Route::get('getusers', [UserController::class,'getUsers'])->name('getusers');
 
 
 

@@ -51,4 +51,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Remark::class);
     }
+
+        //relationship of section and faults
+        public function sections()
+        {
+            return $this->belongsToMany(Section::class);
+        }
 }

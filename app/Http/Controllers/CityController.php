@@ -25,7 +25,7 @@ class CityController extends Controller
     public function index()
     {
         $cities = DB::table('cities')
-                ->orderBy('cities.created_at', 'desc')
+                ->orderBy('cities.city', 'asc')
                 ->get();
         return view('cities.index',compact('cities'))
         ->with('i');

@@ -192,7 +192,7 @@
 
                         @can('finance')
                         <li class="nav-item">
-                            <a  class="nav-link">
+                            <a href="{{ route('finance.index') }}" class="nav-link">
                                 <i class="nav-icon fas fa-money-check-alt"></i>
                                 <p>Finance</p>
                             </a>
