@@ -149,7 +149,7 @@ class DepartmentController extends Controller
     public function update(Request $request, Department $department)
     {
         $request->validate([
-            'department' => 'required',
+            'department' => 'required|string|unique:departments',
             
         ]);
       

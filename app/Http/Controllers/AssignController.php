@@ -145,45 +145,95 @@ class AssignController extends Controller
     {
         //
     }
-    private function getLatestUserId(int $section_id): ?int
-    {
-        return FaultSection::where('section_id', $section_id)
-            ->latest('fault_id')
-            ->first()?->user_id;
-    }
 
-    private function getNextUserId(int $section_id, int $latestUserId): ?int
-    {
-        return DB::table('section_user')
-            ->where('section_id', $section_id)
-            ->where('user_id', ">", $latestUserId)
-            ->orderBy('user_id')
-            ->first()?->user_id;
-    }
 
-    private function getFirstUserId($section_id): ?int
-    {
-        return DB::table('section_user')
-            ->where('section_id', $section_id)
-            ->orderBy('user_id')
-            ->first()
-            ?->user_id;
-    }
 
-    public function getMeetingUserId(int $section_id): ?int
+
+
+
+
+public function autoAssign(Request $request, $id)
     {
-        $latestUserId = $this->getLatestUserId($section_id);
-        if ($latestUserId === null) {
-            // First time the meeting is being held
-            return $this->getFirstUserId($section_id);
+        DB::beginTransaction();
+        try{
+            request()->validate([
+                'section_id'=> 'required',
+                'priorityLevel'=>'required',
+                'faultType'=>'required',
+                'confirmedRfo'=>'required'
+            ]);
+
+            $fault = Fault::find($id);
+            $req= $request->all();
+            $req['status_id'] = 2;
+            $fault ->update($req);
+
+
+
+            $fault_section = FaultSection::find($id);
+            $fault_section -> update(
+                [
+                    'fault_id'=> $fault->id,
+                    'section_id' => $request['section_id'],
+                ]
+            );
+
+            $users = User::join('departments','users.department_id','=','departments.id')
+                ->leftjoin('sections','users.section_id','=','sections.id')
+                ->where('sections.id','=',1)
+                ->pluck('users.id')
+                ->toArray();
+
+            $faults = DB::table('fault_section')
+                ->leftjoin('faults','fault_section.fault_id','=','faults.id')
+                ->whereNull('faults.assignedTo')
+                ->where('fault_section.section_id','=',3)
+                ->pluck('faults.id')
+                ->toArray();
+
+            $userslength=count($users);
+            $userIndex = 0;
+
+            for($i=0; $i < count($faults); $i++){
+    
+                $autoAssign  = $faults[$i];
+    
+                $autoAssign = Fault::find($autoAssign );
+
+                $assign = DB::table('faults')
+                        ->where('faults.id', $id)
+                        ->get();
+
+                        //->update(array('member_type' => $plan));
+      
+                $req[$autoAssign] = $users[$userIndex]; 
+                $userIndex ++;
+          
+                if($userIndex >= $userslength){
+                    $userIndex = 0;
+                }
+  
+            }
+
+
+            if($fault  && $fault_section && $userfaults)
+            {
+                DB::commit();
+            }
+            else
+            {
+                DB::rollback();
+            }
+            return redirect(route('department_faults.index')) 
+            ->with('success','Fault Assessed');
         }
-
-        $nextUserId = $this->getNextUserId($section_id, $latestUserId);
-        if ($nextUserId === null) {
-            // All users have had their turn, starting over
-            return $this->getFirstUserId($section_id);
+        catch(Exception $ex)
+        {
+            DB::rollback();
         }
-
-        return $nextUserId;
+//$this->assign();
     }
+
 }
+
+

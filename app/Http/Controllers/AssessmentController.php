@@ -186,12 +186,14 @@ class AssessmentController extends Controller
                 'faultType'=>'required',
                 'confirmedRfo'=>'required'
             ]);
-
+    
             $fault = Fault::find($id);
             $req= $request->all();
             $req['status_id'] = 2;
             $fault ->update($req);
-
+    
+    
+    
             $fault_section = FaultSection::find($id);
             $fault_section -> update(
                 [
@@ -199,7 +201,46 @@ class AssessmentController extends Controller
                     'section_id' => $request['section_id'],
                 ]
             );
-            if($fault  && $fault_section)
+    
+            $users = User::join('departments','users.department_id','=','departments.id')
+                ->leftjoin('sections','users.section_id','=','sections.id')
+                ->where('sections.id','=',1)
+                ->pluck('users.id')
+                ->toArray();
+    
+            $faults = DB::table('fault_section')
+                ->leftjoin('faults','fault_section.fault_id','=','faults.id')
+                ->whereNull('faults.assignedTo')
+                ->where('fault_section.section_id','=',1)
+                ->pluck('faults.id')
+                ->toArray();
+    
+            $userslength=count($users);
+            $userIndex = 0;
+            $userfaults =[];
+    
+            for($i=0; $i < count($faults); $i++){
+    
+                $autoAssign  = $faults[$i];
+
+                $userfaults[$autoAssign] = $users[$userIndex]; 
+
+                $user = $users[$userIndex];
+    
+                $assign = Fault::find($autoAssign);
+                $req= $request->all();
+                $req['assignedTo'] = $userfaults[$autoAssign];
+                $assign ->update($req);
+    
+                $userIndex ++;
+          
+                if($userIndex >= $userslength){
+                    $userIndex = 0;
+                }
+            }
+            //dd($assign);
+    
+            if($fault  && $fault_section && $assign)
             {
                 DB::commit();
             }
@@ -214,7 +255,7 @@ class AssessmentController extends Controller
         {
             DB::rollback();
         }
-
+    //$this->assign();
     }
 
     /**
@@ -226,5 +267,46 @@ class AssessmentController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function assign(){
+
+        $users = User::join('departments','users.department_id','=','departments.id')
+        ->leftjoin('sections','users.section_id','=','sections.id')
+        ->where('sections.id','=',3)
+        ->pluck('users.id')
+        ->toArray();
+
+         $faults = DB::table('fault_section')
+         ->leftjoin('faults','fault_section.fault_id','=','faults.id')
+         ->whereNull('faults.assignedTo')
+         ->where('fault_section.section_id','=',3)
+        ->pluck('faults.id')
+        ->toArray();
+
+        $userfaults =[];
+        $userslength=count($users);
+        $userIndex = 0;
+
+
+        for($i=0; $i < count($faults); $i++){
+    
+            $autoAssign  = $faults[$i];
+
+            $userfaults[$autoAssign] = $users[$userIndex]; 
+            //$assign = $users[$userIndex]; 
+            $userIndex ++;
+      
+            if($userIndex >= $userslength){
+                $userIndex = 0;
+            }
+            // update(['idtest'=$userfaults[$fault]>])
+          
+      
+
+        }
+//dd($userfaults) ;
+        return $userfaults;
+
     }
 }

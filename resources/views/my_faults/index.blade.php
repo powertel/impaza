@@ -14,9 +14,7 @@ My Faults
     <div class="card-header">
         <h3 class="card-title">{{_('My Faults')}}</h3>
         <div class="card-tools">
-            @can('fault-create')
-                <a  class="btn btn-primary btn-sm" href="{{ route('faults.create') }}"><i class="fas fa-plus-circle"></i>{{_('Log Fault')}} </a>
-            @endcan
+
             
         </div>
     </div>

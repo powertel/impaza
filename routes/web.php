@@ -92,3 +92,7 @@ Route::get('getusers', [UserController::class,'getUsers'])->name('getusers');
 
 
 
+Route::get('auto', [AssessmentController::class,'assign']);
+
+
+
