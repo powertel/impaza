@@ -84,6 +84,20 @@ User
                     </div>
                 </div>
 
+                <div class="form-group row">
+                    <label for="user_status" class="col-sm-3 col-form-label">Status</label>
+                    <div class="col-sm-9">
+                        <select class="custom-select" id="user_status" name="user_status">
+                            <option selected="selected" value="{{ $user->user_status}}">{{ $user->status_name }}</option>
+                            @foreach($user_statuses as $status)
+                                @unless ($status->id ===$user->user_status)
+                                    <option value="{{ $status->id}}">{{ $status->status_name }}</option>
+                                @endunless
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
 <!--                 <div class="form-group row">
                     <label for="password" class="col-sm-3 col-form-label">Password</label>
                     <div class="col-sm-9">

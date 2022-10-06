@@ -24,6 +24,7 @@ Department Faults
                     <th>Customer</th>
                     <th>Account Manager</th>
                     <th>Link Name</th>
+                    <th>Assigned To</th>
                     <th>Status</th>
                     <th>Actions</th>
                 </tr>
@@ -35,6 +36,7 @@ Department Faults
                     <td>{{ $fault->customer }}</td>
                     <td>{{ $fault->accountManager }}</td>
                     <td>{{ $fault->link }}</td>
+                    <td>{{ $fault->name }}</td>
                     <td style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? 'none' }};">
                         <strong>{{$fault->description}}</strong> 
                     </td>

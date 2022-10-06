@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('fault_section', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('section_id');
+            $table->unsignedInteger('section_id')->nullable();
             $table->unsignedInteger('fault_id');
             $table->unsignedInteger('user_id')->nullable();
             $table->timestamps();

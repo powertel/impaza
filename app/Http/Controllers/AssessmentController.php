@@ -30,7 +30,7 @@ class AssessmentController extends Controller
      */
     public function index(Request $req)
     {
-        $user = auth()->user();
+/*         $user = auth()->user();
         $faults = Section::find(auth()->user()->section_id)->faults()
                 ->leftJoin('users','fault_section.section_id','=','users.section_id')
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
@@ -41,6 +41,19 @@ class AssessmentController extends Controller
                 ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
                 'account_managers.accountManager','faults.suspectedRfo','links.link'
                 ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
+        return view('assessments.index',compact('faults'))
+        ->with('i'); */
+
+        $faults = DB::table('faults')
+            ->leftjoin('customers','faults.customer_id','=','customers.id')
+            ->leftjoin('links','faults.link_id','=','links.id')
+            ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
+            ->leftjoin('statuses','faults.status_id','=','statuses.id')
+            ->orderBy('faults.created_at', 'desc')
+            ->where('faults.status_id','=',1)
+            ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
+            'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description'
+            ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
         return view('assessments.index',compact('faults'))
         ->with('i');
     }
@@ -210,7 +223,7 @@ class AssessmentController extends Controller
             {
                 DB::rollback();
             }
-            return redirect(route('department_faults.index')) 
+            return redirect(route('assessments.index')) 
             ->with('success','Fault Assessed');
         }
         catch(Exception $ex)

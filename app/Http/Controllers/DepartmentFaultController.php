@@ -13,6 +13,7 @@ use App\Models\Remark;
 use App\Models\AccountManager;
 use App\Models\Section;
 use App\Models\User;
+use App\Models\UserStatus;
 use DB;
 
 class DepartmentFaultController extends Controller
@@ -42,12 +43,13 @@ class DepartmentFaultController extends Controller
                 ->orderBy('faults.created_at', 'desc')
                 ->where('users.id','=',auth()->user()->id)
                 ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
-                'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description','users.name'
+                'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description','faults.assignedTo','users.name'
                 ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
 
                 $autoAssign = $this->autoAssign(auth()->user()->section_id);
         return view('department_faults.index',compact('faults','autoAssign'))
         ->with('i');
+        
     }
 
     /**
@@ -145,7 +147,9 @@ class DepartmentFaultController extends Controller
    
         $users = User::join('departments','users.department_id','=','departments.id')
             ->leftjoin('sections','users.section_id','=','sections.id')
+            ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
             ->where('sections.id','=',$section_id)
+            ->where('user_statuses.status_name','=','active')
             ->pluck('users.id')
             ->toArray();
 
@@ -171,7 +175,7 @@ class DepartmentFaultController extends Controller
             $assign = Fault::find($autoAssign);
             //$req= $request->all();
             $req['assignedTo'] = $userfaults[$autoAssign];
-            $req['status_id'] = 2;
+            $req['status_id'] = 3;
             $assign ->update($req);
 
             $userIndex ++;

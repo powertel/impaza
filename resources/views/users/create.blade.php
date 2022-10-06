@@ -83,12 +83,19 @@ User
 
                 
                 <div class="form-group row">
-                    <label for="posirion" class="col-sm-3 col-form-label">Status</label>
+                    <label for="status" class="col-sm-3 col-form-label">Status</label>
                     <div class="col-sm-9">
-                        <select id="position"  class="custom-select @error('position_id') is-invalid @enderror" name="position_id">
-                            <option selected disabled>Select Status</option>
-                            <option value="">Active</option>
-                            <option value="">Inactive</option>
+                        <select  class="custom-select @error('user_status') is-invalid @enderror" name="user_status" >
+                            <option selected disabled >Select Status</option>
+                            @foreach($user_statuses as $status)
+                    
+                                @if (old('user_status')==$status->id)
+                                    <option value="{{ $status->id}}" selected>{{ $status->status_name }}</option>
+                                @else
+                                    <option value="{{ $status->id}}">{{ $status->status_name }}</option>
+                                @endif
+
+                            @endforeach
                         </select>
                     </div>
                 </div>

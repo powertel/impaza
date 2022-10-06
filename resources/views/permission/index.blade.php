@@ -10,7 +10,7 @@
         <div class="card-header">
             <h3 class="card-title">Permission Table</h3>
             <div class="card-tools">
-                <a href="{{ route('permission.create') }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></i>Create new permission</a>
+               <!--  <a href="{{ route('permission.create') }}" class="btn btn-primary"><i class="fa fa-plus-circle"></i></i>Create new permission</a> -->
             </div>
         </div>
 

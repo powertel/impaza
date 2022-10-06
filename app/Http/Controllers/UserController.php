@@ -8,6 +8,7 @@ use App\Models\Department;
 use App\Models\Section;
 use App\Models\Position;
 use App\Models\SectionUser;
+use App\Models\UserStatus;
 use Spatie\Permission\Models\Role;
 use DB;
 use Hash;
@@ -32,7 +33,8 @@ class UserController extends Controller
         $users = User::join('departments','users.department_id','=','departments.id')
                 ->leftjoin('sections','users.section_id','=','sections.id')
                 ->leftjoin('positions','users.position_id','=','positions.id')
-                ->get(['users.id','users.name','users.email','users.department_id','users.position_id','users.section_id','sections.section','departments.department','positions.position']);
+                ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
+                ->get(['users.id','users.name','users.email','users.department_id','users.position_id','users.section_id','sections.section','departments.department','positions.position','user_statuses.status_name']);
         return view('users.index',compact('users'))
         ->with('i');
     }
@@ -47,7 +49,8 @@ class UserController extends Controller
         $department = Department::all();
         $section = Section::all();
         $position = Position::all();
-        return view('users.create',compact('roles','department','section','position'));
+        $user_statuses = UserStatus::all();
+        return view('users.create',compact('roles','department','section','position','user_statuses'));
     }
 
     /**
@@ -148,8 +151,9 @@ class UserController extends Controller
         $user = User::leftjoin('departments','users.department_id','=','departments.id')
                 ->leftjoin('sections','users.section_id','=','sections.id')
                 ->leftjoin('positions','users.position_id','=','positions.id')
+                ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
                 ->where('users.id','=',$id)
-                ->get(['users.id','users.name','users.email','users.department_id','users.position_id','users.section_id','sections.section','departments.department','positions.position'])
+                ->get(['users.id','users.name','users.email','users.department_id','users.position_id','users.section_id','sections.section','departments.department','positions.position','users.user_status','user_statuses.status_name'])
                 ->first();
 //dd($user);
         $roles = Role::pluck('name','name')->all();
@@ -157,8 +161,9 @@ class UserController extends Controller
         $department = Department::all();
         $section = Section::all();
         $position = Position::all();
+        $user_statuses = UserStatus::all();
     
-        return view('users.edit',compact('user','roles','userRole','department','section','position'));
+        return view('users.edit',compact('user','roles','userRole','department','section','position','user_statuses'));
     }
 
     /**

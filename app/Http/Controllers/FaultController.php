@@ -129,7 +129,6 @@ class FaultController extends Controller
             $fault_section = FaultSection::create(
                 [
                     'fault_id'=> $fault->id,
-                    'section_id' => 1,
                 ]
             );
           //  $request->user()->posts()->create($request->only('body'));
