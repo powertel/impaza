@@ -79,6 +79,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('pop/{id}', [FaultController::class,'findPop'])->name('pop');
     Route::get('section/{id}', [DepartmentController::class,'findSection'])->name('section');
     Route::get('position/{id}', [DepartmentController::class,'findPosition'])->name('position');
+    Route::put('auto/{id}/auto', [AssessmentController::class,'assign'])->name('auto');
 });
 
 
@@ -92,7 +93,7 @@ Route::get('getusers', [UserController::class,'getUsers'])->name('getusers');
 
 
 
-Route::get('auto', [AssessmentController::class,'assign']);
+Route::put('auto', [AssessmentController::class,'assign']);
 
 
 

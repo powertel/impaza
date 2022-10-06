@@ -49,16 +49,6 @@ Profile
                                             </div>
 
                                             <div class="form-group">
-                                                <label for="email">Email Address</label>
-                                                <input type="email" name="email"  id="email" class="form-control @error('email') is-invalid @enderror" value="{{ auth()->user()->email }}" placeholder="E-mail Address">
-                                                @error('siteemail')
-                                                    <span class="invalid-feedback" role="alert">
-                                                        <strong>{{ $message }}</strong>
-                                                    </span>
-                                                @enderror
-                                            </div>
-
-                                            <div class="form-group">
                                                 <label for="phone">Phone Number</label>
                                                 <input type="text" name="phonenumber" id="phone" class="form-control @error('phone') is-invalid @enderror" placeholder="Phone Number" value="{{ auth()->user()->phonenumber }}" required>
                                                 @error('phonenumber')

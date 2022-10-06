@@ -32,6 +32,7 @@ class DepartmentFaultController extends Controller
     public function index(Request $req)
     {
         $user = auth()->user();
+        
         $faults = Section::find(auth()->user()->section_id)->faults()
                 ->leftJoin('users','fault_section.section_id','=','users.section_id')
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
@@ -43,7 +44,9 @@ class DepartmentFaultController extends Controller
                 ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
                 'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description','users.name'
                 ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
-        return view('department_faults.index',compact('faults'))
+
+                $autoAssign = $this->autoAssign(auth()->user()->section_id);
+        return view('department_faults.index',compact('faults','autoAssign'))
         ->with('i');
     }
 
@@ -134,4 +137,54 @@ class DepartmentFaultController extends Controller
     ->with('i'); */
 
     }
+
+
+
+    public function autoAssign($section_id)
+    {
+   
+        $users = User::join('departments','users.department_id','=','departments.id')
+            ->leftjoin('sections','users.section_id','=','sections.id')
+            ->where('sections.id','=',$section_id)
+            ->pluck('users.id')
+            ->toArray();
+
+        $faults = DB::table('fault_section')
+            ->leftjoin('faults','fault_section.fault_id','=','faults.id')
+            ->whereNull('faults.assignedTo')
+            ->where('fault_section.section_id','=',$section_id)
+            ->pluck('faults.id')
+            ->toArray();
+
+        $userslength=count($users);
+        $userIndex = 0;
+        $userfaults =[];
+
+        for($i=0; $i < count($faults); $i++){
+
+            $autoAssign  = $faults[$i];
+
+            $userfaults[$autoAssign] = $users[$userIndex]; 
+
+            $user = $users[$userIndex];
+
+            $assign = Fault::find($autoAssign);
+            //$req= $request->all();
+            $req['assignedTo'] = $userfaults[$autoAssign];
+            $req['status_id'] = 2;
+            $assign ->update($req);
+
+            $userIndex ++;
+        
+            if($userIndex >= $userslength){
+                $userIndex = 0;
+            }
+        }
+        //dd($assign);
+        //return redirect(route('department_faults.index')) 
+        //->with('success','Fault Assessed');
+        
+
+    }
+
 }

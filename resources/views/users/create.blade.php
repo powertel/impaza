@@ -81,6 +81,18 @@ User
                     </div>
                 </div>
 
+                
+                <div class="form-group row">
+                    <label for="posirion" class="col-sm-3 col-form-label">Status</label>
+                    <div class="col-sm-9">
+                        <select id="position"  class="custom-select @error('position_id') is-invalid @enderror" name="position_id">
+                            <option selected disabled>Select Status</option>
+                            <option value="">Active</option>
+                            <option value="">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="form-group row">
                     <label for="password" class="col-sm-3 col-form-label">Password</label>
                     <div class="col-sm-9">
@@ -94,6 +106,7 @@ User
                         <input type="password" class="form-control @error('confirm-password') is-invalid @enderror" name="confirm-password" placeholder="Confirm Ppassword">
                     </div>
                 </div>
+
 
         
                 <div class="card-footer">

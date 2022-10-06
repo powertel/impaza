@@ -202,45 +202,7 @@ class AssessmentController extends Controller
                 ]
             );
     
-            $users = User::join('departments','users.department_id','=','departments.id')
-                ->leftjoin('sections','users.section_id','=','sections.id')
-                ->where('sections.id','=',1)
-                ->pluck('users.id')
-                ->toArray();
-    
-            $faults = DB::table('fault_section')
-                ->leftjoin('faults','fault_section.fault_id','=','faults.id')
-                ->whereNull('faults.assignedTo')
-                ->where('fault_section.section_id','=',1)
-                ->pluck('faults.id')
-                ->toArray();
-    
-            $userslength=count($users);
-            $userIndex = 0;
-            $userfaults =[];
-    
-            for($i=0; $i < count($faults); $i++){
-    
-                $autoAssign  = $faults[$i];
-
-                $userfaults[$autoAssign] = $users[$userIndex]; 
-
-                $user = $users[$userIndex];
-    
-                $assign = Fault::find($autoAssign);
-                $req= $request->all();
-                $req['assignedTo'] = $userfaults[$autoAssign];
-                $assign ->update($req);
-    
-                $userIndex ++;
-          
-                if($userIndex >= $userslength){
-                    $userIndex = 0;
-                }
-            }
-            //dd($assign);
-    
-            if($fault  && $fault_section && $assign)
+            if($fault  && $fault_section)
             {
                 DB::commit();
             }
@@ -300,12 +262,9 @@ class AssessmentController extends Controller
             if($userIndex >= $userslength){
                 $userIndex = 0;
             }
-            // update(['idtest'=$userfaults[$fault]>])
-          
-      
 
         }
-//dd($userfaults) ;
+
         return $userfaults;
 
     }

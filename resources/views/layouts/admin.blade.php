@@ -248,7 +248,7 @@
                         <li class="nav-item">
                             <a  class="nav-link"  href="{{ route('chief-tech-clear.index') }}">
                                 <i class="nav-icon 	fas fa-exclamation-triangle"></i>
-                                <p>Chief Tech Clear Faults</p>
+                                <p>Clear Faults</p>
                             </a>
                         </li>                            
                         @endcan

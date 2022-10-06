@@ -29,6 +29,7 @@ Users
                     <th>Email</th>
                     <th>Roles</th>
                     <th>Department</th>
+                    <th>Section</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -46,6 +47,7 @@ Users
                     @endif
                     </td>
                     <td>{{ $user->department }}</td>
+                    <td>{{ $user->section}}</td>
                     <td>
                         <form action="{{ route('users.destroy',$user->id) }}" method="POST">
                             <a class="btn btn-info btn-sm" style="padding:0px 2px; color:#fff;" href="{{ route('users.show',$user->id) }}">View</a>

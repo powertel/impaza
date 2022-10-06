@@ -80,11 +80,11 @@ User
                 <div class="form-group row">
                     <label for="role" class="col-sm-3 col-form-label">Role</label>
                     <div class="col-sm-9">
-                    {!! Form::select('roles[]', $roles,$userRole, array('class' => 'form-control')) !!}
+                    {!! Form::select('roles[]', $roles,$userRole, array('class' => 'custom-select')) !!}
                     </div>
                 </div>
 
-                <div class="form-group row">
+<!--                 <div class="form-group row">
                     <label for="password" class="col-sm-3 col-form-label">Password</label>
                     <div class="col-sm-9">
                         <input type="text" class="form-control @error('password') is-invalid @enderror" name="password" >
@@ -96,7 +96,7 @@ User
                     <div class="col-sm-9">
                         <input type="text" class="form-control @error('confirm-password') is-invalid @enderror" name="confirm-password" >
                     </div>
-                </div>
+                </div> -->
         
                 <div class="card-footer">
                     <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
