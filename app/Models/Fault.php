@@ -61,9 +61,4 @@ class Fault extends Model
     {
         return $this->belongsToMany(Section::class);
     }
-
-    public function users()
-    {
-        return $this->belongsTo(User::class);
-    }
 }
