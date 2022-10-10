@@ -34,10 +34,11 @@ class FaultController extends Controller
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
                 ->leftjoin('links','faults.link_id','=','links.id')
                 ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
+                ->leftjoin('users','faults.assignedTo','=','users.id')
                 ->leftjoin('statuses','faults.status_id','=','statuses.id')
                 ->orderBy('faults.created_at', 'desc')
                 ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
-                'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description'
+                'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description','users.name'
                 ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
         return view('faults.index',compact('faults'))
         ->with('i');

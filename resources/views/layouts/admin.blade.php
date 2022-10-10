@@ -190,12 +190,14 @@
                         </li>                            
                         @endcan
 
+                        @can('assessement-fault-list')
                         <li  class="nav-item">
                             <a href="{{ route('assessments.index') }}" class="nav-link">
                                 <i class="nav-icon 	fas fa-radiation"></i>
                                 <p>Assess Faults</p>
                             </a>
-                        </li>
+                        </li>                                
+                        @endcan
 
                         @can('finance')
                         <li class="nav-item">

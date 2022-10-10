@@ -90,8 +90,9 @@ class AssignController extends Controller
         ->leftjoin('pops','faults.pop_id','=','pops.id')
         ->leftjoin('remarks','remarks.fault_id','=','faults.id')
         ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
+        ->leftjoin('users','faults.assignedTo','=','users.id')
         ->where('faults.id','=',$id)
-        ->get(['faults.id','faults.customer_id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
+        ->get(['faults.id','faults.customer_id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','users.name',
         'account_managers.accountManager','faults.accountManager_id','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo','faults.link_id','links.link'
         ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
         ->first();
