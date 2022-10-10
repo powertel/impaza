@@ -108,6 +108,7 @@ class AssignController extends Controller
         $technicians = DB::table('users')
                     ->leftJoin('sections','users.section_id','=','sections.id')
                     ->where('users.section_id','=',auth()->user()->section_id)
+                    ->where('user_statuses.status_name','=','active')
                     ->get(['users.id','users.name']);
                     //dd($technicians);
 

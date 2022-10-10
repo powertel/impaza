@@ -224,7 +224,6 @@ class UserController extends Controller
        // dd($user);
         $this->validate($request,[
             'name'=>'required',
-            'email'=>'required|email|unique:users,email,'.$user->id,
             'phonenumber'=>'required'
 
         ]);
@@ -232,7 +231,6 @@ class UserController extends Controller
        /// $user->update($request->all());
        $user->update([
         'name'=>$request->name,
-        'email'=>$request->email,
         'phonenumber'=>$request->phonenumber
        ]);
 
