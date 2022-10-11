@@ -161,7 +161,6 @@ class DepartmentFaultController extends Controller
         ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
         ->orderBy('faults.created_at', 'desc')
         ->where('fault_section.section_id','=',auth()->user()->section_id)
-       // ->where('users.id','=',auth()->user()->id)
         ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
         'account_managers.accountManager','faults.suspectedRfo','links.link'
         ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
@@ -204,7 +203,6 @@ class DepartmentFaultController extends Controller
             $user = $users[$userIndex];
 
             $assign = Fault::find($autoAssign);
-            //$req= $request->all();
             $req['assignedTo'] = $userfaults[$autoAssign];
             $req['status_id'] = 3;
             $assign ->update($req);
@@ -215,11 +213,8 @@ class DepartmentFaultController extends Controller
                 $userIndex = 0;
             }
         }
-        //dd($assign);
-        //return redirect(route('department_faults.index')) 
-        //->with('success','Fault Assessed');
         
-
     }
 
 }
+

@@ -25,10 +25,12 @@ Faults
             <thead>
                 <tr>
                     <th>No.</th>
+                    <th>fault No.</th>
                     <th>Customer</th>
                     <th>Account Manager</th>
-                    <th>Link Name</th>
+                    <th>Link</th>
                     <th>Assigned To</th>
+                    <th>Reported</th>
                     <th>Status</th>
                     <th>Actions</th>
                 </tr>
@@ -37,10 +39,12 @@ Faults
                 @foreach ($faults as $fault)
                  <tr >
                     <td>{{ ++$i }}</td>
+                    <td>{{$fault->id}}</td>
                     <td>{{ $fault->customer }}</td>
                     <td>{{ $fault->accountManager }}</td>
                     <td>{{ $fault->link }}</td>
                     <td>{{$fault->name}}</td>
+                    <th>{{$fault->created_at}}</th>
                     <td style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? 'none' }};">
                        <strong>{{$fault->description}}</strong> 
                     </td>
