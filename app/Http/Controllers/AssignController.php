@@ -21,7 +21,7 @@ class AssignController extends Controller
 {
     function __construct()
     {
-        $this->middleware('permission:assign-fault-list|assign-fault-create|assign-fault-edit|assign-fault-delete', ['only' => ['index','store']]);
+        $this->middleware('permission:assigned-fault-list|assign-fault-create|assign-fault-edit|assign-fault-delete', ['only' => ['index','store']]);
          $this->middleware('permission:assign-fault', ['only' => ['edit','update']]); 
     }
     /**
