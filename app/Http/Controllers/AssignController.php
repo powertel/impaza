@@ -14,6 +14,7 @@ use App\Models\AccountManager;
 use App\Models\User;
 use App\Models\Section;
 use App\Models\FaultSection;
+use App\Models\UserStatus;
 use DB;
 
 class AssignController extends Controller
@@ -31,13 +32,21 @@ class AssignController extends Controller
     public function index()
     {
         $faults = DB::table('faults')
-                ->leftjoin('customers','faults.customer_id','=','customers.id')
-                ->leftjoin('links','faults.link_id','=','links.id')
-                ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
-                ->orderBy('faults.created_at', 'desc')
-                ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
-                'account_managers.accountManager','faults.suspectedRfo','links.link'
-                ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
+        ->leftjoin('fault_section','faults.id','=','fault_section.fault_id')
+        ->leftjoin('users','faults.assignedTo','=','users.id')
+        ->leftjoin('sections','fault_section.section_id','=','sections.id')
+        ->leftjoin('customers','faults.customer_id','=','customers.id')
+        ->leftjoin('links','faults.link_id','=','links.id')
+        ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
+        ->leftjoin('statuses','faults.status_id','=','statuses.id')
+        ->orderBy('faults.created_at', 'desc')
+        ->where('fault_section.section_id','=',auth()->user()->section_id)
+       ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
+       'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description','faults.assignedTo','users.name'
+       ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
+
+
+       $autoAssign = $this->autoAssign(auth()->user()->section_id);
         return view('assign.index',compact('faults'))
         ->with('i');
     }
@@ -150,10 +159,52 @@ class AssignController extends Controller
 
 
 
+    public function autoAssign($section_id)
+    {
+   
+        $users = User::join('departments','users.department_id','=','departments.id')
+            ->leftjoin('sections','users.section_id','=','sections.id')
+            ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
+            ->where('sections.id','=',$section_id)
+            ->where('user_statuses.id','=',1)
+            ->pluck('users.id')
+            ->toArray();
+
+        $faults = DB::table('fault_section')
+            ->leftjoin('faults','fault_section.fault_id','=','faults.id')
+            ->whereNull('faults.assignedTo')
+            ->where('fault_section.section_id','=',$section_id)
+            ->pluck('faults.id')
+            ->toArray();
+
+        $userslength=count($users);
+        $userIndex = 0;
+        $userfaults =[];
+
+        for($i=0; $i < count($faults); $i++){
+
+            $autoAssign  = $faults[$i];
+
+            $userfaults[$autoAssign] = $users[$userIndex]; 
+
+            $user = $users[$userIndex];
+
+            $assign = Fault::find($autoAssign);
+            $req['assignedTo'] = $userfaults[$autoAssign];
+            $req['status_id'] = 3;
+            $assign ->update($req);
+
+            $userIndex ++;
+        
+            if($userIndex >= $userslength){
+                $userIndex = 0;
+            }
+        }
+        
+    }
 
 
-
-
+/* 
 public function autoAssign(Request $request, $id)
     {
         DB::beginTransaction();
@@ -235,7 +286,7 @@ public function autoAssign(Request $request, $id)
         }
 //$this->assign();
     }
-
+ */
 }
 
 

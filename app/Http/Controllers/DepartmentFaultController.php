@@ -64,7 +64,7 @@ class DepartmentFaultController extends Controller
        'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description','faults.assignedTo','users.name'
        ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
 
-        $autoAssign = $this->autoAssign(auth()->user()->section_id);
+
     return view('department_faults.index',compact('faults'))
     ->with('i');
         

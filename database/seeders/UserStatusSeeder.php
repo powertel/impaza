@@ -15,8 +15,8 @@ class UserStatusSeeder extends Seeder
      */
     public function run()
     {
-        $user_statuses =  ['Active',
-            'Inactive'];
+        $user_statuses =  ['Assignable',
+            'Unassignable'];
 
         foreach ($user_statuses as $user_status) {
             UserStatus::create(['status_name' => $user_status]);

@@ -63,7 +63,6 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('assign', AssignController::class);
     Route::resource('chief-tech-clear', ChiefTechClearFaultsController::class);
     Route::resource('noc-clear', NocClearFaultsController::class);
-    Route::resource('assign', AssignController::class);
     Route::resource('permits', PermitController::class);
     Route::resource('finance', FinanceController::class);
     Route::resource('my_faults', MyFaultController::class);
