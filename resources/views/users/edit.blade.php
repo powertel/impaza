@@ -80,7 +80,21 @@ User
                 <div class="form-group row">
                     <label for="role" class="col-sm-3 col-form-label">Role</label>
                     <div class="col-sm-9">
-                    {!! Form::select('roles[]', $roles,$userRole, array('class' => 'form-control')) !!}
+                    {!! Form::select('roles[]', $roles,$userRole, array('class' => 'custom-select')) !!}
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="user_status" class="col-sm-3 col-form-label">Status</label>
+                    <div class="col-sm-9">
+                        <select class="custom-select" id="user_status" name="user_status">
+                            <option selected="selected" value="{{ $user->user_status}}">{{ $user->status_name }}</option>
+                            @foreach($user_statuses as $status)
+                                @unless ($status->id ===$user->user_status)
+                                    <option value="{{ $status->id}}">{{ $status->status_name }}</option>
+                                @endunless
+                            @endforeach
+                        </select>
                     </div>
                 </div>
 
@@ -96,7 +110,7 @@ User
                     <div class="col-sm-9">
                         <input type="text" class="form-control @error('confirm-password') is-invalid @enderror" name="confirm-password" >
                     </div>
-                </div>
+                </div> 
         
                 <div class="card-footer">
                     <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>

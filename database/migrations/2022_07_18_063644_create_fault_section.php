@@ -15,8 +15,9 @@ return new class extends Migration
     {
         Schema::create('fault_section', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('section_id');
+            $table->unsignedInteger('section_id')->nullable();
             $table->unsignedInteger('fault_id');
+            $table->unsignedInteger('user_id')->nullable();
             $table->timestamps();
             $table->foreign('section_id')
                 ->references('id')
@@ -24,6 +25,9 @@ return new class extends Migration
             $table->foreign('fault_id')
                     ->references('id')
                     ->on('faults');
+            $table->foreign('user_id')
+            ->references('id')
+            ->on('users');
             
         });
     }

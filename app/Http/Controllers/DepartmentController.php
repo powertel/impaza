@@ -27,7 +27,7 @@ class DepartmentController extends Controller
     {
 
         $departments = DB::table('departments')
-                ->orderBy('departments.created_at', 'desc')
+                ->orderBy('departments.department', 'asc')
                 ->get();
 
         return view('departments.index', compact('departments'))
@@ -149,7 +149,7 @@ class DepartmentController extends Controller
     public function update(Request $request, Department $department)
     {
         $request->validate([
-            'department' => 'required',
+            'department' => 'required|string|unique:departments',
             
         ]);
       

@@ -32,7 +32,7 @@ class LinkController extends Controller
             ->leftjoin('cities','links.city_id','=','cities.id')
             ->leftjoin('suburbs','links.suburb_id','=','suburbs.id')
             ->leftjoin('pops','links.pop_id','=','pops.id')
-            ->orderBy('links.created_at', 'desc')
+            ->orderBy('cities.city', 'asc')
             ->get(['links.id','links.link','customers.customer','cities.city','pops.pop','suburbs.suburb']);
         return view('links.index',compact('links'))
         ->with('i');
@@ -46,7 +46,10 @@ class LinkController extends Controller
     public function create()
     {
         $city = City::all();
-        $customer = Customer::all();
+        //$customer = Customer::all();
+        $customer = DB::table('customers')
+        ->orderBy('customers.customer', 'asc')
+        ->get();
         $location = Suburb::all();
         $link = Link::all();
         $pop = Pop::all();
@@ -68,7 +71,9 @@ class LinkController extends Controller
             'customer_id' => 'required',
             'link' => 'required|string|unique:links'
         ]);
-        $link = Link::create($request->all());
+        $req = $request->all();
+        $req['link_status'] = 1;
+        $link = Link::create($req);
 
         if($link)
         {
@@ -92,9 +97,9 @@ class LinkController extends Controller
     {
         $link = DB::table('links')
                 ->leftjoin('customers','links.customer_id','=','customers.id')
-                ->leftjoin('cities','customers.city_id','=','cities.id')
-                ->leftjoin('suburbs','customers.suburb_id','=','suburbs.id')
-                ->leftjoin('pops','customers.pop_id','=','pops.id')
+                ->leftjoin('cities','links.city_id','=','cities.id')
+                ->leftjoin('suburbs','links.suburb_id','=','suburbs.id')
+                ->leftjoin('pops','links.pop_id','=','pops.id')
                 ->where('links.id','=',$id)
                 ->get(['links.id','links.link','customers.customer','cities.city','pops.pop','suburbs.suburb'])
                 ->first();
@@ -111,9 +116,9 @@ class LinkController extends Controller
     {
         $link = DB::table('links')
                 ->leftjoin('customers','links.customer_id','=','customers.id')
-                ->leftjoin('cities','customers.city_id','=','cities.id')
-                ->leftjoin('suburbs','customers.suburb_id','=','suburbs.id')
-                ->leftjoin('pops','customers.pop_id','=','pops.id')
+                ->leftjoin('cities','links.city_id','=','cities.id')
+                ->leftjoin('suburbs','links.suburb_id','=','suburbs.id')
+                ->leftjoin('pops','links.pop_id','=','pops.id')
                 ->where('links.id','=',$id)
                 ->get(['links.id','links.link','links.customer_id','links.city_id','links.pop_id','links.suburb_id','customers.customer','cities.city','pops.pop','suburbs.suburb'])
                 ->first();
@@ -149,4 +154,5 @@ class LinkController extends Controller
     {
         //
     }
+
 }

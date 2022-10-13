@@ -14,6 +14,8 @@ class Link extends Model
         'city_id',
         'suburb_id',
         'pop_id',
+        'link_status',
+        'contract_number',
         'customer_id'
     ];
 

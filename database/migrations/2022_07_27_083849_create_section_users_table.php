@@ -13,10 +13,17 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('customers', function (Blueprint $table) {
+        Schema::create('section_users', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('customer');
+            $table->unsignedInteger('section_id');
+            $table->unsignedInteger('user_id')->nullable();
             $table->timestamps();
+            $table->foreign('section_id')
+                ->references('id')
+                ->on('sections');
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users');
         });
     }
 
@@ -27,6 +34,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('customers');
+        Schema::dropIfExists('section_users');
     }
 };

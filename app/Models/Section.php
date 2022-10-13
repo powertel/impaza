@@ -30,5 +30,10 @@ class Section extends Model
         return $this->belongsToMany(Fault::class);
     }
 
+    //relationship of section and faults
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
+    }
 
 }

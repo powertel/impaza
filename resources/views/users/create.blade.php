@@ -81,6 +81,25 @@ User
                     </div>
                 </div>
 
+                
+                <div class="form-group row">
+                    <label for="status" class="col-sm-3 col-form-label">Status</label>
+                    <div class="col-sm-9">
+                        <select  class="custom-select @error('user_status') is-invalid @enderror" name="user_status" >
+                            <option selected disabled >Select Status</option>
+                            @foreach($user_statuses as $status)
+                    
+                                @if (old('user_status')==$status->id)
+                                    <option value="{{ $status->id}}" selected>{{ $status->status_name }}</option>
+                                @else
+                                    <option value="{{ $status->id}}">{{ $status->status_name }}</option>
+                                @endif
+
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
                 <div class="form-group row">
                     <label for="password" class="col-sm-3 col-form-label">Password</label>
                     <div class="col-sm-9">
@@ -94,6 +113,7 @@ User
                         <input type="password" class="form-control @error('confirm-password') is-invalid @enderror" name="confirm-password" placeholder="Confirm Ppassword">
                     </div>
                 </div>
+
 
         
                 <div class="card-footer">

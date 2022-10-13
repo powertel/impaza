@@ -25,7 +25,8 @@ class User extends Authenticatable
         'department_id',
         'section_id',
         'position_id',
-        'phonenumber'
+        'phonenumber',
+        'user_status'
     ];
 
     /**
@@ -51,4 +52,15 @@ class User extends Authenticatable
     {
         return $this->hasMany(Remark::class);
     }
+
+        //relationship of section and faults
+        public function sections()
+        {
+            return $this->belongsToMany(Section::class);
+        }
+
+        public function faults()
+        {
+            return $this->hasMany(Fault::class);
+        }
 }

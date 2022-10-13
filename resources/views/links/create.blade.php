@@ -82,12 +82,11 @@ Link
                         <input type="text" class="form-control  @error('link') is-invalid @enderror" name="link" placeholder="Link Name" value="{{ old('link') }}">
                     </div>
                 </div>
-
            
-                    <div class="card-footer">
-                        <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
-                        <a type="button" class="btn btn-danger btn-sm" href="{{ url()->previous() }}">{{ __('Cancel') }}</a>
-                    </div>
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
+                    <a type="button" class="btn btn-danger btn-sm" href="{{ url()->previous() }}">{{ __('Cancel') }}</a>
+                </div>
                 </form> 
             </div> 
         </div>

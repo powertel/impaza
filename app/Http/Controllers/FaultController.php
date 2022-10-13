@@ -34,10 +34,11 @@ class FaultController extends Controller
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
                 ->leftjoin('links','faults.link_id','=','links.id')
                 ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
+                ->leftjoin('users','faults.assignedTo','=','users.id')
                 ->leftjoin('statuses','faults.status_id','=','statuses.id')
                 ->orderBy('faults.created_at', 'desc')
                 ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
-                'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description'
+                'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description','users.name'
                 ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
         return view('faults.index',compact('faults'))
         ->with('i');
@@ -51,7 +52,9 @@ class FaultController extends Controller
     public function create()
     {
         $city = City::all();
-        $customer = Customer::all();
+        $customer = DB::table('customers')
+            ->orderBy('customers.customer', 'asc')
+            ->get();
         $location = Suburb::all();
         $link = Link::all();
         $pop = Pop::all();
@@ -76,9 +79,11 @@ class FaultController extends Controller
     public function findLink($id)
     {
         $link = Link::where('customer_id',$id)
+        ->where('links.link_status','=',2)
         ->pluck("link","id");
         return response()->json($link);
     }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -125,7 +130,6 @@ class FaultController extends Controller
             $fault_section = FaultSection::create(
                 [
                     'fault_id'=> $fault->id,
-                    'section_id' => 1,
                 ]
             );
           //  $request->user()->posts()->create($request->only('body'));
@@ -232,5 +236,21 @@ class FaultController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+
+    public function faults(Request $req)
+    {
+        $faults = DB::table('faults')
+                ->leftjoin('customers','faults.customer_id','=','customers.id')
+                ->leftjoin('links','faults.link_id','=','links.id')
+                ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
+                ->leftjoin('statuses','faults.status_id','=','statuses.id')
+                ->orderBy('faults.created_at', 'desc')
+                ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
+                'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description'
+                ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
+
+        return response()->json($faults);
     }
 }

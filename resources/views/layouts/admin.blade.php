@@ -190,9 +190,36 @@
                         </li>                            
                         @endcan
 
+                        @can('my-fault-list')
+                        <li class="nav-item">
+                            <a  class="nav-link" href="{{ route('my_faults.index') }}">
+                                <i class="nav-icon 	fas fa-satellite-dish"></i>
+                                <p>My Faults</p>
+                            </a>
+                        </li>                            
+                        @endcan
+
+                        @can('assigned-fault-list')
+                        <li  class="nav-item">
+                            <a href="{{ route('assign.index') }}" class="nav-link">
+                                <i class="nav-icon 	fas fa-radiation"></i>
+                                <p>Assigned Faults</p>
+                            </a>
+                        </li>                                
+                        @endcan
+
+                        @can('assessement-fault-list')
+                        <li  class="nav-item">
+                            <a href="{{ route('assessments.index') }}" class="nav-link">
+                                <i class="nav-icon 	fas fa-radiation"></i>
+                                <p>Assess Faults</p>
+                            </a>
+                        </li>                                
+                        @endcan
+
                         @can('finance')
                         <li class="nav-item">
-                            <a  class="nav-link">
+                            <a href="{{ route('finance.index') }}" class="nav-link">
                                 <i class="nav-icon fas fa-money-check-alt"></i>
                                 <p>Finance</p>
                             </a>
@@ -226,14 +253,7 @@
                         </li>                            
                         @endcan
                         
-                        @can('my-fault-list')
-                        <li class="nav-item">
-                            <a  class="nav-link" href="{{ route('my_faults.index') }}">
-                                <i class="nav-icon 	fas fa-satellite-dish"></i>
-                                <p>My Faults</p>
-                            </a>
-                        </li>                            
-                        @endcan
+
 
                         @can('department-faults-list')
                         <li class="nav-item">
@@ -248,7 +268,7 @@
                         <li class="nav-item">
                             <a  class="nav-link"  href="{{ route('chief-tech-clear.index') }}">
                                 <i class="nav-icon 	fas fa-exclamation-triangle"></i>
-                                <p>Chief Tech Clear Faults</p>
+                                <p>Clear Faults</p>
                             </a>
                         </li>                            
                         @endcan

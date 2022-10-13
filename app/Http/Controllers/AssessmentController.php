@@ -30,7 +30,7 @@ class AssessmentController extends Controller
      */
     public function index(Request $req)
     {
-        $user = auth()->user();
+/*         $user = auth()->user();
         $faults = Section::find(auth()->user()->section_id)->faults()
                 ->leftJoin('users','fault_section.section_id','=','users.section_id')
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
@@ -41,6 +41,19 @@ class AssessmentController extends Controller
                 ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
                 'account_managers.accountManager','faults.suspectedRfo','links.link'
                 ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
+        return view('assessments.index',compact('faults'))
+        ->with('i'); */
+
+        $faults = DB::table('faults')
+            ->leftjoin('customers','faults.customer_id','=','customers.id')
+            ->leftjoin('links','faults.link_id','=','links.id')
+            ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
+            ->leftjoin('statuses','faults.status_id','=','statuses.id')
+            ->orderBy('faults.created_at', 'desc')
+            ->where('faults.status_id','=',1)
+            ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
+            'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description'
+            ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
         return view('assessments.index',compact('faults'))
         ->with('i');
     }
@@ -186,12 +199,14 @@ class AssessmentController extends Controller
                 'faultType'=>'required',
                 'confirmedRfo'=>'required'
             ]);
-
+    
             $fault = Fault::find($id);
             $req= $request->all();
             $req['status_id'] = 2;
             $fault ->update($req);
-
+    
+    
+    
             $fault_section = FaultSection::find($id);
             $fault_section -> update(
                 [
@@ -199,6 +214,7 @@ class AssessmentController extends Controller
                     'section_id' => $request['section_id'],
                 ]
             );
+    
             if($fault  && $fault_section)
             {
                 DB::commit();
@@ -207,14 +223,14 @@ class AssessmentController extends Controller
             {
                 DB::rollback();
             }
-            return redirect(route('department_faults.index')) 
+            return redirect(route('assessments.index')) 
             ->with('success','Fault Assessed');
         }
         catch(Exception $ex)
         {
             DB::rollback();
         }
-
+    //$this->assign();
     }
 
     /**
@@ -226,5 +242,43 @@ class AssessmentController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function assign(){
+
+        $users = User::join('departments','users.department_id','=','departments.id')
+        ->leftjoin('sections','users.section_id','=','sections.id')
+        ->where('sections.id','=',3)
+        ->pluck('users.id')
+        ->toArray();
+
+         $faults = DB::table('fault_section')
+         ->leftjoin('faults','fault_section.fault_id','=','faults.id')
+         ->whereNull('faults.assignedTo')
+         ->where('fault_section.section_id','=',3)
+        ->pluck('faults.id')
+        ->toArray();
+
+        $userfaults =[];
+        $userslength=count($users);
+        $userIndex = 0;
+
+
+        for($i=0; $i < count($faults); $i++){
+    
+            $autoAssign  = $faults[$i];
+
+            $userfaults[$autoAssign] = $users[$userIndex]; 
+            //$assign = $users[$userIndex]; 
+            $userIndex ++;
+      
+            if($userIndex >= $userslength){
+                $userIndex = 0;
+            }
+
+        }
+
+        return $userfaults;
+
     }
 }
