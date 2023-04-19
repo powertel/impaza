@@ -27,9 +27,11 @@ class CreateAdminUserSeeder extends Seeder
         ]);
         $position = Position::create([
             'position'=>'Senior Engineer',
+            'position_id'=>'1',
         ]);
         $userstatus = UserStatus::create([
             'user_statuses' => 'Unassignable',
+            'user_statuses_id'=>'1',
         ]);
         $role = Role::create(['name' => 'Admin']);
 
