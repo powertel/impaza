@@ -24,7 +24,7 @@ class CreateAdminUserSeeder extends Seeder
         ]) ;
         $section = Section::create([
             'section' => 'NOC',
-             'department_id' => '1',
+             'department_id' => $department->id,
 
         ]);
         $user = User::create([
