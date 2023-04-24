@@ -6,6 +6,8 @@ use App\Models\Position;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use App\Models\Department;
+use App\Models\Section;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use App\Models\UserStatus;
@@ -20,6 +22,14 @@ class CreateAdminUserSeeder extends Seeder
     public function run()
     {
 
+        $department = Department::create([
+            'department' => 'TECHNICAL',
+        ]) ;
+        $section = Section::create([
+            'section' => 'NOC',
+             'department_id' => $department->id,
+
+        ]);
         $user = User::create([
             'name' => 'Powertel',
             'email' => 'admin@powertel.co.zw',
