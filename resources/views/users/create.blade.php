@@ -17,7 +17,7 @@ User
             <div class="card-body">
                 <form action="{{ route('users.store') }}" method="POST">
                 {{ csrf_field() }}
-        
+
                 <div class="form-group row">
                     <label for="name" class="col-sm-3 col-form-label">Name</label>
                     <div class="col-sm-9">
@@ -61,7 +61,7 @@ User
                 </div>
 
                 <div class="form-group row">
-                    <label for="posirion" class="col-sm-3 col-form-label">Position</label>
+                    <label for="position" class="col-sm-3 col-form-label">Position</label>
                     <div class="col-sm-9">
                         <select id="position"  class="custom-select @error('position_id') is-invalid @enderror" name="position_id">
                             <option selected disabled>Select Position</option>
@@ -73,7 +73,7 @@ User
                         </select>
                     </div>
                 </div>
-                
+
                 <div class="form-group row">
                     <label for="confirm-password" class="col-sm-3 col-form-label">Role</label>
                     <div class="col-sm-9">
@@ -81,14 +81,14 @@ User
                     </div>
                 </div>
 
-                
+
                 <div class="form-group row">
                     <label for="status" class="col-sm-3 col-form-label">Status</label>
                     <div class="col-sm-9">
                         <select  class="custom-select @error('user_status') is-invalid @enderror" name="user_status" >
                             <option selected disabled >Select Status</option>
                             @foreach($user_statuses as $status)
-                    
+
                                 @if (old('user_status')==$status->id)
                                     <option value="{{ $status->id}}" selected>{{ $status->status_name }}</option>
                                 @else
@@ -115,16 +115,16 @@ User
                 </div>
 
 
-        
+
                 <div class="card-footer">
                     <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
                     <a type="button" class="btn btn-danger btn-sm" href="{{ route('users.index') }}">{{ __('Cancel') }}</a>
                 </div>
-                </form> 
-            </div> 
+                </form>
+            </div>
         </div>
     </div>
- 
+
 </section>
 @endsection
 @section('scripts')
