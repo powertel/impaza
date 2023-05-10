@@ -52,7 +52,8 @@ links
                         @method('DELETE')
                         @can('link-delete')
                         <button type="submit" class="btn btn-danger btn-sm" style="padding:0px 2px; color:#fff;">Delete</button>
-                        @endcan
+                                                                                   
+                      @endcan
                     </form>
                         
                         

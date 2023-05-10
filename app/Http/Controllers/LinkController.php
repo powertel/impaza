@@ -152,7 +152,9 @@ class LinkController extends Controller
      */
     public function destroy($id)
     {
-        //
+        Link::find($id)->delete();
+        return redirect()->route('links.index')
+                        ->with('success','Link deleted successfully');
     }
 
 }
