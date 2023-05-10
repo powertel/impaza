@@ -34,7 +34,7 @@ class CreateAdminUserSeeder extends Seeder
             'section_id' => $section->id,
         ]);
         $user_statuses= UserStatus::create([
-            'user_statuses' => 'status_name',
+            'status_name' => 'Unassignable',
         ]) ;
         $user = User::create([
             'name' => 'Powertel',
@@ -44,7 +44,7 @@ class CreateAdminUserSeeder extends Seeder
 
         $role = Role::create(['name' => 'Admin']);
 
-        $permissions = Permission::pluck('id','id')->all();
+        $permissions = Permission::pluck('id','name')->all();
 
         $role->syncPermissions($permissions);
 
