@@ -1,4 +1,29 @@
 <script>
+             function Confirm_Delete()
+       {
+        event.preventDefault();
+        new swal({
+            title: "Are you sure you want to delete this record?",
+            text: "If you delete this, it will be gone forever.",
+            icon: "warning",
+            type: "warning",
+            buttons: ["Cancel","Yes!"],
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '##3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((willDelete) => {
+            if (willDelete.isConfirmed) {
+                $('#theForm').submit();
+                swal.fire('Deleted!','Your file has been deleted.','success');
+            }   
+            else{
+                location.reload();
+            } 
+        });
+    }
+        </script>
+<script>
 $('#city').on('change',function () {
         var CityID = $(this).val();
         if (CityID) {

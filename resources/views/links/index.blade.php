@@ -42,7 +42,7 @@ links
                     <td>{{ $link->pop}}</td>
                     <td>{{ $link->link}}</td>
                     <td>
-                    <form action="{{ route('links.destroy',$link->id) }}" method="POST">
+                    <form  id="theForm" action="{{ route('links.destroy',$link->id) }}" method="POST">
                         <a href="{{ route('links.show',$link->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
                         @can('account-manager-edit')
                         <a href="{{ route('links.edit',$link->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
@@ -51,7 +51,7 @@ links
                         @csrf
                         @method('DELETE')
                         @can('link-delete')
-                        <button type="submit" class="btn btn-danger btn-sm" style="padding:0px 2px; color:#fff;">Delete</button>
+                        <button type="submit" class="btn btn-danger btn-sm" style="padding:0px 2px; color:#fff;" onclick="Confirm_Delete()" >Delete</button>
                                                                                    
                       @endcan
                     </form>
