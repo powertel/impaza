@@ -14,7 +14,7 @@ User
                 </h3>
             </div>
             <div class="card-body">
-                <form action="{{ route('users.update', $user->id ) }}" method="POST">
+                <form id="UF" action="{{ route('users.update', $user->id ) }}" method="POST">
                 @csrf
                 @method('PUT')
 
@@ -115,7 +115,7 @@ User
                 </div>
 
                 <div class="card-footer">
-                    <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
+                    <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()"> Save</button>
                     <a type="button" class="btn btn-danger btn-sm" href="{{ route('users.index') }}">{{ __('Cancel') }}</a>
                 </div>
                 </form>
@@ -124,9 +124,10 @@ User
     </div>
 
 </section>
+
 @endsection
 
 @section('scripts')
-    @include('partials.department')
+ @include('partials.scripts')
 @endsection
 

@@ -1,4 +1,29 @@
 <script>
+     function submitResult(){
+        event.preventDefault();
+        new swal ({
+            title: 'Do you want to save the changes?',
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: 'Save',
+            denyButtonText: `Don't save`,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '##3085d6',
+        }).then((submitResult) => {
+        if (submitResult.isConfirmed) {
+             $('#UF').submit();
+            swal.fire('Saved!',  '', 'success')
+        } else if (submitResult.isDenied) {
+            $('#UF').submit();
+            swal.fire('Changes are not saved', '', 'info');
+        }
+        else{
+            location.reload();
+        }
+        });
+            }
+        </script>
+<script>
 $('#city').on('change',function () {
         var CityID = $(this).val();
         if (CityID) {
