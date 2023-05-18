@@ -13,9 +13,11 @@ new swal({
     dangerMode: true,}).then((willDelete) => {
   if (willDelete.isConfirmed) {
     form.submit();
+    new swal('Deleted','','success')
   } 
    else{
-    javascript:void(0);
+    new swal('File not Deleted','','info')
+    location.reload();
             } 
 });});
 </script>
