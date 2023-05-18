@@ -17,7 +17,7 @@ Pop
             <div class="card-body">
                 <form action="{{ route('pops.store') }}" method="POST">
                 {{ csrf_field() }}
-        
+
                 <div class="form-group row">
                     <label for="city" class="col-sm-3 col-form-label">City/Town</label>
                     <div class="col-sm-9">
@@ -52,16 +52,16 @@ Pop
                         <input type="text" class="form-control @error('pop') is-invalid @enderror" name="pop" placeholder="Pop Name" value="{{ old('pop') }}">
                     </div>
                 </div>
-        
+
                 <div class="card-footer">
-                    <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
+                    <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()"> Save</button>
                     <a type="button" class="btn btn-danger btn-sm" href="{{ url()->previous() }}">{{ __('Cancel') }}</a>
                 </div>
-                </form> 
-            </div> 
+                </form>
+            </div>
         </div>
     </div>
- 
+
 </section>
 @endsection
 @section('scripts')

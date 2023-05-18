@@ -1,9 +1,4 @@
 @extends('layouts.admin')
-
-@section('title')
-Customer
-@endsection
-
 @include('partials.css')
 @section('content')
 
@@ -12,37 +7,43 @@ Customer
         <div class="card w-50">
             <div class="card-header">
                 <h3 class="card-title">
-                    {{_('Update customer')}}
+                    {{_('Update Section')}}
                 </h3>
             </div>
+
             <div class="card-body">
-                <form action="{{ route('customers.update', $customer->id ) }}" method="POST">
+                <form  action="{{ route('sections.update',$section->id) }}" method="POST">
                     @csrf
                     @method('PUT')
+
                     <div class="form-group row">
-                        <label for="customer" class="col-sm-3  col-form-label">Customer</label>
+                        <label for="section" class="col-sm-3 col-form-label">Section</label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" name="customer"  value="{{ $customer->customer}}">
-                            @error ('customer')
+                            <input type="text"  class="form-control" name="section" value="{{ $section->section }}">
+                            @error ('section')
+
                                 <div class="alert-danger">
                                      {{$message }}
                                 </div>
+
+
                             @enderror
                         </div>
+
                     </div>
 
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()">{{ __('Save') }}</button>
-                        <a type="button" class="btn btn-danger btn-sm" href="{{ url()->previous() }}">{{ __('Cancel') }}</a>
+
+                        <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
+                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('sections.index') }}">{{ __('Cancel') }}</a>
+
+
+
                     </div>
                 </form>
             </div>
         </div>
     </div>
-
 </section>
-@endsection
 
-@section('scripts')
-    @include('partials.scripts')
 @endsection

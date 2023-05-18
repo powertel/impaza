@@ -16,7 +16,7 @@ Role
             <div class="card-body">
                 <form action="{{ route('roles.store') }}" method="POST">
                 {{ csrf_field() }}
-        
+
                 <div class="form-group row">
                     <label for="name" class="col-sm-3 col-form-label">Role Name</label>
                     <div class="col-sm-9">
@@ -30,7 +30,7 @@ Role
                           <div  class="form-control" style="height: 500px; overflow: auto;">
                               @foreach($permission as $value)
                               <ul type = "square">
-                              <label>{{ Form::checkbox('permission[]', $value->id, false, array('class' => 'name')) }} 
+                              <label>{{ Form::checkbox('permission[]', $value->id, false, array('class' => 'name')) }}
                                 <strong>{{ $value->name }}</strong></label>
                               </ul>
                               @endforeach
@@ -40,14 +40,14 @@ Role
                 </div>
 
                 <div class="card-footer">
-                    <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
+                    <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()"> Save</button>
                     <a type="button" class="btn btn-danger btn-sm" href="{{ route('roles.index') }}">{{ __('Cancel') }}</a>
                 </div>
-                </form> 
-            </div> 
+                </form>
+            </div>
         </div>
     </div>
- 
+
 </section>
 @endsection
 @section('scripts')

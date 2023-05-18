@@ -10,13 +10,13 @@ Link
         <div class="card w-50">
             <div class="card-header">
                 <h3 class="card-title">
-                    {{_('Create Link')}} 
+                    {{_('Create Link')}}
                 </h3>
             </div>
             <div class="card-body">
                 <form action="{{ route('links.store') }}" method="POST">
                 {{ csrf_field() }}
-                    
+
                     <div class="form-group row">
                         <label for="customer" class="col-sm-3 col-form-label">Customer</label>
                         <div class="col-sm-9">
@@ -82,16 +82,16 @@ Link
                         <input type="text" class="form-control  @error('link') is-invalid @enderror" name="link" placeholder="Link Name" value="{{ old('link') }}">
                     </div>
                 </div>
-           
+
                 <div class="card-footer">
-                    <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
+                    <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()">{{ __('Save') }}</button>
                     <a type="button" class="btn btn-danger btn-sm" href="{{ url()->previous() }}">{{ __('Cancel') }}</a>
                 </div>
-                </form> 
-            </div> 
+                </form>
+            </div>
         </div>
     </div>
- 
+
 </section>
 @endsection
 

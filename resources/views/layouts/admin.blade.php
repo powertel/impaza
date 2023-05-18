@@ -128,6 +128,15 @@
                                 </li>
                                 @endcan
 
+                                @can('department-list')
+                                <li class="nav-item">
+                                    <a href="{{ route('sections.index') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-clipboard-list"></i>
+                                        <p>Sections</p>
+                                    </a>
+                                </li>
+                                @endcan
+
                                 @can('account-manager-list')
                                 <li class="nav-item">
                                     <a href="{{ route('account_managers.index') }}" class="nav-link">
@@ -372,28 +381,6 @@
 
         <!-- Scripts -->
         @section('scripts')
-<script>
-    $(document).ready(function(){
-        $('success').click(function (e){
-            e.preventDefault();
-            var Toast =Swal.fire({
-                title: 'Do you want to save the changes?',
-                showDenyButton: true,
-                showCancelButton: true,
-                confirmButtonText: 'Save',
-                denyButtonText: `Don't save`,
-                }).then((result) => {
-
-                if (result.isConfirmed) {
-                    Swal.fire('Saved!', '', 'success')
-                } else if (result.isDenied) {
-                    Swal.fire('Changes are not saved', '', 'info')
-                }
-})
-        })
-    })
-
-</script>
 @endsection
 
         <script src="{{ asset('js/app.js') }}"></script>

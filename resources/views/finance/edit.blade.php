@@ -17,7 +17,7 @@ Finance
                 <form action="{{ route('finance.update', $link->id ) }}" method="POST">
                     @csrf
                     @method('PUT')
-                    
+
                     <div class="form-group row">
                         <label for="customer" class="col-sm-3 col-form-label">Customer</label>
                         <div class="col-sm-9">
@@ -45,17 +45,17 @@ Finance
                             <input type="text" placeholder="Enter Contract Number" class="form-control @error('contract_number') is-invalid @enderror"  name="contract_number" value="{{ $link->contract_number}}">
                         </div>
                     </div>
-           
+
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
+                        <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()">{{ __('Save') }}</button>
                         <a type="button" class="btn btn-danger btn-sm" href="{{ route('finance.index' ) }}">{{ __('Cancel') }}</a>
                     </div>
-                </form> 
-            </div> 
+                </form>
+            </div>
         </div>
     </div>
-           
- 
+
+
 </section>
 @endsection
 

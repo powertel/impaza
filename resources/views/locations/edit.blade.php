@@ -30,7 +30,7 @@ Location
                             </select>
                         </div>
                     </div>
-                    
+
                     <div class="form-group row">
                         <label for="location" class="col-sm-3 col-form-label">Location</label>
                         <div class="col-sm-9">
@@ -38,19 +38,19 @@ Location
                             @error ('suburb')
                                 <div class="alert-danger">
                                      {{$message }}
-                                </div>                                
+                                </div>
                             @enderror
                         </div>
                     </div>
-           
+
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
+                        <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()" >{{ __('Save') }}</button>
                         <a type="button" class="btn btn-danger btn-sm" href="{{ route('locations.index' ) }}">{{ __('Cancel') }}</a>
                     </div>
-                </form> 
-            </div> 
+                </form>
+            </div>
         </div>
     </div>
- 
+
 </section>
 @endsection

@@ -10,6 +10,13 @@ use DB;
 
 class SectionController extends Controller
 {
+    function __construct()
+    {
+         $this->middleware('permission:department-list|department-create|department-edit|department-delete', ['only' => ['index','store']]);
+         $this->middleware('permission:department-create', ['only' => ['create','store']]);
+         $this->middleware('permission:department-edit', ['only' => ['edit','update']]);
+         $this->middleware('permission:department-delete', ['only' => ['destroy']]);
+    }
     /**
      * Display a listing of the resource.
      *
@@ -17,7 +24,13 @@ class SectionController extends Controller
      */
     public function index()
     {
-        //
+
+        $sections = DB::table('sections')
+                ->orderBy('sections.section', 'asc')
+                ->get();
+
+        return view('sections.index', compact('sections'))
+        ->with('i');
     }
 
     /**
@@ -28,7 +41,8 @@ class SectionController extends Controller
     public function create()
     {
         $department = Department::all();
-        return view('sections.create',compact('department'));
+        $section = Section::all();
+        return view('sections.create',compact('department','section'));
     }
 
     /**
@@ -47,7 +61,7 @@ class SectionController extends Controller
 
         if($section)
         {
-            return redirect()->route('departments.index')
+            return redirect()->route('sections.index')
             ->with('success','Section Created');
         }
         else
@@ -64,7 +78,7 @@ class SectionController extends Controller
      */
     public function show($id)
     {
-        //
+        return view('sections.show',compact('section'));
     }
 
     /**
@@ -73,9 +87,9 @@ class SectionController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Section $section)
     {
-        //
+        return view('sections.edit',compact('section'));
     }
 
     /**
@@ -85,9 +99,17 @@ class SectionController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Section $section)
     {
-        //
+        $request->validate([
+            'section' => 'required|string|unique:sections',
+
+        ]);
+
+        $section->update($request->all());
+
+        return redirect()->route('sections.index')
+                        ->with('success','Section Updated');
     }
 
     /**
@@ -98,6 +120,8 @@ class SectionController extends Controller
      */
     public function destroy($id)
     {
-        //
+        Section::find($id)->delete();
+        return redirect()->route('sections.index')
+                        ->with('success','Section deleted successfully');
     }
 }

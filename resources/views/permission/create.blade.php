@@ -27,7 +27,8 @@
         </div>
 
         <div class="card-footer">
-            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Create Permission</button>
+            <button type="submit" class="btn btn-primary" onclick="return submitResult()"><i class="fas fa-save"></i> Create Permission</button>
+
         </div>
     </form>
 </div>

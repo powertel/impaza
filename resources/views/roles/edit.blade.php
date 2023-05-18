@@ -17,7 +17,7 @@ Role
             <form action="{{ route('roles.update', $role->id ) }}" method="POST">
                 @csrf
                 @method('PUT')
-        
+
                 <div class="form-group row">
                     <label for="name" class="col-sm-3 col-form-label">Role Name</label>
                     <div class="col-sm-9">
@@ -39,16 +39,16 @@ Role
                         </div>
                     </div>
                 </div>
-        
+
                 <div class="card-footer">
-                    <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
+                    <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()"> Save</button>
                     <a type="button" class="btn btn-danger btn-sm" href="{{ route('roles.index') }}">{{ __('Cancel') }}</a>
                 </div>
-                </form> 
-            </div> 
+                </form>
+            </div>
         </div>
     </div>
- 
+
 </section>
 @endsection
 @section('scripts')
