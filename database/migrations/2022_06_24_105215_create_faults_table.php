@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('faults', function (Blueprint $table) {
             $table->increments('id');
+			$table->string("fault_ref_number");
             $table->unsignedInteger('customer_id');
             $table->string('contactName');
             $table->integer('phoneNumber');

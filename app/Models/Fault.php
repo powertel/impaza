@@ -16,6 +16,7 @@ class Fault extends Model
      */
     protected $fillable = [
         'customer_id',
+		'fault_ref_number',
         'contactName',
         'phoneNumber',
         'contactEmail',
