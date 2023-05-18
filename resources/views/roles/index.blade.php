@@ -34,7 +34,7 @@ Roles
                             @endforeach
                         </td>
                         <td>
-                            <form action="{{ route('roles.destroy',$role->id) }}" method="POST">
+                            <form name="theForm" action="{{ route('roles.destroy',$role->id) }}" method="POST">
                                 <a class="btn btn-info btn-sm" style="padding:0px 2px; color:#fff;" href="{{ route('roles.show',$role->id) }}">View</a>
                                 @can('role-edit')
                                 <a class="btn btn-danger btn-sm" style="padding:0px 2px; color:#fff;" href="{{ route('roles.edit',$role->id) }}">Edit</a>
@@ -43,7 +43,7 @@ Roles
                                 @csrf
                                 @method('DELETE')
                                 @can('role-delete')
-                                <button type="submit" class="btn btn-danger btn-sm" style="padding:0px 2px; color:#fff;">Delete</button>
+                                <button type="submit" class="btn btn-danger btn-sm" style="padding:0px 2px; color:#fff;" onclick="Confirm_Delete()" >Delete</button>
                                 @endcan
                             </form>
                         </td>
