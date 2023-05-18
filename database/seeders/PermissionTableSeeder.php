@@ -68,7 +68,7 @@ class PermissionTableSeeder extends Seeder
 
             'my-fault-list',
             'department-faults-list',
-            'assigned-fault-list',   
+            'assigned-fault-list',
             'assessement-fault-list',
             'noc-clear-faults-list',
             'chief-tech-clear-faults-list',
@@ -93,7 +93,7 @@ class PermissionTableSeeder extends Seeder
             'noc-clear-faults-clear',
             'chief-tech-clear-faults-clear'
          ];
-       
+
          foreach ($permissions as $permission) {
               Permission::create(['name' => $permission]);
          }

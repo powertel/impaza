@@ -18,12 +18,12 @@ Section
             <div class="card-body">
                 <form action="{{ route('sections.store') }}" method="POST">
                 {{ csrf_field() }}
-        
+
                     <div class="form-group row">
                         <label for="department" class="col-sm-3 col-form-label">Department</label>
                         <div class="col-sm-9">
                         <select id="department" class="custom-select  @error('department_id') is-invalid @enderror" name="department_id" value="{{ old('department_id') }}">
-                                <option selected disabled >Select department</option>
+                                <option selected disabled >Select Department</option>
                                 @foreach($department as $department)
                                     @if (old('department_id')==$department->id)
                                         <option value="{{ $department->id}}" selected>{{ $department->department }}</option>
@@ -41,7 +41,7 @@ Section
                             @error ('section')
                                 <div class="alert-danger">
                                      {{$message }}
-                                </div>                                
+                                </div>
                             @enderror
 
                         </div>
@@ -49,12 +49,12 @@ Section
 
                     <div class="card-footer">
 
-                        <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
-                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('departments.index') }}">{{ __('Cancel') }}</a>
+                        <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()"> Save</button>
+                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('sections.index') }}">{{ __('Cancel') }}</a>
 
                     </div>
-                </form> 
-            </div> 
+                </form>
+            </div>
         </div>
     </div>
 </section>

@@ -15,7 +15,11 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+
+    <!-- Popup -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <body class="sidebar-mini" style="height: auto;">
     <div class="wrapper" id="app">
         <!-- Navbar -->
@@ -95,7 +99,7 @@
                                         <i class="nav-icon fas fa-user-cog"></i>
                                         <p>Users</p>
                                     </a>
-                                </li>                                
+                                </li>
                                 @endcan
 
                                 @can('role-list')
@@ -104,7 +108,7 @@
                                         <i class="fas fa-bomb nav-icon"></i>
                                         <p>Roles</p>
                                     </a>
-                                </li>                                  
+                                </li>
                                 @endcan
 
                                 @can('permissions')
@@ -113,7 +117,7 @@
                                         <i class="fas fa-users-cog nav-icon"></i>
                                         <p>Permissions</p>
                                     </a>
-                                </li>                                    
+                                </li>
                                 @endcan
 
                                 @can('department-list')
@@ -122,7 +126,16 @@
                                         <i class="nav-icon fas fa-book-reader"></i>
                                         <p>Departments</p>
                                     </a>
-                                </li>                                  
+                                </li>
+                                @endcan
+
+                                @can('department-list')
+                                <li class="nav-item">
+                                    <a href="{{ route('sections.index') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-clipboard-list"></i>
+                                        <p>Sections</p>
+                                    </a>
+                                </li>
                                 @endcan
 
                                 @can('account-manager-list')
@@ -140,7 +153,7 @@
                                         <i class="nav-icon fas fa-city"></i>
                                         <p>Cities</p>
                                         </a>
-                                </li>                                  
+                                </li>
                                 @endcan
 
                                 @can('location-list')
@@ -149,7 +162,7 @@
                                         <i class="nav-icon fas fa-location"></i>
                                         <p>Locations</p>
                                         </a>
-                                </li>                                  
+                                </li>
                                 @endcan
 
                                 @can('pop-list')
@@ -158,7 +171,7 @@
                                         <i class="nav-icon fas fa-bullseye"></i>
                                         <p>Pops</p>
                                         </a>
-                                </li>                                
+                                </li>
                                 @endcan
 
                                 @can('customer-list')
@@ -167,7 +180,7 @@
                                         <i class="nav-icon fas fa-address-card"></i>
                                         <p>Customers</p>
                                         </a>
-                                </li>                                
+                                </li>
                                 @endcan
 
                                 @can('link-list')
@@ -176,10 +189,10 @@
                                         <i class="nav-icon fas fa-street-view"></i>
                                         <p>Links</p>
                                         </a>
-                                </li>                                
+                                </li>
                                 @endcan
                             </ul>
-                        </li>                            
+                        </li>
                         @endcan
                         @can('fault-list')
                         <li  class="nav-item">
@@ -187,7 +200,7 @@
                                 <i class="nav-icon fas fa-exclamation-triangle"></i>
                                 <p>Faults</p>
                             </a>
-                        </li>                            
+                        </li>
                         @endcan
 
                         @can('my-fault-list')
@@ -196,7 +209,7 @@
                                 <i class="nav-icon 	fas fa-satellite-dish"></i>
                                 <p>My Faults</p>
                             </a>
-                        </li>                            
+                        </li>
                         @endcan
 
                         @can('assigned-fault-list')
@@ -205,7 +218,7 @@
                                 <i class="nav-icon 	fas fa-radiation"></i>
                                 <p>Assigned Faults</p>
                             </a>
-                        </li>                                
+                        </li>
                         @endcan
 
                         @can('assessement-fault-list')
@@ -214,7 +227,7 @@
                                 <i class="nav-icon 	fas fa-radiation"></i>
                                 <p>Assess Faults</p>
                             </a>
-                        </li>                                
+                        </li>
                         @endcan
 
                         @can('finance')
@@ -223,7 +236,7 @@
                                 <i class="nav-icon fas fa-money-check-alt"></i>
                                 <p>Finance</p>
                             </a>
-                        </li>                            
+                        </li>
                         @endcan
 
 
@@ -250,9 +263,9 @@
                                 </a>
                               </li>
                             </ul>
-                        </li>                            
+                        </li>
                         @endcan
-                        
+
 
 
                         @can('department-faults-list')
@@ -261,7 +274,7 @@
                                 <i class="nav-icon 	fas fa-satellite"></i>
                                 <p>Department Faults</p>
                             </a>
-                        </li>                            
+                        </li>
                         @endcan
 
                         @can('chief-tech-clear-faults-list')
@@ -270,7 +283,7 @@
                                 <i class="nav-icon 	fas fa-exclamation-triangle"></i>
                                 <p>Clear Faults</p>
                             </a>
-                        </li>                            
+                        </li>
                         @endcan
 
                         @can('noc-clear-faults-list')
@@ -279,16 +292,16 @@
                                 <i class="nav-icon 	fas fa-exclamation-triangle"></i>
                                 <p>Noc Clear Faults</p>
                             </a>
-                        </li>                            
+                        </li>
                         @endcan
-                           
+
                         @can('materials')
                         <li class="nav-item">
                             <a  class="nav-link">
                                 <i class="nav-icon 	fas fa-wrench"></i>
                                 <p>Materials</p>
                             </a>
-                        </li>                            
+                        </li>
                         @endcan
 
 
@@ -298,7 +311,7 @@
                               <i class="nav-icon fas fa-file-export"></i>
                               <p>Reports</p>
                             </a>
-                        </li>                            
+                        </li>
                         @endcan
                         <li  class="nav-item">
                             <a href="{{ route('user.profile') }}" class="nav-link">
@@ -368,6 +381,8 @@
     <!-- ./wrapper -->
 
         <!-- Scripts -->
+        @section('scripts')
+@endsection
 
         <script src="{{ asset('js/app.js') }}"></script>
 
@@ -389,8 +404,8 @@
     getXmlHttpRequestObject = function()
     {
         if(!xhr)
-        {               
-            // Create a new XMLHttpRequest object 
+        {
+            // Create a new XMLHttpRequest object
             xhr = new XMLHttpRequest();
         }
         return xhr;
@@ -399,8 +414,8 @@
     updateLiveData = function()
     {
         var now = new Date();
-        // Date string is appended as a query with live data 
-        // for not to use the cached version 
+        // Date string is appended as a query with live data
+        // for not to use the cached version
         var url = 'livefeed.txt?' + now.getTime();
         xhr = getXmlHttpRequestObject();
         xhr.onreadystatechange = evenHandler;
@@ -426,7 +441,12 @@
     }
 });
         </script>
+
                 @yield('scripts')
+
+                @include('partials.scripts')
     </body>
+    @section('scripts')
+@endsection
 
 </html>

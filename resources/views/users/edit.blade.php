@@ -14,10 +14,10 @@ User
                 </h3>
             </div>
             <div class="card-body">
-                <form action="{{ route('users.update', $user->id ) }}" method="POST">
+                <form id="UF" action="{{ route('users.update', $user->id ) }}" method="POST">
                 @csrf
                 @method('PUT')
-        
+
                 <div class="form-group row">
                     <label for="name" class="col-sm-3 col-form-label">Name</label>
                     <div class="col-sm-9">
@@ -38,6 +38,8 @@ User
                     <option selected="selected" value="{{ $user->department_id}}">{{ $user->department}}</option>
                             @foreach($department as $depart)
                                 @if ($depart->id === $user->department_id)
+                                    <option value="{{ $depart->id}}" selected>{{ $depart->department }}</option>
+                                @else
                                     <option value="{{ $depart->id}}">{{ $depart->department }}</option>
                                 @endif
                             @endforeach
@@ -62,7 +64,7 @@ User
                 </div>
 
                 <div class="form-group row">
-                    <label for="posirion" class="col-sm-3 col-form-label">Position</label>
+                    <label for="position" class="col-sm-3 col-form-label">Position</label>
                     <div class="col-sm-9">
                         <select id="position"  class="custom-select @error('position_id') is-invalid @enderror" name="position_id">
                         <option selected="selected" value="{{ $user->position_id}}">{{ $user->position }}</option>
@@ -70,7 +72,7 @@ User
                                 @if ($position->section_id === $user->section_id)
                                     @unless ($position->id === $user->position_id)
                                         <option value="{{ $position->id}}">{{ $position->position }}</option>
-                                    @endunless  
+                                    @endunless
                                 @endif
                             @endforeach
                         </select>
@@ -101,30 +103,31 @@ User
                 <div class="form-group row">
                     <label for="password" class="col-sm-3 col-form-label">Password</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control @error('password') is-invalid @enderror" name="password" >
+                        <input type="password" class="form-control @error('password') is-invalid @enderror" name="password" >
                     </div>
                 </div>
 
                 <div class="form-group row">
                     <label for="confirm-password" class="col-sm-3 col-form-label">Confirm Password</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control @error('confirm-password') is-invalid @enderror" name="confirm-password" >
+                        <input type="password" class="form-control @error('confirm-password') is-invalid @enderror" name="confirm-password" >
                     </div>
-                </div> 
-        
+                </div>
+
                 <div class="card-footer">
-                    <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
+                    <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()"> Save</button>
                     <a type="button" class="btn btn-danger btn-sm" href="{{ route('users.index') }}">{{ __('Cancel') }}</a>
                 </div>
-                </form> 
-            </div> 
+                </form>
+            </div>
         </div>
     </div>
- 
+
 </section>
+
 @endsection
 
 @section('scripts')
-    @include('partials.department')
+ @include('partials.scripts')
 @endsection
 

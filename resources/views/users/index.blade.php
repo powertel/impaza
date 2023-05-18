@@ -14,9 +14,9 @@ Users
         <h3 class="card-title">{{_('Users')}}</h3>
         <div class="card-tools">
             @can('user-create')
-              <a  class="btn btn-primary btn-sm" href="{{ route('users.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create User')}} </a>  
+              <a  class="btn btn-primary btn-sm" href="{{ route('users.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create User')}} </a>
             @endcan
-            
+
         </div>
     </div>
     <!-- /.card-header -->
@@ -52,14 +52,14 @@ Users
                   <!--  <td>{{ $user->status_name}}</td> -->
 
                     <td style="background-color: {{ App\Models\UserStatus::STATUS_COLOR[ $user->status_name ] ?? 'none' }};">
-                       <strong>{{$user->status_name}}</strong> 
+                       <strong>{{$user->status_name}}</strong>
                     </td>
 
                     <td>
                         <form action="{{ route('users.destroy',$user->id) }}" method="POST">
                             <a class="btn btn-info btn-sm" style="padding:0px 2px; color:#fff;" href="{{ route('users.show',$user->id) }}">View</a>
                             @can('user-edit')
-                            <a class="btn btn-primary btn-sm" style="padding:0px 2px; color:#fff;" href="{{ route('users.edit',$user->id) }}">Edit</a>   
+                            <a class="btn btn-primary btn-sm" style="padding:0px 2px; color:#fff;" href="{{ route('users.edit',$user->id) }}">Edit</a>
                             @endcan
 
                             @csrf
@@ -69,13 +69,14 @@ Users
                             @endcan
                         </form>
                     </td>
+
                 </tr>
                 @endforeach
-            </tbody> 
+            </tbody>
         </table>
     </div>
     <!-- /.card-body -->
 </div>
- 
+
 </section>
 @endsection

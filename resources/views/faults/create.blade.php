@@ -46,7 +46,7 @@ Fault
 
                         </div>
                     </div>
-            
+
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="contactName" class="form-label">Contact Name</label>
@@ -86,14 +86,14 @@ Fault
                             </select>
                         </div>
                     </div>
-            
+
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="phone" class="form-label">Phone Number</label>
                             <input type="text" class="form-control @error('phoneNumber') is-invalid @enderror"  placeholder="Phone Number" name="phoneNumber" value="{{ old('phoneNumber') }}" >
 
                         </div>
-                        
+
                         <div class="mb-3 col-md-6">
                             <label for="serviceType" class="form-label">Service Type</label>
                             <select  class="custom-select @error('serviceType') is-invalid @enderror" name="serviceType">
@@ -107,7 +107,7 @@ Fault
                                 <option value="E-VENDING" @if (old('serviceType') == "E-VENDING") {{ 'selected' }} @endif>E-VENDING</option>
                             </select>
                         </div>
-  
+
                     </div>
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
@@ -127,7 +127,7 @@ Fault
                             </select>
                         </div>
                     </div>
-            
+
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="adress" class="form-label">Address</label>
@@ -138,7 +138,7 @@ Fault
                             <select  class="custom-select @error('accountManager_id') is-invalid @enderror" name="accountManager_id" >
                                 <option selected disabled >Select Account Manager</option>
                                 @foreach($accountManager as $acc_manager)
-                        
+
                                     @if (old('accountManager_id')==$acc_manager->id)
                                         <option value="{{ $acc_manager->id}}" selected>{{ $acc_manager->accountManager }}</option>
                                     @else
@@ -149,25 +149,25 @@ Fault
                             </select>
                         </div>
                     </div>
-            
+
                     <div class="row g-2">
-    
+
                         <div class="mb-3 col-md-6">
                             <label for="remarks" class="form-label">Remarks</label>
                             <textarea name="remark" class="form-control @error('remark') is-invalid @enderror" placeholder="Enter any additional comments" rows="2"  >{{ old('remark') }}</textarea>
                         </div>
-    
+
                     </div>
-        
+
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
+                        <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()">{{ __('Save') }}</button>
                         <a type="button" class="btn btn-danger btn-sm" href="{{ route('faults.index') }}">{{ __('Cancel') }}</a>
                     </div>
-                </form> 
-            </div> 
+                </form>
+            </div>
         </div>
     </div>
- 
+
 </section>
 @endsection
 

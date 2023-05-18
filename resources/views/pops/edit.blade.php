@@ -39,7 +39,7 @@ Pop
                                     @if ($suburb->city_id === $pop->city_id)
                                         @unless($suburb->id ===$pop->suburb_id)
                                             <option value="{{ $suburb->id}}">{{ $suburb->suburb }}</option>
-                                        @endunless                                    
+                                        @endunless
                                     @endif
                                 @endforeach
                             </select>
@@ -52,20 +52,20 @@ Pop
                             @error ('pop')
                                 <div class="alert-danger">
                                      {{$message }}
-                                </div>                                
+                                </div>
                             @enderror
                         </div>
                     </div>
-           
+
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
+                        <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()"> Save</button>
                         <a type="button" class="btn btn-danger btn-sm" href="{{ route('pops.index') }}">{{ __('Cancel') }}</a>
                     </div>
-                </form> 
-            </div> 
+                </form>
+            </div>
         </div>
     </div>
- 
+
 </section>
 @endsection
 @section('scripts')
