@@ -24,8 +24,9 @@ Faults
         <table  class="table table-striped">
             <thead>
                 <tr>
-                    <th>No.</th>
-                    <th>fault No.</th>
+                   <!-- <th>No.</th>-->
+                   <!-- <th>fault No.</th>-->
+					<th>Ref. No.</th>
                     <th>Customer</th>
                     <th>Account Manager</th>
                     <th>Link</th>
@@ -38,8 +39,9 @@ Faults
             <tbody>
                 @foreach ($faults as $fault)
                  <tr >
-                    <td>{{ ++$i }}</td>
-                    <td>{{$fault->id}}</td>
+                    <!--<td>{{ ++$i }}</td>-->
+                    <!--<td>{{$fault->id}}</td>-->
+					<td>{{$fault->fault_ref_number}}</td>
                     <td>{{ $fault->customer }}</td>
                     <td>{{ $fault->accountManager }}</td>
                     <td>{{ $fault->link }}</td>

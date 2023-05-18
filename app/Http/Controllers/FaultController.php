@@ -37,7 +37,7 @@ class FaultController extends Controller
                 ->leftjoin('users','faults.assignedTo','=','users.id')
                 ->leftjoin('statuses','faults.status_id','=','statuses.id')
                 ->orderBy('faults.created_at', 'desc')
-                ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
+                ->get(['faults.id','faults.fault_ref_number','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
                 'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description','users.name'
                 ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
         return view('faults.index',compact('faults'))
@@ -114,9 +114,13 @@ class FaultController extends Controller
             ]);
 
             $req = $request->all();
-            //I used the approach ye last time
+           
             //This is where i am creating the fault
             $req['status_id'] = 1;
+			$req['fault_ref_number']="PWT".date("YmdHis");
+			
+			//var_dump($req);
+			//die();
 
             $fault = Fault::create($req);
             $remark = Remark::create(
