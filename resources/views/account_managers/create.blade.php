@@ -23,15 +23,15 @@ Account Manager
                             <input type="text" class="form-control @error('accountManager') is-invalid @enderror" name="accountManager" placeholder="Account Manager" value="{{ old('accountManager') }}">
                         </div>
                     </div>
-           
+
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
+                        <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()">{{ __('Save') }}</button>
                         <a type="button" class="btn btn-danger btn-sm"href="{{ route('account_managers.index' ) }}">{{ __('Cancel') }}</a>
                     </div>
-                </form> 
-            </div> 
+                </form>
+            </div>
         </div>
     </div>
- 
+
 </section>
 @endsection

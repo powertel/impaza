@@ -18,24 +18,24 @@ City
             <div class="card-body">
                 <form action="{{ route('cities.store') }}" method="POST">
                 {{ csrf_field() }}
-        
+
                     <div class="form-group row">
                         <label for="city" class="col-sm-3 col-form-label">City/Town</label>
                         <div class="col-sm-9">
                             <input type="text"  class="form-control @error('city') is-invalid @enderror" name="city" placeholder="City Name" value="{{ old('city') }}">
                         </div>
                     </div>
-           
-                    <div class="card-footer">
-                        <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
 
-                      
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()">{{ __('Save') }}</button>
+
+
                         <a type="button" class="btn btn-danger btn-sm" href="{{ route('cities.index' ) }}">{{ __('Cancel') }}</a>
                     </div>
-                </form> 
-            </div> 
+                </form>
+            </div>
         </div>
     </div>
- 
+
 </section>
 @endsection

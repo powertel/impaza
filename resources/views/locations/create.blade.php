@@ -16,7 +16,7 @@ Location
             <div class="card-body">
                 <form action="{{ route('locations.store') }}" method="POST">
                 {{ csrf_field() }}
-        
+
                 <div class="form-group row">
                         <label for="city" class="col-sm-3 col-form-label">City/Town</label>
                         <div class="col-sm-9">
@@ -38,15 +38,15 @@ Location
                             <input type="text" class="form-control @error('suburb') is-invalid @enderror" name="suburb" placeholder="Location" value="{{ old('suburb') }}">
                         </div>
                     </div>
-           
+
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-success btn-sm float-right">{{ __('Save') }}</button>
+                        <button type="submit" class="btn btn-success btn-sm float-right" onclick="return submitResult()" >{{ __('Save') }}</button>
                         <a type="button" class="btn btn-danger btn-sm" href="{{ route('locations.index' ) }}">{{ __('Cancel') }}</a>
                     </div>
-                </form> 
-            </div> 
+                </form>
+            </div>
         </div>
     </div>
- 
+
 </section>
 @endsection

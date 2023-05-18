@@ -1,7 +1,8 @@
+
 @extends('layouts.admin')
 
 @section('title')
-Departments
+Sections
 @endsection
 @include('partials.css')
 @section('content')
@@ -9,10 +10,9 @@ Departments
 <section class="content" >
 <div class="card" >
     <div class="card-header">
-        <h3 class="card-title">{{_('Departments')}}</h3>
+        <h3 class="card-title">{{_('Sections')}}</h3>
         <div class="card-tools">
             @can('department-create')
-            <a  class="btn btn-primary btn-sm" href="{{ route('departments.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create New Department')}} </a>
             <a  class="btn btn-primary btn-sm" href="{{ route('sections.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create New Section')}} </a>
             <a  class="btn btn-primary btn-sm" href="{{ route('positions.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create New Position')}} </a>
             @endcan
@@ -24,18 +24,18 @@ Departments
             <thead>
                 <tr>
                     <th>No.</th>
-                    <th>Department</th>
+                    <th>Sections</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($departments as $department)
+                @foreach ($sections as $section)
                 <tr >
                     <td>{{++$i}}</td>
-                    <td>{{ $department->department}}</td>
+                    <td>{{ $section->section}}</td>
                     <td>
                             @can('department-edit')
-                            <a href="{{ route('departments.edit',$department->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Edit</a>
+                            <a href="{{ route('sections.edit',$section->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Edit</a>
                             @endcan
                     </td>
                 </tr>

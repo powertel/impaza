@@ -17,7 +17,7 @@ Link
                 <form action="{{ route('links.update', $link->id ) }}" method="POST">
                     @csrf
                     @method('PUT')
-                    
+
                     <div class="form-group row">
                         <label for="customer" class="col-sm-3 col-form-label">Customer</label>
                         <div class="col-sm-9">
@@ -53,7 +53,7 @@ Link
                                     @if ($suburb->city_id === $link->city_id)
                                         @unless($suburb->id ===$link->suburb_id)
                                             <option value="{{ $suburb->id}}">{{ $suburb->suburb }}</option>
-                                        @endunless                                    
+                                        @endunless
                                     @endif
                                 @endforeach
                             </select>
@@ -68,7 +68,7 @@ Link
                                     @if($pop->suburb_id === $link->suburb_id)
                                         @unless($pop->id ===$link->pop_id)
                                             <option value="{{ $pop->id}}">{{ $pop->pop }}</option>
-                                        @endunless                                        
+                                        @endunless
                                     @endif
                                 @endforeach
                             </select>
@@ -81,17 +81,17 @@ Link
                             <input type="text" class="form-control" name="link"  value="{{ $link->link}}">
                         </div>
                     </div>
-           
+
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
+                        <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()">{{ __('Save') }}</button>
                         <a type="button" class="btn btn-danger btn-sm" href="{{ url()->previous() }}">{{ __('Cancel') }}</a>
                     </div>
-                </form> 
-            </div> 
+                </form>
+            </div>
         </div>
     </div>
-           
- 
+
+
 </section>
 @endsection
 

@@ -18,7 +18,7 @@ Position
             <div class="card-body">
                 <form action="{{ route('positions.store') }}" method="POST">
                 {{ csrf_field() }}
-        
+
                     <div class="form-group row">
                         <label for="department" class="col-sm-3 col-form-label">Department</label>
                         <div class="col-sm-9">
@@ -54,19 +54,19 @@ Position
                             @error ('position')
                                 <div class="alert-danger">
                                      {{$message }}
-                                </div>                                
+                                </div>
                             @enderror
                         </div>
                     </div>
-           
+
                     <div class="card-footer">
 
-                        <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
+                        <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()"> Save</button>
                         <a type="button" class="btn btn-danger btn-sm" href="{{ route('departments.index') }}">{{ __('Cancel') }}</a>
 
                     </div>
-                </form> 
-            </div> 
+                </form>
+            </div>
         </div>
     </div>
 </section>

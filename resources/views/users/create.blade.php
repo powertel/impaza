@@ -110,14 +110,14 @@ User
                 <div class="form-group row">
                     <label for="confirm-password" class="col-sm-3 col-form-label">Confirm Password</label>
                     <div class="col-sm-9">
-                        <input type="password" class="form-control @error('confirm-password') is-invalid @enderror" name="confirm-password" placeholder="Confirm Ppassword">
+                        <input type="password" class="form-control @error('confirm-password') is-invalid @enderror" name="confirm-password" placeholder="Confirm Password">
                     </div>
                 </div>
 
 
 
                 <div class="card-footer">
-                    <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
+                    <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()"> Save</button>
                     <a type="button" class="btn btn-danger btn-sm" href="{{ route('users.index') }}">{{ __('Cancel') }}</a>
                 </div>
                 </form>
