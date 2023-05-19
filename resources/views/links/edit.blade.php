@@ -14,7 +14,7 @@ Link
                 </h3>
             </div>
             <div class="card-body">
-                <form action="{{ route('links.update', $link->id ) }}" method="POST">
+                <form id="UF" action="{{ route('links.update', $link->id ) }}" method="POST">
                     @csrf
                     @method('PUT')
 

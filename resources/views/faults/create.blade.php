@@ -14,7 +14,7 @@ Fault
                 </h3>
             </div>
             <div class="card-body">
-                <form action="{{ route('faults.store') }}" method="POST">
+                <form id="UF" action="{{ route('faults.store') }}" method="POST">
                 {{ csrf_field() }}
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
@@ -90,7 +90,7 @@ Fault
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="phone" class="form-label">Phone Number</label>
-                            <input type="text" class="form-control @error('phoneNumber') is-invalid @enderror"  placeholder="Phone Number" name="phoneNumber" value="{{ old('phoneNumber') }}" >
+                            <input type="number" class="form-control @error('phoneNumber') is-invalid @enderror"  placeholder="Phone Number" name="phoneNumber" value="{{ old('phoneNumber') }}" >
 
                         </div>
 
@@ -160,7 +160,7 @@ Fault
                     </div>
 
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()">{{ __('Save') }}</button>
+                        <button type="submit" class="btn btn-success btn-sm" onclick="return inlineSave()">{{ __('Save') }}</button>
                         <a type="button" class="btn btn-danger btn-sm" href="{{ route('faults.index') }}">{{ __('Cancel') }}</a>
                     </div>
                 </form>

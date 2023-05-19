@@ -10,6 +10,13 @@ use DB;
 
 class PositionController extends Controller
 {
+    function __construct()
+    {
+         $this->middleware('permission:department-list|department-create|department-edit|department-delete', ['only' => ['index','store']]);
+         $this->middleware('permission:department-create', ['only' => ['create','store']]);
+         $this->middleware('permission:department-edit', ['only' => ['edit','update']]);
+         $this->middleware('permission:department-delete', ['only' => ['destroy']]);
+    }
     /**
      * Display a listing of the resource.
      *
@@ -17,7 +24,12 @@ class PositionController extends Controller
      */
     public function index()
     {
-        //
+        $positions = DB::table('positions')
+        ->orderBy('positions.position', 'asc')
+        ->get();
+
+            return view('positions.index', compact('positions'))
+            ->with('i');
     }
 
     /**
@@ -49,7 +61,7 @@ class PositionController extends Controller
 
         if($position)
         {
-            return redirect()->route('departments.index')
+            return redirect()->route('positions.index')
             ->with('success','Position Created');
         }
         else
@@ -64,9 +76,9 @@ class PositionController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Position $position)
     {
-        //
+        return view('positions.show',compact('position'));
     }
 
     /**
@@ -75,9 +87,9 @@ class PositionController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Position $position)
     {
-        //
+        return view('positions.edit',compact('position'));
     }
 
     /**
@@ -87,9 +99,17 @@ class PositionController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Position $position)
     {
-        //
+        $request->validate([
+            'section' => 'required|string|unique:sections',
+
+        ]);
+
+        $position->update($request->all());
+
+        return redirect()->route('positions.index')
+                        ->with('success','Position Updated');
     }
 
     /**

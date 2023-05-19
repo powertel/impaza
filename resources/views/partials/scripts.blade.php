@@ -1,5 +1,5 @@
 <script type="text/javascript">
-    
+
     $('.show_confirm').click(function(event) {
 var form =  $(this).closest("form");
 var name = $(this).data("name");
@@ -13,21 +13,27 @@ new swal({
     dangerMode: true,}).then((willDelete) => {
   if (willDelete.isConfirmed) {
     form.submit();
-  } 
+  }
    else{
     javascript:void(0);
-            } 
+            }
 });});
 </script>
+<script>
+    function inlineSave(){
+
+       new swal({
+            icon: 'success',
+            title: 'Saved',
+            showConfirmButton: false,
+            timer: 1000
+        })
+       };
+       </script>
 <script>
      function submitResult(){
         event.preventDefault();
         new swal ({
-        preConfirm: () => {
-                    if (submitResult === '') {
-                    }
-                        Swal.showValidationMessage('<i class="fa fa-info-circle"></i> Department name is required')
-                    };
                     title: 'Do you want to save the changes?',
                     showDenyButton: true,
                     showCancelButton: true,
