@@ -15,14 +15,14 @@ use App\Models\User;
 use App\Models\Section;
 use App\Models\FaultSection;
 use App\Models\UserStatus;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class AssignController extends Controller
 {
     function __construct()
     {
-        $this->middleware('permission:assigned-fault-list|assign-fault-create|assign-fault-edit|assign-fault-delete', ['only' => ['index','store']]);
-         $this->middleware('permission:assign-fault', ['only' => ['edit','update']]); 
+        $this->middleware('permission:assigned-fault-list|assign-fault-create|assign-fault-edit|assign-fault-delete|re-assign-fault', ['only' => ['index','store']]);
+         $this->middleware('permission:assign-fault|re-assign-fault', ['only' => ['edit','update']]); 
     }
     /**
      * Display a listing of the resource.
@@ -46,7 +46,7 @@ class AssignController extends Controller
        ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
 
 
-       $autoAssign = $this->autoAssign(auth()->user()->section_id);
+      // $autoAssign = $this->autoAssign(auth()->user()->section_id);
         return view('assign.index',compact('faults'))
         ->with('i');
     }
@@ -113,12 +113,14 @@ class AssignController extends Controller
         $links = Link::all();
         $remarks= Remark::all();
         $accountManagers = AccountManager::all();
-
-        $technicians = DB::table('users')
+		
+		$technicians = DB::table('users')
                     ->leftJoin('sections','users.section_id','=','sections.id')
+					->leftJoin('user_statuses','users.user_status','=','user_statuses.id')
                     ->where('users.section_id','=',auth()->user()->section_id)
-                    ->where('user_statuses.status_name','=','active')
+                    ->where('user_statuses.status_name','=','Assignable')
                     ->get(['users.id','users.name']);
+
                     //dd($technicians);
 
         return view('assign.assign',compact('fault','customers','cities','suburbs','pops','links','remarks','accountManagers','technicians'));
@@ -169,6 +171,8 @@ class AssignController extends Controller
             ->where('user_statuses.id','=',1)
             ->pluck('users.id')
             ->toArray();
+			
+			
 
         $faults = DB::table('fault_section')
             ->leftjoin('faults','fault_section.fault_id','=','faults.id')

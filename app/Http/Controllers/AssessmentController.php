@@ -14,7 +14,8 @@ use App\Models\Remark;
 use App\Models\AccountManager;
 use App\Models\Section;
 use App\Models\FaultSection;
-use DB;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class AssessmentController extends Controller
 {
@@ -30,6 +31,8 @@ class AssessmentController extends Controller
      */
     public function index(Request $req)
     {
+
+        
 /*         $user = auth()->user();
         $faults = Section::find(auth()->user()->section_id)->faults()
                 ->leftJoin('users','fault_section.section_id','=','users.section_id')
@@ -116,7 +119,7 @@ class AssessmentController extends Controller
             ->with('success', 'Fault Created');
         }
 
-        catch(Exception $ex)
+        catch(\Exception $ex)
         {
             DB::rollback();
         }
@@ -191,6 +194,9 @@ class AssessmentController extends Controller
      */
     public function update(Request $request, $id)
     {
+
+
+      
         DB::beginTransaction();
         try{
             request()->validate([
@@ -200,11 +206,12 @@ class AssessmentController extends Controller
                 'confirmedRfo'=>'required'
             ]);
     
+           // dd($request);
             $fault = Fault::find($id);
             $req= $request->all();
             $req['status_id'] = 2;
             $fault ->update($req);
-    
+      
     
     
             $fault_section = FaultSection::find($id);
@@ -214,6 +221,12 @@ class AssessmentController extends Controller
                     'section_id' => $request['section_id'],
                 ]
             );
+			
+			$this->autoAssign($request['section_id']);
+			
+			
+            //dd($this->assign());
+           
     
             if($fault  && $fault_section)
             {
@@ -226,11 +239,11 @@ class AssessmentController extends Controller
             return redirect(route('assessments.index')) 
             ->with('success','Fault Assessed');
         }
-        catch(Exception $ex)
+        catch(\Exception $ex)
         {
             DB::rollback();
         }
-    //$this->assign();
+        
     }
 
     /**
@@ -243,6 +256,55 @@ class AssessmentController extends Controller
     {
         //
     }
+	
+	private function autoAssign($section_id)
+    {
+   
+        $users = User::join('departments','users.department_id','=','departments.id')
+            ->leftjoin('sections','users.section_id','=','sections.id')
+            ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
+            ->where('sections.id','=',$section_id)
+            ->where('user_statuses.id','=',1)
+            ->pluck('users.id')
+            ->toArray();
+			
+			
+
+        $faults = DB::table('fault_section')
+            ->leftjoin('faults','fault_section.fault_id','=','faults.id')
+            ->whereNull('faults.assignedTo')
+            ->where('fault_section.section_id','=',$section_id)
+            ->pluck('faults.id')
+            ->toArray();
+
+        $userslength=count($users);
+            // Retrieve the last assigned user index from persistent storage
+        $lastAssignedUserIndex = Cache::get('last_assigned_user_index', 0);
+        $userfaults =[];
+
+        for($i=0; $i < count($faults); $i++){
+
+            $autoAssign  = $faults[$i];
+
+            $userfaults[$autoAssign] = $users[$lastAssignedUserIndex]; 
+
+            $user = $users[$lastAssignedUserIndex];
+
+            $assign = Fault::find($autoAssign);
+            $req['assignedTo'] = $userfaults[$autoAssign];
+            $req['status_id'] = 3;
+            $assign ->update($req);
+
+            $lastAssignedUserIndex ++;
+        
+            if($lastAssignedUserIndex >= $userslength){
+                $lastAssignedUserIndex = 0;
+            }
+        }
+        // Store the updated last assigned user index in persistent storage
+        Cache::put('last_assigned_user_index', $lastAssignedUserIndex);
+    }
+
 
     public function assign(){
 
@@ -251,7 +313,7 @@ class AssessmentController extends Controller
         ->where('sections.id','=',3)
         ->pluck('users.id')
         ->toArray();
-
+//dd($users);
          $faults = DB::table('fault_section')
          ->leftjoin('faults','fault_section.fault_id','=','faults.id')
          ->whereNull('faults.assignedTo')

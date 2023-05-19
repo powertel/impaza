@@ -114,9 +114,10 @@ class FaultController extends Controller
             ]);
 
             $req = $request->all();
-            //I used the approach ye last time
+        
             //This is where i am creating the fault
             $req['status_id'] = 1;
+			$req['user_id'] =$request->user()->id;
 
             $fault = Fault::create($req);
             $remark = Remark::create(
