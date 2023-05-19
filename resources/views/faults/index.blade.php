@@ -31,7 +31,8 @@ Faults
                     <th>Account Manager</th>
                     <th>Link</th>
                     <th>Assigned To</th>
-                    <th>Reported</th>
+                    <th>Date Reported</th>
+					<th>Logged By</th>
                     <th>Status</th>
                     <th>Actions</th>
                 </tr>
@@ -47,6 +48,7 @@ Faults
                     <td>{{ $fault->link }}</td>
                     <td>{{$fault->name}}</td>
                     <th>{{$fault->created_at}}</th>
+					<td> {{ auth()->user()->name }}</td>
                     <td style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? 'none' }};">
                        <strong>{{$fault->description}}</strong> 
                     </td>
