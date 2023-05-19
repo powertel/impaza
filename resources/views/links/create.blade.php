@@ -14,7 +14,7 @@ Link
                 </h3>
             </div>
             <div class="card-body">
-                <form action="{{ route('links.store') }}" method="POST">
+                <form id="UF" action="{{ route('links.store') }}" method="POST">
                 {{ csrf_field() }}
 
                     <div class="form-group row">
@@ -84,7 +84,7 @@ Link
                 </div>
 
                 <div class="card-footer">
-                    <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()">{{ __('Save') }}</button>
+                    <button type="submit" class="btn btn-success btn-sm" onclick="return inlineSave()">{{ __('Save') }}</button>
                     <a type="button" class="btn btn-danger btn-sm" href="{{ url()->previous() }}">{{ __('Cancel') }}</a>
                 </div>
                 </form>

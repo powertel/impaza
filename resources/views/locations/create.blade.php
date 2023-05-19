@@ -14,7 +14,7 @@ Location
                 </h3>
             </div>
             <div class="card-body">
-                <form action="{{ route('locations.store') }}" method="POST">
+                <form id="UF" action="{{ route('locations.store') }}" method="POST">
                 {{ csrf_field() }}
 
                 <div class="form-group row">
@@ -40,7 +40,7 @@ Location
                     </div>
 
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-success btn-sm float-right" onclick="return submitResult()" >{{ __('Save') }}</button>
+                        <button type="submit" class="btn btn-success btn-sm float-right" onclick="return inlineSave()" >{{ __('Save') }}</button>
                         <a type="button" class="btn btn-danger btn-sm" href="{{ route('locations.index' ) }}">{{ __('Cancel') }}</a>
                     </div>
                 </form>

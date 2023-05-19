@@ -16,7 +16,7 @@ Customer
                 </h3>
             </div>
             <div class="card-body">
-                <form action="{{ route('customers.update', $customer->id ) }}" method="POST">
+                <form id="UF" action="{{ route('customers.update', $customer->id ) }}" method="POST">
                     @csrf
                     @method('PUT')
                     <div class="form-group row">

@@ -12,7 +12,7 @@
             <a href="{{ route('permission.index') }}" class="btn btn-danger"><i class="fas fa-shield-alt"></i> See all Permission</a>
         </div>
     </div>
-    <form method="POST" action="{{ route('permission.store') }}">
+    <form id="UF" method="POST" action="{{ route('permission.store') }}">
         @csrf
         <div class="card-body">
             <div class="form-group">
@@ -27,7 +27,7 @@
         </div>
 
         <div class="card-footer">
-            <button type="submit" class="btn btn-primary" onclick="return submitResult()"><i class="fas fa-save"></i> Create Permission</button>
+            <button type="submit" class="btn btn-primary" onclick="return inlineSave()"><i class="fas fa-save"></i> Create Permission</button>
 
         </div>
     </form>

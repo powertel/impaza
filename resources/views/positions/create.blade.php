@@ -16,7 +16,7 @@ Position
             </div>
 
             <div class="card-body">
-                <form action="{{ route('positions.store') }}" method="POST">
+                <form id="UF" action="{{ route('positions.store') }}" method="POST">
                 {{ csrf_field() }}
 
                     <div class="form-group row">
@@ -61,8 +61,8 @@ Position
 
                     <div class="card-footer">
 
-                        <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()"> Save</button>
-                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('departments.index') }}">{{ __('Cancel') }}</a>
+                        <button type="submit" class="btn btn-success btn-sm" onclick="return inlineSave()"> Save</button>
+                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('positions.index') }}">{{ __('Cancel') }}</a>
 
                     </div>
                 </form>

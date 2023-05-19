@@ -16,7 +16,7 @@ City
                 </h3>
             </div>
             <div class="card-body">
-                <form action="{{ route('cities.update', $city->id ) }}" method="POST">
+                <form id="UF" action="{{ route('cities.update', $city->id ) }}" method="POST">
                     @csrf
                     @method('PUT')
                     <div class="form-group row">

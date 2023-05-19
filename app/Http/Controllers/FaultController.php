@@ -114,20 +114,13 @@ class FaultController extends Controller
             ]);
 
             $req = $request->all();
-<<<<<<< HEAD
         
             //This is where i am creating the fault
             $req['status_id'] = 1;
 			$req['user_id'] =$request->user()->id;
-=======
-           
-            //This is where i am creating the fault
-            $req['status_id'] = 1;
 			$req['fault_ref_number']="PWT".date("YmdHis");
 			
-			//var_dump($req);
-			//die();
->>>>>>> 68c45a0816d99051e99567f081379b258a3df3ec
+
 
             $fault = Fault::create($req);
             $remark = Remark::create(
