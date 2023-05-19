@@ -35,6 +35,7 @@ class FaultController extends Controller
                 ->leftjoin('links','faults.link_id','=','links.id')
                 ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
                 ->leftjoin('users','faults.assignedTo','=','users.id')
+				//->leftjoin('users','faults.user_id','=','users.id')
                 ->leftjoin('statuses','faults.status_id','=','statuses.id')
                 ->orderBy('faults.created_at', 'desc')
                 ->get(['faults.id','faults.fault_ref_number','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
