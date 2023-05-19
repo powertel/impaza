@@ -7,20 +7,20 @@
         <div class="card w-50">
             <div class="card-header">
                 <h3 class="card-title">
-                    {{_('Update Section')}}
+                    {{_('Update Position')}}
                 </h3>
             </div>
 
             <div class="card-body">
-                <form id="UF" action="{{ route('sections.update',$section->id) }}" method="POST">
+                <form id="UF" action="{{ route('positions.update',$section->id) }}" method="POST">
                     @csrf
                     @method('PUT')
 
                     <div class="form-group row">
-                        <label for="section" class="col-sm-3 col-form-label">Section</label>
+                        <label for="position" class="col-sm-3 col-form-label">Position</label>
                         <div class="col-sm-9">
-                            <input type="text"  class="form-control" name="section" value="{{ $section->section }}">
-                            @error ('section')
+                            <input type="text"  class="form-control" name="section" value="{{ $position->position }}">
+                            @error ('position')
 
                                 <div class="alert-danger">
                                      {{$message }}

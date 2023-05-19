@@ -138,6 +138,15 @@
                                 </li>
                                 @endcan
 
+                                @can('department-list')
+                                <li class="nav-item">
+                                    <a href="{{ route('positions.index') }}" class="nav-link">
+                                        <i class="nav-icon fas fa-clipboard"></i>
+                                        <p>Positions</p>
+                                    </a>
+                                </li>
+                                @endcan
+
                                 @can('account-manager-list')
                                 <li class="nav-item">
                                     <a href="{{ route('account_managers.index') }}" class="nav-link">

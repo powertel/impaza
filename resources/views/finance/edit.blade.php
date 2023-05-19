@@ -14,7 +14,7 @@ Finance
                 </h3>
             </div>
             <div class="card-body">
-                <form action="{{ route('finance.update', $link->id ) }}" method="POST">
+                <form id="UF" action="{{ route('finance.update', $link->id ) }}" method="POST">
                     @csrf
                     @method('PUT')
 

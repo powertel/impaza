@@ -14,7 +14,7 @@ Pop
                 </h3>
             </div>
             <div class="card-body">
-                <form action="{{ route('pops.update', $pop->id ) }}" method="POST">
+                <form id="UF" action="{{ route('pops.update', $pop->id ) }}" method="POST">
                     @csrf
                     @method('PUT')
                     <div class="form-group row">

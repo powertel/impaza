@@ -199,14 +199,14 @@ class AssessmentController extends Controller
                 'faultType'=>'required',
                 'confirmedRfo'=>'required'
             ]);
-    
+
             $fault = Fault::find($id);
             $req= $request->all();
             $req['status_id'] = 2;
             $fault ->update($req);
-    
-    
-    
+
+
+
             $fault_section = FaultSection::find($id);
             $fault_section -> update(
                 [
@@ -214,7 +214,7 @@ class AssessmentController extends Controller
                     'section_id' => $request['section_id'],
                 ]
             );
-    
+
             if($fault  && $fault_section)
             {
                 DB::commit();
@@ -223,14 +223,14 @@ class AssessmentController extends Controller
             {
                 DB::rollback();
             }
-            return redirect(route('assessments.index')) 
+            return redirect(route('assessments.index'))
             ->with('success','Fault Assessed');
         }
         catch(Exception $ex)
         {
             DB::rollback();
         }
-    //$this->assign();
+    $this->assign();
     }
 
     /**
@@ -248,14 +248,14 @@ class AssessmentController extends Controller
 
         $users = User::join('departments','users.department_id','=','departments.id')
         ->leftjoin('sections','users.section_id','=','sections.id')
-        ->where('sections.id','=',3)
+        ->where('sections.id','=','3')
         ->pluck('users.id')
         ->toArray();
 
          $faults = DB::table('fault_section')
          ->leftjoin('faults','fault_section.fault_id','=','faults.id')
          ->whereNull('faults.assignedTo')
-         ->where('fault_section.section_id','=',3)
+         ->where('fault_section.section_id','=', '3')
         ->pluck('faults.id')
         ->toArray();
 
@@ -265,13 +265,13 @@ class AssessmentController extends Controller
 
 
         for($i=0; $i < count($faults); $i++){
-    
+
             $autoAssign  = $faults[$i];
 
-            $userfaults[$autoAssign] = $users[$userIndex]; 
-            //$assign = $users[$userIndex]; 
+            $userfaults[$autoAssign] = $users[$userIndex];
+            //$assign = $users[$userIndex];
             $userIndex ++;
-      
+
             if($userIndex >= $userslength){
                 $userIndex = 0;
             }

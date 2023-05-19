@@ -15,7 +15,7 @@ User
                 </h3>
             </div>
             <div class="card-body">
-                <form action="{{ route('users.store') }}" method="POST">
+                <form id="UF" action="{{ route('users.store') }}" method="POST">
                 {{ csrf_field() }}
 
                 <div class="form-group row">
@@ -117,7 +117,7 @@ User
 
 
                 <div class="card-footer">
-                    <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()"> Save</button>
+                    <button type="submit" class="btn btn-success btn-sm" onclick="return inlineSave()"> Save</button>
                     <a type="button" class="btn btn-danger btn-sm" href="{{ route('users.index') }}">{{ __('Cancel') }}</a>
                 </div>
                 </form>
