@@ -46,9 +46,16 @@ Faults
                     <td>{{ $fault->customer }}</td>
                     <td>{{ $fault->accountManager }}</td>
                     <td>{{ $fault->link }}</td>
-                    <td>{{$fault->name}}</td>
+                    <td>{{$fault->assignedTo}}</td>
                     <th>{{$fault->created_at}}</th>
-					<td> {{ auth()->user()->name }}</td>
+					<td> {{$fault->reportedBy}}</td>
+					
+					<!--<td>@if ($fault->id == $fault->user_id)
+						{{$fault->name}}
+					@endif
+					</td>-->
+					
+				
                     <td style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? 'none' }};">
                        <strong>{{$fault->description}}</strong> 
                     </td>
