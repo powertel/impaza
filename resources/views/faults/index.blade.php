@@ -21,7 +21,7 @@ Faults
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <table  class="table table-striped">
+        <table  class="table table-striped" id="faults-list">
             <thead>
                 <tr>
                    <!-- <th>No.</th>-->
@@ -49,13 +49,6 @@ Faults
                     <td>{{$fault->assignedTo}}</td>
                     <th>{{$fault->created_at}}</th>
 					<td> {{$fault->reportedBy}}</td>
-					
-					<!--<td>@if ($fault->id == $fault->user_id)
-						{{$fault->name}}
-					@endif
-					</td>-->
-					
-				
                     <td style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? 'none' }};">
                        <strong>{{$fault->description}}</strong> 
                     </td>
@@ -73,6 +66,5 @@ Faults
     </div>
     <!-- /.card-body -->
 </div>
- 
 </section>
 @endsection
