@@ -84,14 +84,19 @@ class CustomerController extends Controller
      */
     public function show($id)
     {
+        // $customer = DB::table('customers')
+        //         ->leftjoin('cities','customers.city_id','=','cities.id')
+        //         ->leftjoin('suburbs','customers.suburb_id','=','suburbs.id')
+        //         ->leftjoin('pops','customers.pop_id','=','pops.id')
+        //         ->leftjoin('links','customers.id','=','links.customer_id')
+        //         ->where('customers.id','=',$id)
+        //         ->get(['customers.id','customers.customer','cities.city','links.link','pops.pop','suburbs.suburb'])
+        //         ->first();
+        // return view('customers.show',compact('customer'));
         $customer = DB::table('customers')
-                ->leftjoin('cities','customers.city_id','=','cities.id')
-                ->leftjoin('suburbs','customers.suburb_id','=','suburbs.id')
-                ->leftjoin('pops','customers.pop_id','=','pops.id')
-                ->leftjoin('links','customers.id','=','links.customer_id')
-                ->where('customers.id','=',$id)
-                ->get(['customers.id','customers.customer','cities.city','links.link','pops.pop','suburbs.suburb'])
-                ->first();
+        ->where('customers.id','=',$id)
+        ->get()
+        ->first();
         return view('customers.show',compact('customer'));
     }
 
