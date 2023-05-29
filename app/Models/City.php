@@ -18,6 +18,10 @@ class City extends Model
         return $this->hasMany(Suburb::class);
     }
 
+    public function customer()
+    {
+        return $this->hasMany(Customer::class);
+    }
     public function pops()
     {
         return $this -> hasManyThrough(Pop::class, Suburb::class,Link::class);
