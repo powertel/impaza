@@ -16,11 +16,16 @@ class Link extends Model
         'pop_id',
         'link_status',
         'contract_number',
-        'customer_id'
+        'customer_id',
+        'linkType_id',
     ];
 
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+    public function linktype()
+    {
+        return $this->belongsTo(LinkType::class);
     }
 }

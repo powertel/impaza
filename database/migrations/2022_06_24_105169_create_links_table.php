@@ -20,6 +20,7 @@ return new class extends Migration
             $table->unsignedInteger('customer_id');
             $table->unsignedInteger('city_id');
             $table->unsignedInteger('pop_id');
+            $table->unsignedInteger('linkType_id');
             $table->unsignedInteger('link_status');
             $table->string('link');
             $table->timestamps();
@@ -29,6 +30,7 @@ return new class extends Migration
             $table->foreign('customer_id')
                     ->references('id')
                     ->on('customers');
+                    
         });
     }
 

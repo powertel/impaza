@@ -75,6 +75,22 @@ Link
                     </select>
                     </div>
                 </div>
+                <div class="form-group row">
+                    <label for="linkType" class="col-sm-3 col-form-label">Link Type</label>
+                    <div class="col-sm-9">
+                    <select id="linkType"  class="custom-select @error('linkType_id') is-invalid @enderror" name="linkType_id">
+                        <option selected disabled>Select Link Type</option>
+                        @foreach($linkType as $link_type)
+                        @if (old('linkType_id')==$link_type->id)
+                                        <option value="{{ $link_type->id}}" selected>{{ $link_type->linkType }}</option>
+                                    @else
+                                        <option value="{{ $link_type->id}}">{{ $link_type->linkType }}</option>
+                                    @endif
+
+                        @endforeach
+                    </select>
+                    </div>
+                </div>
 
                 <div class="form-group row">
                     <label for="pop" class="col-sm-3 col-form-label">Link</label>
@@ -82,7 +98,6 @@ Link
                         <input type="text" class="form-control  @error('link') is-invalid @enderror" name="link" placeholder="Link Name" value="{{ old('link') }}">
                     </div>
                 </div>
-
                 <div class="card-footer">
                     <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()">{{ __('Save') }}</button>
                     <a type="button" class="btn btn-danger btn-sm" href="{{ url()->previous() }}">{{ __('Cancel') }}</a>

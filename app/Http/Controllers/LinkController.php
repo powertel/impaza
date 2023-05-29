@@ -8,6 +8,7 @@ use App\Models\City;
 use App\Models\Pop;
 use App\Models\Customer;
 use App\Models\Link;
+use App\Models\LinkType;
 use DB;
 
 class LinkController extends Controller
@@ -53,7 +54,8 @@ class LinkController extends Controller
         $location = Suburb::all();
         $link = Link::all();
         $pop = Pop::all();
-        return view('links.create',compact('customer','city','location','link','pop'));
+        $linkType = LinkType::all();
+        return view('links.create',compact('customer','city','linkType','location','link','pop'));
     }
 
     /**
@@ -67,6 +69,7 @@ class LinkController extends Controller
         request()->validate([
             'city_id' => 'required',
             'suburb_id' => 'required',
+            'linkType_id' => 'required',
             'pop_id' => 'required',
             'customer_id' => 'required',
             'link' => 'required|string|unique:links'
