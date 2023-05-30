@@ -28,7 +28,6 @@ links
                     <th>City/Town</th>
                     <th>Location</th>
                     <th>Pop</th>
-                    <th>Link Type</th>
                     <th>link</th>
                     <th>Actions</th>
 
