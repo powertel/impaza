@@ -62,4 +62,12 @@ class Fault extends Model
     {
         return $this->belongsToMany(Section::class);
     }
+    public function confirmedrfo()
+    {
+        return $this->belongsTo(ConfirmedRfo::class);
+    }
+    public function suspectedrfo()
+    {
+        return $this->belongsTo(SuspectedRfo::class);
+    }
 }

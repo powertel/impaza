@@ -5,15 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ConfirmedRfo extends Model
+class SuspectedRfo extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'ConfirmedRFO'
+        'SuspectedRFO'
     ];
     public function fault()
     {
         return $this->hasMany(Fault::class);
     }
 }
-

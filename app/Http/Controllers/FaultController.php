@@ -36,9 +36,11 @@ class FaultController extends Controller
                 ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
                 ->leftjoin('users','faults.assignedTo','=','users.id')
                 ->leftjoin('statuses','faults.status_id','=','statuses.id')
+                ->leftjoin('confirmed_rfos','faults.confirmedRfo_id','=','confirmed_rfos.id')
+                ->leftjoin('suspected_rfos','faults.suspectedRfo_id','=','suspected_rfos.id')
                 ->orderBy('faults.created_at', 'desc')
                 ->get(['faults.id','faults.fault_ref_number','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
-                'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description','users.name'
+                'account_managers.accountManager','confirmed_rfos.ConfirmedRFO','suspected_rfos.SuspectedRFO','links.link','statuses.description','users.name'
                 ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
         return view('faults.index',compact('faults'))
         ->with('i');
@@ -108,7 +110,7 @@ class FaultController extends Controller
                 'suburb_id'=> 'required',
                 'pop_id'=> 'required',
                 'link_id'=> 'required',
-                'suspectedRfo'=> 'required',
+                'suspectedRfo_id'=> 'required',
                 'serviceType'=> 'required',
                 'remark'=> 'required',
             ]);
