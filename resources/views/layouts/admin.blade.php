@@ -220,13 +220,29 @@
                             </a>
                         </li>
                         @endcan
-
                         @can('assessement-fault-list')
-                        <li  class="nav-item">
-                            <a href="{{ route('assessments.index') }}" class="nav-link">
-                                <i class="nav-icon 	fas fa-radiation"></i>
-                                <p>Assess Faults</p>
+                        <li class="nav-item has-treeview">
+                        <a  class="nav-link">
+                        <i class="nav-icon 	fas fa-radiation"></i>
+                                <p>
+                                    Assess Faults
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
                             </a>
+                            <ul class="nav nav-treeview">
+                              <li class="nav-item">
+                                <a  class="nav-link" href="{{ route('assessments.index') }}">
+                                    <i class="nav-icon 	fas fa-check-circle"></i>
+                                    <p> Assess Faults</p>
+                                </a>
+                              </li>
+                              <li class="nav-item">
+                              <a href="{{ route('assessments.index') }}" class="nav-link">
+                              <i class="nav-icon 	fas fa-clipboard-check"></i>
+                                    <p>Confirmed RFO</p>
+                                </a>
+                              </li>
+                            </ul>
                         </li>
                         @endcan
 
