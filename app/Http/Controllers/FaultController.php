@@ -12,6 +12,7 @@ use App\Models\Link;
 use App\Models\Remark;
 use App\Models\AccountManager;
 use App\Models\FaultSection;
+use App\Models\SuspectedRfo;
 use DB;
 
 class FaultController extends Controller
@@ -61,7 +62,8 @@ class FaultController extends Controller
         $link = Link::all();
         $pop = Pop::all();
         $accountManager = AccountManager::all();
-        return view('faults.create',compact('customer','city','accountManager','location','link','pop'));
+        $suspectedRFO = SuspectedRfo::all();
+        return view('faults.create',compact('customer','city','accountManager','location','link','pop','suspectedRFO'));
     }
 
     public function findSuburb($id)
