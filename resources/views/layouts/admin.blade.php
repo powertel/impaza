@@ -239,7 +239,7 @@
                               <li class="nav-item">
                               <a href="{{ route('rfos.index') }}" class="nav-link">
                               <i class="nav-icon 	fas fa-plus-square"></i>
-                                    <p>Confirmed RFO</p>
+                                    <p>Reasons For Outage</p>
                                 </a>
                               </li>
                             </ul>
