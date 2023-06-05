@@ -35,7 +35,6 @@ class NocClearFaultsController extends Controller
             ->leftjoin('users','faults.assignedTo','=','users.id')
             ->leftjoin('customers','faults.customer_id','=','customers.id')
             ->leftjoin('links','faults.link_id','=','links.id')
-            ->leftjoin('suspected_rfos','faults.suspectedRfo_id','=','suspected_rfos.id')
             ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
             ->leftjoin('statuses','faults.status_id','=','statuses.id')
             ->orderBy('faults.created_at', 'desc')

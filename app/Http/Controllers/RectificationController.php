@@ -122,7 +122,6 @@ class RectificationController extends Controller
         ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
         ->leftjoin('pops','faults.pop_id','=','pops.id')
         ->leftjoin('remarks','remarks.fault_id','=','faults.id')
-        ->leftjoin('suspected_rfos','faults.suspectedRfo_id','=','suspected_rfos.id')
         ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
         ->where('faults.id','=',$id)
         ->get(['faults.id','faults.customer_id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
