@@ -61,7 +61,7 @@ class DepartmentFaultController extends Controller
         ->orderBy('faults.created_at', 'desc')
         ->where('fault_section.section_id','=',auth()->user()->section_id)
        ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
-       'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description','faults.assignedTo','users.name'
+       'account_managers.accountManager','faults.suspectedRfo_id','links.link','statuses.description','faults.assignedTo','users.name'
        ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
 
 
@@ -162,7 +162,7 @@ class DepartmentFaultController extends Controller
         ->orderBy('faults.created_at', 'desc')
         ->where('fault_section.section_id','=',auth()->user()->section_id)
         ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
-        'account_managers.accountManager','faults.suspectedRfo','links.link'
+        'account_managers.accountManager','faults.suspectedRfo_id','confirmed_rfos.ConfirmedRFO','suspected_rfos.SuspectedRFO','links.link'
         ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
     return view('department_faults.index',compact('faults'))
     ->with('i');

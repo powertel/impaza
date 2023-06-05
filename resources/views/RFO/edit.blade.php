@@ -12,15 +12,15 @@
             </div>
 
             <div class="card-body">
-                <form  action="{{ route('departments.update',$department->id) }}" method="POST">
+                <form  action="{{ route('rfos.update',$rfo->id) }}" method="POST">
                     @csrf
                     @method('PUT')
         
                     <div class="form-group row">
-                        <label for="department" class="col-sm-3 col-form-label">Department</label>
+                        <label for="RFO" class="col-sm-3 col-form-label">RFO</label>
                         <div class="col-sm-9">
-                            <input type="text"  class="form-control" name="department" value="{{ $department->department }}">
-                            @error ('department')
+                            <input type="text"  class="form-control" name="RFO" value="{{ $rfo->RFO }}">
+                            @error ('RFO')
 
                                 <div class="alert-danger">
                                      {{$message }}
@@ -35,7 +35,7 @@
                     <div class="card-footer">
 
                         <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
-                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('departments.index') }}">{{ __('Cancel') }}</a>
+                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('rfos.index') }}">{{ __('Cancel') }}</a>
 
                         
 

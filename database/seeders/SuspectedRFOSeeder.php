@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\SuspectedRfo;
+use App\Models\S;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

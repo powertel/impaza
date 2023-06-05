@@ -13,10 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('confirmed_rfos', function (Blueprint $table) {
+        Schema::create('reasons_for_outages', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->string('ConfirmedRFO');
+            $table->string('RFO');
+
         });
     }
 
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('confirmed_rfos');
+        Schema::dropIfExists('reasons_for_outages');
     }
 };

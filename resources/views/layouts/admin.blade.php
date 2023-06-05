@@ -237,7 +237,7 @@
                                 </a>
                               </li>
                               <li class="nav-item">
-                              <a href="{{ route('assessments.index') }}" class="nav-link">
+                              <a href="{{ route('rfos.index') }}" class="nav-link">
                               <i class="nav-icon 	fas fa-plus-square"></i>
                                     <p>Confirmed RFO</p>
                                 </a>

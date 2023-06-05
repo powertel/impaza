@@ -14,7 +14,7 @@ Fault
                 </h3>
             </div>
             <div class="card-body">
-                <form action="{{ route('faults.store') }}" method="POST">
+                <form id="UF" action="{{ route('faults.store') }}" method="POST">
                 {{ csrf_field() }}
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
@@ -90,7 +90,7 @@ Fault
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="phone" class="form-label">Phone Number</label>
-                            <input type="text" class="form-control @error('phoneNumber') is-invalid @enderror"  placeholder="Phone Number" name="phoneNumber" value="{{ old('phoneNumber') }}" >
+                            <input type="number" class="form-control @error('phoneNumber') is-invalid @enderror"  placeholder="Phone Number" name="phoneNumber" value="{{ old('phoneNumber') }}" >
 
                         </div>
 
@@ -113,20 +113,21 @@ Fault
                         <div class="mb-3 col-md-6">
                             <label for="email" class="form-label">Email Address</label>
                             <input type="email" class="form-control @error('contactEmail') is-invalid @enderror" placeholder="email" name="contactEmail" value="{{ old('contactEmail') }}" >
-
                         </div>
                         <div class="mb-3 col-md-6">
-                            <label for="suspectedRfo_id" class="form-label">Suspected Reason For Outage</label>
-                            <select  class="custom-select @error('suspectedRfo_id') is-invalid @enderror" name="suspectedRfo_id">
-                            <option selected disabled>Choose Suspected RFO</option>
-                                 @foreach($suspectedRFO as $suspected_rfo)
-                                    @if (old('suspectedRFO_id')==$suspected_rfo->id)
-                                        <option value="{{ $suspected_rfo->id}}" selected>{{ $suspected_rfo->SuspectedRFO }}</option>
+                        <label for="suspectedRFO" class="form-label">Suspected Reason For Outage</label>
+                            <select  class="custom-select @error('suspectedRfo_id') is-invalid @enderror" name="suspectedRfo_id" >
+                                <option selected disabled >Select RFO</option>
+                                @foreach($suspectedRFO  as $suspected_rfo)
+
+                                    @if (old('suspectedRfo_id')==$suspected_rfo->id)
+                                        <option value="{{ $suspected_rfo->id}}" selected>{{ $suspected_rfo->RFO }}</option>
                                     @else
-                                        <option value="{{ $suspected_rfo->id}}">{{ $suspected_rfo->SuspectedRFO }}</option>
+                                        <option value="{{ $suspected_rfo->id}}">{{ $suspected_rfo->RFO }}</option>
                                     @endif
-                                 @endforeach
-                         </select>
+
+                                @endforeach
+                            </select>
                         </div>
                     </div>
 
@@ -162,7 +163,7 @@ Fault
                     </div>
 
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()">{{ __('Save') }}</button>
+                        <button type="submit" class="btn btn-success btn-sm" onclick="return inlineSave()">{{ __('Save') }}</button>
                         <a type="button" class="btn btn-danger btn-sm" href="{{ route('faults.index') }}">{{ __('Cancel') }}</a>
                     </div>
                 </form>

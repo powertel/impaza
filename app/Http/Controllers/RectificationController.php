@@ -64,7 +64,7 @@ class RectificationController extends Controller
                 'suburb_id'=> 'required',
                 'pop_id'=> 'required',
                 'link_id'=> 'required',
-                'suspectedRfo'=> 'required',
+                'suspectedRfo_id'=> 'required',
                 'serviceType'=> 'required',
                 'serviceAttribute'=> 'required',
                 'remark'=> 'required'
@@ -122,10 +122,11 @@ class RectificationController extends Controller
         ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
         ->leftjoin('pops','faults.pop_id','=','pops.id')
         ->leftjoin('remarks','remarks.fault_id','=','faults.id')
+        ->leftjoin('suspected_rfos','faults.suspectedRfo_id','=','suspected_rfos.id')
         ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
         ->where('faults.id','=',$id)
         ->get(['faults.id','faults.customer_id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
-        'account_managers.accountManager','faults.accountManager_id','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo','faults.link_id','links.link'
+        'account_managers.accountManager','faults.accountManager_id','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo_id','faults.link_id','links.link'
         ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
         ->first();
 

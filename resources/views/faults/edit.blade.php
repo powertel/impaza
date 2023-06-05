@@ -116,13 +116,13 @@ Fault
                         </div>
                         <div class="mb-3 col-md-6">
                             <label for="suspectedRfo" class="form-label">Suspected Reason For Outage</label>
-                            <select  class="custom-select " value="{{$fault->suspectedRfo}}" name="suspectedRfo">
-                                <option selected="selected">{{ $fault->suspectedRfo }}</option>
-                                <option value="No fx Light"  @if (old('suspectedRfo') == "No fx Light") {{ 'selected' }} @endif>No fx Light</option>
-                                <option value="No PON Light"  @if (old('suspectedRfo') == "No PON Light") {{ 'selected' }} @endif>No PON Light</option>
-                                <option value="BTS Down"  @if (old('suspectedRfo') == "BTS Down") {{ 'selected' }} @endif>BTS Down</option>
-                                <option value="Node Down"  @if (old('suspectedRfo') == "Node Down") {{ 'selected' }} @endif>Node Down</option>
-                                <option value="Unknown"  @if (old('suspectedRfo') == "Unknown") {{ 'selected' }} @endif>Unknown</option>
+                            <select class="custom-select" id="suspectedRFO" name="suspectedRfo_id">
+                                <option selected="selected" value="{{ $fault->suspectedRfo_id}}">{{ $fault->RFO }}</option>
+                                @foreach($suspectedRFO as $suspected_rfo)
+                                    @unless ($suspected_rfo->id ===$fault->suspectedRfo_id)
+                                        <option value="{{ $suspected_rfo->id}}">{{ $suspected_rfo->RFO }}</option>
+                                    @endunless
+                                @endforeach
                             </select>
                         </div>
                     </div>

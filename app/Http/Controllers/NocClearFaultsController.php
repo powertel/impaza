@@ -35,12 +35,13 @@ class NocClearFaultsController extends Controller
             ->leftjoin('users','faults.assignedTo','=','users.id')
             ->leftjoin('customers','faults.customer_id','=','customers.id')
             ->leftjoin('links','faults.link_id','=','links.id')
+            ->leftjoin('suspected_rfos','faults.suspectedRfo_id','=','suspected_rfos.id')
             ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
             ->leftjoin('statuses','faults.status_id','=','statuses.id')
             ->orderBy('faults.created_at', 'desc')
             ->where('faults.status_id','=',5)
             ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
-            'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description'
+            'account_managers.accountManager','faults.suspectedRfo_id','links.link','statuses.description'
             ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
         return view('clear_faults.noc_clear',compact('faults'))
         ->with('i');

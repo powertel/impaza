@@ -67,7 +67,7 @@ Fault
 
                     <div class="col">
                         <strong>SUSPECTED REASON FOR OUTAGE</strong>
-                        <p class="text-muted">{{ $fault->suspectedRfo }}</p>
+                        <p class="text-muted">{{ $SuspectedRFO->RFO}}</p>
                     </div>
                 </div>
                 <hr>
@@ -86,8 +86,8 @@ Fault
 
                 <div class="row g-2">
                     <div class="col">
-                        <strong>REASON FOR OUTAGE</strong>
-                        <p class="text-muted">{{ $fault->confirmedRfo }}</p>
+                        <strong>CONFIRMED REASON FOR OUTAGE</strong>
+                        <p class="text-muted">{{ $ConfirmedRFO->RFO}}</p>
                     </div>
 
                     <div class="col">
