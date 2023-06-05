@@ -42,7 +42,7 @@ Finance
                     <div class="form-group row">
                         <label for="contract_number" class="col-sm-3 col-form-label">Contract Number</label>
                         <div class="col-sm-9">
-                            <input type="number" placeholder="Enter Contract Number" class="form-control @error('contract_number') is-invalid @enderror"  name="contract_number" value="{{ $link->contract_number}}">
+                            <input type="text" placeholder="Enter Contract Number" class="form-control @error('contract_number') is-invalid @enderror"  name="contract_number" value="{{ $link->contract_number}}">
                         </div>
                     </div>
 
