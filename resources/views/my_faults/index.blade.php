@@ -15,7 +15,7 @@ My Faults
         <h3 class="card-title">{{_('My Faults')}}</h3>
         <div class="card-tools">
 
-            
+
         </div>
     </div>
     <!-- /.card-header -->
@@ -39,39 +39,41 @@ My Faults
                     <td>{{ $fault->accountManager }}</td>
                     <td>{{ $fault->link }}</td>
                     <td style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? 'none' }};">
-                        <strong>{{$fault->description}}</strong> 
+                        <strong>{{$fault->description}}</strong>
                     </td>
                     <td>
-                    <form style="display:inline" action="{{ route('noc-clear.update',$fault->id) }}"  method="POST">  
+                    <form style="display:inline" action="{{ route('noc-clear.update',$fault->id) }}"  method="POST">
                         @csrf
                         @method('PUT')
                         @can('noc-clear-faults-clear')
-                        <button type="submit" class="btn btn-sm btn-primary" style="padding:0px 2px; color:#fff;" >Clear</button>   
+                        <button type="submit" class="btn btn-sm btn-primary" style="padding:0px 2px; color:#fff;" >Clear</button>
                         @endcan
                     </form>
                     <form style="display:inline" action="{{ route('chief-tech-clear.update',$fault->id) }}"  method="POST">
                             @csrf
                             @method('PUT')
                             @can('chief-tech-clear-faults-clear')
-                            <button type="submit" class="btn btn-sm btn-primary" style="padding:0px 2px; color:#fff;" >Clear</button>   
+                            <button type="submit" class="btn btn-sm btn-primary" style="padding:0px 2px; color:#fff;" >Clear</button>
                             @endcan
                      </form>
                         @can('rectify-fault')
                             <a href="{{ route('rectify.edit',$fault->id) }}" class="btn btn-sm btn-primary" style="padding:0px 2px; color:#fff;" >Rectify</a>
                         @endcan
                         @can('request-permit')
-                        <a href="{{ route('request-permit.edit',$fault->id) }}" class="btn btn-sm btn-warning" style="padding:0px 2px; color:#fff;" >Request Permit</a>                            
+                        <a href="{{ route('request-permit.edit',$fault->id) }}" class="btn btn-sm btn-warning" style="padding:0px 2px; color:#fff;" >Request Permit</a>
+                        @endcan
+                        @can('materials')
+                        <a href="{{ route('stores.create',$fault->id) }}" class="btn btn-sm btn-primary" style="padding:0px 2px; color:#fff;" >Request Material</a>
                         @endcan
                         <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
-                    
                     </td>
                 </tr>
                 @endforeach
-            </tbody> 
+            </tbody>
         </table>
     </div>
     <!-- /.card-body -->
 </div>
- 
+
 </section>
 @endsection

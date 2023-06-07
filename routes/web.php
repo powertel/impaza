@@ -26,6 +26,7 @@ use App\Http\Controllers\PositionController;
 use App\Http\Controllers\ChiefTechClearFaultsController;
 use App\Http\Controllers\NocClearFaultsController;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\StoreController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -68,6 +69,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('my_faults', MyFaultController::class);
     Route::resource('department_faults', DepartmentFaultController::class);
     Route::resource('request-permit', RequestPermitController::class);
+    Route::resource('stores', StoreController::class);
 
     Route::put('disconnect/{id}/disconnect', [FinanceController::class,'disconnect'])->name('disconnect');
     Route::put('reconnect/{id}/reconnect', [FinanceController::class,'reconnect'])->name('reconnect');
@@ -79,6 +81,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('section/{id}', [DepartmentController::class,'findSection'])->name('section');
     Route::get('position/{id}', [DepartmentController::class,'findPosition'])->name('position');
     Route::put('auto/{id}/auto', [AssessmentController::class,'assign'])->name('auto');
+    Route::get('stores/{id}', [StoreController::class,'findstores'])->name('stores');
 });
 
 
@@ -86,6 +89,7 @@ Route::get('department-faults', [DepartmentFaultController::class,'getSections']
 //Users
 Route::get('/profile',[UserController::class,'profile'])->name('user.profile');
 Route::post('/profile',[UserController::class,'postProfile'])->name('user.postProfile');
+
 
 Route::get('getfaults', [FaultController::class,'faults'])->name('getfaults');
 Route::get('getusers', [UserController::class,'getUsers'])->name('getusers');

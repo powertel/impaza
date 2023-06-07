@@ -313,15 +313,26 @@
                         </li>
                         @endcan
 
-
-                        @can('reports')
+                        @can('materials')
                         <li class="nav-item">
-                            <a  class="nav-link">
+                            <a href="{{ route('stores.index') }}" class="nav-link">
                               <i class="nav-icon fas fa-file-export"></i>
-                              <p>Reports</p>
+                              <p>Stores</p>
                             </a>
                         </li>
                         @endcan
+
+
+                        @can('reports')
+                        <li class="nav-item">
+                                <a  class="nav-link">
+                                <i class="nav-icon fas fa-bullseye"></i>
+                                <p>Reports</p>
+                                </a>
+                        </li>
+                        @endcan
+
+
                         <li  class="nav-item">
                             <a href="{{ route('user.profile') }}" class="nav-link">
                                 <i class="nav-icon fas fa-user"></i>
@@ -450,7 +461,7 @@
     }
 });
         </script>
-		
+
 <script>
 $(document).ready(function() {
 	let table = $('#faults-list').DataTable();
