@@ -104,7 +104,7 @@ class ChiefTechClearFaultsController extends Controller
         $req['status_id'] = 5;
         $fault ->update($req);
 
-        return redirect()->route('chief-tech-clear.index')
+        return redirect()->route('faults.edit',$id)
             ->with('success','Fault Has Been Cleared by Chief Technician');
     }
 

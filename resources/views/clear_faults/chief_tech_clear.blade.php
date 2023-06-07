@@ -57,6 +57,7 @@ Clear Faults
     </div>
     <!-- /.card-body -->
 </div>
+
  
 {{-- {{$section->section}}
 
