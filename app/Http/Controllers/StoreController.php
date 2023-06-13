@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use DB;
 use App\Models\Store;
-
+use App\Models\Fault;
 
 class StoreController extends Controller
 {
@@ -16,9 +16,23 @@ class StoreController extends Controller
      */
     public function index()
     {
-        $stores =DB::table('stores')
-        ->get();
-        return view('stores.index', compact('stores'));
+        $stores = DB::table('stores')
+        ->leftjoin('faults','stores.fault_id','=','faults.id')
+
+        ->get([
+        'faults.id',
+        'faults.fault_ref_number',
+        'faults.faultType',
+        'stores.requisition_number',
+        'stores.materials',
+        'stores.SAP_ref',
+        ]);
+
+        //dd($faults);
+
+
+        return view('stores.index',compact('stores'))
+        ->with('i');
     }
 
     /**
@@ -40,7 +54,19 @@ class StoreController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+        DB::beginTransaction();
+        try{
+            request()->validate([
+                'SAP_ref' => 'required',
+                'materials'=> 'required',
+            ]);
+
+            $req = $request->all();
+
+            //This is where i am creating the fault
+
+
     }
 
     /**
@@ -51,7 +77,14 @@ class StoreController extends Controller
      */
     public function show($id)
     {
-        //
+        $stores = DB::table('stores')
+        ->leftjoin('faults','stores.fault_id','=','faults.id')
+        ->leftjoin('stores','stores.stores_id','=','stores.id')
+        ->where('stores.id','=',$id)
+        ->get(['stores.id','faults.fault_ref_number','faults.faultType','stores.requisition_number','stores.SAP_ref','stores.created_at'])
+        ->first();
+        return view('stores.show',compact('stores'));
+
     }
 
     /**
