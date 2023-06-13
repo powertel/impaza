@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Fault extends Model
 {
@@ -61,5 +62,10 @@ class Fault extends Model
     public function sections()
     {
         return $this->belongsToMany(Section::class);
+    }
+
+    public function stores()
+    {
+        return $this->hasMany(Store::class);
     }
 }

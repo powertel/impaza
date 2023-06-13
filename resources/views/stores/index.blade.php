@@ -25,23 +25,19 @@ Stores
             <thead>
                 <tr>
                     <th>Fault Ref. No.</th>
-                    <th>Fault Name</th>
+                    <th>Fault Type</th>
                     <th>Requisition No.</th>
                     <th>SAP Ref. No.</th>
-                    <th>Date Requested</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($stores as $stores)
+                @foreach ($stores as $store)
                  <tr >
-                    <td>{{$stores->fault_ref_number}}</td>
-                    <td>{{$stores->fault_name }}</td>
-                    <td>{{$stores->requisition_number }}</td>
-                    <td>{{$stores->ref_Number }}</td>
-                    <td>
-                        {{ Carbon\Carbon::parse($stores->created_at)->format('j F Y h:i a') }}
-                        </td>
+                    <td>{{$store->fault_ref_number}}</td>
+                    <td>{{$store->faultType }}</td>
+                    <td>{{$store->requisition_number }}</td>
+                    <td>{{$store->SAP_ref}}</td>
                     <td>
                         @can('material')
                         <a href="{{ route('stores.show',$stores->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
