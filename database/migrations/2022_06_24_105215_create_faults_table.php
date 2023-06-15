@@ -26,8 +26,8 @@ return new class extends Migration
             $table->unsignedInteger('suburb_id');
             $table->unsignedInteger('pop_id');
             $table->unsignedInteger('link_id');
-            $table->string('suspectedRfo');
-            $table->string('confirmedRfo');
+            $table->unsignedInteger('suspectedRfo_id');
+            $table->unsignedInteger('confirmedRfo_id')->default(1);
             $table->string('serviceType');
             $table->string('serviceAttribute');
             $table->unsignedInteger('user_id')->nullable();

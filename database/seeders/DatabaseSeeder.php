@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             PermissionTableSeeder::class,
             UserStatusSeeder::class,
             CreateAdminUserSeeder::class,
+            RFOSeeder::class,
             LinkTypeSeeder::class,
         ]);
         // \App\Models\User::factory(10)->create();

@@ -12,6 +12,7 @@ use App\Models\Link;
 use App\Models\Remark;
 use App\Models\AccountManager;
 use App\Models\FaultSection;
+use App\Models\ReasonsForOutage;
 use DB;
 
 class FaultController extends Controller
@@ -37,6 +38,7 @@ class FaultController extends Controller
                 ->leftjoin('users as assigned_users','faults.assignedTo','=','assigned_users.id')
 				->leftjoin('users as reported_users','faults.user_id','=','reported_users.id')
                 ->leftjoin('statuses','faults.status_id','=','statuses.id')
+                ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
                 ->orderBy('faults.created_at', 'desc')
                 ->get([
 				'faults.id',
@@ -47,7 +49,7 @@ class FaultController extends Controller
 				'faults.phoneNumber',
 				'faults.contactEmail',
 				'faults.address',
-                'account_managers.accountManager',
+        'account_managers.accountManager',
 				'faults.suspectedRfo',
 				'links.link',
 				'statuses.description',
@@ -61,6 +63,7 @@ class FaultController extends Controller
 				]);
 				
 				//dd($faults);
+
         return view('faults.index',compact('faults'))
         ->with('i');
 		
@@ -82,7 +85,8 @@ class FaultController extends Controller
         $link = Link::all();
         $pop = Pop::all();
         $accountManager = AccountManager::all();
-        return view('faults.create',compact('customer','city','accountManager','location','link','pop'));
+        $suspectedRFO = ReasonsForOutage::all();
+        return view('faults.create',compact('customer','city','accountManager','location','link','pop','suspectedRFO'));
     }
 
     public function findSuburb($id)
@@ -131,7 +135,7 @@ class FaultController extends Controller
                 'suburb_id'=> 'required',
                 'pop_id'=> 'required',
                 'link_id'=> 'required',
-                'suspectedRfo'=> 'required',
+                'suspectedRfo_id'=> 'required',
                 'serviceType'=> 'required',
                 'remark'=> 'required',
             ]);
@@ -186,7 +190,10 @@ class FaultController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-    {
+    {   
+       
+     
+                       
         $fault = DB::table('faults')
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
                 ->leftjoin('links','faults.link_id','=','links.id')
@@ -197,12 +204,18 @@ class FaultController extends Controller
                 ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
                 ->where('faults.id','=',$id)
                 ->get(['faults.id','faults.customer_id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
-                'account_managers.accountManager','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo','faults.link_id','links.link'
-                ,'faults.serviceType','faults.confirmedRfo','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
+                'account_managers.accountManager','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.link_id','links.link'
+                ,'faults.serviceType','faults.suspectedRfo_id','faults.confirmedRfo_id','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
+                ->first();
+                $SuspectedRFO = DB::table('reasons_for_outages')->where('reasons_for_outages.id','=',$fault->suspectedRfo_id)
+                ->get('reasons_for_outages.RFO')
+                ->first();
+                $ConfirmedRFO = DB::table('reasons_for_outages')->where('reasons_for_outages.id','=',$fault->confirmedRfo_id)
+                ->get('reasons_for_outages.RFO')
                 ->first();
 
-               $remarks= Remark::all();
-        return view('faults.show',compact('fault','remarks'));
+               $remarks= Remark::all(); 
+        return view('faults.show',compact('fault','remarks','SuspectedRFO','ConfirmedRFO'));
     }
 
     /**
@@ -220,10 +233,11 @@ class FaultController extends Controller
             ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
             ->leftjoin('pops','faults.pop_id','=','pops.id')
             ->leftjoin('remarks','remarks.fault_id','=','faults.id')
+            ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
             ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
             ->where('faults.id','=',$id)
             ->get(['faults.id','faults.customer_id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
-            'account_managers.accountManager','faults.accountManager_id','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo','faults.link_id','links.link'
+            'account_managers.accountManager','faults.accountManager_id','faults.suspectedRfo_id','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','reasons_for_outages.RFO','faults.link_id','links.link'
             ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
             ->first();
 
@@ -234,8 +248,9 @@ class FaultController extends Controller
             $links = Link::all();
             $remarks= Remark::all();
             $accountManagers = AccountManager::all();
+            $suspectedRFO = ReasonsForOutage::all();
 
-        return view('faults.edit',compact('fault','customers','cities','suburbs','pops','links','remarks','accountManagers'));
+        return view('faults.edit',compact('fault','suspectedRFO','customers','cities','suburbs','pops','links','remarks','accountManagers'));
 
     }
 

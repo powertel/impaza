@@ -40,7 +40,7 @@ class NocClearFaultsController extends Controller
             ->orderBy('faults.created_at', 'desc')
             ->where('faults.status_id','=',5)
             ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
-            'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description'
+            'account_managers.accountManager','faults.suspectedRfo_id','links.link','statuses.description'
             ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
         return view('clear_faults.noc_clear',compact('faults'))
         ->with('i');
