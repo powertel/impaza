@@ -24,6 +24,7 @@ class Fault extends Model
         'accountManager_id',
         'city_id',
         'suburb_id',
+        'section_id',
         'pop_id',
         'link_id',
         'suspectedRfo',
@@ -58,7 +59,7 @@ class Fault extends Model
     }
 
     //relationship of section and faults
-    public function sections()
+    public function section()
     {
         return $this->belongsToMany(Section::class);
     }

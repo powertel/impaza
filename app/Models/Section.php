@@ -25,9 +25,9 @@ class Section extends Model
     }
     
     //relationship of section and faults
-    public function faults()
+    public function fault()
     {
-        return $this->belongsToMany(Fault::class);
+        return $this->hasMany(Fault::class);
     }
 
     //relationship of section and faults

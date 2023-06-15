@@ -17,6 +17,7 @@ return new class extends Migration
             $table->increments('id');
 			$table->string("fault_ref_number");
             $table->unsignedInteger('customer_id');
+            $table->unsignedInteger('section_id');
             $table->string('contactName');
             $table->integer('phoneNumber');
             $table->string('contactEmail');

@@ -16,4 +16,9 @@ class FaultSection extends Model
         'section_id'
 
     ];
+    public function fault()
+    {
+        return $this->belongsToMany(Fault::class);
+    }
+
 }

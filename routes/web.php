@@ -26,6 +26,7 @@ use App\Http\Controllers\PositionController;
 use App\Http\Controllers\ChiefTechClearFaultsController;
 use App\Http\Controllers\NocClearFaultsController;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\ReportController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -68,6 +69,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('my_faults', MyFaultController::class);
     Route::resource('department_faults', DepartmentFaultController::class);
     Route::resource('request-permit', RequestPermitController::class);
+    Route::resource('reports', ReportController::class);
 
     Route::put('disconnect/{id}/disconnect', [FinanceController::class,'disconnect'])->name('disconnect');
     Route::put('reconnect/{id}/reconnect', [FinanceController::class,'reconnect'])->name('reconnect');

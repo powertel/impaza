@@ -316,7 +316,7 @@
 
                         @can('reports')
                         <li class="nav-item">
-                            <a  class="nav-link">
+                            <a href="{{ route('reports.index') }}"  class="nav-link">
                               <i class="nav-icon fas fa-file-export"></i>
                               <p>Reports</p>
                             </a>
