@@ -30,6 +30,7 @@ links
                     <th>Pop</th>
                     <th>link</th>
                     <th>Actions</th>
+
                 </tr>
             </thead>
             <tbody>
@@ -41,6 +42,7 @@ links
                     <td>{{ $link->suburb}}</td>
                     <td>{{ $link->pop}}</td>
                     <td>{{ $link->link}}</td>
+
                     <td>
                     <form  name="theForm" action="{{ route('links.destroy',$link->id) }}" method="POST">
                         <a href="{{ route('links.show',$link->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>

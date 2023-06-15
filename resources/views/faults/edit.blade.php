@@ -13,7 +13,7 @@ Fault
                 <h3 class="card-title">{{_('Edit Fault')}}</h3>
             </div>
             <div class="card-body">
-                <form  action="{{ route('faults.update', $fault->id ) }}" method="POST">
+                <form id="UF" action="{{ route('faults.update', $fault->id ) }}" method="POST">
                     @csrf
                     @method('PUT')
                     <div class="row g-2">
@@ -42,7 +42,7 @@ Fault
 
                         </div>
                     </div>
-            
+
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="contactName" class="form-label">Contact Name</label>
@@ -56,7 +56,7 @@ Fault
                                     @if ($suburb->city_id === $fault->city_id)
                                         @unless($suburb->id ===$fault->suburb_id)
                                             <option value="{{ $suburb->id}}">{{ $suburb->suburb }}</option>
-                                        @endunless                                    
+                                        @endunless
                                     @endif
                                 @endforeach
                             </select>
@@ -69,7 +69,7 @@ Fault
                                     @if ($link->customer_id === $fault->customer_id)
                                         @unless ($link->id ===$fault->link_id)
                                             <option value="{{ $link->id}}">{{ $link->link }}</option>
-                                        @endunless                                        
+                                        @endunless
                                     @endif
                                 @endforeach
                             </select>
@@ -82,14 +82,14 @@ Fault
                                     @if($pop->suburb_id === $fault->suburb_id)
                                         @unless($pop->id ===$fault->pop_id)
                                             <option value="{{ $pop->id}}">{{ $pop->pop }}</option>
-                                        @endunless                                        
+                                        @endunless
                                     @endif
                                 @endforeach
                             </select>
 
                         </div>
                     </div>
-            
+
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="phone" class="form-label">Phone Number</label>
@@ -126,7 +126,7 @@ Fault
                             </select>
                         </div>
                     </div>
-            
+
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="adress" class="form-label">Address</label>
@@ -144,13 +144,13 @@ Fault
                             </select>
                         </div>
                     </div>
-        
+
                     <div class="card-footer">
                         <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
                         <a type="button" class="btn btn-danger btn-sm" href="javascript:history.back()">{{ __('Cancel') }}</a>
                     </div>
-                </form> 
-            </div> 
+                </form>
+            </div>
         </div>
         <div class="card  w-50">
             <div class="card-header">
@@ -174,7 +174,7 @@ Fault
                 </div>
                 @endif
                 @endforeach
-            </div> 
+            </div>
 
             <div class="card-footer">
                 <form action="/faults/{{$fault->id}}/remarks" method="POST">
@@ -189,7 +189,7 @@ Fault
             </div>
         </div>
     </div>
- 
+
 </section>
 @endsection
 

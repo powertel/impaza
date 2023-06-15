@@ -35,15 +35,39 @@ class FaultController extends Controller
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
                 ->leftjoin('links','faults.link_id','=','links.id')
                 ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
-                ->leftjoin('users','faults.assignedTo','=','users.id')
+                ->leftjoin('users as assigned_users','faults.assignedTo','=','assigned_users.id')
+				->leftjoin('users as reported_users','faults.user_id','=','reported_users.id')
                 ->leftjoin('statuses','faults.status_id','=','statuses.id')
                 ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
                 ->orderBy('faults.created_at', 'desc')
-                ->get(['faults.id','faults.fault_ref_number','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
-                'account_managers.accountManager','reasons_for_outages.RFO','links.link','statuses.description','users.name'
-                ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
+                ->get([
+				'faults.id',
+				'faults.user_id',
+				'faults.fault_ref_number',
+				'customers.customer',
+				'faults.contactName',
+				'faults.phoneNumber',
+				'faults.contactEmail',
+				'faults.address',
+        'account_managers.accountManager',
+				'faults.suspectedRfo',
+				'links.link',
+				'statuses.description',
+				'assigned_users.name as assignedTo',
+				'reported_users.name as reportedBy',
+				'faults.serviceType',
+				'faults.serviceAttribute',
+				'faults.faultType',
+				'faults.priorityLevel',
+				'faults.created_at'
+				]);
+				
+				//dd($faults);
+
         return view('faults.index',compact('faults'))
         ->with('i');
+		
+		
     }
 
     /**
@@ -117,13 +141,13 @@ class FaultController extends Controller
             ]);
 
             $req = $request->all();
-           
+        
             //This is where i am creating the fault
             $req['status_id'] = 1;
+			$req['user_id'] =$request->user()->id;
 			$req['fault_ref_number']="PWT".date("YmdHis");
 			
-			//var_dump($req);
-			//die();
+
 
             $fault = Fault::create($req);
             $remark = Remark::create(

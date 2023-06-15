@@ -39,6 +39,10 @@ Link
                         <strong>LINK</strong>
                         <p class="text-muted">{{ $link->link }}</p>
                     </div>
+                    <div class="col">
+                        <strong>LINK TYPE</strong>
+                        <p class="text-muted">{{ $link->linkType }}</p>
+                    </div>
                 </div>
                 <div class="card-footer">
                     <a type="button" class="btn btn-danger btn-sm"href="{{ url()->previous() }}">{{ __('Close') }}</a>

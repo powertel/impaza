@@ -142,6 +142,7 @@ class CustomerController extends Controller
      */
     public function destroy($id)
     {
-        //
+        DB::table("customers")->where('id',$id)->delete();
+        return redirect()->route('customers.index');
     }
 }

@@ -153,7 +153,6 @@ class AccountManagerController extends Controller
     public function destroy($id)
     {
         AccountManager::find($id)->delete();
-        return redirect()->route('account_managers.index')
-                        ->with('success','Account Manager deleted successfully');
+        return redirect()->route('account_managers.index');
     }
 }

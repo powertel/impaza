@@ -14,7 +14,7 @@ Link
                 </h3>
             </div>
             <div class="card-body">
-                <form action="{{ route('links.update', $link->id ) }}" method="POST">
+                <form id="UF" action="{{ route('links.update', $link->id ) }}" method="POST">
                     @csrf
                     @method('PUT')
 
@@ -74,7 +74,19 @@ Link
                             </select>
                         </div>
                     </div>
-
+                    <div class="form-group row">
+                        <label for="city" class="col-sm-3 col-form-label">Link Type</label>
+                        <div class="col-sm-9">
+                            <select class="custom-select" id="link_type" name="linkType_id">
+                                <option selected="selected" value="{{ $link->linkType_id}}">{{ $link->linkType }}</option>
+                                @foreach($linkTypes as $link_type)
+                                    @unless ($link_type->id ===$link->linkType_id)
+                                        <option value="{{ $link_type->id}}">{{ $link_type->linkType}}</option>
+                                    @endunless
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
                     <div class="form-group row">
                         <label for="link" class="col-sm-3 col-form-label">Link</label>
                         <div class="col-sm-9">

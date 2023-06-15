@@ -47,7 +47,7 @@ Customers
                         @csrf
                         @method('DELETE')
                         @can('customer-delete')
-                        <button type="submit" class="btn btn-danger btn-sm" style="padding:0px 2px; color:#fff;">Delete</button>
+                        <button type="button" class="btn btn-danger btn-sm show_confirm" data-toggle="tooltip" title='Delete' style="padding:0px 2px; color:#fff;">Delete</button> 
                         @endcan
                     </form>
                        

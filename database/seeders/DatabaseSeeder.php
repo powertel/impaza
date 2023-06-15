@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\LinkType;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Contracts\Permission;
@@ -22,6 +23,7 @@ class DatabaseSeeder extends Seeder
             UserStatusSeeder::class,
             CreateAdminUserSeeder::class,
             RFOSeeder::class,
+            LinkTypeSeeder::class,
         ]);
         // \App\Models\User::factory(10)->create();
 

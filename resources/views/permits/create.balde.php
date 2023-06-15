@@ -14,7 +14,7 @@ City
                 </h3>
             </div>
             <div class="card-body">
-                <form action="{{ route('cities.store') }}" method="POST">
+                <form id="UF" action="{{ route('cities.store') }}" method="POST">
                 {{ csrf_field() }}
 
                     <div class="form-group row">
@@ -30,7 +30,7 @@ City
                     </div>
 
                     <div class="card-footer">
-                    <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()"> Save</button>
+                    <button type="submit" class="btn btn-success btn-sm" onclick="return inlineSave()"> Save</button>
                         <a type="button" class="btn btn-danger btn-sm" href="{{ route('cities.index' ) }}">{{ __('Cancel') }}</a>
                     </div>
                 </form>
