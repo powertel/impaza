@@ -21,6 +21,7 @@ Customer
                         <strong>CUSTOMER</strong>
                         <p class="text-muted">{{ $customer->customer }}</p>
                     </div>
+           
                 <hr>
                 <div class="card-footer">
                     <a type="button" class="btn btn-danger btn-sm" href="{{ route('customers.index') }}">{{ __('Close') }}</a>
