@@ -103,7 +103,7 @@ class NocClearFaultsController extends Controller
         $req['status_id'] = 6;
         $fault ->update($req);
         
-        return redirect()->route('noc-clear.index')
+        return redirect()->route('faults.edit',$id)
             ->with('success','Fault Has Been Cleared By Noc');
     }
 

@@ -45,21 +45,24 @@ Finance
                         <form  style="margin-block-end: 0px;" action="{{ route('disconnect',$link->id) }}" method="POST">
                             <a href="{{ route('finance.show',$link->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
                             <a href="{{ route('finance.edit',$link->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
-                            @can('finance-link-update')
+                    @if ($link->link_status==='Pending')
+                    @can('finance-link-update')
                             <a href="{{ route('finance.edit',$link->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Approve</a>
-                            @endcan
-                           
-                            @csrf
+                    @endcan
+                    @elseif ($link->link_status==='Connected')
+                    @csrf
                             @method('PUT')
                             <button type="submit" class="btn btn-danger btn-sm" style="padding:0px 2px; color:#fff;">Disconnect</button>
-
-                        </form>
+                    @elseif ($link->link_status==='Disconnected')
+                    </form>
                         <td>
                         <form  style="margin-block-end: 0px;" action="{{ route('reconnect',$link->id) }}" method="POST">
                             @csrf
                             @method('PUT')
                             <button type="submit" class="btn btn-danger btn-sm" style="padding:0px 2px; color:#fff;">Reconnect</button>
-                        </form>                            
+                        </form> 
+                    @else
+                    @endif                           
                         </td>
 
                     </td>
