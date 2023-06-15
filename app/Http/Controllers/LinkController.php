@@ -8,6 +8,7 @@ use App\Models\City;
 use App\Models\Pop;
 use App\Models\Customer;
 use App\Models\Link;
+use App\Models\LinkType;
 use DB;
 
 class LinkController extends Controller
@@ -53,7 +54,8 @@ class LinkController extends Controller
         $location = Suburb::all();
         $link = Link::all();
         $pop = Pop::all();
-        return view('links.create',compact('customer','city','location','link','pop'));
+        $linkType = LinkType::all();
+        return view('links.create',compact('customer','city','linkType','location','link','pop'));
     }
 
     /**
@@ -67,6 +69,7 @@ class LinkController extends Controller
         request()->validate([
             'city_id' => 'required',
             'suburb_id' => 'required',
+            'linkType_id' => 'required',
             'pop_id' => 'required',
             'customer_id' => 'required',
             'link' => 'required|string|unique:links'
@@ -100,8 +103,9 @@ class LinkController extends Controller
                 ->leftjoin('cities','links.city_id','=','cities.id')
                 ->leftjoin('suburbs','links.suburb_id','=','suburbs.id')
                 ->leftjoin('pops','links.pop_id','=','pops.id')
+                ->leftjoin('link_types','links.linkType_id','=','link_types.id')
                 ->where('links.id','=',$id)
-                ->get(['links.id','links.link','customers.customer','cities.city','pops.pop','suburbs.suburb'])
+                ->get(['links.id','links.link','customers.customer','link_types.linkType','cities.city','pops.pop','suburbs.suburb'])
                 ->first();
         return view('links.show',compact('link'));
     }
@@ -119,14 +123,16 @@ class LinkController extends Controller
                 ->leftjoin('cities','links.city_id','=','cities.id')
                 ->leftjoin('suburbs','links.suburb_id','=','suburbs.id')
                 ->leftjoin('pops','links.pop_id','=','pops.id')
+                ->leftjoin('link_types','links.linkType_id','=','link_types.id')
                 ->where('links.id','=',$id)
-                ->get(['links.id','links.link','links.customer_id','links.city_id','links.pop_id','links.suburb_id','customers.customer','cities.city','pops.pop','suburbs.suburb'])
+                ->get(['links.id','links.linkType_id','links.link','links.customer_id','link_types.linkType','links.city_id','links.pop_id','links.suburb_id','customers.customer','cities.city','pops.pop','suburbs.suburb'])
                 ->first();
                 $customers = Customer::all();
                 $cities = City::all();
                 $suburbs = Suburb::all();
                 $pops = Pop::all();
-        return view('links.edit',compact('link','customers','cities','suburbs','pops',));
+                $linkTypes =LinkType::all();
+        return view('links.edit',compact('link','customers','cities','suburbs','pops','linkTypes'));
     }
 
     /**

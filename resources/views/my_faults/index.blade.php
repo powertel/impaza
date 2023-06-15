@@ -42,6 +42,7 @@ My Faults
                         <strong>{{$fault->description}}</strong>
                     </td>
                     <td>
+
                     <form style="display:inline" action="{{ route('noc-clear.update',$fault->id) }}"  method="POST">
                         @csrf
                         @method('PUT')
@@ -56,16 +57,25 @@ My Faults
                             <button type="submit" class="btn btn-sm btn-primary" style="padding:0px 2px; color:#fff;" >Clear</button>
                             @endcan
                      </form>
+
+                       <!--<a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>-->
+                        @if ($fault->description==='Fault is under rectification')
+
                         @can('rectify-fault')
                             <a href="{{ route('rectify.edit',$fault->id) }}" class="btn btn-sm btn-primary" style="padding:0px 2px; color:#fff;" >Rectify</a>
-                        @endcan
+                        @endcan  
                         @can('request-permit')
+
                         <a href="{{ route('request-permit.edit',$fault->id) }}" class="btn btn-sm btn-warning" style="padding:0px 2px; color:#fff;" >Request Permit</a>
                         @endcan
                         @can('materials')
                         <a href="{{ route('stores.create',$fault->id) }}" class="btn btn-sm btn-primary" style="padding:0px 2px; color:#fff;" >Request Material</a>
                         @endcan
                         <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
+
+    
+                        @endif
+
                     </td>
                 </tr>
                 @endforeach

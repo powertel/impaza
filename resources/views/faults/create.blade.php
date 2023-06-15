@@ -113,17 +113,20 @@ Fault
                         <div class="mb-3 col-md-6">
                             <label for="email" class="form-label">Email Address</label>
                             <input type="email" class="form-control @error('contactEmail') is-invalid @enderror" placeholder="email" name="contactEmail" value="{{ old('contactEmail') }}" >
-
                         </div>
                         <div class="mb-3 col-md-6">
-                            <label for="suspectedRfo" class="form-label">Suspected Reason For Outage</label>
-                            <select  class="custom-select @error('suspectedRfo') is-invalid @enderror" name="suspectedRfo" value="{{ old('suspectedRfo') }}" >
-                                <option selected disabled>Choose</option>
-                                <option value="No fx Light"  @if (old('suspectedRfo') == "No fx Light") {{ 'selected' }} @endif>No fx Light</option>
-                                <option value="No PON Light"  @if (old('suspectedRfo') == "No PON Light") {{ 'selected' }} @endif>No PON Light</option>
-                                <option value="BTS Down"  @if (old('suspectedRfo') == "BTS Down") {{ 'selected' }} @endif>BTS Down</option>
-                                <option value="Node Down"  @if (old('suspectedRfo') == "Node Down") {{ 'selected' }} @endif>Node Down</option>
-                                <option value="Unknown"  @if (old('suspectedRfo') == "Unknown") {{ 'selected' }} @endif>Unknown</option>
+                        <label for="suspectedRFO" class="form-label">Suspected Reason For Outage</label>
+                            <select  class="custom-select @error('suspectedRfo_id') is-invalid @enderror" name="suspectedRfo_id" >
+                                <option selected disabled >Select RFO</option>
+                                @foreach($suspectedRFO  as $suspected_rfo)
+
+                                    @if (old('suspectedRfo_id')==$suspected_rfo->id)
+                                        <option value="{{ $suspected_rfo->id}}" selected>{{ $suspected_rfo->RFO }}</option>
+                                    @else
+                                        <option value="{{ $suspected_rfo->id}}">{{ $suspected_rfo->RFO }}</option>
+                                    @endif
+
+                                @endforeach
                             </select>
                         </div>
                     </div>

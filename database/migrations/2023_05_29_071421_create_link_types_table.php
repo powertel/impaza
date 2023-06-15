@@ -13,13 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('customers', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('customer');
-            $table->unsignedInteger('city_id');
-            $table->unsignedInteger('suburb_id');
-            $table->unsignedInteger('pop_id');
+        Schema::create('link_types', function (Blueprint $table) {
+            $table->id();
             $table->timestamps();
+            $table->string('linkType');
         });
     }
 
@@ -30,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('customers');
+        Schema::dropIfExists('link_types');
     }
 };

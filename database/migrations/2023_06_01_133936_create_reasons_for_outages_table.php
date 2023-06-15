@@ -13,13 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('customers', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('customer');
-            $table->unsignedInteger('city_id');
-            $table->unsignedInteger('suburb_id');
-            $table->unsignedInteger('pop_id');
+        Schema::create('reasons_for_outages', function (Blueprint $table) {
+            $table->id();
             $table->timestamps();
+            $table->string('RFO');
+
         });
     }
 
@@ -30,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('customers');
+        Schema::dropIfExists('reasons_for_outages');
     }
 };

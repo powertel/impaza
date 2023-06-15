@@ -26,11 +26,11 @@ class Fault extends Model
         'suburb_id',
         'pop_id',
         'link_id',
-        'suspectedRfo',
+        'suspectedRfo_id',
         'serviceType',
         'serviceAttribute',
         'status_id',
-        'confirmedRfo',
+        'confirmedRfo_id',
         'faultType',
         'priorityLevel',
         'assignedTo',
@@ -61,5 +61,13 @@ class Fault extends Model
     public function sections()
     {
         return $this->belongsToMany(Section::class);
+    }
+    public function confirmedrfo()
+    {
+        return $this->belongsTo(ReasonsForOutage::class);
+    }
+    public function suspectedrfo()
+    {
+        return $this->belongsTo(ReasonsForOutage::class);
     }
 }
