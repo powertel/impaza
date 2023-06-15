@@ -26,18 +26,17 @@ Stores
                 <tr>
                     <th>Fault Ref. No.</th>
                     <th>Fault Type</th>
-                    <th>Requisition No.</th>
                     <th>SAP Ref. No.</th>
+                    <th>Requested by</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($stores as $store)
+                @foreach ($stores as $store, $faults as $fault)
                  <tr >
                     <td>{{$store->fault_ref_number}}</td>
                     <td>{{$store->faultType }}</td>
-                    <td>{{$store->requisition_number }}</td>
-                    <td>{{$store->SAP_ref}}</td>
+                    <td>{{$store->SAP_ref}}</td>}}
                     <td>
                         @can('material')
                         <a href="{{ route('stores.show',$stores->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>

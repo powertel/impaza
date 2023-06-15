@@ -15,7 +15,6 @@ return new class extends Migration
     {
         Schema::create('stores', function (Blueprint $table) {
             $table->id();
-            $table->increments('requisition_number')->nullable();
             $table->unsignedInteger('fault_id');
             $table->string('fault_ref_number');
             $table->string('materials')->nullable();

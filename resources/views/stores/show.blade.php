@@ -27,11 +27,6 @@ Stores
                     </div>
                 </div>
                 <hr>
-                <div class="row g-2">
-                    <div class="col-md-6">
-                        <strong>Requisition No.</strong>
-                        <p class="text-muted">{{ $stores->requisition_number }}</p>
-                    </div>
                     <div class="col-md-2">
                         <strong>SAP Ref. No.</strong>
                         <p class="text-muted">{{ $stores->ref_Number }}</p>

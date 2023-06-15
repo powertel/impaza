@@ -13,6 +13,8 @@ class Store extends Model
         'fault_ref_number',
         'requisition_number',
         'faults_id',
+        'user_id',
+        'fault_id',
         'materials',
         'SAP_ref'
     ];

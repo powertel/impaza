@@ -20,19 +20,19 @@ Materials
                 {{ csrf_field() }}
 
                 <div class="form-group row">
-                        <label for="request-material" class="col-sm-3 col-form-label">Sap Ref. No.</label>
+                        <label for="SAP_ref" class="col-sm-3 col-form-label">Sap Ref. No.</label>
                         <div class="col-sm-9 ">
-                            <input type="text" class="form-control @error('request-material') is-invalid @enderror" name="request-material" placeholder="Enter SAP No." value="{{ old('request-material') }}">
-                            @error ('request-material')
+                            <input type="text" class="form-control @error('request-material') is-invalid @enderror" name="SAP_ref" placeholder="Enter SAP No." value="{{ old('SAP_ref') }}">
+                            @error ('SAP_ref')
                                 <div class="alert-danger">
                                      {{$message }}
                                 </div>
                             @enderror
                         </div >
-                        <label for="request-material" class="col-sm-3 col-form-label">Material</label>
+                        <label for="materials" class="col-sm-3 col-form-label">Material</label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control @error('request-material') is-invalid @enderror" name="request-material" placeholder="Material Description" value="{{ old('request-material') }}">
-                            @error ('request-material')
+                            <input type="text" class="form-control @error('request-material') is-invalid @enderror" name="materials" placeholder="Material Description" value="{{ old('materials') }}">
+                            @error ('materials')
                                 <div class="alert-danger">
                                      {{$message }}
                                 </div>

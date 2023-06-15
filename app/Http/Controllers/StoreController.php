@@ -9,6 +9,10 @@ use App\Models\Fault;
 
 class StoreController extends Controller
 {
+    function __construct()
+    {
+         $this->middleware('permission:materials', ['only' => ['index','store']]);
+    }
     /**
      * Display a listing of the resource.
      *
@@ -23,7 +27,6 @@ class StoreController extends Controller
         'faults.id',
         'faults.fault_ref_number',
         'faults.faultType',
-        'stores.requisition_number',
         'stores.materials',
         'stores.SAP_ref',
         ]);
@@ -52,21 +55,20 @@ class StoreController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, Fault $fault)
     {
 
-        DB::beginTransaction();
-        try{
-            request()->validate([
-                'SAP_ref' => 'required',
-                'materials'=> 'required',
-            ]);
+              Store::create(
+            [
+            // 'fault_id'=> $fault->id,
+            // 'user_id' => $request->user()->id,
+            'SAP_ref' =>  $request['SAP_ref'],
+            'materials'=>  $request['materials'],
+            ]
 
-            $req = $request->all();
+        );
 
-            //This is where i am creating the fault
-
-
+        return back();
     }
 
     /**
