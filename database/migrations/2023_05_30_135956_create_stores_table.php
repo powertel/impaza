@@ -16,7 +16,6 @@ return new class extends Migration
         Schema::create('stores', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('fault_id');
-            $table->string('fault_ref_number');
             $table->string('materials')->nullable();
             $table->string('SAP_ref');
             $table->timestamps();

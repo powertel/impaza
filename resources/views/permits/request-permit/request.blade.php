@@ -34,13 +34,13 @@ Rectify
                             <input type="checkbox" class="form-check-input">
                         </div>
                     </div>
-                    
+
                     <div class="card-footer">
-                        <button type="submit" class="btn btn-success btn-sm " >{{ __('Clear') }}</button>  
-                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('faults.index') }}" >{{ __('Cancel') }}</a>           
+                        <button type="submit" class="btn btn-success btn-sm " >{{ __('Clear') }}</button>
+                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('my_faults.index') }}" >{{ __('Cancel') }}</a>
                     </div>
-                </form> 
-            </div> 
+                </form>
+            </div>
         </div>
     </div>
     <div class="col d-flex justify-content-center">
@@ -66,7 +66,7 @@ Rectify
                 </div>
                 @endif
                 @endforeach
-            </div> 
+            </div>
 
             <div class="card-footer">
                 <form action="/faults/{{$fault->id}}/remarks" method="POST">

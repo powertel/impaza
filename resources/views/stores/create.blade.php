@@ -20,6 +20,15 @@ Materials
                 {{ csrf_field() }}
 
                 <div class="form-group row">
+                    <label for="issuedTo" class="col-sm-3 col-form-label">Fault ID</label>
+                    <div class="col-sm-9 ">
+
+                        @error ('fault_id')
+                            <div class="alert-danger">
+                                 {{$message }}
+                            </div>
+                        @enderror
+                    </div >
                         <label for="SAP_ref" class="col-sm-3 col-form-label">Sap Ref. No.</label>
                         <div class="col-sm-9 ">
                             <input type="text" class="form-control @error('request-material') is-invalid @enderror" name="SAP_ref" placeholder="Enter SAP No." value="{{ old('SAP_ref') }}">
