@@ -35,48 +35,54 @@ Departments
             <tbody>
                 <tr >
                     <th scope="row">GLOBAL</th>
-                    <td> {{$global}}</td>
-                    <td> {{$Resolved}}</td>
-                    <td>{{$Outstanding = $global - $Resolved}}</td>
-                    @if($global===0)
+                    <td> {{$global_count}}</td>
+                    <td> {{$Resolved_count}}</td>
+                    <td>{{$Outstanding = $global_count - $Resolved_count}}</td>
+                    @if($global_count===0)
                     <td>NULL</td>
                     @else
-                    <td>{{$Resolved / $global}}</td>
+                    <td>{{$Resolved_count / $global_count}}</td>
                     @endif
+                    <td>{{$TD_global}}</td>
+                    <td></td>
                 </tr>
                 <tr >
                     <th scope="row">NOC</th>
                     <td> {{$NOC_count}}</td>
-                    <td> {{$ResolvedNOC}}</td>
-                    <td>{{$NOC_count - $ResolvedNOC}}</td>
+                    <td> {{$ResolvedNOC_count}}</td>
+                    <td>{{$NOC_count - $ResolvedNOC_count}}</td>
                     @if($NOC_count===0)
-                    <td>NULL</td>
+                    <td>$logged</td>
                     @else
-                    <td>{{$ResolvedNOC / $NOC_count}}</td>
+                    <td>{{$ResolvedNOC_count / $NOC_count}}</td>
                         @endif
+                    <td>{{$TD_NOC}}</td>
+                    <td></td>
                 </tr>
                 <tr >   
                     <th scope="row">HRE</th>
                     <td>{{$HRE_count}}</td>
-                    <td> {{$ResolvedHRE}}</td>
-                    <td>{{$HRE_count - $ResolvedHRE}}</td>
+                    <td> {{$ResolvedHRE_count}}</td>
+                    <td>{{$HRE_count - $ResolvedHRE_count}}</td>
                     @if($HRE_count===0)
                     <td>NULL</td>
                     @else
-                    <td>{{$ResolvedHRE / $HRE_count}}</td>
+                    <td>{{$ResolvedHRE_count / $HRE_count}}</td>
                     @endif
+                    <td>{{$TD_HRE}}</td>
                     
                 </tr>
                 <tr >
                     <th scope="row">BYO</th>
                     <td> {{$BYO_count}}</td>
-                    <td> {{$ResolvedBYO}}</td>
-                    <td>{{$BYO_count- $ResolvedBYO}}</td>
+                    <td> {{$ResolvedBYO_count}}</td>
+                    <td>{{$BYO_count- $ResolvedBYO_count}}</td>
                     @if($BYO_count===0)
                     <td>NULL</td>
                     @else
-                    <td>{{$ResolvedBYO / $BYO_count}}</td>
+                    <td>{{$ResolvedBYO_count / $BYO_count}}</td>
                         @endif
+                    <td>{{$TD_BYO}}</td>
                 </tr>
             </tbody>
         </table>

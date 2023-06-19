@@ -3,15 +3,9 @@
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Fault;
-use App\Models\Suburb;
-use App\Models\City;
-use App\Models\Pop;
-use App\Models\Customer;
-use App\Models\Link;
-use App\Models\Remark;
-use App\Models\AccountManager;
-use App\Models\FaultSection;
 use DB;
+use Carbon\Carbon;
+
 
 class ReportController extends Controller
 {
@@ -21,32 +15,67 @@ class ReportController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {   $faults = Fault::all();
-        $Resolved = DB::table('faults')
+    {  
+        
+        $TD_global= 0;
+        $TD_NOC=0;
+        $TD_HRE=0;
+        $TD_BYO=0;
+        $Resolved=DB::table('faults')
+        ->where('faults.status_id','=',6)->get();
+        $ResolvedNOC= DB::table('faults')
         ->where('faults.status_id','=',6)
-        ->count();
-        $ResolvedNOC = DB::table('faults')
+        ->where('section_id','=',1)->get();
+        $ResolvedHRE= DB::table('faults')
         ->where('faults.status_id','=',6)
-        ->where('section_id','=',1)
-        ->count();
-        $ResolvedHRE = DB::table('faults')
+        ->where('section_id','!=','1')->get();
+        $ResolvedBYO= DB::table('faults')
         ->where('faults.status_id','=',6)
-        ->where('section_id','!=','1')
-        ->count();
-        $ResolvedBYO = DB::table('faults')
-        ->where('faults.status_id','=',6)
-        ->where('section_id','=',2)
-        ->count();
-        $global= DB::table('faults')->count();
+        ->where('section_id','=',2)->get();
+        $Resolved_count =  $Resolved->count();
+        $ResolvedNOC_count = $ResolvedNOC->count();
+        $ResolvedHRE_count = $ResolvedHRE->count();
+        $ResolvedBYO_count = $ResolvedBYO->count();
+        $global_count= DB::table('faults')->count();
         $NOC_count = DB::table('fault_section')
                ->where('section_id','=','1')->count();
         $HRE_count = DB::table('fault_section')
                ->where('section_id','!=','1')->count();
         $BYO_count = DB::table('fault_section')
                ->where('section_id','=','2')->count();
+      
+            foreach($Resolved as $RS){
+             $log=  Carbon::parse($RS->created_at);
+             $clear= Carbon::parse($RS->updated_at);
+             $TD =   $log->diffInHours($clear); 
+             $TD_global +=  $TD;
+           }
+      
+            foreach($ResolvedNOC as $RS){
+             $log=  Carbon::parse($RS->created_at);
+             $clear= Carbon::parse($RS->updated_at);
+             $TD =   $log->diffInHours($clear); 
+             $TD_NOC +=  $TD;
+           }
+             
+  
+  
+         foreach($ResolvedHRE as $RS){
+          $log=  Carbon::parse($RS->created_at);
+          $clear= Carbon::parse($RS->updated_at);
+          $TD =   $log->diffInHours($clear); 
+          $TD_HRE +=  $TD;
+           }
+     
+        foreach($ResolvedBYO as $RS){
+         $log=  Carbon::parse($RS->created_at);
+         $clear= Carbon::parse($RS->updated_at);
+         $TD =   $log->diffInHours($clear); 
+         $TD_BYO +=  $TD;
+           }
+             
         
-        
-        return view('reports.faultresolution',compact('faults','global','NOC_count','HRE_count','BYO_count','Resolved','ResolvedNOC','ResolvedHRE','ResolvedBYO'));
+        return view('reports.faultresolution',compact('TD_NOC','TD_HRE','TD_BYO','TD_global','global_count','NOC_count','HRE_count','BYO_count','Resolved_count','ResolvedNOC_count','ResolvedHRE_count','ResolvedBYO_count'));
 
     }
 
