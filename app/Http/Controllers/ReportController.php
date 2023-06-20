@@ -47,14 +47,14 @@ class ReportController extends Controller
             foreach($Resolved as $RS){
              $log=  Carbon::parse($RS->created_at);
              $clear= Carbon::parse($RS->updated_at);
-             $TD =   $log->diffInHours($clear); 
+             $TD =   $log->diffInMinutes($clear); 
              $TD_global +=  $TD;
            }
       
             foreach($ResolvedNOC as $RS){
              $log=  Carbon::parse($RS->created_at);
              $clear= Carbon::parse($RS->updated_at);
-             $TD =   $log->diffInHours($clear); 
+             $TD =   $log->diffInMinutes($clear); 
              $TD_NOC +=  $TD;
            }
              
@@ -63,14 +63,14 @@ class ReportController extends Controller
          foreach($ResolvedHRE as $RS){
           $log=  Carbon::parse($RS->created_at);
           $clear= Carbon::parse($RS->updated_at);
-          $TD =   $log->diffInHours($clear); 
+          $TD =   $log->diffInMinutes($clear); 
           $TD_HRE +=  $TD;
            }
      
         foreach($ResolvedBYO as $RS){
          $log=  Carbon::parse($RS->created_at);
          $clear= Carbon::parse($RS->updated_at);
-         $TD =   $log->diffInHours($clear); 
+         $TD =   $log->diffInMinutes($clear); 
          $TD_BYO +=  $TD;
            }
              

@@ -9,7 +9,7 @@ Departments
 <section class="content" >
 <div class="card" >
     <div class="card-header">
-        <h3 class="card-title">{{_('Departments')}}</h3>
+        <h3 class="card-title">{{_('Fault Resolution Report')}}</h3>
         <div class="card-tools">
             @can('department-create')
             <a  class="btn btn-primary btn-sm" href="{{ route('departments.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create New Department')}} </a>
@@ -20,7 +20,7 @@ Departments
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <table  class="table table-striped">
+        <table  class="table table-borderless">
             <thead>
                 <tr>
                     <th scope="col">Scope</th>
@@ -42,9 +42,9 @@ Departments
                     <td>NULL</td>
                     @else
                     <td>{{$Resolved_count / $global_count}}</td>
-                    @endif
                     <td>{{$TD_global}}</td>
-                    <td></td>
+                    <td>{{$Resolved_count / $TD_global }}</td>
+                    @endif
                 </tr>
                 <tr >
                     <th scope="row">NOC</th>
@@ -52,12 +52,12 @@ Departments
                     <td> {{$ResolvedNOC_count}}</td>
                     <td>{{$NOC_count - $ResolvedNOC_count}}</td>
                     @if($NOC_count===0)
-                    <td>$logged</td>
+                    <td>NULL</td>
                     @else
                     <td>{{$ResolvedNOC_count / $NOC_count}}</td>
-                        @endif
                     <td>{{$TD_NOC}}</td>
-                    <td></td>
+                    <td>{{$ResolvedNOC_count / $TD_NOC }}</td>
+                    @endif
                 </tr>
                 <tr >   
                     <th scope="row">HRE</th>
@@ -68,8 +68,9 @@ Departments
                     <td>NULL</td>
                     @else
                     <td>{{$ResolvedHRE_count / $HRE_count}}</td>
-                    @endif
                     <td>{{$TD_HRE}}</td>
+                    <td>{{$ResolvedHRE_count / $TD_HRE }}</td>
+                    @endif
                     
                 </tr>
                 <tr >
@@ -81,8 +82,9 @@ Departments
                     <td>NULL</td>
                     @else
                     <td>{{$ResolvedBYO_count / $BYO_count}}</td>
-                        @endif
                     <td>{{$TD_BYO}}</td>
+                    <td>{{$ResolvedBYO_count / $TD_BYO}}</td>
+                    @endif
                 </tr>
             </tbody>
         </table>
