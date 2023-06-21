@@ -16,19 +16,18 @@ class ReportController extends Controller
      */
     public function index()
     {  
-        
+      
         $TD_global= 0;
         $TD_NOC=0;
         $TD_HRE=0;
         $TD_BYO=0;
-        $Resolved=DB::table('faults')
-        ->where('faults.status_id','=',6)->get();
+        $Resolved= DB::table('faults')->where('faults.status_id','=',6)->get();
         $ResolvedNOC= DB::table('faults')
         ->where('faults.status_id','=',6)
         ->where('section_id','=',1)->get();
         $ResolvedHRE= DB::table('faults')
         ->where('faults.status_id','=',6)
-        ->where('section_id','!=','1')->get();
+        ->where('section_id','!=',1)->where('section_id','!=',2)->get();
         $ResolvedBYO= DB::table('faults')
         ->where('faults.status_id','=',6)
         ->where('section_id','=',2)->get();
@@ -37,12 +36,9 @@ class ReportController extends Controller
         $ResolvedHRE_count = $ResolvedHRE->count();
         $ResolvedBYO_count = $ResolvedBYO->count();
         $global_count= DB::table('faults')->count();
-        $NOC_count = DB::table('fault_section')
-               ->where('section_id','=','1')->count();
-        $HRE_count = DB::table('fault_section')
-               ->where('section_id','!=','1')->count();
-        $BYO_count = DB::table('fault_section')
-               ->where('section_id','=','2')->count();
+        $NOC_count =  DB::table('fault_section')->where('section_id','=','1')->count();
+        $HRE_count = DB::table('fault_section')->where('section_id','!=','1')->where('section_id','!=',2)->count();
+        $BYO_count =DB::table('fault_section')->where('section_id','=','2')->count();
       
             foreach($Resolved as $RS){
              $log=  Carbon::parse($RS->created_at);

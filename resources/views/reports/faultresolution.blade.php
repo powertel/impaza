@@ -11,15 +11,20 @@ Departments
     <div class="card-header">
         <h3 class="card-title">{{_('Fault Resolution Report')}}</h3>
         <div class="card-tools">
-            @can('department-create')
-            <a  class="btn btn-primary btn-sm" href="{{ route('departments.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create New Department')}} </a>
-            <a  class="btn btn-primary btn-sm" href="{{ route('sections.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create New Section')}} </a>
-            <a  class="btn btn-primary btn-sm" href="{{ route('positions.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create New Position')}} </a>
-            @endcan
-        </div>
+    </div>
     </div>
     <!-- /.card-header -->
     <div class="card-body">
+       <form>
+        <p><label for="Custom Date">Custom Date :</label>    <input type="date" name="Custom Date" placeholder="Custom Date" />                   <label for="End date">From :</label>  <input type="date" name="Start Date" placeholder="Enter Start date" />    <label for="Start Date">To :</label>  <input type="date" name="End date" placeholder="Enter End date" />
+        <label for="Custom Period">Custom Period:</label><select name="Custom Period" value="{{ old('Custom Period') }}" >
+                                <option selected disabled>Choose</option>
+                                <option value="No fx Light"  @if (old('Custom Period') == "Daily") {{ 'selected' }} @endif>Daily</option>
+                                <option value="No PON Light"  @if (old('Custom Period') == "Monthly") {{ 'selected' }} @endif>Monthly</option>
+                                <option value="BTS Down"  @if (old('Custom Period') == "Quarterly") {{ 'selected' }} @endif>Quarterly</option>
+                                <option value="Node Down"  @if (old('Custom Period') == "Yearly") {{ 'selected' }} @endif>Yearly</option>
+                               </select> </p>
+        </form>
         <table  class="table table-borderless">
             <thead>
                 <tr>
