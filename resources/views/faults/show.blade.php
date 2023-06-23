@@ -132,7 +132,7 @@ Fault
                         Added Remark  {{$remark->created_at->diffForHumans()}}
                        </strong>
                     </h4>
-
+                    <h5 class="font-weight-bold">{{ $remarkActivity->activity}}</h5>
                     <p>{{$remark->remark}} </p>
                 </div>
                 @endif
@@ -140,7 +140,6 @@ Fault
             </div> 
         </div>
     </div>
- 
 </section>
 @endsection
 

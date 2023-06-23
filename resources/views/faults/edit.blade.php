@@ -5,9 +5,9 @@ Fault
 @endsection
 @include('partials.css')
 @section('content')
-
 <section class="content">
     <div class="col d-flex justify-content-center">
+    @if(url()->previous()==='http://127.0.0.1:8000/faults')
         <div class="card  w-100">
             <div class="card-header">
                 <h3 class="card-title">{{_('Edit Fault')}}</h3>
@@ -18,7 +18,7 @@ Fault
                     @method('PUT')
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
-                            <label for="customerName" class="form-label">Customer Name </label>
+                            <label for="customerName" class="form-label">{Customer Name} </label>
                             <select class="custom-select" id="customer" name="customer_id">
                                 <option selected="selected" value="{{ $fault->customer_id}}">{{ $fault->customer }}</option>
                                 @foreach($customers as $customer)
@@ -28,7 +28,6 @@ Fault
                                 @endforeach
                             </select>
                         </div>
-
                         <div class="mb-3 col-md-6">
                             <label for="city" class="form-label">City/Town</label>
                             <select  class="custom-select" id="city" name="city_id">
@@ -39,10 +38,8 @@ Fault
                                     @endunless
                                 @endforeach
                             </select>
-
                         </div>
                     </div>
-
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="contactName" class="form-label">Contact Name</label>
@@ -86,10 +83,8 @@ Fault
                                     @endif
                                 @endforeach
                             </select>
-
                         </div>
                     </div>
-
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="phone" class="form-label">Phone Number</label>
@@ -126,7 +121,6 @@ Fault
                             </select>
                         </div>
                     </div>
-
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="adress" class="form-label">Address</label>
@@ -144,7 +138,6 @@ Fault
                             </select>
                         </div>
                     </div>
-
                     <div class="card-footer">
                         <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
                         <a type="button" class="btn btn-danger btn-sm" href="javascript:history.back()">{{ __('Cancel') }}</a>
@@ -152,11 +145,12 @@ Fault
                 </form>
             </div>
         </div>
+        @endif
         <div class="card  w-50">
             <div class="card-header">
                 <h3 class="card-title">{{_('Remarks')}}</h3>
             </div>
-            <div class="card-body" style="height: 0px; overflow-y: auto">
+            <div class="card-body" style="height: auto; overflow-y: auto">
                 @foreach($remarks as $remark)
                 @if ($remark->fault_id === $fault->id)
                 <div class="callout callout-info">
@@ -169,18 +163,18 @@ Fault
                         Added Remark  {{$remark->created_at->diffForHumans()}}
                        </strong>
                     </h4>
-
+                    <h5 class="font-weight-bold">{{ $remarkActivity->activity}}</h5>
                     <p>{{$remark->remark}} </p>
                 </div>
                 @endif
                 @endforeach
             </div>
-
             <div class="card-footer">
                 <form action="/faults/{{$fault->id}}/remarks" method="POST">
                     {{ csrf_field() }}
                     <div class="form-group">
                         <textarea name="remark" class="form-control" placeholder="Enter Your Remarks" rows="1"></textarea>
+                        <input type="hidden" name="activity" value="ON FAULT EDIT">
                     </div>
                     <div class="form-group">
                         <button type="submit" class="btn btn-success btn-sm float-right">{{ __('Add Remark') }}</button>
@@ -189,10 +183,8 @@ Fault
             </div>
         </div>
     </div>
-
 </section>
 @endsection
-
 @section('scripts')
     @include('partials.faults')
 @endsection

@@ -149,16 +149,13 @@ Fault
                             </select>
                         </div>
                     </div>
-
                     <div class="row g-2">
-
                         <div class="mb-3 col-md-6">
                             <label for="remarks" class="form-label">Remarks</label>
                             <textarea name="remark" class="form-control @error('remark') is-invalid @enderror" placeholder="Enter any additional comments" rows="2"  >{{ old('remark') }}</textarea>
+                            <input type="hidden" name="activity" value="ON LOGGING">
                         </div>
-
                     </div>
-
                     <div class="card-footer">
                         <button type="submit" class="btn btn-success btn-sm" onclick="return inlineSave()">{{ __('Save') }}</button>
                         <a type="button" class="btn btn-danger btn-sm" href="{{ route('faults.index') }}">{{ __('Cancel') }}</a>
@@ -167,7 +164,6 @@ Fault
             </div>
         </div>
     </div>
-
 </section>
 @endsection
 

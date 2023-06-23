@@ -13,6 +13,7 @@ class Remark extends Model
         'remark',
         'user_id',
         'fault_id',
+        'remarkActivity_id'
     ];
 
     public function customer()
@@ -28,5 +29,9 @@ class Remark extends Model
     public function fault()
     {
         return $this->belongsTo(Fault::class);
+    }
+    public function remarkActivity()
+    {
+        return $this->belongsToMany(RemarkActivity::class);
     }
 }

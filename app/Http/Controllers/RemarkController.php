@@ -41,16 +41,15 @@ class RemarkController extends Controller
      */
     public function store(Request $request,Fault $fault)
     {
-
+        $remarkActivity_id = DB::table('remark_activities')->where('activity','=',$request['activity'])->get('remark_activities.id')->first();
         Remark::create(
             [
             'fault_id'=> $fault->id,
             'user_id' => $request->user()->id,
-            'remark' => $request['remark'],                
+            'remark' => $request['remark'],   
+            'remarkActivity_id'=>$remarkActivity_id->id,           
             ]
-
         );
-    
         return back();
     }
 

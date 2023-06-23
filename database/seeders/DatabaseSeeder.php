@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             UserStatusSeeder::class,
             CreateAdminUserSeeder::class,
             LinkTypeSeeder::class,
+            RemarkActivitySeeder ::class,
         ]);
         // \App\Models\User::factory(10)->create();
 

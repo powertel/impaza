@@ -12,7 +12,9 @@ use App\Models\Link;
 use App\Models\Remark;
 use App\Models\AccountManager;
 use App\Models\FaultSection;
+use App\Models\RemarkActivity;
 use DB;
+
 
 class FaultController extends Controller
 {
@@ -146,11 +148,14 @@ class FaultController extends Controller
 
 
             $fault = Fault::create($req);
+          
+            $remarkActivity_id = DB::table('remark_activities')->where('activity','=',$request['activity'])->get('remark_activities.id')->first();
             $remark = Remark::create(
                 [
                     'fault_id'=> $fault->id,
                     'user_id' => $request->user()->id,
                     'remark' => $request['remark'],
+                    'remarkActivity_id'=>$remarkActivity_id->id,
                 ]
             );
 
@@ -200,9 +205,15 @@ class FaultController extends Controller
                 'account_managers.accountManager','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo','faults.link_id','links.link'
                 ,'faults.serviceType','faults.confirmedRfo','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
                 ->first();
+        $remarkActivity= DB::table('remarks')
+                       ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
+                       ->where('remarks.id','=',$id)
+                       ->get('remark_activities.activity')
+                       ->first();
+          
 
                $remarks= Remark::all();
-        return view('faults.show',compact('fault','remarks'));
+        return view('faults.show',compact('fault','remarks','remarkActivity'));
     }
 
     /**
@@ -226,7 +237,12 @@ class FaultController extends Controller
             'account_managers.accountManager','faults.accountManager_id','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo','faults.link_id','links.link'
             ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
             ->first();
-
+            $remarkActivity= DB::table('remarks')
+            ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
+            ->where('remarks.fault_id','=',$id)
+            ->get('remark_activities.activity')
+            ->first();
+         
             $cities = City::all();
             $customers = Customer::all();
             $suburbs = Suburb::all();
@@ -235,7 +251,7 @@ class FaultController extends Controller
             $remarks= Remark::all();
             $accountManagers = AccountManager::all();
 
-        return view('faults.edit',compact('fault','customers','cities','suburbs','pops','links','remarks','accountManagers'));
+        return view('faults.edit',compact('fault','customers','cities','suburbs','pops','links','remarks','accountManagers','remarkActivity'));
 
     }
 
