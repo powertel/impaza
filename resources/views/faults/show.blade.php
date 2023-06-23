@@ -121,21 +121,16 @@ Fault
             </div>
             <div class="card-body" style="height: 0px; overflow-y: auto">
                 @foreach($remarks as $remark)
-                @if ($remark->fault_id === $fault->id)
                 <div class="callout callout-info">
-                    @if($remark->user)
-                    <h5 class="font-weight-bold">{{ $remark->user->name}}</h5>
-                    @endif
-
+                    <h5 class="font-weight-bold">{{ $remark->name}}</h5>
                     <h4 class="text-muted text-sm">
                         <strong>
-                        Added Remark  {{$remark->created_at->diffForHumans()}}
+                        Added Remark  {{Carbon\Carbon::parse($remark->created_at)->diffForHumans()}}
                        </strong>
                     </h4>
-                    <h5 class="font-weight-bold">{{ $remarkActivity->activity}}</h5>
+                    <h5 class="font-weight-bold">{{ $remark->activity}}</h5>
                     <p>{{$remark->remark}} </p>
                 </div>
-                @endif
                 @endforeach
             </div> 
         </div>

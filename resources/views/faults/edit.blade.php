@@ -150,23 +150,18 @@ Fault
             <div class="card-header">
                 <h3 class="card-title">{{_('Remarks')}}</h3>
             </div>
-            <div class="card-body" style="height: auto; overflow-y: auto">
-                @foreach($remarks as $remark)
-                @if ($remark->fault_id === $fault->id)
+            <div class="card-body" style="height: 250px; overflow-y: auto">
+            @foreach($remarks as $remark)
                 <div class="callout callout-info">
-                    @if($remark->user)
-                    <h5 class="font-weight-bold">{{ $remark->user->name}}</h5>
-                    @endif
-
+                    <h5 class="font-weight-bold">{{ $remark->name}}</h5>
                     <h4 class="text-muted text-sm">
                         <strong>
-                        Added Remark  {{$remark->created_at->diffForHumans()}}
+                        Added Remark  {{Carbon\Carbon::parse($remark->created_at)->diffForHumans()}}
                        </strong>
                     </h4>
-                    <h5 class="font-weight-bold">{{ $remarkActivity->activity}}</h5>
+                    <h5 class="font-weight-bold">{{ $remark->activity}}</h5>
                     <p>{{$remark->remark}} </p>
                 </div>
-                @endif
                 @endforeach
             </div>
             <div class="card-footer">
@@ -174,7 +169,7 @@ Fault
                     {{ csrf_field() }}
                     <div class="form-group">
                         <textarea name="remark" class="form-control" placeholder="Enter Your Remarks" rows="1"></textarea>
-                        <input type="hidden" name="activity" value="ON FAULT EDIT">
+                        <input type="hidden" name="url" value="{{$previous=url()->previous()}}">  
                     </div>
                     <div class="form-group">
                         <button type="submit" class="btn btn-success btn-sm float-right">{{ __('Add Remark') }}</button>

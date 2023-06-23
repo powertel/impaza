@@ -172,13 +172,16 @@ class AssessmentController extends Controller
         'account_managers.accountManager','faults.accountManager_id','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo','faults.link_id','links.link'
         ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
         ->first();
-
+        $remarks= DB::table('remarks')
+        ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
+        ->leftjoin('users','remarks.user_id','=','users.id')
+        ->where('remarks.fault_id','=',$id)
+        ->get(['remarks.id','remarks.created_at','remarks.remark','users.name','remark_activities.activity']);
         $cities = City::all();
         $customers = Customer::all();
         $suburbs = Suburb::all();
         $pops = Pop::all();
         $links = Link::all();
-        $remarks= Remark::all();
         $accountManagers = AccountManager::all();
         $sections = Section::all();
 

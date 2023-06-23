@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\Fault;
 use App\Models\Remark;
@@ -41,13 +41,26 @@ class RemarkController extends Controller
      */
     public function store(Request $request,Fault $fault)
     {
+        $previous = $request['url'];
+        $FAULT_EDIT=Str::contains($previous, 'faults');
+        $CT_CLEAR=Str::contains($previous, 'chief-tech-clear');
+        $NOC_CLEAR=Str::contains($previous, 'noc-clear');
+        $REASSIGN=Str::contains($previous, 'assign');
+        if($FAULT_EDIT){
+        $request['activity']='ON FAULT EDIT';}
+        elseif($CT_CLEAR){
+        $request['activity']='ON CHIEF-TECH CLEAR';}
+        elseif($NOC_CLEAR){
+        $request['activity']='ON NOC CLEAR';}
+        elseif($REASSIGN){
+        $request['activity']='ON CHIEF-TECH REASSIGN';}
         $remarkActivity_id = DB::table('remark_activities')->where('activity','=',$request['activity'])->get('remark_activities.id')->first();
         Remark::create(
             [
             'fault_id'=> $fault->id,
             'user_id' => $request->user()->id,
-            'remark' => $request['remark'],   
-            'remarkActivity_id'=>$remarkActivity_id->id,           
+            'remark' => $request['remark'], 
+            'remarkActivity_id'=>$remarkActivity_id->id,              
             ]
         );
         return back();
