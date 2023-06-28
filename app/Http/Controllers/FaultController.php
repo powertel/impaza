@@ -59,12 +59,12 @@ class FaultController extends Controller
 				'faults.priorityLevel',
 				'faults.created_at'
 				]);
-				
+
 				//dd($faults);
         return view('faults.index',compact('faults'))
         ->with('i');
-		
-		
+
+
     }
 
     /**
@@ -137,12 +137,12 @@ class FaultController extends Controller
             ]);
 
             $req = $request->all();
-        
+
             //This is where i am creating the fault
             $req['status_id'] = 1;
 			$req['user_id'] =$request->user()->id;
 			$req['fault_ref_number']="PWT".date("YmdHis");
-			
+
 
 
             $fault = Fault::create($req);

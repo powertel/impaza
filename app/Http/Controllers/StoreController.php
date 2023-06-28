@@ -3,15 +3,21 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use DB;
+use Illuminate\Support\Facades\DB;
 use App\Models\Store;
 use App\Models\Fault;
+use App\Models\StoreStatus;
 
 class StoreController extends Controller
 {
+    private $faultId;
+
     function __construct()
     {
+
          $this->middleware('permission:materials', ['only' => ['index','store']]);
+         $this->middleware('permission:materials', ['only' => ['create','edit']]);
+         $this->middleware('permission:materials', ['only' => ['show']]);
     }
     /**
      * Display a listing of the resource.
@@ -22,18 +28,15 @@ class StoreController extends Controller
     {
         $stores = DB::table('stores')
         ->leftjoin('faults','stores.fault_id','=','faults.id')
-
+        ->leftjoin('store_statuses','stores.store_status','=','store_statuses.id')
         ->get([
         'faults.id',
         'faults.fault_ref_number',
         'faults.faultType',
         'stores.materials',
         'stores.SAP_ref',
+        'store_statuses.store_status',
         ]);
-
-        //dd($faults);
-
-
         return view('stores.index',compact('stores'))
         ->with('i');
     }
@@ -43,10 +46,25 @@ class StoreController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+
+
+
+
+    public function create(Request $request)
     {
-        $stores = Store::all();
-        return view('stores.create', compact('stores'));
+        $this->faultId = $request->f_id;
+    $stores = DB::table('stores')
+    ->leftjoin('faults','stores.fault_id','=','faults.id')
+    ->leftjoin('store_statuses','stores.store_status','=','store_statuses.id')
+    ->orderBy('stores.created_at', 'desc')
+    ->get([
+    'faults.fault_ref_number',
+    'faults.faultType',
+    'stores.materials',
+    'stores.id',
+    'stores.SAP_ref',
+    ])->first();
+    return view('stores.create', compact('stores'));
     }
 
     /**
@@ -55,20 +73,30 @@ class StoreController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, Fault $fault)
+    public function store(Request $request)
     {
 
-              Store::create(
-            [
-            // 'fault_id'=> $fault->id,
-            // 'user_id' => $request->user()->id,
-            'SAP_ref' =>  $request['SAP_ref'],
-            'materials'=>  $request['materials'],
-            ]
 
-        );
 
-        return back();
+       //dd($request->f_id);
+        request()->validate([
+            'SAP_ref' => 'required',
+            'materials' => 'required',
+        ]);
+        $req = $request->all();
+        $req['fault_id'] = $request->f_id;
+        $req['store_status'] = 1;
+        $store = Store::create($req);
+
+        if($store)
+        {
+            return redirect()->route('my_faults.index')
+            ->with('success','Material Requested');
+        }
+        else
+        {
+            return back()->with('fail','Something went wrong');
+        }
     }
 
     /**
@@ -79,14 +107,44 @@ class StoreController extends Controller
      */
     public function show($id)
     {
+        // $stores = DB::table('stores')
+        //     ->leftjoin('faults','stores.fault_id','=','faults.id')
+        //     ->where('stores.id','=',$id)
+        //     ->get(['stores.id','stores.materials','stores.SAP_ref','stores.created_at','stores.fault_id','faults.fault_ref_number','faults.faultType','faults.suspectedRfo',
+        //     'faults.serviceType','faults.confirmedRfo','faults.faultType','faults.priorityLevel'])
+        //     ->first();
+        // return view('stores.show',compact('stores'));
+        // $stores = DB::table('stores')
+        // ->leftjoin('faults','stores.fault_id','=','faults.id')
+        // ->leftjoin('store_statuses','stores.store_status','=','store_statuses.id')
+        // ->where('stores.id','=',$id)
+        // ->get([
+        // 'stores.id',
+        // 'stores.fault_id',
+        // 'faults.fault_ref_number',
+        // 'faults.faultType',
+        // 'stores.materials',
+        // 'stores.id',
+        // 'stores.SAP_ref',
+        // ])->first();
+        // $faults = Fault::all();
+
+        // return view('stores.show', compact('stores','faults'));
         $stores = DB::table('stores')
         ->leftjoin('faults','stores.fault_id','=','faults.id')
-        ->leftjoin('stores','stores.stores_id','=','stores.id')
+        ->leftjoin('store_statuses','stores.store_status','=','store_statuses.id')
         ->where('stores.id','=',$id)
-        ->get(['stores.id','faults.fault_ref_number','faults.faultType','stores.requisition_number','stores.SAP_ref','stores.created_at'])
-        ->first();
-        return view('stores.show',compact('stores'));
-
+        ->get([
+        'faults.id',
+        'faults.fault_ref_number',
+        'faults.faultType',
+        'stores.materials',
+        'stores.SAP_ref',
+        'store_statuses.store_status',
+        ])
+        ->first();;
+        return view('stores.show',compact('stores'))
+        ->with('i');
     }
 
     /**
@@ -97,7 +155,12 @@ class StoreController extends Controller
      */
     public function edit($id)
     {
-        //
+        $fault = DB::table('faults')
+        ->leftjoin('stores','faults.fault_id','=','stores.id')
+        ->where('stores.id','=',$id)
+        ->get(['stores.id','faults.fault_ref_number','faults.faultType','stores.requisition_number','stores.SAP_ref','stores.created_at'])
+        ->first();
+        return view('my_faults.index',compact('stores','faults'));
     }
 
     /**
@@ -107,9 +170,9 @@ class StoreController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request,$id)
     {
-        //
+
     }
 
     /**
@@ -121,5 +184,26 @@ class StoreController extends Controller
     public function destroy($id)
     {
         //
+    }
+    public function Deny(Request $request, $id)
+    {
+
+        $stores = StoreStatus::find($id);
+        $req= $request->all();
+        $req['store_status'] = 3;
+        $stores ->update($req);
+        return redirect(route('stores.index'))
+        ->with('success','Request Denied');
+    }
+
+    public function Issue(Request $request, $id)
+    {
+
+        $stores = StoreStatus::find($id);
+        $req= $request->all();
+        $req['store_status'] = 2;
+        $stores ->update($req);
+        return redirect(route('stores.index'))
+        ->with('success','Request Granted');
     }
 }

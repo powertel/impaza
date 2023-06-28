@@ -13,14 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('stores', function (Blueprint $table) {
+        Schema::create('store_statuses', function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('fault_id');
-            $table->string('fault_ref_number');
-            $table->string('faultType');
-            $table->string('materials');
-            $table->string('SAP_ref');
-            $table->unsignedInteger('store_status');
+            $table->string('store_status');
             $table->timestamps();
         });
     }
@@ -32,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('stores');
+        Schema::dropIfExists('store_statuses');
     }
 };

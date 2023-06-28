@@ -18,7 +18,7 @@ Materials
             <div class="card-body">
                 <form id="UF" action="{{ route('stores.store') }}" method="POST">
                 {{ csrf_field() }}
-
+                    <input type="hidden" name="f_id" value="{{ request()->input('fID') }}" >
                 <div class="form-group row">
                         <label for="SAP_ref" class="col-sm-3 col-form-label">Sap Ref. No.</label>
                         <div class="col-sm-9 ">

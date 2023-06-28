@@ -10,7 +10,7 @@ Finance
         <div class="card w-50">
             <div class="card-header">
                 <h3 class="card-title">
-                    {{_('Confirm Link')}}
+                    {{_('Request Details')}}
                 </h3>
             </div>
             <div class="card-body">

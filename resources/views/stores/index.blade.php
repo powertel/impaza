@@ -27,7 +27,7 @@ Stores
                     <th>Fault Ref. No.</th>
                     <th>Fault Type</th>
                     <th>SAP Ref. No.</th>
-                    <th>Requested by</th>
+                    <th>Status</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -37,14 +37,17 @@ Stores
                     <td>{{$store->fault_ref_number}}</td>
                     <td>{{$store->faultType }}</td>
                     <td>{{$store->SAP_ref}}</td>
+                    <td  style=" background-color: {{ App\Models\StoreStatus::STATUS_COLOR[ $store->store_status ] ?? 'none' }};">
+                        <strong>{{ $store->store_status}}</strong>
+                     </td>
                     <td>
-                        @can('material')
-                        <a href="{{ route('stores.show',$stores->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
-                        </div>
-                        @endcan
-                        @can('material')
-                        <a href="{{ route('stores.issue',$link->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >issue</a>
-                        @endcan
+                        <form  style="margin-block-end: 0px;" action="{{ route('deny',$store->id) }}" method="POST">
+                            <a href="{{ route('stores.show',$store->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
+                            @can('materials')
+                            <a href="{{ route('stores.index',$store->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Issue</a>
+                            @endcan
+
+                        </form>
                     </td>
                 </tr>
                 @endforeach
