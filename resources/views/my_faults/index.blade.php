@@ -62,8 +62,8 @@ My Faults
                         @can('request-permit')
                         <a href="{{ route('request-permit.edit',$fault->id) }}" class="btn btn-sm btn-warning" style="padding:0px 2px; color:#fff;" >Request Permit</a>
                         @endcan
-                        @can('materials')
-                        <a href="{{ route('stores.create',['id'=>$fault->id,'fID'=>$fault->id]) }}" class="btn btn-sm btn-warning" style="padding:0px 2px; color:#ffffff;" >Request Material</a>
+                        @can('request-material')
+                        <a href="{{ route('stores.create',['id'=>$fault->id,'fID'=>$fault->id]) }}" class="btn btn-sm btn-primary" style="padding:0px 2px; color:#ffffff;" >Request Material</a>
                         @endcan
                         <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
                     </td>

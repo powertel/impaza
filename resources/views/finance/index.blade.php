@@ -12,7 +12,7 @@ Finance
     <div class="card-header">
         <h3 class="card-title">{{_('Links')}}</h3>
         <div class="card-tools">
-            
+
         </div>
     </div>
     <!-- /.card-header -->
@@ -39,7 +39,7 @@ Finance
                     <td>{{ $link->city}}</td>
                     <td>{{ $link->link}}</td>
                     <td  style=" background-color: {{ App\Models\LinkStatus::STATUS_COLOR[ $link->link_status ] ?? 'none' }};">
-                       <strong>{{ $link->link_status}}</strong> 
+                       <strong>{{ $link->link_status}}</strong>
                     </td>
                     <td>
                         <form  style="margin-block-end: 0px;" action="{{ route('disconnect',$link->id) }}" method="POST">
@@ -48,7 +48,6 @@ Finance
                             @can('finance-link-update')
                             <a href="{{ route('finance.edit',$link->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Approve</a>
                             @endcan
-                           
                             @csrf
                             @method('PUT')
                             <button type="submit" class="btn btn-danger btn-sm" style="padding:0px 2px; color:#fff;">Disconnect</button>
@@ -59,17 +58,17 @@ Finance
                             @csrf
                             @method('PUT')
                             <button type="submit" class="btn btn-danger btn-sm" style="padding:0px 2px; color:#fff;">Reconnect</button>
-                        </form>                            
+                        </form>
                         </td>
 
                     </td>
                 </tr>
                 @endforeach
-            </tbody>  
+            </tbody>
         </table>
     </div>
     <!-- /.card-body -->
 </div>
- 
+
 </section>
 @endsection

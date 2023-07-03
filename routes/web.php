@@ -73,8 +73,8 @@ Route::group(['middleware' => ['auth']], function() {
 
     Route::put('disconnect/{id}/disconnect', [FinanceController::class,'disconnect'])->name('disconnect');
     Route::put('reconnect/{id}/reconnect', [FinanceController::class,'reconnect'])->name('reconnect');
-    Route::put('deny/{id}/denied', [StoreController::class,'denied'])->name('deny');
-    Route::put('issue/{id}/issued', [StoreController::class,'issued'])->name('issue');
+    Route::put('deny/{id}/deny', [StoreController::class,'deny'])->name('deny');
+    Route::put('issue/{id}/issue', [StoreController::class,'issue'])->name('issue');
 
     Route::post('faults/{fault}/remarks', [RemarkController::class,'store']);
     Route::get('suburb/{id}', [FaultController::class,'findSuburb'])->name('suburb');

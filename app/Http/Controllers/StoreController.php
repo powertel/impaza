@@ -15,8 +15,8 @@ class StoreController extends Controller
     function __construct()
     {
 
-         $this->middleware('permission:materials', ['only' => ['index','store']]);
-         $this->middleware('permission:materials', ['only' => ['create','edit']]);
+         $this->middleware('permission:materials', ['only' => ['index','edit']]);
+         $this->middleware('permission:request-material', ['only' => ['create','store']]);
          $this->middleware('permission:materials', ['only' => ['show']]);
     }
     /**
@@ -107,44 +107,13 @@ class StoreController extends Controller
      */
     public function show($id)
     {
-        // $stores = DB::table('stores')
-        //     ->leftjoin('faults','stores.fault_id','=','faults.id')
-        //     ->where('stores.id','=',$id)
-        //     ->get(['stores.id','stores.materials','stores.SAP_ref','stores.created_at','stores.fault_id','faults.fault_ref_number','faults.faultType','faults.suspectedRfo',
-        //     'faults.serviceType','faults.confirmedRfo','faults.faultType','faults.priorityLevel'])
-        //     ->first();
-        // return view('stores.show',compact('stores'));
-        // $stores = DB::table('stores')
-        // ->leftjoin('faults','stores.fault_id','=','faults.id')
-        // ->leftjoin('store_statuses','stores.store_status','=','store_statuses.id')
-        // ->where('stores.id','=',$id)
-        // ->get([
-        // 'stores.id',
-        // 'stores.fault_id',
-        // 'faults.fault_ref_number',
-        // 'faults.faultType',
-        // 'stores.materials',
-        // 'stores.id',
-        // 'stores.SAP_ref',
-        // ])->first();
-        // $faults = Fault::all();
-
-        // return view('stores.show', compact('stores','faults'));
         $stores = DB::table('stores')
-        ->leftjoin('faults','stores.fault_id','=','faults.id')
-        ->leftjoin('store_statuses','stores.store_status','=','store_statuses.id')
-        ->where('stores.id','=',$id)
-        ->get([
-        'faults.id',
-        'faults.fault_ref_number',
-        'faults.faultType',
-        'stores.materials',
-        'stores.SAP_ref',
-        'store_statuses.store_status',
-        ])
-        ->first();;
-        return view('stores.show',compact('stores'))
-        ->with('i');
+            ->leftjoin('faults','stores.fault_id','=','faults.id')
+            ->leftjoin('users as request_users','stores.user_id','=','request_users.id')
+            ->where('faults.id','=',$id)
+            ->get(['stores.id','stores.materials','stores.SAP_ref','request_users.name as requestedBy','stores.created_at','stores.fault_id','faults.fault_ref_number','faults.faultType','faults.suspectedRfo','faults.serviceType','faults.confirmedRfo','faults.faultType','faults.priorityLevel'])
+            ->first();
+           return view('stores.show',compact('stores'));
     }
 
     /**
@@ -172,7 +141,7 @@ class StoreController extends Controller
      */
     public function update(Request $request,$id)
     {
-
+        //
     }
 
     /**
@@ -185,24 +154,24 @@ class StoreController extends Controller
     {
         //
     }
-    public function Deny(Request $request, $id)
+    public function deny(Request $request, $id)
     {
 
-        $stores = StoreStatus::find($id);
+        $store = Store::find($id);
         $req= $request->all();
         $req['store_status'] = 3;
-        $stores ->update($req);
+        $store ->update($req);
         return redirect(route('stores.index'))
         ->with('success','Request Denied');
     }
 
-    public function Issue(Request $request, $id)
+    public function issue(Request $request, $id)
     {
 
-        $stores = StoreStatus::find($id);
+        $store = Store::find($id);
         $req= $request->all();
         $req['store_status'] = 2;
-        $stores ->update($req);
+        $store ->update($req);
         return redirect(route('stores.index'))
         ->with('success','Request Granted');
     }

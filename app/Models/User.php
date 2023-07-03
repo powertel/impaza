@@ -63,4 +63,8 @@ class User extends Authenticatable
         {
             return $this->hasMany(Fault::class);
         }
+        public function stores()
+        {
+            return $this->hasMany(Store::class);
+        }
 }

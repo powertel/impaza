@@ -16,12 +16,17 @@ class Store extends Model
         'fault_id',
         'materials',
         'store_status',
-        'SAP_ref'
+        'SAP_ref',
+        'user_id'
     ];
 
     public function fault()
     {
         return $this->belongsTo(Fault::class, 'fault_id')->withDefault();
+    }
+    public function users()
+    {
+        return $this->belongsTo(User::class);
     }
     public function store_status()
     {

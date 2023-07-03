@@ -14,7 +14,7 @@ Stores
         <h3 class="card-title">{{_('Stores')}}</h3>
         <div class="card-tools">
             @can('material')
-                <a  class="btn btn-primary btn-sm" href="{{ route('material') }}"><i class="fas fa-plus-circle"></i> </a>
+                <a  class="btn btn-primary btn-sm" href="{{ route('materials') }}"><i class="fas fa-plus-circle"></i> </a>
             @endcan
 
         </div>
@@ -43,10 +43,9 @@ Stores
                     <td>
                         <form  style="margin-block-end: 0px;" action="{{ route('deny',$store->id) }}" method="POST">
                             <a href="{{ route('stores.show',$store->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
-                            @can('materials')
-                            <a href="{{ route('stores.index',$store->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Issue</a>
-                            @endcan
-
+                            @csrf
+                            @method('PUT')
+                            <button type="submit" class="btn btn-danger btn-sm" style="padding:0px 2px; color:#fff;">Deny</button>
                         </form>
                     </td>
                 </tr>
