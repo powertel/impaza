@@ -12,8 +12,10 @@ use App\Models\Link;
 use App\Models\Remark;
 use App\Models\AccountManager;
 use App\Models\FaultSection;
-use App\Models\RemarkActivity;
 use DB;
+use Illuminate\Support\Facades\Storage;
+ 
+
 
 
 class FaultController extends Controller
@@ -117,6 +119,7 @@ class FaultController extends Controller
      */
     public function store(Request $request)
     {
+      
         //Fault::create($request->all());
 
         DB::beginTransaction();
@@ -129,26 +132,26 @@ class FaultController extends Controller
                 'contactEmail'=> 'required',
                 'address'=> 'required',
                 'accountManager_id'=> 'required',
-                'city_id'=> 'required',
                 'suburb_id'=> 'required',
                 'pop_id'=> 'required',
                 'link_id'=> 'required',
                 'suspectedRfo'=> 'required',
                 'serviceType'=> 'required',
                 'remark'=> 'required',
+               'attachment' => 'required|mimes:png,jpg,jpeg|max:2048'
             ]);
-
+           
             $req = $request->all();
         
             //This is where i am creating the fault
             $req['status_id'] = 1;
 			$req['user_id'] =$request->user()->id;
 			$req['fault_ref_number']="PWT".date("YmdHis");
-			
-
 
             $fault = Fault::create($req);
-          
+            if($request->attachment){
+                $path =  $request->file('attachment')->storePublicly('attachments','public');}
+            else { $path = "NULL";}
             $remarkActivity_id = DB::table('remark_activities')->where('activity','=',$request['activity'])->get('remark_activities.id')->first();
             $remark = Remark::create(
                 [
@@ -156,8 +159,11 @@ class FaultController extends Controller
                     'user_id' => $request->user()->id,
                     'remark' => $request['remark'],
                     'remarkActivity_id'=>$remarkActivity_id->id,
+                    'file_path'=>$path
                 ]
             );
+           
+        
 
             $fault_section = FaultSection::create(
                 [
@@ -212,8 +218,8 @@ class FaultController extends Controller
                     ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
                     ->leftjoin('users','remarks.user_id','=','users.id')
                     ->where('remarks.fault_id','=',$id)
-                    ->get(['remarks.id','remarks.created_at','remarks.remark','users.name','remark_activities.activity']);
-                    //dd($remarks);
+                    ->get(['remarks.id','remarks.created_at','remarks.remark','remarks.file_path','users.name','remark_activities.activity']);
+                
                 
         return view('faults.show',compact('fault','remarks',));
     }
@@ -243,8 +249,8 @@ class FaultController extends Controller
             ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
             ->leftjoin('users','remarks.user_id','=','users.id')
             ->where('remarks.fault_id','=',$id)
-            ->get(['remarks.id','remarks.created_at','remarks.remark','users.name','remark_activities.activity']);
-        
+            ->get(['remarks.id','remarks.created_at','remarks.remark','remarks.file_path','users.name','remark_activities.activity']);
+            
             $cities = City::all();
             $customers = Customer::all();
             $suburbs = Suburb::all();

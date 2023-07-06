@@ -132,7 +132,7 @@ class RectificationController extends Controller
         ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
         ->leftjoin('users','remarks.user_id','=','users.id')
         ->where('remarks.fault_id','=',$id)
-        ->get(['remarks.id','remarks.created_at','remarks.remark','users.name','remark_activities.activity']);
+        ->get(['remarks.id','remarks.created_at','remarks.remark','remarks.file_path','users.name','remark_activities.activity']);
         $cities = City::all();
         $customers = Customer::all();
         $suburbs = Suburb::all();

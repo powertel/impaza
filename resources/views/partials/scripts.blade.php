@@ -1,3 +1,19 @@
+
+
+<script>
+      $(document).ready(function () {
+            
+            $("img").click(function () {
+                var img=$(this).attr('src'); 
+            $("#show_it").attr('src',img);
+                $('#PicModal').modal('show');
+            });
+        });
+       
+      
+   
+       </script>
+
 <script type="text/javascript">
 
     $('.show_confirm').click(function(event) {

@@ -10,10 +10,12 @@ class Remark extends Model
     use HasFactory;
 
     protected $fillable = [
+
         'remark',
         'user_id',
         'fault_id',
-        'remarkActivity_id'
+        'remarkActivity_id',
+        'file_path',
     ];
 
     public function customer()

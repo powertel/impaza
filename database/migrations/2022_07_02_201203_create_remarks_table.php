@@ -21,6 +21,7 @@ return new class extends Migration
             $table->unsignedInteger('remarkActivity_id');      
             $table->text('remark');
             $table->timestamps();
+            $table->string('file_path');
             $table->foreign('fault_id')
                     ->references('id')
                     ->on('faults');
