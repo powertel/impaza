@@ -50,7 +50,7 @@ class FaultController extends Controller
 				'faults.contactEmail',
 				'faults.address',
         'account_managers.accountManager',
-				'faults.suspectedRfo',
+				'faults.suspectedRfo_id',
 				'links.link',
 				'statuses.description',
 				'assigned_users.name as assignedTo',
