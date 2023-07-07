@@ -92,7 +92,7 @@ Fault
 
                     <div class="col">
                         <strong>FAULT TYPE</strong>
-                        <p class="text-muted">{{ $fault->faultType }}</p>
+                        <p class="text-muted">{{ $fault->Type }}</p>
                     </div>
                 </div>
                 <hr>

@@ -3,14 +3,11 @@
 @section('title')
 Assess Faults
 @endsection
-
 @include('partials.css')
 @section('content')
 
 <section class="content">
-
 <div class="card">
-
     <!--Card Header-->
     <div class="card-header">
         <h3 class="card-title">{{_('Assess Faults')}}</h3>
@@ -60,6 +57,5 @@ Assess Faults
     </div>
     <!-- /.card-body -->
 </div>
- 
 </section>
 @endsection

@@ -31,7 +31,7 @@ class Fault extends Model
         'serviceAttribute',
         'status_id',
         'confirmedRfo_id',
-        'faultType',
+        'faultType_id',
         'priorityLevel',
         'assignedTo',
         'user_id'
@@ -70,4 +70,9 @@ class Fault extends Model
     {
         return $this->belongsTo(ReasonsForOutage::class);
     }
+    public function faultType()
+    {
+        return $this->belongsTo(FaultType::class);
+    }
+
 }

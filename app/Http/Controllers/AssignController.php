@@ -37,13 +37,14 @@ class AssignController extends Controller
         ->leftjoin('sections','fault_section.section_id','=','sections.id')
         ->leftjoin('customers','faults.customer_id','=','customers.id')
         ->leftjoin('links','faults.link_id','=','links.id')
+        ->leftjoin('fault_types','faults.faultType_id','=','fault_types.id')
         ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
         ->leftjoin('statuses','faults.status_id','=','statuses.id')
         ->orderBy('faults.created_at', 'desc')
         ->where('fault_section.section_id','=',auth()->user()->section_id)
        ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
        'account_managers.accountManager','faults.suspectedRfo_id','links.link','statuses.description','faults.assignedTo','users.name'
-       ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
+       ,'faults.serviceType','faults.serviceAttribute','faults.faultType_id','fault_types.Type','faults.priorityLevel','faults.created_at']);
 
 
       // $autoAssign = $this->autoAssign(auth()->user()->section_id);
@@ -97,13 +98,14 @@ class AssignController extends Controller
         ->leftjoin('cities','faults.city_id','=','cities.id')
         ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
         ->leftjoin('pops','faults.pop_id','=','pops.id')
+        ->leftjoin('fault_types','faults.faultType_id','=','fault_types.id')
         ->leftjoin('remarks','remarks.fault_id','=','faults.id')
         ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
         ->leftjoin('users','faults.assignedTo','=','users.id')
         ->where('faults.id','=',$id)
         ->get(['faults.id','faults.customer_id','customers.customer','faults.suspectedRfo_id','links.link','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','users.name',
         'account_managers.accountManager','faults.accountManager_id','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo_id','faults.link_id','links.link'
-        ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
+        ,'faults.serviceType','faults.serviceAttribute','faults.faultType_id','fault_types.Type','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
         ->first();
 
         $cities = City::all();

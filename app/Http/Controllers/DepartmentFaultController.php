@@ -56,13 +56,14 @@ class DepartmentFaultController extends Controller
         ->leftjoin('sections','fault_section.section_id','=','sections.id')
         ->leftjoin('customers','faults.customer_id','=','customers.id')
         ->leftjoin('links','faults.link_id','=','links.id')
+        ->leftjoin('fault_types','faults.faultType_id','=','fault_types.id')
         ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
         ->leftjoin('statuses','faults.status_id','=','statuses.id')
         ->orderBy('faults.created_at', 'desc')
         ->where('fault_section.section_id','=',auth()->user()->section_id)
        ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
        'account_managers.accountManager','faults.suspectedRfo_id','links.link','statuses.description','faults.assignedTo','users.name'
-       ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
+       ,'faults.serviceType','faults.serviceAttribute','faults.faultType_id','fault_types.Type','faults.priorityLevel','faults.created_at']);
 
 
     return view('department_faults.index',compact('faults'))
@@ -157,13 +158,14 @@ class DepartmentFaultController extends Controller
         ->leftjoin('users','faults.assignedTo','=','users.id')
         ->leftjoin('sections','fault_section.section_id','=','sections.id')
         ->leftjoin('customers','faults.customer_id','=','customers.id')
+        ->leftjoin('fault_types','faults.faultType_id','=','fault_types.id')
         ->leftjoin('links','faults.link_id','=','links.id')
         ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
         ->orderBy('faults.created_at', 'desc')
         ->where('fault_section.section_id','=',auth()->user()->section_id)
         ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
         'account_managers.accountManager','faults.suspectedRfo_id','links.link'
-        ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
+        ,'faults.serviceType','faults.serviceAttribute','faults.faultType_id','fault_types.Type','faults.priorityLevel','faults.created_at']);
     return view('department_faults.index',compact('faults'))
     ->with('i');
 

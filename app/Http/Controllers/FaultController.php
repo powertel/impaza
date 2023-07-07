@@ -37,6 +37,7 @@ class FaultController extends Controller
                 ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
                 ->leftjoin('users as assigned_users','faults.assignedTo','=','assigned_users.id')
 				->leftjoin('users as reported_users','faults.user_id','=','reported_users.id')
+                ->leftjoin('fault_types','faults.faultType_id','=','fault_types.id')
                 ->leftjoin('statuses','faults.status_id','=','statuses.id')
                 ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
                 ->orderBy('faults.created_at', 'desc')
@@ -57,7 +58,7 @@ class FaultController extends Controller
 				'reported_users.name as reportedBy',
 				'faults.serviceType',
 				'faults.serviceAttribute',
-				'faults.faultType',
+				'faults.faultType_id',
 				'faults.priorityLevel',
 				'faults.created_at'
 				]);
@@ -201,11 +202,12 @@ class FaultController extends Controller
                 ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
                 ->leftjoin('pops','faults.pop_id','=','pops.id')
                 ->leftjoin('remarks','remarks.fault_id','=','faults.id')
+                ->leftjoin('fault_types','faults.faultType_id','=','fault_types.id')
                 ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
                 ->where('faults.id','=',$id)
                 ->get(['faults.id','faults.customer_id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
                 'account_managers.accountManager','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.link_id','links.link'
-                ,'faults.serviceType','faults.suspectedRfo_id','faults.confirmedRfo_id','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
+                ,'faults.serviceType','faults.suspectedRfo_id','faults.confirmedRfo_id','fault_types.Type','faults.faultType_id','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
                 ->first();
                 $SuspectedRFO = DB::table('reasons_for_outages')->where('reasons_for_outages.id','=',$fault->suspectedRfo_id)
                 ->get('reasons_for_outages.RFO')
@@ -232,13 +234,14 @@ class FaultController extends Controller
             ->leftjoin('cities','faults.city_id','=','cities.id')
             ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
             ->leftjoin('pops','faults.pop_id','=','pops.id')
+            ->leftjoin('fault_types','faults.faultType_id','=','fault_types.id')
             ->leftjoin('remarks','remarks.fault_id','=','faults.id')
             ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
             ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
             ->where('faults.id','=',$id)
             ->get(['faults.id','faults.customer_id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
             'account_managers.accountManager','faults.accountManager_id','faults.suspectedRfo_id','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','reasons_for_outages.RFO','faults.link_id','links.link'
-            ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
+            ,'faults.serviceType','faults.serviceAttribute','fault_types.Type','faults.faultType_id','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
             ->first();
 
             $cities = City::all();
@@ -287,11 +290,12 @@ class FaultController extends Controller
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
                 ->leftjoin('links','faults.link_id','=','links.id')
                 ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
+                ->leftjoin('fault_types','faults.faultType_id','=','fault_types.id')
                 ->leftjoin('statuses','faults.status_id','=','statuses.id')
                 ->orderBy('faults.created_at', 'desc')
                 ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
                 'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description'
-                ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
+                ,'faults.serviceType','faults.serviceAttribute','fault_types.Type','faults.faultType_id','faults.priorityLevel','faults.created_at']);
 
         return response()->json($faults);
     }

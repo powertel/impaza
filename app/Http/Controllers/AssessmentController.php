@@ -14,6 +14,7 @@ use App\Models\Remark;
 use App\Models\AccountManager;
 use App\Models\Section;
 use App\Models\FaultSection;
+use App\Models\FaultType;
 use App\Models\ReasonsForOutage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
@@ -54,11 +55,12 @@ class AssessmentController extends Controller
             ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','faults.confirmedRfo_id','=','reasons_for_outages.id')
             ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
             ->leftjoin('statuses','faults.status_id','=','statuses.id')
+            ->leftjoin('fault_types','faults.faultType_id','=','fault_types.id')
             ->orderBy('faults.created_at', 'desc')
             ->where('faults.status_id','=',1)
             ->get(['faults.id','customers.customer','faults.contactName','reasons_for_outages.RFO','faults.phoneNumber','faults.contactEmail','faults.address',
             'account_managers.accountManager','faults.suspectedRfo_id','links.link','statuses.description'
-            ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
+            ,'faults.serviceType','faults.serviceAttribute','faults.faultType_id','fault_types.Type','faults.priorityLevel','faults.created_at']);
         return view('assessments.index',compact('faults'))
         ->with('i');
     }
@@ -142,12 +144,13 @@ class AssessmentController extends Controller
                 ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
                 ->leftjoin('pops','faults.pop_id','=','pops.id')
                 ->leftjoin('remarks','remarks.fault_id','=','faults.id')
+                ->leftjoin('fault_types','faults.faultType_id','=','fault_types.id')
                 ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
                 ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','faults.confirmedRfo_id','=','reasons_for_outages.id')
                 ->where('faults.id','=',$id)
                 ->get(['faults.id','faults.customer_id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
                 'account_managers.accountManager','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo_id','faults.link_id','links.link'
-                ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','reasons_for_outages.RFO','faults.created_at'])
+                ,'faults.serviceType','faults.serviceAttribute','faults.faultType_id','fault_types.Type','faults.priorityLevel','remarks.fault_id','remarks.remark','reasons_for_outages.RFO','faults.created_at'])
                 ->first();
 
                $remarks= Remark::all();
@@ -169,12 +172,13 @@ class AssessmentController extends Controller
         ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
         ->leftjoin('pops','faults.pop_id','=','pops.id')
         ->leftjoin('remarks','remarks.fault_id','=','faults.id')
+          ->leftjoin('fault_types','faults.faultType_id','=','fault_types.id')
         ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
         ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
         ->where('faults.id','=',$id)
         ->get(['faults.id','faults.customer_id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','reasons_for_outages.RFO',
         'account_managers.accountManager','faults.accountManager_id','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo_id','faults.link_id','links.link'
-        ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
+        ,'faults.serviceType','faults.serviceAttribute','faults.faultType_id','fault_types.Type','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
         ->first();
 
         $cities = City::all();
@@ -187,9 +191,10 @@ class AssessmentController extends Controller
         $sections = Section::all();
         $confirmedRFO = ReasonsForOutage::all();
         $suspectedRFO = ReasonsForOutage::all();
+        $faultTypes = FaultType::all();
 
 
-    return view('assessments.assess',compact('fault','customers','confirmedRFO','cities','suburbs','suspectedRFO','pops','links','remarks','accountManagers','sections'));
+    return view('assessments.assess',compact('fault','customers','confirmedRFO','cities','suburbs','suspectedRFO','pops','links','remarks','accountManagers','sections','faultTypes'));
     }
 
     /**
@@ -201,7 +206,7 @@ class AssessmentController extends Controller
      */
     public function update(Request $request, $id)
     {
-
+       // dd($request);
 
       
         DB::beginTransaction();
@@ -209,7 +214,7 @@ class AssessmentController extends Controller
             request()->validate([
                 'section_id'=> 'required',
                 'priorityLevel'=>'required',
-                'faultType'=>'required',
+                'faultType_id'=>'required',
                 'confirmedRfo_id'=>'required'
             ]);
 

@@ -9,10 +9,16 @@ class ReasonsForOutage extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'RFO'
+        'RFO',
+        'faultType_id',
     ];
     public function fault()
     {
         return $this->hasMany(Fault::class);
     }
+    public function faultType()
+    {
+        return $this->belongsTo(Fault::class);
+    }
+
 }

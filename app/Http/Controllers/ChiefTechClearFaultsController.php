@@ -37,12 +37,13 @@ class ChiefTechClearFaultsController extends Controller
             ->leftjoin('links','faults.link_id','=','links.id')
             ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
             ->leftjoin('statuses','faults.status_id','=','statuses.id')
+            ->leftjoin('fault_types','faults.faultType_id','=','fault_types.id')
             ->orderBy('faults.created_at', 'desc')
             ->where('faults.status_id','=',4)
             ->where('users.section_id','=',auth()->user()->section_id)
             ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
             'account_managers.accountManager','faults.suspectedRfo_id','links.link','faults.suspectedRfo_id','links.link','statuses.description'
-            ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
+            ,'faults.serviceType','faults.serviceAttribute','faults.faultType_id','fault_types.Type','faults.priorityLevel','faults.created_at']);
         return view('clear_faults.chief_tech_clear',compact('faults'))
         ->with('i');
     }

@@ -130,18 +130,22 @@ Assess
                     <div class="row g-2">
                         <div class="mb-3 col-md-3">
                             <label for="faultType" class="form-label">Fault Type</label>
-                            <select type="text"  class="custom-select @error('faultType') is-invalid @enderror"  name="faultType">
-                                <option selected disabled>Select Fault Type</option>
-                                <option  value="Carrier/Mux"  @if (old('faultType') == "Carrier/Mux") {{ 'selected' }} @endif>Carrier/Mux</option>
-                                <option  value="logical"  @if (old('faultType') == "logical") {{ 'selected' }} @endif>logical</option>
-                                <option  value="Cable"  @if (old('faultType') == "Cable") {{ 'selected' }} @endif>Cable</option>
-                                <option  value="Power"  @if (old('faultType') == "Power") {{ 'selected' }} @endif>Power</option>
-                                <option  value="Active Equipments"  @if (old('faultType') == "Active Equipments") {{ 'selected' }} @endif>Active Equipments</option>
+                            <select type="text"  class="custom-select @error('faultType_id') is-invalid @enderror"  name="faultType_id">
+                            <option selected disabled >Select fault Type</option>
+                                @foreach($faultTypes  as $faultType)
+
+                                    @if (old('faultType_id')==$faultType->id)
+                                        <option value="{{ $faultType->id}}" selected>{{$faultType->Type }}</option>
+                                    @else
+                                        <option value="{{ $faultType->id}}">{{$faultType->Type }}</option>
+                                    @endif
+
+                                @endforeach
                             </select>
                         </div>
                         <div class="mb-3 col-md-3">
                         <label for="suspectedRFO" class="form-label">Confirmed Reason For Outage</label>
-                            <select  class="custom-select @error('Rfo_id') is-invalid @enderror" name="confirmedRfo_id" >
+                            <select  class="custom-select @error('confirmedRfo_id') is-invalid @enderror" name="confirmedRfo_id" >
                                 <option selected disabled >Select RFO</option>
                                 @foreach($confirmedRFO  as $confirmed_rfo)
 

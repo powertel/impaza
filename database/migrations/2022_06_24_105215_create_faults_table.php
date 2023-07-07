@@ -31,7 +31,7 @@ return new class extends Migration
             $table->string('serviceType');
             $table->string('serviceAttribute');
             $table->unsignedInteger('user_id')->nullable();
-            $table->string('faultType')->nullable();
+            $table->unsignedInteger('faultType_id')->nullable();
             $table->unsignedInteger('assignedTo')->nullable();
             $table->string('priorityLevel')->nullable();
             $table->unsignedInteger('status_id')->nullable();

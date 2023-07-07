@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             CreateAdminUserSeeder::class,
             RFOSeeder::class,
             LinkTypeSeeder::class,
+            FaultTypeseeder::class,
         ]);
         // \App\Models\User::factory(10)->create();
 

@@ -13,13 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('reasons_for_outages', function (Blueprint $table) {
+        Schema::create('fault_types', function (Blueprint $table) {
             $table->id();
+            $table->string('Type');
             $table->timestamps();
-            $table->unsignedInteger('faulttype_id');
-            $table->string('RFO');
         });
-        
     }
 
     /**
@@ -29,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('reasons_for_outages');
+        Schema::dropIfExists('fault_types');
     }
 };
