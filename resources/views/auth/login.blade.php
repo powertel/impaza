@@ -99,6 +99,21 @@
 
   .row-actions { display: flex; align-items: center; justify-content: space-between; margin: 8px 0 16px; }
   .remember { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
+  /* Align and style checkbox to match other inputs */
+  .remember .form-check-input {
+    width: 18px;
+    height: 18px;
+    margin: 0; /* remove default top offset */
+    border: 1px solid rgba(221,227,235,0.9);
+    border-radius: 4px;
+    background: rgba(255,255,255,0.92);
+    accent-color: var(--brand-primary); /* modern browsers use brand color */
+    box-shadow: inset 0 1px 2px rgba(17,23,34,0.06);
+  }
+  .remember .form-check-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(76,111,255,0.18);
+  }
   .forgot a { font-size: 13px; color: #6a86ff; text-decoration: none; }
   .forgot a:hover { text-decoration: underline; }
 
@@ -177,10 +192,7 @@
       </div>
 
       <div class="row-actions">
-        <label class="remember" for="remember">
-          <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-          Remember me
-        </label>
+
         <span class="forgot">
           @if (Route::has('password.request'))
             <a href="{{ route('password.request') }}">Forgot password?</a>
