@@ -144,7 +144,7 @@ class AssignController extends Controller
         $req= $request->all();
         $req['status_id'] = 3;
         $fault ->update($req);
-        return redirect(route('department_faults.index'))
+        return redirect()->route('faults.edit',$id)
         ->with('success','Fault Assigned');
     }
 

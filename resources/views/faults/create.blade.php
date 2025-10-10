@@ -14,7 +14,7 @@ Fault
                 </h3>
             </div>
             <div class="card-body">
-                <form id="UF" action="{{ route('faults.store') }}" method="POST">
+                <form id="UF" action="{{ route('faults.store') }}" method="POST" enctype="multipart/form-data">
                 {{ csrf_field() }}
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
@@ -133,7 +133,7 @@ Fault
 
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
-                            <label for="adress" class="form-label">Address</label>
+                            <label for="address" class="form-label">Address</label>
                             <input type="text" class="form-control @error('address') is-invalid @enderror"  placeholder="Address" name="address" value="{{ old('address') }}" >
                         </div>
                         <div class="mb-3 col-md-6">
@@ -152,16 +152,15 @@ Fault
                             </select>
                         </div>
                     </div>
-
                     <div class="row g-2">
-
                         <div class="mb-3 col-md-6">
-                            <label for="remarks" class="form-label">Remarks</label>
-                            <textarea name="remark" class="form-control @error('remark') is-invalid @enderror" placeholder="Enter any additional comments" rows="2"  >{{ old('remark') }}</textarea>
+                            <label for="remark" class="form-label">Remarks</label><br>
+                           <!-- <input for="fileToUpload" class="nav-icon fal fa-upload">Attach File With Remark</label> -->
+                            <textarea name="remark" class="form-control @error('remark') is-invalid @enderror" placeholder="Enter any additional comments and Attach Your File Below If Any" rows="2"  >{{ old('remark') }}</textarea>
+                           <input type="hidden" name="activity" value="ON LOGGING">
+                           <input type="file" name="attachment" class="form-control @error('attachment') is-invalid @enderror" id="fileToUpload">
                         </div>
-
                     </div>
-
                     <div class="card-footer">
                         <button type="submit" class="btn btn-success btn-sm" onclick="return inlineSave()">{{ __('Save') }}</button>
                         <a type="button" class="btn btn-danger btn-sm" href="{{ route('faults.index') }}">{{ __('Cancel') }}</a>
@@ -170,7 +169,6 @@ Fault
             </div>
         </div>
     </div>
-
 </section>
 @endsection
 
