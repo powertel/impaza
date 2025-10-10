@@ -64,13 +64,12 @@
     width: 100%;
     max-width: 440px;
     margin: 0 auto;
-    background: linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(245,248,255,0.75) 60%, rgba(76,111,255,0.10) 100%);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: var(--bg-1);
+    border: 1px solid rgba(76,111,255,0.14);
     border-radius: 18px;
-    box-shadow: 0 20px 36px rgba(25, 35, 53, 0.20);
-    border: 1px solid rgba(255,255,255,0.65);
+    box-shadow: 0 16px 28px rgba(25, 35, 53, 0.14);
     padding: 26px 26px 20px;
+    overflow: hidden; /* ensures corners render cleanly (fixes bottom-left) */
   }
 
   .form-header { text-align: center; margin-bottom: 14px; }
@@ -82,18 +81,19 @@
   .form-control.custom {
     width: 100%;
     padding: 12px 14px;
-    border-radius: 10px;
-    border: 1px solid rgba(221,227,235,0.7);
-    background: rgba(255,255,255,0.72);
+    border-radius: 12px;
+    border: 1px solid #c7d2e3; /* stronger contrast */
+    background: #ffffff; /* solid white for visibility */
     color: var(--text-main);
+    box-shadow: 0 2px 6px rgba(17,23,34,0.06); /* subtle elevation */
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
   }
-  .form-control.custom::placeholder { color: #9aa7b3; }
+  .form-control.custom::placeholder { color: #7c8da1; }
   .form-control.custom:focus {
     outline: none;
-    border-color: var(--input-focus);
-    box-shadow: 0 0 0 3px rgba(76,111,255,0.18);
-    background: rgba(255,255,255,0.9);
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 3px rgba(76,111,255,0.18), 0 2px 6px rgba(17,23,34,0.08);
+    background: #ffffff;
   }
   .invalid-feedback { color: var(--error); }
 
