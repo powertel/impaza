@@ -64,12 +64,12 @@
     width: 100%;
     max-width: 440px;
     margin: 0 auto;
-    background: rgba(255,255,255,0.28);
+    background: linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(245,248,255,0.75) 60%, rgba(76,111,255,0.10) 100%);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-radius: 18px;
-    box-shadow: 0 14px 28px rgba(25, 35, 53, 0.10);
-    border: 1px solid rgba(255,255,255,0.50);
+    box-shadow: 0 20px 36px rgba(25, 35, 53, 0.20);
+    border: 1px solid rgba(255,255,255,0.65);
     padding: 26px 26px 20px;
   }
 
