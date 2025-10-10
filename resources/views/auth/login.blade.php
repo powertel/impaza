@@ -64,13 +64,12 @@
     width: 100%;
     max-width: 440px;
     margin: 0 auto;
-    background: rgba(255,255,255,0.28);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: var(--bg-1);
+    border: 1px solid rgba(76,111,255,0.14);
     border-radius: 18px;
-    box-shadow: 0 14px 28px rgba(25, 35, 53, 0.10);
-    border: 1px solid rgba(255,255,255,0.50);
+    box-shadow: 0 16px 28px rgba(25, 35, 53, 0.14);
     padding: 26px 26px 20px;
+    overflow: hidden; /* ensures corners render cleanly (fixes bottom-left) */
   }
 
   .form-header { text-align: center; margin-bottom: 14px; }
@@ -82,23 +81,39 @@
   .form-control.custom {
     width: 100%;
     padding: 12px 14px;
-    border-radius: 10px;
-    border: 1px solid rgba(221,227,235,0.7);
-    background: rgba(255,255,255,0.72);
+    border-radius: 12px;
+    border: 1px solid #c7d2e3; /* stronger contrast */
+    background: #ffffff; /* solid white for visibility */
     color: var(--text-main);
+    box-shadow: 0 2px 6px rgba(17,23,34,0.06); /* subtle elevation */
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
   }
-  .form-control.custom::placeholder { color: #9aa7b3; }
+  .form-control.custom::placeholder { color: #7c8da1; }
   .form-control.custom:focus {
     outline: none;
-    border-color: var(--input-focus);
-    box-shadow: 0 0 0 3px rgba(76,111,255,0.18);
-    background: rgba(255,255,255,0.9);
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 3px rgba(76,111,255,0.18), 0 2px 6px rgba(17,23,34,0.08);
+    background: #ffffff;
   }
   .invalid-feedback { color: var(--error); }
 
   .row-actions { display: flex; align-items: center; justify-content: space-between; margin: 8px 0 16px; }
   .remember { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
+  /* Align and style checkbox to match other inputs */
+  .remember .form-check-input {
+    width: 18px;
+    height: 18px;
+    margin: 0; /* remove default top offset */
+    border: 1px solid rgba(221,227,235,0.9);
+    border-radius: 4px;
+    background: rgba(255,255,255,0.92);
+    accent-color: var(--brand-primary); /* modern browsers use brand color */
+    box-shadow: inset 0 1px 2px rgba(17,23,34,0.06);
+  }
+  .remember .form-check-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(76,111,255,0.18);
+  }
   .forgot a { font-size: 13px; color: #6a86ff; text-decoration: none; }
   .forgot a:hover { text-decoration: underline; }
 
@@ -177,10 +192,7 @@
       </div>
 
       <div class="row-actions">
-        <label class="remember" for="remember">
-          <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-          Remember me
-        </label>
+
         <span class="forgot">
           @if (Route::has('password.request'))
             <a href="{{ route('password.request') }}">Forgot password?</a>
