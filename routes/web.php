@@ -44,8 +44,8 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
-Auth::routes();
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Auth::routes(['verify' => true]);
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->middleware('verified')->name('home');
 
 Route::group(['middleware' => ['auth']], function() {
     Route::resource('users', UserController::class);
@@ -83,6 +83,10 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('position/{id}', [DepartmentController::class,'findPosition'])->name('position');
     Route::put('auto/{id}/auto', [AssessmentController::class,'assign'])->name('auto');
     Route::get('stores/{id}', [StoreController::class,'findstores'])->name('stores');
+
+    // Add change password routes
+    Route::get('/password/change', [UserController::class,'getPassword'])->name('user.password.change');
+    Route::post('/password/change', [UserController::class,'postPassword'])->name('user.password.update');
 });
 
 
