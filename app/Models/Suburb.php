@@ -23,6 +23,10 @@ class Suburb extends Model
     {
         return $this->hasMany(Pop::class);
     }
+    public function customer()
+    {
+        return $this->hasMany(Customer::class);
+    }
 
     public function fault()
     {

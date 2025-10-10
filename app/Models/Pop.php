@@ -23,4 +23,9 @@ class Pop extends Model
     {
         return $this->hasOne(Fault::class);
     }
+    public function customer()
+    {
+        return $this->hasMany(Customer::class);
+    }
+
 }

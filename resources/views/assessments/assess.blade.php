@@ -99,14 +99,14 @@ Assess
         
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
-                        <label for="suspectedRfo" class="form-label">Suspected RFO</label>
-                            <select  class="custom-select " value="{{$fault->suspectedRfo}}" name="suspectedRfo">
-                            <option selected="selected">{{ $fault->suspectedRfo }}</option>
-                                <option>No fx Light</option>
-                                <option>No PON Light</option>
-                                <option>BTS Down</option>
-                                <option>Node Down</option>
-                                <option>Unknown</option>
+                        <label for="suspectedRfo" class="form-label">Suspected Reason For Outage</label>
+                            <select class="custom-select" id="suspectedRFO" name="suspectedRfo_id">
+                                <option selected="selected" value="{{ $fault->suspectedRfo_id}}">{{ $fault->RFO }}</option>
+                                @foreach($suspectedRFO as $suspected_rfo)
+                                    @unless ($suspected_rfo->id ===$fault->suspectedRfo_id)
+                                        <option value="{{ $suspected_rfo->id}}">{{ $suspected_rfo->RFO }}</option>
+                                    @endunless
+                                @endforeach
                             </select>
                         </div>
                 
@@ -140,25 +140,18 @@ Assess
                             </select>
                         </div>
                         <div class="mb-3 col-md-3">
-                            <label for="rfo" class="form-label">Confirmed RFO</label>
-                            <select type="text" class="custom-select @error('confirmedRfo') is-invalid @enderror" name="confirmedRfo" >
-                                <option selected disabled>Select RFO</option>
-                                <option  value="Faulty Mux"  @if (old('confirmedRfo') == "Faulty Mux") {{ 'selected' }} @endif>Faulty Mux</option>
-                                <option  value="Faulty Board"  @if (old('confirmedRfo') == "Faulty Board") {{ 'selected' }} @endif>Faulty Board</option>
-                                <option  value="Power Fault"  @if (old('confirmedRfo') == "Power Fault") {{ 'selected' }} @endif>Power Fault</option>
-                                <option  value="UTP Fault"  @if (old('confirmedRfo') == "UTP Fault") {{ 'selected' }} @endif>UTP fault</option>
-                                <option  value="Patch Lead Fault"  @if (old('confirmedRfo') == "Patch Lead Fault") {{ 'selected' }} @endif>Patch lead Fault</option>
-                                <option  value="UG Cable Fault"  @if (old('confirmedRfo') == "UG Cable Fault") {{ 'selected' }} @endif>UG cable FFault</option>
-                                <option  value="Burnt Cables"  @if (old('confirmedRfo') == "Burnt Cables") {{ 'selected' }} @endif>Burnt Cables</option>
-                                <option  value="FAS"  @if (old('confirmedRfo') == "FAS") {{ 'selected' }} @endif>FAS</option>
-                                <option  value="Power Outage"  @if (old('confirmedRfo') == "Power Outage") {{ 'selected' }} @endif>Power Outage</option>
-                                <option  value="Backbone Fault"  @if (old('confirmedRfo') == "Backbone Fault") {{ 'selected' }} @endif>Backbone Fault</option>
-                                <option  value="Faulty Switch"  @if (old('confirmedRfo') == "Faulty Switch") {{ 'selected' }} @endif>Faulty Switch</option>
-                                <option  value="Faulty Router"  @if (old('confirmedRfo') == "Faulty Router") {{ 'selected' }} @endif>Faulty Router</option>
-                                <option  value="Faulty Chassis"  @if (old('confirmedRfo') == "Faulty Chassis") {{ 'selected' }} @endif>Faulty Chassis</option>
-                                <option  value="Converter Faulty"  @if (old('confirmedRfo') == "Converter Faulty") {{ 'selected' }} @endif>Converter Faulty</option>
-                                <option  value=" Faulty SW/Port"  @if (old('confirmedRfo') == " Faulty SW/Port") {{ 'selected' }} @endif>Faulty SW/Port</option>
-                                <option  value="CPE  Faulty"  @if (old('confirmedRfo') == "CPE  Faulty") {{ 'selected' }} @endif>CPE Faulty</option>
+                        <label for="suspectedRFO" class="form-label">Confirmed Reason For Outage</label>
+                            <select  class="custom-select @error('Rfo_id') is-invalid @enderror" name="confirmedRfo_id" >
+                                <option selected disabled >Select RFO</option>
+                                @foreach($confirmedRFO  as $confirmed_rfo)
+
+                                    @if (old('confirmedRfo_id')==$confirmed_rfo->id)
+                                        <option value="{{ $confirmed_rfo->id}}" selected>{{ $confirmed_rfo->RFO }}</option>
+                                    @else
+                                        <option value="{{ $confirmed_rfo->id}}">{{ $confirmed_rfo->RFO }}</option>
+                                    @endif
+
+                                @endforeach
                             </select>
                         </div>
                         <div class="mb-3 col-md-6">

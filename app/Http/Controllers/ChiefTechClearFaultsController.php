@@ -41,7 +41,7 @@ class ChiefTechClearFaultsController extends Controller
             ->where('faults.status_id','=',4)
             ->where('users.section_id','=',auth()->user()->section_id)
             ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
-            'account_managers.accountManager','faults.suspectedRfo','links.link','statuses.description'
+            'account_managers.accountManager','faults.suspectedRfo_id','links.link','faults.suspectedRfo_id','links.link','statuses.description'
             ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
         return view('clear_faults.chief_tech_clear',compact('faults'))
         ->with('i');
