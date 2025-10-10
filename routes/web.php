@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\FaultController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CityController;
@@ -44,10 +46,10 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
-Auth::routes(['verify' => true]);
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->middleware('verified')->name('home');
+Auth::routes();
 
 Route::group(['middleware' => ['auth']], function() {
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::resource('users', UserController::class);
     Route::resource('roles', RoleController::class);
     Route::resource('permission',PermissionController::class);
