@@ -114,8 +114,9 @@
     outline: none;
     box-shadow: 0 0 0 3px rgba(76,111,255,0.18);
   }
-  .forgot a { font-size: 13px; color: #6a86ff; text-decoration: none; }
-  .forgot a:hover { text-decoration: underline; }
+  .forgot-block { margin: 8px 0 16px; }
+  .forgot-link { font-size: 13px; color: #6a86ff; text-decoration: none; }
+  .forgot-link:hover { text-decoration: underline; }
 
   .btn-primary.modern {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -191,13 +192,10 @@
         @enderror
       </div>
 
-      <div class="row-actions">
-
-        <span class="forgot">
-          @if (Route::has('password.request'))
-            <a href="{{ route('password.request') }}">Forgot password?</a>
-          @endif
-        </span>
+      <div class="forgot-block">
+        @if (Route::has('password.request'))
+          <a class="forgot-link" href="{{ route('password.request') }}">Forgot password?</a>
+        @endif
       </div>
 
       <button type="submit" class="btn btn-primary modern">Sign in</button>
