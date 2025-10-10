@@ -2,63 +2,196 @@
 
 @section('content')
 
-<div class="login-box">
-  <div class="login-logo">
-    <h3>LOGIN</h3>
+<style>
+  :root {
+    --brand-primary: #4C6FFF; /* primary accent for actions */
+    --brand-primary-dark: #3a57cc;
+    --brand-accent: #00A651; /* subtle green accent */
+    --bg-1: #eaf2ff;
+    --bg-2: #f2f5ff;
+    --gradient-a: #9fd0ff;
+    --gradient-b: #c2b7ff;
+    --gradient-c: #b6e0ff;
+    --card-bg: #ffffff;
+    --text-main: #0b1b2b;
+    --text-muted: #6b7a8c;
+    --border: #e6ebf2;
+    --input-bg: #ffffff;
+    --input-border: #dde3eb;
+    --input-focus: #b9c7ff;
+    --error: #e75050;
+  }
+
+  /* override layout wrapper to allow full-width stage */
+  .login-box { width: 100% !important; max-width: none !important; margin: 0 !important; padding: 6vh 6vw; }
+
+  body.login-page {
+    min-height: 100vh !important;
+    background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+  }
+
+  .login-stage {
+    position: relative;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 36px;
+    border-radius: 24px;
+    background: var(--bg-1);
+
+  }
+  .login-stage::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+
+    pointer-events: none;
+  }
+
+  .brand-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    color: var(--text-main);
+    font-weight: 800;
+    letter-spacing: 0.3px;
+  }
+  .brand-top img { width: 28px; height: 28px; object-fit: contain; border-radius: 6px; }
+
+  .login-card {
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto;
+    background: rgba(255,255,255,0.28);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 18px;
+    box-shadow: 0 14px 28px rgba(25, 35, 53, 0.10);
+    border: 1px solid rgba(255,255,255,0.50);
+    padding: 26px 26px 20px;
+  }
+
+  .form-header { text-align: center; margin-bottom: 14px; }
+  .form-header h2 { margin: 0; font-size: 20px; font-weight: 800; color: var(--text-main); }
+  .form-header .subtitle { margin: 6px 0 0; font-size: 13px; color: var(--text-muted); }
+
+  .form-group { margin-bottom: 16px; }
+  .form-label { display: block; margin-bottom: 6px; font-weight: 600; color: var(--text-main); font-size: 13px; }
+  .form-control.custom {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(221,227,235,0.7);
+    background: rgba(255,255,255,0.72);
+    color: var(--text-main);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+  }
+  .form-control.custom::placeholder { color: #9aa7b3; }
+  .form-control.custom:focus {
+    outline: none;
+    border-color: var(--input-focus);
+    box-shadow: 0 0 0 3px rgba(76,111,255,0.18);
+    background: rgba(255,255,255,0.9);
+  }
+  .invalid-feedback { color: var(--error); }
+
+  .row-actions { display: flex; align-items: center; justify-content: space-between; margin: 8px 0 16px; }
+  .remember { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
+  .forgot a { font-size: 13px; color: #6a86ff; text-decoration: none; }
+  .forgot a:hover { text-decoration: underline; }
+
+  .btn-primary.modern {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 12px 16px; border: none; border-radius: 12px;
+    font-weight: 700; letter-spacing: 0.2px; color: #ffffff;
+    background: var(--brand-primary);
+    box-shadow: 0 10px 20px rgba(76,111,255,0.30);
+    transition: transform 0.06s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    backdrop-filter: blur(6px);
+  }
+  .btn-primary.modern:hover { filter: brightness(1.05); box-shadow: 0 14px 26px rgba(76,111,255,0.42); }
+  .btn-primary.modern:active { transform: translateY(1px); }
+
+  .oauth {
+    margin-top: 12px;
+  }
+  .btn-google {
+    width: 100%;
+    background: #ffffff;
+    color: var(--text-main);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: 600;
+    box-shadow: 0 8px 18px rgba(17,23,34,0.06);
+  }
+  .btn-google:hover { box-shadow: 0 10px 20px rgba(17,23,34,0.08); }
+  .btn-google svg { width: 18px; height: 18px; }
+
+  .footer-links { margin-top: 12px; text-align: center; font-size: 13px; color: var(--text-muted); }
+  .footer-links a { color: #6a86ff; text-decoration: none; }
+  .footer-links a:hover { text-decoration: underline; }
+
+  @media (max-width: 720px) {
+    .login-stage { padding: 22px; }
+    .login-card { padding: 22px; }
+  }
+</style>
+
+<div id="app" style="display:none"></div>
+<div class="login-stage">
+  <div class="brand-top">
+    <img src="{{ asset('img/logo_sm.png') }}" alt="iMPAZAMON logo">
+    <span>iMPAZAMON</span>
   </div>
-  <!-- /.login-logo -->
-  <div class="card">
-  <div class="card-body login-card-body">
-        <p class="login-box-msg"></p>
 
-        <form action="{{ route('login') }}" method="post">
-            @csrf
-            <div class="input-group mb-3">
-                <input id="email" type="email" placeholder="Email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
-                <div class="input-group-append">
-                    <div class="input-group-text">
-                    <span class="fas fa-envelope"></span>
-                    </div>
-                </div>
-                @error('email')
-                    <span class="invalid-feedback" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                @enderror
-            </div>
-            <div class="input-group mb-3">
-                <input id="password" type="password" placeholder="Password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="current-password">
-                <div class="input-group-append">
-                    <div class="input-group-text">
-                        <span class="fas fa-lock"></span>
-                    </div>
-                </div>
-                @error('password')
-                    <span class="invalid-feedback" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                @enderror
-            </div>
-            <div class="row" style="margin-left: 10px;">
-                <div class="col-8">
-                    <div class="icheck-primary">
-                        <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
-                        <label for="remember">
-                            Remember Me
-                        </label>
-                    </div>
-                </div>
-  
-                <div class="col-4">
-                    <button type="submit" class="btn btn-primary btn-block">login</button>
-                </div>
-
-            </div>
-        </form>
+  <div class="login-card">
+    <div class="form-header">
+      <h2>Welcome Back!</h2>
+      <p class="subtitle">We missed you! Please enter your details.</p>
     </div>
-    <!-- /.login-card-body -->
+
+    <form action="{{ route('login') }}" method="post">
+      @csrf
+
+      <div class="form-group">
+        <label for="email" class="form-label">Email</label>
+        <input id="email" type="email" placeholder="Enter your Email" class="form-control custom @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
+        @error('email')
+          <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+        @enderror
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <input id="password" type="password" placeholder="Enter Password" class="form-control custom @error('password') is-invalid @enderror" name="password" required autocomplete="current-password">
+        @error('password')
+          <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+        @enderror
+      </div>
+
+      <div class="row-actions">
+        <label class="remember" for="remember">
+          <input class="form-check-input" type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
+          Remember me
+        </label>
+        <span class="forgot">
+          @if (Route::has('password.request'))
+            <a href="{{ route('password.request') }}">Forgot password?</a>
+          @endif
+        </span>
+      </div>
+
+      <button type="submit" class="btn btn-primary modern">Sign in</button>
+
+    </form>
   </div>
 </div>
-<!-- /.login-box -->
 
 @endsection
