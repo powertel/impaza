@@ -10,7 +10,7 @@
         </div>
 
         <!-- Sidebar Menu -->
-        <nav class="mt-2" style="flex: 1 1 auto; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch;">
+        <nav class="mt-2" style="flex: 1 1 auto;">
           <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false" style="margin: 0; padding: 0;">
             <li class="nav-header">Main</li>
             <li class="nav-item">

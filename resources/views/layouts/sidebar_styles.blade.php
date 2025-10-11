@@ -26,8 +26,10 @@
    min-height: 0; /* allow flex children to shrink and scroll */
  }
 .main-sidebar .sidebar .user-panel { flex: 0 0 auto; }
-.main-sidebar .sidebar nav { flex: 1 1 auto; height: 100%; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; scrollbar-width: none; /* Firefox */ }
-.main-sidebar .sidebar nav::-webkit-scrollbar { width: 0; height: 0; }
+.main-sidebar .sidebar { height: 100%; padding-top: 0; display: flex; flex-direction: column; min-height: 0; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; scrollbar-width: none; }
+    .main-sidebar .sidebar::-webkit-scrollbar { width: 0; height: 0; }
+    .main-sidebar .sidebar nav { flex: 0 0 auto; height: auto; overflow: visible; -webkit-overflow-scrolling: auto; overscroll-behavior: auto; touch-action: auto; }
+    .main-sidebar .sidebar nav::-webkit-scrollbar { width: 0; height: 0; }
 
 /* Sidebar nav */
 .nav-sidebar .nav-header {
@@ -107,7 +109,7 @@
      overflow: hidden; /* contain scroll to nav */
      min-height: 0; /* allow flex children to shrink and scroll */
    }
-  .main-sidebar .sidebar nav { flex: 1 1 auto; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; scrollbar-width: none; /* Firefox */ }
+  .main-sidebar .sidebar nav { flex: 0 0 auto; overflow: visible; }
   .main-sidebar .sidebar nav::-webkit-scrollbar { width: 0; height: 0; }
 }
 
@@ -135,7 +137,7 @@
 // Prevent scroll chaining: when scrolling inside the sidebar, do not scroll the main page
 // Attach handlers to the whole sidebar and its internal scroll container
 document.addEventListener('DOMContentLoaded', function () {
-  var scrollEl = document.querySelector('.main-sidebar .sidebar nav');
+  var scrollEl = document.querySelector('.main-sidebar .sidebar');
   if (!scrollEl) { return; }
 
   function atTop(el) { return el.scrollTop <= 0; }
