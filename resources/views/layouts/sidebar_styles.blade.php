@@ -108,10 +108,23 @@
    }
   .main-sidebar .sidebar nav { flex: 1 1 auto; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
 }
-</style>
-<style>
+
+/* Active/selected menu item: force text and icons to white */
+.nav-sidebar .nav-link.active,
+.nav-sidebar > .nav-item > .nav-link.active { color: #fff !important; }
+.nav-sidebar .nav-link.active p { color: #fff !important; }
+.nav-sidebar .nav-link.active i.nav-icon,
+.nav-sidebar > .nav-item > .nav-link.active i.nav-icon { color: #fff !important; }
+/* Treeview nested items */
+.nav-treeview .nav-link.active,
+.nav-treeview .nav-link.active p,
+.nav-treeview .nav-link.active i { color: #fff !important; }
+
 /* Ensure the UL inside the nav can scroll within the available height */
 .nav.nav-sidebar { overflow-y: auto; overflow-x: hidden; max-height: 100%; -webkit-overflow-scrolling: touch; width: 100%; }
 .nav-sidebar .nav-link { display: flex; align-items: center; }
 .nav-sidebar .nav-link p { white-space: normal; word-break: break-word; overflow-wrap: anywhere; }
+
+/* Contain scroll within the sidebar and make it smooth */
+.main-sidebar .sidebar nav, .nav.nav-sidebar { overscroll-behavior: contain; scroll-behavior: smooth; }
 </style>
