@@ -1,5 +1,5 @@
 <!-- Main Sidebar Container -->
-<aside class="main-sidebar sidebar-dark-primary elevation-4" style="background:#fff;border-right:1px solid #eee;">
+<aside class="main-sidebar sidebar-light-primary elevation-4" style="background:#fff;border-right:1px solid #eee;">
     <!-- Sidebar -->
     <div class="sidebar">
         <!-- Sidebar user panel (optional) -->
