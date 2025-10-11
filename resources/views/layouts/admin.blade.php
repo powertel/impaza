@@ -36,8 +36,8 @@
         top: var(--header-height);
         left: 0;
         height: calc(100vh - var(--header-height));
-        overflow-y: auto;
-        overflow-x: hidden;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
         overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
         z-index: 1030;
@@ -45,7 +45,7 @@
       .main-sidebar .sidebar {
         height: auto;
         padding-top: 0;
-        overflow: visible;
+        overflow: initial;
       }
       .main-sidebar .sidebar {
         height: calc(100vh - 56px);
@@ -78,8 +78,8 @@
       @media (max-width: 991.98px) {
         .sidebar-mini .main-header { margin-left: 0; }
         /* On small screens let the sidebar use full viewport when opened */
-        .main-sidebar { top: 0; height: 100vh; overflow-y: auto; }
-        .main-sidebar .sidebar { height: 100vh; padding-top: 56px; }
+        .main-sidebar { top: 0; height: 100vh; overflow-y: auto !important; }
+        .main-sidebar .sidebar { height: auto; padding-top: 0; overflow: initial; }
       }
       .nav-sidebar .nav-link {
         font-size: clamp(11px, 1.3vw, 13px);
