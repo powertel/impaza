@@ -81,6 +81,68 @@ $('#city').on('change',function () {
 </script>
 
 <script>
+// Edit modal: populate dependent selects within the opened modal context
+$(document).on('change', '.city-select', function(){
+  var CityID = $(this).val();
+  var $modal = $(this).closest('.modal');
+  var $suburb = $modal.find('.suburb-select');
+  var $pop = $modal.find('.pop-select');
+  if (CityID) {
+    $.ajax({
+      url: '/suburb/' + CityID,
+      type: 'GET',
+      dataType: 'json',
+      success: function(res){
+        $suburb.empty().append('<option selected disabled>Select Suburb</option>');
+        $pop.empty().append('<option selected disabled>Select Pop</option>');
+        $.each(res, function(key, value){ $suburb.append('<option value="'+key+'">'+value+'</option>'); });
+      }
+    });
+  } else {
+    $suburb.empty();
+    $pop.empty();
+  }
+});
+
+$(document).on('change', '.suburb-select', function(){
+  var suburbID = $(this).val();
+  var $modal = $(this).closest('.modal');
+  var $pop = $modal.find('.pop-select');
+  if (suburbID) {
+    $.ajax({
+      url: '/pop/' + suburbID,
+      type: 'GET',
+      dataType: 'json',
+      success: function(res){
+        $pop.empty().append('<option selected disabled>Select Pop</option>');
+        $.each(res, function(key, value){ $pop.append('<option value="'+key+'">'+value+'</option>'); });
+      }
+    });
+  } else {
+    $pop.empty();
+  }
+});
+
+$(document).on('change', '.customer-select', function(){
+  var customerID = $(this).val();
+  var $modal = $(this).closest('.modal');
+  var $link = $modal.find('.link-select');
+  if (customerID) {
+    $.ajax({
+      url: '/link/' + customerID,
+      type: 'GET',
+      dataType: 'json',
+      success: function(res){
+        $link.empty().append('<option selected disabled>Select Link</option>');
+        $.each(res, function(key, value){ $link.append('<option value="'+key+'">'+value+'</option>'); });
+      }
+    });
+  } else {
+    $link.empty();
+  }
+});
+</script>
+
 // Disable Save until all required fields in the create modal are valid
 $(function(){
   var $saveBtn = $('button[form="UF"][type="submit"]');
