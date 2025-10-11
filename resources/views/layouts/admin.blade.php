@@ -15,7 +15,77 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+
+    <style>
+      /* Sidebar modern + responsive font scaling */
+      .main-sidebar {
+        background: #fff;
+        border-right: 1px solid #eee;
+      }
+      .nav-sidebar .nav-header {
+        font-size: clamp(11px, 1.2vw, 12px);
+        color: #9aa0ac;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 12px 18px 6px;
+        margin-top: 8px;
+      }
+      .nav-sidebar .nav-link {
+        font-size: clamp(12px, 1.5vw, 14px);
+        color: #374151;
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin: 2px 8px;
+        transition: background-color .2s ease, color .2s ease, padding .2s ease;
+      }
+      .nav-sidebar .nav-link i.nav-icon {
+        font-size: 1rem; /* responsive icon sizing can scale with font-size */
+        color: #9aa0ac;
+        margin-right: 10px;
+      }
+      .nav-sidebar .nav-link:hover {
+        background-color: #f8f9fb;
+        color: #111827;
+      }
+      .nav-sidebar .nav-link.active {
+        background-color: #eef4ff;
+        color: #1f5cff;
+      }
+      /* Active icon color tweak */
+      .nav-sidebar .nav-link.active i.nav-icon { color: #1f5cff; }
+
+      /* Brand area spacing for a cleaner look */
+      .brand-link { padding: 18px 16px; }
+      .brand-link .brand-image { opacity: 0.9; }
+
+      /* Reduce general sidebar font a bit while respecting accessibility */
+      .main-sidebar, .sidebar { font-size: clamp(12px, 1.4vw, 14px); }
+
+      /* Compact divider style for headers */
+      .nav-sidebar .nav-header:after {
+        content: '';
+        display: block;
+        height: 0;
+        border-top: 1px solid #f0f0f0;
+        margin: 6px 0 8px;
+      }
+
+      /* Remove left border accent from active link (AdminLTE default) if present */
+      .nav-sidebar .nav-link.active, .nav-sidebar .nav-link.active:focus {
+        box-shadow: none;
+      }
+
+      /* Responsive sidebar width slightly slimmer on large screens */
+      @media (min-width: 1280px) {
+        .sidebar-mini .main-sidebar { width: 240px; }
+        .sidebar-mini .content-wrapper, .sidebar-mini .main-footer, .sidebar-mini .main-header { margin-left: 240px; }
+      }
+    </style>
+
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+
     <!-- Popup -->
    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha512-3gJwYpMe3QewGELv8k/BX9vcqhryRdzRMxVfq6ngyWXwo03GFEzjsUm8Q7RZcHPHksttq7/GFoxjCVUjkjvPdw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -26,7 +96,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
     <div class="wrapper" id="app">
         <!-- Navbar -->
-        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light" style="background:#fff;border-bottom:1px solid #eee;box-shadow:0 1px 2px rgba(16,24,40,.04);">
             <!-- Left navbar links -->
             <ul class="navbar-nav">
                 <li class="nav-item">
@@ -62,7 +132,7 @@
         <!-- /.navbar -->
 
         <!-- Main Sidebar Container -->
-        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <aside class="main-sidebar sidebar-dark-primary elevation-4" style="background:#fff;border-right:1px solid #eee;">
             <!-- Sidebar -->
             <div class="sidebar">
                 <!-- Sidebar user panel (optional) -->
@@ -313,7 +383,7 @@
         </aside>
 
         <!-- Content Wrapper. Contains page content -->
-        <div class="content-wrapper" style="min-height: 399px;">
+        <div class="content-wrapper" style="min-height: 399px;background:#f7f9fc;">
             <!-- Content Header (Page header) -->
             <div class="content-header">
                 <div class="container-fluid">
