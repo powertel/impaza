@@ -1,7 +1,7 @@
 <!-- Main Sidebar Container -->
 <aside class="main-sidebar sidebar-light-primary elevation-4" style="background:#fff;border-right:1px solid #eee;">
     <!-- Sidebar -->
-    <div class="sidebar" style="min-height: 100%; height: auto; display: flex; flex-direction: column; min-height: 0;">
+    <div class="sidebar" style="display: flex; flex-direction: column; min-height: 0;">
         <!-- Sidebar user panel (optional) -->
         <div class="user-panel d-flex" style="flex: 0 0 auto;">
             <div class="info">
@@ -11,7 +11,7 @@
 
         <!-- Sidebar Menu -->
         <nav class="mt-2" style="flex: 1 1 auto; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch;">
-          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false" style="height: 100%; margin: 0; padding: 0; overflow-y: auto; overflow-x: hidden;">
+          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false" style="margin: 0; padding: 0;">
             <li class="nav-header">Main</li>
             <li class="nav-item">
               <a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
