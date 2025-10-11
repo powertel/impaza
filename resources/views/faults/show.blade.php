@@ -121,26 +121,44 @@ Fault
             </div>
             <div class="card-body" style="height: 0px; overflow-y: auto">
                 @foreach($remarks as $remark)
-                @if ($remark->fault_id === $fault->id)
                 <div class="callout callout-info">
-                    @if($remark->user)
-                    <h5 class="font-weight-bold">{{ $remark->user->name}}</h5>
-                    @endif
-
+                    <h5 class="font-weight-bold">{{ $remark->name}}</h5>
                     <h4 class="text-muted text-sm">
                         <strong>
-                        Added Remark  {{$remark->created_at->diffForHumans()}}
+                        Added Remark  {{Carbon\Carbon::parse($remark->created_at)->diffForHumans()}}
                        </strong>
                     </h4>
-
+                    <h5 class="font-weight-bold">{{ $remark->activity}}</h5>
                     <p>{{$remark->remark}} </p>
+                    <h4 class="text-muted text-sm">
+                        <strong>
+                        Attachment
+                       </strong>
+                    </h4>
+                    <img src="{{asset('storage/'.$remark->file_path)}}"alt="Not here!" title="Attachment" style="height:100px; width:auto">
                 </div>
-                @endif
                 @endforeach
             </div> 
         </div>
     </div>
- 
+<!-- Modal -->
+<div class="modal fade bd-example-modal-xl"  id="PicModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel"> REMARK ATTACHMENT</h5>
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      <img id="show_it" src=""alt="Not here!" style="height:500px; max-width:100%" title="Attachment">
+      </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+  </div>
+</div>
 </section>
 @endsection
 

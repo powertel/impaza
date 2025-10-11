@@ -14,6 +14,10 @@ use App\Models\AccountManager;
 use App\Models\FaultSection;
 use App\Models\ReasonsForOutage;
 use DB;
+use Illuminate\Support\Facades\Storage;
+ 
+
+
 
 class FaultController extends Controller
 {
@@ -130,6 +134,7 @@ class FaultController extends Controller
      */
     public function store(Request $request)
     {
+      
         //Fault::create($request->all());
 
         DB::beginTransaction();
@@ -142,32 +147,38 @@ class FaultController extends Controller
                 'contactEmail'=> 'required',
                 'address'=> 'required',
                 'accountManager_id'=> 'required',
-                'city_id'=> 'required',
                 'suburb_id'=> 'required',
                 'pop_id'=> 'required',
                 'link_id'=> 'required',
                 'suspectedRfo_id'=> 'required',
                 'serviceType'=> 'required',
                 'remark'=> 'required',
+               'attachment' => 'required|mimes:png,jpg,jpeg|max:2048'
             ]);
-
+           
             $req = $request->all();
         
             //This is where i am creating the fault
             $req['status_id'] = 1;
 			$req['user_id'] =$request->user()->id;
 			$req['fault_ref_number']="PWT".date("YmdHis");
-			
-
 
             $fault = Fault::create($req);
+            if($request->attachment){
+                $path =  $request->file('attachment')->storePublicly('attachments','public');}
+            else { $path = "NULL";}
+            $remarkActivity_id = DB::table('remark_activities')->where('activity','=',$request['activity'])->get('remark_activities.id')->first();
             $remark = Remark::create(
                 [
                     'fault_id'=> $fault->id,
                     'user_id' => $request->user()->id,
                     'remark' => $request['remark'],
+                    'remarkActivity_id'=>$remarkActivity_id->id,
+                    'file_path'=>$path
                 ]
             );
+           
+        
 
             $fault_section = FaultSection::create(
                 [
@@ -225,8 +236,20 @@ class FaultController extends Controller
                 ->get('reasons_for_outages.RFO')
                 ->first();
 
-               $remarks= Remark::all(); 
+          
+           
+               
+               $remarks= DB::table('remarks')
+                    ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
+                    ->leftjoin('users','remarks.user_id','=','users.id')
+                    ->where('remarks.fault_id','=',$id)
+                    ->get(['remarks.id','remarks.created_at','remarks.remark','remarks.file_path','users.name','remark_activities.activity']);
+                
+                
+
+ 
         return view('faults.show',compact('fault','remarks','SuspectedRFO','ConfirmedRFO'));
+
     }
 
     /**
@@ -251,17 +274,23 @@ class FaultController extends Controller
             'account_managers.accountManager','faults.accountManager_id','faults.suspectedRfo_id','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','reasons_for_outages.RFO','faults.link_id','links.link'
             ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
             ->first();
-
+            $remarks= DB::table('remarks')
+            ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
+            ->leftjoin('users','remarks.user_id','=','users.id')
+            ->where('remarks.fault_id','=',$id)
+            ->get(['remarks.id','remarks.created_at','remarks.remark','remarks.file_path','users.name','remark_activities.activity']);
+            
             $cities = City::all();
             $customers = Customer::all();
             $suburbs = Suburb::all();
             $pops = Pop::all();
             $links = Link::all();
-            $remarks= Remark::all();
             $accountManagers = AccountManager::all();
             $suspectedRFO = ReasonsForOutage::all();
 
+
         return view('faults.edit',compact('fault','suspectedRFO','customers','cities','suburbs','pops','links','remarks','accountManagers'));
+
 
     }
 

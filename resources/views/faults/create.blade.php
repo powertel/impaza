@@ -10,9 +10,10 @@
                     <i class="bx bx-x"></i>
                 </button>
             </div>
-            <div class="modal-body p-4">
-                <form id="UF" action="{{ route('faults.store') }}" method="POST">
-                    {{ csrf_field() }}
+
+            <div class="card-body">
+                <form id="UF" action="{{ route('faults.store') }}" method="POST" enctype="multipart/form-data">
+                {{ csrf_field() }}
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="customer" class="form-label">Customer Name </label>
@@ -130,7 +131,7 @@
 
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
-                            <label for="adress" class="form-label">Address</label>
+                            <label for="address" class="form-label">Address</label>
                             <input type="text" class="form-control @error('address') is-invalid @enderror"  placeholder="Address" name="address" value="{{ old('address') }}" >
                         </div>
                         <div class="mb-3 col-md-6">
@@ -149,26 +150,18 @@
                             </select>
                         </div>
                     </div>
-
                     <div class="row g-2">
-
                         <div class="mb-3 col-md-6">
-                            <label for="remarks" class="form-label">Remarks</label>
-                            <textarea name="remark" class="form-control @error('remark') is-invalid @enderror" placeholder="Enter any additional comments" rows="2"  >{{ old('remark') }}</textarea>
+                            <label for="remark" class="form-label">Remarks</label><br>
+                           <!-- <input for="fileToUpload" class="nav-icon fal fa-upload">Attach File With Remark</label> -->
+                            <textarea name="remark" class="form-control @error('remark') is-invalid @enderror" placeholder="Enter any additional comments and Attach Your File Below If Any" rows="2"  >{{ old('remark') }}</textarea>
+                           <input type="hidden" name="activity" value="ON LOGGING">
+                           <input type="file" name="attachment" class="form-control @error('attachment') is-invalid @enderror" id="fileToUpload">
                         </div>
-
                     </div>
+</section>
+@endsection
 
-                    <div class="modal-footer border-top mt-4 pt-3">
-                        <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">
-                            <i class="bx bx-x me-1"></i>Cancel
-                        </button>
-                        <button type="submit" class="btn btn-outline-primary" id="submitBtn" onclick="this.innerHTML = '<i class=\'bx bx-loader-alt bx-spin\'></i> Processing...'">
-                            <i class="bx bx-check me-1"></i>Log Fault
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+@section('scripts')
+    @include('partials.faults')
+@endsection
