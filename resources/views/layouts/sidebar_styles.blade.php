@@ -3,24 +3,30 @@
 :root { --header-height: 56px; }
 
 .main-sidebar {
-  background: #fff;
-  border-right: 2px solid #e6e9f0;
-  box-shadow: 2px 0 6px rgba(16,24,40,.06);
-  position: fixed;
-  top: var(--header-height);
-  left: 0;
-  height: calc(100vh - var(--header-height));
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-  z-index: 1030;
-}
+   background: #fff;
+   border-right: 2px solid #e6e9f0;
+   box-shadow: 2px 0 6px rgba(16,24,40,.06);
+   position: fixed;
+   top: var(--header-height);
+   bottom: 0;
+   left: 0;
+   height: auto;
+   overflow-y: hidden !important; /* make inner .sidebar the scroll container */
+   overflow-x: hidden !important;
+   overscroll-behavior: contain;
+   -webkit-overflow-scrolling: touch;
+   z-index: 1030;
+ }
 .main-sidebar .sidebar {
-  height: auto;
-  padding-top: 0;
-  overflow: visible;
-}
+   height: 100%;
+   padding-top: 0; /* keep brand close to header */
+   display: flex;
+   flex-direction: column;
+   overflow: hidden; /* contain scroll to nav */
+   min-height: 0; /* allow flex children to shrink and scroll */
+ }
+.main-sidebar .sidebar .user-panel { flex: 0 0 auto; }
+.main-sidebar .sidebar nav { flex: 1 1 auto; height: 100%; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
 
 /* Sidebar nav */
 .nav-sidebar .nav-header {
@@ -90,8 +96,22 @@
   .sidebar-mini .content-wrapper, .sidebar-mini .main-footer, .sidebar-mini .main-header { margin-left: 240px; }
 }
 @media (max-width: 991.98px) {
-  /* On small screens let the sidebar use full viewport when opened */
-  .main-sidebar { top: 0; height: 100vh; overflow-y: auto !important; }
-  .main-sidebar .sidebar { height: auto; padding-top: 0; overflow: initial; }
+  /* Keep consistent scrolling and header offset on small screens */
+  .main-sidebar { top: var(--header-height); bottom: 0; height: auto; overflow-y: hidden !important; }
+  .main-sidebar .sidebar {
+     height: 100%;
+     padding-top: 0; /* keep brand close to header */
+     display: flex;
+     flex-direction: column;
+     overflow: hidden; /* contain scroll to nav */
+     min-height: 0; /* allow flex children to shrink and scroll */
+   }
+  .main-sidebar .sidebar nav { flex: 1 1 auto; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
 }
+</style>
+<style>
+/* Ensure the UL inside the nav can scroll within the available height */
+.nav.nav-sidebar { overflow-y: auto; overflow-x: hidden; max-height: 100%; -webkit-overflow-scrolling: touch; width: 100%; }
+.nav-sidebar .nav-link { display: flex; align-items: center; }
+.nav-sidebar .nav-link p { white-space: normal; word-break: break-word; overflow-wrap: anywhere; }
 </style>
