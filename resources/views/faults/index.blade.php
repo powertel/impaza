@@ -28,7 +28,7 @@ Faults
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <table  class="table table-striped" id="faults-list" style="font-size:14px">
+        <table class="table table-striped table-hover align-middle" id="faults-list" style="font-size:14px">
             <thead>
                 <tr>
                    <!-- <th>No.</th>-->
@@ -58,14 +58,21 @@ Faults
 					{{ Carbon\Carbon::parse($fault->created_at)->format('j F Y h:i a') }}
 					</td>
 					<td> {{$fault->reportedBy}}</td>
-                    <td style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? 'none' }};">
-                       <strong>{{$fault->description}}</strong> 
+                    <td class="text-nowrap">
+                        <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: #fff; padding: 0.5rem 0.75rem; font-weight: 600;">
+                            {{$fault->description}}
+                        </span>
                     </td>
-                    <td>
-                        @can('fault-edit')
-                        <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Edit</a>
-                        @endcan
-                        <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
+                    <td class="text-nowrap">
+                        <div class="btn-group btn-group-sm gap-2" role="group" aria-label="Actions">
+                            @can('fault-edit')
+                            <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#editFaultModal-{{ $fault->id }}">
+                                <i class="fas fa-edit me-1"></i> Edit
+                            </button>
+                            @endcan
+                            <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                                <i class="fas fa-eye me-1"></i> View
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -73,6 +80,22 @@ Faults
             </tbody> 
         </table>
         @include('faults.create')
+
+        @foreach ($faults as $fault)
+            @include('faults.edit', [
+                'fault' => $fault,
+                'customers' => $customer,
+                'cities' => $city,
+                'suburbs' => $location,
+                'pops' => $pop,
+                'links' => $link,
+                'accountManagers' => $accountManager,
+                'suspectedRFO' => $suspectedRFO
+            ])
+            @include('faults.show', [
+                'fault' => $fault
+            ])
+        @endforeach
     </div>
     <!-- /.card-body -->
 </div>

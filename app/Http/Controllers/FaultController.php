@@ -43,31 +43,35 @@ class FaultController extends Controller
 				->leftjoin('users as reported_users','faults.user_id','=','reported_users.id')
                 ->leftjoin('statuses','faults.status_id','=','statuses.id')
                 ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
+                ->leftjoin('cities','faults.city_id','=','cities.id')
+                ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
+                ->leftjoin('pops','faults.pop_id','=','pops.id')
                 ->orderBy('faults.created_at', 'desc')
                 ->get([
-				'faults.id',
-				'faults.user_id',
-				'faults.fault_ref_number',
-				'customers.customer',
-				'faults.contactName',
-				'faults.phoneNumber',
-				'faults.contactEmail',
-				'faults.address',
+                'faults.id',
+                'faults.user_id',
+                'faults.fault_ref_number',
+                'customers.customer',
+                'faults.contactName',
+                'faults.phoneNumber',
+                'faults.contactEmail',
+                'faults.address',
                 'account_managers.accountManager',
-				'faults.suspectedRfo_id',
-				'links.link',
-				'statuses.description',
-				'assigned_users.name as assignedTo',
-				'reported_users.name as reportedBy',
-				'faults.serviceType',
-				'faults.serviceAttribute',
-				'faults.faultType',
-				'faults.priorityLevel',
-				'faults.created_at'
-				]);
-				
-				//dd($faults);
-        
+                'faults.suspectedRfo_id',
+                'links.link',
+                'statuses.description',
+                'assigned_users.name as assignedTo',
+                'reported_users.name as reportedBy',
+                'faults.serviceType',
+                'faults.serviceAttribute',
+                'faults.faultType',
+                'faults.priorityLevel',
+                'faults.created_at',
+                'cities.city',
+                'suburbs.suburb',
+                'pops.pop',
+                'reasons_for_outages.RFO as RFO'
+                ]);
         
         $city = City::all();
         $customer = DB::table('customers')
@@ -81,174 +85,6 @@ class FaultController extends Controller
 
         return view('faults.index',compact('faults','customer','city','accountManager','location','link','pop','suspectedRFO'))
         ->with('i');
-		
-		
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        $city = City::all();
-        $customer = DB::table('customers')
-            ->orderBy('customers.customer', 'asc')
-            ->get();
-        $location = Suburb::all();
-        $link = Link::all();
-        $pop = Pop::all();
-        $accountManager = AccountManager::all();
-        $suspectedRFO = ReasonsForOutage::all();
-        return view('faults.create1',compact('customer','city','accountManager','location','link','pop','suspectedRFO'));
-    }
-
-    public function findSuburb($id)
-    {
-        $suburb = Suburb::where('city_id',$id)
-        ->pluck("suburb","id");
-        return response()->json($suburb);
-    }
-
-    public function findPop($id)
-    {
-        $pop = Pop::where('suburb_id',$id)
-        ->pluck("pop","id");
-        return response()->json($pop);
-    }
-
-    public function findLink($id)
-    {
-        $link = Link::where('customer_id',$id)
-        ->where('links.link_status','=',2)
-        ->pluck("link","id");
-        return response()->json($link);
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-      
-        //Fault::create($request->all());
-
-        DB::beginTransaction();
-        try{
-            request()->validate([
-                'city_id' => 'required',
-                'customer_id'=> 'required',
-                'contactName'=> 'required',
-                'phoneNumber'=> 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
-                'contactEmail'=> 'required',
-                'address'=> 'required',
-                'accountManager_id'=> 'required',
-                'suburb_id'=> 'required',
-                'pop_id'=> 'required',
-                'link_id'=> 'required',
-                'suspectedRfo_id'=> 'required',
-                'serviceType'=> 'required',
-                'remark'=> 'required',
-               'attachment' => 'required|mimes:png,jpg,jpeg|max:2048'
-            ]);
-           
-            $req = $request->all();
-        
-            //This is where i am creating the fault
-            $req['status_id'] = 1;
-			$req['user_id'] =$request->user()->id;
-			$req['fault_ref_number']="PWT".date("YmdHis");
-
-            $fault = Fault::create($req);
-            if($request->attachment){
-                $path =  $request->file('attachment')->storePublicly('attachments','public');}
-            else { $path = "NULL";}
-            $remarkActivity_id = DB::table('remark_activities')->where('activity','=',$request['activity'])->get('remark_activities.id')->first();
-            $remark = Remark::create(
-                [
-                    'fault_id'=> $fault->id,
-                    'user_id' => $request->user()->id,
-                    'remark' => $request['remark'],
-                    'remarkActivity_id'=>$remarkActivity_id->id,
-                    'file_path'=>$path
-                ]
-            );
-           
-        
-
-            $fault_section = FaultSection::create(
-                [
-                    'fault_id'=> $fault->id,
-                ]
-            );
-          //  $request->user()->posts()->create($request->only('body'));
-            if($fault && $remark && $fault_section)
-            {
-                DB::commit();
-            }
-            else
-            {
-                DB::rollback();
-            }
-            return redirect()->route('faults.index')
-            ->with('success', 'Fault Created');
-        }
-
-        catch(Exception $ex)
-        {
-            DB::rollback();
-        }
-
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {   
-       
-     
-                       
-        $fault = DB::table('faults')
-                ->leftjoin('customers','faults.customer_id','=','customers.id')
-                ->leftjoin('links','faults.link_id','=','links.id')
-                ->leftjoin('cities','faults.city_id','=','cities.id')
-                ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
-                ->leftjoin('pops','faults.pop_id','=','pops.id')
-                ->leftjoin('remarks','remarks.fault_id','=','faults.id')
-                ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
-                ->where('faults.id','=',$id)
-                ->get(['faults.id','faults.customer_id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
-                'account_managers.accountManager','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.link_id','links.link'
-                ,'faults.serviceType','faults.suspectedRfo_id','faults.confirmedRfo_id','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
-                ->first();
-                $SuspectedRFO = DB::table('reasons_for_outages')->where('reasons_for_outages.id','=',$fault->suspectedRfo_id)
-                ->get('reasons_for_outages.RFO')
-                ->first();
-                $ConfirmedRFO = DB::table('reasons_for_outages')->where('reasons_for_outages.id','=',$fault->confirmedRfo_id)
-                ->get('reasons_for_outages.RFO')
-                ->first();
-
-          
-           
-               
-               $remarks= DB::table('remarks')
-                    ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
-                    ->leftjoin('users','remarks.user_id','=','users.id')
-                    ->where('remarks.fault_id','=',$id)
-                    ->get(['remarks.id','remarks.created_at','remarks.remark','remarks.file_path','users.name','remark_activities.activity']);
-                
-                
-
- 
-        return view('faults.show',compact('fault','remarks','SuspectedRFO','ConfirmedRFO'));
 
     }
 

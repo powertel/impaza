@@ -145,7 +145,7 @@
                     <div class="row g-3">
                         <div class="mb-3 col-md-8">
                             <label for="remark" class="form-label">Remarks</label>
-                            <textarea name="remark" class="form-control @error('remark') is-invalid @enderror" placeholder="Enter any additional comments" rows="3">{{ old('remark') }}</textarea>
+                            <textarea name="remark" required class="form-control @error('remark') is-invalid @enderror" placeholder="Enter any additional comments" rows="3">{{ old('remark') }}</textarea>
                             <input type="hidden" name="activity" value="ON LOGGING">
                         </div>
                         <div class="mb-3 col-md-4">
