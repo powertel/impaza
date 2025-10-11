@@ -17,11 +17,9 @@
   z-index: 1030;
 }
 .main-sidebar .sidebar {
-  height: calc(100vh - 56px);
-  padding-top: 56px; /* account for sticky header */
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
+  height: auto;
+  padding-top: 0; /* remove extra top space so brand aligns near header */
+  overflow: initial;
 }
 
 /* Sidebar nav */
@@ -67,6 +65,12 @@
   color: #1f5cff;
 }
 .nav-sidebar .nav-link.active i.nav-icon { color: #1f5cff; }
+
+/* Tight spacing overrides for brand and nav */
+.user-panel { margin: 0 !important; padding: 8px 14px !important; border-bottom: 1px solid #f0f0f0; }
+.user-panel .info h3 { margin: 0 !important; font-size: 14px; line-height: 1.2; }
+.sidebar .nav.mt-2 { margin-top: 4px !important; }
+
 
 /* Brand area */
 .brand-link { padding: 16px 14px; }
