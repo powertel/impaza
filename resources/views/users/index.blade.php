@@ -14,7 +14,7 @@ Users
         <h3 class="card-title">{{_('Users')}}</h3>
         <div class="card-tools">
             @can('user-create')
-              <a  class="btn btn-primary btn-sm" href="{{ route('users.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create User')}} </a>
+              <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createUserModal"><i class="fas fa-plus-circle"></i>{{_('Create User')}}</button>
             @endcan
 
         </div>
@@ -57,9 +57,9 @@ Users
 
                     <td>
                         <form action="{{ route('users.destroy',$user->id) }}" method="POST">
-                            <a class="btn btn-info btn-sm" style="padding:0px 2px; color:#fff;" href="{{ route('users.show',$user->id) }}">View</a>
+                            <button type="button" class="btn btn-info btn-sm" style="padding:0px 2px; color:#fff;" data-bs-toggle="modal" data-bs-target="#showUserModal-{{ $user->id }}">View</button>
                             @can('user-edit')
-                            <a class="btn btn-primary btn-sm" style="padding:0px 2px; color:#fff;" href="{{ route('users.edit',$user->id) }}">Edit</a>
+                            <button type="button" class="btn btn-primary btn-sm" style="padding:0px 2px; color:#fff;" data-bs-toggle="modal" data-bs-target="#editUserModal-{{ $user->id }}">Edit</button>
                             @endcan
 
                             @csrf
@@ -78,5 +78,16 @@ Users
     <!-- /.card-body -->
 </div>
 
+@include('users.create_modal', ['roles' => $roles, 'department' => $department, 'section' => $section, 'position' => $position, 'user_statuses' => $user_statuses])
+
+@foreach ($users as $user)
+  @include('users.show_modal', ['user' => $user])
+  @include('users.edit_modal', ['user' => $user, 'department' => $department, 'section' => $section, 'position' => $position, 'roles' => $roles, 'user_statuses' => $user_statuses])
+@endforeach
+
 </section>
+@endsection
+
+@section('scripts')
+@include('partials.users')
 @endsection

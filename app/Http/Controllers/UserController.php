@@ -35,7 +35,15 @@ class UserController extends Controller
                 ->leftjoin('positions','users.position_id','=','positions.id')
                 ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
                 ->get(['users.id','users.name','users.email','users.department_id','users.position_id','users.section_id','sections.section','departments.department','positions.position','user_statuses.status_name']);
-        return view('users.index',compact('users'))
+        
+        // Provide supporting datasets for modal-based create/edit in index
+        $roles = Role::pluck('name','name')->all();
+        $department = Department::all();
+        $section = Section::all();
+        $position = Position::all();
+        $user_statuses = UserStatus::all();
+        
+        return view('users.index',compact('users','roles','department','section','position','user_statuses'))
         ->with('i');
     }
     /**
