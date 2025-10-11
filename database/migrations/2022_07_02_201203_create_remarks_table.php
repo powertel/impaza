@@ -18,8 +18,10 @@ return new class extends Migration
             //$table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->unsignedInteger('user_id');
             $table->unsignedInteger('fault_id');
+            $table->unsignedInteger('remarkActivity_id');      
             $table->text('remark');
             $table->timestamps();
+            $table->string('file_path');
             $table->foreign('fault_id')
                     ->references('id')
                     ->on('faults');
