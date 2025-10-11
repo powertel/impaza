@@ -19,7 +19,7 @@ Fault
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="customerName" class="form-label">{Customer Name} </label>
-                            <select class="custom-select" id="customer" name="customer_id">
+                            <select class="form-select" id="customer" name="customer_id">
                                 <option selected="selected" value="{{ $fault->customer_id}}">{{ $fault->customer }}</option>
                                 @foreach($customers as $customer)
                                     @unless ($customer->id ===$fault->customer_id)
@@ -30,7 +30,7 @@ Fault
                         </div>
                         <div class="mb-3 col-md-6">
                             <label for="city" class="form-label">City/Town</label>
-                            <select  class="custom-select" id="city" name="city_id">
+                            <select  class="form-select" id="city" name="city_id">
                                 <option selected="selected" value="{{ $fault->city_id}}">{{ $fault->city }}</option>
                                 @foreach($cities as $city)
                                     @unless($city->id ===$fault->city_id)
@@ -60,7 +60,7 @@ Fault
                         </div>
                         <div class="mb-3 col-md-2">
                             <label for="suburb" class="form-label">Link</label>
-                            <select class="custom-select" id="link" name="link_id">
+                            <select class="form-select" id="link" name="link_id">
                             <option selected="selected" value="{{ $fault->link_id}}">{{ $fault->link}}</option>
                                 @foreach($links as $link)
                                     @if ($link->customer_id === $fault->customer_id)
@@ -73,7 +73,7 @@ Fault
                         </div>
                         <div class="mb-3 col-md-2">
                             <label for="pop" class="form-label">POP</label>
-                            <select  class="custom-select" id="pop" name="pop_id" >
+                            <select  class="form-select" id="pop" name="pop_id" >
                                 <option selected="selected" value="{{ $fault->pop_id}}">{{ $fault->pop }}</option>
                                 @foreach($pops as $pop)
                                     @if($pop->suburb_id === $fault->suburb_id)
@@ -92,7 +92,7 @@ Fault
                         </div>
                         <div class="mb-3 col-md-6">
                             <label for="service" class="form-label">Service Type</label>
-                            <select type="text"  class="custom-select " value="{{$fault->serviceType}}" name="serviceType">
+                            <select type="text"  class="form-select" value="{{$fault->serviceType}}" name="serviceType">
                                 <option selected="selected">{{ $fault->serviceType }}</option>
                                 <option value="VPN"  @if (old('serviceType') == "VPN") {{ 'selected' }} @endif>VPN</option>
                                 <option value="INTERNET" @if (old('serviceType') == "INTERNET") {{ 'selected' }} @endif>INTERNET</option>
@@ -111,7 +111,7 @@ Fault
                         </div>
                         <div class="mb-3 col-md-6">
                             <label for="suspectedRfo" class="form-label">Suspected Reason For Outage</label>
-                            <select class="custom-select" id="suspectedRFO" name="suspectedRfo_id">
+                            <select class="form-select" id="suspectedRFO" name="suspectedRfo_id">
                                 <option selected="selected" value="{{ $fault->suspectedRfo_id}}">{{ $fault->RFO }}</option>
                                 @foreach($suspectedRFO as $suspected_rfo)
                                     @unless ($suspected_rfo->id ===$fault->suspectedRfo_id)
@@ -128,7 +128,7 @@ Fault
                         </div>
                         <div class="mb-3 col-md-6">
                             <label for="accountManager" class="form-label">Account Manager</label>
-                            <select class="custom-select" id="accountManager" name="accountManager_id">
+                            <select class="form-select" id="accountManager" name="accountManager_id">
                                 <option selected="selected" value="{{ $fault->accountManager_id}}">{{ $fault->accountManager }}</option>
                                 @foreach($accountManagers as $acc_manager)
                                     @unless ($acc_manager->id ===$fault->accountManager_id)
@@ -166,25 +166,24 @@ Fault
                         Attachment
                        </strong>
                     </h4>
-                    <img src="{{asset('storage/'.$remark->file_path)}}"alt="Not here!" title="Attachment" style="height:100px; width:auto">
+                    <img src="{{asset('storage/'.$remark->file_path)}}"alt="Not here!" title="Attachment" style="height:100px; width:auto"> 
+                    <button type="button" class="btn btn-outline-secondary btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#PicModal-{{ $remark->id }}">View Attachment</button>
                      <!-- Modal -->
-                   <div class="modal fade bd-example-modal-xl"  id="PicModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
-                     <div class="modal-content">
-                        <div class="modal-header">
-                          <h5 class="modal-title" id="exampleModalLabel"> REMARK ATTACHMENT</h5>
-                          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                   </button>
-                        </div>
-                      <div class="modal-body">
-                      <img id="show_it" alt="Not here!" src="" style="height:500px; max-width:100%" title="Attachment">
-                         </div>
-                        <div class="modal-footer">
-                                </div>
-                             </div>
+                   <div class="modal custom-modal fade" id="PicModal-{{ $remark->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="PicModalLabel-{{ $remark->id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="PicModalLabel-{{ $remark->id }}">Remark Attachment</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                          </div>
+                            <div class="modal-body">
+                                <img src="{{asset('storage/'.$remark->file_path)}}" alt="Not here!" style="height:500px; max-width:100%" title="Attachment">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 @endforeach
             </div>
