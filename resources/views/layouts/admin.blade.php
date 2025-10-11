@@ -95,13 +95,7 @@
         <!-- /.content-wrapper -->
 
     <!-- Main Footer -->
-      <footer class="main-footer">
-        <!-- Default to the left -->
-        <div class="text-center">
-        <strong>Copyright &copy; <?php echo date('Y') ?> <a>POWERTEL</a>.</strong> All rights reserved.
-        </div>
-
-      </footer>
+      @include('layouts.footer')
     </div>
     <!-- ./wrapper -->
 
