@@ -13,8 +13,15 @@ Faults
     <div class="card-header">
         <h3 class="card-title">{{_('Faults')}}</h3>
         <div class="card-tools">
+            
+                <!-- <a  class="btn btn-primary btn-sm" href="{{ route('faults.create') }}"><i class="fas fa-plus-circle"></i>{{_('Log Fault')}} </a> -->
+            
             @can('fault-create')
-                <a  class="btn btn-primary btn-sm" href="{{ route('faults.create') }}"><i class="fas fa-plus-circle"></i>{{_('Log Fault')}} </a>
+                <button type="button" class="btn btn-primary btn-sm" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#createFaultModal">
+                    <i class="fas fa-plus-circle"></i> Log Fault
+                </button>
             @endcan
             
         </div>
@@ -65,8 +72,14 @@ Faults
                 @endforeach
             </tbody> 
         </table>
+        @include('faults.create')
     </div>
     <!-- /.card-body -->
 </div>
 </section>
 @endsection
+
+@section('scripts')
+    @include('partials.faults')
+@endsection
+

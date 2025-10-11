@@ -1,16 +1,19 @@
-<!-- Add Programme Modal -->
-<div class="modal custom-modal fade" id="createFaultModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="createFaultModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createFaultModalLabel">
-                    <i class="bx bx-building me-2"></i>Add New Fault
-                </h5>
-                <button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close">
-                    <i class="bx bx-x"></i>
-                </button>
+@extends('layouts.admin')
+
+@section('title')
+Fault
+@endsection
+@include('partials.css')
+@section('content')
+<section class="content">
+    <div class="col d-flex justify-content-center">
+        <div class="card w-100">
+            <div class="card-header">
+                <h3 class="card-title">
+                    {{_('Log Fault')}}
+                </h3>
             </div>
-            <div class="modal-body p-4">
+            <div class="card-body">
                 <form id="UF" action="{{ route('faults.store') }}" method="POST">
                     {{ csrf_field() }}
                     <div class="row g-2">
@@ -159,16 +162,18 @@
 
                     </div>
 
-                    <div class="modal-footer border-top mt-4 pt-3">
-                        <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">
-                            <i class="bx bx-x me-1"></i>Cancel
-                        </button>
-                        <button type="submit" class="btn btn-outline-primary" id="submitBtn" onclick="this.innerHTML = '<i class=\'bx bx-loader-alt bx-spin\'></i> Processing...'">
-                            <i class="bx bx-check me-1"></i>Log Fault
-                        </button>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-success btn-sm" onclick="return inlineSave()">{{ __('Save') }}</button>
+                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('faults.index') }}">{{ __('Cancel') }}</a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-</div>
+
+</section>
+@endsection
+
+@section('scripts')
+    @include('partials.faults')
+@endsection

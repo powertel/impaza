@@ -49,7 +49,7 @@ class FaultController extends Controller
 				'faults.phoneNumber',
 				'faults.contactEmail',
 				'faults.address',
-        'account_managers.accountManager',
+                'account_managers.accountManager',
 				'faults.suspectedRfo_id',
 				'links.link',
 				'statuses.description',
@@ -63,8 +63,19 @@ class FaultController extends Controller
 				]);
 				
 				//dd($faults);
+        
+        
+        $city = City::all();
+        $customer = DB::table('customers')
+            ->orderBy('customers.customer', 'asc')
+            ->get();
+        $location = Suburb::all();
+        $link = Link::all();
+        $pop = Pop::all();
+        $accountManager = AccountManager::all();
+        $suspectedRFO = ReasonsForOutage::all();
 
-        return view('faults.index',compact('faults'))
+        return view('faults.index',compact('faults','customer','city','accountManager','location','link','pop','suspectedRFO'))
         ->with('i');
 		
 		
@@ -86,7 +97,7 @@ class FaultController extends Controller
         $pop = Pop::all();
         $accountManager = AccountManager::all();
         $suspectedRFO = ReasonsForOutage::all();
-        return view('faults.create',compact('customer','city','accountManager','location','link','pop','suspectedRFO'));
+        return view('faults.create1',compact('customer','city','accountManager','location','link','pop','suspectedRFO'));
     }
 
     public function findSuburb($id)
