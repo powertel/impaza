@@ -44,14 +44,14 @@
                     <div class="row g-2">
                         <div class="mb-3 col-md-2">
                             <label for="suburb-{{ $fault->id }}" class="form-label">Location</label>
-                            <select class="form-select suburb-select" id="suburb-{{ $fault->id }}" name="suburb_id">
+                            <select class="form-select suburb-select" id="suburb-{{ $fault->id }}" name="suburb_id" data-selected="{{ $fault->suburb_id ?? '' }}">
                                 @isset($fault->suburb_id)
                                     <option selected="selected" value="{{ $fault->suburb_id }}">{{ $fault->suburb ?? 'Current Suburb' }}</option>
                                 @else
                                     <option selected disabled>Select Suburb</option>
                                 @endisset
                                 @foreach($suburbs as $suburb)
-                                    @if (isset($fault->city_id) && $suburb->city_id === $fault->city_id)
+                                    @if (isset($fault->city_id) && $suburb->city_id == $fault->city_id)
                                         <option value="{{ $suburb->id }}" @if(isset($fault->suburb_id) && $fault->suburb_id == $suburb->id) selected @endif>{{ $suburb->suburb }}</option>
                                     @endif
                                 @endforeach
@@ -59,14 +59,14 @@
                         </div>
                         <div class="mb-3 col-md-2">
                             <label for="link-{{ $fault->id }}" class="form-label">Link</label>
-                            <select class="form-select link-select" id="link-{{ $fault->id }}" name="link_id">
+                            <select class="form-select link-select" id="link-{{ $fault->id }}" name="link_id" data-selected="{{ $fault->link_id ?? '' }}">
                                 @isset($fault->link_id)
                                     <option selected="selected" value="{{ $fault->link_id }}">{{ $fault->link ?? 'Current Link' }}</option>
                                 @else
                                     <option selected disabled>Select Link</option>
                                 @endisset
                                 @foreach($links as $l)
-                                    @if (isset($fault->customer_id) && $l->customer_id === $fault->customer_id)
+                                    @if (isset($fault->customer_id) && $l->customer_id == $fault->customer_id)
                                         <option value="{{ $l->id }}" @if(isset($fault->link_id) && $fault->link_id == $l->id) selected @endif>{{ $l->link }}</option>
                                     @endif
                                 @endforeach
@@ -74,14 +74,14 @@
                         </div>
                         <div class="mb-3 col-md-2">
                             <label for="pop-{{ $fault->id }}" class="form-label">POP</label>
-                            <select class="form-select pop-select" id="pop-{{ $fault->id }}" name="pop_id">
+                            <select class="form-select pop-select" id="pop-{{ $fault->id }}" name="pop_id" data-selected="{{ $fault->pop_id ?? '' }}">
                                 @isset($fault->pop_id)
                                     <option selected="selected" value="{{ $fault->pop_id }}">{{ $fault->pop ?? 'Current Pop' }}</option>
                                 @else
                                     <option selected disabled>Select Pop</option>
                                 @endisset
                                 @foreach($pops as $p)
-                                    @if (isset($fault->suburb_id) && $p->suburb_id === $fault->suburb_id)
+                                    @if (isset($fault->suburb_id) && $p->suburb_id == $fault->suburb_id)
                                         <option value="{{ $p->id }}" @if(isset($fault->pop_id) && $fault->pop_id == $p->id) selected @endif>{{ $p->pop }}</option>
                                     @endif
                                 @endforeach
