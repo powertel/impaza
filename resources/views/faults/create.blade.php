@@ -159,9 +159,10 @@
                            <input type="file" name="attachment" class="form-control @error('attachment') is-invalid @enderror" id="fileToUpload">
                         </div>
                     </div>
-</section>
-@endsection
+</form>
+            </div>
+        </div>
+    </div>
+</div>
 
-@section('scripts')
-    @include('partials.faults')
-@endsection
+<!-- Removed stray Blade section directives from partial to prevent InvalidArgumentException -->

@@ -17,32 +17,82 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
     <style>
+      /* Global compact typography to match SmartHR-like UI */
+      html, body { font-size: 12px; color: #111827; }
+      .content-wrapper { background: #f5f7fb; }
+
+      /* Navbar */
+      .main-header .navbar-nav .nav-link { font-size: 12px; padding: 6px 10px; }
+      .main-header .navbar-nav .nav-link i { font-size: 0.9rem; }
+
       /* Sidebar modern + responsive font scaling */
+      .main-header { position: sticky; top: 0; z-index: 1040; border-bottom: 1px solid #e6e9f0; box-shadow: 0 1px 2px rgba(16,24,40,.04); }
+      :root { --header-height: 56px; }
       .main-sidebar {
         background: #fff;
-        border-right: 1px solid #eee;
+        border-right: 2px solid #e6e9f0;
+        box-shadow: 2px 0 6px rgba(16,24,40,.06);
+        position: fixed;
+        top: var(--header-height);
+        left: 0;
+        height: calc(100vh - var(--header-height));
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+        z-index: 1030;
+      }
+      .main-sidebar .sidebar {
+        height: auto;
+        padding-top: 0;
+        overflow: initial;
+      }
+      .main-sidebar .sidebar {
+        height: calc(100vh - 56px);
+        padding-top: 56px; /* account for sticky header */
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
       }
       .nav-sidebar .nav-header {
-        font-size: clamp(11px, 1.2vw, 12px);
-        color: #9aa0ac;
+        font-size: clamp(10px, 1.1vw, 11px);
+        color:rgb(6, 6, 6);
         font-weight: 700;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        padding: 12px 18px 6px;
-        margin-top: 8px;
+        padding: 10px 16px 6px;
+        margin-top: 6px;
+      }
+      .nav-sidebar .nav-link:hover {
+        background-color: #f8f9fb;
+        color: #111827;
+      }
+
+      @media (min-width: 992px) {
+        .sidebar-mini .main-sidebar { width: 240px; }
+        .sidebar-mini .content-wrapper, .sidebar-mini .main-footer, .sidebar-mini .main-header { margin-left: 240px; }
+      }
+
+      .main-header { border-bottom: 1px solid #e6e9f0; box-shadow: 0 1px 2px rgba(16,24,40,.04); }
+
+      @media (max-width: 991.98px) {
+        .sidebar-mini .main-header { margin-left: 0; }
+        /* On small screens let the sidebar use full viewport when opened */
+        .main-sidebar { top: 0; height: 100vh; overflow-y: auto !important; }
+        .main-sidebar .sidebar { height: auto; padding-top: 0; overflow: initial; }
       }
       .nav-sidebar .nav-link {
-        font-size: clamp(12px, 1.5vw, 14px);
-        color: #374151;
+        font-size: clamp(11px, 1.3vw, 13px);
+        color:rgb(8, 8, 8);
         border-radius: 8px;
-        padding: 8px 12px;
+        padding: 7px 11px;
         margin: 2px 8px;
         transition: background-color .2s ease, color .2s ease, padding .2s ease;
       }
       .nav-sidebar .nav-link i.nav-icon {
-        font-size: 1rem; /* responsive icon sizing can scale with font-size */
-        color: #9aa0ac;
-        margin-right: 10px;
+        font-size: 0.9rem;
+        color:rgb(10, 10, 10);
+        margin-right: 8px;
       }
       .nav-sidebar .nav-link:hover {
         background-color: #f8f9fb;
@@ -52,15 +102,14 @@
         background-color: #eef4ff;
         color: #1f5cff;
       }
-      /* Active icon color tweak */
       .nav-sidebar .nav-link.active i.nav-icon { color: #1f5cff; }
 
       /* Brand area spacing for a cleaner look */
-      .brand-link { padding: 18px 16px; }
+      .brand-link { padding: 16px 14px; }
       .brand-link .brand-image { opacity: 0.9; }
 
       /* Reduce general sidebar font a bit while respecting accessibility */
-      .main-sidebar, .sidebar { font-size: clamp(12px, 1.4vw, 14px); }
+      .main-sidebar, .sidebar { font-size: clamp(11px, 1.3vw, 13px); }
 
       /* Compact divider style for headers */
       .nav-sidebar .nav-header:after {
@@ -71,20 +120,44 @@
         margin: 6px 0 8px;
       }
 
-      /* Remove left border accent from active link (AdminLTE default) if present */
       .nav-sidebar .nav-link.active, .nav-sidebar .nav-link.active:focus {
         box-shadow: none;
       }
 
-      /* Responsive sidebar width slightly slimmer on large screens */
       @media (min-width: 1280px) {
         .sidebar-mini .main-sidebar { width: 240px; }
         .sidebar-mini .content-wrapper, .sidebar-mini .main-footer, .sidebar-mini .main-header { margin-left: 240px; }
       }
+
+      /* Cards and content elements */
+      .card { border: 1px solid #eee; border-radius: 10px; box-shadow: 0 1px 2px rgba(16,24,40,.04); }
+      .card-body { padding: 14px; }
+      .card-title { font-size: 14px; font-weight: 700; color: #111827; }
+
+      /* Tables */
+      .table { font-size: 12px; }
+      .table thead th { font-size: 11px; color: #6b7280; font-weight: 700; }
+      .table tbody td { font-size: 12px; }
+
+      /* Breadcrumbs */
+      .breadcrumb { font-size: 11px; }
+
+      /* Buttons */
+      .btn { font-size: 12px; }
+      .btn-sm { font-size: 11px; padding: 6px 10px; }
+
+      /* Global icon sizing (Font Awesome) */
+      .fa, .fas, .far, .fab { font-size: 0.9rem; }
+
+      /* DataTables tweaks */
+      .dataTables_wrapper .dataTables_length, 
+      .dataTables_wrapper .dataTables_filter,
+      .dataTables_wrapper .dataTables_info,
+      .dataTables_wrapper .dataTables_paginate { font-size: 12px; }
     </style>
 
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous"> -->
 
     <!-- Popup -->
    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha512-3gJwYpMe3QewGELv8k/BX9vcqhryRdzRMxVfq6ngyWXwo03GFEzjsUm8Q7RZcHPHksttq7/GFoxjCVUjkjvPdw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -428,16 +501,25 @@
 
         <script src="{{ asset('js/app.js') }}"></script>
 
-        <script>
-
-        $(function () {
-            $('table').DataTable({
-                processing: true,
-                serverSide: false
-            });
-        });
-
-        </script>
+        <style>
+          /* Heading scale override for compact UI */
+          .h1, h1 { font-size: 1.6rem; }
+          .h2, h2 { font-size: 1.4rem; }
+          .h3, h3 { font-size: 1.25rem; }
+          .h4, h4 { font-size: 1.1rem; }
+          .h5, h5 { font-size: 1rem; }
+          .h6, h6 { font-size: 0.9rem; }
+      
+          /* Compact table paddings */
+          .table thead th, .table tbody td { padding: 8px 10px; }
+      
+          /* Compact stat icons inside cards */
+          .card .rounded-circle { width: 32px; height: 32px; }
+      
+          /* Slightly smaller global icon size */
+          .fa, .fas, .far, .fab { font-size: 0.85rem; }
+        </style>
+        
         <script>
             window.addEventListener('load', function()
 {
@@ -503,3 +585,16 @@ $(document).ready(function() {
 @endsection
 
 </html>
+
+<script>
+  (function(){
+    function setHeaderHeightVar(){
+      var header = document.querySelector('.main-header');
+      var h = header ? header.offsetHeight : 56;
+      document.documentElement.style.setProperty('--header-height', h + 'px');
+    }
+    window.addEventListener('resize', setHeaderHeightVar);
+    document.addEventListener('DOMContentLoaded', setHeaderHeightVar);
+    setHeaderHeightVar();
+  })();
+</script>
