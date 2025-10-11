@@ -26,7 +26,8 @@
    min-height: 0; /* allow flex children to shrink and scroll */
  }
 .main-sidebar .sidebar .user-panel { flex: 0 0 auto; }
-.main-sidebar .sidebar nav { flex: 1 1 auto; height: 100%; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+.main-sidebar .sidebar nav { flex: 1 1 auto; height: 100%; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; scrollbar-width: none; /* Firefox */ }
+.main-sidebar .sidebar nav::-webkit-scrollbar { width: 0; height: 0; }
 
 /* Sidebar nav */
 .nav-sidebar .nav-header {
@@ -106,7 +107,8 @@
      overflow: hidden; /* contain scroll to nav */
      min-height: 0; /* allow flex children to shrink and scroll */
    }
-  .main-sidebar .sidebar nav { flex: 1 1 auto; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+  .main-sidebar .sidebar nav { flex: 1 1 auto; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; scrollbar-width: none; /* Firefox */ }
+  .main-sidebar .sidebar nav::-webkit-scrollbar { width: 0; height: 0; }
 }
 
 /* Active/selected menu item: force text and icons to white */
@@ -121,10 +123,51 @@
 .nav-treeview .nav-link.active i { color: #fff !important; }
 
 /* Ensure the UL inside the nav can scroll within the available height */
-.nav.nav-sidebar { overflow-y: auto; overflow-x: hidden; max-height: 100%; -webkit-overflow-scrolling: touch; width: 100%; }
+.nav.nav-sidebar { overflow: visible; width: 100%; }
 .nav-sidebar .nav-link { display: flex; align-items: center; }
 .nav-sidebar .nav-link p { white-space: normal; word-break: break-word; overflow-wrap: anywhere; }
 
 /* Contain scroll within the sidebar and make it smooth */
-.main-sidebar .sidebar nav, .nav.nav-sidebar { overscroll-behavior: contain; scroll-behavior: smooth; }
+.main-sidebar .sidebar nav { overscroll-behavior: contain; scroll-behavior: smooth; }
 </style>
+
+<script>
+// Prevent scroll chaining: when scrolling inside the sidebar, do not scroll the main page
+// Attach handlers to the whole sidebar and its internal scroll container
+document.addEventListener('DOMContentLoaded', function () {
+  var scrollEl = document.querySelector('.main-sidebar .sidebar nav');
+  if (!scrollEl) { return; }
+
+  function atTop(el) { return el.scrollTop <= 0; }
+  function atBottom(el) { return el.scrollTop + el.clientHeight >= el.scrollHeight; }
+
+  // Natural wheel scroll inside sidebar; prevent page scroll only at boundaries
+  function handleWheel(e, delta) {
+    const top = atTop(scrollEl);
+    const bottom = atBottom(scrollEl);
+    if ((delta < 0 && top) || (delta > 0 && bottom)) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    // Otherwise let the browser perform the default scroll behavior
+  }
+
+  scrollEl.addEventListener('wheel', function (e) { handleWheel(e, e.deltaY); }, { passive: false });
+  // Legacy event for older browsers
+  scrollEl.addEventListener('mousewheel', function (e) { handleWheel(e, -e.wheelDelta); }, { passive: false });
+
+  // Touch: use boundary logic to prevent page scroll chaining
+  let startY = 0;
+  scrollEl.addEventListener('touchstart', function (e) { if (e.touches && e.touches.length) { startY = e.touches[0].clientY; } }, { passive: true });
+  scrollEl.addEventListener('touchmove', function (e) {
+    if (!e.touches || !e.touches.length) { return; }
+    const dy = startY - e.touches[0].clientY; // positive when scrolling down
+    const top = atTop(scrollEl);
+    const bottom = atBottom(scrollEl);
+    if ((dy < 0 && top) || (dy > 0 && bottom)) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, { passive: false });
+});
+</script>
