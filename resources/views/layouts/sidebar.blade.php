@@ -1,9 +1,9 @@
 <!-- Main Sidebar Container -->
-<aside class="main-sidebar sidebar-dark-primary elevation-4" style="background:#fff;border-right:1px solid #eee;">
+<aside class="main-sidebar sidebar-light-primary elevation-4" style="background:#fff;border-right:1px solid #eee;">
     <!-- Sidebar -->
     <div class="sidebar">
         <!-- Sidebar user panel (optional) -->
-        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+        <div class="user-panel d-flex">
             <div class="info">
                 <h3 class="d-block" style="color: orange;">IMPAZAMON</h3>
             </div>
