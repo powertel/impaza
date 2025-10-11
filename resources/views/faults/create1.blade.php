@@ -1,19 +1,21 @@
-<!-- Add Programme Modal -->
-<div class="modal custom-modal fade" id="createFaultModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="createFaultModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createFaultModalLabel">
-                    <i class="bx bx-building me-2"></i>Add New Fault
-                </h5>
-                <button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close">
-                    <i class="bx bx-x"></i>
-                </button>
-            </div>
+@extends('layouts.admin')
 
+@section('title')
+Fault
+@endsection
+@include('partials.css')
+@section('content')
+<section class="content">
+    <div class="col d-flex justify-content-center">
+        <div class="card w-100">
+            <div class="card-header">
+                <h3 class="card-title">
+                    {{_('Log Fault')}}
+                </h3>
+            </div>
             <div class="card-body">
-                <form id="UF" action="{{ route('faults.store') }}" method="POST" enctype="multipart/form-data">
-                {{ csrf_field() }}
+                <form id="UF" action="{{ route('faults.store') }}" method="POST">
+                    {{ csrf_field() }}
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
                             <label for="customer" class="form-label">Customer Name </label>
@@ -131,7 +133,7 @@
 
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
-                            <label for="address" class="form-label">Address</label>
+                            <label for="adress" class="form-label">Address</label>
                             <input type="text" class="form-control @error('address') is-invalid @enderror"  placeholder="Address" name="address" value="{{ old('address') }}" >
                         </div>
                         <div class="mb-3 col-md-6">
@@ -150,15 +152,25 @@
                             </select>
                         </div>
                     </div>
+
                     <div class="row g-2">
+
                         <div class="mb-3 col-md-6">
-                            <label for="remark" class="form-label">Remarks</label><br>
-                           <!-- <input for="fileToUpload" class="nav-icon fal fa-upload">Attach File With Remark</label> -->
-                            <textarea name="remark" class="form-control @error('remark') is-invalid @enderror" placeholder="Enter any additional comments and Attach Your File Below If Any" rows="2"  >{{ old('remark') }}</textarea>
-                           <input type="hidden" name="activity" value="ON LOGGING">
-                           <input type="file" name="attachment" class="form-control @error('attachment') is-invalid @enderror" id="fileToUpload">
+                            <label for="remarks" class="form-label">Remarks</label>
+                            <textarea name="remark" class="form-control @error('remark') is-invalid @enderror" placeholder="Enter any additional comments" rows="2"  >{{ old('remark') }}</textarea>
                         </div>
+
                     </div>
+
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-success btn-sm" onclick="return inlineSave()">{{ __('Save') }}</button>
+                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('faults.index') }}">{{ __('Cancel') }}</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </section>
 @endsection
 
