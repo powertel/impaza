@@ -21,7 +21,18 @@ Stores
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <table  class="table table-striped" id="material" style="font-size:14px">
+        <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+            <label for="storesPageSize" class="mb-0 small text-muted">Show</label>
+            <select id="storesPageSize" class="form-select form-select-sm" style="width:auto;">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="all">All</option>
+            </select>
+            <input id="storesSearch" type="search" class="form-control form-control-sm" placeholder="Search..." style="max-width:240px;">
+        </div>
+        <table  class="table table-striped js-paginated-table" id="material" style="font-size:14px" data-page-size="20" data-page-size-control="#storesPageSize" data-pager="#storesPager" data-search="#storesSearch">
             <thead>
                 <tr>
                     <th>Fault Ref. No.</th>
@@ -55,6 +66,7 @@ Stores
                 @endforeach
             </tbody>
         </table>
+        <div id="storesPager" class="mt-2"></div>
     </div>
     <!-- /.card-body -->
 </div>
