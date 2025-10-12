@@ -3,7 +3,13 @@
 @section('title')
 Faults
 @endsection
+
+@section('Faults')
+Faults
+@endsection
+
 @include('partials.css')
+
 @section('content')
 <section class="content">
 
