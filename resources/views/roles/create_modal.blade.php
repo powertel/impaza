@@ -24,12 +24,16 @@
               </div>
               <input type="text" class="form-control form-control-sm permission-search" placeholder="Search permissions...">
               <div class="border rounded p-2 mt-2 permission-list" style="max-height: 400px; overflow: auto;">
-                @foreach($permission as $value)
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="permission[]" id="perm_create_{{ $value->id }}" value="{{ $value->id }}">
-                    <label class="form-check-label" for="perm_create_{{ $value->id }}"><strong>{{ $value->name }}</strong></label>
-                  </div>
-                @endforeach
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-2">
+                  @foreach($permission as $value)
+                    <div class="col permission-item">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="permission[]" id="perm_create_{{ $value->id }}" value="{{ $value->id }}">
+                        <label class="form-check-label" for="perm_create_{{ $value->id }}"><strong>{{ $value->name }}</strong></label>
+                      </div>
+                    </div>
+                  @endforeach
+                </div>
               </div>
             </div>
           </div>
