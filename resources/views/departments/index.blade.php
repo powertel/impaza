@@ -38,7 +38,7 @@ Departments
             </div>
 
             <table id="departmentsTable" class="table table-hover align-middle js-paginated-table" data-page-size="20" data-page-size-control="#departmentsPageSize" data-pager="#departmentsPager" data-search="#departmentsSearch">
-                <thead>
+                <thead class="thead-light">
                     <tr>
                         <th>No.</th>
                         <th>Department</th>

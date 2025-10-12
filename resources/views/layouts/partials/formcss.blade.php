@@ -726,5 +726,4 @@
         font-style: italic; /* Placeholder text style */
         opacity: 0.7; /* Placeholder transparency */
     }
-
 </style>
