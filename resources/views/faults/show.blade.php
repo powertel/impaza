@@ -1,167 +1,166 @@
-@extends('layouts.admin')
-
-@section('title')
-Fault
-@endsection
-@include('partials.css')
-@section('content')
-
-<section class="content">
-    <div class="col d-flex justify-content-center">
-        <div class="card w-100">
-            <div class="card-header">
-                <h3 class="card-title">
-                  {{_('View Details')}}
-                </h3>
+<!-- Show Fault Modal (Modernized) -->
+<div class="modal custom-modal fade" id="showFaultModal-{{ $fault->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="showFaultModalLabel-{{ $fault->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0">
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-primary me-2"><i class="fas fa-eye"></i></span>
+                    <h5 class="modal-title mb-0" id="showFaultModalLabel-{{ $fault->id }}">View Fault</h5>
+                </div>
+                <button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="card-body">
-                <div class="row g-2">
-                    <div class="col">
-                        <strong>CUSTOMER</strong>
-                        <p class="text-muted">{{ $fault->customer }}</p>
+
+            <div class="modal-body pt-0">
+                <div class="row g-4">
+                    <!-- Fault Details -->
+                    <div class="col-lg-6">
+                        <div class="card border-0 shadow-sm h-100 rounded-3">
+                            <div class="card-header bg-transparent border-0">
+                                <h6 class="mb-0 text-secondary"><i class="fas fa-info-circle me-2 text-primary"></i>Fault Details</h6>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <small class="text-muted">Customer Name</small>
+                                        <div class="fw-semibold">{{ $fault->customer }}</div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <small class="text-muted">City/Town</small>
+                                        <div class="fw-semibold">{{ $fault->city }}</div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <small class="text-muted">Location</small>
+                                        <div class="fw-semibold">{{ $fault->suburb }}</div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <small class="text-muted">Link</small>
+                                        <div class="fw-semibold">{{ $fault->link }}</div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <small class="text-muted">POP</small>
+                                        <div class="fw-semibold">{{ $fault->pop }}</div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <small class="text-muted">Service Type</small>
+                                        <div class="fw-semibold"><span class="badge bg-secondary">{{ $fault->serviceType }}</span></div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <small class="text-muted">Address</small>
+                                        <div class="fw-semibold">{{ $fault->address }}</div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <small class="text-muted">Account Manager</small>
+                                        <div class="fw-semibold">{{ $fault->accountManager }}</div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
 
-                    <div class="col">
-                        <strong>CITY/TOWN</strong>
-                        <p class="text-muted">{{ $fault->city }}</p>
+                    <!-- Contact & RFO -->
+                    <div class="col-lg-6">
+                        <div class="card border-0 shadow-sm h-100 rounded-3">
+                            <div class="card-header bg-transparent border-0">
+                                <h6 class="mb-0 text-secondary"><i class="fas fa-user-circle me-2 text-primary"></i>Contact & RFO</h6>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <small class="text-muted">Contact Name</small>
+                                        <div class="fw-semibold">{{ $fault->contactName }}</div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <small class="text-muted">Phone Number</small>
+                                        <div class="fw-semibold">{{ $fault->phoneNumber }}</div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <small class="text-muted">Email Address</small>
+                                        <div class="fw-semibold">{{ $fault->contactEmail }}</div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <small class="text-muted">Suspected RFO</small>
+                                        <div class="fw-semibold">{{ $fault->RFO }}</div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-                <hr>
-                <div class="row g-2">
-                    <div class="col-md-6">
-                        <strong>CONTACT NAME</strong>
-                        <p class="text-muted">{{ $fault->contactName }}</p>
-                    </div>
 
-                    <div class="col-md-2">
-                        <strong>LOCATION</strong>
-                        <p class="text-muted">{{ $fault->suburb }}</p>
+                @if(isset($remarks) && count($remarks))
+                <div class="mt-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-info me-2"><i class="fas fa-comment-dots"></i></span>
+                        <h6 class="mb-0 text-secondary">Remarks</h6>
                     </div>
-                    <div class="col-md-2">
-                        <strong>LINK</strong>
-                        <p class="text-muted">{{ $fault->link }}</p>
-                    </div>
-                    <div class="col-md-2">
-                        <strong>POP</strong>
-                        <p class="text-muted">{{ $fault->pop }}</p>
-                    </div>
-                </div>
-                <hr>
-                <div class="row g-2">
-                    <div class="col">
-                        <strong>PHONE NUMBER</strong>
-                        <p class="text-muted">{{ $fault->phoneNumber }}</p>
-                    </div>
+                    <div class="row g-3">
+                        @foreach($remarks as $remark)
+                            <div class="col-md-6">
+                                <div class="card border-0 shadow-sm h-100 rounded-3">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="mb-1 fw-semibold">{{ $remark->name }}</h6>
+                                                <small class="text-muted">Added {{ Carbon\Carbon::parse($remark->created_at)->diffForHumans() }}</small>
+                                            </div>
+                                        </div>
+                                        <p class="mt-2 mb-0">{{ $remark->remark }}</p>
+                                        @if($remark->file_path)
+                                            <div class="mt-3">
+                                                <img src="{{ asset('storage/'.$remark->file_path) }}" alt="Attachment" title="Attachment" class="img-fluid rounded" style="max-height: 220px; object-fit: cover;">
+                                                <button type="button" class="btn btn-outline-secondary btn-sm mt-2" data-bs-toggle="modal" data-bs-target="#PicModal-{{ $remark->id }}">View Attachment</button>
+                                            </div>
 
-                    <div class="col">
-                        <strong>SERVICE TYPE</strong>
-                        <p class="text-muted">{{ $fault->serviceType }}</p>
+                                            <!-- Remark Attachment Modal -->
+                                            <div class="modal custom-modal fade" id="PicModal-{{ $remark->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="PicModalLabel-{{ $remark->id }}" aria-hidden="true">
+                                                <div class="modal-dialog modal-xl modal-dialog-centered">
+                                                    <div class="modal-content rounded-4 border-0 shadow-lg">
+                                                        <div class="modal-header border-0">
+                                                            <h5 class="modal-title" id="PicModalLabel-{{ $remark->id }}"><i class="fas fa-paperclip me-2"></i>Remark Attachment</h5>
+                                                            <button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <img src="{{ asset('storage/'.$remark->file_path) }}" alt="Attachment" title="Attachment" class="img-fluid rounded">
+                                                        </div>
+                                                        <div class="modal-footer border-0">
+                                                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
-                <hr>
-                <div class="row g-2">
-                    <div class="col">
-                        <strong>EMAIL ADDRESS</strong>
-                        <p class="text-muted">{{ $fault->contactEmail }}</p>
-                    </div>
-
-                    <div class="col">
-                        <strong>SUSPECTED REASON FOR OUTAGE</strong>
-                        <p class="text-muted">{{ $SuspectedRFO->RFO}}</p>
-                    </div>
-                </div>
-                <hr>
-                <div class="row g-2">
-                    <div class="col">
-                        <strong>PHYSICAL ADDRESS</strong>
-                        <p class="text-muted">{{ $fault->address }}</p>
-                    </div>
-
-                    <div class="col">
-                        <strong>ACCOUNT MANAGER</strong>
-                        <p class="text-muted">{{ $fault->accountManager }}</p>
-                    </div>
-                </div>
-                <hr>
-
-                <div class="row g-2">
-                    <div class="col">
-                        <strong>CONFIRMED REASON FOR OUTAGE</strong>
-                        <p class="text-muted">{{ $ConfirmedRFO->RFO}}</p>
-                    </div>
-
-                    <div class="col">
-                        <strong>FAULT TYPE</strong>
-                        <p class="text-muted">{{ $fault->faultType }}</p>
-                    </div>
-                </div>
-                <hr>
-                <div class="row g-2">
-                    <div class="col">
-                        <strong>PRIORITY LEVEL</strong>
-                        <p class="text-muted">{{ $fault->priorityLevel }}</p>
-                    </div>
-                </div>
-                <hr>
-
-                <div class="card-footer">
-                    @can('fault-assessment')
-                        <a type="button" class="btn btn-primary btn-sm" href="{{ route('assessments.edit',$fault->id) }}">Assess</a>
-                    @endcan
-                    @can('assign-fault')
-                    <a type="button" class="btn btn-Success btn-sm" href="{{ route('assign.edit',$fault->id) }}">Assign</a>
-                    @endcan
-                    <a type="button" class="btn btn-danger btn-sm" href="{{ url()->previous() }}">{{ __('Close') }}</a>
-                </div>
-            </div> 
-        </div>
-        <div class="card  w-50">
-            <div class="card-header">
-                <h3 class="card-title">{{_('Remarks')}}</h3>
+                @endif
             </div>
-            <div class="card-body" style="height: 0px; overflow-y: auto">
-                @foreach($remarks as $remark)
-                <div class="callout callout-info">
-                    <h5 class="font-weight-bold">{{ $remark->name}}</h5>
-                    <h4 class="text-muted text-sm">
-                        <strong>
-                        Added Remark  {{Carbon\Carbon::parse($remark->created_at)->diffForHumans()}}
-                       </strong>
-                    </h4>
-                    <h5 class="font-weight-bold">{{ $remark->activity}}</h5>
-                    <p>{{$remark->remark}} </p>
-                    <h4 class="text-muted text-sm">
-                        <strong>
-                        Attachment
-                       </strong>
-                    </h4>
-                    <img src="{{asset('storage/'.$remark->file_path)}}"alt="Not here!" title="Attachment" style="height:100px; width:auto">
-                </div>
-                @endforeach
-            </div> 
+
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Close</button>
+            </div>
         </div>
     </div>
-<!-- Modal -->
-<div class="modal fade bd-example-modal-xl"  id="PicModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-<div class="modal-dialog modal-dialog-centered modal-xl" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel"> REMARK ATTACHMENT</h5>
-        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-      <img id="show_it" src=""alt="Not here!" style="height:500px; max-width:100%" title="Attachment">
-      </div>
-      <div class="modal-footer">
-      </div>
-    </div>
-  </div>
 </div>
-</section>
-@endsection
-
-@section('scripts')
-
-@endsection

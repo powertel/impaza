@@ -30,7 +30,13 @@ class RoleController extends Controller
     public function index(Request $request)
     {
         $roles = Role::all();
-        return view('roles.index',compact('roles'))
+        $permission = Permission::get();
+        $rolePermRows = DB::table('role_has_permissions')->get(['role_id','permission_id']);
+        $rolePermissionsMap = [];
+        foreach ($rolePermRows as $row) {
+            $rolePermissionsMap[$row->role_id][] = $row->permission_id;
+        }
+        return view('roles.index',compact('roles','permission','rolePermissionsMap'))
             ->with('i');
     }
     
