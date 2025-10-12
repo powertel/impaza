@@ -25,13 +25,12 @@ class DepartmentController extends Controller
      */
     public function index()
     {
-
-        $departments = DB::table('departments')
-                ->orderBy('departments.department', 'asc')
-                ->get();
-
+        $departments = Department::with(['sections.positions', 'positions'])
+            ->orderBy('department', 'asc')
+            ->get();
+    
         return view('departments.index', compact('departments'))
-        ->with('i');
+            ->with('i');
     }
 
     /**
@@ -67,54 +66,40 @@ class DepartmentController extends Controller
      */
     public function store(Request $request)
     {
-
-
         DB::beginTransaction();
         try{
-
-            request()->validate([
-    
-                'department' => 'required|string|unique:departments',
-                'section' => 'required|string|unique:sections',
-                'position' => 'required|string|unique:positions'
-            ]);
-
-            $department =  Department::create(
-                [
-                    'department' => $request['department'],
-                ]
-            );
-            $section = Section::create(
-                [
-                    'department_id' => $department->id,
-                    'section' => $request['section'],
-                ]
-            );
-            $position= Position::create(
-                [
-                    'section_id' => $section->id,
-                    'position' => $request['position'],
-                ]
-            );
-            
-            
-            if($department&&$section&&$position)
-            {
+            // Support multi-create: items[]
+            if ($request->has('items')) {
+                $items = $request->input('items', []);
+                foreach ($items as $item) {
+                    $validated = validator($item, [
+                        'department' => 'required|string|unique:departments,department',
+                    ])->validate();
+                    Department::create([
+                        'department' => $validated['department'],
+                    ]);
+                }
                 DB::commit();
+                return redirect()->route('departments.index')
+                    ->with('success','Departments created successfully.');
             }
-            else
-            {
-                DB::rollback();
-            }
+    
+            // Fallback single-create
+            $request->validate([
+                'department' => 'required|string|unique:departments,department',
+            ]);
+            Department::create([
+                'department' => $request->input('department'),
+            ]);
+            DB::commit();
             return redirect()->route('departments.index')
-            ->with('success','Department created successfully.');
+                ->with('success','Department created successfully.');
         }
-
-        catch(Exception $ex)
+        catch(\Exception $ex)
         {
             DB::rollback();
+            return back()->withErrors(['error' => $ex->getMessage()])->withInput();
         }
-       
     }
 
     /**

@@ -32,6 +32,12 @@
       /* Buttons */
       .btn { font-size: 12px; }
       .btn-sm { font-size: 11px; padding: 6px 10px; }
+      /* Icon-only compact action buttons */
+      .btn-icon { width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; }
+
+      /* Flex gap utilities for BS4 */
+      .gap-1 { gap: .25rem !important; }
+      .gap-2 { gap: .5rem !important; }
 
       /* Global icon sizing (Font Awesome) */
       .fa, .fas, .far, .fab { font-size: 0.9rem; }
@@ -40,6 +46,10 @@
       .card { border: 1px solid #eee; border-radius: 10px; box-shadow: 0 1px 2px rgba(16,24,40,.04); }
       .card-body { padding: 14px; }
       .card-title { font-size: 14px; font-weight: 700; color: #111827; }
+
+      /* Modal scrollability and whitespace control */
+      #departmentCreateModal .modal-body { max-height: 70vh; overflow-y: auto; padding-bottom: 0.75rem; }
+      #departmentCreateModal .repeater-items { max-height: 60vh; overflow-y: auto; }
     </style>
 
     @include('layouts.partials.header_styles')
@@ -185,6 +195,7 @@ $(document).ready(function() {
                 @yield('scripts')
 
                 @include('partials.scripts')
+                @include('layouts.partials.scripts')
     </body>
     @section('scripts')
 @endsection

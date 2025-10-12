@@ -137,3 +137,44 @@ $('#city').on('change',function () {
     });
 </script>
 
+
+// Departments repeater helpers
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const repeater = document.getElementById('departmentRepeater');
+    if (!repeater) return;
+    const itemsContainer = repeater.querySelector('.repeater-items');
+    const addBtn = document.getElementById('addRepeaterItem');
+    const removeBtn = document.getElementById('removeRepeaterItem');
+    let index = itemsContainer.querySelectorAll('.repeater-item').length - 1;
+
+    function createItem(idx) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'repeater-item border rounded p-3 mb-3';
+      wrapper.innerHTML = `
+        <div class="row g-3 align-items-end">
+          <div class="col-12">
+            <label class="form-label">Department</label>
+            <input type="text" name="items[${idx}][department]" class="form-control" placeholder="e.g. Operations" required>
+          </div>
+        </div>
+      `;
+      return wrapper;
+    }
+
+    addBtn?.addEventListener('click', function() {
+      index += 1;
+      itemsContainer.appendChild(createItem(index));
+    });
+
+    removeBtn?.addEventListener('click', function() {
+      const items = itemsContainer.querySelectorAll('.repeater-item');
+      if (items.length > 1) {
+        items[items.length - 1].remove();
+        index -= 1;
+      }
+    });
+  });
+</script>
+</script>
+
