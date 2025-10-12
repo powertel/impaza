@@ -26,9 +26,6 @@
                   <span class="badge bg-warning text-dark rounded-pill me-1 mb-1"><i class="fas fa-shield-alt"></i> {{ $p->name }}</span>
                 @endif
               @endforeach
-              @if($assignedCount === 0)
-                <div class="text-muted">No permissions assigned.</div>
-              @endif
             </div>
           </div>
         </div>

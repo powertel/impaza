@@ -110,32 +110,6 @@
             </li>
             @endcan
 
-            <li class="nav-header">User Management</li>
-            @can('user-list')
-            <li class="nav-item">
-              <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
-                <i class="nav-icon fas fa-user-cog"></i>
-                <p>Users</p>
-              </a>
-            </li>
-            @endcan
-            @can('role-list')
-            <li class="nav-item">
-              <a class="nav-link {{ request()->routeIs('roles.*') ? 'active' : '' }}" href="{{ route('roles.index') }}">
-                <i class="nav-icon fas fa-user-shield"></i>
-                <p>Roles</p>
-              </a>
-            </li>
-            @endcan
-            @can('permissions')
-            <li class="nav-item">
-              <a class="nav-link {{ request()->routeIs('permission.*') ? 'active' : '' }}" href="{{ route('permission.index') }}">
-                <i class="nav-icon fas fa-users-cog"></i>
-                <p>Permissions</p>
-              </a>
-            </li>
-            @endcan
-
             <li class="nav-header">Organization</li>
             @can('department-list')
             <li class="nav-item">
@@ -220,6 +194,32 @@
               <a class="nav-link">
                 <i class="nav-icon fas fa-chart-bar"></i>
                 <p>Reports</p>
+              </a>
+            </li>
+            @endcan
+
+            <li class="nav-header">User Management</li>
+            @can('user-list')
+            <li class="nav-item">
+              <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
+                <i class="nav-icon fas fa-user-cog"></i>
+                <p>Users</p>
+              </a>
+            </li>
+            @endcan
+            @can('role-list')
+            <li class="nav-item">
+              <a class="nav-link {{ request()->routeIs('roles.*') ? 'active' : '' }}" href="{{ route('roles.index') }}">
+                <i class="nav-icon fas fa-user-shield"></i>
+                <p>Roles</p>
+              </a>
+            </li>
+            @endcan
+            @can('permissions')
+            <li class="nav-item">
+              <a class="nav-link {{ request()->routeIs('permission.*') ? 'active' : '' }}" href="{{ route('permission.index') }}">
+                <i class="nav-icon fas fa-users-cog"></i>
+                <p>Permissions</p>
               </a>
             </li>
             @endcan
