@@ -426,14 +426,7 @@
         <script src="{{ asset('js/app.js') }}"></script>
 
         <script>
-
-        $(function () {
-            $('table').DataTable({
-                processing: true,
-                serverSide: false
-            });
-        });
-
+        // DataTables initialization removed in favor of native pagination utility
         </script>
         <script>
             window.addEventListener('load', function()
@@ -482,14 +475,7 @@
         </script>
 
 <script>
-$(document).ready(function() {
-	let table = $('#faults-list').DataTable();
-    table.destroy();
-    $('#faults-list').DataTable({
-        "order": [[5,"desc"]] // Disable default sorting
-    });
-});
-
+ // DataTables initialization removed in favor of native pagination utility
 </script>
 
                 @yield('scripts')

@@ -17,7 +17,18 @@ Finance
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <table  class="table table-striped">
+        <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+            <label for="financePageSize" class="mb-0 small text-muted">Show</label>
+            <select id="financePageSize" class="form-select form-select-sm" style="width:auto;">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="all">All</option>
+            </select>
+            <input id="financeSearch" type="search" class="form-control form-control-sm" placeholder="Search..." style="max-width:240px;">
+        </div>
+        <table  class="table table-striped js-paginated-table" data-page-size="20" data-page-size-control="#financePageSize" data-pager="#financePager" data-search="#financeSearch">
             <thead>
                 <tr>
                     <th>No.</th>
@@ -70,6 +81,7 @@ Finance
                 @endforeach
             </tbody>  
         </table>
+        <div id="financePager" class="mt-2"></div>
     </div>
     <!-- /.card-body -->
 </div>

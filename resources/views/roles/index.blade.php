@@ -50,8 +50,19 @@ Roles
         </div>
     </div>
     <div class="card-body">
+        <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+            <label for="rolesPageSize" class="mb-0 small text-muted">Show</label>
+            <select id="rolesPageSize" class="form-select form-select-sm" style="width:auto;">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="all">All</option>
+            </select>
+            <input id="rolesSearch" type="search" class="form-control form-control-sm" placeholder="Search..." style="max-width:240px;">
+        </div>
         <div class="table-responsive">
-        <table class="table table-striped table-hover align-middle">
+        <table class="table table-striped table-hover align-middle js-paginated-table" data-page-size="20" data-page-size-control="#rolesPageSize" data-pager="#rolesPager" data-search="#rolesSearch">
             <thead>
                 <tr>
                     <th style="width:60px">#</th>
@@ -89,6 +100,7 @@ Roles
                 @endforeach
             </tbody>
         </table>
+        <div id="rolesPager" class="mt-2"></div>
         </div>
     </div>
 </div>
