@@ -53,7 +53,7 @@ Departments
                         <td class="text-nowrap">
                             
                                 @can('department-edit')
-                                <button  class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#departmentEditModal{{ $department->id }}">
+                                <button  class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#departmentEditModal{{ $department->id }}">
                                     <i class="fas fa-edit"></i>Edit
                                 </button>
                                 @endcan

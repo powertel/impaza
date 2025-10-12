@@ -61,7 +61,7 @@ Locations
                         <td>{{ $location->suburb}}</td>
                         <td>
                             @can('location-edit')
-                            <a href="{{ route('locations.edit',$location->id) }}" class="btn btn-sm btn-outline-danger" style="padding:0px 2px;" >
+                            <a href="{{ route('locations.edit',$location->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
                                <i class="fas fa-edit"></i> Edit
                             </a>
                             @endcan

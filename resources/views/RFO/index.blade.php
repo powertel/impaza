@@ -50,7 +50,7 @@ RFO
                         <td>{{ $rfo->RFO}}</td>
                         <td>
                                 @can('department-edit')
-                                <a href="{{ route('rfos.edit',$rfo->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
+                                <a href="{{ route('rfos.edit',$rfo->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
                                     <i class="fas fa-edit"></i>Edit
                                 </a>
                                 @endcan

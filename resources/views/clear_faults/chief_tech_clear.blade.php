@@ -64,9 +64,13 @@ Clear Faults
                                 @csrf
                                 @method('PUT')
                                 @can('chief-tech-clear-faults-clear')
-                                <button type="submit" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Clear</button>   
+                                <button type="submit" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
+                                    <i class="fas fa-save"></i>Clear
+                                </button>   
                                 @endcan
-                                <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
+                                <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
+                                    <i class="fas fa-eye"></i>View
+                                </a>
                             </form>
                         </td>
                     </tr>

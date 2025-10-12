@@ -88,11 +88,11 @@ Faults
                         <td class="text-nowrap">
                             <div class="btn-group btn-group-sm gap-2" role="group" aria-label="Actions">
                                 @can('fault-edit')
-                                <button  class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#editFaultModal-{{ $fault->id }}">
+                                <button  class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editFaultModal-{{ $fault->id }}">
                                     <i class="fas fa-edit me-1"></i> Edit
                                 </button>
                                 @endcan
-                                <button  class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                                <button  class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                     <i class="fas fa-eye me-1"></i> View
                                 </button>
                             </div>

@@ -63,9 +63,13 @@ Assign Faults
                         </td>
                         <td>
                             @can('re-assign-fault')
-                            <a href="{{ route('assign.edit',$fault->id) }}" class="btn btn-sm btn-primary" style="padding:0px 2px; color:#fff;" >Re-Assign</a>
+                            <a href="{{ route('assign.edit',$fault->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
+                                <i class="fas fa-save"></i>Re-Assign
+                            </a>
                             @endcan
-                            <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
+                            <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
+                                <i class="fas fa-eye"></i>View
+                            </a>
                         </td>
                     </tr>
                     @endforeach

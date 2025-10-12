@@ -64,12 +64,12 @@ Finance
                                 <a href="{{ route('finance.show',$link->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
                                    <i class="fas fa-eye"></i> View
                                 </a>
-                                <a href="{{ route('finance.edit',$link->id) }}" class="btn btn-sm btn-outline-info" style="padding:0px 2px;" >
+                                <a href="{{ route('finance.edit',$link->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
                                    <i class="fas fa-edit"></i> Edit
                                 </a>
                                 @if ($link->link_status==='Pending')
                                 @can('finance-link-update')
-                                        <a href="{{ route('finance.edit',$link->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
+                                        <a href="{{ route('finance.edit',$link->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
                                            <i class="fas fa-eye"></i> Approve
                                         </a>
                                 @endcan
@@ -85,7 +85,7 @@ Finance
                             <form  style="margin-block-end: 0px;" action="{{ route('reconnect',$link->id) }}" method="POST">
                                 @csrf
                                 @method('PUT')
-                                <button type="submit" class="btn btn-outline-success btn-sm" style="padding:0px 2px;">
+                                <button type="submit" class="btn btn-outline-priamry btn-sm" style="padding:0px 2px;">
                                     <i class="fas fa-eye"></i>Reconnect
                                 </button>
                             </form> 

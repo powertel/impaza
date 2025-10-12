@@ -54,7 +54,7 @@ Sections
                         <td>{{ $section->section}}</td>
                         <td>
                                 @can('department-edit')
-                                <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#sectionEditModal{{ $section->id }}" style="padding:0px 2px;">
+                                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#sectionEditModal{{ $section->id }}" style="padding:0px 2px;">
                                 <i class="fas fa-edit me-1"></i> Edit
                                 </button>
                                 @endcan

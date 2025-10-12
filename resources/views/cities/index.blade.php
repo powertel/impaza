@@ -53,7 +53,7 @@ Cities
                         <td>
                             <form action="{{ route('cities.destroy',$city->id) }}" method="POST">
                                 @can('city-edit')
-                                    <button type="button" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#cityEditModal{{ $city->id }}">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#cityEditModal{{ $city->id }}">
                                     <i class="fas fa-edit"></i> Edit
                                     </button>
                                 @endcan

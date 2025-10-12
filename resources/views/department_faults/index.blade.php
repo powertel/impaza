@@ -57,7 +57,9 @@ Department Faults
                             <strong>{{$fault->description}}</strong> 
                         </td>
                         <td>
-                            <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
+                            <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
+                                <i class="fas fa-eye"></i>View
+                            </a>
                         </td>
                     </tr>
                     @endforeach

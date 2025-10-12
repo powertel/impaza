@@ -69,7 +69,7 @@ Assess Faults
                             @endcan
 
                             @can('fault-edit')
-                            <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px; " >
+                            <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px; " >
                               <i class="fas fa-edit"></i>  Edit
                             </a>
                             @endcan

@@ -59,7 +59,7 @@ Customers
                                 <i class="fas fa-eye"></i>View
                             </a>
                             @can('account-manager-edit')
-                            <a href="{{ route('customers.edit',$customer->id) }}" class="btn btn-sm btn-outline-danger" style="padding:0px 2px;" >
+                            <a href="{{ route('customers.edit',$customer->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
                                 <i class="fas fa-edit"></i>Edit
                             </a>
                             @endcan
