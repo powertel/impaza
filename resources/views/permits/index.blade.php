@@ -13,13 +13,21 @@ Permits
     <div class="card-header">
         <h3 class="card-title">{{_('Approved Permits')}}</h3>
         <div class="card-tools">
+            <input id="permitsSearch" type="text" class="form-control form-control-sm d-inline-block w-auto" placeholder="Search">
+            <select id="permitsPageSize" class="form-control form-control-sm d-inline-block w-auto">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
 <!--             <a  class="btn btn-primary btn-sm" href="{{ route('locations.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create location')}} </a>
             <a  class="btn btn-primary btn-sm" href="{{ route('pops.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Pop')}} </a> -->
         </div>
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <table  class="table table-striped">
+        <table  class="table table-striped js-paginated-table" data-page-size="20" data-page-size-control="#permitsPageSize" data-pager="#permitsPager" data-search="#permitsSearch">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -47,12 +55,14 @@ Permits
 
             </tbody> 
         </table>
-    </div>
-    <!-- /.card-body -->
-</div>
- 
-</section>
-@endsection
-@section('scripts')
-    @include('partials.scripts')
-@endsection
++        <div id="permitsPager" class="mt-2"></div>
+     </div>
+     <!-- /.card-body -->
+ </div>
+  
+ </section>
+ @endsection
+ @section('scripts')
+     @include('partials.scripts')
+-<div id="permitsPager" class="mt-2"></div>
+ @endsection

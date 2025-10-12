@@ -182,14 +182,7 @@
         </script>
 
 <script>
-$(document).ready(function() {
-	let table = $('#faults-list').DataTable();
-    table.destroy();
-    $('#faults-list').DataTable({
-        "order": [[5,"desc"]] // Disable default sorting
-    });
-});
-
+ // DataTables initialization removed in favor of native pagination utility
 </script>
 
                 @yield('scripts')
