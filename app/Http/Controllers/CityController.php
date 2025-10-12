@@ -50,11 +50,33 @@ class CityController extends Controller
     public function store(Request $request)
     {
 
-        request()->validate([
-            'city' => 'required|string|unique:cities'
+        // Support bulk creation via items[] or single via city
+        if ($request->has('items')) {
+            $request->validate([
+                'items' => 'required|array|min:1',
+                'items.*.city' => 'required|string|distinct|unique:cities,city',
+            ]);
+
+            DB::beginTransaction();
+            try {
+                foreach ($request->input('items') as $item) {
+                    City::create(['city' => $item['city']]);
+                }
+                DB::commit();
+                return redirect()->route('cities.index')
+                    ->with('success', 'City/Town(s) Created.');
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return back()->with('fail', 'Something went wrong');
+            }
+        }
+
+        // Single create fallback
+        $request->validate([
+            'city' => 'required|string|unique:cities,city'
         ]);
 
-        $city = City::create($request->all());
+        $city = City::create($request->only('city'));
 
         if($city)
         {
@@ -65,8 +87,6 @@ class CityController extends Controller
         {
             return back()->with('fail','Something went wrong');
         }
-    
-
     }
 
     /**

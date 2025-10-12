@@ -54,10 +54,7 @@
         </div>
       </form>
 
--      @section('scripts')
--        @parent
--        @include('partials.department')
--      @endsection
+
     </div>
   </div>
 </div>
