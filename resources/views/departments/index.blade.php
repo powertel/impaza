@@ -8,40 +8,63 @@ Departments
 
 <section class="content" >
 <div class="card" >
-    <div class="card-header">
-        <h3 class="card-title">{{_('Departments')}}</h3>
-        <div class="card-tools">
+    <div class="card-header d-flex align-items-center">
+        <h3 class="card-title mb-0">{{_('Departments')}}</h3>
+        <div class="card-tools ms-auto d-flex align-items-center gap-2">
             @can('department-create')
-            <a  class="btn btn-primary btn-sm" href="{{ route('departments.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create New Department')}} </a>
-            <a  class="btn btn-primary btn-sm" href="{{ route('sections.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create New Section')}} </a>
-            <a  class="btn btn-primary btn-sm" href="{{ route('positions.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create New Position')}} </a>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#departmentCreateModal"><i class="fas fa-plus-circle"></i> {{_('Create Department(s)')}} </button>
             @endcan
         </div>
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <table  class="table table-striped">
+        <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+            <div class="input-group input-group-sm" style="width: 170px;">
+                <div class="input-group-prepend"><span class="input-group-text">Show</span></div>
+                <select id="departmentsPageSize" class="form-control">
+                    <option value="10">10</option>
+                    <option value="20" selected>20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="all">All</option>
+                </select>
+            </div>
+            <div class="input-group input-group-sm" style="width: 220px;">
+                <input type="text" id="departmentsSearch" class="form-control" placeholder="Search departments">
+            </div>
+        </div>
+        <table id="departmentsTable" class="table table-striped align-middle js-paginated-table" data-page-size="20" data-page-size-control="#departmentsPageSize" data-pager="#departmentsPager" data-search="#departmentsSearch">
             <thead>
                 <tr>
                     <th>No.</th>
                     <th>Department</th>
-                    <th>Action</th>
+                    <th class="text-end">Action</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($departments as $department)
-                <tr >
-                    <td>{{++$i}}</td>
-                    <td>{{ $department->department}}</td>
-                    <td>
+                <tr>
+                    <td>{{ ++$i }}</td>
+                    <td>{{ $department->department }}</td>
+                    <td class="text-end">
+                        <div class="d-flex justify-content-end gap-1">
                             @can('department-edit')
-                            <a href="{{ route('departments.edit',$department->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Edit</a>
+                            <button class="btn btn-success btn-sm btn-icon" data-bs-toggle="modal" data-bs-target="#departmentEditModal{{ $department->id }}" title="Edit"><i class="fas fa-edit"></i></button>
                             @endcan
+                            @can('department-delete')
+                            <form action="{{ route('departments.destroy', $department->id) }}" method="POST" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm btn-icon show_confirm" data-name="{{ $department->department }}" title="Delete"><i class="fas fa-trash"></i></button>
+                            </form>
+                            @endcan
+                        </div>
                     </td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
+        <div id="departmentsPager" class="mt-2"></div>
     </div>
     <!-- /.card-body -->
 </div>
@@ -49,4 +72,10 @@ Departments
 
 </section>
 
+@include('departments.create_modal')
+@include('departments.edit_modal')
+
+@endsection
+
+@section('scripts')
 @endsection
