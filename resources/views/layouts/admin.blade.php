@@ -76,19 +76,10 @@
     @include('layouts.partials.sidebar_styles')
     @include('layouts.partials.formcss')
 
-
-    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous"> -->
-
-    <!-- Popup -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha512-3gJwYpMe3QewGELv8k/BX9vcqhryRdzRMxVfq6ngyWXwo03GFEzjsUm8Q7RZcHPHksttq7/GFoxjCVUjkjvPdw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 
+<body class="sidebar-mini">
 
-    <body class="sidebar-mini">
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     
     <div class="wrapper" id="app">
         <!-- Navbar -->
@@ -137,7 +128,13 @@
     @section('scripts')
     @endsection
 
-        <script src="{{ asset('js/app.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <!-- Popup -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha512-3gJwYpMe3QewGELv8k/BX9vcqhryRdzRMxVfq6ngyWXwo03GFEzjsUm8Q7RZcHPHksttq7/GFoxjCVUjkjvPdw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="{{ asset('js/app.js') }}"></script>
 
         
         <script>
@@ -186,29 +183,29 @@
                 });
         </script>
 
-<script>
- // DataTables initialization removed in favor of native pagination utility
-</script>
+        <script>
+            (function(){
+                function setHeaderHeightVar(){
+                var header = document.querySelector('.main-header');
+                var h = header ? header.offsetHeight : 56;
+                document.documentElement.style.setProperty('--header-height', h + 'px');
+                }
+                window.addEventListener('resize', setHeaderHeightVar);
+                document.addEventListener('DOMContentLoaded', setHeaderHeightVar);
+                setHeaderHeightVar();
+            })();
+        </script>
 
-                @yield('scripts')
 
-                @include('partials.scripts')
-                @include('layouts.partials.scripts')
-    </body>
-    @section('scripts')
-@endsection
+        @yield('scripts')
+
+        @include('partials.scripts')
+        @include('layouts.partials.scripts')
+
+        @section('scripts')
+        @endsection
+</body>
 
 </html>
 
-<script>
-  (function(){
-    function setHeaderHeightVar(){
-      var header = document.querySelector('.main-header');
-      var h = header ? header.offsetHeight : 56;
-      document.documentElement.style.setProperty('--header-height', h + 'px');
-    }
-    window.addEventListener('resize', setHeaderHeightVar);
-    document.addEventListener('DOMContentLoaded', setHeaderHeightVar);
-    setHeaderHeightVar();
-  })();
-</script>
+
