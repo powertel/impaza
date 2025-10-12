@@ -63,5 +63,5 @@ Positions
 
 @section('scripts')
     @include('partials.department')
-    {{-- @include('partials.scripts') removed to avoid duplicate event bindings; base layout already includes this --}}
+
 @endsection

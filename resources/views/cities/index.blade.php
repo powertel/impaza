@@ -15,7 +15,7 @@ Cities
         <h3 class="card-title">{{_('Cities')}}</h3>
         <div class="card-tools">
             @can('city-create')
-            <a  class="btn btn-primary btn-sm" href="{{ route('cities.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create City/Town')}} </a>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#cityCreateModal"><i class="fas fa-plus-circle"></i>{{_('Create City/Town(s)')}} </button>
             @endcan
             @can('location-create')
             <a  class="btn btn-primary btn-sm" href="{{ route('locations.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create location')}} </a>
@@ -54,8 +54,10 @@ Cities
                         <form action="{{ route('cities.destroy',$city->id) }}" method="POST">
                             <a href="{{ route('cities.show',$city->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
                             @can('city-edit')
-                            <a href="{{ route('cities.edit',$city->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
-                            @endcan
+-                            <a href="{{ route('cities.edit',$city->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
++                            <button type="button" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" data-bs-toggle="modal" data-bs-target="#cityEditModal{{ $city->id }}">Edit</button>
+-                            <button class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" data-bs-toggle="modal" data-bs-target="#cityEditModal{{ $city->id }}">Edit</button>
+                             @endcan
 
                         </form>
                         
@@ -72,3 +74,6 @@ Cities
  
 </section>
 @endsection
+
+@include('cities.create_modal')
++@include('cities.edit_modal')
