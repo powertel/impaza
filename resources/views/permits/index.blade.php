@@ -55,7 +55,7 @@ Permits
 
             </tbody> 
         </table>
-+        <div id="permitsPager" class="mt-2"></div>
+       <div id="permitsPager" class="mt-2"></div>
      </div>
      <!-- /.card-body -->
  </div>
