@@ -13,7 +13,7 @@ Positions
         <h3 class="card-title">{{_('Positions')}}</h3>
         <div class="card-tools">
             @can('department-create')
-            <a  class="btn btn-primary btn-sm" href="{{ route('positions.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create New Position')}} </a>
+            <a  class="btn btn-primary btn-sm" href="#" data-toggle="modal" data-target="#positionCreateModal"><i class="fas fa-plus-circle"></i>{{_('Create New Position')}} </a>
             @endcan
             <input id="positionsSearch" type="text" class="form-control form-control-sm d-inline-block w-auto" placeholder="Search">
             <select id="positionsPageSize" class="form-control form-control-sm d-inline-block w-auto">
@@ -41,7 +41,7 @@ Positions
                     <td>{{ $position->position}}</td>
                     <td>
                             @can('department-edit')
-                            <a href="{{ route('positions.edit',$position->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Edit</a>
+                            <a href="#" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" data-toggle="modal" data-target="#positionEditModal" data-id="{{ $position->id }}" data-position="{{ $position->position }}">Edit</a>
                             @endcan
                     </td>
                 </tr>
@@ -49,6 +49,9 @@ Positions
             </tbody>
         </table>
         <div id="positionsPager" class="mt-2"></div>
+
+        @include('positions.create_modal')
+        @include('positions.edit_modal')
     </div>
     <!-- /.card-body -->
 </div>
@@ -56,4 +59,9 @@ Positions
 
 </section>
 
+@endsection
+
+@section('scripts')
+    @include('partials.department')
+    {{-- @include('partials.scripts') removed to avoid duplicate event bindings; base layout already includes this --}}
 @endsection

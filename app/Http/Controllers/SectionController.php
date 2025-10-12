@@ -28,8 +28,9 @@ class SectionController extends Controller
         $sections = DB::table('sections')
                 ->orderBy('sections.section', 'asc')
                 ->get();
+        $departments = Department::orderBy('department','asc')->get();
 
-        return view('sections.index', compact('sections'))
+        return view('sections.index', compact('sections','departments'))
         ->with('i');
     }
 
@@ -53,20 +54,43 @@ class SectionController extends Controller
      */
     public function store(Request $request)
     {
-        request()->validate([
-            'department_id' => 'required',
-            'section' => 'required|string|unique:sections'
-        ]);
-        $section = Section::create($request->all());
+        DB::beginTransaction();
+        try {
+            // Bulk create via items[] if present
+            if ($request->has('items')) {
+                $request->validate([
+                    'department_id' => 'required|integer|exists:departments,id',
+                ]);
+                $items = $request->input('items', []);
+                foreach ($items as $item) {
+                    $validated = validator($item, [
+                        'section' => 'required|string|unique:sections,section',
+                    ])->validate();
+                    Section::create([
+                        'department_id' => $request->input('department_id'),
+                        'section' => $validated['section'],
+                    ]);
+                }
+                DB::commit();
+                return redirect()->route('sections.index')
+                    ->with('success','Sections created successfully.');
+            }
 
-        if($section)
-        {
+            // Fallback single create
+            $request->validate([
+                'department_id' => 'required|integer|exists:departments,id',
+                'section' => 'required|string|unique:sections,section',
+            ]);
+            Section::create([
+                'department_id' => $request->input('department_id'),
+                'section' => $request->input('section'),
+            ]);
+            DB::commit();
             return redirect()->route('sections.index')
-            ->with('success','Section Created');
-        }
-        else
-        {
-            return back()->with('fail','Something went wrong');
+                ->with('success','Section Created');
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            return back()->withErrors(['error' => $ex->getMessage()])->withInput();
         }
     }
 
@@ -102,8 +126,7 @@ class SectionController extends Controller
     public function update(Request $request, Section $section)
     {
         $request->validate([
-            'section' => 'required|string|unique:sections',
-
+            'section' => 'required|string|unique:sections,section,' . $section->id . ',id',
         ]);
 
         $section->update($request->all());

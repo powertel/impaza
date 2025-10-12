@@ -12,14 +12,14 @@
             </div>
 
             <div class="card-body">
-                <form id="UF" action="{{ route('positions.update',$section->id) }}" method="POST">
+                <form id="UF" action="{{ route('positions.update',$position->id) }}" method="POST">
                     @csrf
                     @method('PUT')
 
                     <div class="form-group row">
                         <label for="position" class="col-sm-3 col-form-label">Position</label>
                         <div class="col-sm-9">
-                            <input type="text"  class="form-control" name="section" value="{{ $position->position }}">
+                            <input type="text"  class="form-control" name="position" value="{{ $position->position }}">
                             @error ('position')
 
                                 <div class="alert-danger">
@@ -35,7 +35,7 @@
                     <div class="card-footer">
 
                         <button type="submit" class="btn btn-success btn-sm" onclick="return submitResult()">{{ __('Save') }}</button>
-                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('sections.index') }}">{{ __('Cancel') }}</a>
+                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('positions.index') }}">{{ __('Cancel') }}</a>
 
 
 

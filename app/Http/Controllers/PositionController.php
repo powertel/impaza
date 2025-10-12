@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Department;
 use App\Models\Section;
 use App\Models\Position;
+use Illuminate\Validation\Rule;
 use DB;
 
 class PositionController extends Controller
@@ -25,10 +26,12 @@ class PositionController extends Controller
     public function index()
     {
         $positions = DB::table('positions')
-        ->orderBy('positions.position', 'asc')
-        ->get();
+            ->orderBy('positions.position', 'asc')
+            ->get();
+        $department = Department::all();
+        $section = Section::all();
 
-            return view('positions.index', compact('positions'))
+        return view('positions.index', compact('positions','department','section'))
             ->with('i');
     }
 
@@ -52,21 +55,47 @@ class PositionController extends Controller
      */
     public function store(Request $request)
     {
-        request()->validate([
-            'department_id' => 'required',
-            'section_id' => 'required',
-            'position' => 'required'
-        ]);
-        $position = Position::create($request->all());
+        DB::beginTransaction();
+        try {
+            // Bulk create via items[] if present
+            if ($request->has('items')) {
+                $request->validate([
+                    'department_id' => 'required|integer|exists:departments,id',
+                    'section_id' => 'required|integer|exists:sections,id',
+                ]);
+                $items = $request->input('items', []);
+                foreach ($items as $item) {
+                    $validated = validator($item, [
+                        'position' => ['required','string', Rule::unique('positions','position')->where('section_id', $request->input('section_id'))],
+                    ])->validate();
+                    Position::create([
+                        'section_id' => $request->input('section_id'),
+                        'position' => $validated['position'],
+                    ]);
+                }
+                DB::commit();
+                return redirect()->route('positions.index')
+                    ->with('success','Positions created successfully.');
+            }
 
-        if($position)
-        {
+            // Fallback single create
+            $request->validate([
+                'department_id' => 'required|integer|exists:departments,id',
+                'section_id' => 'required|integer|exists:sections,id',
+                'position' => ['required','string', Rule::unique('positions','position')->where('section_id', $request->input('section_id'))],
+            ]);
+
+            $position = Position::create([
+                'section_id' => $request->input('section_id'),
+                'position' => $request->input('position'),
+            ]);
+
+            DB::commit();
             return redirect()->route('positions.index')
-            ->with('success','Position Created');
-        }
-        else
-        {
-            return back()->with('fail','Something went wrong');
+                ->with('success','Position Created');
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            return back()->withErrors(['error' => $ex->getMessage()])->withInput();
         }
     }
 
@@ -102,11 +131,14 @@ class PositionController extends Controller
     public function update(Request $request, Position $position)
     {
         $request->validate([
-            'section' => 'required|string|unique:sections',
-
+            'position' => [
+                'required',
+                'string',
+                Rule::unique('positions', 'position')->ignore($position->id),
+            ],
         ]);
 
-        $position->update($request->all());
+        $position->update($request->only('position'));
 
         return redirect()->route('positions.index')
                         ->with('success','Position Updated');
