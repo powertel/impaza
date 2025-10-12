@@ -61,3 +61,7 @@ Sections
 @include('sections.edit_modal')
  
  @endsection
+
+@section('scripts')
+  @include('partials.scripts')
+@endsection
