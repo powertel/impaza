@@ -13,7 +13,7 @@ Sections
         <h3 class="card-title">{{_('Sections')}}</h3>
         <div class="card-tools">
             @can('department-create')
-            <a  class="btn btn-primary btn-sm" href="{{ route('sections.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create New Section')}} </a>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#sectionCreateModal"><i class="fas fa-plus-circle"></i>{{_('Create Section(s)')}} </button>
             <a  class="btn btn-primary btn-sm" href="{{ route('positions.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create New Position')}} </a>
             @endcan
             <input id="sectionsSearch" type="text" class="form-control form-control-sm d-inline-block w-auto" placeholder="Search">
@@ -42,7 +42,7 @@ Sections
                     <td>{{ $section->section}}</td>
                     <td>
                             @can('department-edit')
-                            <a href="{{ route('sections.edit',$section->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Edit</a>
+                            <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#sectionEditModal{{ $section->id }}" style="padding:0px 2px; color:#fff;">Edit</button>
                             @endcan
                     </td>
                 </tr>
@@ -57,4 +57,7 @@ Sections
 
 </section>
 
-@endsection
+@include('sections.create_modal')
+@include('sections.edit_modal')
+ 
+ @endsection
