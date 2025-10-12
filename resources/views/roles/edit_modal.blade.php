@@ -25,14 +25,14 @@
                 </div>
               </div>
               <input type="text" class="form-control form-control-sm permission-search" placeholder="Search permissions...">
-              <div class="border rounded p-2 mt-2 permission-list" style="max-height: 400px; overflow: auto;">
-                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-2">
+              <div class="border rounded p-3 mt-3 permission-list" style="max-height: 400px; overflow: auto;">
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-3">
                   @foreach($permission as $value)
                     @php $checked = isset($rolePermissionsMap[$role->id]) && in_array($value->id, $rolePermissionsMap[$role->id]); @endphp
                     <div class="col permission-item">
                       <div class="form-check">
                         <input class="form-check-input" type="checkbox" name="permission[]" id="perm_edit_{{ $role->id }}_{{ $value->id }}" value="{{ $value->id }}" {{ $checked ? 'checked' : '' }}>
-                        <label class="form-check-label" for="perm_edit_{{ $role->id }}_{{ $value->id }}"><strong>{{ $value->name }}</strong></label>
+                        <label class="form-check-label ms-2" for="perm_edit_{{ $role->id }}_{{ $value->id }}"><strong>{{ $value->name }}</strong></label>
                       </div>
                     </div>
                   @endforeach
