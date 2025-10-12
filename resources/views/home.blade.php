@@ -95,10 +95,20 @@ Dashboard
       <div class="card">
         <div class="card-header">
           <h3 class="card-title" style="font-size:13px">Recent Faults</h3>
++         <div class="card-tools">
++           <input id="dashboardRecentSearch" type="text" class="form-control form-control-sm d-inline-block w-auto" placeholder="Search">
++           <select id="dashboardRecentPageSize" class="form-control form-control-sm d-inline-block w-auto">
++             <option value="10">10</option>
++             <option value="20" selected>20</option>
++             <option value="50">50</option>
++             <option value="100">100</option>
++           </select>
++         </div>
         </div>
         <div class="card-body p-2">
           <div class="table-responsive">
-            <table class="table table-hover table-sm" id="dashboard-recent-faults">
+-            <table class="table table-hover table-sm" id="dashboard-recent-faults">
++            <table class="table table-hover table-sm js-paginated-table" id="dashboard-recent-faults" data-page-size="10" data-page-size-control="#dashboardRecentPageSize" data-pager="#dashboardRecentPager" data-search="#dashboardRecentSearch">
               <thead>
                 <tr>
                   <th>ID</th>
@@ -125,6 +135,7 @@ Dashboard
                 @endforelse
               </tbody>
             </table>
++            <div id="dashboardRecentPager" class="mt-2"></div>
           </div>
         </div>
       </div>
@@ -133,14 +144,17 @@ Dashboard
 </section>
 @endsection
 
-@section('scripts')
-<script>
-$(function(){
-  $('#dashboard-recent-faults').DataTable({
-    order: [[3,'desc']],
-    pageLength: 10,
-    lengthChange: false
-  });
-});
-</script>
-@endsection
+-@section('scripts')
+-<script>
+-$(function(){
+-  $('#dashboard-recent-faults').DataTable({
+-    order: [[3,'desc']],
+-    pageLength: 10,
+-    lengthChange: false
+-  });
+-});
+-</script>
+-@endsection
++@section('scripts')
++  @include('partials.scripts')
++@endsection

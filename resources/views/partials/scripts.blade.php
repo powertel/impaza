@@ -138,7 +138,7 @@ $('#city').on('change',function () {
 </script>
 
 
-// Departments repeater helpers
+{{-- Departments repeater helpers --}}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const repeater = document.getElementById('departmentRepeater');

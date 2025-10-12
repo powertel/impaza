@@ -86,8 +86,8 @@
             </li>
             @endcan
 
-            @can('permit-list')
             <li class="nav-header">Permits</li>
+            @can('permit-list')
             <li class="nav-item">
               <a class="nav-link {{ request()->routeIs('permits.*') ? 'active' : '' }}" href="{{ route('permits.index') }}">
                 <i class="nav-icon fas fa-check-circle"></i>
@@ -102,8 +102,8 @@
             </li>
             @endcan
 
-            @can('finance')
             <li class="nav-header">Finance</li>
+            @can('finance')
             <li class="nav-item">
               <a href="{{ route('finance.index') }}" class="nav-link {{ request()->routeIs('finance.*') ? 'active' : '' }}">
                 <i class="nav-icon fas fa-money-check-alt"></i>

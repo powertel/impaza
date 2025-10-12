@@ -14,11 +14,18 @@ Clear Faults
     <div class="card-header">
         <h3 class="card-title">{{_('Clear Faults')}}</h3>
         <div class="card-tools">
+            <input id="chiefTechClearSearch" type="text" class="form-control form-control-sm d-inline-block w-auto" placeholder="Search">
+            <select id="chiefTechClearPageSize" class="form-control form-control-sm d-inline-block w-auto">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
         </div>
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <table  class="table table-striped">
+        <table  class="table table-striped js-paginated-table" data-page-size="20" data-page-size-control="#chiefTechClearPageSize" data-pager="#chiefTechClearPager" data-search="#chiefTechClearSearch">
             <thead>
                 <tr>
                     <th>No.</th>
@@ -54,17 +61,21 @@ Clear Faults
                 @endforeach
             </tbody> 
         </table>
-    </div>
-    <!-- /.card-body -->
-</div>
-
++        <div id="chiefTechClearPager" class="mt-2"></div>
+     </div>
+     <!-- /.card-body -->
+ </div>
  
-{{-- {{$section->section}}
-
-@foreach ($section -> faults as $fault )
-
-<span>{{$fault->contactName}}</span>
-    
-@endforeach --}}
-</section>
-@endsection
+  
+ {{-- {{$section->section}}
+ 
+ @foreach ($section -> faults as $fault )
+ 
+ <span>{{$fault->contactName}}</span>
+     
+ @endforeach --}}
+ </section>
+ @endsection
+-
+-<div id="chiefTechClearPager" class="mt-2"></div>
++

@@ -15,11 +15,18 @@ Assess Faults
     <div class="card-header">
         <h3 class="card-title">{{_('Assess Faults')}}</h3>
         <div class="card-tools">
+            <input id="assessmentsSearch" type="text" class="form-control form-control-sm d-inline-block w-auto" placeholder="Search">
+            <select id="assessmentsPageSize" class="form-control form-control-sm d-inline-block w-auto">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
         </div>
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <table  class="table table-striped">
+        <table  class="table table-striped js-paginated-table" data-page-size="20" data-page-size-control="#assessmentsPageSize" data-pager="#assessmentsPager" data-search="#assessmentsSearch">
             <thead>
                 <tr>
                     <th>No.</th>
@@ -57,6 +64,7 @@ Assess Faults
                 @endforeach
             </tbody> 
         </table>
+        <div id="assessmentsPager" class="mt-2"></div>
     </div>
     <!-- /.card-body -->
 </div>

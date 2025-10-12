@@ -19,12 +19,18 @@ Pops
             @can('customer-create')
                 <a  class="btn btn-primary btn-sm" href="{{ route('customers.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Customer')}} </a>
             @endcan
-            
+            <input id="popsSearch" type="text" class="form-control form-control-sm d-inline-block w-auto" placeholder="Search">
+            <select id="popsPageSize" class="form-control form-control-sm d-inline-block w-auto">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
         </div>
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <table  class="table table-striped">
+        <table  class="table table-striped js-paginated-table" data-page-size="20" data-page-size-control="#popsPageSize" data-pager="#popsPager" data-search="#popsSearch">
             <thead>
                 <tr>
                     <th>No.</th>
@@ -52,9 +58,14 @@ Pops
                 @endforeach
             </tbody> 
         </table>
-    </div>
-    <!-- /.card-body -->
-</div>
++        <div id="popsPager" class="mt-2"></div>
+     </div>
+     <!-- /.card-body -->
+ </div>
  
-</section>
-@endsection
+  
+ </section>
+ @endsection
+-
+-<div id="popsPager" class="mt-2"></div>
++

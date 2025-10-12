@@ -14,11 +14,18 @@ Requested Permits
     <div class="card-header">
         <h3 class="card-title">{{_('Requested Permits')}}</h3>
         <div class="card-tools">
+            <input id="requestedPermitsSearch" type="text" class="form-control form-control-sm d-inline-block w-auto" placeholder="Search">
+            <select id="requestedPermitsPageSize" class="form-control form-control-sm d-inline-block w-auto">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
         </div>
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <table  class="table table-striped">
+        <table  class="table table-striped js-paginated-table" data-page-size="20" data-page-size-control="#requestedPermitsPageSize" data-pager="#requestedPermitsPager" data-search="#requestedPermitsSearch">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -54,4 +61,5 @@ Requested Permits
 @endsection
 @section('scripts')
     @include('partials.scripts')
+<div id="requestedPermitsPager" class="mt-2"></div>
 @endsection

@@ -15,11 +15,18 @@ Positions
             @can('department-create')
             <a  class="btn btn-primary btn-sm" href="{{ route('positions.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create New Position')}} </a>
             @endcan
+            <input id="positionsSearch" type="text" class="form-control form-control-sm d-inline-block w-auto" placeholder="Search">
+            <select id="positionsPageSize" class="form-control form-control-sm d-inline-block w-auto">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
         </div>
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <table  class="table table-striped">
+        <table  class="table table-striped js-paginated-table" data-page-size="20" data-page-size-control="#positionsPageSize" data-pager="#positionsPager" data-search="#positionsSearch">
             <thead>
                 <tr>
                     <th>No.</th>
@@ -41,6 +48,7 @@ Positions
                 @endforeach
             </tbody>
         </table>
+        <div id="positionsPager" class="mt-2"></div>
     </div>
     <!-- /.card-body -->
 </div>
