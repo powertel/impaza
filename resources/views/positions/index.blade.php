@@ -51,7 +51,7 @@ Positions
                         <td>
                             @can('department-edit')
                                 <a href="#" class="btn btn-sm btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#positionEditModal" data-id="{{ $position->id }}" data-position="{{ $position->position }}">
-                                    <i class="fas fa-edit"></i>Edit</a>
+                                    <i class="fas fa-edit me-1"></i>Edit</a>
                             @endcan
                         </td>
                     </tr>

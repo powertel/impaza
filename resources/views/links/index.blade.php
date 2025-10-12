@@ -62,18 +62,18 @@ links
                         <td>
                         <form  name="theForm" action="{{ route('links.destroy',$link->id) }}" method="POST">
                             <a href="{{ route('links.show',$link->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
-                                <i class="fas fa-eye"></i>View
+                                <i class="fas fa-eye me-1"></i>View
                             </a>
                             @can('account-manager-edit')
                             <a href="{{ route('links.edit',$link->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
-                                <i class="fas fa-edit"></i>Edit
+                                <i class="fas fa-edit me-1"></i>Edit
                             </a>
                             @endcan    
                             @csrf
                             @method('DELETE')
                             @can('link-delete') 
                             <button type="button" class="btn btn-outline-danger btn-sm show_confirm" data-toggle="tooltip" title='Delete' style="padding:0px 2px;">
-                                <i class="fas fa-trash"></i>Delete
+                                <i class="fas fa-trash me-1"></i>Delete
                             </button>                                                               
                         @endcan
                         </form>  

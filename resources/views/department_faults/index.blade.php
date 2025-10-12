@@ -58,7 +58,7 @@ Department Faults
                         </td>
                         <td>
                             <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
-                                <i class="fas fa-eye"></i>View
+                                <i class="fas fa-eye me-1"></i>View
                             </a>
                         </td>
                     </tr>

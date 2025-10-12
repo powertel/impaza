@@ -70,11 +70,11 @@ Assess Faults
 
                             @can('fault-edit')
                             <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px; " >
-                              <i class="fas fa-edit"></i>  Edit
+                              <i class="fas fa-edit me-1"></i>  Edit
                             </a>
                             @endcan
                             <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
-                               <i class="fas fa-eye"></i> View
+                               <i class="fas fa-eye me-1"></i> View
                             </a>
                             </div>
                         </td>

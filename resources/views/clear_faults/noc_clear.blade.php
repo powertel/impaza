@@ -65,11 +65,11 @@ Clear Faults
                             @method('PUT')
                             @can('noc-clear-faults-clear')
                             <button type="submit" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
-                                <i class="fas fa-save"></i>Clear
+                                <i class="fas fa-save me-1"></i>Clear
                             </button>   
                             @endcan
                             <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
-                                <i class="fas fa-eye"></i>View
+                                <i class="fas fa-eye me-1"></i>View
                             </a>
                         </form> 
                         </td>

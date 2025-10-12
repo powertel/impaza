@@ -55,11 +55,11 @@ Account Managers
                         <td>
                             <form action="{{ route('account_managers.destroy',$acc_manager->id) }}" method="POST">
                                 <a href="{{ route('account_managers.show',$acc_manager->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
-                                    <i class="fas fa-eye"></i>View
+                                    <i class="fas fa-eye me-1"></i>View
                                 </a>
                                 @can('account-manager-edit')
                                 <a href="{{ route('account_managers.edit',$acc_manager->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
-                                    <i class="fas fa-edit"></i>Edit
+                                    <i class="fas fa-edit me-1"></i>Edit
                                 </a>
                                 @endcan
 
@@ -67,7 +67,7 @@ Account Managers
                                 @method('DELETE')
                                 @can('account-manager-delete')
                                 <button type="button" class="btn btn-outline-danger btn-sm show_confirm" data-toggle="tooltip" title='Delete' style="padding:0px 2px;">
-                                <i class="fas fa-trash"></i>  Delete
+                                <i class="fas fa-trash me-1"></i>  Delete
                                 </button> 
                                 @endcan
                             </form>

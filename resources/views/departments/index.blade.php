@@ -54,7 +54,7 @@ Departments
                             
                                 @can('department-edit')
                                 <button  class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#departmentEditModal{{ $department->id }}">
-                                    <i class="fas fa-edit"></i>Edit
+                                    <i class="fas fa-edit me-1"></i>Edit
                                 </button>
                                 @endcan
                                 @can('department-delete')
@@ -62,7 +62,7 @@ Departments
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-outline-danger show_confirm" data-name="{{ $department->department }}" title="Delete">
-                                        <i class="fas fa-trash"></i>Delete
+                                        <i class="fas fa-trash me-1"></i>Delete
                                     </button>
                                 </form>
                                 @endcan
