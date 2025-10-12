@@ -4,6 +4,7 @@
 @section('title')
 Sections
 @endsection
+
 @include('partials.css')
 @section('content')
 
@@ -14,19 +15,23 @@ Sections
         <div class="card-tools">
             @can('department-create')
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#sectionCreateModal"><i class="fas fa-plus-circle"></i>{{_('Create Section(s)')}} </button>
-            <a  class="btn btn-primary btn-sm" href="{{ route('positions.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create New Position')}} </a>
             @endcan
-            <input id="sectionsSearch" type="text" class="form-control form-control-sm d-inline-block w-auto" placeholder="Search">
+
+        </div>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+        <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+            <label for="sectionsPageSize" class="mb-0 small text-muted">Show</label>
             <select id="sectionsPageSize" class="form-control form-control-sm d-inline-block w-auto">
                 <option value="10">10</option>
                 <option value="20" selected>20</option>
                 <option value="50">50</option>
                 <option value="100">100</option>
+                <option value="all">All</option>
             </select>
+            <input id="sectionsSearch" type="text" class="form-control form-control-sm d-inline-block w-auto" placeholder="Search">
         </div>
-    </div>
-    <!-- /.card-header -->
-    <div class="card-body">
         <table  class="table table-striped js-paginated-table" data-page-size="20" data-page-size-control="#sectionsPageSize" data-pager="#sectionsPager" data-search="#sectionsSearch">
             <thead>
                 <tr>
@@ -42,7 +47,9 @@ Sections
                     <td>{{ $section->section}}</td>
                     <td>
                             @can('department-edit')
-                            <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#sectionEditModal{{ $section->id }}" style="padding:0px 2px; color:#fff;">Edit</button>
+                            <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#sectionEditModal{{ $section->id }}" style="padding:0px 2px;">
+                               <i class="fas fa-edit me-1"></i> Edit
+                            </button>
                             @endcan
                     </td>
                 </tr>

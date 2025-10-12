@@ -3,7 +3,9 @@
 @section('title')
 Departments
 @endsection
+
 @include('partials.css')
+
 @section('content')
 
 <section class="content" >
@@ -18,57 +20,60 @@ Departments
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
-            <div class="input-group input-group-sm" style="width: 170px;">
-                <div class="input-group-prepend"><span class="input-group-text">Show</span></div>
-                <select id="departmentsPageSize" class="form-control">
-                    <option value="10">10</option>
-                    <option value="20" selected>20</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                    <option value="all">All</option>
-                </select>
+        <div class="table-responsive">
+            <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+                <div class="input-group input-group-sm" style="width: 170px;">
+                    <div class="input-group-prepend"><span class="input-group-text">Show</span></div>
+                    <select id="departmentsPageSize" class="form-control">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="all">All</option>
+                    </select>
+                </div>
+                <div class="input-group input-group-sm" style="width: 220px;">
+                    <input type="text" id="departmentsSearch" class="form-control" placeholder="Search departments">
+                </div>
             </div>
-            <div class="input-group input-group-sm" style="width: 220px;">
-                <input type="text" id="departmentsSearch" class="form-control" placeholder="Search departments">
-            </div>
-        </div>
-        <table id="departmentsTable" class="table table-striped align-middle js-paginated-table" data-page-size="20" data-page-size-control="#departmentsPageSize" data-pager="#departmentsPager" data-search="#departmentsSearch">
-            <thead>
-                <tr>
-                    <th>No.</th>
-                    <th>Department</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($departments as $department)
-                <tr>
-                    <td>{{ ++$i }}</td>
-                    <td>{{ $department->department }}</td>
-                    <td class="text-nowrap">
-                        <div class="btn-group btn-group-sm gap-2" role="group" aria-label="Actions">
-                            @can('department-edit')
-                            <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#departmentEditModal{{ $department->id }}">
-                                <i class="fas fa-edit me-1"></i>Edit
-                            </button>
-                            @endcan
-                            @can('department-delete')
-                            <form action="{{ route('departments.destroy', $department->id) }}" method="POST" class="d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-outline-danger show_confirm" data-name="{{ $department->department }}" title="Delete">
-                                    <i class="fas fa-trash"></i>Delete
+
+            <table id="departmentsTable" class="table table-hover align-middle js-paginated-table" data-page-size="20" data-page-size-control="#departmentsPageSize" data-pager="#departmentsPager" data-search="#departmentsSearch">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Department</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($departments as $department)
+                    <tr>
+                        <td>{{ ++$i }}</td>
+                        <td>{{ $department->department }}</td>
+                        <td class="text-nowrap">
+                            
+                                @can('department-edit')
+                                <button  class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#departmentEditModal{{ $department->id }}">
+                                    <i class="fas fa-edit"></i>Edit
                                 </button>
-                            </form>
-                            @endcan
-                        </div>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-        <div id="departmentsPager" class="mt-2"></div>
+                                @endcan
+                                @can('department-delete')
+                                <form action="{{ route('departments.destroy', $department->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-outline-danger show_confirm" data-name="{{ $department->department }}" title="Delete">
+                                        <i class="fas fa-trash"></i>Delete
+                                    </button>
+                                </form>
+                                @endcan
+                            
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            <div id="departmentsPager" class="mt-2"></div>
+        </div>
     </div>
     <!-- /.card-body -->
 </div>
