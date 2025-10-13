@@ -95,7 +95,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" form="user-create-form" class="btn btn-primary">Save</button>
+        <button type="submit" form="user-create-form" class="btn btn-primary"><i class="fas fa-save"></i>Save</button>
       </div>
     </div>
   </div>

@@ -15,56 +15,75 @@ Assess Faults
     <div class="card-header">
         <h3 class="card-title">{{_('Assess Faults')}}</h3>
         <div class="card-tools">
-            <input id="assessmentsSearch" type="text" class="form-control form-control-sm d-inline-block w-auto" placeholder="Search">
-            <select id="assessmentsPageSize" class="form-control form-control-sm d-inline-block w-auto">
-                <option value="10">10</option>
-                <option value="20" selected>20</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-            </select>
+
         </div>
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <table  class="table table-striped js-paginated-table" data-page-size="20" data-page-size-control="#assessmentsPageSize" data-pager="#assessmentsPager" data-search="#assessmentsSearch">
-            <thead>
-                <tr>
-                    <th>No.</th>
-                    <th>Customer</th>
-                    <th>Contact Name</th>
-                    <th>Account Manager</th>
-                    <th>Link Name</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($faults as $fault)
-                 <tr >
-                    <td>{{ ++$i }}</td>
-                    <td>{{ $fault->customer }}</td>
-                    <td>{{ $fault->contactName }}</td>
-                    <td>{{ $fault->accountManager }}</td>
-                    <td>{{ $fault->link }}</td>
-                    <td style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? 'none' }};">
-                       <strong>{{$fault->description}}</strong> 
-                    </td>
-                    <td>
-                        @can('fault-assessment')
-                            <a href="{{ route('assessments.edit',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Assess</a>
-                        @endcan
+        <div class="table-responsive">
+            <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+                <div class="input-group input-group-sm" style="width: 170px;">
+                    <div class="input-group-prepend"><span class="input-group-text">Show</span></div>
+                    <select id="assessmentsPageSize" class="form-select form-select-sm" style="width:auto;">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="all">All</option>
+                    </select>
+                </div>
+                <div class="input-group input-group-sm" style="width: 220px;">
+                    <input type="text" id="assessmentsSearch" class="form-control" placeholder="Search faults">
+                </div>
+            </div>
+            <table  class="table table-hover js-paginated-table" data-page-size="20" data-page-size-control="#assessmentsPageSize" data-pager="#assessmentsPager" data-search="#assessmentsSearch">
+                <thead class="thead-light">
+                    <tr>
+                        <th>No.</th>
+                        <th>Customer</th>
+                        <th>Contact Name</th>
+                        <th>Account Manager</th>
+                        <th>Link Name</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($faults as $fault)
+                    <tr >
+                        <td>{{ ++$i }}</td>
+                        <td>{{ $fault->customer }}</td>
+                        <td>{{ $fault->contactName }}</td>
+                        <td>{{ $fault->accountManager }}</td>
+                        <td>{{ $fault->link }}</td>
+                        <td class="text-nowrap">
+                            <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: #fff; padding: 0.5rem 0.75rem; font-weight: 600;">
+                                {{$fault->description}}
+                            </span>
+                        </td>
+                        <td>
+                            @can('fault-assessment')
+                                <a href="{{ route('assessments.edit',$fault->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
+                                  <i class="fas fa-eye"></i>  Assess
+                                </a>
+                            @endcan
 
-                        @can('fault-edit')
-                        <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >Edit</a>
-                        @endcan
-                        <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
-                        </div>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody> 
-        </table>
-        <div id="assessmentsPager" class="mt-2"></div>
+                            @can('fault-edit')
+                            <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px; " >
+                              <i class="fas fa-edit me-1"></i>  Edit
+                            </a>
+                            @endcan
+                            <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
+                               <i class="fas fa-eye me-1"></i> View
+                            </a>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody> 
+            </table>
+            <div id="assessmentsPager" class="mt-2"></div>
+        </div>
     </div>
     <!-- /.card-body -->
 </div>

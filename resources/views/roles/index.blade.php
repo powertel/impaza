@@ -50,57 +50,61 @@ Roles
         </div>
     </div>
     <div class="card-body">
-        <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
-            <label for="rolesPageSize" class="mb-0 small text-muted">Show</label>
-            <select id="rolesPageSize" class="form-select form-select-sm" style="width:auto;">
-                <option value="10">10</option>
-                <option value="20" selected>20</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-                <option value="all">All</option>
-            </select>
-            <input id="rolesSearch" type="search" class="form-control form-control-sm" placeholder="Search..." style="max-width:240px;">
-        </div>
         <div class="table-responsive">
-        <table class="table table-striped table-hover align-middle js-paginated-table" data-page-size="20" data-page-size-control="#rolesPageSize" data-pager="#rolesPager" data-search="#rolesSearch">
-            <thead>
-                <tr>
-                    <th style="width:60px">#</th>
-                    <th>Role</th>
-                    <th>Permissions</th>
-                    <th width="280px">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            @foreach ($roles as $role)
-                    <tr>
-                        <td>{{++$i}}</td>
-                        <td>{{ $role->name }}</td>
-                        <td>
-                            @foreach ($role->permissions as $perm)
-                                <span class="badge bg-warning text-dark rounded-pill me-1 mb-1"><i class="fas fa-shield-alt"></i> {{ $perm->name }}</span>
-                            @endforeach
-                        </td>
-                        <td>
-                            <form name="theForm" action="{{ route('roles.destroy',$role->id) }}" method="POST">
-                                <button type="button" class="btn btn-info btn-sm d-inline-flex align-items-center" style="padding:2px 8px; color:#fff;" data-bs-toggle="modal" data-bs-target="#roleShowModal{{ $role->id }}"><i class="fas fa-eye me-1"></i> View</button>
-                                @can('role-edit')
-                                <button type="button" class="btn btn-danger btn-sm d-inline-flex align-items-center" style="padding:2px 8px; color:#fff;" data-bs-toggle="modal" data-bs-target="#roleEditModal{{ $role->id }}"><i class="fas fa-pen me-1"></i> Edit</button>
-                                @endcan
+          <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+            <div class="input-group input-group-sm" style="width: 170px;">
+                <div class="input-group-prepend"><span class="input-group-text">Show</span></div>
+                <select id="rolesPageSize" class="form-select form-select-sm" style="width:auto;">
+                    <option value="10">10</option>
+                    <option value="20" selected>20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="all">All</option>
+                </select>
+            </div>
+            <div class="input-group input-group-sm" style="width: 220px;">
+                <input type="text" id="rolesSearch" class="form-control" placeholder="Search Roles">
+            </div>
+          </div>
+          <table class="table table-hover table-hover align-middle js-paginated-table" data-page-size="20" data-page-size-control="#rolesPageSize" data-pager="#rolesPager" data-search="#rolesSearch">
+              <thead class="thead-light">
+                  <tr>
+                      <th style="width:60px">#</th>
+                      <th>Role</th>
+                      <th>Permissions</th>
+                      <th width="280px">Actions</th>
+                  </tr>
+              </thead>
+              <tbody>
+              @foreach ($roles as $role)
+                      <tr>
+                          <td>{{++$i}}</td>
+                          <td>{{ $role->name }}</td>
+                          <td>
+                              @foreach ($role->permissions as $perm)
+                                  <span class="badge bg-warning text-dark rounded-pill me-1 mb-1"><i class="fas fa-shield-alt"></i> {{ $perm->name }}</span>
+                              @endforeach
+                          </td>
+                          <td>
+                              <form name="theForm" action="{{ route('roles.destroy',$role->id) }}" method="POST">
+                                  <button type="button" class="btn btn-outline-success btn-sm d-inline-flex align-items-center" style="padding:2px 8px;" data-bs-toggle="modal" data-bs-target="#roleShowModal{{ $role->id }}"><i class="fas fa-eye me-1"></i> View</button>
+                                  @can('role-edit')
+                                  <button type="button" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center" style="padding:2px 8px;" data-bs-toggle="modal" data-bs-target="#roleEditModal{{ $role->id }}"><i class="fas fa-pen me-1"></i> Edit</button>
+                                  @endcan
 
-                                @csrf
-                                @method('DELETE')
-                                @can('role-delete')
-                                <button type="button" class="btn btn-danger btn-sm show_confirm d-inline-flex align-items-center" data-toggle="tooltip" title='Delete' style="padding:2px 8px; color:#fff;"><i class="fas fa-trash-alt me-1"></i> Delete</button> 
-                                @endcan
-                            </form>
-                        </td>
-                        
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-        <div id="rolesPager" class="mt-2"></div>
+                                  @csrf
+                                  @method('DELETE')
+                                  @can('role-delete')
+                                  <button type="button" class="btn btn-outline-danger btn-sm show_confirm d-inline-flex align-items-center" data-toggle="tooltip" title='Delete' style="padding:2px 8px;"><i class="fas fa-trash-alt me-1"></i> Delete</button> 
+                                  @endcan
+                              </form>
+                          </td>
+                          
+                      </tr>
+                  @endforeach
+              </tbody>
+          </table>
+          <div id="rolesPager" class="mt-2"></div>
         </div>
     </div>
 </div>

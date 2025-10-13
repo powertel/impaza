@@ -22,18 +22,22 @@ Stores
     <!-- /.card-header -->
     <div class="card-body">
         <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
-            <label for="storesPageSize" class="mb-0 small text-muted">Show</label>
-            <select id="storesPageSize" class="form-select form-select-sm" style="width:auto;">
-                <option value="10">10</option>
-                <option value="20" selected>20</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-                <option value="all">All</option>
-            </select>
-            <input id="storesSearch" type="search" class="form-control form-control-sm" placeholder="Search..." style="max-width:240px;">
+            <div class="input-group input-group-sm" style="width: 170px;">
+                <div class="input-group-prepend"><span class="input-group-text">Show</span></div>
+                <select id="storesPageSize" class="form-select form-select-sm" style="width:auto;">
+                    <option value="10">10</option>
+                    <option value="20" selected>20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="all">All</option>
+                </select>
+            </div>
+            <div class="input-group input-group-sm" style="width: 220px;">
+                <input type="text" id="storesSearch" class="form-control" placeholder="Search stores">
+            </div>
         </div>
-        <table  class="table table-striped js-paginated-table" id="material" style="font-size:14px" data-page-size="20" data-page-size-control="#storesPageSize" data-pager="#storesPager" data-search="#storesSearch">
-            <thead>
+        <table  class="table table-hover js-paginated-table" id="material" style="font-size:14px" data-page-size="20" data-page-size-control="#storesPageSize" data-pager="#storesPager" data-search="#storesSearch">
+            <thead class="thead-light">
                 <tr>
                     <th>Fault Ref. No.</th>
                     <th>Fault Name</th>

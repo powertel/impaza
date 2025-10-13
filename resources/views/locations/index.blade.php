@@ -23,43 +23,58 @@ Locations
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
-            <label for="locationsPageSize" class="mb-0 small text-muted">Show</label>
-            <select id="locationsPageSize" class="form-select form-select-sm" style="width:auto;">
-                <option value="10">10</option>
-                <option value="20" selected>20</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-                <option value="all">All</option>
-            </select>
-            <input id="locationsSearch" type="search" class="form-control form-control-sm" placeholder="Search..." style="max-width:240px;">
+
+        <div class="table-responsive">
+
+            <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+                <div class="input-group input-group-sm" style="width: 170px;">
+                    <div class="input-group-prepend"><span class="input-group-text">Show</span></div>
+                    <select id="locationsPageSize" class="form-select form-select-sm" style="width:auto;">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="all">All</option>
+                    </select>
+                </div>
+                <div class="input-group input-group-sm" style="width: 220px;">
+                    <input type="text" id="locationsSearch" class="form-control" placeholder="Search Locations">
+                </div>
+            </div>
+
+            
+
+            <table  class="table table-hover js-paginated-table" data-page-size="20" data-page-size-control="#locationsPageSize" data-pager="#locationsPager" data-search="#locationsSearch">
+                <thead class="thead-light">
+                    <tr>
+                        <th>No.</th>
+                        <th>City</th>
+                        <th>location</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($locations as $location)
+                    <tr >
+                        <td>{{++$i}}</td>
+                        <td>{{ $location->city}}</td>
+                        <td>{{ $location->suburb}}</td>
+                        <td>
+                            @can('location-edit')
+                            <a href="{{ route('locations.edit',$location->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
+                               <i class="fas fa-edit me-1"></i> Edit
+                            </a>
+                            @endcan
+                            <a href="{{ route('locations.show',$location->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
+                               <i class="fas fa-eye me-1"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody> 
+            </table>
+            <div id="locationsPager" class="mt-2"></div>
         </div>
-        <table  class="table table-striped js-paginated-table" data-page-size="20" data-page-size-control="#locationsPageSize" data-pager="#locationsPager" data-search="#locationsSearch">
-            <thead>
-                <tr>
-                    <th>No.</th>
-                    <th>City</th>
-                    <th>location</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($locations as $location)
-                 <tr >
-                    <td>{{++$i}}</td>
-                    <td>{{ $location->city}}</td>
-                    <td>{{ $location->suburb}}</td>
-                    <td>
-                        @can('location-edit')
-                        <a href="{{ route('locations.edit',$location->id) }}" class="btn btn-sm btn-danger" style="padding:0px 2px; color:#fff;" >Edit</a>
-                        @endcan
-                        <a href="{{ route('locations.show',$location->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody> 
-        </table>
-        <div id="locationsPager" class="mt-2"></div>
     </div>
     <!-- /.card-body -->
 </div>

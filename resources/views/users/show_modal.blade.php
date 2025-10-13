@@ -1,6 +1,6 @@
 <!-- Show User Modal -->
 <div class="modal custom-modal fade" id="showUserModal-{{ $user->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="showUserModalLabel-{{ $user->id }}" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
+  <div class="modal-dialog modal-lg modal-dialog">
     <div class="modal-content rounded-4 border-0 shadow-lg">
       <div class="modal-header border-0">
         <div class="d-flex align-items-center">

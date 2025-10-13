@@ -21,7 +21,7 @@
             </li>
 
             @canany(['fault-list','my-fault-list','assigned-fault-list','assessement-fault-list','chief-tech-clear-faults-list','noc-clear-faults-list','department-faults-list'])
-                        <li class="nav-header">Faults</li>
+              <li class="nav-header">Faults</li>
             @endcanany
             @can('fault-list')
             <li class="nav-item">
