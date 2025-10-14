@@ -79,8 +79,16 @@ class CustomerController extends Controller
     {
         $customers = DB::table('customers')
                 ->orderBy('customers.customer', 'asc')
-                ->get(['customers.id','customers.customer','customers.account_number']);
-        return view('customers.index',compact('customers'))
+                ->get(['customers.id','customers.customer','customers.account_number','customers.account_manager_id']);
+
+        // Fetch account managers joined with users for display and selection
+        $accountManagers = DB::table('account_managers')
+            ->leftJoin('users', 'account_managers.user_id', '=', 'users.id')
+            ->whereNotNull('account_managers.user_id')
+            ->orderBy('users.name', 'asc')
+            ->get(['account_managers.id as am_id', 'account_managers.user_id as user_id', 'users.name as name']);
+
+        return view('customers.index',compact('customers','accountManagers'))
         ->with('i');
     }
 
@@ -115,10 +123,12 @@ class CustomerController extends Controller
                     $validated = validator($item, [
                         'customer' => 'required|string|unique:customers,customer',
                         'account_number' => 'required|string|unique:customers,account_number',
+                        'account_manager_id' => 'nullable|integer|exists:users,id',
                     ])->validate();
                     Customer::create([
                         'customer' => $validated['customer'],
                         'account_number' => $validated['account_number'],
+                        'account_manager_id' => $validated['account_manager_id'] ?? null,
                     ]);
                 }
                 DB::commit();
@@ -129,8 +139,9 @@ class CustomerController extends Controller
             $request->validate([
                 'customer' => 'required|string|unique:customers,customer',
                 'account_number' => 'required|string|unique:customers,account_number',
+                'account_manager_id' => 'nullable|integer|exists:users,id',
             ]);
-            $customer = Customer::create($request->only('customer','account_number'));
+            $customer = Customer::create($request->only('customer','account_number','account_manager_id'));
 
             DB::commit();
             return redirect()->route('customers.index')
@@ -197,6 +208,8 @@ class CustomerController extends Controller
         $validated = $request->validate([
             'customer' => ['required','string', Rule::unique('customers','customer')->ignore($id)],
             'account_number' => ['required','string', Rule::unique('customers','account_number')->ignore($id)],
+            // Required but not unique; 1 manager can have many customers
+            'account_manager_id' => ['required','integer','exists:users,id'],
         ]);
         $customer->update($validated);
         return redirect(route('customers.index'))

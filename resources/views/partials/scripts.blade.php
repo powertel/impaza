@@ -192,15 +192,26 @@ $('#city').on('change',function () {
       wrapper.className = 'repeater-item border rounded p-3 mb-3';
       wrapper.innerHTML = `
         <div class="row g-3 align-items-end">
-          <div class="col-md-6">
+          <div class="col-md-4">
             <label class="form-label">Customer</label>
             <input type="text" name="items[${idx}][customer]" class="form-control customer-name-input" placeholder="e.g. Acme Corp" required>
             <div class="invalid-feedback">This customer name already exists.</div>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-4">
             <label class="form-label">Account Number</label>
             <input type="text" name="items[${idx}][account_number]" class="form-control account-number-input" placeholder="e.g. 123456789" required>
             <div class="invalid-feedback">This account number already exists.</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Account Manager</label>
+            <select name="items[${idx}][account_manager_id]" class="form-select">
+              <option value="">None</option>
+              @isset($accountManagers)
+                @foreach($accountManagers as $am)
+                  <option value="{{ $am->user_id }}">{{ $am->name ?? ('User #'.$am->user_id) }}</option>
+                @endforeach
+              @endisset
+            </select>
           </div>
         </div>
       `;

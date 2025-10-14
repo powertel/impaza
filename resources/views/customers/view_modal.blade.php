@@ -13,6 +13,21 @@
           <dd class="col-sm-7">{{ $customer->customer }}</dd>
           <dt class="col-sm-5">Account Number</dt>
           <dd class="col-sm-7">{{ $customer->account_number }}</dd>
+          @php
+            $manager = DB::table('account_managers')
+              ->leftJoin('users','account_managers.user_id','=','users.id')
+              ->where('account_managers.user_id', $customer->account_manager_id)
+              ->select('users.name as name','account_managers.accountManager as title')
+              ->first();
+          @endphp
+          <dt class="col-sm-5">Account Manager</dt>
+          <dd class="col-sm-7">
+            @if($manager)
+              <span class="d-block">{{ $manager->name }}</span>
+            @else
+              <span class="text-muted">Not set</span>
+            @endif
+          </dd>
         </dl>
 
         <hr class="my-3">
