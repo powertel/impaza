@@ -86,7 +86,9 @@
             </li>
             @endcan
 
-            <li class="nav-header">Permits</li>
+            @canany(['permit-list'])
+              <li class="nav-header">Permits</li>
+            @endcanany
             @can('permit-list')
             <li class="nav-item">
               <a class="nav-link {{ request()->routeIs('permits.*') ? 'active' : '' }}" href="{{ route('permits.index') }}">
@@ -102,7 +104,9 @@
             </li>
             @endcan
 
-            <li class="nav-header">Finance</li>
+            @canany(['finance'])
+              <li class="nav-header">Finance</li>
+            @endcanany
             @can('finance')
             <li class="nav-item">
               <a href="{{ route('finance.index') }}" class="nav-link {{ request()->routeIs('finance.*') ? 'active' : '' }}">
@@ -112,7 +116,9 @@
             </li>
             @endcan
 
-            <li class="nav-header">Organization</li>
+            @canany(['department-list'])
+              <li class="nav-header">Organization</li>
+            @endcanany
             @can('department-list')
             <li class="nav-item">
               <a href="{{ route('departments.index') }}" class="nav-link {{ request()->routeIs('departments.*') ? 'active' : '' }}">
@@ -138,7 +144,9 @@
             </li>
             @endcan
 
-            <li class="nav-header">Network</li>
+            @canany(['city-list','location-list','pop-list'])
+              <li class="nav-header">Network</li>
+            @endcanany
             @can('city-list')
             <li class="nav-item">
               <a href="{{ route('cities.index') }}" class="nav-link {{ request()->routeIs('cities.*') ? 'active' : '' }}">
@@ -164,7 +172,9 @@
             </li>
             @endcan
 
-            <li class="nav-header">Business</li>
+            @canany(['customer-list','link-list','account-manager-list'])
+              <li class="nav-header">Business</li>
+            @endcanany
             @can('customer-list')
             <li class="nav-item">
               <a href="{{ route('customers.index') }}" class="nav-link {{ request()->routeIs('customers.*') ? 'active' : '' }}">
@@ -190,8 +200,10 @@
             </li>
             @endcan
 
-            @can('reports')
+            @canany(['reports'])
             <li class="nav-header">Reports</li>
+            @endcanany
+            @can('reports')
             <li class="nav-item">
               <a class="nav-link">
                 <i class="nav-icon fas fa-chart-bar"></i>
@@ -200,7 +212,9 @@
             </li>
             @endcan
 
-            <li class="nav-header">User Management</li>
+            @canany(['user-list','role-list','permissions'])
+              <li class="nav-header">User Management</li>
+            @endcanany
             @can('user-list')
             <li class="nav-item">
               <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
