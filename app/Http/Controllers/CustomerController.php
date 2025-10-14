@@ -8,6 +8,8 @@ use App\Models\City;
 use App\Models\Pop;
 use App\Models\Customer;
 use App\Models\Link;
+use Illuminate\Validation\Rule;
+use Illuminate\Database\QueryException;
 use DB;
 
 class CustomerController extends Controller
@@ -29,7 +31,7 @@ class CustomerController extends Controller
     {
         $customers = DB::table('customers')
                 ->orderBy('customers.customer', 'asc')
-                ->get(['customers.id','customers.customer']);
+                ->get(['customers.id','customers.customer','customers.account_number']);
         return view('customers.index',compact('customers'))
         ->with('i');
     }
@@ -57,21 +59,37 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
+        DB::beginTransaction();
+        try {
+            if ($request->has('items')) {
+                $items = $request->input('items', []);
+                foreach ($items as $item) {
+                    $validated = validator($item, [
+                        'customer' => 'required|string|unique:customers,customer',
+                        'account_number' => 'required|string|unique:customers,account_number',
+                    ])->validate();
+                    Customer::create([
+                        'customer' => $validated['customer'],
+                        'account_number' => $validated['account_number'],
+                    ]);
+                }
+                DB::commit();
+                return redirect()->route('customers.index')
+                    ->with('success','Customer(s) Created.');
+            }
 
-        request()->validate([
-            'customer' => 'required|string|unique:customers',
-        ]);
+            $request->validate([
+                'customer' => 'required|string|unique:customers,customer',
+                'account_number' => 'required|string|unique:customers,account_number',
+            ]);
+            $customer = Customer::create($request->only('customer','account_number'));
 
-        $customer=  Customer::create($request->all());
-
-        if($customer)
-        {
+            DB::commit();
             return redirect()->route('customers.index')
-             ->with('success','Customer Created.');
-        }
-        else
-        {
-            return back()->with('fail','Something went wrong');
+                ->with('success','Customer Created.');
+        } catch (\Exception $ex) {
+            DB::rollBack();
+            return back()->withErrors(['error' => $ex->getMessage()])->withInput();
         }
 
     }
@@ -127,11 +145,14 @@ class CustomerController extends Controller
      */
     public function update(Request $request, $id)
     {
-
         $customer = Customer::find($id);
-        $customer ->update($request->all());
+        $validated = $request->validate([
+            'customer' => ['required','string', Rule::unique('customers','customer')->ignore($id)],
+            'account_number' => ['required','string', Rule::unique('customers','account_number')->ignore($id)],
+        ]);
+        $customer->update($validated);
         return redirect(route('customers.index'))
-        ->with('success','Customer updated successfully'); 
+            ->with('success','Customer updated successfully'); 
     }
 
     /**
@@ -142,7 +163,17 @@ class CustomerController extends Controller
      */
     public function destroy($id)
     {
-        DB::table("customers")->where('id',$id)->delete();
-        return redirect()->route('customers.index');
+        try {
+            $hasLinks = DB::table('links')->where('customer_id', $id)->exists();
+            if ($hasLinks) {
+                return redirect()->route('customers.index')
+                    ->withErrors(['error' => 'Cannot delete customer: there are associated links referencing this customer.']);
+            }
+            Customer::findOrFail($id)->delete();
+            return redirect()->route('customers.index')->with('success', 'Customer deleted successfully');
+        } catch (QueryException $e) {
+            return redirect()->route('customers.index')
+                ->withErrors(['error' => 'Delete failed due to existing references.']);
+        }
     }
 }

@@ -14,7 +14,7 @@ Customers
         <h3 class="card-title">{{_('Customers')}}</h3>
         <div class="card-tools">
             @can('customer-create')
-            <a  class="btn btn-primary btn-sm" href="{{ route('customers.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Customer')}} </a>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#customerCreateModal"><i class="fas fa-plus-circle"></i> {{_('Create Customer(s)')}} </button>
             @endcan
             @can('link-create')
                 <a  class="btn btn-primary btn-sm" href="{{ route('links.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Link')}} </a>
@@ -45,6 +45,7 @@ Customers
                     <tr>
                         <th>No.</th>
                         <th>Customer</th>
+                        <th>Account Number</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -53,27 +54,21 @@ Customers
                     <tr>
                         <td>{{++$i}}</td>
                         <td>{{ $customer->customer}}</td>
+                        <td>{{ $customer->account_number }}</td>
                         <td>
-                        <form action="{{ route('customers.destroy',$customer->id) }}" method="POST">
-                            <a href="{{ route('customers.show',$customer->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
+                            <button type="button" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#customerViewModal{{ $customer->id }}">
                                 <i class="fas fa-eye me-1"></i>View
-                            </a>
-                            @can('account-manager-edit')
-                            <a href="{{ route('customers.edit',$customer->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
+                            </button>
+                            @can('customer-edit')
+                            <button type="button" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#customerEditModal{{ $customer->id }}">
                                 <i class="fas fa-edit me-1"></i>Edit
-                            </a>
+                            </button>
                             @endcan
-
-                            @csrf
-                            @method('DELETE')
                             @can('customer-delete')
-                            <button type="button" class="btn btn-outline-danger btn-sm show_confirm" data-toggle="tooltip" title='Delete' style="padding:0px 2px;">
+                            <button type="button" class="btn btn-outline-danger btn-sm" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#customerDeleteModal{{ $customer->id }}">
                                 <i class="fas fa-trash me-1"></i>Delete
                             </button> 
                             @endcan
-                        </form>
-                        
-                            
                         </td>
                     </tr>
                     @endforeach
@@ -87,3 +82,8 @@ Customers
  
 </section>
 @endsection
+
+@include('customers.create_modal')
+@include('customers.edit_modal')
+@include('customers.view_modal')
+@include('customers.delete_modal')
