@@ -123,22 +123,9 @@
                     </div>
 
                     <div class="row g-3">
-                        <div class="mb-3 col-md-8">
+                        <div class="mb-3 col-md-12">
                             <label for="address" class="form-label">Address</label>
                             <input type="text" class="form-control @error('address') is-invalid @enderror"  placeholder="Address" name="address" value="{{ old('address') }}" >
-                        </div>
-                        <div class="mb-3 col-md-4">
-                            <label for="accountManager" class="form-label">Account Manager</label>
-                            <select  class="form-select @error('accountManager_id') is-invalid @enderror" name="accountManager_id" >
-                                <option selected disabled >Select Account Manager</option>
-                                @foreach($accountManager as $acc_manager)
-                                    @if (old('accountManager_id')==$acc_manager->id)
-                                        <option value="{{ $acc_manager->id}}" selected>{{ $acc_manager->accountManager }}</option>
-                                    @else
-                                        <option value="{{ $acc_manager->id}}">{{ $acc_manager->accountManager }}</option>
-                                    @endif
-                                @endforeach
-                            </select>
                         </div>
                     </div>
 

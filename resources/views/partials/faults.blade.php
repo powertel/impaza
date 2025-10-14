@@ -154,33 +154,51 @@ $(document).off('change', '.customer-select').on('change', '.customer-select', f
 // Disable Save until all required fields in the create modal are valid
 $(function(){
   var $saveBtn = $('button[form="UF"][type="submit"]');
-  function checkValidity(){
+  function computeValidity(mark){
     var requiredSelectors = [
       '#customer', '#city', 'input[name="contactName"]', 'input[name="phoneNumber"]', 'input[name="contactEmail"]',
       '#suburb', '#link', '#pop', 'select[name="serviceType"]', 'select[name="suspectedRfo_id"]',
-      'input[name="address"]', 'select[name="accountManager_id"]', 'textarea[name="remark"]'
+      'input[name="address"]', 'textarea[name="remark"]'
     ];
     var allValid = true;
     requiredSelectors.forEach(function(sel){
       var $el = $(sel);
       if(!$el.length){ allValid = false; return; }
-      if($el.is('select')){
-        var val = $el.val();
-        if(!val){ allValid = false; $el.addClass('is-invalid'); } else { $el.removeClass('is-invalid'); }
+      var isSelect = $el.is('select');
+      var val = isSelect ? $el.val() : ($el.val()||'').trim();
+      var empty = !val;
+      if(empty){ allValid = false; }
+      if(mark){
+        if(empty){ $el.addClass('is-invalid'); } else { $el.removeClass('is-invalid'); }
       } else {
-        var val = ($el.val()||'').trim();
-        if(!val){ allValid = false; $el.addClass('is-invalid'); } else { $el.removeClass('is-invalid'); }
+        // On initial open, do not mark invalid
+        $el.removeClass('is-invalid');
       }
     });
-    var email = $('input[name="contactEmail"]').val()||'';
-    if(email && !/^\S+@\S+\.\S+$/.test(email)){ allValid = false; $('input[name="contactEmail"]').addClass('is-invalid'); }
-    var phone = $('input[name="phoneNumber"]').val()||'';
-    if(phone.replace(/\D/g,'').length < 10){ allValid = false; $('input[name="phoneNumber"]').addClass('is-invalid'); }
+    var emailEl = $('input[name="contactEmail"]');
+    var email = emailEl.val()||'';
+    var phoneEl = $('input[name="phoneNumber"]');
+    var phone = phoneEl.val()||'';
+    if(mark){
+      if(email && !/^\S+@\S+\.\S+$/.test(email)){ allValid = false; emailEl.addClass('is-invalid'); } else { emailEl.removeClass('is-invalid'); }
+      if(phone.replace(/\D/g,'').length < 10){ allValid = false; phoneEl.addClass('is-invalid'); } else { phoneEl.removeClass('is-invalid'); }
+    }
     $saveBtn.prop('disabled', !allValid);
   }
   $saveBtn.prop('disabled', true);
-  $('#createFaultModal').on('shown.bs.modal', checkValidity);
-  $(document).on('input change', '#createFaultModal input, #createFaultModal select, #createFaultModal textarea', checkValidity);
+  // On modal open: compute validity without marking fields invalid
+  $('#createFaultModal').on('shown.bs.modal', function(){ computeValidity(false); });
+  // When user interacts: compute and mark invalids
+  $(document).on('input change', '#createFaultModal input, #createFaultModal select, #createFaultModal textarea', function(){ computeValidity(true); });
+
+  // Enhance the Customer select with Select2 inside the modal
+  if($('#customer').length){
+    $('#customer').select2({
+      placeholder: 'Select Customer',
+      width: '100%',
+      dropdownParent: $('#createFaultModal')
+    });
+  }
 });
 </script>
 
@@ -188,6 +206,15 @@ $(function(){
 // Initialize edit modal selects on open
 $(document).off('shown.bs.modal', '.modal[id^="editFaultModal-"]').on('shown.bs.modal', '.modal[id^="editFaultModal-"]', function(){
   var $modal = $(this);
+  // Apply Select2 to customer select in the edit modal
+  var $customerSel = $modal.find('.customer-select');
+  if($customerSel.length && !$customerSel.hasClass('select2-hidden-accessible')){
+    $customerSel.select2({
+      placeholder: 'Select Customer',
+      width: '100%',
+      dropdownParent: $modal
+    });
+  }
   var cityID = $modal.find('.city-select').val();
   var suburbSelected = $modal.find('.suburb-select').data('selected');
   var customerID = $modal.find('.customer-select').val();

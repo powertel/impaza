@@ -78,8 +78,10 @@ class CustomerController extends Controller
     public function index()
     {
         $customers = DB::table('customers')
+                ->leftJoin('account_managers', 'customers.account_manager_id', '=', 'account_managers.id')
+                ->leftJoin('users as account_manager_users', 'account_managers.user_id', '=', 'account_manager_users.id')
                 ->orderBy('customers.customer', 'asc')
-                ->get(['customers.id','customers.customer','customers.account_number','customers.account_manager_id']);
+                ->get(['customers.id','customers.customer','customers.account_number','customers.account_manager_id','account_manager_users.name as accountManager']);
 
         // Fetch account managers joined with users for display and selection
         $accountManagers = DB::table('account_managers')

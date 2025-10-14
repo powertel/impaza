@@ -43,6 +43,7 @@ Customers
                     <tr>
                         <th>No.</th>
                         <th>Customer</th>
+                        <th>Account Manager</th>
                         <th>Account Number</th>
                         <th>Actions</th>
                     </tr>
@@ -52,6 +53,7 @@ Customers
                     <tr>
                         <td>{{++$i}}</td>
                         <td>{{ $customer->customer}}</td>
+                        <td>{{ $customer->accountManager }}</td>
                         <td>{{ $customer->account_number }}</td>
                         <td>
                             <button type="button" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#customerViewModal{{ $customer->id }}">
