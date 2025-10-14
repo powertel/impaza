@@ -303,6 +303,57 @@ $('#city').on('change',function () {
     // expose globally for modal shown rebinds
     window.bindLinkCascades = bindLinkCascades;
 
+    // Simple (non-repeater) cascading for edit forms and modals
+    function bindSimpleLinkCascades(scope) {
+      const root = scope || document;
+      const citySel = root.querySelector('select[name="city_id"], #city');
+      const suburbSel = root.querySelector('select[name="suburb_id"], #suburb');
+      const popSel = root.querySelector('select[name="pop_id"], #pop');
+      if (!citySel || !suburbSel || !popSel) return;
+
+      if (citySel.dataset.simpleBound === '1') return; // avoid duplicates
+      citySel.dataset.simpleBound = '1';
+      suburbSel.dataset.simpleBound = '1';
+
+      citySel.addEventListener('change', function(){
+        const cityId = this.value;
+        $(suburbSel).empty().append('<option selected disabled>Select Location</option>');
+        $(popSel).empty().append('<option selected disabled>Select Pop</option>');
+        if (!cityId) return;
+        $.ajax({
+          url: '/suburb/' + cityId,
+          type: 'GET',
+          dataType: 'json',
+          success: function(res){
+            if (res) {
+              $.each(res, function(key, value){
+                $(suburbSel).append('<option value="'+key+'">'+value+'</option>');
+              });
+            }
+          }
+        });
+      });
+
+      suburbSel.addEventListener('change', function(){
+        const suburbId = this.value;
+        $(popSel).empty().append('<option selected disabled>Select Pop</option>');
+        if (!suburbId) return;
+        $.ajax({
+          url: '/pop/' + suburbId,
+          type: 'GET',
+          dataType: 'json',
+          success: function(res){
+            if (res) {
+              $.each(res, function(key, value){
+                $(popSel).append('<option value="'+key+'">'+value+'</option>');
+              });
+            }
+          }
+        });
+      });
+    }
+    window.bindSimpleLinkCascades = bindSimpleLinkCascades;
+
     function createItem(idx) {
       const wrapper = document.createElement('div');
       wrapper.className = 'repeater-item border rounded p-3 mb-3 position-relative';
@@ -313,7 +364,7 @@ $('#city').on('change',function () {
             <label class="form-label">City/Town</label>
             <select name="items[${idx}][city_id]" class="form-select" required>
               <option value="" disabled selected>Select City</option>
-              ${Array.from(document.querySelectorAll('#createLinkModal select[name="items\\[0\\]\[city_id\]"] option'))
+              ${Array.from(document.querySelectorAll('#linkCitiesTemplate option'))
                 .map(o => `<option value="${o.value}">${o.text}</option>`).join('')}
             </select>
           </div>
@@ -321,7 +372,7 @@ $('#city').on('change',function () {
             <label class="form-label">Location</label>
             <select name="items[${idx}][suburb_id]" class="form-select" required>
               <option value="" disabled selected>Select Location</option>
-              ${Array.from(document.querySelectorAll('#createLinkModal select[name="items\\[0\\]\[suburb_id\]"] option'))
+              ${Array.from(document.querySelectorAll('#linkSuburbsTemplate option'))
                 .map(o => `<option value="${o.value}">${o.text}</option>`).join('')}
             </select>
           </div>
@@ -329,7 +380,7 @@ $('#city').on('change',function () {
             <label class="form-label">Pop</label>
             <select name="items[${idx}][pop_id]" class="form-select" required>
               <option value="" disabled selected>Select Pop</option>
-              ${Array.from(document.querySelectorAll('#createLinkModal select[name="items\\[0\\]\[pop_id\]"] option'))
+              ${Array.from(document.querySelectorAll('#linkPopsTemplate option'))
                 .map(o => `<option value="${o.value}">${o.text}</option>`).join('')}
             </select>
           </div>
@@ -337,13 +388,13 @@ $('#city').on('change',function () {
             <label class="form-label">Link Type</label>
             <select name="items[${idx}][linkType_id]" class="form-select" required>
               <option value="" disabled selected>Select Type</option>
-              ${Array.from(document.querySelectorAll('#createLinkModal select[name="items\\[0\\]\[linkType_id\]"] option'))
+              ${Array.from(document.querySelectorAll('#linkTypesTemplate option'))
                 .map(o => `<option value="${o.value}">${o.text}</option>`).join('')}
             </select>
           </div>
           <div class="col-md-6">
             <label class="form-label">Link</label>
-            <input type="text" name="items[${idx}][link]" class="form-control" placeholder="e.g. MPLS-001" required>
+            <input type="text" name="items[${idx}][link]" class="form-control link-name-input" placeholder="e.g. MPLS-001" required>
           </div>
         </div>
       `;
@@ -355,6 +406,7 @@ $('#city').on('change',function () {
       const item = createItem(index);
       itemsContainer.appendChild(item);
       bindLinkCascades(itemsContainer);
+      if (window.bindLinkNameValidation) window.bindLinkNameValidation(item);
     });
 
     removeBtn?.addEventListener('click', function() {
@@ -384,6 +436,7 @@ $('#city').on('change',function () {
   document.addEventListener('DOMContentLoaded', function() {
     const accCheckUrl = "{{ route('customers.check-account-number') }}";
     const nameCheckUrl = "{{ route('customers.check-customer-name') }}";
+    const linkCheckUrl = "{{ route('links.check-link-name') }}";
 
     const debounceTimers = new WeakMap();
 
@@ -395,7 +448,8 @@ $('#city').on('change',function () {
     function refreshFormSubmitState(form) {
       const hasInvalidAcc = form.querySelectorAll('.account-number-input.is-invalid').length > 0;
       const hasInvalidName = form.querySelectorAll('.customer-name-input.is-invalid').length > 0;
-      setSubmitDisabled(form, hasInvalidAcc || hasInvalidName);
+      const hasInvalidLink = form.querySelectorAll('.link-name-input.is-invalid').length > 0;
+      setSubmitDisabled(form, hasInvalidAcc || hasInvalidName || hasInvalidLink);
     }
 
     function validateInput(input) {
@@ -504,16 +558,72 @@ $('#city').on('change',function () {
       inputs.forEach(bindNameValidationToInput);
     };
 
+    // Link name validation
+    function validateLinkInput(input) {
+      const value = (input.value || '').trim();
+      const form = input.closest('form');
+      const ignoreId = input.dataset.ignoreId || '';
+      if (value === '') {
+        input.classList.remove('is-invalid');
+        input.classList.remove('is-valid');
+        refreshFormSubmitState(form);
+        return;
+      }
+
+      $.get(linkCheckUrl, { link: value, ignore_id: ignoreId })
+        .done(function(res) {
+          if (res && res.available === true) {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (fb) fb.classList.remove('d-block');
+          } else {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (fb) fb.classList.add('d-block');
+          }
+          refreshFormSubmitState(form);
+        })
+        .fail(function() {
+          input.classList.remove('is-invalid');
+          input.classList.remove('is-valid');
+          const fb = input.parentElement.querySelector('.invalid-feedback');
+          if (fb) fb.classList.remove('d-block');
+          refreshFormSubmitState(form);
+        });
+    }
+
+    function bindLinkValidationToInput(input) {
+      function debouncedValidate() {
+        const existing = debounceTimers.get(input);
+        if (existing) clearTimeout(existing);
+        const t = setTimeout(() => validateLinkInput(input), 350);
+        debounceTimers.set(input, t);
+      }
+      input.addEventListener('input', debouncedValidate);
+      input.addEventListener('blur', () => validateLinkInput(input));
+    }
+
+    window.bindLinkNameValidation = function(root) {
+      const scope = root || document;
+      const inputs = scope.querySelectorAll('.link-name-input');
+      inputs.forEach(bindLinkValidationToInput);
+    };
+
     // Bind on load for existing inputs (create & edit modals)
     window.bindAccountNumberValidation(document);
     window.bindCustomerNameValidation(document);
+    window.bindLinkNameValidation(document);
 
     // Also re-bind when a Bootstrap modal is shown, to make sure dynamic content is wired
     document.querySelectorAll('.modal').forEach(function(modalEl) {
       modalEl.addEventListener('shown.bs.modal', function() {
         window.bindAccountNumberValidation(modalEl);
         window.bindCustomerNameValidation(modalEl);
+        window.bindLinkNameValidation(modalEl);
         if (window.bindLinkCascades) window.bindLinkCascades(modalEl);
+        if (window.bindSimpleLinkCascades) window.bindSimpleLinkCascades(modalEl);
       });
     });
 
@@ -543,6 +653,18 @@ $('#city').on('change',function () {
       });
     }
 
+    function checkLinkAvailabilityValue(value, ignoreId) {
+      return new Promise(function(resolve) {
+        $.get(linkCheckUrl, { link: value, ignore_id: ignoreId })
+          .done(function(res){
+            resolve(!!(res && res.available === true));
+          })
+          .fail(function(){
+            resolve(false);
+          });
+      });
+    }
+
     function handleFormSubmit(e) {
       const form = e.target;
       // First use native HTML5 validation
@@ -554,7 +676,8 @@ $('#city').on('change',function () {
 
       const accInputs = form.querySelectorAll('.account-number-input');
       const nameInputs = form.querySelectorAll('.customer-name-input');
-      if (!accInputs.length && !nameInputs.length) {
+      const linkInputs = form.querySelectorAll('.link-name-input');
+      if (!accInputs.length && !nameInputs.length && !linkInputs.length) {
         // No relevant fields; let native submission proceed
         return;
       }
@@ -598,17 +721,36 @@ $('#city').on('change',function () {
             }
             return available;
           });
+        }),
+        ...Array.from(linkInputs).map(function(input){
+          const value = (input.value || '').trim();
+          const ignoreId = input.dataset.ignoreId || '';
+          if (!value) return Promise.resolve(true);
+          return checkLinkAvailabilityValue(value, ignoreId).then(function(available){
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (available) {
+              input.classList.remove('is-invalid');
+              input.classList.add('is-valid');
+              if (fb) fb.classList.remove('d-block');
+            } else {
+              input.classList.add('is-invalid');
+              input.classList.remove('is-valid');
+              if (fb) fb.classList.add('d-block');
+            }
+            return available;
+          });
         })
       ];
 
       Promise.all(checks).then(function(results){
         const anyTaken = results.some(function(r){ return r === false; }) ||
           form.querySelectorAll('.account-number-input.is-invalid').length > 0 ||
-          form.querySelectorAll('.customer-name-input.is-invalid').length > 0;
+          form.querySelectorAll('.customer-name-input.is-invalid').length > 0 ||
+          form.querySelectorAll('.link-name-input.is-invalid').length > 0;
         if (anyTaken) {
           setSubmitDisabled(form, false); // keep enabled to allow corrections
-          // Focus the first invalid account number field
-          const firstInvalid = form.querySelector('.account-number-input.is-invalid');
+          // Focus the first invalid field
+          const firstInvalid = form.querySelector('.account-number-input.is-invalid, .customer-name-input.is-invalid, .link-name-input.is-invalid');
           if (firstInvalid) firstInvalid.focus();
           return; // do not submit
         }
@@ -622,8 +764,8 @@ $('#city').on('change',function () {
       }).catch(function(){
         // If endpoint fails, keep form open and allow corrections
         setSubmitDisabled(form, false);
-        const firstInvalid = form.querySelector('.customer-name-input.is-invalid, .account-number-input.is-invalid')
-          || form.querySelector('.customer-name-input, .account-number-input');
+        const firstInvalid = form.querySelector('.customer-name-input.is-invalid, .account-number-input.is-invalid, .link-name-input.is-invalid')
+          || form.querySelector('.customer-name-input, .account-number-input, .link-name-input');
         if (firstInvalid) firstInvalid.focus();
         // Do not submit on failure of availability check
       });

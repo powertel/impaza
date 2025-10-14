@@ -30,7 +30,7 @@
                       <option value="">None</option>
                       @isset($accountManagers)
                         @foreach($accountManagers as $am)
-                          <option value="{{ $am->user_id }}">{{ $am->name ?? ('User #'.$am->user_id) }}</option>
+                          <option value="{{ $am->am_id }}">{{ $am->name ?? ('User #'.$am->user_id) }}</option>
                         @endforeach
                       @endisset
                     </select>

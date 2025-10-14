@@ -9,6 +9,7 @@ use App\Models\Pop;
 use App\Models\Customer;
 use App\Models\Link;
 use App\Models\LinkType;
+use Illuminate\Validation\Rule;
 use DB;
 
 class LinkController extends Controller
@@ -181,9 +182,37 @@ class LinkController extends Controller
     public function update(Request $request, $id)
     {
         $link = Link::find($id);
-        $link ->update($request->all());
+        // Validate link uniqueness on update (similar to customer validation)
+        $validated = $request->validate([
+            'link' => ['required','string', Rule::unique('links','link')->ignore($id)],
+        ]);
+        $link->update($request->all());
         return redirect(route('links.index'))
-        ->with('success','Link Updated');
+            ->with('success','Link Updated');
+    }
+
+    /**
+     * Check if a link name is available (AJAX).
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkLinkName(Request $request)
+    {
+        $value = trim((string) $request->input('link'));
+        $ignoreId = $request->input('ignore_id');
+
+        if ($value === '') {
+            return response()->json(['available' => false]);
+        }
+
+        $query = Link::where('link', $value);
+        if (!empty($ignoreId)) {
+            $query->where('id', '<>', $ignoreId);
+        }
+        $exists = $query->exists();
+
+        return response()->json(['available' => !$exists]);
     }
 
     /**

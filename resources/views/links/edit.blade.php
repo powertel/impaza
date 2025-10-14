@@ -90,7 +90,7 @@ Link
                     <div class="form-group row">
                         <label for="link" class="col-sm-3 col-form-label">Link</label>
                         <div class="col-sm-9">
-                            <input type="text" class="form-control" name="link"  value="{{ $link->link}}">
+                            <input type="text" class="form-control link-name-input" data-ignore-id="{{ $link->id }}" name="link"  value="{{ $link->link}}">
                         </div>
                     </div>
 

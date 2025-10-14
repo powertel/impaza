@@ -14,6 +14,7 @@ use App\Models\AccountManager;
 use App\Models\FaultSection;
 use App\Models\ReasonsForOutage;
 use DB;
+use App\Models\User;
 use Illuminate\Support\Facades\Storage;
  
 
@@ -38,9 +39,10 @@ class FaultController extends Controller
         $faults = DB::table('faults')
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
                 ->leftjoin('links','faults.link_id','=','links.id')
-                ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
                 ->leftjoin('users as assigned_users','faults.assignedTo','=','assigned_users.id')
 				->leftjoin('users as reported_users','faults.user_id','=','reported_users.id')
+                ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
+                ->leftjoin('users as account_manager_users','account_managers.user_id','=','account_manager_users.id')
                 ->leftjoin('statuses','faults.status_id','=','statuses.id')
                 ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
                 ->leftjoin('cities','faults.city_id','=','cities.id')
@@ -57,13 +59,12 @@ class FaultController extends Controller
                 'faults.suburb_id',
                 'faults.pop_id',
                 'faults.link_id',
-                'faults.accountManager_id',
                 'faults.status_id',
                 'faults.contactName',
                 'faults.phoneNumber',
                 'faults.contactEmail',
                 'faults.address',
-                'account_managers.accountManager',
+                'account_manager_users.name as accountManager',
                 'faults.suspectedRfo_id',
                 'links.link',
                 'statuses.description',
@@ -92,6 +93,84 @@ class FaultController extends Controller
 
         return view('faults.index',compact('faults','customer','city','accountManager','location','link','pop','suspectedRFO'))
         ->with('i');
+
+    }
+
+        /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+      
+        //Fault::create($request->all());
+
+        DB::beginTransaction();
+        try{
+            request()->validate([
+                'city_id' => 'required',
+                'customer_id'=> 'required',
+                'contactName'=> 'required',
+                'phoneNumber'=> 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
+                'contactEmail'=> 'required',
+                'address'=> 'required',
+                'suburb_id'=> 'required',
+                'pop_id'=> 'required',
+                'link_id'=> 'required',
+                'suspectedRfo_id'=> 'required',
+                'serviceType'=> 'required',
+                'remark'=> 'required',
+               'attachment' => 'null|mimes:png,jpg,jpeg|max:2048'
+            ]);
+           
+            $req = $request->all();
+        
+            //This is where i am creating the fault
+            $req['status_id'] = 1;
+			$req['user_id'] =$request->user()->id;
+			$req['fault_ref_number']="PWT".date("YmdHis");
+
+            $fault = Fault::create($req);
+            if($request->attachment){
+                $path =  $request->file('attachment')->storePublicly('attachments','public');}
+            else { $path = "NULL";}
+            $remarkActivity_id = DB::table('remark_activities')->where('activity','=',$request['activity'])->get('remark_activities.id')->first();
+            $remark = Remark::create(
+                [
+                    'fault_id'=> $fault->id,
+                    'user_id' => $request->user()->id,
+                    'remark' => $request['remark'],
+                    'remarkActivity_id'=>$remarkActivity_id->id,
+                    'file_path'=>$path
+                ]
+            );
+           
+        
+
+            $fault_section = FaultSection::create(
+                [
+                    'fault_id'=> $fault->id,
+                ]
+            );
+          //  $request->user()->posts()->create($request->only('body'));
+            if($fault && $remark && $fault_section)
+            {
+                DB::commit();
+            }
+            else
+            {
+                DB::rollback();
+            }
+            return redirect()->route('faults.index')
+            ->with('success', 'Fault Created');
+        }
+
+        catch(Exception $ex)
+        {
+            DB::rollback();
+        }
 
     }
 
@@ -147,7 +226,31 @@ class FaultController extends Controller
     public function update(Request $request, $id)
     {
         $fault = Fault::find($id);
-        $fault ->update($request->all());
+
+        // Derive Account Manager from the selected customer
+        $customerId = $request->input('customer_id');
+        $accountManagerId = null;
+        if ($customerId) {
+            $customer = Customer::find($customerId);
+            if ($customer && $customer->account_manager_id) {
+                // Find or create the AccountManager record mapped to the user
+                $amUserId = $customer->account_manager_id;
+                $user = User::find($amUserId);
+                $accountManager = AccountManager::firstOrCreate(
+                    ['user_id' => $amUserId],
+                    ['accountManager' => $user ? $user->name : 'Account Manager']
+                );
+                $accountManagerId = $accountManager->id;
+            }
+        }
+
+        $data = $request->all();
+        // Always set accountManager_id from customer association
+        if ($accountManagerId) {
+            $data['accountManager_id'] = $accountManagerId;
+        }
+
+        $fault->update($data);
         return redirect(route('faults.index'))
         ->with('success','Fault Updated');
     }

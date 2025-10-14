@@ -95,7 +95,7 @@ Link
                 <div class="form-group row">
                     <label for="pop" class="col-sm-3 col-form-label">Link</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control  @error('link') is-invalid @enderror" name="link" placeholder="Link Name" value="{{ old('link') }}">
+                        <input type="text" class="form-control link-name-input @error('link') is-invalid @enderror" name="link" placeholder="Link Name" value="{{ old('link') }}">
                     </div>
                 </div>
                 <div class="card-footer">

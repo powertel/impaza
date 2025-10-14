@@ -138,21 +138,7 @@
                         </div>
                     </div>
 
-                    <div class="row g-2">
-                        <div class="mb-3 col-md-6">
-                            <label for="accountManager-{{ $fault->id }}" class="form-label">Account Manager</label>
-                            <select class="form-select" id="accountManager-{{ $fault->id }}" name="accountManager_id">
-                                @isset($fault->accountManager_id)
-                                    <option selected="selected" value="{{ $fault->accountManager_id }}">{{ $fault->accountManager ?? 'Current Account Manager' }}</option>
-                                @endisset
-                                @foreach($accountManagers as $acc_manager)
-                                    @if (!isset($fault->accountManager_id) || $acc_manager->id !== $fault->accountManager_id)
-                                        <option value="{{ $acc_manager->id }}">{{ $acc_manager->accountManager }}</option>
-                                    @endif
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
+                    
                 </form>
             </div>
             <div class="modal-footer">

@@ -10,7 +10,7 @@
         @csrf
         <div class="modal-body">
           <div class="mb-3">
-            <label class="form-label">User</label>
+            <label class="form-label">Account Manager</label>
             <select name="user_id" class="form-select @error('user_id') is-invalid @enderror" required>
               <option value="" disabled selected>Select User</option>
               @isset($users)

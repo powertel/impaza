@@ -32,7 +32,7 @@
             </div>
             <div class="repeater-items">
               <div class="repeater-item border rounded p-3 mb-3 position-relative">
-                <button type="button" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 mt-2 me-2 remove-item-btn"><i class="fas fa-times"></i></button>
+                <!-- <button type="button" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 mt-2 me-2 remove-item-btn"><i class="fas fa-times"></i></button> -->
                 <div class="row g-3 align-items-end">
                   <div class="col-md-3">
                     <label class="form-label">City/Town</label>
@@ -84,7 +84,7 @@
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">Link</label>
-                    <input type="text" name="items[0][link]" class="form-control @error('items.0.link') is-invalid @enderror" placeholder="e.g. MPLS-001" required>
+                    <input type="text" name="items[0][link]" class="form-control link-name-input @error('items.0.link') is-invalid @enderror" placeholder="e.g. MPLS-001" required>
                     @error('items.0.link')
                       <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -92,6 +92,29 @@
                 </div>
               </div>
             </div>
+          </div>
+          <!-- Hidden templates for repeater option cloning -->
+          <div id="linkSelectTemplates" class="d-none">
+            <select id="linkCitiesTemplate">
+              @foreach($cities as $city)
+                <option value="{{ $city->id }}">{{ $city->city }}</option>
+              @endforeach
+            </select>
+            <select id="linkSuburbsTemplate">
+              @foreach($suburbs as $sub)
+                <option value="{{ $sub->id }}">{{ $sub->suburb }}</option>
+              @endforeach
+            </select>
+            <select id="linkPopsTemplate">
+              @foreach($pops as $p)
+                <option value="{{ $p->id }}">{{ $p->pop }}</option>
+              @endforeach
+            </select>
+            <select id="linkTypesTemplate">
+              @foreach($linkTypes as $lt)
+                <option value="{{ $lt->id }}">{{ $lt->linkType }}</option>
+              @endforeach
+            </select>
           </div>
         </div>
         <div class="modal-footer">

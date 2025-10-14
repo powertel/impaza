@@ -90,7 +90,6 @@ class AssessmentController extends Controller
                 'phoneNumber'=> 'required',
                 'contactEmail'=> 'required',
                 'address'=> 'required',
-                'accountManager_id'=> 'required',
                 'city_id'=> 'required',
                 'suburb_id'=> 'required',
                 'pop_id'=> 'required',
@@ -100,7 +99,22 @@ class AssessmentController extends Controller
                 'serviceAttribute'=> 'required',
                 'remark'=> 'required'
             ]);
-            $fault = Fault::create($request->all());
+            // Derive Account Manager from the selected customer
+            $customer = Customer::find($request->input('customer_id'));
+            $amUserId = $customer ? $customer->account_manager_id : null;
+            $accountManagerId = null;
+            if ($amUserId) {
+                $user = User::find($amUserId);
+                $accountManager = AccountManager::firstOrCreate(
+                    ['user_id' => $amUserId],
+                    ['accountManager' => $user ? $user->name : 'Account Manager']
+                );
+                $accountManagerId = $accountManager->id;
+            }
+
+            $data = $request->all();
+            $data['accountManager_id'] = $accountManagerId;
+            $fault = Fault::create($data);
             $remark = Remark::create(
                 [
                     'fault_id'=> $fault->id,

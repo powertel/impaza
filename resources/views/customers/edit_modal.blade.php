@@ -27,7 +27,7 @@
               <option value="" disabled {{ empty($customer->account_manager_id) ? 'selected' : '' }}>Select Account Manager</option>
               @isset($accountManagers)
                 @foreach($accountManagers as $am)
-                  <option value="{{ $am->user_id }}" {{ (int)$customer->account_manager_id === (int)$am->user_id ? 'selected' : '' }}>
+                  <option value="{{ $am->am_id }}" {{ (int)$customer->account_manager_id === (int)$am->user_id ? 'selected' : '' }}>
                     {{ $am->name ?? ('User #'.$am->user_id) }}
                   </option>
                 @endforeach
