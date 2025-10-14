@@ -42,6 +42,7 @@ Cities
                     <tr>
                         <th>No.</th>
                         <th>City/Town</th>
+                        <th>Region</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -50,6 +51,7 @@ Cities
                     <tr >
                         <td>{{++$i}}</td>
                         <td>{{ $city->city}}</td>
+                        <td>{{ $city->region ?? '-' }}</td>
                         <td>
                             <form action="{{ route('cities.destroy',$city->id) }}" method="POST">
                                 @can('city-edit')
@@ -68,6 +70,8 @@ Cities
             </table>
             <div id="citiesPager" class="mt-2"></div>
         </div>
+        @include('cities.create_modal')
+        @include('cities.edit_modal')
     </div>
     <!-- /.card-body -->
 </div>
@@ -75,5 +79,3 @@ Cities
 </section>
 @endsection
 
-@include('cities.create_modal')
-@include('cities.edit_modal')

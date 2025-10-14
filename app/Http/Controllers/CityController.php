@@ -55,12 +55,16 @@ class CityController extends Controller
             $request->validate([
                 'items' => 'required|array|min:1',
                 'items.*.city' => 'required|string|distinct|unique:cities,city',
+                'items.*.region' => 'required|string',
             ]);
 
             DB::beginTransaction();
             try {
                 foreach ($request->input('items') as $item) {
-                    City::create(['city' => $item['city']]);
+                    City::create([
+                        'city' => $item['city'],
+                        'region' => $item['region'],
+                    ]);
                 }
                 DB::commit();
                 return redirect()->route('cities.index')
@@ -73,10 +77,11 @@ class CityController extends Controller
 
         // Single create fallback
         $request->validate([
-            'city' => 'required|string|unique:cities,city'
+            'city' => 'required|string|unique:cities,city',
+            'region' => 'required|string',
         ]);
 
-        $city = City::create($request->only('city'));
+        $city = City::create($request->only('city','region'));
 
         if($city)
         {
@@ -130,11 +135,12 @@ class CityController extends Controller
     {
 
         request()->validate([
-            'city' => 'required|string|unique:cities'
+            'city' => 'required|string|unique:cities,city,'.$id,
+            'region' => 'required|string'
         ]);
         
         $city = City::find($id);
-        $city ->update($request->all());
+        $city->update($request->only('city','region'));
 
         if($city)
         {
