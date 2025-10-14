@@ -84,7 +84,7 @@
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">Link</label>
-                    <input type="text" name="items[0][link]" class="form-control @error('items.0.link') is-invalid @enderror" placeholder="e.g. MPLS-001" required>
+                    <input type="text" name="items[0][link]" class="form-control link-name-input @error('items.0.link') is-invalid @enderror" placeholder="e.g. MPLS-001" required>
                     @error('items.0.link')
                       <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

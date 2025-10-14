@@ -32,7 +32,7 @@
             </div>
             <div class="col-md-6">
               <label class="form-label">Link</label>
-              <input type="text" name="link" value="{{ $full ? $full->link : $link->link }}" class="form-control" required>
+              <input type="text" name="link" value="{{ $full ? $full->link : $link->link }}" class="form-control link-name-input" data-ignore-id="{{ $link->id }}" required>
             </div>
             <div class="col-md-4">
               <label class="form-label">City/Town</label>
