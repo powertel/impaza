@@ -16,7 +16,9 @@ Account Managers
         <h3 class="card-title">{{_('Account Manager')}}</h3>
         <div class="card-tools">
             @can('account-manager-create')
-            <a  class="btn btn-primary btn-sm" href="{{ route('account_managers.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Account Manager')}} </a>
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#accountManagerCreateModal">
+                <i class="fas fa-plus-circle"></i>{{_('Create Account Manager')}}
+            </button>
             @endcan
 
         </div>
@@ -51,16 +53,16 @@ Account Managers
                     @foreach ($account_managers as $acc_manager)
                     <tr >
                         <td>{{++$i}}</td>
-                        <td>{{ $acc_manager->accountManager}}</td>
+                        <td>{{ $acc_manager->name ?? '—' }}</td>
                         <td>
                             <form action="{{ route('account_managers.destroy',$acc_manager->id) }}" method="POST">
-                                <a href="{{ route('account_managers.show',$acc_manager->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
+                                <button type="button" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#accountManagerViewModal{{ $acc_manager->id }}">
                                     <i class="fas fa-eye me-1"></i>View
-                                </a>
+                                </button>
                                 @can('account-manager-edit')
-                                <a href="{{ route('account_managers.edit',$acc_manager->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
+                                <button type="button" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#accountManagerEditModal{{ $acc_manager->id }}">
                                     <i class="fas fa-edit me-1"></i>Edit
-                                </a>
+                                </button>
                                 @endcan
 
                                 @csrf
@@ -84,4 +86,7 @@ Account Managers
 </div>
  
 </section>
+@include('account_managers.create_modal')
+@include('account_managers.edit_modal')
+@include('account_managers.view_modal')
 @endsection
