@@ -16,7 +16,7 @@
           @php
             $manager = DB::table('account_managers')
               ->leftJoin('users','account_managers.user_id','=','users.id')
-              ->where('account_managers.user_id', $customer->account_manager_id)
+              ->where('account_managers.id', $customer->account_manager_id)
               ->select('users.name as name','account_managers.accountManager as title')
               ->first();
           @endphp
