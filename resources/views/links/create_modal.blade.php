@@ -32,7 +32,7 @@
             </div>
             <div class="repeater-items">
               <div class="repeater-item border rounded p-3 mb-3 position-relative">
-                <button type="button" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 mt-2 me-2 remove-item-btn"><i class="fas fa-times"></i></button>
+                <!-- <button type="button" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 mt-2 me-2 remove-item-btn"><i class="fas fa-times"></i></button> -->
                 <div class="row g-3 align-items-end">
                   <div class="col-md-3">
                     <label class="form-label">City/Town</label>
