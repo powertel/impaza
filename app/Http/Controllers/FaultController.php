@@ -178,4 +178,23 @@ class FaultController extends Controller
 
         return response()->json($faults);
     }
+
+    // Cascading selects helpers
+    public function findSuburb($cityId)
+    {
+        $suburbs = Suburb::where('city_id', $cityId)->pluck('suburb', 'id');
+        return response()->json($suburbs);
+    }
+
+    public function findPop($suburbId)
+    {
+        $pops = Pop::where('suburb_id', $suburbId)->pluck('pop', 'id');
+        return response()->json($pops);
+    }
+
+    public function findLink($customerId)
+    {
+        $links = Link::where('customer_id', $customerId)->pluck('link', 'id');
+        return response()->json($links);
+    }
 }

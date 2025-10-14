@@ -1,0 +1,79 @@
+@can('link-edit')
+@php
+  $full = DB::table('links')
+    ->leftJoin('customers','links.customer_id','=','customers.id')
+    ->leftJoin('cities','links.city_id','=','cities.id')
+    ->leftJoin('suburbs','links.suburb_id','=','suburbs.id')
+    ->leftJoin('pops','links.pop_id','=','pops.id')
+    ->leftJoin('link_types','links.linkType_id','=','link_types.id')
+    ->where('links.id', $link->id)
+    ->select('links.id','links.link','links.customer_id','links.city_id','links.suburb_id','links.pop_id','links.linkType_id')
+    ->first();
+@endphp
+<div class="modal fade" id="linkEditModal{{ $link->id }}" tabindex="-1" aria-labelledby="linkEditModalLabel{{ $link->id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="linkEditModalLabel{{ $link->id }}">Edit Link</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{{ route('links.update', $link->id) }}" method="POST">
+        @csrf
+        @method('PUT')
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Customer</label>
+              <select name="customer_id" class="form-select" required>
+                @foreach($customers as $cust)
+                  <option value="{{ $cust->id }}" {{ ($full && $full->customer_id == $cust->id) ? 'selected' : '' }}>{{ $cust->customer }}</option>
+                @endforeach
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Link</label>
+              <input type="text" name="link" value="{{ $full ? $full->link : $link->link }}" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">City/Town</label>
+              <select name="city_id" class="form-select" required>
+                @foreach($cities as $city)
+                  <option value="{{ $city->id }}" {{ ($full && $full->city_id == $city->id) ? 'selected' : '' }}>{{ $city->city }}</option>
+                @endforeach
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Location</label>
+              <select name="suburb_id" class="form-select" required>
+                @foreach($suburbs as $sub)
+                  <option value="{{ $sub->id }}" {{ ($full && $full->suburb_id == $sub->id) ? 'selected' : '' }}>{{ $sub->suburb }}</option>
+                @endforeach
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Pop</label>
+              <select name="pop_id" class="form-select" required>
+                @foreach($pops as $p)
+                  <option value="{{ $p->id }}" {{ ($full && $full->pop_id == $p->id) ? 'selected' : '' }}>{{ $p->pop }}</option>
+                @endforeach
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Link Type</label>
+              <select name="linkType_id" class="form-select" required>
+                @foreach($linkTypes as $lt)
+                  <option value="{{ $lt->id }}" {{ ($full && $full->linkType_id == $lt->id) ? 'selected' : '' }}>{{ $lt->linkType }}</option>
+                @endforeach
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light border btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-save"></i> Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+@endcan

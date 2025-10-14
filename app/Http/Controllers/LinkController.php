@@ -35,7 +35,12 @@ class LinkController extends Controller
             ->leftjoin('pops','links.pop_id','=','pops.id')
             ->orderBy('cities.city', 'asc')
             ->get(['links.id','links.link','customers.customer','cities.city','pops.pop','suburbs.suburb']);
-        return view('links.index',compact('links'))
+        $customers = DB::table('customers')->orderBy('customers.customer', 'asc')->get();
+        $cities = City::all();
+        $suburbs = Suburb::all();
+        $pops = Pop::all();
+        $linkTypes = LinkType::all();
+        return view('links.index',compact('links','customers','cities','suburbs','pops','linkTypes'))
         ->with('i');
     }
 
@@ -66,28 +71,59 @@ class LinkController extends Controller
      */
     public function store(Request $request)
     {
-        request()->validate([
-            'city_id' => 'required',
-            'suburb_id' => 'required',
-            'linkType_id' => 'required',
-            'pop_id' => 'required',
-            'customer_id' => 'required',
-            'link' => 'required|string|unique:links'
-        ]);
-        $req = $request->all();
-        $req['link_status'] = 1;
-        $link = Link::create($req);
+        // Support both single create and batch create via repeater items
+        if ($request->has('items')) {
+            $request->validate([
+                'customer_id' => 'required|exists:customers,id',
+                'items' => 'required|array|min:1',
+                'items.*.city_id' => 'required|exists:cities,id',
+                'items.*.suburb_id' => 'required|exists:suburbs,id',
+                'items.*.linkType_id' => 'required|exists:link_types,id',
+                'items.*.pop_id' => 'required|exists:pops,id',
+                'items.*.link' => 'required|string|unique:links,link',
+            ]);
 
-        if($link)
-        {
+            $customerId = $request->input('customer_id');
+            $created = 0;
+            foreach ($request->input('items') as $item) {
+                $data = [
+                    'customer_id' => $customerId,
+                    'city_id' => $item['city_id'],
+                    'suburb_id' => $item['suburb_id'],
+                    'linkType_id' => $item['linkType_id'],
+                    'pop_id' => $item['pop_id'],
+                    'link' => $item['link'],
+                    'link_status' => 1,
+                ];
+                Link::create($data);
+                $created++;
+            }
+
             return redirect()->route('links.index')
-            ->with('success','Link Created');
+                ->with('success', $created.' link(s) created');
+        } else {
+            $request->validate([
+                'city_id' => 'required|exists:cities,id',
+                'suburb_id' => 'required|exists:suburbs,id',
+                'linkType_id' => 'required|exists:link_types,id',
+                'pop_id' => 'required|exists:pops,id',
+                'customer_id' => 'required|exists:customers,id',
+                'link' => 'required|string|unique:links,link'
+            ]);
+            $req = $request->all();
+            $req['link_status'] = 1;
+            $link = Link::create($req);
+
+            if($link)
+            {
+                return redirect()->route('links.index')
+                ->with('success','Link Created');
+            }
+            else
+            {
+                return back()->with('fail','Something went wrong');
+            }
         }
-        else
-        {
-            return back()->with('fail','Something went wrong');
-        }
-    
     }
 
     /**

@@ -3,7 +3,9 @@
 @section('title')
 Customers
 @endsection
+
 @include('partials.css')
+
 @section('content')
 
 <section class="content">
@@ -15,11 +17,7 @@ Customers
         <div class="card-tools">
             @can('customer-create')
             <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#customerCreateModal"><i class="fas fa-plus-circle"></i> {{_('Create Customer(s)')}} </button>
-            @endcan
-            @can('link-create')
-                <a  class="btn btn-primary btn-sm" href="{{ route('links.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Link')}} </a>
-            @endcan
-            
+            @endcan            
         </div>
     </div>
     <!-- /.card-header -->
@@ -75,6 +73,11 @@ Customers
                 </tbody> 
             </table>
             <div id="customersPager" class="mt-2"></div>
+
+            @include('customers.create_modal')
+            @include('customers.edit_modal')
+            @include('customers.view_modal')
+            @include('customers.delete_modal')
         </div>
     </div>
     <!-- /.card-body -->
@@ -83,7 +86,4 @@ Customers
 </section>
 @endsection
 
-@include('customers.create_modal')
-@include('customers.edit_modal')
-@include('customers.view_modal')
-@include('customers.delete_modal')
+
