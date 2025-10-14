@@ -235,6 +235,7 @@ $('#city').on('change',function () {
     });
   });
 </script>
+
 {{-- Links repeater helpers --}}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
@@ -246,6 +247,61 @@ $('#city').on('change',function () {
     const addBtn = document.getElementById('addLinkRepeaterItem');
     const removeBtn = document.getElementById('removeLinkRepeaterItem');
     let index = itemsContainer.querySelectorAll('.repeater-item').length;
+
+    // Bind cascading City -> Location -> Pop inside repeater items
+    function bindLinkCascades(scope) {
+      const itemScopes = (scope && scope.querySelectorAll) ? scope.querySelectorAll('.repeater-item') : [];
+      itemScopes.forEach(function(item){
+        const citySel = item.querySelector('select[name*="[city_id]"]');
+        const suburbSel = item.querySelector('select[name*="[suburb_id]"]');
+        const popSel = item.querySelector('select[name*="[pop_id]"]');
+        if (!citySel || !suburbSel || !popSel) return;
+
+        // Avoid duplicate bindings
+        if (citySel.dataset.bound === '1') return;
+        citySel.dataset.bound = '1';
+        suburbSel.dataset.bound = '1';
+
+        citySel.addEventListener('change', function(){
+          const cityId = this.value;
+          $(suburbSel).empty().append('<option selected disabled>Select Location</option>');
+          $(popSel).empty().append('<option selected disabled>Select Pop</option>');
+          if (!cityId) return;
+          $.ajax({
+            url: '/suburb/' + cityId,
+            type: 'GET',
+            dataType: 'json',
+            success: function(res){
+              if (res) {
+                $.each(res, function(key, value){
+                  $(suburbSel).append('<option value="'+key+'">'+value+'</option>');
+                });
+              }
+            }
+          });
+        });
+
+        suburbSel.addEventListener('change', function(){
+          const suburbId = this.value;
+          $(popSel).empty().append('<option selected disabled>Select Pop</option>');
+          if (!suburbId) return;
+          $.ajax({
+            url: '/pop/' + suburbId,
+            type: 'GET',
+            dataType: 'json',
+            success: function(res){
+              if (res) {
+                $.each(res, function(key, value){
+                  $(popSel).append('<option value="'+key+'">'+value+'</option>');
+                });
+              }
+            }
+          });
+        });
+      });
+    }
+    // expose globally for modal shown rebinds
+    window.bindLinkCascades = bindLinkCascades;
 
     function createItem(idx) {
       const wrapper = document.createElement('div');
@@ -296,7 +352,9 @@ $('#city').on('change',function () {
 
     addBtn?.addEventListener('click', function() {
       index += 1;
-      itemsContainer.appendChild(createItem(index));
+      const item = createItem(index);
+      itemsContainer.appendChild(item);
+      bindLinkCascades(itemsContainer);
     });
 
     removeBtn?.addEventListener('click', function() {
@@ -317,6 +375,8 @@ $('#city').on('change',function () {
         index = itemsContainer.querySelectorAll('.repeater-item').length; // re-sync index
       }
     });
+    // Initial bind for existing items
+    bindLinkCascades(repeater);
   });
 </script>
 {{-- Account number uniqueness validation (create/edit modals and repeater) --}}
@@ -453,6 +513,7 @@ $('#city').on('change',function () {
       modalEl.addEventListener('shown.bs.modal', function() {
         window.bindAccountNumberValidation(modalEl);
         window.bindCustomerNameValidation(modalEl);
+        if (window.bindLinkCascades) window.bindLinkCascades(modalEl);
       });
     });
 
