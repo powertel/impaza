@@ -15,7 +15,7 @@
                     <div class="row g-3">
                         <div class="mb-3 col-md-6">
                             <label for="customer" class="form-label">Customer Name </label>
-                            <select id="customer" class="form-select @error('customer_id') is-invalid @enderror"  name="customer_id" >
+                            <select id="customer" class="form-select select2 @error('customer_id') is-invalid @enderror"  name="customer_id" >
                                 <option selected disabled >Select Customer</option>
                                 @foreach($customer as $customer)
                                     @if (old('customer_id')==$customer->id)

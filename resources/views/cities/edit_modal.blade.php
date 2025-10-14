@@ -15,6 +15,28 @@
             <label class="form-label">City/Town</label>
             <input type="text" name="city" class="form-control" value="{{ $city->city }}" required>
           </div>
+          <div class="mb-3">
+            <label class="form-label">Region</label>
+            <select name="region" class="form-select" required>
+              @if($city->region)
+                <option value="{{ $city->region }}" selected>{{ $city->region }}</option>
+              @else
+                <option value="" disabled selected>Select Region</option>
+              @endif
+              @unless($city->region === 'North')
+                <option value="North">North</option>
+              @endunless
+              @unless($city->region === 'West')
+                <option value="West">West</option>
+              @endunless
+              @unless($city->region === 'East')
+                <option value="East">East</option>
+              @endunless
+              @unless($city->region === 'South')
+                <option value="South">South</option>
+              @endunless
+            </select>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>

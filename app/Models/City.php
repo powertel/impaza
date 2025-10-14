@@ -11,6 +11,7 @@ class City extends Model
 
     protected $fillable = [
         'city',
+        'region',
     ];
 
     public function suburbs()

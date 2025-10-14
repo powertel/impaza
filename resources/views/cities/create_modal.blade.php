@@ -14,9 +14,19 @@
             <div class="repeater-items">
               <div class="repeater-item border rounded p-3 mb-3">
                 <div class="row g-3 align-items-end">
-                  <div class="col-12">
+                  <div class="col-md-6">
                     <label class="form-label">City/Town</label>
                     <input type="text" name="items[0][city]" class="form-control" placeholder="e.g. Harare" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Region</label>
+                    <select name="items[0][region]" class="form-select" required>
+                      <option value="" disabled selected>Select Region</option>
+                      <option value="North">North</option>
+                      <option value="West">West</option>
+                      <option value="East">East</option>
+                      <option value="South">South</option>
+                    </select>
                   </div>
                 </div>
               </div>
