@@ -11,5 +11,11 @@ class AccountManager extends Model
 
     protected $fillable = [
         'accountManager',
+        'user_id',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

@@ -11,6 +11,8 @@ class Customer extends Model
 
     protected $fillable = [
         'customer',
+        'account_number',
+        'account_manager_id',
         'city_id',
         'suburb_id',
         'pop_id',
@@ -31,5 +33,10 @@ class Customer extends Model
     public function pop()
     {
         return $this->belongsTo(Pop::class);
+    }
+
+    public function accountManager()
+    {
+        return $this->belongsTo(User::class, 'account_manager_id');
     }
 }
