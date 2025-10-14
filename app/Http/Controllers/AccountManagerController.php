@@ -24,9 +24,16 @@ class AccountManagerController extends Controller
     public function index()
     {
         $account_managers = DB::table('account_managers')
+                ->leftJoin('users','account_managers.user_id','=','users.id')
                 ->orderBy('account_managers.created_at', 'desc')
-                ->get();
-        return view('account_managers.index',compact('account_managers'))
+                ->get(['account_managers.id','account_managers.user_id','users.name']);
+
+        // Provide users list for create/edit modals
+        $users = DB::table('users')
+                ->orderBy('name','asc')
+                ->get(['id','name']);
+
+        return view('account_managers.index',compact('account_managers','users'))
         ->with('i');
     }
 
@@ -48,12 +55,13 @@ class AccountManagerController extends Controller
      */
     public function store(Request $request)
     {
-
         request()->validate([
-            'accountManager' => 'required|string|unique:account_managers'
+            'user_id' => 'required|integer|exists:users,id|unique:account_managers,user_id',
         ]);
 
-        $acc_manager = AccountManager::create($request->all());
+        $acc_manager = AccountManager::create([
+            'user_id' => $request->input('user_id'),
+        ]);
 
         
         if($acc_manager)
@@ -126,11 +134,13 @@ class AccountManagerController extends Controller
     public function update(Request $request, $id)
     {
         request()->validate([
-            'accountManager' => 'required|string|unique:account_managers'
+            'user_id' => 'required|integer|exists:users,id|unique:account_managers,user_id,'.$id.',id',
         ]);
         
         $acc_manager = AccountManager::find($id);
-        $acc_manager ->update($request->all());
+        $acc_manager->update([
+            'user_id' => $request->input('user_id'),
+        ]);
         
         if($acc_manager)
         {
@@ -152,7 +162,21 @@ class AccountManagerController extends Controller
      */
     public function destroy($id)
     {
-        AccountManager::find($id)->delete();
-        return redirect()->route('account_managers.index');
+        $acc_manager = AccountManager::find($id);
+        if(!$acc_manager){
+            return redirect()->route('account_managers.index')->with('fail','Account Manager not found');
+        }
+
+        // Only allow delete if no customers associated with this manager's user_id
+        $customerCount = DB::table('customers')
+            ->where('account_manager_id','=',$acc_manager->id)
+            ->count();
+
+        if($customerCount > 0){
+            return back()->with('fail','Cannot delete: customers are associated with this account manager');
+        }
+
+        $acc_manager->delete();
+        return redirect()->route('account_managers.index')->with('success','Account Manager deleted');
     }
 }
