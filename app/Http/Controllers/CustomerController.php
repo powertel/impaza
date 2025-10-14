@@ -22,6 +22,30 @@ class CustomerController extends Controller
          $this->middleware('permission:customer-edit', ['only' => ['edit','update']]);
          $this->middleware('permission:customer-delete', ['only' => ['destroy']]);
     }
+
+    /**
+     * Check if an account number is available (AJAX).
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkAccountNumber(Request $request)
+    {
+        $value = trim((string) $request->input('account_number'));
+        $ignoreId = $request->input('ignore_id');
+
+        if ($value === '') {
+            return response()->json(['available' => false]);
+        }
+
+        $query = Customer::where('account_number', $value);
+        if (!empty($ignoreId)) {
+            $query->where('id', '<>', $ignoreId);
+        }
+        $exists = $query->exists();
+
+        return response()->json(['available' => !$exists]);
+    }
     /**
      * Display a listing of the resource.
      *

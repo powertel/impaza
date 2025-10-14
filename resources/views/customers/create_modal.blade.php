@@ -20,7 +20,8 @@
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">Account Number</label>
-                    <input type="text" name="items[0][account_number]" class="form-control" placeholder="e.g. 123456789" required>
+                    <input type="text" name="items[0][account_number]" class="form-control account-number-input" placeholder="e.g. 123456789" required>
+                    <div class="invalid-feedback">This account number already exists.</div>
                   </div>
                 </div>
               </div>

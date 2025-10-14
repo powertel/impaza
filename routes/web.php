@@ -57,6 +57,8 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('sections', SectionController::class);
     Route::resource('positions', PositionController::class);
     Route::resource('faults', FaultController::class);
+    // Customers: client-side validation helper (must be BEFORE resource route)
+    Route::get('customers/check-account-number', [CustomerController::class, 'checkAccountNumber'])->name('customers.check-account-number');
     Route::resource('customers', CustomerController::class);
     Route::resource('cities', CityController::class);
     Route::resource('locations', LocationController::class);
