@@ -906,6 +906,41 @@ $('#city').on('change',function () {
     repeater.dataset.bound = 'true';
   });
 </script>
+{{-- Location view modal helpers --}}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const modals = document.querySelectorAll('.js-location-view-modal');
+    modals.forEach(function(modal){
+      if (modal.dataset.bound === 'true') return;
+      modal.addEventListener('shown.bs.modal', function(ev) {
+        const suburbId = modal.getAttribute('data-suburb-id');
+        const tbody = modal.querySelector(`#viewPopsBody${suburbId}`);
+        if (!tbody) return;
+        // Show loading state
+        tbody.innerHTML = `<tr><td colspan="2" class="text-muted">Loading POPs...</td></tr>`;
+        // Fetch pops for this suburb (location)
+        $.ajax({
+          url: `/pop/${suburbId}`,
+          type: 'GET',
+          dataType: 'json',
+          success: function(res){
+            const entries = Object.entries(res || {});
+            if (!entries.length) {
+              tbody.innerHTML = `<tr><td colspan="2" class="text-muted">No POPs found for this location.</td></tr>`;
+              return;
+            }
+            let i = 0;
+            tbody.innerHTML = entries.map(function([id, name]){ i++; return `<tr><td>${i}</td><td>${name}</td></tr>`; }).join('');
+          },
+          error: function(){
+            tbody.innerHTML = `<tr><td colspan="2" class="text-danger">Failed to load POPs.</td></tr>`;
+          }
+        });
+      });
+      modal.dataset.bound = 'true';
+    });
+  });
+</script>
 {{-- Positions repeater helpers --}}
 <script>
   document.addEventListener('DOMContentLoaded', function() {

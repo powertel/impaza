@@ -62,9 +62,9 @@ Locations
                                <i class="fas fa-edit me-1"></i> Edit
                             </button>
                             @endcan
-                            <a href="{{ route('locations.show',$location->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
+                            <button class="btn btn-sm btn-outline-success" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#locationViewModal{{ $location->id }}">
                                <i class="fas fa-eye me-1"></i> View
-                            </a>
+                            </button>
                         </td>
                     </tr>
                     @endforeach
@@ -79,6 +79,7 @@ Locations
 </section>
 @include('locations.create_modal')
 @include('locations.edit_modal')
+@include('locations.view_modal')
 @endsection
 @section('scripts')
     @include('partials.scripts')
