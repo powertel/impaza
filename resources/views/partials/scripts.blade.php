@@ -235,6 +235,90 @@ $('#city').on('change',function () {
     });
   });
 </script>
+{{-- Links repeater helpers --}}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const repeater = document.getElementById('linkRepeater');
+    if (!repeater) return;
+    if (repeater.dataset.initialized === '1') return; // guard against double-binding
+    repeater.dataset.initialized = '1';
+    const itemsContainer = repeater.querySelector('.repeater-items');
+    const addBtn = document.getElementById('addLinkRepeaterItem');
+    const removeBtn = document.getElementById('removeLinkRepeaterItem');
+    let index = itemsContainer.querySelectorAll('.repeater-item').length;
+
+    function createItem(idx) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'repeater-item border rounded p-3 mb-3 position-relative';
+      wrapper.innerHTML = `
+        <button type="button" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 mt-2 me-2 remove-item-btn"><i class="fas fa-times"></i> </button>
+        <div class="row g-3 align-items-end">
+          <div class="col-md-3">
+            <label class="form-label">City/Town</label>
+            <select name="items[${idx}][city_id]" class="form-select" required>
+              <option value="" disabled selected>Select City</option>
+              ${Array.from(document.querySelectorAll('#createLinkModal select[name="items\\[0\\]\[city_id\]"] option'))
+                .map(o => `<option value="${o.value}">${o.text}</option>`).join('')}
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Location</label>
+            <select name="items[${idx}][suburb_id]" class="form-select" required>
+              <option value="" disabled selected>Select Location</option>
+              ${Array.from(document.querySelectorAll('#createLinkModal select[name="items\\[0\\]\[suburb_id\]"] option'))
+                .map(o => `<option value="${o.value}">${o.text}</option>`).join('')}
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Pop</label>
+            <select name="items[${idx}][pop_id]" class="form-select" required>
+              <option value="" disabled selected>Select Pop</option>
+              ${Array.from(document.querySelectorAll('#createLinkModal select[name="items\\[0\\]\[pop_id\]"] option'))
+                .map(o => `<option value="${o.value}">${o.text}</option>`).join('')}
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Link Type</label>
+            <select name="items[${idx}][linkType_id]" class="form-select" required>
+              <option value="" disabled selected>Select Type</option>
+              ${Array.from(document.querySelectorAll('#createLinkModal select[name="items\\[0\\]\[linkType_id\]"] option'))
+                .map(o => `<option value="${o.value}">${o.text}</option>`).join('')}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Link</label>
+            <input type="text" name="items[${idx}][link]" class="form-control" placeholder="e.g. MPLS-001" required>
+          </div>
+        </div>
+      `;
+      return wrapper;
+    }
+
+    addBtn?.addEventListener('click', function() {
+      index += 1;
+      itemsContainer.appendChild(createItem(index));
+    });
+
+    removeBtn?.addEventListener('click', function() {
+      const items = itemsContainer.querySelectorAll('.repeater-item');
+      if (items.length > 1) {
+        items[items.length - 1].remove();
+        index -= 1;
+      }
+    });
+    // Per-item remove support
+    repeater.addEventListener('click', function(e){
+      const btn = e.target.closest('.remove-item-btn');
+      if (!btn) return;
+      const item = btn.closest('.repeater-item');
+      const items = itemsContainer.querySelectorAll('.repeater-item');
+      if (items.length > 1 && item) {
+        item.remove();
+        index = itemsContainer.querySelectorAll('.repeater-item').length; // re-sync index
+      }
+    });
+  });
+</script>
 {{-- Account number uniqueness validation (create/edit modals and repeater) --}}
 <script>
   document.addEventListener('DOMContentLoaded', function() {

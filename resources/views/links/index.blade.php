@@ -13,9 +13,12 @@ links
         <h3 class="card-title">{{_('Links')}}</h3>
         <div class="card-tools">
             @can('link-create')
-            <a  class="btn btn-primary btn-sm" href="{{ route('links.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Link')}} </a>
+                <button type="button" class="btn btn-primary btn-sm" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#createLinkModal">
+                    <i class="fas fa-plus-circle"></i> {{ _('Create Link') }}
+                </button>
             @endcan
-            
         </div>
     </div>
     <!-- /.card-header -->
@@ -60,23 +63,27 @@ links
                         <td>{{ $link->link}}</td>
 
                         <td>
-                        <form  name="theForm" action="{{ route('links.destroy',$link->id) }}" method="POST">
-                            <a href="{{ route('links.show',$link->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
-                                <i class="fas fa-eye me-1"></i>View
-                            </a>
-                            @can('account-manager-edit')
-                            <a href="{{ route('links.edit',$link->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
-                                <i class="fas fa-edit me-1"></i>Edit
-                            </a>
-                            @endcan    
-                            @csrf
-                            @method('DELETE')
-                            @can('link-delete') 
-                            <button type="button" class="btn btn-outline-danger btn-sm show_confirm" data-toggle="tooltip" title='Delete' style="padding:0px 2px;">
-                                <i class="fas fa-trash me-1"></i>Delete
-                            </button>                                                               
-                        @endcan
-                        </form>  
+                            <form name="theForm" action="{{ route('links.destroy',$link->id) }}" method="POST" class="d-inline">
+                                @can('link-list')
+                                <button type="button" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" 
+                                        data-bs-toggle="modal" data-bs-target="#linkViewModal{{ $link->id }}">
+                                    <i class="fas fa-eye me-1"></i>View
+                                </button>
+                                @endcan
+                                @can('link-edit')
+                                <button type="button" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" 
+                                        data-bs-toggle="modal" data-bs-target="#linkEditModal{{ $link->id }}">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </button>
+                                @endcan
+                                @csrf
+                                @method('DELETE')
+                                @can('link-delete') 
+                                <button type="button" class="btn btn-outline-danger btn-sm show_confirm" data-toggle="tooltip" title='Delete' style="padding:0px 2px;">
+                                    <i class="fas fa-trash me-1"></i>Delete
+                                </button>
+                                @endcan
+                            </form>
                         </td>
                     </tr>
                     @endforeach
@@ -86,10 +93,34 @@ links
         </div>
     </div>
     <!-- /.card-body -->
+     @include('links.create_modal', [
+        'customers' => $customers,
+        'cities' => $cities,
+        'suburbs' => $suburbs,
+        'pops' => $pops,
+        'linkTypes' => $linkTypes
+        ])
+
+        @foreach($links as $lnk)
+        @include('links.edit_modal', [
+            'link' => $lnk,
+            'customers' => $customers,
+            'cities' => $cities,
+            'suburbs' => $suburbs,
+            'pops' => $pops,
+            'linkTypes' => $linkTypes
+        ])
+        @include('links.view_modal', [ 'link' => $lnk ])
+        @endforeach
 </div>
  
 </section>
+@section('scripts')
+  @include('partials.scripts')
 @endsection
+@endsection
+
+
 
 
 
