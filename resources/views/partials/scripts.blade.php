@@ -313,7 +313,7 @@ $('#city').on('change',function () {
             <label class="form-label">City/Town</label>
             <select name="items[${idx}][city_id]" class="form-select" required>
               <option value="" disabled selected>Select City</option>
-              ${Array.from(document.querySelectorAll('#createLinkModal select[name="items\\[0\\]\[city_id\]"] option'))
+              ${Array.from(document.querySelectorAll('#linkCitiesTemplate option'))
                 .map(o => `<option value="${o.value}">${o.text}</option>`).join('')}
             </select>
           </div>
@@ -321,7 +321,7 @@ $('#city').on('change',function () {
             <label class="form-label">Location</label>
             <select name="items[${idx}][suburb_id]" class="form-select" required>
               <option value="" disabled selected>Select Location</option>
-              ${Array.from(document.querySelectorAll('#createLinkModal select[name="items\\[0\\]\[suburb_id\]"] option'))
+              ${Array.from(document.querySelectorAll('#linkSuburbsTemplate option'))
                 .map(o => `<option value="${o.value}">${o.text}</option>`).join('')}
             </select>
           </div>
@@ -329,7 +329,7 @@ $('#city').on('change',function () {
             <label class="form-label">Pop</label>
             <select name="items[${idx}][pop_id]" class="form-select" required>
               <option value="" disabled selected>Select Pop</option>
-              ${Array.from(document.querySelectorAll('#createLinkModal select[name="items\\[0\\]\[pop_id\]"] option'))
+              ${Array.from(document.querySelectorAll('#linkPopsTemplate option'))
                 .map(o => `<option value="${o.value}">${o.text}</option>`).join('')}
             </select>
           </div>
@@ -337,7 +337,7 @@ $('#city').on('change',function () {
             <label class="form-label">Link Type</label>
             <select name="items[${idx}][linkType_id]" class="form-select" required>
               <option value="" disabled selected>Select Type</option>
-              ${Array.from(document.querySelectorAll('#createLinkModal select[name="items\\[0\\]\[linkType_id\]"] option'))
+              ${Array.from(document.querySelectorAll('#linkTypesTemplate option'))
                 .map(o => `<option value="${o.value}">${o.text}</option>`).join('')}
             </select>
           </div>

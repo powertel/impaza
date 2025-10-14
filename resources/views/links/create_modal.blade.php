@@ -93,6 +93,29 @@
               </div>
             </div>
           </div>
+          <!-- Hidden templates for repeater option cloning -->
+          <div id="linkSelectTemplates" class="d-none">
+            <select id="linkCitiesTemplate">
+              @foreach($cities as $city)
+                <option value="{{ $city->id }}">{{ $city->city }}</option>
+              @endforeach
+            </select>
+            <select id="linkSuburbsTemplate">
+              @foreach($suburbs as $sub)
+                <option value="{{ $sub->id }}">{{ $sub->suburb }}</option>
+              @endforeach
+            </select>
+            <select id="linkPopsTemplate">
+              @foreach($pops as $p)
+                <option value="{{ $p->id }}">{{ $p->pop }}</option>
+              @endforeach
+            </select>
+            <select id="linkTypesTemplate">
+              @foreach($linkTypes as $lt)
+                <option value="{{ $lt->id }}">{{ $lt->linkType }}</option>
+              @endforeach
+            </select>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-light border btn-sm" data-bs-dismiss="modal">Cancel</button>
