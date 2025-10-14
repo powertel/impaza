@@ -46,6 +46,30 @@ class CustomerController extends Controller
 
         return response()->json(['available' => !$exists]);
     }
+
+    /**
+     * Check if a customer name is available (AJAX).
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkCustomerName(Request $request)
+    {
+        $value = trim((string) $request->input('customer'));
+        $ignoreId = $request->input('ignore_id');
+
+        if ($value === '') {
+            return response()->json(['available' => false]);
+        }
+
+        $query = Customer::where('customer', $value);
+        if (!empty($ignoreId)) {
+            $query->where('id', '<>', $ignoreId);
+        }
+        $exists = $query->exists();
+
+        return response()->json(['available' => !$exists]);
+    }
     /**
      * Display a listing of the resource.
      *

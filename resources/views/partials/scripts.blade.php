@@ -194,7 +194,8 @@ $('#city').on('change',function () {
         <div class="row g-3 align-items-end">
           <div class="col-md-6">
             <label class="form-label">Customer</label>
-            <input type="text" name="items[${idx}][customer]" class="form-control" placeholder="e.g. Acme Corp" required>
+            <input type="text" name="items[${idx}][customer]" class="form-control customer-name-input" placeholder="e.g. Acme Corp" required>
+            <div class="invalid-feedback">This customer name already exists.</div>
           </div>
           <div class="col-md-6">
             <label class="form-label">Account Number</label>
@@ -211,6 +212,7 @@ $('#city').on('change',function () {
       const item = createItem(index);
       itemsContainer.appendChild(item);
       window.bindAccountNumberValidation?.(item);
+      window.bindCustomerNameValidation?.(item);
     });
 
     removeBtn?.addEventListener('click', function() {
@@ -226,6 +228,7 @@ $('#city').on('change',function () {
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const accCheckUrl = "{{ route('customers.check-account-number') }}";
+    const nameCheckUrl = "{{ route('customers.check-customer-name') }}";
 
     const debounceTimers = new WeakMap();
 
@@ -235,8 +238,9 @@ $('#city').on('change',function () {
     }
 
     function refreshFormSubmitState(form) {
-      const hasInvalid = form.querySelectorAll('.account-number-input.is-invalid').length > 0;
-      setSubmitDisabled(form, hasInvalid);
+      const hasInvalidAcc = form.querySelectorAll('.account-number-input.is-invalid').length > 0;
+      const hasInvalidName = form.querySelectorAll('.customer-name-input.is-invalid').length > 0;
+      setSubmitDisabled(form, hasInvalidAcc || hasInvalidName);
     }
 
     function validateInput(input) {
@@ -292,13 +296,68 @@ $('#city').on('change',function () {
       inputs.forEach(bindValidationToInput);
     };
 
+    // Customer name validation
+    function validateNameInput(input) {
+      const value = (input.value || '').trim();
+      const form = input.closest('form');
+      const ignoreId = input.dataset.ignoreId || '';
+      if (value === '') {
+        input.classList.remove('is-invalid');
+        input.classList.remove('is-valid');
+        refreshFormSubmitState(form);
+        return;
+      }
+
+      $.get(nameCheckUrl, { customer: value, ignore_id: ignoreId })
+        .done(function(res) {
+          if (res && res.available === true) {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (fb) fb.classList.remove('d-block');
+          } else {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (fb) fb.classList.add('d-block');
+          }
+          refreshFormSubmitState(form);
+        })
+        .fail(function() {
+          input.classList.remove('is-invalid');
+          input.classList.remove('is-valid');
+          const fb = input.parentElement.querySelector('.invalid-feedback');
+          if (fb) fb.classList.remove('d-block');
+          refreshFormSubmitState(form);
+        });
+    }
+
+    function bindNameValidationToInput(input) {
+      function debouncedValidate() {
+        const existing = debounceTimers.get(input);
+        if (existing) clearTimeout(existing);
+        const t = setTimeout(() => validateNameInput(input), 350);
+        debounceTimers.set(input, t);
+      }
+      input.addEventListener('input', debouncedValidate);
+      input.addEventListener('blur', () => validateNameInput(input));
+    }
+
+    window.bindCustomerNameValidation = function(root) {
+      const scope = root || document;
+      const inputs = scope.querySelectorAll('.customer-name-input');
+      inputs.forEach(bindNameValidationToInput);
+    };
+
     // Bind on load for existing inputs (create & edit modals)
     window.bindAccountNumberValidation(document);
+    window.bindCustomerNameValidation(document);
 
     // Also re-bind when a Bootstrap modal is shown, to make sure dynamic content is wired
     document.querySelectorAll('.modal').forEach(function(modalEl) {
       modalEl.addEventListener('shown.bs.modal', function() {
         window.bindAccountNumberValidation(modalEl);
+        window.bindCustomerNameValidation(modalEl);
       });
     });
 
@@ -316,6 +375,18 @@ $('#city').on('change',function () {
       });
     }
 
+    function checkNameAvailabilityValue(value, ignoreId) {
+      return new Promise(function(resolve) {
+        $.get(nameCheckUrl, { customer: value, ignore_id: ignoreId })
+          .done(function(res){
+            resolve(!!(res && res.available === true));
+          })
+          .fail(function(){
+            resolve(false);
+          });
+      });
+    }
+
     function handleFormSubmit(e) {
       const form = e.target;
       // First use native HTML5 validation
@@ -325,37 +396,59 @@ $('#city').on('change',function () {
         return;
       }
 
-      const inputs = form.querySelectorAll('.account-number-input');
-      if (!inputs.length) {
-        // No account number fields; let native submission proceed
+      const accInputs = form.querySelectorAll('.account-number-input');
+      const nameInputs = form.querySelectorAll('.customer-name-input');
+      if (!accInputs.length && !nameInputs.length) {
+        // No relevant fields; let native submission proceed
         return;
       }
 
       e.preventDefault();
       setSubmitDisabled(form, true);
 
-      const checks = Array.from(inputs).map(function(input){
-        const value = (input.value || '').trim();
-        const ignoreId = input.dataset.ignoreId || '';
-        if (!value) return Promise.resolve(true);
-        return checkAvailabilityValue(value, ignoreId).then(function(available){
-          const fb = input.parentElement.querySelector('.invalid-feedback');
-          if (available) {
-            input.classList.remove('is-invalid');
-            input.classList.add('is-valid');
-            if (fb) fb.classList.remove('d-block');
-          } else {
-            input.classList.add('is-invalid');
-            input.classList.remove('is-valid');
-            if (fb) fb.classList.add('d-block');
-          }
-          return available;
-        });
-      });
+      const checks = [
+        ...Array.from(accInputs).map(function(input){
+          const value = (input.value || '').trim();
+          const ignoreId = input.dataset.ignoreId || '';
+          if (!value) return Promise.resolve(true);
+          return checkAvailabilityValue(value, ignoreId).then(function(available){
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (available) {
+              input.classList.remove('is-invalid');
+              input.classList.add('is-valid');
+              if (fb) fb.classList.remove('d-block');
+            } else {
+              input.classList.add('is-invalid');
+              input.classList.remove('is-valid');
+              if (fb) fb.classList.add('d-block');
+            }
+            return available;
+          });
+        }),
+        ...Array.from(nameInputs).map(function(input){
+          const value = (input.value || '').trim();
+          const ignoreId = input.dataset.ignoreId || '';
+          if (!value) return Promise.resolve(true);
+          return checkNameAvailabilityValue(value, ignoreId).then(function(available){
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (available) {
+              input.classList.remove('is-invalid');
+              input.classList.add('is-valid');
+              if (fb) fb.classList.remove('d-block');
+            } else {
+              input.classList.add('is-invalid');
+              input.classList.remove('is-valid');
+              if (fb) fb.classList.add('d-block');
+            }
+            return available;
+          });
+        })
+      ];
 
       Promise.all(checks).then(function(results){
         const anyTaken = results.some(function(r){ return r === false; }) ||
-          form.querySelectorAll('.account-number-input.is-invalid').length > 0;
+          form.querySelectorAll('.account-number-input.is-invalid').length > 0 ||
+          form.querySelectorAll('.customer-name-input.is-invalid').length > 0;
         if (anyTaken) {
           setSubmitDisabled(form, false); // keep enabled to allow corrections
           // Focus the first invalid account number field
@@ -373,8 +466,9 @@ $('#city').on('change',function () {
       }).catch(function(){
         // If endpoint fails, keep form open and allow corrections
         setSubmitDisabled(form, false);
-        const firstAcc = form.querySelector('.account-number-input');
-        if (firstAcc) firstAcc.focus();
+        const firstInvalid = form.querySelector('.customer-name-input.is-invalid, .account-number-input.is-invalid')
+          || form.querySelector('.customer-name-input, .account-number-input');
+        if (firstInvalid) firstInvalid.focus();
         // Do not submit on failure of availability check
       });
     }

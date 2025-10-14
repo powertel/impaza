@@ -16,7 +16,8 @@
                 <div class="row g-3 align-items-end">
                   <div class="col-md-6">
                     <label class="form-label">Customer</label>
-                    <input type="text" name="items[0][customer]" class="form-control" placeholder="e.g. Acme Corp" required>
+                    <input type="text" name="items[0][customer]" class="form-control customer-name-input" placeholder="e.g. Acme Corp" required>
+                    <div class="invalid-feedback">This customer name already exists.</div>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">Account Number</label>

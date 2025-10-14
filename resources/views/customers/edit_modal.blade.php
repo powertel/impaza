@@ -13,7 +13,8 @@
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">Customer</label>
-            <input type="text" name="customer" class="form-control" value="{{ $customer->customer }}" required>
+            <input type="text" name="customer" class="form-control customer-name-input" value="{{ $customer->customer }}" required data-ignore-id="{{ $customer->id }}">
+            <div class="invalid-feedback">This customer name already exists.</div>
           </div>
           <div class="mb-3">
             <label class="form-label">Account Number</label>
