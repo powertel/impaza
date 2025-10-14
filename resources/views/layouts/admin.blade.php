@@ -220,7 +220,7 @@
         @yield('scripts')
 
         @include('partials.scripts')
-        @include('layouts.partials.scripts')
+        @include('layouts.partials.pagination')
 
         @section('scripts')
         @endsection
