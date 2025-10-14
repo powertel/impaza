@@ -781,6 +781,7 @@ $('#city').on('change',function () {
   document.addEventListener('DOMContentLoaded', function() {
     const repeater = document.getElementById('sectionRepeater');
     if (!repeater) return;
+    if (repeater.dataset.bound === 'true') return; // guard against duplicate bindings
     const itemsContainer = repeater.querySelector('.repeater-items');
     const addBtn = document.getElementById('addSectionRepeaterItem');
     const removeBtn = document.getElementById('removeSectionRepeaterItem');
@@ -812,6 +813,7 @@ $('#city').on('change',function () {
         index -= 1;
       }
     });
+    repeater.dataset.bound = 'true';
   });
 </script>
 {{-- Cities repeater helpers --}}
@@ -819,6 +821,7 @@ $('#city').on('change',function () {
   document.addEventListener('DOMContentLoaded', function() {
     const repeater = document.getElementById('cityRepeater');
     if (!repeater) return;
+    if (repeater.dataset.bound === 'true') return; // guard against duplicate bindings
     const itemsContainer = repeater.querySelector('.repeater-items');
     const addBtn = document.getElementById('addCityRepeaterItem');
     const removeBtn = document.getElementById('removeCityRepeaterItem');
@@ -860,6 +863,82 @@ $('#city').on('change',function () {
         index -= 1;
       }
     });
+    repeater.dataset.bound = 'true';
+  });
+</script>
+{{-- Locations repeater helpers --}}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const repeater = document.getElementById('locationRepeater');
+    if (!repeater) return;
+    if (repeater.dataset.bound === 'true') return; // guard against duplicate bindings
+    const itemsContainer = repeater.querySelector('.repeater-items');
+    const addBtn = document.getElementById('addLocationRepeaterItem');
+    const removeBtn = document.getElementById('removeLocationRepeaterItem');
+    let index = itemsContainer.querySelectorAll('.repeater-item').length - 1;
+
+    function createItem(idx) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'repeater-item border rounded p-3 mb-3';
+      wrapper.innerHTML = `
+        <div class="row g-3 align-items-end">
+          <div class="col-md-12">
+            <label class="form-label">Location</label>
+            <input type="text" name="items[${idx}][suburb]" class="form-control" placeholder="Location" required>
+          </div>
+        </div>
+      `;
+      return wrapper;
+    }
+
+    addBtn?.addEventListener('click', function() {
+      index += 1;
+      itemsContainer.appendChild(createItem(index));
+    });
+
+    removeBtn?.addEventListener('click', function() {
+      const items = itemsContainer.querySelectorAll('.repeater-item');
+      if (items.length > 1) {
+        items[items.length - 1].remove();
+        index -= 1;
+      }
+    });
+    repeater.dataset.bound = 'true';
+  });
+</script>
+{{-- Location view modal helpers --}}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const modals = document.querySelectorAll('.js-location-view-modal');
+    modals.forEach(function(modal){
+      if (modal.dataset.bound === 'true') return;
+      modal.addEventListener('shown.bs.modal', function(ev) {
+        const suburbId = modal.getAttribute('data-suburb-id');
+        const tbody = modal.querySelector(`#viewPopsBody${suburbId}`);
+        if (!tbody) return;
+        // Show loading state
+        tbody.innerHTML = `<tr><td colspan="2" class="text-muted">Loading POPs...</td></tr>`;
+        // Fetch pops for this suburb (location)
+        $.ajax({
+          url: `/pop/${suburbId}`,
+          type: 'GET',
+          dataType: 'json',
+          success: function(res){
+            const entries = Object.entries(res || {});
+            if (!entries.length) {
+              tbody.innerHTML = `<tr><td colspan="2" class="text-muted">No POPs found for this location.</td></tr>`;
+              return;
+            }
+            let i = 0;
+            tbody.innerHTML = entries.map(function([id, name]){ i++; return `<tr><td>${i}</td><td>${name}</td></tr>`; }).join('');
+          },
+          error: function(){
+            tbody.innerHTML = `<tr><td colspan="2" class="text-danger">Failed to load POPs.</td></tr>`;
+          }
+        });
+      });
+      modal.dataset.bound = 'true';
+    });
   });
 </script>
 {{-- Positions repeater helpers --}}
@@ -867,6 +946,7 @@ $('#city').on('change',function () {
   document.addEventListener('DOMContentLoaded', function() {
     const repeater = document.getElementById('positionRepeater');
     if (!repeater) return;
+    if (repeater.dataset.bound === 'true') return; // guard against duplicate bindings
     const itemsContainer = repeater.querySelector('.repeater-items');
     const addBtn = document.getElementById('addPositionRepeaterItem');
     const removeBtn = document.getElementById('removePositionRepeaterItem');
@@ -898,6 +978,7 @@ $('#city').on('change',function () {
         index -= 1;
       }
     });
+    repeater.dataset.bound = 'true';
   });
 </script>
 

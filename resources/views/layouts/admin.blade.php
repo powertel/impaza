@@ -200,10 +200,21 @@
         </script>
 
         <script>
-            $(document).ready(function() {
+            $(document).ready(function () {
+                // Initialize Select2 globally on page load
                 $('.select2').select2();
+
+                // Reinitialize Select2 when any modal is shown
+                $('.modal').on('shown.bs.modal', function () {
+                    $(this).find('.select2').select2({
+                        dropdownParent: $(this), // Ensures the dropdown appears inside the modal
+                        width: '100%' // Ensures consistent styling
+                    });
+                });
             });
+
         </script>
+
 
 
         @yield('scripts')

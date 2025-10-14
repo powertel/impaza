@@ -14,10 +14,7 @@ Locations
         <h3 class="card-title">{{_('Locations')}}</h3>
         <div class="card-tools">
             @can('location-create')
-            <a  class="btn btn-primary btn-sm" href="{{ route('locations.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create location')}} </a>
-            @endcan
-            @can('pop-create')
-            <a  class="btn btn-primary btn-sm" href="{{ route('pops.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Pop')}} </a>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#locationCreateModal"><i class="fas fa-plus-circle"></i>{{_('Create location')}} </button>
             @endcan
         </div>
     </div>
@@ -61,13 +58,13 @@ Locations
                         <td>{{ $location->suburb}}</td>
                         <td>
                             @can('location-edit')
-                            <a href="{{ route('locations.edit',$location->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
+                            <button class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#locationEditModal{{ $location->id }}">
                                <i class="fas fa-edit me-1"></i> Edit
-                            </a>
+                            </button>
                             @endcan
-                            <a href="{{ route('locations.show',$location->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
+                            <button class="btn btn-sm btn-outline-success" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#locationViewModal{{ $location->id }}">
                                <i class="fas fa-eye me-1"></i> View
-                            </a>
+                            </button>
                         </td>
                     </tr>
                     @endforeach
@@ -80,6 +77,9 @@ Locations
 </div>
  
 </section>
+@include('locations.create_modal')
+@include('locations.edit_modal')
+@include('locations.view_modal')
 @endsection
 @section('scripts')
     @include('partials.scripts')

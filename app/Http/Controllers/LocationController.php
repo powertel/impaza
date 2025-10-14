@@ -28,7 +28,8 @@ class LocationController extends Controller
             ->leftjoin('cities','suburbs.city_id','=','cities.id')
             ->orderBy('suburbs.created_at', 'desc')
             ->get(['suburbs.id','suburbs.suburb','cities.city']);
-        return view('locations.index',compact('locations'))
+        $cities = City::all();
+        return view('locations.index',compact('locations','cities'))
         ->with('i');
     }
 
@@ -51,20 +52,44 @@ class LocationController extends Controller
      */
     public function store(Request $request)
     {
-        request()->validate([
-            'city_id' => 'required',
-            'suburb' => 'required|string|unique:suburbs'
-        ]);
-        $location = Suburb::create($request->all());
-        
-        if($location)
-        {
-            return redirect()->route('locations.index')
-            ->with('success','Location Created');
-        }
-        else
-        {
-            return back()->with('fail','Something went wrong');
+        // Support batch creation via repeater (single city + multiple suburbs)
+        if ($request->has('items')) {
+            $validated = $request->validate([
+                'city_id' => 'required|integer|exists:cities,id',
+                'items' => 'required|array|min:1',
+                'items.*.suburb' => 'required|string|distinct|unique:suburbs,suburb',
+            ]);
+            DB::beginTransaction();
+            try {
+                foreach ($validated['items'] as $item) {
+                    Suburb::create([
+                        'city_id' => $validated['city_id'],
+                        'suburb' => $item['suburb'],
+                    ]);
+                }
+                DB::commit();
+                return redirect()->route('locations.index')
+                ->with('success','Locations Created');
+            } catch (\Exception $ex) {
+                DB::rollBack();
+                return back()->withErrors(['error' => $ex->getMessage()])->withInput();
+            }
+        } else {
+            request()->validate([
+                'city_id' => 'required',
+                'suburb' => 'required|string|unique:suburbs'
+            ]);
+            $location = Suburb::create($request->all());
+            
+            if($location)
+            {
+                return redirect()->route('locations.index')
+                ->with('success','Location Created');
+            }
+            else
+            {
+                return back()->with('fail','Something went wrong');
+            }
         }
 
     }
