@@ -906,6 +906,94 @@ $('#city').on('change',function () {
     repeater.dataset.bound = 'true';
   });
 </script>
+{{-- POPs create modal helpers --}}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const citySel = document.getElementById('popCreateCity');
+    const suburbSel = document.getElementById('popCreateSuburb');
+    const repeater = document.querySelector('.js-repeater-pops');
+    const list = repeater ? repeater.querySelector('.js-repeater-list') : null;
+    const addBtn = document.querySelector('.js-repeater-add');
+
+    // Filter suburb options by selected city (using data-city attribute)
+    function filterSuburbs() {
+      if (!citySel || !suburbSel) return;
+      const cityId = citySel.value;
+      const options = suburbSel.querySelectorAll('option');
+      let hasVisible = false;
+      options.forEach(function(opt){
+        const c = opt.getAttribute('data-city');
+        if (!c) return; // skip placeholder
+        const visible = String(c) === String(cityId);
+        opt.style.display = visible ? '' : 'none';
+        if (visible) hasVisible = true;
+      });
+      // Reset selection if current selection is hidden
+      if (suburbSel.value) {
+        const selectedOpt = suburbSel.querySelector('option[value="'+suburbSel.value+'"]');
+        if (selectedOpt && selectedOpt.style.display === 'none') {
+          suburbSel.value = '';
+        }
+      }
+      // If no visible options, ensure placeholder is selected
+      if (!hasVisible) {
+        suburbSel.value = '';
+      }
+    }
+
+    citySel?.addEventListener('change', filterSuburbs);
+    // Initialize filter on load if a city is preselected
+    if (citySel && citySel.value) { filterSuburbs(); }
+
+    // Simple repeater: add/remove POP inputs
+    let index = list ? list.querySelectorAll('.js-repeater-item').length : 0;
+    function createItem(idx) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'list-group-item d-flex align-items-center gap-2 js-repeater-item';
+      wrapper.innerHTML = `
+        <div class="flex-grow-1">
+          <input type="text" class="form-control" name="items[${idx}][pop]" placeholder="Pop name" required>
+        </div>
+        <button type="button" class="btn btn-sm btn-danger js-repeater-remove" title="Remove">&times;</button>
+      `;
+      return wrapper;
+    }
+
+    addBtn?.addEventListener('click', function(){
+      if (!list) return;
+      const item = createItem(index);
+      list.appendChild(item);
+      index += 1;
+    });
+
+    list?.addEventListener('click', function(e){
+      const btn = e.target.closest('.js-repeater-remove');
+      if (!btn) return;
+      const item = btn.closest('.js-repeater-item');
+      if (!item) return;
+      // keep at least one row
+      const items = list.querySelectorAll('.js-repeater-item');
+      if (items.length > 1) {
+        item.remove();
+      }
+    });
+
+    // Validate city & suburb selected before submit
+    const createForm = document.querySelector('.js-pops-create-form');
+    createForm?.addEventListener('submit', function(e){
+      if (!citySel?.value || !suburbSel?.value) {
+        e.preventDefault();
+        alert('Please select City/Town and Location first.');
+      }
+    });
+
+    // Re-apply filter when modal opens (ensure visibility state correct)
+    const popCreateModal = document.getElementById('popCreateModal');
+    popCreateModal?.addEventListener('shown.bs.modal', function(){
+      filterSuburbs();
+    });
+  });
+</script>
 {{-- Location view modal helpers --}}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
