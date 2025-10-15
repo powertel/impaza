@@ -59,19 +59,14 @@ Clear Faults
                             <strong>{{$fault->description}}</strong> 
                         </td>
                         <td>
-                            <form style="display:inline"  action="{{ route('chief-tech-clear.update',$fault->id) }}"  method="POST">
-
-                                @csrf
-                                @method('PUT')
-                                @can('chief-tech-clear-faults-clear')
-                                <button type="submit" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
-                                    <i class="fas fa-save me-1"></i>Clear
-                                </button>   
-                                @endcan
-                                <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
-                                    <i class="fas fa-eye me-1"></i>View
-                                </a>
-                            </form>
+                            @can('chief-tech-clear-faults-clear')
+                                <button type="button" class="btn btn-sm btn-outline-primary" style="padding:0px 8px;" data-bs-toggle="modal" data-bs-target="#chiefTechClearModal-{{ $fault->id }}">
+                                    <i class="fas fa-save me-1"></i> Clear
+                                </button>
+                            @endcan
+                            <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 8px;" >
+                                <i class="fas fa-eye me-1"></i> View
+                            </a>
                         </td>
                     </tr>
                     @endforeach
@@ -93,4 +88,32 @@ Clear Faults
  @endforeach --}}
  </section>
  @endsection
+
+@section('scripts')
+    <!-- Per-row Chief Tech Clear confirmation modals -->
+    @foreach ($faults as $fault)
+    <div class="modal fade" id="chiefTechClearModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="chiefTechClearModalLabel-{{ $fault->id }}" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="chiefTechClearModalLabel-{{ $fault->id }}">Confirm Clear</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('chief-tech-clear.update',$fault->id) }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body">
+                        <p class="mb-1">Clear fault <strong>{{ $fault->fault_ref_number ?? ('#'.$fault->id) }}</strong>?</p>
+                        <small class="text-muted">This marks the fault as cleared by Chief Tech.</small>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-check me-1"></i> Confirm</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endforeach
+@endsection
 

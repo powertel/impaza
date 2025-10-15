@@ -15,11 +15,16 @@ class UserStatusSeeder extends Seeder
      */
     public function run()
     {
-        $user_statuses =  ['Assignable',
-            'Unassignable'];
+        $user_statuses =  [
+            'Assignable',
+            'Unassignable',
+            'Standby',
+            'On Leave',
+            'Away', 
+        ];
 
         foreach ($user_statuses as $user_status) {
-            UserStatus::create(['status_name' => $user_status]);
+            UserStatus::firstOrCreate(['status_name' => $user_status]);
         }
 
     }

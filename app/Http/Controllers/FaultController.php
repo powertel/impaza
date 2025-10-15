@@ -16,6 +16,7 @@ use App\Models\ReasonsForOutage;
 use DB;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
+use App\Services\FaultLifecycle;
  
 
 
@@ -133,6 +134,8 @@ class FaultController extends Controller
 			$req['fault_ref_number']="PWT".date("YmdHis");
 
             $fault = Fault::create($req);
+            // Start lifecycle at "Waiting for assessment" (status_id = 1)
+            FaultLifecycle::recordStatusChange($fault, 1, $request->user()->id);
             if($request->attachment){
                 $path =  $request->file('attachment')->storePublicly('attachments','public');}
             else { $path = "NULL";}

@@ -16,6 +16,7 @@ use App\Models\Section;
 use App\Models\FaultSection;
 use App\Models\UserStatus;
 use Illuminate\Support\Facades\DB;
+use App\Services\FaultLifecycle;
 
 class AssignController extends Controller
 {
@@ -144,6 +145,10 @@ class AssignController extends Controller
         $req= $request->all();
         $req['status_id'] = 3;
         $fault ->update($req);
+        // Log assigned stage and record assignment window
+        FaultLifecycle::recordStatusChange($fault, 3, $request->user()->id);
+        $region = \DB::table('cities')->where('id', $fault->city_id)->value('region');
+        FaultLifecycle::startAssignment($fault, (int)$req['assignedTo'], $request->user()->id, FaultLifecycle::isOffHours(), $region);
         return redirect()->route('faults.edit',$id)
         ->with('success','Fault Assigned');
     }

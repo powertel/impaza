@@ -147,7 +147,6 @@ $('#city').on('change',function () {
     const addBtn = document.getElementById('addRepeaterItem');
     const removeBtn = document.getElementById('removeRepeaterItem');
     let index = itemsContainer.querySelectorAll('.repeater-item').length - 1;
-    let index = itemsContainer.querySelectorAll('.repeater-item').length - 1;
 
     function createItem(idx) {
       const wrapper = document.createElement('div');

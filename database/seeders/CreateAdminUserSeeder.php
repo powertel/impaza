@@ -21,21 +21,7 @@ class CreateAdminUserSeeder extends Seeder
      */
     public function run()
     {
-        $department = Department::create([
-            'department' => 'TECHNICAL',
-        ]) ;
-        $section = Section::create([
-            'section' => 'NOC',
-             'department_id' => $department->id,
-
-        ]);
-        $position = Position::create([
-            'position'=>'Senior Engineer',
-            'section_id' => $section->id,
-        ]);
-        $user_statuses= UserStatus::create([
-            'status_name' => 'Unassignable',
-        ]) ;
+        
         $user = User::create([
             'name' => 'Powertel',
             'email' => 'admin@powertel.co.zw',

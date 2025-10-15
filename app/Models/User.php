@@ -26,7 +26,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'section_id',
         'position_id',
         'phonenumber',
-        'user_status'
+        'user_status',
+        'region',
+        'weekly_standby',
+        'weekend_standby'
     ];
 
     /**
@@ -46,6 +49,8 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'weekly_standby' => 'boolean',
+        'weekend_standby' => 'boolean',
     ];
 
     public function remarks()
