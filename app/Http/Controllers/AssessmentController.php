@@ -63,7 +63,20 @@ class AssessmentController extends Controller
             ->get(['faults.id','customers.customer','faults.contactName','reasons_for_outages.RFO','faults.phoneNumber','faults.contactEmail','faults.address',
             'account_manager_users.name as accountManager','links.link','statuses.description'
             ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
-        return view('assessments.index',compact('faults'))
+        // Datasets required for modal-based actions on the assessments page
+        $sections = Section::all();
+        $confirmedRFO = ReasonsForOutage::all();
+
+        // For edit/view modal parity, provide datasets used by faults.edit partial
+        $customers = Customer::orderBy('customer','asc')->get();
+        $cities = City::all();
+        $suburbs = Suburb::all();
+        $pops = Pop::all();
+        $links = Link::all();
+        $accountManagers = AccountManager::all();
+        $suspectedRFO = ReasonsForOutage::all();
+
+        return view('assessments.index',compact('faults','sections','confirmedRFO','customers','cities','suburbs','pops','links','accountManagers','suspectedRFO'))
         ->with('i');
 
 
