@@ -53,16 +53,16 @@ class AssessmentController extends Controller
 
         $faults = DB::table('faults')
             ->leftjoin('customers','faults.customer_id','=','customers.id')
+            ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
             ->leftjoin('links','faults.link_id','=','links.id')
             ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
-            ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
+            ->leftjoin('users as account_manager_users','account_managers.user_id','=','account_manager_users.id')
             ->leftjoin('statuses','faults.status_id','=','statuses.id')
             ->orderBy('faults.created_at', 'desc')
             ->where('faults.status_id','=',1)
             ->get(['faults.id','customers.customer','faults.contactName','reasons_for_outages.RFO','faults.phoneNumber','faults.contactEmail','faults.address',
-            'account_managers.accountManager','links.link','statuses.description'
+            'account_manager_users.name as accountManager','links.link','statuses.description'
             ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
-
         return view('assessments.index',compact('faults'))
         ->with('i');
 
