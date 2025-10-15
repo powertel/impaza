@@ -29,7 +29,10 @@ class PopController extends Controller
             ->leftjoin('suburbs','pops.suburb_id','=','suburbs.id')
             ->orderBy('suburbs.created_at', 'desc')
             ->get(['pops.id','pops.pop','suburbs.suburb','cities.city']);
-        return view('pops.index',compact('pops'))
+        // Provide datasets for modal-based create/edit on index
+        $cities = City::all();
+        $suburbs = Suburb::all();
+        return view('pops.index',compact('pops','cities','suburbs'))
         ->with('i');
     }
 
@@ -54,25 +57,49 @@ class PopController extends Controller
      */
     public function store(Request $request)
     {
+        // Support batch creation via repeater (single location + multiple POPs)
+        if ($request->has('items')) {
+            $validated = $request->validate([
+                'city_id' => 'required|integer|exists:cities,id',
+                'suburb_id' => 'required|integer|exists:suburbs,id',
+                'items' => 'required|array|min:1',
+                'items.*.pop' => 'required|string|distinct|unique:pops,pop',
+            ]);
+            DB::beginTransaction();
+            try {
+                foreach ($validated['items'] as $item) {
+                    Pop::create([
+                        'city_id' => $validated['city_id'],
+                        'suburb_id' => $validated['suburb_id'],
+                        'pop' => $item['pop'],
+                    ]);
+                }
+                DB::commit();
+                return redirect()->route('pops.index')
+                ->with('success','POPs Created');
+            } catch (\Exception $ex) {
+                DB::rollBack();
+                return back()->withErrors(['error' => $ex->getMessage()])->withInput();
+            }
+        } else {
+            $request->validate([
+                'city_id' => 'required',
+                'suburb_id' => 'required',
+                'pop' => 'required|string|unique:pops,pop'
+            ]);
+            $pop = Pop::create($request->all());
 
-        request()->validate([
-            'city_id' => 'required',
-            'suburb_id' => 'required',
-            'pop' => 'required|string|unique:pops'
-        ]);
-        $pop = Pop::create($request->all());
-
-        if($pop)
-        {
-            return redirect()->route('pops.index')
-            ->with('success','Pop Created');
-        }
-        else
-        {
-            return back()->with('fail','Something went wrong');
+            if($pop)
+            {
+                return redirect()->route('pops.index')
+                ->with('success','Pop Created');
+            }
+            else
+            {
+                return back()->with('fail','Something went wrong');
+            }
         }
     
-
     }
 
     /**

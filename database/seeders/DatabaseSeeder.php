@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             StatusSeeder::class,
             PermissionTableSeeder::class,
             UserStatusSeeder::class,
+            AutoAssignSettingSeeder::class,
             CreateAdminUserSeeder::class,
             RFOSeeder::class,
             LinkTypeSeeder::class,

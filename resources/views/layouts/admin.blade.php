@@ -20,7 +20,7 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
     <style>
-        /* Global compact typography to match SmartHR-like UI */
+        /* Global compact typography to match */
         html, body { font-size: 12px; color: #111827; }
         .content-wrapper { background: #f5f7fb; }
 
@@ -33,7 +33,7 @@
         .breadcrumb { font-size: 11px; }
 
         /* Buttons */
-        .btn { font-size: 12px; }
+        .btn { font-size: 11px; }
         .btn-sm { font-size: 11px; padding: 6px 10px; }
         /* Icon-only compact action buttons */
         .btn-icon { width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; }
@@ -220,7 +220,7 @@
         @yield('scripts')
 
         @include('partials.scripts')
-        @include('layouts.partials.scripts')
+        @include('layouts.partials.pagination')
 
         @section('scripts')
         @endsection

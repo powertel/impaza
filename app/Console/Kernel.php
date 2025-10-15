@@ -15,7 +15,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // Auto-assign assessed faults to available technicians every five minutes
+        $schedule->command('faults:auto-assign')->everyFiveMinutes();
     }
 
     /**

@@ -14,10 +14,7 @@ Pops
         <h3 class="card-title">{{_('Pops')}}</h3>
         <div class="card-tools">
             @can('pop-create')
-              <a  class="btn btn-primary btn-sm" href="{{ route('pops.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Pop')}} </a>  
-            @endcan
-            @can('customer-create')
-                <a  class="btn btn-primary btn-sm" href="{{ route('customers.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create Customer')}} </a>
+              <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#popCreateModal"><i class="fas fa-plus-circle"></i>{{_('Create Pop')}} </button>
             @endcan
         </div>
     </div>
@@ -63,18 +60,20 @@ Pops
                             </a> 
                             @endcan
                             
-                            <a href="{{ route('pops.show',$pop->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
+                            <button type="button" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#popViewModal{{ $pop->id }}">
                                 <i class="fas fa-eye me-1"></i>View
-                            </a>
+                            </button>
                         </td>
                     </tr>
                     @endforeach
                 </tbody> 
             </table>
             <div id="popsPager" class="mt-2"></div>
-        </div>
+         </div>
      </div>
      <!-- /.card-body -->
+        @include('pops.create_modal')
+  @include('pops.view_modal')
  </div>
  
   

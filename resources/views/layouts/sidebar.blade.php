@@ -116,6 +116,18 @@
             </li>
             @endcan
 
+            @canany(['technician-configuration'])
+            <li class="nav-header">Configuration</li>
+            @endcanany
+            @can('technician-configuration')
+            <li class="nav-item">
+              <a href="{{ route('technicians.config') }}" class="nav-link {{ request()->routeIs('technicians.config') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-users-cog"></i>
+                <p>Technician Settings</p>
+              </a>
+            </li>
+            @endcan
+
             @canany(['department-list'])
               <li class="nav-header">Organization</li>
             @endcanany

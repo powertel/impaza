@@ -14,6 +14,7 @@ use App\Models\AccountManager;
 use App\Models\Section;
 use App\Models\User;
 use DB;
+use App\Services\FaultLifecycle;
 
 class ChiefTechClearFaultsController extends Controller
 {
@@ -103,6 +104,7 @@ class ChiefTechClearFaultsController extends Controller
         $req= $request->all();
         $req['status_id'] = 5;
         $fault ->update($req);
+        FaultLifecycle::recordStatusChange($fault, 5, $request->user()->id);
 
         return redirect()->route('faults.edit',$id)
             ->with('success','Fault Has Been Cleared by Chief Technician');

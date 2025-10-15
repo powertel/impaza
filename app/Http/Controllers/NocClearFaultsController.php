@@ -14,6 +14,7 @@ use App\Models\AccountManager;
 use App\Models\Section;
 use App\Models\User;
 use DB;
+use App\Services\FaultLifecycle;
 
 class NocClearFaultsController extends Controller
 {
@@ -102,6 +103,9 @@ class NocClearFaultsController extends Controller
         $req= $request->all();
         $req['status_id'] = 6;
         $fault ->update($req);
+        FaultLifecycle::recordStatusChange($fault, 6, $request->user()->id);
+        // Ensure assignment window is closed when NOC clears
+        FaultLifecycle::resolveAssignment($fault);
         
         return redirect()->route('faults.edit',$id)
             ->with('success','Fault Has Been Cleared By Noc');

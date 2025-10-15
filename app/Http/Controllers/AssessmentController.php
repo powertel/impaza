@@ -17,6 +17,8 @@ use App\Models\FaultSection;
 use App\Models\ReasonsForOutage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use App\Services\FaultLifecycle;
+use App\Models\AutoAssignSetting;
 
 class AssessmentController extends Controller
 {
@@ -48,19 +50,36 @@ class AssessmentController extends Controller
         return view('assessments.index',compact('faults'))
         ->with('i'); */
 
+
         $faults = DB::table('faults')
             ->leftjoin('customers','faults.customer_id','=','customers.id')
+            ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
             ->leftjoin('links','faults.link_id','=','links.id')
-            ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','faults.confirmedRfo_id','=','reasons_for_outages.id')
-            ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
+            ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
+            ->leftjoin('users as account_manager_users','account_managers.user_id','=','account_manager_users.id')
             ->leftjoin('statuses','faults.status_id','=','statuses.id')
             ->orderBy('faults.created_at', 'desc')
             ->where('faults.status_id','=',1)
             ->get(['faults.id','customers.customer','faults.contactName','reasons_for_outages.RFO','faults.phoneNumber','faults.contactEmail','faults.address',
-            'account_managers.accountManager','faults.suspectedRfo_id','links.link','statuses.description'
+            'account_manager_users.name as accountManager','links.link','statuses.description'
             ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
-        return view('assessments.index',compact('faults'))
+        // Datasets required for modal-based actions on the assessments page
+        $sections = Section::all();
+        $confirmedRFO = ReasonsForOutage::all();
+
+        // For edit/view modal parity, provide datasets used by faults.edit partial
+        $customers = Customer::orderBy('customer','asc')->get();
+        $cities = City::all();
+        $suburbs = Suburb::all();
+        $pops = Pop::all();
+        $links = Link::all();
+        $accountManagers = AccountManager::all();
+        $suspectedRFO = ReasonsForOutage::all();
+
+        return view('assessments.index',compact('faults','sections','confirmedRFO','customers','cities','suburbs','pops','links','accountManagers','suspectedRFO'))
         ->with('i');
+
+
     }
 
     /**
@@ -238,6 +257,8 @@ class AssessmentController extends Controller
             $req= $request->all();
             $req['status_id'] = 2;
             $fault ->update($req);
+            // Log transition to "Fault has been assessed" (status_id = 2)
+            FaultLifecycle::recordStatusChange($fault, 2, $request->user()->id);
 
             $fault_section = FaultSection::find($id);
             $fault_section -> update(
@@ -278,25 +299,52 @@ class AssessmentController extends Controller
         //
     }
 	
-	private function autoAssign($section_id)
+    private function autoAssign($section_id)
     {
-   
-        $users = User::join('departments','users.department_id','=','departments.id')
+        // Load configurable settings
+        $settings = AutoAssignSetting::query()->first();
+        $considerRegion = (bool)($settings->consider_region ?? true);
+        $considerLeave = (bool)($settings->consider_leave ?? true);
+        $isOffHours = \App\Services\FaultLifecycle::isOffHours();
+        $isWeekendOff = (bool)($settings->weekend_standby_enabled ?? true) && now()->isWeekend();
+
+        $usersQuery = User::join('departments','users.department_id','=','departments.id')
             ->leftjoin('sections','users.section_id','=','sections.id')
             ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
             ->where('sections.id','=',$section_id)
-            ->where('user_statuses.id','=',1)
-            ->pluck('users.id')
-            ->toArray();
-			
-			
+            // Off-hours -> accept Standby or Assignable if present; otherwise Assignable.
+            ->where(function($q) use ($isOffHours) {
+                if ($isOffHours) {
+                    $q->whereIn('user_statuses.status_name', ['Standby','Assignable']);
+                } else {
+                    $q->where('user_statuses.status_name', '=', 'Assignable');
+                }
+            })
+            // Exclude known non-working statuses where applicable
+            ->whereNotIn('user_statuses.status_name', $considerLeave ? ['Unassignable','On Leave'] : ['Unassignable'])
+            // Apply per-user standby flags during off-hours
+            ->when($isOffHours, function($q) use ($isWeekendOff) {
+                if ($isWeekendOff) {
+                    $q->where('users.weekend_standby', '=', true);
+                } else {
+                    $q->where('users.weekly_standby', '=', true);
+                }
+            });
 
+        // Fault list by section
         $faults = DB::table('fault_section')
             ->leftjoin('faults','fault_section.fault_id','=','faults.id')
             ->whereNull('faults.assignedTo')
             ->where('fault_section.section_id','=',$section_id)
             ->pluck('faults.id')
             ->toArray();
+
+        // If region consideration is enabled, we'll assign per fault using region-aware filtering
+        $users = $usersQuery->pluck('users.id')->toArray();
+			
+			
+
+        // For round-robin we keep an index, but region filter may yield a subset per fault
 
         $userslength=count($users);
             // Retrieve the last assigned user index from persistent storage
@@ -307,14 +355,63 @@ class AssessmentController extends Controller
 
             $autoAssign  = $faults[$i];
 
-            $userfaults[$autoAssign] = $users[$lastAssignedUserIndex]; 
+            // Region-aware candidate filtering if enabled
+            $faultRegion = null;
+            if ($considerRegion) {
+                $faultRegion = \DB::table('faults')
+                    ->leftJoin('cities', 'faults.city_id', '=', 'cities.id')
+                    ->where('faults.id', '=', $autoAssign)
+                    ->value('cities.region');
+            }
 
-            $user = $users[$lastAssignedUserIndex];
+            $eligibleUsers = $users;
+            if ($considerRegion && $faultRegion) {
+                $eligibleUsers = User::join('departments','users.department_id','=','departments.id')
+                    ->leftjoin('sections','users.section_id','=','sections.id')
+                    ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
+                    ->where('sections.id','=',$section_id)
+                    ->where('users.region', '=', $faultRegion)
+                    ->where(function($q) use ($isOffHours) {
+                        if ($isOffHours) {
+                            $q->whereIn('user_statuses.status_name', ['Standby','Assignable']);
+                        } else {
+                            $q->where('user_statuses.status_name', '=', 'Assignable');
+                        }
+                    })
+                    ->whereNotIn('user_statuses.status_name', $considerLeave ? ['Unassignable','On Leave'] : ['Unassignable'])
+                    ->when($isOffHours, function($q) use ($isWeekendOff) {
+                        if ($isWeekendOff) {
+                            $q->where('users.weekend_standby', '=', true);
+                        } else {
+                            $q->where('users.weekly_standby', '=', true);
+                        }
+                    })
+                    ->pluck('users.id')
+                    ->toArray();
+
+                if (empty($eligibleUsers)) {
+                    $eligibleUsers = $users;
+                }
+            }
+
+            if (empty($eligibleUsers)) {
+                continue;
+            }
+
+            $idx = $lastAssignedUserIndex % count($eligibleUsers);
+            $userfaults[$autoAssign] = $eligibleUsers[$idx];
+
+            $user = $eligibleUsers[$idx];
 
             $assign = Fault::find($autoAssign);
             $req['assignedTo'] = $userfaults[$autoAssign];
             $req['status_id'] = 3;
             $assign ->update($req);
+            // Log transition to "Fault is under rectification" (status_id = 3)
+            FaultLifecycle::recordStatusChange($assign, 3, auth()->id());
+            // Record assignment window (standby determination and region from city if available)
+            $faultCity = \DB::table('cities')->where('id', $assign->city_id)->value('region');
+            FaultLifecycle::startAssignment($assign, $userfaults[$autoAssign], auth()->id(), FaultLifecycle::isOffHours(), $faultCity);
 
             $lastAssignedUserIndex ++;
         

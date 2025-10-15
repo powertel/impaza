@@ -353,6 +353,12 @@
         padding: 1rem 2rem 1.5rem 2rem;
     }
 
+    /* Auto-Assign modal whitespace tweaks */
+    #autoSettingsModal .modal-dialog { max-width: 680px; }
+    #autoSettingsModal .modal-body { padding: 1rem 1.25rem 0.75rem 1.25rem; }
+    #autoSettingsModal .form-label { margin-bottom: .25rem; }
+    #autoSettingsModal .form-check { margin-top: .25rem; }
+
     /* Custom Modal for Assets Style - Only for .custom-modal-overlay */
     .custom-modal-overlay {
         display: none;

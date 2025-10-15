@@ -12,6 +12,7 @@ use App\Models\Link;
 use App\Models\Remark;
 use App\Models\AccountManager;
 use DB;
+use App\Services\FaultLifecycle;
 
 class RectificationController extends Controller
 {
@@ -156,6 +157,9 @@ class RectificationController extends Controller
         $req= $request->all();
         $req['status_id'] = 4;
         $fault ->update($req);
+        // Technician resolved
+        FaultLifecycle::recordStatusChange($fault, 4, $request->user()->id);
+        FaultLifecycle::resolveAssignment($fault);
         return redirect(route('my_faults.index'))
         ->with('success','Fault Restored');
     }

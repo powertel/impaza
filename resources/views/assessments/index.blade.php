@@ -61,27 +61,46 @@ Assess Faults
                                 {{$fault->description}}
                             </span>
                         </td>
-                        <td>
-                            @can('fault-assessment')
-                                <a href="{{ route('assessments.edit',$fault->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
-                                  <i class="fas fa-eye"></i>  Assess
-                                </a>
-                            @endcan
+                        <td class="text-nowrap">
+                            <div class="btn-group btn-group-sm gap-2" role="group" aria-label="Actions">
+                                @can('fault-assessment')
+                                <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#assessFaultModal-{{ $fault->id }}">
+                                  <i class="fas fa-clipboard-check me-1"></i> Assess
+                                </button>
+                                @endcan
 
-                            @can('fault-edit')
-                            <a href="{{ route('faults.edit',$fault->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px; " >
-                              <i class="fas fa-edit me-1"></i>  Edit
-                            </a>
-                            @endcan
-                            <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
-                               <i class="fas fa-eye me-1"></i> View
-                            </a>
+                                @can('fault-edit')
+                                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editFaultModal-{{ $fault->id }}">
+                                  <i class="fas fa-edit me-1"></i> Edit
+                                </button>
+                                @endcan
+
+                                <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                                   <i class="fas fa-eye me-1"></i> View
+                                </button>
                             </div>
                         </td>
                     </tr>
                     @endforeach
                 </tbody> 
             </table>
+            @foreach ($faults as $fault)
+                @include('assessments.assess_modal', [
+                    'fault' => $fault,
+                    'sections' => $sections,
+                    'confirmedRFO' => $confirmedRFO
+                ])
+                @include('faults.edit', [
+                    'fault' => $fault,
+                    'customers' => $customers,
+                    'cities' => $cities,
+                    'suburbs' => $suburbs,
+                    'pops' => $pops,
+                    'links' => $links,
+                    'accountManagers' => $accountManagers,
+                    'suspectedRFO' => $suspectedRFO
+                ])
+            @endforeach
             <div id="assessmentsPager" class="mt-2"></div>
         </div>
     </div>
