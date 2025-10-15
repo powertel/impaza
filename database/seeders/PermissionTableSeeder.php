@@ -91,7 +91,8 @@ class PermissionTableSeeder extends Seeder
             'materials',
             'reports',
             'noc-clear-faults-clear',
-            'chief-tech-clear-faults-clear'
+            'chief-tech-clear-faults-clear',
+            'technician-configuration'
          ];
 
          foreach ($permissions as $permission) {
