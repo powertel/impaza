@@ -136,9 +136,11 @@ class FaultController extends Controller
             $fault = Fault::create($req);
             // Start lifecycle at "Waiting for assessment" (status_id = 1)
             FaultLifecycle::recordStatusChange($fault, 1, $request->user()->id);
-            if($request->attachment){
-                $path =  $request->file('attachment')->storePublicly('attachments','public');}
-            else { $path = "NULL";}
+            if ($request->hasFile('attachment')) {
+                $path = $request->file('attachment')->storePublicly('attachments', 'public');
+            } else {
+                $path = null;
+            }
             $remarkActivity_id = DB::table('remark_activities')->where('activity','=',$request['activity'])->get('remark_activities.id')->first();
             $remark = Remark::create(
                 [

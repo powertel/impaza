@@ -10,6 +10,11 @@ Rectify
         <div class="card  w-50">
             <div class="card-header">
                 <h3 class="card-title">{{_('Fault Rectification')}}</h3>
+                <div class="card-tools">
+                    <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                        <i class="fas fa-eye me-1"></i> View Fault
+                    </button>
+                </div>
             </div>
             <div class="card-body">
             <form action="{{ route('rectify.update', $fault->id ) }}" method="POST">
@@ -62,24 +67,24 @@ Rectify
                 </div>
                 @endforeach
             </div> 
-  <!-- Modal -->
-<div class="modal fade bd-example-modal-xl"  id="PicModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-<div class="modal-dialog modal-dialog-centered modal-xl" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel"> REMARK ATTACHMENT</h5>
-        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-      <img id="show_it" src=""alt="Not here!" style="height:500px; max-width:100%" title="Attachment">
-      </div>
-      <div class="modal-footer">
-      </div>
-    </div>
-  </div>
-</div>
+            <!-- Modal -->
+            <div class="modal fade bd-example-modal-xl"  id="PicModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel"> REMARK ATTACHMENT</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                <img id="show_it" src=""alt="Not here!" style="height:500px; max-width:100%" title="Attachment">
+                </div>
+                <div class="modal-footer">
+                </div>
+                </div>
+            </div>
+            </div>
             <div class="card-footer">
                 <form action="/faults/{{$fault->id}}/remarks" method="POST" enctype="multipart/form-data">
                     {{ csrf_field() }}
@@ -95,6 +100,7 @@ Rectify
             </div>
         </div>
     </div>
+    @include('faults.show',[ 'fault' => $fault, 'remarks' => $remarks ])
 </section>
 @endsection
 
