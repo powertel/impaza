@@ -54,53 +54,48 @@ My Faults
                         <td>{{ $fault->customer }}</td>
                         <td>{{ $fault->accountManager }}</td>
                         <td>{{ $fault->link }}</td>
-                        <td style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? 'none' }};">
+                        <!-- <td style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? 'none' }};">
                             <strong>{{$fault->description}}</strong>
+                        </td> -->
+                        <td class="text-nowrap">
+                            <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
+                                {{$fault->description}}
+                            </span>
                         </td>
                         <td>
 
-                        <form style="display:inline" action="{{ route('noc-clear.update',$fault->id) }}"  method="POST">
-                            @csrf
-                            @method('PUT')
-                            @can('noc-clear-faults-clear')
-                            <button type="submit" class="btn btn-sm btn-outline-primary" style="padding:0px 2px; " >
+                        @can('noc-clear-faults-clear')
+                            <button class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#nocClearModal-{{ $fault->id }}">
                                 <i class="fas fa-save me-1"></i>Clear
                             </button>
-                            @endcan
-                        </form>
-                        <form style="display:inline" action="{{ route('chief-tech-clear.update',$fault->id) }}"  method="POST">
-                                @csrf
-                                @method('PUT')
-                                @can('chief-tech-clear-faults-clear')
-                                <button type="submit" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
-                                    <i class="fas fa-save me-1"></i>Clear
-                                </button>
-                                @endcan
-                        </form>
+                        @endcan
+                        @can('chief-tech-clear-faults-clear')
+                            <button class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#chiefTechClearModal-{{ $fault->id }}">
+                                <i class="fas fa-save me-1"></i>Clear
+                            </button>
+                        @endcan
 
                         <!--<a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>-->
                             @if ($fault->description==='Fault is under rectification')
 
                             @can('rectify-fault')
-                                <a href="{{ route('rectify.edit',$fault->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
+                                <button class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#rectifyEditModal-{{ $fault->id }}">
                                     <i class="fas fa-save me-1"></i>Rectify
-                                </a>
+                                </button>
                             @endcan  
                             @can('request-permit')
-
-                            <a href="{{ route('request-permit.edit',$fault->id) }}" class="btn btn-sm btn-outline-warning" style="padding:0px 2px;" >
-                                <i class="fas fa-pencil me-1"></i>Request Permit
-                            </a>
+                                <button class="btn btn-sm btn-outline-warning" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#requestPermitEditModal-{{ $fault->id }}">
+                                    <i class="fas fa-pencil me-1"></i>Request Permit
+                                </button>
                             @endcan
                             @can('materials')
-                            <a href="{{ route('stores.create',$fault->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
-                                <i class="fas fa-pencil me-1"></i>Request Material</a>
+                                <button class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#requestMaterialCreateModal-{{ $fault->id }}">
+                                    <i class="fas fa-pencil me-1"></i>Request Material
+                                </button>
                             @endcan
-                            <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
+                            <button class="btn btn-sm btn-outline-success" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                 <i class="fas fa-eye me-1"></i>View
-                            </a>
-
-        
+                            </button>
                             @endif
 
                         </td>
@@ -108,6 +103,14 @@ My Faults
                     @endforeach
                 </tbody>
             </table>
+            @foreach ($faults as $fault)
+                @include('clear_faults.noc_clear_modal', [ 'fault' => $fault ])
+                @include('clear_faults.chief_tech_clear_modal', [ 'fault' => $fault ])
+                @include('rectification.edit_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
+                @include('permits.requested-permits.edit_modal', [ 'fault' => $fault ])
+                @include('stores.create_modal', [ 'fault' => $fault ])
+                @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
+            @endforeach
             <div id="myFaultsPager" class="mt-2"></div>
         </div>       
     </div>
@@ -115,4 +118,11 @@ My Faults
 </div>
 
 </section>
+@endsection
+
+@section('scripts')
+    @include('partials.scripts')
+    <script>
+      window.currentUserName = @json(optional(auth()->user())->name);
+    </script>
 @endsection

@@ -26,4 +26,12 @@
 
     /* Responsive attachment image */
     .custom-modal .modal-body img { display: block; height: auto; max-width: 100%; border-radius: 8px; }
+
+    /* Chat-style remarks */
+    .chat-messages { display: flex; flex-direction: column; gap: .75rem; }
+    .chat-msg { max-width: 75%; padding: .5rem .75rem; border-radius: .75rem; background: #f1f5f9; }
+    .chat-msg-self { align-self: flex-end; background: #dbeafe; }
+    .chat-msg-other { align-self: flex-start; }
+    .chat-msg-meta { font-size: .75rem; color: #64748b; margin-bottom: .25rem; }
+    .chat-msg-body { white-space: pre-wrap; }
 </style>

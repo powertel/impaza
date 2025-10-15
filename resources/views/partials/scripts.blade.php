@@ -176,6 +176,86 @@ $('#city').on('change',function () {
     });
   });
 </script>
+
+{{-- Remarks chat submission (AJAX, keeps modal open) --}}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    const csrf = csrfMeta ? csrfMeta.getAttribute('content') : '';
+
+    async function postForm(url, form) {
+      const fd = new FormData(form);
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+        body: fd,
+      });
+      const text = await res.text();
+      let json = {};
+      try { json = JSON.parse(text); } catch (e) {}
+      if (!res.ok) {
+        console.error('Remark save failed', text);
+        if (window.swal) { new swal('Save failed', 'Please try again', 'error'); }
+      }
+      return json;
+    }
+
+    function renderRemarkBubble(r) {
+      const isSelf = (r?.name && r.name === (window.currentUserName || ''));
+      const container = document.createElement('div');
+      container.className = `chat-msg ${isSelf ? 'chat-msg-self' : 'chat-msg-other'}`;
+      const created = r?.created_at ? new Date(r.created_at) : new Date();
+      const meta = document.createElement('div');
+      meta.className = 'chat-msg-meta';
+      meta.innerHTML = `<strong>${r?.name || 'You'}</strong> <span class="text-muted">• ${created.toLocaleString()}</span>${r?.activity ? `<span class="ms-2 badge bg-light text-dark">${r.activity}</span>` : ''}`;
+      const body = document.createElement('div');
+      body.className = 'chat-msg-body';
+      body.textContent = r?.remark || '';
+      container.appendChild(meta);
+      container.appendChild(body);
+      if (r?.file_path) {
+        const imgWrap = document.createElement('div');
+        imgWrap.className = 'mt-2';
+        const img = document.createElement('img');
+        img.className = 'img-fluid rounded';
+        img.style.height = '100px';
+        img.style.width = 'auto';
+        img.alt = 'Attachment';
+        img.title = 'Attachment';
+        img.src = `/storage/${r.file_path}`;
+        imgWrap.appendChild(img);
+        container.appendChild(imgWrap);
+      }
+      return container;
+    }
+
+    // Capture submit for all remark forms
+    document.querySelectorAll('.js-remark-form').forEach(form => {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const targetSel = form.dataset.remarksTarget;
+        const list = targetSel ? document.querySelector(targetSel) : null;
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending...'; }
+        const url = form.getAttribute('action');
+        const json = await postForm(url, form);
+        if (json && json.status === 'ok' && json.remark) {
+          const bubble = renderRemarkBubble(json.remark);
+          if (list) {
+            list.appendChild(bubble);
+            list.scrollTop = list.scrollHeight;
+          }
+          // Reset inputs
+          const ta = form.querySelector('textarea[name="remark"]');
+          if (ta) ta.value = '';
+          const file = form.querySelector('input[type="file"][name="attachment"]');
+          if (file) file.value = '';
+        }
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Send'; }
+      });
+    });
+  });
+</script>
 {{-- Customers repeater helpers --}}
 <script>
   document.addEventListener('DOMContentLoaded', function() {

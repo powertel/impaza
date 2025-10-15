@@ -40,48 +40,86 @@ class RemarkController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request,Fault $fault)
-    {    request()->validate([
-        'remark'=> 'required',
-       'attachment' => 'required|mimes:png,jpg,jpeg|max:2048'
-    ]);
-        $previous = $request['url'];
-        $FAULT_EDIT=Str::contains($previous, 'faults');
-        $CT_CLEAR=Str::contains($previous, 'chief-tech-clear');
-        $NOC_CLEAR=Str::contains($previous, 'noc-clear');
-        $REASSIGN=Str::contains($previous, 'assign');
-        if($FAULT_EDIT){
-        $request['activity']='ON FAULT EDIT';}
-        elseif($CT_CLEAR){
-        $request['activity']='ON CHIEF-TECH CLEAR';}
-        elseif($NOC_CLEAR){
-        $request['activity']='ON NOC CLEAR';}
-        elseif($REASSIGN){
-        $request['activity']='ON CHIEF-TECH REASSIGN';}
-        if($request->attachment){
-            $path =  $request->file('attachment')->storePublicly('attachments','public');}
-        else { $path = "NULL";}
-        $remarkActivity_id = DB::table('remark_activities')->where('activity','=',$request['activity'])->get('remark_activities.id')->first();
-        Remark::create(
-            [
-            'fault_id'=> $fault->id,
+    {
+        // Validate: attachment optional and limited to image types
+        $validated = $request->validate([
+            'remark' => 'required|string',
+            'attachment' => 'nullable|mimes:png,jpg,jpeg|max:2048',
+            'activity' => 'nullable|string',
+            'url' => 'nullable|string'
+        ]);
+
+        // Resolve activity: prefer explicit, fallback based on URL context
+        $activity = $validated['activity'] ?? null;
+        if (!$activity) {
+            $previous = $validated['url'] ?? '';
+            $FAULT_EDIT = Str::contains($previous, 'faults');
+            $CT_CLEAR   = Str::contains($previous, 'chief-tech-clear');
+            $NOC_CLEAR  = Str::contains($previous, 'noc-clear');
+            $REASSIGN   = Str::contains($previous, 'assign');
+            if ($FAULT_EDIT)      { $activity = 'ON FAULT EDIT'; }
+            elseif ($CT_CLEAR)    { $activity = 'ON CHIEF-TECH CLEAR'; }
+            elseif ($NOC_CLEAR)   { $activity = 'ON NOC CLEAR'; }
+            elseif ($REASSIGN)    { $activity = 'ON CHIEF-TECH REASSIGN'; }
+        }
+
+        // Store attachment if present
+        $path = null;
+        if ($request->hasFile('attachment')) {
+            $path = $request->file('attachment')->storePublicly('attachments', 'public');
+        }
+
+        // Map activity to remark_activities.id
+        $remarkActivityId = null;
+        if ($activity) {
+            $remarkActivityId = DB::table('remark_activities')
+                ->where('activity', '=', $activity)
+                ->value('id');
+        }
+
+        // Create remark
+        $remark = Remark::create([
+            'fault_id' => $fault->id,
             'user_id' => $request->user()->id,
-            'remark' => $request['remark'], 
-            'remarkActivity_id'=>$remarkActivity_id->id,  
-            'file_path'=>$path            
-            ]
-        );
-        if($CT_CLEAR)
-        {
-            return redirect(route('chief-tech-clear.index'));}
-            elseif($NOC_CLEAR){
-                return redirect(route('noc-clear.index'));}
-            elseif($REASSIGN){
-                return redirect(route('assign.index'));}
-            else{
-                return back();
-            }
-            
-        
+            'remark' => $validated['remark'],
+            'remarkActivity_id' => $remarkActivityId,
+            'file_path' => $path,
+        ]);
+
+        // If this is an AJAX/JSON request, respond with the remark payload
+        if ($request->expectsJson()) {
+            $fullRemark = DB::table('remarks')
+                ->leftJoin('remark_activities', 'remarks.remarkActivity_id', '=', 'remark_activities.id')
+                ->leftJoin('users', 'remarks.user_id', '=', 'users.id')
+                ->where('remarks.id', '=', $remark->id)
+                ->select([
+                    'remarks.id',
+                    'remarks.fault_id',
+                    'remarks.created_at',
+                    'remarks.remark',
+                    'remarks.file_path',
+                    'users.name',
+                    'remark_activities.activity'
+                ])->first();
+
+            return response()->json(['status' => 'ok', 'remark' => $fullRemark]);
+        }
+
+        // Legacy redirects (non-AJAX)
+        $previous = $validated['url'] ?? '';
+        $CT_CLEAR   = Str::contains($previous, 'chief-tech-clear');
+        $NOC_CLEAR  = Str::contains($previous, 'noc-clear');
+        $REASSIGN   = Str::contains($previous, 'assign');
+        if ($CT_CLEAR) {
+            return redirect(route('chief-tech-clear.index'));
+        } elseif ($NOC_CLEAR) {
+            return redirect(route('noc-clear.index'));
+        } elseif ($REASSIGN) {
+            return redirect(route('assign.index'));
+        } else {
+            return back();
+        }
+
     }
 
     /**
