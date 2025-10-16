@@ -107,8 +107,8 @@ My Faults
                 @include('clear_faults.noc_clear_modal', [ 'fault' => $fault ])
                 @include('clear_faults.chief_tech_clear_modal', [ 'fault' => $fault ])
                 @include('rectification.edit_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
-                @include('permits.requested-permits.edit_modal', [ 'fault' => $fault ])
-                @include('stores.create_modal', [ 'fault' => $fault ])
+                @include('permits.requested-permits.edit_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
+                @include('stores.create_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
                 @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
             @endforeach
             <div id="myFaultsPager" class="mt-2"></div>
