@@ -28,14 +28,12 @@
                         </div>
 
                         <div class="mb-3 col-md-6">
-                            <label for="linkName" class="form-label">City/Town</label>
-                            <select id="city" class="form-select @error('city_id') is-invalid @enderror" name="city_id" >
-                                <option selected disabled  >Select City/Town</option>
-                                @foreach($city as $city)
-                                    @if (old('city_id')==$city->id)
-                                        <option value="{{ $city->id}}" selected>{{ $city->city }}</option>
-                                    @else
-                                        <option value="{{ $city->id}}">{{ $city->city }}</option>
+                            <label for="link" class="form-label">Link</label>
+                            <select id="link" class="form-select @error('link_id') is-invalid @enderror" name="link_id" >
+                                <option selected disabled>Select Link</option>
+                                @foreach($link as $link)
+                                    @if (old('link_id')==$link->id)
+                                        <option value="{{ $link->id}}" selected>{{ $link->link }}</option>
                                     @endif
                                 @endforeach
                             </select>
@@ -51,63 +49,8 @@
                             <label for="phone" class="form-label">Phone Number</label>
                             <input type="number" class="form-control @error('phoneNumber') is-invalid @enderror"  placeholder="Phone Number" name="phoneNumber" value="{{ old('phoneNumber') }}" >
                         </div>
-                        <div class="mb-3 col-md-4">
-                            <label for="email" class="form-label">Email Address</label>
-                            <input type="email" class="form-control @error('contactEmail') is-invalid @enderror" placeholder="Email" name="contactEmail" value="{{ old('contactEmail') }}" >
-                        </div>
-                    </div>
 
-                    <div class="row g-3">
                         <div class="mb-3 col-md-4">
-                            <label for="city" class="form-label">Location</label>
-                            <select id="suburb"  class="form-select @error('suburb_id') is-invalid @enderror" name="suburb_id" >
-                                <option selected disabled>Select Suburb</option>
-                                @foreach($location as $location)
-                                    @if (old('suburb_id')==$location->id)
-                                        <option value="{{ $location->id}}" selected>{{ $location->suburb }}</option>
-                                    @endif
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3 col-md-4">
-                            <label for="suburb" class="form-label">Link</label>
-                            <select id="link" class="form-select @error('link_id') is-invalid @enderror" name="link_id" >
-                                <option selected disabled>Select Link</option>
-                                @foreach($link as $link)
-                                    @if (old('link_id')==$link->id)
-                                        <option value="{{ $link->id}}" selected>{{ $link->link }}</option>
-                                    @endif
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3 col-md-4">
-                            <label for="pop" class="form-label">POP</label>
-                            <select id="pop"  class="form-select @error('pop_id') is-invalid @enderror" name="pop_id" >
-                                <option selected disabled>Select Pop</option>
-                                @foreach($pop as $pop)
-                                    @if (old('pop_id')==$pop->id)
-                                        <option value="{{ $pop->id}}" selected>{{ $pop->pop }}</option>
-                                    @endif
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="row g-3">
-                        <div class="mb-3 col-md-6">
-                            <label for="serviceType" class="form-label">Service Type</label>
-                            <select  class="form-select @error('serviceType') is-invalid @enderror" name="serviceType">
-                                <option  selected disabled>Choose</option>
-                                <option value="VPN"  @if (old('serviceType') == "VPN") {{ 'selected' }} @endif>VPN</option>
-                                <option value="INTERNET" @if (old('serviceType') == "INTERNET") {{ 'selected' }} @endif>INTERNET</option>
-                                <option value="VOIP" @if (old('serviceType') == "VOIP") {{ 'selected' }} @endif>VOIP</option>
-                                <option value="CARRIER SERVICE" @if (old('serviceType') == "CARRIER SERVICE") {{ 'selected' }} @endif>CARRIER SERVICE</option>
-                                <option value="POWERTRACK" @if (old('serviceType') == "POWERTRACK") {{ 'selected' }} @endif>POWERTRACK</option>
-                                <option value="CDMA VOICE" @if (old('serviceType') == "CDMA VOICE") {{ 'selected' }} @endif>CDMA VOICE</option>
-                                <option value="E-VENDING" @if (old('serviceType') == "E-VENDING") {{ 'selected' }} @endif>E-VENDING</option>
-                            </select>
-                        </div>
-                        <div class="mb-3 col-md-6">
                             <label for="suspectedRFO" class="form-label">Suspected Reason For Outage</label>
                             <select  class="form-select @error('suspectedRfo_id') is-invalid @enderror" name="suspectedRfo_id" >
                                 <option selected disabled >Select RFO</option>
@@ -120,6 +63,7 @@
                                 @endforeach
                             </select>
                         </div>
+                        
                     </div>
 
                     <div class="row g-3">

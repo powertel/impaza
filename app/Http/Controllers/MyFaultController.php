@@ -33,7 +33,8 @@ class MyFaultController extends Controller
                  ->leftjoin('users','faults.assignedTo','=','users.id')
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
                 ->leftjoin('links','faults.link_id','=','links.id')
-                ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
+                ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
+                ->leftjoin('users as account_manager_users','account_managers.user_id','=','account_manager_users.id')
                 ->leftjoin('statuses','faults.status_id','=','statuses.id')
                 ->leftjoin('cities','faults.city_id','=','cities.id')
                 ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
@@ -48,7 +49,7 @@ class MyFaultController extends Controller
                     'faults.phoneNumber',
                     'faults.contactEmail',
                     'faults.address',
-                    'account_managers.accountManager',
+                    'account_manager_users.name as accountManager',
                     'links.link',
                     'statuses.description',
                     'faults.serviceType',

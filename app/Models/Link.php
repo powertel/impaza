@@ -11,6 +11,9 @@ class Link extends Model
 
     protected $fillable = [
         'link',
+        'jcc_number',
+        'service_type',
+        'capacity',
         'city_id',
         'suburb_id',
         'pop_id',

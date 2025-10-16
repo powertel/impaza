@@ -62,6 +62,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('customers/check-customer-name', [CustomerController::class, 'checkCustomerName'])->name('customers.check-customer-name');
     // Links: client-side validation helper (must be BEFORE resource route)
     Route::get('links/check-link-name', [LinkController::class, 'checkLinkName'])->name('links.check-link-name');
+    Route::get('links/check-jcc-number', [LinkController::class, 'checkJccNumber'])->name('links.check-jcc-number');
     Route::resource('customers', CustomerController::class);
     Route::resource('cities', CityController::class);
     Route::resource('locations', LocationController::class);

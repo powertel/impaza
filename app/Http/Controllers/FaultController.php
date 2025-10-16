@@ -82,6 +82,25 @@ class FaultController extends Controller
                 'reasons_for_outages.RFO as RFO'
                 ]);
         
+        // Collect remarks for all listed faults and group by fault_id
+        $faultIds = $faults->pluck('id');
+        $remarksRecords = DB::table('remarks')
+            ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
+            ->leftjoin('users','remarks.user_id','=','users.id')
+            ->whereIn('remarks.fault_id', $faultIds)
+            ->orderBy('remarks.created_at', 'desc')
+            ->get([
+                'remarks.id',
+                'remarks.fault_id',
+                'remarks.created_at',
+                'remarks.remark',
+                'remarks.file_path',
+                'users.name',
+                'remark_activities.activity'
+            ]);
+
+        $remarksByFault = $remarksRecords->groupBy('fault_id');
+        
         $city = City::all();
         $customer = DB::table('customers')
             ->orderBy('customers.customer', 'asc')
@@ -92,7 +111,7 @@ class FaultController extends Controller
         $accountManager = AccountManager::all();
         $suspectedRFO = ReasonsForOutage::all();
 
-        return view('faults.index',compact('faults','customer','city','accountManager','location','link','pop','suspectedRFO'))
+        return view('faults.index',compact('faults','customer','city','accountManager','location','link','pop','suspectedRFO','remarksByFault'))
         ->with('i');
 
     }
@@ -111,22 +130,57 @@ class FaultController extends Controller
         DB::beginTransaction();
         try{
             request()->validate([
-                'city_id' => 'required',
-                'customer_id'=> 'required',
-                'contactName'=> 'required',
+                'customer_id'=> 'required|exists:customers,id',
+                'contactName'=> 'required|string',
                 'phoneNumber'=> 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
-                'contactEmail'=> 'required',
-                'address'=> 'required',
-                'suburb_id'=> 'required',
-                'pop_id'=> 'required',
-                'link_id'=> 'required',
-                'suspectedRfo_id'=> 'required',
-                'serviceType'=> 'required',
-                'remark'=> 'required',
-               'attachment' => 'null|mimes:png,jpg,jpeg|max:2048'
+                'address'=> 'required|string',
+                'link_id'=> 'required|exists:links,id',
+                'suspectedRfo_id'=> 'required|exists:reasons_for_outages,id',
+                'remark'=> 'required|string',
+                'attachment' => 'nullable|mimes:png,jpg,jpeg|max:2048'
             ]);
            
             $req = $request->all();
+            // Derive location and service details from selected link
+            $lnk = Link::find($request->input('link_id'));
+            if($lnk){
+                $req['city_id'] = $lnk->city_id;
+                $req['suburb_id'] = $lnk->suburb_id;
+                $req['pop_id'] = $lnk->pop_id;
+                $req['serviceType'] = $lnk->service_type; // map to faults.serviceType
+            }
+            // Remove email if it is not provided anymore
+            if(!$request->filled('contactEmail')){
+                $req['contactEmail'] = null;
+            }
+
+            // Derive Account Manager from selected customer (snapshot at creation)
+            $customer = Customer::find($request->input('customer_id'));
+            $accountManagerId = null;
+            if ($customer) {
+                $amUserId = $customer->account_manager_id; // references users.id
+                if ($amUserId) {
+                    $user = User::find($amUserId);
+                    $accountManager = AccountManager::firstOrCreate(
+                        ['user_id' => $amUserId],
+                        ['accountManager' => $user ? $user->name : 'Account Manager']
+                    );
+                    $accountManagerId = $accountManager->id;
+                } else {
+                    // Fallback to an "Unassigned" Account Manager record to satisfy NOT NULL constraint
+                    $accountManager = AccountManager::whereNull('user_id')
+                        ->where('accountManager', 'Unassigned')
+                        ->first();
+                    if (!$accountManager) {
+                        $accountManager = AccountManager::create([
+                            'accountManager' => 'Unassigned',
+                            'user_id' => null,
+                        ]);
+                    }
+                    $accountManagerId = $accountManager->id;
+                }
+            }
+            $req['accountManager_id'] = $accountManagerId;
         
             //This is where i am creating the fault
             $req['status_id'] = 1;
@@ -187,6 +241,13 @@ class FaultController extends Controller
      */
     public function edit($id)
     {
+        // Prevent loading the edit view for locked faults
+        $faultModel = Fault::find($id);
+        if ($faultModel && (int)$faultModel->status_id !== 1) {
+            return redirect()->route('faults.index')
+                ->with('error', 'This fault cannot be edited after it passes the initial stage.');
+        }
+
         $fault = DB::table('faults')
             ->leftjoin('customers','faults.customer_id','=','customers.id')
             ->leftjoin('links','faults.link_id','=','links.id')
@@ -232,27 +293,51 @@ class FaultController extends Controller
     {
         $fault = Fault::find($id);
 
-        // Derive Account Manager from the selected customer
-        $customerId = $request->input('customer_id');
-        $accountManagerId = null;
-        if ($customerId) {
-            $customer = Customer::find($customerId);
-            if ($customer && $customer->account_manager_id) {
-                // Find or create the AccountManager record mapped to the user
-                $amUserId = $customer->account_manager_id;
-                $user = User::find($amUserId);
-                $accountManager = AccountManager::firstOrCreate(
-                    ['user_id' => $amUserId],
-                    ['accountManager' => $user ? $user->name : 'Account Manager']
-                );
-                $accountManagerId = $accountManager->id;
-            }
+        // Block edits once fault has passed status_id = 1
+        if ($fault && (int)$fault->status_id !== 1) {
+            return redirect()->route('faults.index')
+                ->with('error', 'Editing is locked after the initial stage.');
         }
 
         $data = $request->all();
-        // Always set accountManager_id from customer association
-        if ($accountManagerId) {
-            $data['accountManager_id'] = $accountManagerId;
+
+        // If customer changed, derive Account Manager from the selected customer
+        if ($request->filled('customer_id')) {
+            $customer = Customer::find($request->input('customer_id'));
+            if ($customer) {
+                $amUserId = $customer->account_manager_id;
+                if ($amUserId) {
+                    $user = User::find($amUserId);
+                    $accountManager = AccountManager::firstOrCreate(
+                        ['user_id' => $amUserId],
+                        ['accountManager' => $user ? $user->name : 'Account Manager']
+                    );
+                    $data['accountManager_id'] = $accountManager->id;
+                } else {
+                    // Fallback to Unassigned to maintain NOT NULL constraint
+                    $fallbackAm = AccountManager::whereNull('user_id')
+                        ->where('accountManager', 'Unassigned')
+                        ->first();
+                    if (!$fallbackAm) {
+                        $fallbackAm = AccountManager::create([
+                            'accountManager' => 'Unassigned',
+                            'user_id' => null,
+                        ]);
+                    }
+                    $data['accountManager_id'] = $fallbackAm->id;
+                }
+            }
+        }
+
+        // If link changed, re-derive location and service details
+        if ($request->filled('link_id') && $request->input('link_id') != $fault->link_id) {
+            $lnk = Link::find($request->input('link_id'));
+            if ($lnk) {
+                $data['city_id'] = $lnk->city_id;
+                $data['suburb_id'] = $lnk->suburb_id;
+                $data['pop_id'] = $lnk->pop_id;
+                $data['serviceType'] = $lnk->service_type;
+            }
         }
 
         $fault->update($data);

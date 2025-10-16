@@ -34,6 +34,40 @@
               <div class="repeater-item border rounded p-3 mb-3 position-relative">
                 <!-- <button type="button" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 mt-2 me-2 remove-item-btn"><i class="fas fa-times"></i></button> -->
                 <div class="row g-3 align-items-end">
+                  <!-- Row 1: Link (paired visually with the Customer select above) -->
+                  <div class="col-md-6">
+                    <label class="form-label">Link</label>
+                    <input type="text" name="items[0][link]" class="form-control link-name-input @error('items.0.link') is-invalid @enderror" placeholder="e.g. HRE-ZB-Magetsi" required>
+                    @error('items.0.link')
+                      <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                  </div>
+                  <div class="col-md-6 d-none d-md-block"></div>
+
+                  <!-- Row 2: JCC Number, Service Type, Capacity -->
+                  <div class="w-100"></div>
+                  <div class="col-md-4">
+                    <label class="form-label">JCC Number</label>
+                    <input type="text" name="items[0][jcc_number]" class="form-control jcc-number-input" placeholder="e.g. JCC-12345">
+                    <div class="invalid-feedback">JCC number already exists.</div>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Service Type</label>
+                    <select name="items[0][service_type]" class="form-select">
+                      <option value="" selected disabled >Select Servive Type</option>
+                      <option value="Internet">Internet</option>
+                      <option value="VPN">VPN</option>
+                      <option value="Carrier Services">Carrier Services</option>
+                      <option value="E-Vending">E-Vending</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Capacity</label>
+                    <input type="text" name="items[0][capacity]" class="form-control" placeholder="e.g. 100Mbps">
+                  </div>
+
+                  <!-- Row 3: City/Town, Location, Pop -->
+                  <div class="w-100"></div>
                   <div class="col-md-3">
                     <label class="form-label">City/Town</label>
                     <select name="items[0][city_id]" class="form-select @error('items.0.city_id') is-invalid @enderror" required>
@@ -70,6 +104,10 @@
                       <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                   </div>
+                  <div class="col-md-3 d-none d-md-block"></div>
+
+                  <!-- Row 4: Link Type -->
+                  <div class="w-100"></div>
                   <div class="col-md-3">
                     <label class="form-label">Link Type</label>
                     <select name="items[0][linkType_id]" class="form-select @error('items.0.linkType_id') is-invalid @enderror" required>
@@ -79,13 +117,6 @@
                       @endforeach
                     </select>
                     @error('items.0.linkType_id')
-                      <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                  </div>
-                  <div class="col-md-6">
-                    <label class="form-label">Link</label>
-                    <input type="text" name="items[0][link]" class="form-control link-name-input @error('items.0.link') is-invalid @enderror" placeholder="e.g. MPLS-001" required>
-                    @error('items.0.link')
                       <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                   </div>

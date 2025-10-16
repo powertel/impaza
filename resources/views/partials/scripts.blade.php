@@ -439,6 +439,37 @@ $('#city').on('change',function () {
       wrapper.innerHTML = `
         <button type="button" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 mt-2 me-2 remove-item-btn"><i class="fas fa-times"></i> </button>
         <div class="row g-3 align-items-end">
+          <!-- Row 1: Link -->
+          <div class="col-md-6">
+            <label class="form-label">Link</label>
+            <input type="text" name="items[${idx}][link]" class="form-control link-name-input" placeholder="e.g. HRE-ZB-Magetsi" required>
+          </div>
+          <div class="col-md-6 d-none d-md-block"></div>
+
+          <!-- Row 2: JCC Number, Service Type, Capacity -->
+          <div class="w-100"></div>
+          <div class="col-md-4">
+            <label class="form-label">JCC Number</label>
+            <input type="text" name="items[${idx}][jcc_number]" class="form-control jcc-number-input" placeholder="e.g. JCC-12345">
+            <div class="invalid-feedback">JCC number already exists.</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Service Type</label>
+            <select name="items[${idx}][service_type]" class="form-select">
+              <option value="" selected disabled>Select Service Type</option>
+              <option value="Internet">Internet</option>
+              <option value="VPN">VPN</option>
+              <option value="Carrier Services">Carrier Services</option>
+              <option value="E-Vending">E-Vending</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Capacity</label>
+            <input type="text" name="items[${idx}][capacity]" class="form-control" placeholder="e.g. 100Mbps">
+          </div>
+
+          <!-- Row 3: City/Town, Location, Pop -->
+          <div class="w-100"></div>
           <div class="col-md-3">
             <label class="form-label">City/Town</label>
             <select name="items[${idx}][city_id]" class="form-select" required>
@@ -463,6 +494,10 @@ $('#city').on('change',function () {
                 .map(o => `<option value="${o.value}">${o.text}</option>`).join('')}
             </select>
           </div>
+          <div class="col-md-3 d-none d-md-block"></div>
+
+          <!-- Row 4: Link Type -->
+          <div class="w-100"></div>
           <div class="col-md-3">
             <label class="form-label">Link Type</label>
             <select name="items[${idx}][linkType_id]" class="form-select" required>
@@ -470,10 +505,6 @@ $('#city').on('change',function () {
               ${Array.from(document.querySelectorAll('#linkTypesTemplate option'))
                 .map(o => `<option value="${o.value}">${o.text}</option>`).join('')}
             </select>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label">Link</label>
-            <input type="text" name="items[${idx}][link]" class="form-control link-name-input" placeholder="e.g. MPLS-001" required>
           </div>
         </div>
       `;
@@ -516,6 +547,7 @@ $('#city').on('change',function () {
     const accCheckUrl = "{{ route('customers.check-account-number') }}";
     const nameCheckUrl = "{{ route('customers.check-customer-name') }}";
     const linkCheckUrl = "{{ route('links.check-link-name') }}";
+    const jccCheckUrl = "{{ route('links.check-jcc-number') }}";
 
     const debounceTimers = new WeakMap();
 
@@ -528,7 +560,8 @@ $('#city').on('change',function () {
       const hasInvalidAcc = form.querySelectorAll('.account-number-input.is-invalid').length > 0;
       const hasInvalidName = form.querySelectorAll('.customer-name-input.is-invalid').length > 0;
       const hasInvalidLink = form.querySelectorAll('.link-name-input.is-invalid').length > 0;
-      setSubmitDisabled(form, hasInvalidAcc || hasInvalidName || hasInvalidLink);
+      const hasInvalidJcc = form.querySelectorAll('.jcc-number-input.is-invalid').length > 0;
+      setSubmitDisabled(form, hasInvalidAcc || hasInvalidName || hasInvalidLink || hasInvalidJcc);
     }
 
     function validateInput(input) {
@@ -690,10 +723,64 @@ $('#city').on('change',function () {
       inputs.forEach(bindLinkValidationToInput);
     };
 
+    // JCC number validation (optional field)
+    function validateJccInput(input) {
+      const value = (input.value || '').trim();
+      const form = input.closest('form');
+      const ignoreId = input.dataset.ignoreId || '';
+      if (value === '') {
+        input.classList.remove('is-invalid');
+        input.classList.remove('is-valid');
+        refreshFormSubmitState(form);
+        return;
+      }
+
+      $.get(jccCheckUrl, { jcc_number: value, ignore_id: ignoreId })
+        .done(function(res) {
+          if (res && res.available === true) {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (fb) fb.classList.remove('d-block');
+          } else {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (fb) fb.classList.add('d-block');
+          }
+          refreshFormSubmitState(form);
+        })
+        .fail(function() {
+          input.classList.remove('is-invalid');
+          input.classList.remove('is-valid');
+          const fb = input.parentElement.querySelector('.invalid-feedback');
+          if (fb) fb.classList.remove('d-block');
+          refreshFormSubmitState(form);
+        });
+    }
+
+    function bindJccValidationToInput(input) {
+      function debouncedValidate() {
+        const existing = debounceTimers.get(input);
+        if (existing) clearTimeout(existing);
+        const t = setTimeout(() => validateJccInput(input), 350);
+        debounceTimers.set(input, t);
+      }
+      input.addEventListener('input', debouncedValidate);
+      input.addEventListener('blur', () => validateJccInput(input));
+    }
+
+    window.bindJccNumberValidation = function(root) {
+      const scope = root || document;
+      const inputs = scope.querySelectorAll('.jcc-number-input');
+      inputs.forEach(bindJccValidationToInput);
+    };
+
     // Bind on load for existing inputs (create & edit modals)
     window.bindAccountNumberValidation(document);
     window.bindCustomerNameValidation(document);
     window.bindLinkNameValidation(document);
+    window.bindJccNumberValidation && window.bindJccNumberValidation(document);
 
     // Also re-bind when a Bootstrap modal is shown, to make sure dynamic content is wired
     document.querySelectorAll('.modal').forEach(function(modalEl) {
@@ -701,6 +788,7 @@ $('#city').on('change',function () {
         window.bindAccountNumberValidation(modalEl);
         window.bindCustomerNameValidation(modalEl);
         window.bindLinkNameValidation(modalEl);
+        if (window.bindJccNumberValidation) window.bindJccNumberValidation(modalEl);
         if (window.bindLinkCascades) window.bindLinkCascades(modalEl);
         if (window.bindSimpleLinkCascades) window.bindSimpleLinkCascades(modalEl);
       });
@@ -744,6 +832,18 @@ $('#city').on('change',function () {
       });
     }
 
+    function checkJccAvailabilityValue(value, ignoreId) {
+      return new Promise(function(resolve) {
+        $.get(jccCheckUrl, { jcc_number: value, ignore_id: ignoreId })
+          .done(function(res){
+            resolve(!!(res && res.available === true));
+          })
+          .fail(function(){
+            resolve(false);
+          });
+      });
+    }
+
     function handleFormSubmit(e) {
       const form = e.target;
       // First use native HTML5 validation
@@ -756,7 +856,8 @@ $('#city').on('change',function () {
       const accInputs = form.querySelectorAll('.account-number-input');
       const nameInputs = form.querySelectorAll('.customer-name-input');
       const linkInputs = form.querySelectorAll('.link-name-input');
-      if (!accInputs.length && !nameInputs.length && !linkInputs.length) {
+      const jccInputs = form.querySelectorAll('.jcc-number-input');
+      if (!accInputs.length && !nameInputs.length && !linkInputs.length && !jccInputs.length) {
         // No relevant fields; let native submission proceed
         return;
       }
@@ -818,6 +919,24 @@ $('#city').on('change',function () {
             }
             return available;
           });
+        }),
+        ...Array.from(jccInputs).map(function(input){
+          const value = (input.value || '').trim();
+          const ignoreId = input.dataset.ignoreId || '';
+          if (!value) return Promise.resolve(true); // optional field
+          return checkJccAvailabilityValue(value, ignoreId).then(function(available){
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (available) {
+              input.classList.remove('is-invalid');
+              input.classList.add('is-valid');
+              if (fb) fb.classList.remove('d-block');
+            } else {
+              input.classList.add('is-invalid');
+              input.classList.remove('is-valid');
+              if (fb) fb.classList.add('d-block');
+            }
+            return available;
+          });
         })
       ];
 
@@ -825,11 +944,12 @@ $('#city').on('change',function () {
         const anyTaken = results.some(function(r){ return r === false; }) ||
           form.querySelectorAll('.account-number-input.is-invalid').length > 0 ||
           form.querySelectorAll('.customer-name-input.is-invalid').length > 0 ||
-          form.querySelectorAll('.link-name-input.is-invalid').length > 0;
+          form.querySelectorAll('.link-name-input.is-invalid').length > 0 ||
+          form.querySelectorAll('.jcc-number-input.is-invalid').length > 0;
         if (anyTaken) {
           setSubmitDisabled(form, false); // keep enabled to allow corrections
           // Focus the first invalid field
-          const firstInvalid = form.querySelector('.account-number-input.is-invalid, .customer-name-input.is-invalid, .link-name-input.is-invalid');
+          const firstInvalid = form.querySelector('.account-number-input.is-invalid, .customer-name-input.is-invalid, .link-name-input.is-invalid, .jcc-number-input.is-invalid');
           if (firstInvalid) firstInvalid.focus();
           return; // do not submit
         }
@@ -843,11 +963,11 @@ $('#city').on('change',function () {
       }).catch(function(){
         // If endpoint fails, keep form open and allow corrections
         setSubmitDisabled(form, false);
-        const firstInvalid = form.querySelector('.customer-name-input.is-invalid, .account-number-input.is-invalid, .link-name-input.is-invalid')
-          || form.querySelector('.customer-name-input, .account-number-input, .link-name-input');
-        if (firstInvalid) firstInvalid.focus();
-        // Do not submit on failure of availability check
-      });
+        const firstInvalid = form.querySelector('.customer-name-input.is-invalid, .account-number-input.is-invalid, .link-name-input.is-invalid, .jcc-number-input.is-invalid')
+          || form.querySelector('.customer-name-input, .account-number-input, .link-name-input, .jcc-number-input');
+      if (firstInvalid) firstInvalid.focus();
+      // Do not submit on failure of availability check
+    });
     }
 
     document.querySelectorAll('.modal form').forEach(function(form){
