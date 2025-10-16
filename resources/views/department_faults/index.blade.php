@@ -59,14 +59,17 @@ Department Faults
                             </span>
                         </td>
                         <td>
-                            <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
+                            <button class="btn btn-sm btn-outline-success" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                 <i class="fas fa-eye me-1"></i>View
-                            </a>
+                            </button>
                         </td>
                     </tr>
                     @endforeach
                 </tbody> 
             </table>
+            @foreach ($faults as $fault)
+                @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
+            @endforeach
             <div id="departmentFaultsPager" class="mt-2"></div>
         </div>
     </div>
@@ -81,4 +84,11 @@ Department Faults
     
 @endforeach --}}
 </section>
+@endsection
+
+@section('scripts')
+    @include('partials.scripts')
+    <script>
+      window.currentUserName = @json(optional(auth()->user())->name);
+    </script>
 @endsection
