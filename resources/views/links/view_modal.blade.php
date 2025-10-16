@@ -7,29 +7,44 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div class="row g-2">
-          <div class="col">
-            <strong>Customer</strong>
-            <p class="text-muted mb-0">{{ $link->customer }}</p>
+        <div class="row g-3 align-items-end">
+          <div class="col-md-6">
+            <label class="form-label">Customer</label>
+            <div class="form-control bg-light">{{ $link->customer }}</div>
           </div>
-          <div class="col">
-            <strong>City/Town</strong>
-            <p class="text-muted mb-0">{{ $link->city }}</p>
+          <div class="col-md-3">
+            <label class="form-label">City/Town</label>
+            <div class="form-control bg-light">{{ $link->city }}</div>
           </div>
-        </div>
-        <div class="row g-2 mt-2">
-          <div class="col">
-            <strong>Location</strong>
-            <p class="text-muted mb-0">{{ $link->suburb }}</p>
+          <div class="col-md-3">
+            <label class="form-label">Location</label>
+            <div class="form-control bg-light">{{ $link->suburb }}</div>
           </div>
-          <div class="col">
-            <strong>Pop</strong>
-            <p class="text-muted mb-0">{{ $link->pop }}</p>
+          <div class="col-md-3">
+            <label class="form-label">Pop</label>
+            <div class="form-control bg-light">{{ $link->pop }}</div>
           </div>
-        </div>
-        <div class="mt-3">
-          <strong>Link</strong>
-          <p class="text-muted mb-0">{{ $link->link }}</p>
+          <div class="col-md-3">
+            <label class="form-label">Link Type</label>
+            <div class="form-control bg-light">{{ $link->linkType ?? $link->linkType ?? '' }}</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Link</label>
+            <div class="form-control bg-light">{{ $link->link }}</div>
+          </div>
+          <div class="w-100"></div>
+          <div class="col-md-4">
+            <label class="form-label">JCC Number</label>
+            <div class="form-control bg-light">{{ $link->jcc_number ?? '—' }}</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Service Type</label>
+            <div class="form-control bg-light">{{ $link->service_type ?? '—' }}</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Capacity</label>
+            <div class="form-control bg-light">{{ $link->capacity ?? '—' }}</div>
+          </div>
         </div>
       </div>
       <div class="modal-footer">

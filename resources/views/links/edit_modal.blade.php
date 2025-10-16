@@ -7,7 +7,7 @@
     ->leftJoin('pops','links.pop_id','=','pops.id')
     ->leftJoin('link_types','links.linkType_id','=','link_types.id')
     ->where('links.id', $link->id)
-    ->select('links.id','links.link','links.customer_id','links.city_id','links.suburb_id','links.pop_id','links.linkType_id')
+    ->select('links.id','links.link','links.customer_id','links.city_id','links.suburb_id','links.pop_id','links.linkType_id','links.jcc_number','links.service_type','links.capacity')
     ->first();
 @endphp
 <div class="modal fade" id="linkEditModal{{ $link->id }}" tabindex="-1" aria-labelledby="linkEditModalLabel{{ $link->id }}" aria-hidden="true">
@@ -33,6 +33,26 @@
             <div class="col-md-6">
               <label class="form-label">Link</label>
               <input type="text" name="link" value="{{ $full ? $full->link : $link->link }}" class="form-control link-name-input" data-ignore-id="{{ $link->id }}" required>
+            </div>
+            <div class="w-100"></div>
+            <div class="col-md-4">
+              <label class="form-label">JCC Number</label>
+              <input type="text" name="jcc_number" value="{{ $full ? $full->jcc_number : '' }}" class="form-control jcc-number-input" data-ignore-id="{{ $link->id }}" placeholder="e.g. JCC-12345">
+              <div class="invalid-feedback">JCC number already exists.</div>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Service Type</label>
+              <select name="service_type" class="form-select">
+                <option value="" {{ empty($full?->service_type) ? 'selected disabled' : '' }}>Select Service Type</option>
+                <option value="Internet" {{ ($full && $full->service_type === 'Internet') ? 'selected' : '' }}>Internet</option>
+                <option value="VPN" {{ ($full && $full->service_type === 'VPN') ? 'selected' : '' }}>VPN</option>
+                <option value="Carrier Services" {{ ($full && $full->service_type === 'Carrier Services') ? 'selected' : '' }}>Carrier Services</option>
+                <option value="E-Vending" {{ ($full && $full->service_type === 'E-Vending') ? 'selected' : '' }}>E-Vending</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Capacity</label>
+              <input type="text" name="capacity" value="{{ $full ? $full->capacity : '' }}" class="form-control" placeholder="e.g. 100Mbps">
             </div>
             <div class="col-md-4">
               <label class="form-label">City/Town</label>

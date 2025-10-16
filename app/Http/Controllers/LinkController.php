@@ -34,8 +34,9 @@ class LinkController extends Controller
             ->leftjoin('cities','links.city_id','=','cities.id')
             ->leftjoin('suburbs','links.suburb_id','=','suburbs.id')
             ->leftjoin('pops','links.pop_id','=','pops.id')
+            ->leftJoin('link_types','links.linkType_id','=','link_types.id')
             ->orderBy('cities.city', 'asc')
-            ->get(['links.id','links.link','customers.customer','cities.city','pops.pop','suburbs.suburb']);
+            ->get(['links.id','links.jcc_number','links.link','link_types.linkType as linkType','links.service_type','links.capacity','customers.customer','cities.city','pops.pop','suburbs.suburb']);
         $customers = DB::table('customers')->orderBy('customers.customer', 'asc')->get();
         $cities = City::all();
         $suburbs = Suburb::all();
@@ -82,6 +83,9 @@ class LinkController extends Controller
                 'items.*.linkType_id' => 'required|exists:link_types,id',
                 'items.*.pop_id' => 'required|exists:pops,id',
                 'items.*.link' => 'required|string|unique:links,link',
+                'items.*.jcc_number' => 'nullable|string|max:255|unique:links,jcc_number',
+                'items.*.service_type' => 'nullable|string|in:Internet,VPN,Carrier Services,E-Vending',
+                'items.*.capacity' => 'nullable|string|max:255',
             ]);
 
             $customerId = $request->input('customer_id');
@@ -94,6 +98,9 @@ class LinkController extends Controller
                     'linkType_id' => $item['linkType_id'],
                     'pop_id' => $item['pop_id'],
                     'link' => $item['link'],
+                    'jcc_number' => $item['jcc_number'] ?? null,
+                    'service_type' => $item['service_type'] ?? null,
+                    'capacity' => $item['capacity'] ?? null,
                     'link_status' => 1,
                 ];
                 Link::create($data);
@@ -109,7 +116,10 @@ class LinkController extends Controller
                 'linkType_id' => 'required|exists:link_types,id',
                 'pop_id' => 'required|exists:pops,id',
                 'customer_id' => 'required|exists:customers,id',
-                'link' => 'required|string|unique:links,link'
+                'link' => 'required|string|unique:links,link',
+                'jcc_number' => 'nullable|string|max:255|unique:links,jcc_number',
+                'service_type' => 'nullable|string|in:Internet,VPN,Carrier Services,E-Vending',
+                'capacity' => 'nullable|string|max:255',
             ]);
             $req = $request->all();
             $req['link_status'] = 1;
@@ -142,7 +152,7 @@ class LinkController extends Controller
                 ->leftjoin('pops','links.pop_id','=','pops.id')
                 ->leftjoin('link_types','links.linkType_id','=','link_types.id')
                 ->where('links.id','=',$id)
-                ->get(['links.id','links.link','customers.customer','link_types.linkType','cities.city','pops.pop','suburbs.suburb'])
+                ->get(['links.id','links.link','customers.customer','link_types.linkType','cities.city','pops.pop','suburbs.suburb','links.jcc_number','links.service_type','links.capacity'])
                 ->first();
         return view('links.show',compact('link'));
     }
@@ -162,7 +172,7 @@ class LinkController extends Controller
                 ->leftjoin('pops','links.pop_id','=','pops.id')
                 ->leftjoin('link_types','links.linkType_id','=','link_types.id')
                 ->where('links.id','=',$id)
-                ->get(['links.id','links.linkType_id','links.link','links.customer_id','link_types.linkType','links.city_id','links.pop_id','links.suburb_id','customers.customer','cities.city','pops.pop','suburbs.suburb'])
+                ->get(['links.id','links.linkType_id','links.link','links.customer_id','link_types.linkType','links.city_id','links.pop_id','links.suburb_id','customers.customer','cities.city','pops.pop','suburbs.suburb','links.jcc_number','links.service_type','links.capacity'])
                 ->first();
                 $customers = Customer::all();
                 $cities = City::all();
@@ -185,6 +195,9 @@ class LinkController extends Controller
         // Validate link uniqueness on update (similar to customer validation)
         $validated = $request->validate([
             'link' => ['required','string', Rule::unique('links','link')->ignore($id)],
+            'jcc_number' => ['nullable','string','max:255', Rule::unique('links','jcc_number')->ignore($id)],
+            'service_type' => 'nullable|string|in:Internet,VPN,Carrier Services,E-Vending',
+            'capacity' => 'nullable|string|max:255',
         ]);
         $link->update($request->all());
         return redirect(route('links.index'))
@@ -207,6 +220,31 @@ class LinkController extends Controller
         }
 
         $query = Link::where('link', $value);
+        if (!empty($ignoreId)) {
+            $query->where('id', '<>', $ignoreId);
+        }
+        $exists = $query->exists();
+
+        return response()->json(['available' => !$exists]);
+    }
+
+    /**
+     * Check if a JCC number is available (AJAX).
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkJccNumber(Request $request)
+    {
+        $value = trim((string) $request->input('jcc_number'));
+        $ignoreId = $request->input('ignore_id');
+
+        // If empty, treat as available (field is optional)
+        if ($value === '') {
+            return response()->json(['available' => true]);
+        }
+
+        $query = Link::where('jcc_number', $value);
         if (!empty($ignoreId)) {
             $query->where('id', '<>', $ignoreId);
         }
