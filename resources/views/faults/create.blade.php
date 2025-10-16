@@ -49,13 +49,8 @@
                             <label for="phone" class="form-label">Phone Number</label>
                             <input type="number" class="form-control @error('phoneNumber') is-invalid @enderror"  placeholder="Phone Number" name="phoneNumber" value="{{ old('phoneNumber') }}" >
                         </div>
-                        
-                    </div>
 
-                    
-
-                    <div class="row g-3">
-                        <div class="mb-3 col-md-6">
+                        <div class="mb-3 col-md-4">
                             <label for="suspectedRFO" class="form-label">Suspected Reason For Outage</label>
                             <select  class="form-select @error('suspectedRfo_id') is-invalid @enderror" name="suspectedRfo_id" >
                                 <option selected disabled >Select RFO</option>
@@ -68,7 +63,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="mb-3 col-md-6"></div>
+                        
                     </div>
 
                     <div class="row g-3">

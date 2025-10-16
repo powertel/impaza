@@ -82,6 +82,25 @@ class FaultController extends Controller
                 'reasons_for_outages.RFO as RFO'
                 ]);
         
+        // Collect remarks for all listed faults and group by fault_id
+        $faultIds = $faults->pluck('id');
+        $remarksRecords = DB::table('remarks')
+            ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
+            ->leftjoin('users','remarks.user_id','=','users.id')
+            ->whereIn('remarks.fault_id', $faultIds)
+            ->orderBy('remarks.created_at', 'desc')
+            ->get([
+                'remarks.id',
+                'remarks.fault_id',
+                'remarks.created_at',
+                'remarks.remark',
+                'remarks.file_path',
+                'users.name',
+                'remark_activities.activity'
+            ]);
+
+        $remarksByFault = $remarksRecords->groupBy('fault_id');
+        
         $city = City::all();
         $customer = DB::table('customers')
             ->orderBy('customers.customer', 'asc')
@@ -92,7 +111,7 @@ class FaultController extends Controller
         $accountManager = AccountManager::all();
         $suspectedRFO = ReasonsForOutage::all();
 
-        return view('faults.index',compact('faults','customer','city','accountManager','location','link','pop','suspectedRFO'))
+        return view('faults.index',compact('faults','customer','city','accountManager','location','link','pop','suspectedRFO','remarksByFault'))
         ->with('i');
 
     }

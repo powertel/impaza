@@ -123,7 +123,8 @@ Faults
                     ])
                 @endif
                 @include('faults.show', [
-                    'fault' => $fault
+                    'fault' => $fault,
+                    'remarks' => ($remarksByFault[$fault->id] ?? collect())
                 ])
             @endforeach
             <div id="faultsPager" class="mt-2"></div>

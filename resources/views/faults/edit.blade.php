@@ -63,7 +63,6 @@
                                     @endif
                                 @endforeach
                             </select>
-                            <div class="form-text">Changing the Link will update City, Location, POP and Service Type.</div>
                         </div>
                         <div class="mb-3 col-md-2">
                             <label for="pop-{{ $fault->id }}" class="form-label">POP</label>
@@ -76,13 +75,7 @@
                             </select>
     
                         </div>
-                    </div>
 
-                    <div class="row g-2">
-                        <div class="mb-3 col-md-6">
-                            <label for="phone-{{ $fault->id }}" class="form-label">Phone Number</label>
-                            <input type="text" class="form-control" value="{{ $fault->phoneNumber ?? '' }}" name="phoneNumber">
-                        </div>
                         <div class="mb-3 col-md-6">
                             <label for="service-{{ $fault->id }}" class="form-label">Service Type</label>
                             <select class="form-select" name="serviceType" disabled>
@@ -92,19 +85,21 @@
                                     <option selected disabled>Derived from Link</option>
                                 @endisset
                             </select>
-                            <div class="form-text">Auto-derived from selected Link.</div>
                         </div>
                     </div>
 
                     <div class="row g-2">
                         <div class="mb-3 col-md-6">
+                            <label for="phone-{{ $fault->id }}" class="form-label">Phone Number</label>
+                            <input type="text" class="form-control" value="{{ $fault->phoneNumber ?? '' }}" name="phoneNumber">
+                        </div>
+
+                        
+                        <div class="mb-3 col-md-6">
                             <label for="contactName-{{ $fault->id }}" class="form-label">Contact Name</label>
                             <input type="text" class="form-control" value="{{ $fault->contactName ?? '' }}" name="contactName">
                         </div>
-                        <div class="mb-3 col-md-6">
-                            <label for="contactEmail-{{ $fault->id }}" class="form-label">Email Address</label>
-                            <input type="email" class="form-control" value="{{ $fault->contactEmail ?? '' }}" name="contactEmail">
-                        </div>
+
                     </div>
 
                     <div class="row g-2">
