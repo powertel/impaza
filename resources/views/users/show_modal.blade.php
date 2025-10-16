@@ -7,7 +7,7 @@
           <span class="badge bg-primary me-2"><i class="fas fa-user"></i></span>
           <h5 class="modal-title mb-0" id="showUserModalLabel-{{ $user->id }}">View User</h5>
         </div>
-        <button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close " data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body pt-0">
         <div class="row g-4">
