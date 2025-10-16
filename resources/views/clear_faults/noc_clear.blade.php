@@ -64,9 +64,9 @@ Clear Faults
                                     <i class="fas fa-save me-1"></i> Clear
                                 </button>
                             @endcan
-                            <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 8px;" >
+                            <button type="button" class="btn btn-sm btn-outline-success" style="padding:0px 8px;" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                 <i class="fas fa-eye me-1"></i> View
-                            </a>
+                            </button>
                         </td>
                     </tr>
                     @endforeach
@@ -82,29 +82,14 @@ Clear Faults
 @endsection
 
 @section('scripts')
-    <!-- Per-row NOC Clear confirmation modals -->
+    @include('partials.scripts')
+    <script>
+      window.currentUserName = @json(optional(auth()->user())->name);
+    </script>
+
+    <!-- Include per-row View Fault modal with conversation -->
     @foreach ($faults as $fault)
-    <div class="modal fade" id="nocClearModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="nocClearModalLabel-{{ $fault->id }}" aria-hidden="true">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="nocClearModalLabel-{{ $fault->id }}">Confirm Clear</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="{{ route('noc-clear.update',$fault->id) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <div class="modal-body">
-                        <p class="mb-1">Clear fault <strong>{{ $fault->fault_ref_number ?? ('#'.$fault->id) }}</strong>?</p>
-                        <small class="text-muted">This marks the fault as cleared by NOC.</small>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-check me-1"></i> Confirm</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+        @include('chief_tech_clear_modal', [ 'fault' => $fault ])
+        @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
     @endforeach
 @endsection

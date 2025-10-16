@@ -64,9 +64,9 @@ Clear Faults
                                     <i class="fas fa-save me-1"></i> Clear
                                 </button>
                             @endcan
-                            <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 8px;" >
+                            <button type="button" class="btn btn-sm btn-outline-success" style="padding:0px 8px;" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                 <i class="fas fa-eye me-1"></i> View
-                            </a>
+                            </button>
                         </td>
                     </tr>
                     @endforeach
@@ -87,33 +87,24 @@ Clear Faults
      
  @endforeach --}}
  </section>
+
+ {{-- Per-row Fault show modals for "View" --}}
+ @foreach ($faults as $fault)
+     @include('faults.show', [
+         'fault' => $fault,
+         'remarks' => $remarksByFault[$fault->id] ?? collect(),
+     ])
+ @endforeach
  @endsection
 
 @section('scripts')
-    <!-- Per-row Chief Tech Clear confirmation modals -->
+    @include('partials.scripts')
+    <script>
+        window.currentUserName = "{{ auth()->user()->name }}";
+    </script>
+    <!-- Per-row Chief Tech Clear confirmation modals using partial -->
     @foreach ($faults as $fault)
-    <div class="modal fade" id="chiefTechClearModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="chiefTechClearModalLabel-{{ $fault->id }}" aria-hidden="true">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="chiefTechClearModalLabel-{{ $fault->id }}">Confirm Clear</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="{{ route('chief-tech-clear.update',$fault->id) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-                    <div class="modal-body">
-                        <p class="mb-1">Clear fault <strong>{{ $fault->fault_ref_number ?? ('#'.$fault->id) }}</strong>?</p>
-                        <small class="text-muted">This marks the fault as cleared by Chief Tech.</small>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-check me-1"></i> Confirm</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+        @include('clear_faults.chief_tech_clear_modal', ['fault' => $fault])
     @endforeach
 @endsection
 
