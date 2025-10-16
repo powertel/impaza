@@ -149,7 +149,7 @@ class NocClearFaultsController extends Controller
         // Ensure assignment window is closed when NOC clears
         FaultLifecycle::resolveAssignment($fault);
         
-        return redirect()->back('faults.edit',$id)
+        return redirect()->back()
             ->with('success','Fault Has Been Cleared By Noc');
     }
 

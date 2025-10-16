@@ -7,7 +7,7 @@
                     <span class="badge bg-primary me-2"><i class="fas fa-eye"></i></span>
                     <h5 class="modal-title mb-0" id="showFaultModalLabel-{{ $fault->id }}">View Fault</h5>
                 </div>
-                <button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
             <div class="modal-body pt-0">
