@@ -201,36 +201,46 @@ $('#city').on('change',function () {
     }
 
     function renderRemarkBubble(r) {
+      // Match the faults.show conversation layout
       const isSelf = (r?.name && r.name === (window.currentUserName || ''));
-      const container = document.createElement('div');
-      container.className = `chat-msg ${isSelf ? 'chat-msg-self' : 'chat-msg-other'}`;
-      const created = r?.created_at ? new Date(r.created_at) : new Date();
+      const wrapper = document.createElement('div');
+      wrapper.className = `d-flex ${isSelf ? 'justify-content-end' : 'justify-content-start'} mb-3`;
+      const bubble = document.createElement('div');
+      bubble.className = 'rounded-3 shadow-sm px-3 py-2';
+      bubble.style.maxWidth = '75%';
+      bubble.style.backgroundColor = isSelf ? '#e8f5e9' : '#eef5ff';
       const meta = document.createElement('div');
-      meta.className = 'chat-msg-meta';
-      meta.innerHTML = `<strong>${r?.name || 'You'}</strong> <span class="text-muted">• ${created.toLocaleString()}</span>${r?.activity ? `<span class="ms-2 badge bg-light text-dark">${r.activity}</span>` : ''}`;
+      meta.className = 'd-flex align-items-center gap-2 mb-1';
+      const created = r?.created_at ? new Date(r.created_at) : new Date();
+      meta.innerHTML = `<span class="badge ${isSelf ? 'bg-success' : 'bg-secondary'}">${r?.name || 'You'}</span>`+
+        ` <small class="text-muted">${created.toLocaleString()}</small>`+
+        (r?.activity ? ` <small class="text-muted">• ${r.activity}</small>` : '');
       const body = document.createElement('div');
-      body.className = 'chat-msg-body';
+      body.className = 'fw-normal';
       body.textContent = r?.remark || '';
-      container.appendChild(meta);
-      container.appendChild(body);
+      bubble.appendChild(meta);
+      bubble.appendChild(body);
       if (r?.file_path) {
         const imgWrap = document.createElement('div');
         imgWrap.className = 'mt-2';
         const img = document.createElement('img');
         img.className = 'img-fluid rounded';
-        img.style.height = '100px';
-        img.style.width = 'auto';
+        img.style.maxHeight = '160px';
+        img.style.objectFit = 'cover';
         img.alt = 'Attachment';
         img.title = 'Attachment';
         img.src = `/storage/${r.file_path}`;
         imgWrap.appendChild(img);
-        container.appendChild(imgWrap);
+        bubble.appendChild(imgWrap);
       }
-      return container;
+      wrapper.appendChild(bubble);
+      return wrapper;
     }
 
     // Capture submit for all remark forms
     document.querySelectorAll('.js-remark-form').forEach(form => {
+      if (form.dataset.bound === '1') return; // guard against double-binding
+      form.dataset.bound = '1';
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const submitBtn = form.querySelector('button[type="submit"]');
@@ -970,7 +980,7 @@ $('#city').on('change',function () {
     });
     }
 
-    document.querySelectorAll('.modal form').forEach(function(form){
+    document.querySelectorAll('.modal form:not(.js-remark-form)').forEach(function(form){
       form.addEventListener('submit', handleFormSubmit);
     });
   });
