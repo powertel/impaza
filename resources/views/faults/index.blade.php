@@ -81,16 +81,22 @@ Faults
                         </td>
                         <td> {{$fault->reportedBy}}</td>
                         <td class="text-nowrap">
-                            <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: #fff; padding: 0.5rem 0.75rem; font-weight: 600;">
+                            <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
                                 {{$fault->description}}
                             </span>
                         </td>
                         <td class="text-nowrap">
                             <div class="btn-group btn-group-sm gap-2" role="group" aria-label="Actions">
                                 @can('fault-edit')
-                                <button  class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editFaultModal-{{ $fault->id }}">
-                                    <i class="fas fa-edit me-1"></i> Edit
-                                </button>
+                                  @if ($fault->status_id == 1)
+                                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editFaultModal-{{ $fault->id }}">
+                                      <i class="fas fa-edit me-1"></i> Edit
+                                    </button>
+                                  @else
+                                    <button class="btn btn-outline-secondary" disabled title="Editing locked after initial stage">
+                                      <i class="fas fa-lock me-1"></i> Edit
+                                    </button>
+                                  @endif
                                 @endcan
                                 <button  class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                     <i class="fas fa-eye me-1"></i> View
@@ -104,16 +110,18 @@ Faults
             @include('faults.create')
 
             @foreach ($faults as $fault)
-                @include('faults.edit', [
-                    'fault' => $fault,
-                    'customers' => $customer,
-                    'cities' => $city,
-                    'suburbs' => $location,
-                    'pops' => $pop,
-                    'links' => $link,
-                    'accountManagers' => $accountManager,
-                    'suspectedRFO' => $suspectedRFO
-                ])
+                @if ($fault->status_id == 1)
+                    @include('faults.edit', [
+                        'fault' => $fault,
+                        'customers' => $customer,
+                        'cities' => $city,
+                        'suburbs' => $location,
+                        'pops' => $pop,
+                        'links' => $link,
+                        'accountManagers' => $accountManager,
+                        'suspectedRFO' => $suspectedRFO
+                    ])
+                @endif
                 @include('faults.show', [
                     'fault' => $fault
                 ])

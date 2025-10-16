@@ -28,15 +28,12 @@
                         </div>
                         <div class="mb-3 col-md-6">
                             <label for="city-{{ $fault->id }}" class="form-label">City/Town</label>
-                            <select class="form-select city-select" id="city-{{ $fault->id }}" name="city_id">
+                            <select class="form-select city-select" id="city-{{ $fault->id }}" name="city_id" disabled>
                                 @isset($fault->city_id)
                                     <option selected="selected" value="{{ $fault->city_id }}">{{ $fault->city ?? 'Current City' }}</option>
+                                @else
+                                    <option selected disabled>Derived from Link</option>
                                 @endisset
-                                @foreach($cities as $city)
-                                    @if (!isset($fault->city_id) || $city->id !== $fault->city_id)
-                                        <option value="{{ $city->id }}">{{ $city->city }}</option>
-                                    @endif
-                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -44,17 +41,12 @@
                     <div class="row g-2">
                         <div class="mb-3 col-md-2">
                             <label for="suburb-{{ $fault->id }}" class="form-label">Location</label>
-                            <select class="form-select suburb-select" id="suburb-{{ $fault->id }}" name="suburb_id" data-selected="{{ $fault->suburb_id ?? '' }}">
+                            <select class="form-select suburb-select" id="suburb-{{ $fault->id }}" name="suburb_id" data-selected="{{ $fault->suburb_id ?? '' }}" disabled>
                                 @isset($fault->suburb_id)
                                     <option selected="selected" value="{{ $fault->suburb_id }}">{{ $fault->suburb ?? 'Current Suburb' }}</option>
                                 @else
-                                    <option selected disabled>Select Suburb</option>
+                                    <option selected disabled>Derived from Link</option>
                                 @endisset
-                                @foreach($suburbs as $suburb)
-                                    @if (isset($fault->city_id) && $suburb->city_id == $fault->city_id)
-                                        <option value="{{ $suburb->id }}" @if(isset($fault->suburb_id) && $fault->suburb_id == $suburb->id) selected @endif>{{ $suburb->suburb }}</option>
-                                    @endif
-                                @endforeach
                             </select>
                         </div>
                         <div class="mb-3 col-md-2">
@@ -71,21 +63,18 @@
                                     @endif
                                 @endforeach
                             </select>
+                            <div class="form-text">Changing the Link will update City, Location, POP and Service Type.</div>
                         </div>
                         <div class="mb-3 col-md-2">
                             <label for="pop-{{ $fault->id }}" class="form-label">POP</label>
-                            <select class="form-select pop-select" id="pop-{{ $fault->id }}" name="pop_id" data-selected="{{ $fault->pop_id ?? '' }}">
+                            <select class="form-select pop-select" id="pop-{{ $fault->id }}" name="pop_id" data-selected="{{ $fault->pop_id ?? '' }}" disabled>
                                 @isset($fault->pop_id)
                                     <option selected="selected" value="{{ $fault->pop_id }}">{{ $fault->pop ?? 'Current Pop' }}</option>
                                 @else
-                                    <option selected disabled>Select Pop</option>
+                                    <option selected disabled>Derived from Link</option>
                                 @endisset
-                                @foreach($pops as $p)
-                                    @if (isset($fault->suburb_id) && $p->suburb_id == $fault->suburb_id)
-                                        <option value="{{ $p->id }}" @if(isset($fault->pop_id) && $fault->pop_id == $p->id) selected @endif>{{ $p->pop }}</option>
-                                    @endif
-                                @endforeach
                             </select>
+    
                         </div>
                     </div>
 
@@ -96,14 +85,14 @@
                         </div>
                         <div class="mb-3 col-md-6">
                             <label for="service-{{ $fault->id }}" class="form-label">Service Type</label>
-                            <select class="form-select" name="serviceType">
+                            <select class="form-select" name="serviceType" disabled>
                                 @isset($fault->serviceType)
                                     <option selected="selected">{{ $fault->serviceType }}</option>
+                                @else
+                                    <option selected disabled>Derived from Link</option>
                                 @endisset
-                                <option value="Internet">Internet</option>
-                                <option value="VPN">VPN</option>
-                                <option value="MPLS">MPLS</option>
                             </select>
+                            <div class="form-text">Auto-derived from selected Link.</div>
                         </div>
                     </div>
 

@@ -156,8 +156,8 @@ $(function(){
   var $saveBtn = $('button[form="UF"][type="submit"]');
   function computeValidity(mark){
     var requiredSelectors = [
-      '#customer', '#city', 'input[name="contactName"]', 'input[name="phoneNumber"]', 'input[name="contactEmail"]',
-      '#suburb', '#link', '#pop', 'select[name="serviceType"]', 'select[name="suspectedRfo_id"]',
+      '#customer', 'input[name="contactName"]', 'input[name="phoneNumber"]',
+      '#link', 'select[name="suspectedRfo_id"]',
       'input[name="address"]', 'textarea[name="remark"]'
     ];
     var allValid = true;
@@ -175,12 +175,9 @@ $(function(){
         $el.removeClass('is-invalid');
       }
     });
-    var emailEl = $('input[name="contactEmail"]');
-    var email = emailEl.val()||'';
     var phoneEl = $('input[name="phoneNumber"]');
     var phone = phoneEl.val()||'';
     if(mark){
-      if(email && !/^\S+@\S+\.\S+$/.test(email)){ allValid = false; emailEl.addClass('is-invalid'); } else { emailEl.removeClass('is-invalid'); }
       if(phone.replace(/\D/g,'').length < 10){ allValid = false; phoneEl.addClass('is-invalid'); } else { phoneEl.removeClass('is-invalid'); }
     }
     $saveBtn.prop('disabled', !allValid);
