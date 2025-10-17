@@ -23,8 +23,9 @@ class AssignController extends Controller
 {
     function __construct()
     {
-        $this->middleware('permission:assigned-fault-list|assign-fault-create|assign-fault-edit|assign-fault-delete|re-assign-fault', ['only' => ['index','store']]);
-         $this->middleware('permission:assign-fault|re-assign-fault', ['only' => ['edit','update']]); 
+        $this->middleware('permission:assigned-fault-list', ['only' => ['index','create']]);
+        $this->middleware('permission:assign-fault', ['only' => ['store']]);
+        $this->middleware('permission:re-assign-fault', ['only' => ['edit','update']]); 
     }
     /**
      * Display a listing of the resource.
@@ -159,7 +160,58 @@ class AssignController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'fault_id' => 'required|integer|exists:faults,id',
+            'assignedTo' => 'required|integer|exists:users,id',
+        ]);
+
+        $fault = Fault::find($request->input('fault_id'));
+        if (!$fault) {
+            return back()->withErrors(['error' => 'Fault not found'])->withInput();
+        }
+
+        // Only allow assigning if the fault is unassigned and in Assessments (status 2)
+        if ((int)$fault->status_id !== 2 || !is_null($fault->assignedTo)) {
+            return back()->withErrors(['error' => 'Fault is not in an assignable state']).withInput();
+        }
+
+        // Enforce region parity with logged-in user
+        $faultRegion = \DB::table('cities')->where('id', $fault->city_id)->value('region');
+        if ($faultRegion !== auth()->user()->region) {
+            return back()->withErrors(['error' => 'You can only assign faults in your region'])->withInput();
+        }
+
+        // Ensure selected technician is in current section/region and eligible
+        $isTechEligible = \DB::table('users')
+            ->leftJoin('user_statuses','users.user_status','=','user_statuses.id')
+            ->where('users.id', '=', $request->input('assignedTo'))
+            ->where('users.section_id', '=', auth()->user()->section_id)
+            ->where('users.region', '=', auth()->user()->region)
+            ->where('user_statuses.status_name', '=', 'Assignable')
+            ->exists();
+        
+            dd($isTechEligible);
+
+        if (!$isTechEligible) {
+            return back()->withErrors(['assignedTo' => 'Selected technician is not eligible']).withInput();
+        }
+
+        // Transition to Rectification and assign technician
+        $fault->update([
+            'assignedTo' => (int)$request->input('assignedTo'),
+            'status_id' => 3,
+        ]);
+
+        FaultLifecycle::recordStatusChange($fault, 3, $request->user()->id);
+        FaultLifecycle::startAssignment(
+            $fault,
+            (int)$request->input('assignedTo'),
+            $request->user()->id,
+            FaultLifecycle::isOffHours(),
+            $faultRegion
+        );
+
+        return redirect()->back()->with('success', 'Fault Assigned');
     }
 
     /**
