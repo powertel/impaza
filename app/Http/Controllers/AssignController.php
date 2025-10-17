@@ -166,51 +166,6 @@ class AssignController extends Controller
 
 
 
-    public function autoAssign($section_id)
-    {
-   
-        $users = User::join('departments','users.department_id','=','departments.id')
-            ->leftjoin('sections','users.section_id','=','sections.id')
-            ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
-            ->where('sections.id','=',$section_id)
-            ->where('user_statuses.id','=',1)
-            ->pluck('users.id')
-            ->toArray();
-			
-			
-
-        $faults = DB::table('fault_section')
-            ->leftjoin('faults','fault_section.fault_id','=','faults.id')
-            ->whereNull('faults.assignedTo')
-            ->where('fault_section.section_id','=',$section_id)
-            ->pluck('faults.id')
-            ->toArray();
-
-        $userslength=count($users);
-        $userIndex = 0;
-        $userfaults =[];
-
-        for($i=0; $i < count($faults); $i++){
-
-            $autoAssign  = $faults[$i];
-
-            $userfaults[$autoAssign] = $users[$userIndex]; 
-
-            $user = $users[$userIndex];
-
-            $assign = Fault::find($autoAssign);
-            $req['assignedTo'] = $userfaults[$autoAssign];
-            $req['status_id'] = 3;
-            $assign ->update($req);
-
-            $userIndex ++;
-        
-            if($userIndex >= $userslength){
-                $userIndex = 0;
-            }
-        }
-        
-    }
 
 
 /* 

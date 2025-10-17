@@ -1,6 +1,6 @@
 @can('noc-clear-faults-clear')
 <div class="modal fade" id="nocRevokeModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="nocRevokeModalLabel-{{ $fault->id }}" aria-hidden="true">
-  <div class="modal-dialog modal-sm">
+  <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="nocRevokeModalLabel-{{ $fault->id }}">Confirm Revoke (NOC)</h5>
