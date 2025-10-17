@@ -9,18 +9,18 @@ Dashboard
 @endsection
 
 @section('content')
-<section class="content">
+<section class="content dashboard-page">
   <div class="row">
     <!-- Stat cards -->
     <div class="col-xl-3 col-md-6 mb-3">
-      <div class="card">
+      <div class="card stat-card">
         <div class="card-body">
           <div class="d-flex align-items-center justify-content-between">
             <div>
-              <div class="text-muted" style="font-size:12px">Faults</div>
-              <div class="h4 mb-0">{{ $faultCount ?? 0 }}</div>
+              <div class="text-muted stat-title">Faults</div>
+              <div class="h4 mb-0 stat-value">{{ $faultCount ?? 0 }}</div>
             </div>
-            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;background:#eef4ff;color:#1f5cff">
+            <div class="metric-icon icon-faults">
               <i class="fas fa-exclamation-triangle"></i>
             </div>
           </div>
@@ -28,14 +28,14 @@ Dashboard
       </div>
     </div>
     <div class="col-xl-3 col-md-6 mb-3">
-      <div class="card">
+      <div class="card stat-card">
         <div class="card-body">
           <div class="d-flex align-items-center justify-content-between">
             <div>
-              <div class="text-muted" style="font-size:12px">Customers</div>
-              <div class="h4 mb-0">{{ $customerCount ?? 0 }}</div>
+              <div class="text-muted stat-title">Customers</div>
+              <div class="h4 mb-0 stat-value">{{ $customerCount ?? 0 }}</div>
             </div>
-            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;background:#e8fff2;color:#16a34a">
+            <div class="metric-icon icon-customers">
               <i class="fas fa-address-card"></i>
             </div>
           </div>
@@ -43,14 +43,14 @@ Dashboard
       </div>
     </div>
     <div class="col-xl-3 col-md-6 mb-3">
-      <div class="card">
+      <div class="card stat-card">
         <div class="card-body">
           <div class="d-flex align-items-center justify-content-between">
             <div>
-              <div class="text-muted" style="font-size:12px">Links</div>
-              <div class="h4 mb-0">{{ $linkCount ?? 0 }}</div>
+              <div class="text-muted stat-title">Links</div>
+              <div class="h4 mb-0 stat-value">{{ $linkCount ?? 0 }}</div>
             </div>
-            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;background:#fff7ed;color:#f97316">
+            <div class="metric-icon icon-links">
               <i class="fas fa-link"></i>
             </div>
           </div>
@@ -58,14 +58,14 @@ Dashboard
       </div>
     </div>
     <div class="col-xl-3 col-md-6 mb-3">
-      <div class="card">
+      <div class="card stat-card">
         <div class="card-body">
           <div class="d-flex align-items-center justify-content-between">
             <div>
-              <div class="text-muted" style="font-size:12px">Open Today</div>
-              <div class="h4 mb-0">{{ ($recentFaults ?? collect([]))->where('created_at','>=', now()->startOfDay())->count() }}</div>
+              <div class="text-muted stat-title">Open Today</div>
+              <div class="h4 mb-0 stat-value">{{ ($recentFaults ?? collect([]))->where('created_at','>=', now()->startOfDay())->count() }}</div>
             </div>
-            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:32px;height:32px;background:#f1f5f9;color:#0ea5e9">
+            <div class="metric-icon icon-open">
               <i class="fas fa-calendar-day"></i>
             </div>
           </div>
@@ -77,13 +77,13 @@ Dashboard
   <!-- Toolbar -->
   <div class="row mb-3">
     <div class="col">
-      <div class="card">
+      <div class="card toolbar-card">
         <div class="card-body d-flex align-items-center justify-content-between py-2">
           <div class="d-flex align-items-center gap-2">
-            <button class="btn btn-outline-secondary btn-sm"><i class="fas fa-filter"></i> Filters</button>
-            <button class="btn btn-outline-secondary btn-sm"><i class="fas fa-download"></i> Export</button>
+            <button class="btn btn-outline-secondary btn-sm rounded-pill"><i class="fas fa-filter"></i> Filters</button>
+            <button class="btn btn-outline-secondary btn-sm rounded-pill"><i class="fas fa-download"></i> Export</button>
           </div>
-          <a class="btn btn-primary btn-sm" href="{{ route('faults.index') }}"><i class="fas fa-plus-circle"></i> Log Fault</a>
+          <a class="btn btn-primary btn-sm rounded-pill" href="{{ route('faults.index') }}"><i class="fas fa-plus-circle"></i> Log Fault</a>
         </div>
       </div>
     </div>
@@ -94,10 +94,10 @@ Dashboard
     <div class="col">
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title" style="font-size:13px">Recent Faults</h3>
+          <h3 class="card-title">Recent Faults</h3>
          <div class="card-tools">
-           <input id="dashboardRecentSearch" type="text" class="form-control form-control-sm d-inline-block w-auto" placeholder="Search">
-           <select id="dashboardRecentPageSize" class="form-control form-control-sm d-inline-block w-auto">
+           <input id="dashboardRecentSearch" type="text" class="form-control form-control-sm rounded-pill d-inline-block w-auto" placeholder="Search">
+           <select id="dashboardRecentPageSize" class="form-control form-control-sm rounded-pill d-inline-block w-auto">
             <option value="10">10</option>
            <option value="20" selected>20</option>
            <option value="50">50</option>
@@ -127,7 +127,7 @@ Dashboard
                   </tr>
                 @empty
                   <tr class="no-data">
-                    <td class="text-muted">No recent faults</td>
+                    <td class="text-muted" colspan="4">No recent faults</td>
                     <td></td>
                     <td></td>
                     <td></td>

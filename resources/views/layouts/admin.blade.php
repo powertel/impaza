@@ -200,6 +200,19 @@
         </script>
 
         <script>
+            (function(){
+                function setFooterHeightVar(){
+                    var footer = document.querySelector('.main-footer');
+                    var h = footer ? footer.offsetHeight : 56;
+                    document.documentElement.style.setProperty('--footer-height', h + 'px');
+                }
+                window.addEventListener('resize', setFooterHeightVar);
+                document.addEventListener('DOMContentLoaded', setFooterHeightVar);
+                setFooterHeightVar();
+            })();
+        </script>
+
+        <script>
             $(document).ready(function () {
                 // Initialize Select2 globally on page load
                 $('.select2').select2();
