@@ -22,7 +22,7 @@ class NocClearFaultsController extends Controller
     {
          $this->middleware('permission:noc-clear-faults-list|noc-clear-faults-create|noc-clear-faults-clear|noc-clear-faults-delete', ['only' => ['index','store']]);
          $this->middleware('permission:noc-clear-faults-create', ['only' => ['create','store']]);
-         $this->middleware('permission:noc-clear-faults-clear', ['only' => ['edit','update']]);
+         $this->middleware('permission:noc-clear-faults-clear', ['only' => ['edit','update','revoke']]);
          $this->middleware('permission:noc-clear-faults-delete', ['only' => ['destroy']]);
     }
     /**
@@ -43,7 +43,8 @@ class NocClearFaultsController extends Controller
             ->leftjoin('pops','faults.pop_id','=','pops.id')
             ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
             ->orderBy('faults.created_at', 'desc')
-            ->where('faults.status_id','=',5)
+            // Show faults cleared by Technician (CLT: status_id = 4) for NOC review
+            ->where('faults.status_id','=',4)
             ->get([
                 'faults.id',
                 'customers.customer',
@@ -151,6 +152,29 @@ class NocClearFaultsController extends Controller
         
         return redirect()->back()
             ->with('success','Fault Has Been Cleared By Noc');
+    }
+
+    /**
+     * Revoke a technician-cleared fault back to rectification.
+     * Moves status to 3 (Fault is under rectification), reopens assignment window.
+     */
+    public function revoke(Request $request, $id)
+    {
+        $fault = Fault::find($id);
+        if (!$fault) {
+            return redirect()->back()->with('fail', 'Fault not found');
+        }
+
+        $req = $request->all();
+        $req['status_id'] = 3; // Under rectification
+        $fault->update($req);
+        // End current stage (likely Technician Cleared) and reopen Rectification stage to continue timing
+        FaultLifecycle::reopenStageForStatus($fault, 3, $request->user()->id);
+        // Do NOT reassign. Instead, reopen the last assignment to the same owner to continue timing
+        FaultLifecycle::reopenAssignment($fault);
+
+        return redirect()->back()
+            ->with('success', 'Fault has been revoked to Technician for rework');
     }
 
     /**

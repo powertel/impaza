@@ -65,6 +65,9 @@ Clear Faults
                                 <button type="button" class="btn btn-sm btn-outline-primary" style="padding:0px 8px;" data-bs-toggle="modal" data-bs-target="#nocClearModal-{{ $fault->id }}">
                                     <i class="fas fa-save me-1"></i> Clear
                                 </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" style="padding:0px 8px;" data-bs-toggle="modal" data-bs-target="#nocRevokeModal-{{ $fault->id }}">
+                                    <i class="fas fa-undo me-1"></i> Revoke
+                                </button>
                             @endcan
                             <button type="button" class="btn btn-sm btn-outline-success" style="padding:0px 8px;" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                 <i class="fas fa-eye me-1"></i> View
@@ -91,7 +94,8 @@ Clear Faults
 
     <!-- Include per-row View Fault modal with conversation -->
     @foreach ($faults as $fault)
-        @include('chief_tech_clear_modal', [ 'fault' => $fault ])
+        @include('clear_faults.noc_clear_modal', [ 'fault' => $fault ])
+        @include('clear_faults.noc_revoke_modal', [ 'fault' => $fault ])
         @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
     @endforeach
 @endsection

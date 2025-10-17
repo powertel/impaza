@@ -58,8 +58,10 @@ Assign Faults
                         <td>{{ $fault->accountManager }}</td>
                         <td>{{ $fault->link }}</td>
                         <td>{{ $fault->name }}</td>
-                        <td style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? 'none' }};">
-                            <strong>{{$fault->description}}</strong> 
+                        <td class="text-nowrap">
+                            <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
+                                {{$fault->description}}
+                            </span>
                         </td>
                         <td>
                             @can('re-assign-fault')
