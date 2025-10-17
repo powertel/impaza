@@ -14,7 +14,7 @@ Assign Faults
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">{{_('Assigned Faults')}}</h3>
+        <h3 class="card-title">Assigned Faults</h3>
         <div class="card-tools">
             
         </div>
@@ -85,3 +85,4 @@ Assign Faults
  
 </section>
 @endsection
+

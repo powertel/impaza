@@ -12,7 +12,7 @@ Materials
         <div class="card w-50">
             <div class="card-header">
                 <h3 class="card-title">
-                    {{_('Request Material')}}
+                    Request Material
                 </h3>
             </div>
             <div class="card-body">
@@ -54,3 +54,4 @@ Materials
 @section('scripts')
     @include('partials.scripts')
 @endsection
+

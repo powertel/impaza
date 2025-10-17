@@ -149,3 +149,4 @@ Dashboard
 @section('scripts')
 @include('partials.scripts')
 @endsection
+

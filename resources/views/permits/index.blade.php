@@ -11,7 +11,7 @@ Permits
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">{{_('Approved Permits')}}</h3>
+        <h3 class="card-title">Approved Permits</h3>
         <div class="card-tools">
 
         </div>
@@ -76,3 +76,4 @@ Permits
  @section('scripts')
      @include('partials.scripts')
  @endsection
+

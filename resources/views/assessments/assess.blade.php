@@ -10,7 +10,7 @@ Assess
     <div class="col d-flex justify-content-center">
         <div class="card  w-100">
             <div class="card-header">
-                <h3 class="card-title">{{_('Fault Assesment')}}</h3>
+                <h3 class="card-title">Fault Assesment</h3>
             </div>
             <div class="card-body">
                 <form  action="{{ route('assessments.update', $fault->id ) }}" method="POST">
@@ -192,7 +192,7 @@ Assess
         </div>
         <div class="card  w-50">
             <div class="card-header">
-                <h3 class="card-title">{{_('Remarks')}}</h3>
+                <h3 class="card-title">Remarks</h3>
             </div>
             <div class="card-body" style="height: 0px; overflow-y: auto">
             @foreach($remarks as $remark)

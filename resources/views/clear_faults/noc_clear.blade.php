@@ -13,7 +13,7 @@ Clear Faults
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">{{_('Clear Faults')}}</h3>
+        <h3 class="card-title">Clear Faults</h3>
         <div class="card-tools">
 
         </div>
@@ -99,3 +99,4 @@ Clear Faults
         @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
     @endforeach
 @endsection
+

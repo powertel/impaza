@@ -11,10 +11,10 @@ Pops
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">{{_('Pops')}}</h3>
+        <h3 class="card-title">Pops</h3>
         <div class="card-tools">
             @can('pop-create')
-              <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#popCreateModal"><i class="fas fa-plus-circle"></i>{{_('Create Pop')}} </button>
+              <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#popCreateModal"><i class="fas fa-plus-circle"></i>Create Pop </button>
             @endcan
         </div>
     </div>
@@ -79,4 +79,5 @@ Pops
   
  </section>
  @endsection
+
 

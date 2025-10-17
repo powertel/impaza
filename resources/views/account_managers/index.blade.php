@@ -13,11 +13,11 @@ Account Managers
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">{{_('Account Manager')}}</h3>
+        <h3 class="card-title">Account Manager</h3>
         <div class="card-tools">
             @can('account-manager-create')
             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#accountManagerCreateModal">
-                <i class="fas fa-plus-circle"></i>{{_('Create Account Manager')}}
+                <i class="fas fa-plus-circle"></i>Create Account Manager
             </button>
             @endcan
 
@@ -90,3 +90,4 @@ Account Managers
 @include('account_managers.edit_modal')
 @include('account_managers.view_modal')
 @endsection
+

@@ -11,7 +11,7 @@ Reasons For Outage
         <div class="card w-50">
             <div class="card-header">
                 <h3 class="card-title">
-                    {{_('Create RFO')}}
+                    Create RFO
                 </h3>
             </div>
 
@@ -42,3 +42,4 @@ Reasons For Outage
     </div>
 </section>
 @endsection
+

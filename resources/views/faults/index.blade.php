@@ -17,10 +17,10 @@ Faults
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">{{_('Faults')}}</h3>
+        <h3 class="card-title">Faults</h3>
         <div class="card-tools">
             
-                <!-- <a  class="btn btn-primary btn-sm" href="{{ route('faults.create') }}"><i class="fas fa-plus-circle"></i>{{_('Log Fault')}} </a> -->
+                <!-- <a  class="btn btn-primary btn-sm" href="{{ route('faults.create') }}"><i class="fas fa-plus-circle"></i>Log Fault </a> -->
             
             @can('fault-create')
                 <button type="button" class="btn btn-primary btn-sm" 
@@ -138,4 +138,5 @@ Faults
 @section('scripts')
     @include('partials.faults')
 @endsection
+
 

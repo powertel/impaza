@@ -11,10 +11,10 @@ Departments
 <section class="content" >
 <div class="card" >
     <div class="card-header d-flex align-items-center">
-        <h3 class="card-title mb-0">{{_('Departments')}}</h3>
+        <h3 class="card-title mb-0">Departments</h3>
         <div class="card-tools ms-auto d-flex align-items-center gap-2">
             @can('department-create')
-            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#departmentCreateModal"><i class="fas fa-plus-circle"></i> {{_('Create Department(s)')}} </button>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#departmentCreateModal"><i class="fas fa-plus-circle"></i> Create Department(s) </button>
             @endcan
         </div>
     </div>
@@ -88,3 +88,4 @@ Departments
 
 @section('scripts')
 @endsection
+

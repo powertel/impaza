@@ -12,7 +12,7 @@ My Faults
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">{{_('My Faults')}}</h3>
+        <h3 class="card-title">My Faults</h3>
         <div class="card-tools">
 
 
@@ -126,3 +126,4 @@ My Faults
       window.currentUserName = @json(optional(auth()->user())->name);
     </script>
 @endsection
+

@@ -9,7 +9,7 @@ Rectify
     <div class="col d-flex justify-content-center">
         <div class="card  w-50">
             <div class="card-header">
-                <h3 class="card-title">{{_('Fault Rectification')}}</h3>
+                <h3 class="card-title">Fault Rectification</h3>
                 <div class="card-tools">
                     <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                         <i class="fas fa-eye me-1"></i> View Fault
@@ -45,7 +45,7 @@ Rectify
     <div class="col d-flex justify-content-center">
         <div class="card  w-50">
             <div class="card-header">
-                <h3 class="card-title">{{_('Remarks')}}</h3>
+                <h3 class="card-title">Remarks</h3>
             </div>
             <div class="card-body" style="height: 250px; overflow-y: auto">
             @foreach($remarks as $remark)

@@ -10,7 +10,7 @@ Finance
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">{{_('Links')}}</h3>
+        <h3 class="card-title">Links</h3>
         <div class="card-tools">
             
         </div>
@@ -106,3 +106,4 @@ Finance
  
 </section>
 @endsection
+

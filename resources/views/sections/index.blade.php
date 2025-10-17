@@ -12,10 +12,10 @@ Sections
 <section class="content" >
 <div class="card" >
     <div class="card-header">
-        <h3 class="card-title">{{_('Sections')}}</h3>
+        <h3 class="card-title">Sections</h3>
         <div class="card-tools">
             @can('department-create')
-            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#sectionCreateModal"><i class="fas fa-plus-circle"></i>{{_('Create Section(s)')}} </button>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#sectionCreateModal"><i class="fas fa-plus-circle"></i>Create Section(s) </button>
             @endcan
 
         </div>
@@ -80,3 +80,4 @@ Sections
 @section('scripts')
   @include('partials.scripts')
 @endsection
+

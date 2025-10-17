@@ -11,7 +11,7 @@ City
         <div class="card w-50">
             <div class="card-header">
                 <h3 class="card-title">
-                    {{_('Create City')}}
+                    Create City
                 </h3>
             </div>
             <div class="card-body">
@@ -41,3 +41,4 @@ City
 
 </section>
 @endsection
+

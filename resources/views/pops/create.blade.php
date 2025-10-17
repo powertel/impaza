@@ -11,7 +11,7 @@ Pop
         <div class="card w-50">
             <div class="card-header">
                 <h3 class="card-title">
-                    {{_('Create Pop')}}
+                    Create Pop
                 </h3>
             </div>
             <div class="card-body">
@@ -67,3 +67,4 @@ Pop
 @section('scripts')
     @include('partials.scripts')
 @endsection
+

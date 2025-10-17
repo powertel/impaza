@@ -10,7 +10,7 @@ Finance
         <div class="card w-50">
             <div class="card-header">
                 <h3 class="card-title">
-                    {{_('Confirm Link')}}
+                    Confirm Link
                 </h3>
             </div>
             <div class="card-body">
@@ -62,3 +62,4 @@ Finance
 @section('scripts')
     @include('partials.scripts')
 @endsection
+

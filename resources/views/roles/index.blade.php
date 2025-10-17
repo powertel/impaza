@@ -45,7 +45,7 @@ Roles
         <h3 class="card-title">Roles</h3>
         <div class="card-tools">
             @can('role-create')
-               <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#roleCreateModal"><i class="fas fa-plus-circle"></i> {{_('Add New Role')}} </button>  
+               <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#roleCreateModal"><i class="fas fa-plus-circle"></i> Add New Role </button>  
             @endcan
         </div>
     </div>
@@ -114,3 +114,4 @@ Roles
 @include('roles.edit_modal')
 
 @endsection
+

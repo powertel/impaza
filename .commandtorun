@@ -1,0 +1,13 @@
+docker compose up -d --build 
+
+docker compose exec -T app composer install --no-interaction --prefer-dist 
+
+docker compose exec -T app php artisan key:generate 
+
+docker compose exec -T app chmod -R 777 storage bootstrap/cache 
+
+Common next commands:
+
+- docker compose logs -f nginx to tail Nginx logs.
+- docker compose exec app php artisan migrate to run DB migrations.
+- docker compose exec app php artisan cache:clear if you tweak configs.
