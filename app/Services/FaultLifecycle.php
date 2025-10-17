@@ -33,6 +33,34 @@ class FaultLifecycle
         FaultAssignment::resolveForFault($fault->id);
     }
 
+    /**
+     * Reopen the most recent assignment window for the given fault so timing continues.
+     */
+    public static function reopenAssignment(Fault $fault): void
+    {
+        FaultAssignment::reopenForFault($fault->id);
+    }
+
+    /**
+     * End the current stage and reopen the previous stage record for the given status.
+     * If there is no previous stage, starts a new one.
+     */
+    public static function reopenStageForStatus(Fault $fault, int $statusId, ?int $actorUserId = null): void
+    {
+        // Close any currently open stage (e.g., Technician Cleared)
+        FaultStageLog::endStage($fault->id, $actorUserId);
+        // Attempt to reopen the last stage for the target status
+        FaultStageLog::reopenLastForStatus($fault->id, $statusId);
+        // If there is no previous stage of that status, start a fresh one
+        $exists = FaultStageLog::where('fault_id', $fault->id)
+            ->where('status_id', $statusId)
+            ->whereNull('ended_at')
+            ->exists();
+        if (!$exists) {
+            FaultStageLog::startStage($fault->id, $statusId, $actorUserId);
+        }
+    }
+
     public static function isOffHours(Carbon $when = null): bool
     {
         $when = $when ?: now();

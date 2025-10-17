@@ -51,4 +51,20 @@ class FaultAssignment extends Model
             $open->save();
         }
     }
+
+    /**
+     * Reopen the most recent assignment for a fault by clearing resolved_at and duration.
+     * This continues the original assignment timing without creating a new record.
+     */
+    public static function reopenForFault(int $faultId): void
+    {
+        $latest = self::where('fault_id', $faultId)
+            ->orderByDesc('assigned_at')
+            ->first();
+        if ($latest && $latest->resolved_at) {
+            $latest->resolved_at = null;
+            $latest->duration_seconds = null;
+            $latest->save();
+        }
+    }
 }

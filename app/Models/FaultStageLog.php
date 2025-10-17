@@ -51,4 +51,23 @@ class FaultStageLog extends Model
             $open->save();
         }
     }
+
+    /**
+     * Reopen the most recent stage for the given status by clearing ended_at and duration.
+     * If no prior stage exists, returns without changes.
+     */
+    public static function reopenLastForStatus(int $faultId, int $statusId): void
+    {
+        $last = self::where('fault_id', $faultId)
+            ->where('status_id', $statusId)
+            ->whereNotNull('ended_at')
+            ->orderByDesc('started_at')
+            ->first();
+        if ($last) {
+            $last->ended_at = null;
+            $last->ended_by = null;
+            $last->duration_seconds = null;
+            $last->save();
+        }
+    }
 }
