@@ -27,7 +27,7 @@
             <li class="nav-item">
               <a href="{{ route('faults.index') }}" class="nav-link {{ request()->routeIs('faults.*') ? 'active' : '' }}">
                 <i class="nav-icon fas fa-exclamation-triangle"></i>
-                <p>Faults</p>
+                <p>Log</p>
               </a>
             </li>
             @endcan
@@ -41,9 +41,17 @@
             @endcan
             @can('assigned-fault-list')
             <li class="nav-item">
-              <a href="{{ route('assign.index') }}" class="nav-link {{ request()->routeIs('assign.*') ? 'active' : '' }}">
+              <a href="{{ route('assign.index') }}" class="nav-link {{ request()->routeIs('assign.index') ? 'active' : '' }}">
                 <i class="nav-icon fas fa-tasks"></i>
-                <p>Assigned Faults</p>
+                <p>Assigned</p>
+              </a>
+            </li>
+            @endcan
+            @can('assign-fault')
+            <li class="nav-item">
+              <a href="{{ route('assign.create') }}" class="nav-link {{ request()->routeIs('assign.create') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-user-check"></i>
+                <p>Assign</p>
               </a>
             </li>
             @endcan
@@ -51,7 +59,7 @@
             <li class="nav-item">
               <a class="nav-link {{ request()->routeIs('assessments.*') ? 'active' : '' }}" href="{{ route('assessments.index') }}">
                 <i class="nav-icon fas fa-clipboard-check"></i>
-                <p>Assess Faults</p>
+                <p>Assess</p>
               </a>
             </li>
             <li class="nav-item">
@@ -65,7 +73,7 @@
             <li class="nav-item">
               <a class="nav-link {{ request()->routeIs('chief-tech-clear.*') ? 'active' : '' }}" href="{{ route('chief-tech-clear.index') }}">
                 <i class="nav-icon fas fa-wrench"></i>
-                <p>Clear Faults</p>
+                <p>Clear</p>
               </a>
             </li>
             @endcan
@@ -73,7 +81,7 @@
             <li class="nav-item">
               <a class="nav-link {{ request()->routeIs('noc-clear.*') ? 'active' : '' }}" href="{{ route('noc-clear.index') }}">
                 <i class="nav-icon fas fa-broom"></i>
-                <p>NOC Clear Faults</p>
+                <p>NOC Clear</p>
               </a>
             </li>
             @endcan
@@ -81,7 +89,7 @@
             <li class="nav-item">
               <a class="nav-link {{ request()->routeIs('department_faults.*') ? 'active' : '' }}" href="{{ route('department_faults.index') }}">
                 <i class="nav-icon fas fa-satellite"></i>
-                <p>Department Faults</p>
+                <p>Department</p>
               </a>
             </li>
             @endcan

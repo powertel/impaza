@@ -30,6 +30,13 @@ class AutoAssignFaults extends Command
      */
     public function handle(): int
     {
+        // Chief tech toggle: exit early if disabled
+        $settings = AutoAssignSetting::query()->first();
+        if (!$settings || !($settings->auto_assign_enabled ?? false)) {
+            $this->info('Auto-assign disabled by Chief Tech.');
+            return Command::SUCCESS;
+        }
+
         // Find assessed faults with no technician yet assigned
         $faults = DB::table('faults')
             ->leftJoin('fault_section', 'faults.id', '=', 'fault_section.fault_id')
@@ -46,7 +53,6 @@ class AutoAssignFaults extends Command
         $assignedCount = 0;
 
         // Fetch configurable settings once
-        $settings = AutoAssignSetting::query()->first();
         $considerRegion = (bool)($settings->consider_region ?? true);
         $considerLeave = (bool)($settings->consider_leave ?? true);
         $isOffHours = FaultLifecycle::isOffHours();

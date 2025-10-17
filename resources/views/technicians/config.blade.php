@@ -133,6 +133,15 @@ Technician Configuration
               </div>
             </div>
 
+            <div class="row g-2 mt-2">
+              <div class="col-md-6">
+                <div class="form-check">
+                  <input class="form-check-input js-setting" type="checkbox" name="auto_assign_enabled" value="1" id="auto_assign_enabled" data-field="auto_assign_enabled" {{ old('auto_assign_enabled', ($settings->auto_assign_enabled ?? false)) ? 'checked' : '' }}>
+                  <label class="form-check-label" for="auto_assign_enabled">Enable Auto-Assign</label>
+                </div>
+              </div>
+            </div>
+
             <div class="mt-3 d-flex justify-content-end">
               <button type="submit" class="btn btn-primary">Save Settings</button>
             </div>

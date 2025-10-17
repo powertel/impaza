@@ -34,7 +34,7 @@ class UserController extends Controller
                 ->leftjoin('sections','users.section_id','=','sections.id')
                 ->leftjoin('positions','users.position_id','=','positions.id')
                 ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
-                ->get(['users.id','users.name','users.email','users.department_id','users.position_id','users.section_id','sections.section','departments.department','positions.position','user_statuses.status_name']);
+                ->get(['users.id','users.name','users.email','users.department_id','users.position_id','users.section_id','sections.section','departments.department','positions.position','user_statuses.status_name','users.region']);
         
         // Provide supporting datasets for modal-based create/edit in index
         $roles = Role::pluck('name','name')->all();
@@ -42,8 +42,11 @@ class UserController extends Controller
         $section = Section::all();
         $position = Position::all();
         $user_statuses = UserStatus::all();
+        // Regions list and current user's region for user creation
+        $regions = DB::table('cities')->select('region')->whereNotNull('region')->distinct()->orderBy('region')->pluck('region');
+        $currentUserRegion = auth()->user()->region;
         
-        return view('users.index',compact('users','roles','department','section','position','user_statuses'))
+        return view('users.index',compact('users','roles','department','section','position','user_statuses','regions','currentUserRegion'))
         ->with('i');
     }
     /**
@@ -97,11 +100,17 @@ class UserController extends Controller
                 'department_id' => 'required',
                 'section_id' => 'required',
                 'position_id' => 'required',
-                'roles' => 'required'
+                'roles' => 'required',
+                'region' => 'nullable|string'
             ]);
 
             $input = $request->all();
             $input['password'] = Hash::make($input['password']);
+            // Enforce region based on the logged-in user's region if set
+            $currentUserRegion = auth()->user()->region;
+            if (!empty($currentUserRegion)) {
+                $input['region'] = $currentUserRegion;
+            }
 
             $user = User::create($input);
             $user->assignRole($request->input('roles'));
@@ -187,7 +196,8 @@ class UserController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users,email,'.$id,
             'password' => 'same:confirm-password',
-            'roles' => 'required'
+            'roles' => 'required',
+            'region' => 'nullable|string',
         ]);
 
         $input = $request->all();

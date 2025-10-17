@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-Assign Faults
+Assigned Faults
 @endsection
 
 @include('partials.css')
@@ -43,28 +43,44 @@ Assign Faults
                     <tr>
                         <th>No.</th>
                         <th>Customer</th>
-                        <th>Account Manager</th>
-                        <th>Link Name</th>
-                        <th>Assigned To</th>
+                        <th>Link</th>
+                        <th>City</th>
+                        <th>Suburb</th>
+                        <th>POP</th>
+                        <th>Service Type</th>
+                        <th>Priority</th>
                         <th>Status</th>
+                        <th>Assigned To</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ( $faults as $fault )
-                    <tr >
-                        <td>{{ ++$i }}</td>
+                    @foreach ($faults as $fault)
+                    <tr data-fault-id="{{ $fault->id }}">
+                        <td>{{ $fault->id }}</td>
                         <td>{{ $fault->customer }}</td>
-                        <td>{{ $fault->accountManager }}</td>
                         <td>{{ $fault->link }}</td>
-                        <td>{{ $fault->name }}</td>
-                        <td class="text-nowrap">
+                        <td>{{ $fault->city }}</td>
+                        <td>{{ $fault->suburb }}</td>
+                        <td>{{ $fault->pop }}</td>
+                        <td>{{ $fault->serviceType }}</td>
+                        <td>{{ $fault->priorityLevel }}</td>
+                        <td>
                             <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
-                                {{$fault->description}}
+                                {{ $fault->description }}
                             </span>
                         </td>
+                        <td>{{ $fault->name ?? '—' }}</td>
                         <td>
-                            @can('re-assign-fault')
+                            <div class="btn-group btn-group-sm gap-2" role="group" aria-label="Actions">
+                                @can('assign-fault')
+                                    @if ((int)($fault->status_id ?? 0) === 2 && empty($fault->assignedTo))
+                                    <button type="button" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#assignModal-{{ $fault->id }}">
+                                        <i class="fas fa-user-plus me-1"></i>Assign
+                                    </button>
+                                    @endif
+                                @endcan
+                                @can('re-assign-fault')
                                 @if ((int)($fault->status_id ?? 0) === 3)
                                 <button type="button" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#reassignModal-{{ $fault->id }}">
                                     <i class="fas fa-save me-1"></i>Re-Assign
@@ -74,31 +90,35 @@ Assign Faults
                                     <i class="fas fa-lock me-1"></i>Re-Assign
                                 </button>
                                 @endif
-                            @endcan
-                            <a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
-                                <i class="fas fa-eye me-1"></i>View
-                            </a>
+                                @endcan
+                                <button class="btn btn-sm btn-outline-success" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                                    <i class="fas fa-eye me-1"></i>View
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     @endforeach
                 </tbody> 
             </table>
+            @foreach ($faults as $fault)
+                @include('assign.assign_modal', ['fault' => $fault, 'technicians' => ($techniciansByFault[$fault->id] ?? $technicians)])
+                @include('assign.reassign_modal', ['fault' => $fault, 'technicians' => ($techniciansByFault[$fault->id] ?? $technicians)])
+                @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
+            @endforeach
             <div id="assignedfaultsPager" class="mt-2"></div>
         </div>   
+
     </div>
     <!-- /.card-body -->
 </div>
  
-</section>
+ </section>
 @endsection
 
 @section('scripts')
-  @include('partials.scripts')
+    @include('partials.scripts')
 @endsection
  
-@foreach ($faults as $fault)
-  @if((int)($fault->status_id ?? 0) === 3)
-    @include('assign.reassign_modal', ['fault' => $fault, 'technicians' => $technicians])
-  @endif
-@endforeach
+
+
 

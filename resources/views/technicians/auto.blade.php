@@ -29,20 +29,29 @@ Auto-Assign Settings
             <div class="row g-3 mt-2">
               <div class="col-md-4">
                 <div class="form-check">
-                  <input class="form-check-input js-setting" type="checkbox" name="weekend_standby_enabled" value="1" id="weekend_standby_enabled" data-field="weekend_standby_enabled" {{ old('weekend_standby_enabled', ($settings->weekend_standby_enabled ?? true)) ? 'checked' : '' }}>
-                  <label class="form-check-label" for="weekend_standby_enabled">Enable Weekend Standby</label>
+                  <input class="form-check-input js-setting" type="checkbox" id="weekend_standby_enabled" name="weekend_standby_enabled" {{ old('weekend_standby_enabled', $settings->weekend_standby_enabled ?? false) ? 'checked' : '' }} data-field="weekend_standby_enabled">
+                  <label class="form-check-label" for="weekend_standby_enabled">Weekend Standby</label>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="form-check">
-                  <input class="form-check-input js-setting" type="checkbox" name="consider_leave" value="1" id="consider_leave" data-field="consider_leave" {{ old('consider_leave', ($settings->consider_leave ?? true)) ? 'checked' : '' }}>
-                  <label class="form-check-label" for="consider_leave">Exclude On Leave</label>
+                  <input class="form-check-input js-setting" type="checkbox" id="consider_leave" name="consider_leave" {{ old('consider_leave', $settings->consider_leave ?? true) ? 'checked' : '' }} data-field="consider_leave">
+                  <label class="form-check-label" for="consider_leave">Consider Leave</label>
                 </div>
               </div>
               <div class="col-md-4">
                 <div class="form-check">
-                  <input class="form-check-input js-setting" type="checkbox" name="consider_region" value="1" id="consider_region" data-field="consider_region" {{ old('consider_region', ($settings->consider_region ?? true)) ? 'checked' : '' }}>
+                  <input class="form-check-input js-setting" type="checkbox" id="consider_region" name="consider_region" {{ old('consider_region', $settings->consider_region ?? true) ? 'checked' : '' }} data-field="consider_region">
                   <label class="form-check-label" for="consider_region">Consider Region</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="row g-3 mt-3">
+              <div class="col-md-6">
+                <div class="form-check">
+                  <input class="form-check-input js-setting" type="checkbox" id="auto_assign_enabled" name="auto_assign_enabled" {{ old('auto_assign_enabled', $settings->auto_assign_enabled ?? false) ? 'checked' : '' }} data-field="auto_assign_enabled">
+                  <label class="form-check-label" for="auto_assign_enabled">Enable Auto-Assign</label>
                 </div>
               </div>
             </div>

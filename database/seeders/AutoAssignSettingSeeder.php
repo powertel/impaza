@@ -19,6 +19,7 @@ class AutoAssignSettingSeeder extends Seeder
                 'weekend_standby_enabled' => true,
                 'consider_leave' => true,
                 'consider_region' => true,
+                'auto_assign_enabled' => false,
             ]);
         }
     }

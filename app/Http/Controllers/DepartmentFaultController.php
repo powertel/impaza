@@ -221,6 +221,11 @@ class DepartmentFaultController extends Controller
 
     public function autoAssign($section_id)
     {
+        // Respect chief tech toggle: do nothing if disabled
+        $settings = \App\Models\AutoAssignSetting::query()->first();
+        if (!$settings || !($settings->auto_assign_enabled ?? false)) {
+            return; // disabled
+        }
    
         $users = User::join('departments','users.department_id','=','departments.id')
             ->leftjoin('sections','users.section_id','=','sections.id')

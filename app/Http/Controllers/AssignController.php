@@ -17,6 +17,7 @@ use App\Models\FaultSection;
 use App\Models\UserStatus;
 use Illuminate\Support\Facades\DB;
 use App\Services\FaultLifecycle;
+use App\Models\AutoAssignSetting;
 
 class AssignController extends Controller
 {
@@ -41,22 +42,49 @@ class AssignController extends Controller
         ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
         ->leftjoin('users as account_manager_users','account_managers.user_id','=','account_manager_users.id')
         ->leftjoin('statuses','faults.status_id','=','statuses.id')
+        ->leftjoin('cities','faults.city_id','=','cities.id')
+        ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
+        ->leftjoin('pops','faults.pop_id','=','pops.id')
+        ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
         ->orderBy('faults.created_at', 'desc')
         ->where('fault_section.section_id','=',auth()->user()->section_id)
-       ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
-       'account_manager_users.name as accountManager','faults.suspectedRfo_id','links.link','statuses.description','users.name','faults.status_id as status_id'
-       ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
+        ->where('cities.region','=',auth()->user()->region)
+        ->whereNotNull('faults.assignedTo')
+        ->where('faults.status_id','=',3)
+        ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
+            'account_manager_users.name as accountManager','faults.suspectedRfo_id','links.link','statuses.description','users.name','faults.status_id as status_id',
+            'cities.city as city','cities.region as region','faults.city_id as city_id','suburbs.suburb as suburb','pops.pop as pop','faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at',
+            'reasons_for_outages.RFO as RFO']);
+
+        // Collect remarks grouped by fault_id for conversation modal
+        $faultIds = $faults->pluck('id');
+        $remarksRecords = DB::table('remarks')
+            ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
+            ->leftjoin('users','remarks.user_id','=','users.id')
+            ->whereIn('remarks.fault_id', $faultIds)
+            ->orderBy('remarks.created_at', 'desc')
+            ->get([
+                'remarks.id',
+                'remarks.fault_id',
+                'remarks.created_at',
+                'remarks.remark',
+                'remarks.file_path',
+                'users.name',
+                'remark_activities.activity'
+            ]);
+        $remarksByFault = $remarksRecords->groupBy('fault_id');
 
         // Technicians list for modal re-assign (current section, Assignable)
         $technicians = DB::table('users')
             ->leftJoin('sections','users.section_id','=','sections.id')
             ->leftJoin('user_statuses','users.user_status','=','user_statuses.id')
             ->where('users.section_id','=',auth()->user()->section_id)
+            ->where('users.region','=',auth()->user()->region)
             ->where('user_statuses.status_name','=','Assignable')
             ->orderBy('users.name','asc')
             ->get(['users.id','users.name']);
 
-        return view('assign.index',compact('faults','technicians'))
+        return view('assign.index',compact('faults','technicians','remarksByFault'))
         ->with('i');
     }
 
@@ -67,7 +95,60 @@ class AssignController extends Controller
      */
     public function create()
     {
-        //
+        // List faults waiting to be assigned (status = 2)
+        $faults = DB::table('faults')
+            ->leftjoin('fault_section','faults.id','=','fault_section.fault_id')
+            ->leftjoin('users','faults.assignedTo','=','users.id')
+            ->leftjoin('sections','fault_section.section_id','=','sections.id')
+            ->leftjoin('customers','faults.customer_id','=','customers.id')
+            ->leftjoin('links','faults.link_id','=','links.id')
+            ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
+            ->leftjoin('users as account_manager_users','account_managers.user_id','=','account_manager_users.id')
+            ->leftjoin('statuses','faults.status_id','=','statuses.id')
+            ->leftjoin('cities','faults.city_id','=','cities.id')
+            ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
+            ->leftjoin('pops','faults.pop_id','=','pops.id')
+            ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
+            ->orderBy('faults.created_at', 'desc')
+            ->where('fault_section.section_id','=',auth()->user()->section_id)
+            ->where('faults.status_id','=',2)
+            ->whereNull('faults.assignedTo')
+            ->where('cities.region','=',auth()->user()->region)
+            ->get(['faults.id','faults.fault_ref_number','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
+                'account_manager_users.name as accountManager','faults.suspectedRfo_id','links.link','statuses.description','users.name','faults.status_id as status_id',
+                'cities.city as city','cities.region as region','faults.city_id as city_id','suburbs.suburb as suburb','pops.pop as pop','faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at',
+                'reasons_for_outages.RFO as RFO']);
+
+        // Remarks grouped by fault_id
+        $faultIds = $faults->pluck('id');
+        $remarksRecords = DB::table('remarks')
+            ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
+            ->leftjoin('users','remarks.user_id','=','users.id')
+            ->whereIn('remarks.fault_id', $faultIds)
+            ->orderBy('remarks.created_at', 'desc')
+            ->get([
+                'remarks.id',
+                'remarks.fault_id',
+                'remarks.created_at',
+                'remarks.remark',
+                'remarks.file_path',
+                'users.name',
+                'remark_activities.activity'
+            ]);
+        $remarksByFault = $remarksRecords->groupBy('fault_id');
+
+        // Technicians list for assignment (current section, Assignable)
+        $technicians = DB::table('users')
+            ->leftJoin('sections','users.section_id','=','sections.id')
+            ->leftJoin('user_statuses','users.user_status','=','user_statuses.id')
+            ->where('users.section_id','=',auth()->user()->section_id)
+            ->where('users.region','=',auth()->user()->region)
+            ->where('user_statuses.status_name','=','Assignable')
+            ->orderBy('users.name','asc')
+            ->get(['users.id','users.name']);
+
+        return view('assign.waiting',compact('faults','technicians','remarksByFault'))
+            ->with('i');
     }
 
     /**
@@ -110,10 +191,27 @@ class AssignController extends Controller
         ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
         ->leftjoin('users','faults.assignedTo','=','users.id')
         ->where('faults.id','=',$id)
-        ->get(['faults.id','faults.customer_id','customers.customer','faults.suspectedRfo_id','links.link','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','users.name',
-        'account_managers.accountManager','faults.accountManager_id','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo_id','faults.link_id','links.link'
-        ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
-        ->first();
+                ->get([
+                    'faults.id',
+                    'customers.customer',
+                    'faults.contactName',
+                    'faults.phoneNumber',
+                    'faults.contactEmail',
+                    'faults.address',
+                    'account_manager_users.name as accountManager',
+                    'links.link',
+                    'statuses.description',
+                    'faults.serviceType',
+                    'faults.serviceAttribute',
+                    'faults.faultType',
+                    'faults.priorityLevel',
+                    'faults.created_at',
+                    'cities.city as city',
+                    'suburbs.suburb as suburb',
+                    'pops.pop as pop',
+                    'reasons_for_outages.RFO as RFO'
+                ]);
+
 
         $cities = City::all();
         $customers = Customer::all();
@@ -131,6 +229,24 @@ class AssignController extends Controller
                     ->get(['users.id','users.name']);
 
                     //dd($technicians);
+                // Collect remarks for all listed faults and group by fault_id
+        $faultIds = $faults->pluck('id');
+        $remarksRecords = DB::table('remarks')
+            ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
+            ->leftjoin('users','remarks.user_id','=','users.id')
+            ->whereIn('remarks.fault_id', $faultIds)
+            ->orderBy('remarks.created_at', 'desc')
+            ->get([
+                'remarks.id',
+                'remarks.fault_id',
+                'remarks.created_at',
+                'remarks.remark',
+                'remarks.file_path',
+                'users.name',
+                'remark_activities.activity'
+            ]);
+
+        $remarksByFault = $remarksRecords->groupBy('fault_id');
 
         return view('assign.assign',compact('fault','customers','cities','suburbs','pops','links','remarks','accountManagers','technicians'));
     
