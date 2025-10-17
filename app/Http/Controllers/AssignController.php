@@ -189,8 +189,6 @@ class AssignController extends Controller
             ->where('users.region', '=', auth()->user()->region)
             ->where('user_statuses.status_name', '=', 'Assignable')
             ->exists();
-        
-            dd($isTechEligible);
 
         if (!$isTechEligible) {
             return back()->withErrors(['assignedTo' => 'Selected technician is not eligible']).withInput();
@@ -280,7 +278,7 @@ class AssignController extends Controller
                     ->where('user_statuses.status_name','=','Assignable')
                     ->get(['users.id','users.name']);
 
-                    //dd($technicians);
+                    // dd($technicians); // removed debug
                 // Collect remarks for all listed faults and group by fault_id
         $faultIds = $faults->pluck('id');
         $remarksRecords = DB::table('remarks')

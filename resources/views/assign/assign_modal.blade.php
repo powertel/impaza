@@ -6,7 +6,7 @@
         <h5 class="modal-title" id="assignModalLabel-{{ $fault->id }}">Assign Fault</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form action="{{ route('assign.store') }}" method="POST">
+      <form action="/assign" method="POST">
         @csrf
         <input type="hidden" name="fault_id" value="{{ $fault->id }}">
         <div class="modal-body">
