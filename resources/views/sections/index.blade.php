@@ -75,7 +75,7 @@ Sections
 @include('sections.create_modal')
 @include('sections.edit_modal')
  
- @endsection
+@endsection
 
 @section('scripts')
   @include('partials.scripts')

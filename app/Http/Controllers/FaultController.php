@@ -185,7 +185,23 @@ class FaultController extends Controller
             //This is where i am creating the fault
             $req['status_id'] = 1;
 			$req['user_id'] =$request->user()->id;
-			$req['fault_ref_number']="PWT".date("YmdHis");
+            // Build daily-running sequence: PWT2510171, P2510172, …
+            $today = date('ymd');                          // 251017
+            $prefix = 'PWT' . $today;                      // PWT251017
+
+            // Get the highest sequence used today
+            $lastToday = Fault::where('fault_ref_number', 'LIKE', $prefix . '%')
+                               ->orderByDesc('fault_ref_number')
+                               ->value('fault_ref_number');
+
+            if ($lastToday) {
+                // Extract the numeric suffix and increment
+                $next = (int)substr($lastToday, strlen($prefix)) + 1;
+            } else {
+                $next = 1;                                 // First of the day
+            }
+
+            $req['fault_ref_number'] = $prefix . sprintf('%03d', $next);
 
             $fault = Fault::create($req);
             // Start lifecycle at "Waiting for assessment" (status_id = 1)

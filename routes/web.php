@@ -30,6 +30,7 @@ use App\Http\Controllers\NocClearFaultsController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\RFOController;
+use App\Http\Controllers\TechnicianConfigController;
 
 /*
 |--------------------------------------------------------------------------
@@ -99,12 +100,12 @@ Route::group(['middleware' => ['auth']], function() {
     Route::post('/password/change', [UserController::class,'postPassword'])->name('user.password.update');
 
     // Technician settings (single route with modal for auto-assign)
-    Route::get('technicians/config', [\App\Http\Controllers\TechnicianConfigController::class, 'config'])->name('technicians.config');
-    Route::post('technicians/settings', [\App\Http\Controllers\TechnicianConfigController::class, 'updateSettings'])->name('technicians.settings.update');
-    Route::post('technicians/settings/regions', [\App\Http\Controllers\TechnicianConfigController::class, 'updateRegions'])->name('technicians.regions.update');
+    Route::get('technicians/config', [TechnicianConfigController::class, 'config'])->name('technicians.config');
+    Route::post('technicians/settings', [TechnicianConfigController::class, 'updateSettings'])->name('technicians.settings.update');
+    Route::post('technicians/settings/regions', [TechnicianConfigController::class, 'updateRegions'])->name('technicians.regions.update');
     // Auto-save endpoints
-    Route::post('technicians/settings/ajax', [\App\Http\Controllers\TechnicianConfigController::class, 'updateSettingsAjax'])->name('technicians.settings.ajax');
-    Route::post('technicians/users/{user}/setting', [\App\Http\Controllers\TechnicianConfigController::class, 'updateUserSetting'])->name('technicians.user.setting');
+    Route::post('technicians/settings/ajax', [TechnicianConfigController::class, 'updateSettingsAjax'])->name('technicians.settings.ajax');
+    Route::post('technicians/users/{user}/setting', [TechnicianConfigController::class, 'updateUserSetting'])->name('technicians.user.setting');
 });
 
 

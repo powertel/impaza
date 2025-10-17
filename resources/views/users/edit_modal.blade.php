@@ -13,25 +13,20 @@
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label">Name</label>
-              <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ $user->name }}">
+              <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ $user->name }}" required>
             </div>
             <div class="col-md-6">
               <label class="form-label">Email</label>
-              <input type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ $user->email }}">
+              <input type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ $user->email }}" required>
             </div>
           </div>
 
           <div class="row g-3 mt-1">
             <div class="col-md-6">
               <label class="form-label">Department</label>
-              <select class="form-select department-select @error('department_id') is-invalid @enderror" name="department_id" value="{{ $user->department_id }}">
-                @isset($user->department_id)
-                  <option selected value="{{ $user->department_id }}">{{ $user->department }}</option>
-                @endisset
+              <select class="form-select department-select @error('department_id') is-invalid @enderror" name="department_id" data-selected="{{ $user->department_id }}">
                 @foreach($department as $depart)
-                  @if ($depart->id !== $user->department_id)
-                    <option value="{{ $depart->id}}">{{ $depart->department }}</option>
-                  @endif
+                  <option value="{{ $depart->id}}" {{ (int)$user->department_id === (int)$depart->id ? 'selected' : '' }}>{{ $depart->department }}</option>
                 @endforeach
               </select>
             </div>
@@ -72,6 +67,17 @@
                     <option value="{{ $status->id}}">{{ $status->status_name }}</option>
                   @endif
                 @endforeach
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Region</label>
+              <select class="form-select @error('region') is-invalid @enderror" name="region">
+                <option value="" {{ empty($user->region) ? 'selected' : '' }}>Not set</option>
+                @isset($regions)
+                  @foreach($regions as $region)
+                    <option value="{{ $region }}" {{ $user->region === $region ? 'selected' : '' }}>{{ $region }}</option>
+                  @endforeach
+                @endisset
               </select>
             </div>
           </div>

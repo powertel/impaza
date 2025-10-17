@@ -77,6 +77,12 @@
                     </div>
                   </div>
                 </li>
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                  <div>
+                    <small class="text-muted">Region</small>
+                    <div class="fw-semibold">{{ $user->region }}</div>
+                  </div>
+                </li>
               </ul>
             </div>
           </div>

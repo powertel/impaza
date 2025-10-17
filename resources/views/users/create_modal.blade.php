@@ -79,6 +79,18 @@
                 @endforeach
               </select>
             </div>
+            <div class="col-md-6">
+              <label class="form-label">Region</label>
+              <select class="form-select @error('region') is-invalid @enderror" name="region">
+                <option value="" disabled {{ old('region', $currentUserRegion ?? '') ? '' : 'selected' }}>Select Region</option>
+                @isset($regions)
+                  @foreach($regions as $region)
+                    <option value="{{ $region }}" {{ old('region', $currentUserRegion ?? '') === $region ? 'selected' : '' }}>{{ $region }}</option>
+                  @endforeach
+                @endisset
+              </select>
+              <small class="text-muted">Defaults to your region: {{ $currentUserRegion ?? 'Not set' }}</small>
+            </div>
           </div>
 
           <div class="row g-3 mt-1">

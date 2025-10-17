@@ -2,37 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Models\AutoAssignSetting;
 use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TechnicianConfigController extends Controller
 {
-    // Combined view (legacy)
-    public function index()
-    {
-        $settings = AutoAssignSetting::query()->first();
-        if (!$settings) {
-            $settings = new AutoAssignSetting([
-                // Defaults requested: 16:30 start, 06:00 end
-                'standby_start_time' => '16:30:00',
-                'standby_end_time' => '06:00:00',
-                'weekend_standby_enabled' => true,
-                'consider_leave' => true,
-                'consider_region' => true,
-            ]);
-        }
-
-        $regions = DB::table('cities')->select('region')->whereNotNull('region')->distinct()->orderBy('region')->pluck('region');
-        $technicians = User::leftJoin('sections','users.section_id','=','sections.id')
-            ->leftJoin('user_statuses','users.user_status','=','user_statuses.id')
-            ->orderBy('users.name','asc')
-            ->get(['users.id','users.name','sections.section','users.region','users.weekly_standby','users.weekend_standby','user_statuses.status_name']);
-
-        return view('technicians.settings', compact('settings','regions','technicians'));
-    }
-
     // Auto-assign settings page only
     public function auto()
     {
@@ -44,6 +20,7 @@ class TechnicianConfigController extends Controller
                 'weekend_standby_enabled' => true,
                 'consider_leave' => true,
                 'consider_region' => true,
+                'auto_assign_enabled' => false,
             ]);
         }
         return view('technicians.auto', compact('settings'));
@@ -60,6 +37,7 @@ class TechnicianConfigController extends Controller
                 'weekend_standby_enabled' => true,
                 'consider_leave' => true,
                 'consider_region' => true,
+                'auto_assign_enabled' => false,
             ]);
         }
         $regions = DB::table('cities')->select('region')->whereNotNull('region')->distinct()->orderBy('region')->pluck('region');
@@ -78,12 +56,14 @@ class TechnicianConfigController extends Controller
             'weekend_standby_enabled' => 'nullable|boolean',
             'consider_leave' => 'nullable|boolean',
             'consider_region' => 'nullable|boolean',
+            'auto_assign_enabled' => 'nullable|boolean',
         ]);
 
         // Normalize checkboxes
         $data['weekend_standby_enabled'] = (bool)($data['weekend_standby_enabled'] ?? false);
         $data['consider_leave'] = (bool)($data['consider_leave'] ?? false);
         $data['consider_region'] = (bool)($data['consider_region'] ?? false);
+        $data['auto_assign_enabled'] = (bool)($data['auto_assign_enabled'] ?? false);
 
         $settings = AutoAssignSetting::query()->first();
         if ($settings) {
@@ -95,26 +75,7 @@ class TechnicianConfigController extends Controller
         return redirect()->route('technicians.settings')->with('success', 'Auto-assign settings updated');
     }
 
-    public function updateRegions(Request $request)
-    {
-        $payload = $request->validate([
-            'user_id' => 'required|array',
-            'user_id.*' => 'integer|exists:users,id',
-            'region' => 'required|array',
-            'region.*' => 'nullable|string',
-        ]);
-
-        $userIds = $payload['user_id'];
-        $regions = $payload['region'];
-        foreach ($userIds as $idx => $uid) {
-            $reg = $regions[$idx] ?? null;
-            User::where('id', $uid)->update(['region' => $reg]);
-        }
-
-        return back()->with('success', 'Technician regions updated');
-    }
-
-    // Auto-save endpoint for updating a single global setting field
+    // Ajax save global setting
     public function updateSettingsAjax(Request $request)
     {
         $field = $request->validate([
@@ -130,6 +91,7 @@ class TechnicianConfigController extends Controller
                 'weekend_standby_enabled' => true,
                 'consider_leave' => true,
                 'consider_region' => true,
+                'auto_assign_enabled' => false,
             ]);
             $settings->save();
         }
@@ -138,7 +100,7 @@ class TechnicianConfigController extends Controller
         $value = $field['value'];
 
         // Coerce types for known boolean fields
-        $booleanKeys = ['weekend_standby_enabled','consider_leave','consider_region'];
+        $booleanKeys = ['weekend_standby_enabled','consider_leave','consider_region','auto_assign_enabled'];
         if (in_array($key, $booleanKeys, true)) {
             $value = (bool)$value;
         }
@@ -190,13 +152,13 @@ class TechnicianConfigController extends Controller
             case 'on_leave':
                 // Toggle user_status between On Leave and Assignable
                 $onLeave = (bool)$value;
-                $statusId = DB::table('user_statuses')->where('status_name', $onLeave ? 'On Leave' : 'Assignable')->value('id');
-                if ($statusId) {
-                    $user->update(['user_status' => $statusId]);
+                $statusName = $onLeave ? 'On Leave' : 'Assignable';
+                $statusId = DB::table('user_statuses')->where('status_name', $statusName)->value('id');
+                if (!$statusId) {
+                    $statusId = DB::table('user_statuses')->insertGetId(['status_name' => $statusName]);
                 }
+                $user->update(['user_status' => $statusId]);
                 break;
-            default:
-                return response()->json(['error' => 'Unknown field'], 400);
         }
 
         return response()->json(['status' => 'ok']);

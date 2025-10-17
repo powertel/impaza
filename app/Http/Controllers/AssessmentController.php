@@ -303,6 +303,11 @@ class AssessmentController extends Controller
     {
         // Load configurable settings
         $settings = AutoAssignSetting::query()->first();
+        // Gate auto-assignment behind chief tech toggle
+        if (!$settings || !($settings->auto_assign_enabled ?? false)) {
+            return; // Auto-assign disabled; do nothing
+        }
+
         $considerRegion = (bool)($settings->consider_region ?? true);
         $considerLeave = (bool)($settings->consider_leave ?? true);
         $isOffHours = \App\Services\FaultLifecycle::isOffHours();
