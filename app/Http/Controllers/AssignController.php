@@ -38,17 +38,25 @@ class AssignController extends Controller
         ->leftjoin('sections','fault_section.section_id','=','sections.id')
         ->leftjoin('customers','faults.customer_id','=','customers.id')
         ->leftjoin('links','faults.link_id','=','links.id')
-        ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
+        ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
+        ->leftjoin('users as account_manager_users','account_managers.user_id','=','account_manager_users.id')
         ->leftjoin('statuses','faults.status_id','=','statuses.id')
         ->orderBy('faults.created_at', 'desc')
         ->where('fault_section.section_id','=',auth()->user()->section_id)
        ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
-       'account_managers.accountManager','faults.suspectedRfo_id','links.link','statuses.description','faults.assignedTo','users.name'
+       'account_manager_users.name as accountManager','faults.suspectedRfo_id','links.link','statuses.description','users.name','faults.status_id as status_id'
        ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
 
+        // Technicians list for modal re-assign (current section, Assignable)
+        $technicians = DB::table('users')
+            ->leftJoin('sections','users.section_id','=','sections.id')
+            ->leftJoin('user_statuses','users.user_status','=','user_statuses.id')
+            ->where('users.section_id','=',auth()->user()->section_id)
+            ->where('user_statuses.status_name','=','Assignable')
+            ->orderBy('users.name','asc')
+            ->get(['users.id','users.name']);
 
-      // $autoAssign = $this->autoAssign(auth()->user()->section_id);
-        return view('assign.index',compact('faults'))
+        return view('assign.index',compact('faults','technicians'))
         ->with('i');
     }
 
@@ -142,15 +150,26 @@ class AssignController extends Controller
             'assignedTo'=> 'required',
         ]);
         $fault = Fault::find($id);
-        $req= $request->all();
-        $req['status_id'] = 3;
-        $fault ->update($req);
-        // Log assigned stage and record assignment window
-        FaultLifecycle::recordStatusChange($fault, 3, $request->user()->id);
+        $req = $request->only(['assignedTo']);
+
+        // Determine if this is an initial assignment (status transitions to rectification)
+        $isInitialAssign = ($fault && (int)$fault->status_id !== 3);
+
+        if ($isInitialAssign) {
+            // Move fault to Rectification and start a new rectification stage log entry
+            $fault->status_id = 3;
+            $fault->update($req + ['status_id' => 3]);
+            FaultLifecycle::recordStatusChange($fault, 3, $request->user()->id);
+        } else {
+            // Re-assign within the same rectification stage — keep stage timing continuous
+            $fault->update($req);
+        }
+
+        // Close any open assignment and start a new one for the selected technician
         $region = \DB::table('cities')->where('id', $fault->city_id)->value('region');
         FaultLifecycle::startAssignment($fault, (int)$req['assignedTo'], $request->user()->id, FaultLifecycle::isOffHours(), $region);
-        return redirect()->route('faults.edit',$id)
-        ->with('success','Fault Assigned');
+        return redirect()->back()
+        ->with('success','Fault Re-Assigned');
     }
 
     /**
