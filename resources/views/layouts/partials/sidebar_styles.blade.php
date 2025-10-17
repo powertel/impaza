@@ -137,39 +137,51 @@
 // Prevent scroll chaining: when scrolling inside the sidebar, do not scroll the main page
 // Attach handlers to the whole sidebar and its internal scroll container
 document.addEventListener('DOMContentLoaded', function () {
-  var scrollEl = document.querySelector('.main-sidebar .sidebar');
-  if (!scrollEl) { return; }
+  var sidebarRoot = document.querySelector('.main-sidebar');
+  var scrollContainer = document.querySelector('.main-sidebar .sidebar nav') || document.querySelector('.main-sidebar .sidebar');
+  if (!sidebarRoot || !scrollContainer) { return; }
 
-  function atTop(el) { return el.scrollTop <= 0; }
-  function atBottom(el) { return el.scrollTop + el.clientHeight >= el.scrollHeight; }
+  const WHEEL_SPEED = 2.4; // accelerate mouse wheel scrolling
+  const TOUCH_SPEED = 1.4; // slightly faster touch scrolling
 
-  // Natural wheel scroll inside sidebar; prevent page scroll only at boundaries
-  function handleWheel(e, delta) {
-    const top = atTop(scrollEl);
-    const bottom = atBottom(scrollEl);
-    if ((delta < 0 && top) || (delta > 0 && bottom)) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    // Otherwise let the browser perform the default scroll behavior
+  // Always handle wheel inside the sidebar, never propagate to page
+  function handleWheelLock(e) {
+    const dy = (typeof e.deltaY === 'number') ? e.deltaY : (e.wheelDelta ? -e.wheelDelta : 0);
+    scrollContainer.scrollTop += dy * WHEEL_SPEED; // faster nav scrolling
+    e.preventDefault();
+    e.stopPropagation();
   }
 
-  scrollEl.addEventListener('wheel', function (e) { handleWheel(e, e.deltaY); }, { passive: false });
-  // Legacy event for older browsers
-  scrollEl.addEventListener('mousewheel', function (e) { handleWheel(e, -e.wheelDelta); }, { passive: false });
+  // Attach to the whole sidebar so scrolling works anywhere within it
+  sidebarRoot.addEventListener('wheel', handleWheelLock, { passive: false });
+  // Firefox legacy
+  sidebarRoot.addEventListener('DOMMouseScroll', function (e) { handleWheelLock({ deltaY: e.detail }); }, { passive: false });
+  // WebKit legacy
+  sidebarRoot.addEventListener('mousewheel', handleWheelLock, { passive: false });
 
-  // Touch: use boundary logic to prevent page scroll chaining
+  // Touch: lock scroll to the sidebar only, with a mild speed boost
   let startY = 0;
-  scrollEl.addEventListener('touchstart', function (e) { if (e.touches && e.touches.length) { startY = e.touches[0].clientY; } }, { passive: true });
-  scrollEl.addEventListener('touchmove', function (e) {
+  sidebarRoot.addEventListener('touchstart', function (e) {
+    if (e.touches && e.touches.length) { startY = e.touches[0].clientY; }
+  }, { passive: true });
+  sidebarRoot.addEventListener('touchmove', function (e) {
     if (!e.touches || !e.touches.length) { return; }
     const dy = startY - e.touches[0].clientY; // positive when scrolling down
-    const top = atTop(scrollEl);
-    const bottom = atBottom(scrollEl);
-    if ((dy < 0 && top) || (dy > 0 && bottom)) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
+    scrollContainer.scrollTop += dy * TOUCH_SPEED;
+    startY = e.touches[0].clientY;
+    e.preventDefault();
+    e.stopPropagation();
   }, { passive: false });
 });
 </script>
+
+<style>
+/* Override: make only the nav scroll, keep logo/user panel pinned */
+.main-sidebar .sidebar { overflow: hidden !important; }
+.main-sidebar .sidebar nav { flex: 1 1 auto !important; overflow-y: auto !important; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; scroll-behavior: auto !important; scrollbar-width: thin; scrollbar-color: #e9edf5 transparent; }
+.main-sidebar .sidebar nav::-webkit-scrollbar { width: 8px; height: 8px; }
+.main-sidebar .sidebar nav::-webkit-scrollbar-thumb { background: #e9edf5; border-radius: 8px; }
+.main-sidebar .sidebar nav::-webkit-scrollbar-track { background: transparent; }
+.main-sidebar .sidebar nav::-webkit-scrollbar-thumb { background: #e0e6ef; border-radius: 8px; }
+.main-sidebar .sidebar nav::-webkit-scrollbar-track { background: transparent; }
+</style>

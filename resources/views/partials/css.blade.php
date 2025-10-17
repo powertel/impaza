@@ -34,4 +34,33 @@
     .chat-msg-other { align-self: flex-start; }
     .chat-msg-meta { font-size: .75rem; color: #64748b; margin-bottom: .25rem; }
     .chat-msg-body { white-space: pre-wrap; }
+
+/* Dashboard specific refinements */
+  .dashboard-page .stat-card { border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 2px rgba(16,24,40,.06); }
+  .dashboard-page .stat-title { font-size: 12px; color: #6b7280; }
+  .dashboard-page .stat-value { font-size: 1.1rem; font-weight: 700; color: #111827; }
+
+  .dashboard-page .metric-icon { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
+  .dashboard-page .metric-icon.icon-faults { background: #eef4ff; color: #1f5cff; }
+  .dashboard-page .metric-icon.icon-customers { background: #e8fff2; color: #16a34a; }
+  .dashboard-page .metric-icon.icon-links { background: #fff7ed; color: #f97316; }
+  .dashboard-page .metric-icon.icon-open { background: #f1f5f9; color: #0ea5e9; }
+
+  .dashboard-page .toolbar-card { border: 1px solid #e5e7eb; background:#fff; box-shadow: 0 1px 2px rgba(16,24,40,.06); }
+  .dashboard-page .toolbar-card .btn { font-weight: 500; }
+  .dashboard-page .toolbar-card .btn.btn-outline-secondary { border-color:#e5e7eb; color:#334155; }
+  .dashboard-page .toolbar-card .btn.btn-outline-secondary:hover { background:#f8fafc; }
+  .dashboard-page .toolbar-card .btn.btn-primary { background:#1f5cff; border-color:#1f5cff; }
+
+  .dashboard-page .card .card-header { background:#f8fafc; border-bottom:1px solid #eef2f7; }
+  .dashboard-page .card .card-title { font-size:13px; }
+
+  .dashboard-page .card-tools .form-control-sm { border-radius:9999px; }
+  .dashboard-page .card-tools select.form-control-sm { border-radius:9999px; padding-left:10px; padding-right:10px; }
+
+  .dashboard-page .table { border-color:#eef2f7; }
+  .dashboard-page .table thead th { color: #6b7280; font-size: 11px; letter-spacing: .02em; border-bottom:1px solid #eef2f7; }
+  .dashboard-page .table tbody tr:hover { background-color: #f8fafc; }
+  .dashboard-page .table tbody td { border-top: 1px solid #f1f5f9; }
+  .dashboard-page .table .no-data td { text-align: center; padding: 16px; }
 </style>
