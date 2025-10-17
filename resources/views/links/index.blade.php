@@ -10,13 +10,13 @@ links
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">{{_('Links')}}</h3>
+        <h3 class="card-title">Links</h3>
         <div class="card-tools">
             @can('link-create')
                 <button type="button" class="btn btn-primary btn-sm" 
                         data-bs-toggle="modal" 
                         data-bs-target="#createLinkModal">
-                    <i class="fas fa-plus-circle"></i> {{ _('Create Link') }}
+                    <i class="fas fa-plus-circle"></i> Create Link
                 </button>
             @endcan
         </div>
@@ -128,3 +128,4 @@ links
 
 
                           
+

@@ -13,7 +13,7 @@ Assess Faults
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">{{_('Assess Faults')}}</h3>
+        <h3 class="card-title">Assess Faults</h3>
         <div class="card-tools">
 
         </div>
@@ -109,3 +109,4 @@ Assess Faults
  
 </section>
 @endsection
+

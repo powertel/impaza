@@ -11,10 +11,10 @@ Locations
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">{{_('Locations')}}</h3>
+        <h3 class="card-title">Locations</h3>
         <div class="card-tools">
             @can('location-create')
-            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#locationCreateModal"><i class="fas fa-plus-circle"></i>{{_('Create location')}} </button>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#locationCreateModal"><i class="fas fa-plus-circle"></i>Create location </button>
             @endcan
         </div>
     </div>
@@ -84,3 +84,4 @@ Locations
 @section('scripts')
     @include('partials.scripts')
 @endsection
+

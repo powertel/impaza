@@ -11,7 +11,7 @@ Assign
     <div class="col d-flex justify-content-center">
         <div class="card  w-50">
             <div class="card-header">
-                <h3 class="card-title">{{_('Re-Assign')}}</h3>
+                <h3 class="card-title">Re-Assign</h3>
             </div>
             <div class="card-body">
                 <form action="{{ route('assign.update', $fault->id ) }}" method="POST">

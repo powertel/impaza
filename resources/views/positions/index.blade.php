@@ -10,10 +10,10 @@ Positions
 <section class="content" >
 <div class="card" >
     <div class="card-header">
-        <h3 class="card-title">{{_('Positions')}}</h3>
+        <h3 class="card-title">Positions</h3>
         <div class="card-tools">
             @can('department-create')
-            <button  class="btn btn-primary btn-sm" href="#" data-bs-toggle="modal" data-bs-target="#positionCreateModal"><i class="fas fa-plus-circle"></i>{{_('Create New Position')}} </button>
+            <button  class="btn btn-primary btn-sm" href="#" data-bs-toggle="modal" data-bs-target="#positionCreateModal"><i class="fas fa-plus-circle"></i>Create New Position </button>
             @endcan
         </div>
     </div>
@@ -76,3 +76,4 @@ Positions
     @include('partials.department')
 
 @endsection
+

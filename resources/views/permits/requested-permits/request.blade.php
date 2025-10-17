@@ -9,7 +9,7 @@ Request Permit
     <div class="col d-flex justify-content-center">
         <div class="card  w-50">
             <div class="card-header">
-                <h3 class="card-title">{{_('Request Permit')}}</h3>
+                <h3 class="card-title">Request Permit</h3>
             </div>
             <div class="card-body">
                 <form>
@@ -81,7 +81,7 @@ Request Permit
     <div class="col d-flex justify-content-center">
         <div class="card  w-50">
             <div class="card-header">
-                <h3 class="card-title">{{_('Remarks')}}</h3>
+                <h3 class="card-title">Remarks</h3>
             </div>
             <div class="card-body" style="height: 250px; overflow-y: auto">
                 @foreach($remarks as $remark)

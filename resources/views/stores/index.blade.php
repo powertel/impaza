@@ -11,7 +11,7 @@ Stores
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">{{_('Stores')}}</h3>
+        <h3 class="card-title">Stores</h3>
         <div class="card-tools">
             @can('material')
                 <a  class="btn btn-primary btn-sm" href="{{ route('material') }}"><i class="fas fa-plus-circle"></i> </a>
@@ -76,3 +76,4 @@ Stores
 </div>
 </section>
 @endsection
+

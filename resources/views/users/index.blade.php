@@ -11,10 +11,10 @@ Users
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">{{_('Users')}}</h3>
+        <h3 class="card-title">Users</h3>
         <div class="card-tools">
             @can('user-create')
-              <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createUserModal"><i class="fas fa-plus-circle"></i>{{_('Create User')}}</button>
+              <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createUserModal"><i class="fas fa-plus-circle"></i>Create User</button>
             @endcan
 
         </div>
@@ -115,3 +115,4 @@ Users
 @section('scripts')
 @include('partials.users')
 @endsection
+

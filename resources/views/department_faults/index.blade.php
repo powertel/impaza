@@ -11,7 +11,7 @@ Department Faults
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">{{_('Department Faults')}}</h3>
+        <h3 class="card-title">Department Faults</h3>
         <div class="card-tools">
         </div>
     </div>
@@ -92,3 +92,4 @@ Department Faults
       window.currentUserName = @json(optional(auth()->user())->name);
     </script>
 @endsection
+

@@ -9,10 +9,10 @@ RFO
 <section class="content" >
 <div class="card" >
     <div class="card-header">
-        <h3 class="card-title">{{_('Reasons For Outage')}}</h3>
+        <h3 class="card-title">Reasons For Outage</h3>
         <div class="card-tools">
             @can('department-create')
-            <a  class="btn btn-primary btn-sm" href="{{ route('rfos.create') }}"><i class="fas fa-plus-circle"></i>{{_('Create New RFO')}} </a>
+            <a  class="btn btn-primary btn-sm" href="{{ route('rfos.create') }}"><i class="fas fa-plus-circle"></i>Create New RFO </a>
             @endcan
         </div>
     </div>
@@ -69,3 +69,4 @@ RFO
 </section>
 
 @endsection
+

@@ -7,7 +7,7 @@
         <div class="card w-50">
             <div class="card-header">
                 <h3 class="card-title">
-                    {{_('Update Department')}}
+                    Update Department
                 </h3>
             </div>
 
@@ -47,3 +47,4 @@
 </section>
 
 @endsection
+

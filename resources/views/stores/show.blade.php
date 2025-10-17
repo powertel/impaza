@@ -11,7 +11,7 @@ Stores
         <div class="card w-100">
             <div class="card-header">
                 <h3 class="card-title">
-                  {{_('Requested Materials')}}
+                  Requested Materials
                 </h3>
             </div>
             <div class="card-body">
@@ -58,3 +58,4 @@ Stores
 @section('scripts')
 
 @endsection
+

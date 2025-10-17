@@ -98,3 +98,4 @@ $.when( ajax1 , ajax2  ).done(function( a1, a2 ) {
        console.log(langKeys);
 });
 </script>
+

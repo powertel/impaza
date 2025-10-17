@@ -12,10 +12,10 @@ Cities
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">{{_('Cities')}}</h3>
+        <h3 class="card-title">Cities</h3>
         <div class="card-tools">
             @can('city-create')
-            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#cityCreateModal"><i class="fas fa-plus-circle"></i>{{_('Create City/Town(s)')}} </button>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#cityCreateModal"><i class="fas fa-plus-circle"></i>Create City/Town(s) </button>
             @endcan
         </div>
     </div>
@@ -78,4 +78,5 @@ Cities
  
 </section>
 @endsection
+
 
