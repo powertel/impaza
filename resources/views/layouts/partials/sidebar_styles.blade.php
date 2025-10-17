@@ -178,8 +178,10 @@ document.addEventListener('DOMContentLoaded', function () {
 <style>
 /* Override: make only the nav scroll, keep logo/user panel pinned */
 .main-sidebar .sidebar { overflow: hidden !important; }
-.main-sidebar .sidebar nav { flex: 1 1 auto !important; overflow-y: auto !important; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; scroll-behavior: auto !important; }
-.main-sidebar .sidebar nav::-webkit-scrollbar { width: 8px; }
+.main-sidebar .sidebar nav { flex: 1 1 auto !important; overflow-y: auto !important; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; scroll-behavior: auto !important; scrollbar-width: thin; scrollbar-color: #e9edf5 transparent; }
+.main-sidebar .sidebar nav::-webkit-scrollbar { width: 8px; height: 8px; }
+.main-sidebar .sidebar nav::-webkit-scrollbar-thumb { background: #e9edf5; border-radius: 8px; }
+.main-sidebar .sidebar nav::-webkit-scrollbar-track { background: transparent; }
 .main-sidebar .sidebar nav::-webkit-scrollbar-thumb { background: #e0e6ef; border-radius: 8px; }
 .main-sidebar .sidebar nav::-webkit-scrollbar-track { background: transparent; }
 </style>
