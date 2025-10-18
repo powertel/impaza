@@ -1,12 +1,17 @@
 window._ = require("lodash");
 
 try {
-    window.Popper = require("popper.js").default;
+    // jQuery remains available for AdminLTE and other plugins
     window.$ = window.jQuery = require("jquery");
 
-    require("bootstrap");
+    // Bootstrap 5 bundle (includes @popperjs/core v2)
+    window.bootstrap = require("bootstrap/dist/js/bootstrap.bundle");
+
+    // AdminLTE still loads (layout helpers); avoid BS4-specific plugins
     require("admin-lte");
-    require("datatables.net-bs4")(window, $);
+
+    // DataTables styling for Bootstrap 5 (if installed)
+    try { require("datatables.net-bs5")(window, $); } catch (_) {}
 } catch (e) {}
 
 /**
