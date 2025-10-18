@@ -65,7 +65,7 @@
             <li class="nav-item">
               <a href="{{ route('rfos.index') }}" class="nav-link {{ request()->routeIs('rfos.*') ? 'active' : '' }}">
                 <i class="nav-icon fas fa-list-alt"></i>
-                <p>Reasons For Outage</p>
+                <p>RFO</p>
               </a>
             </li>
             @endcan
