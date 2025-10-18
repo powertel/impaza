@@ -20,7 +20,7 @@
               </a>
             </li>
 
-            @canany(['fault-list','my-fault-list','assigned-fault-list','assessement-fault-list','chief-tech-clear-faults-list','noc-clear-faults-list','department-faults-list'])
+            @canany(['fault-list','my-fault-list','assigned-fault-list','assessment-fault-list','chief-tech-clear-faults-list','noc-clear-faults-list','department-faults-list'])
               <li class="nav-header">Faults</li>
             @endcanany
             @can('fault-list')
@@ -55,19 +55,21 @@
               </a>
             </li>
             @endcan
-            @can('assessement-fault-list')
+            @can('assessment-fault-list')
             <li class="nav-item">
               <a class="nav-link {{ request()->routeIs('assessments.*') ? 'active' : '' }}" href="{{ route('assessments.index') }}">
                 <i class="nav-icon fas fa-clipboard-check"></i>
                 <p>Assess</p>
               </a>
             </li>
+
             <li class="nav-item">
               <a href="{{ route('rfos.index') }}" class="nav-link {{ request()->routeIs('rfos.*') ? 'active' : '' }}">
                 <i class="nav-icon fas fa-list-alt"></i>
                 <p>RFO</p>
               </a>
             </li>
+
             @endcan
             @can('chief-tech-clear-faults-list')
             <li class="nav-item">

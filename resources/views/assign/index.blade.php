@@ -9,7 +9,6 @@ Assign Faults
 @section('content')
 
 <section class="content">
-
     <div class="card">
 
         <!--Card Header-->

@@ -62,7 +62,7 @@ Assess Faults
                             </span>
                         </td>
                         <td class="text-nowrap">
-                            <div class="btn-group btn-group-sm gap-2" role="group" aria-label="Actions">
+                            <div class="btn-group btn-group gap-2" role="group" aria-label="Actions">
                                 @can('fault-assessment')
                                 <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#assessFaultModal-{{ $fault->id }}">
                                   <i class="fas fa-clipboard-check me-1"></i> Assess
@@ -75,8 +75,8 @@ Assess Faults
                                 </button>
                                 @endcan
 
-                                <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
-                                   <i class="fas fa-eye me-1"></i> View
+                                <button class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                                    <i class="fas fa-eye me-1"></i>View
                                 </button>
                             </div>
                         </td>
@@ -90,16 +90,7 @@ Assess Faults
                     'sections' => $sections,
                     'confirmedRFO' => $confirmedRFO
                 ])
-                @include('faults.edit', [
-                    'fault' => $fault,
-                    'customers' => $customers,
-                    'cities' => $cities,
-                    'suburbs' => $suburbs,
-                    'pops' => $pops,
-                    'links' => $links,
-                    'accountManagers' => $accountManagers,
-                    'suspectedRFO' => $suspectedRFO
-                ])
+                    @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
             @endforeach
             <div id="assessmentsPager" class="mt-2"></div>
         </div>

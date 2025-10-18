@@ -3,7 +3,9 @@
 @section('title')
 RFO
 @endsection
+
 @include('partials.css')
+
 @section('content')
 
 <section class="content" >
@@ -11,9 +13,9 @@ RFO
     <div class="card-header">
         <h3 class="card-title">Reasons For Outage</h3>
         <div class="card-tools">
-            @can('department-create')
+           
             <a  class="btn btn-primary btn-sm" href="{{ route('rfos.create') }}"><i class="fas fa-plus-circle"></i>Create New RFO </a>
-            @endcan
+          
         </div>
     </div>
     <!-- /.card-header -->
@@ -49,13 +51,14 @@ RFO
                         <td>{{++$i}}</td>
                         <td>{{ $rfo->RFO}}</td>
                         <td>
-                                @can('department-edit')
-                                <a href="{{ route('rfos.edit',$rfo->id) }}" class="btn btn-sm btn-outline-primary"  >
-                                    <i class="fas fa-edit me-1"></i>Edit
-                                </a>
-                                @endcan
+                                
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editRfoModal{{ $rfo->id }}">
+                                <i class="fas fa-edit me-1"></i>Edit
+                            </button>
+      
                         </td>
                     </tr>
+                    @include('RFO.edit', ['rfo' => $rfo])
                     @endforeach
                 </tbody>
             </table>

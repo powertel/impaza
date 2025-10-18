@@ -1,50 +1,25 @@
-@extends('layouts.admin')
-@include('partials.css')
-@section('content')
-
-<section class="content">
-    <div class="col d-flex justify-content-center">
-        <div class="card w-50">
-            <div class="card-header">
-                <h3 class="card-title">
-                    Update Department
-                </h3>
-            </div>
-
-            <div class="card-body">
-                <form  action="{{ route('rfos.update',$rfo->id) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-        
-                    <div class="form-group row">
-                        <label for="RFO" class="col-sm-3 col-form-label">RFO</label>
-                        <div class="col-sm-9">
-                            <input type="text"  class="form-control" name="RFO" value="{{ $rfo->RFO }}">
-                            @error ('RFO')
-
-                                <div class="alert-danger">
-                                     {{$message }}
-                                </div>                                
-                              
-
-                            @enderror
-                        </div>
-
+<!-- Modal -->
+<div class="modal fade" id="editRfoModal{{ $rfo->id }}" tabindex="-1" aria-labelledby="editRfoModalLabel{{ $rfo->id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ route('rfos.update', $rfo->id) }}" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editRfoModalLabel{{ $rfo->id }}">Edit Reason For Outage</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="RFO{{ $rfo->id }}" class="form-label">Reason For Outage</label>
+                        <input type="text" class="form-control" id="RFO{{ $rfo->id }}" name="RFO" value="{{ $rfo->RFO }}" required>
                     </div>
-                    
-                    <div class="card-footer">
-
-                        <button type="submit" class="btn btn-success btn-sm">{{ __('Save') }}</button>
-                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('rfos.index') }}">{{ __('Cancel') }}</a>
-
-                        
-
-                    </div>
-                </form> 
-            </div> 
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
         </div>
     </div>
-</section>
-
-@endsection
-
+</div>
