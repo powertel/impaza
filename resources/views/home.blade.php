@@ -4,12 +4,10 @@
 Dashboard
 @endsection
 
-@section('pageName')
-Dashboard
-@endsection
+@include('partials.css')
 
 @section('content')
-<section class="content dashboard-page">
+<section class="content">
   <div class="row">
     <!-- Stat cards -->
     <div class="col-xl-3 col-md-6 mb-3">
@@ -149,4 +147,5 @@ Dashboard
 @section('scripts')
 @include('partials.scripts')
 @endsection
+
 
