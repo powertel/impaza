@@ -25,6 +25,10 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
 RUN pecl install redis \
     && docker-php-ext-enable redis
 
+# Enable OPcache for performance
+RUN docker-php-ext-install opcache
+COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
@@ -32,5 +36,11 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
 WORKDIR /var/www/html
+
+# Copy application source code (ensure artisan exists before composer scripts)
+COPY . ./
+
+# Install PHP dependencies inside the image for baked-code workflow
+RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-interaction --no-progress --prefer-dist
 
 CMD ["php-fpm"]

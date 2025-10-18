@@ -121,7 +121,7 @@ class AssignController extends Controller
                 'cities.city as city','cities.region as region','faults.city_id as city_id','suburbs.suburb as suburb','pops.pop as pop','faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at',
                 'reasons_for_outages.RFO as RFO']);
 
-        // Remarks grouped by fault_id
+        // Collect remarks grouped by fault_id for conversation modal
         $faultIds = $faults->pluck('id');
         $remarksRecords = DB::table('remarks')
             ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')

@@ -4,7 +4,7 @@
 Assign Faults
 @endsection
 
-@include('partials.css')
+
 
 @section('content')
 
@@ -14,7 +14,7 @@ Assign Faults
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">Assigned Faults</h3>
+        <h3 class="card-title">Assig Faults</h3>
         <div class="card-tools">
             
         </div>
@@ -74,7 +74,9 @@ Assign Faults
                                 @can('assign-fault')
                                     <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#assignModal-{{ $fault->id }}"><i class="fas fa-user-tag"></i> Assign</button>
                                 @endcan
-                                <button class="btn  btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}"><i class="fas fa-eye"></i> View</button>
+                                <button class="btn  btn-outline-success" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                                    <i class="fas fa-eye me-1"></i>View
+                                </button>
                             </td>
                         </tr>
                     @endforeach
@@ -84,9 +86,8 @@ Assign Faults
         </div>   
         @foreach($faults as $fault)
             @include('assign.assign_modal', ['fault' => $fault, 'technicians' => ($techniciansByFault[$fault->id] ?? $technicians)])
-            @include('faults.show', ['fault' => $fault, 'remarks' => $remarksByFault[$fault->id] ?? collect([])])
+            @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
         @endforeach
-
 
 
     </div>
