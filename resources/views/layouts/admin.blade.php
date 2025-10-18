@@ -237,6 +237,8 @@
 
         @section('scripts')
         @endsection
+
+        @include('partials.idle_logout')
 </body>
 
 </html>

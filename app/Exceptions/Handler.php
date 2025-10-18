@@ -3,6 +3,8 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Session\TokenMismatchException;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -44,7 +46,19 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->reportable(function (Throwable $e) {
-            //
+            // keep default reporting
+        });
+
+        $this->renderable(function (TokenMismatchException $e, $request) {
+            Log::warning('CSRF token mismatch (419)', [
+                'path' => $request->path(),
+                'url' => $request->fullUrl(),
+                'method' => $request->method(),
+                'origin' => $request->getSchemeAndHttpHost(),
+                'user_id' => optional($request->user())->id,
+                'has_token' => $request->has('_token'),
+            ]);
+            // Let Laravel render the default 419 response
         });
     }
 }
