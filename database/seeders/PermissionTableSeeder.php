@@ -69,7 +69,7 @@ class PermissionTableSeeder extends Seeder
             'my-fault-list',
             'department-faults-list',
             'assigned-fault-list',
-            'assessement-fault-list',
+            'assessment-fault-list',
             'noc-clear-faults-list',
             'chief-tech-clear-faults-list',
             're-assign-fault',

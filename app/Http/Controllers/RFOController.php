@@ -10,10 +10,10 @@ class RFOController extends Controller
 {
     function __construct()
     {
-         $this->middleware('permission:department-list|department-create|department-edit|department-delete', ['only' => ['index','store']]);
-         $this->middleware('permission:department-create', ['only' => ['create','store']]);
-         $this->middleware('permission:department-edit', ['only' => ['edit','update']]);
-         $this->middleware('permission:department-delete', ['only' => ['destroy']]);
+         $this->middleware('permission:assessment-fault-list|assessment-fault-create|assessment-fault-edit|assessment-fault-delete', ['only' => ['index','store']]);
+         $this->middleware('permission:assessment-fault-create', ['only' => ['create','store']]);
+         $this->middleware('permission:assessment-fault-edit', ['only' => ['edit','update']]);
+         $this->middleware('permission:assessment-fault-delete', ['only' => ['destroy']]);
     }
     /**
      * Display a listing of the resource.
@@ -75,7 +75,7 @@ class RFOController extends Controller
                 DB::rollback();
             }
             return redirect()->route('rfos.index')
-            ->with('success','Department created successfully.');
+            ->with('success','assessment-fault created successfully.');
         }
 
         catch(Exception $ex)
@@ -115,17 +115,27 @@ class RFOController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request,ReasonsForOutage $rfo)
+    public function update(Request $request, ReasonsForOutage $rfo)
     {
         $request->validate([
-            'RFO' => 'required|string|unique:reasons_for_outages',
-            
+            'RFO' => 'required|string|unique:reasons_for_outages,RFO,'.$rfo->id,
         ]);
-      
-        $rfo->update($request->all());
-      
-        return redirect()->route('rfos.index')
-                        ->with('success','Department Updated');
+
+        DB::beginTransaction();
+        try {
+            $rfo->update([
+                'RFO' => $request->input('RFO'),
+            ]);
+
+            DB::commit();
+            return redirect()->route('rfos.index')
+                ->with('success','assessment-fault updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollback();
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'Failed to update assessment-fault.']);
+        }
     }
 
 

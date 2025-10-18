@@ -52,17 +52,24 @@ class AssessmentController extends Controller
 
 
         $faults = DB::table('faults')
+            ->leftjoin('fault_section','faults.id','=','fault_section.fault_id')
+            ->leftjoin('users','faults.assignedTo','=','users.id')
+            ->leftjoin('sections','fault_section.section_id','=','sections.id')
             ->leftjoin('customers','faults.customer_id','=','customers.id')
-            ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
             ->leftjoin('links','faults.link_id','=','links.id')
-            ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
+            ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
             ->leftjoin('users as account_manager_users','account_managers.user_id','=','account_manager_users.id')
             ->leftjoin('statuses','faults.status_id','=','statuses.id')
+            ->leftjoin('cities','faults.city_id','=','cities.id')
+            ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
+            ->leftjoin('pops','faults.pop_id','=','pops.id')
+            ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
             ->orderBy('faults.created_at', 'desc')
             ->where('faults.status_id','=',1)
-            ->get(['faults.id','customers.customer','faults.contactName','reasons_for_outages.RFO','faults.phoneNumber','faults.contactEmail','faults.address',
-            'account_manager_users.name as accountManager','links.link','statuses.description'
-            ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at']);
+            ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
+                'account_manager_users.name as accountManager','faults.suspectedRfo_id','links.link','statuses.description','users.name','faults.status_id as status_id',
+                'cities.city as city','cities.region as region','faults.city_id as city_id','suburbs.suburb as suburb','pops.pop as pop','faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at',
+                'reasons_for_outages.RFO as RFO']);
         // Datasets required for modal-based actions on the assessments page
         $sections = Section::all();
         $confirmedRFO = ReasonsForOutage::all();
@@ -76,7 +83,25 @@ class AssessmentController extends Controller
         $accountManagers = AccountManager::all();
         $suspectedRFO = ReasonsForOutage::all();
 
-        return view('assessments.index',compact('faults','sections','confirmedRFO','customers','cities','suburbs','pops','links','accountManagers','suspectedRFO'))
+        // Collect remarks grouped by fault_id for conversation modal
+        $faultIds = $faults->pluck('id');
+        $remarksRecords = DB::table('remarks')
+            ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
+            ->leftjoin('users','remarks.user_id','=','users.id')
+            ->whereIn('remarks.fault_id', $faultIds)
+            ->orderBy('remarks.created_at', 'desc')
+            ->get([
+                'remarks.id',
+                'remarks.fault_id',
+                'remarks.created_at',
+                'remarks.remark',
+                'remarks.file_path',
+                'users.name',
+                'remark_activities.activity'
+            ]);
+        $remarksByFault = $remarksRecords->groupBy('fault_id');
+
+        return view('assessments.index',compact('faults','sections','confirmedRFO','remarksByFault'))
         ->with('i');
 
 
@@ -213,11 +238,13 @@ class AssessmentController extends Controller
         'account_managers.accountManager','faults.accountManager_id','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo_id','faults.link_id','links.link'
         ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
         ->first();
+
         $remarks= DB::table('remarks')
         ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
         ->leftjoin('users','remarks.user_id','=','users.id')
         ->where('remarks.fault_id','=',$id)
         ->get(['remarks.id','remarks.created_at','remarks.remark','remarks.file_path','users.name','remark_activities.activity']);
+
         $cities = City::all();
         $customers = Customer::all();
         $suburbs = Suburb::all();
