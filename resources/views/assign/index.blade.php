@@ -82,16 +82,16 @@ Assigned Faults
                                 @endcan
                                 @can('re-assign-fault')
                                 @if ((int)($fault->status_id ?? 0) === 3)
-                                <button type="button" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#reassignModal-{{ $fault->id }}">
+                                <button type="button" class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#reassignModal-{{ $fault->id }}">
                                     <i class="fas fa-save me-1"></i>Re-Assign
                                 </button>
                                 @else
-                                <button class="btn btn-sm btn-outline-secondary" disabled title="Re-assignment locked after initial stage" style="padding:0px 2px;">
+                                <button class="btn btn-outline-secondary" disabled title="Re-assignment locked after initial stage" >
                                     <i class="fas fa-lock me-1"></i>Re-Assign
                                 </button>
                                 @endif
                                 @endcan
-                                <button class="btn btn-sm btn-outline-success" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                                <button class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                     <i class="fas fa-eye me-1"></i>View
                                 </button>
                             </div>
