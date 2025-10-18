@@ -1,6 +1,6 @@
 @can('assign-fault')
 <div class="modal fade" id="assignModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="assignModalLabel-{{ $fault->id }}" aria-hidden="true">
-  <div class="modal-dialog modal-md">
+  <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="assignModalLabel-{{ $fault->id }}">Assign Fault</h5>
@@ -41,29 +41,3 @@
   </div>
 </div>
 @endcan
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    var modalEl = document.getElementById('assignModal-{{ $fault->id }}');
-    if (!modalEl) return;
-    var form = modalEl.querySelector('form');
-    var submitBtn = modalEl.querySelector('button[type="submit"]');
-    if (!form || !submitBtn) return;
-    // Fallback: ensure clicking Assign actually submits the form
-    submitBtn.addEventListener('click', function(e){
-      // If native validation fails, show messages and stop
-      if (!form.checkValidity()) {
-        e.preventDefault();
-        form.reportValidity();
-        return;
-      }
-      // Force a programmatic submit to bypass any unexpected interceptors
-      e.preventDefault();
-      if (typeof form.requestSubmit === 'function') {
-        form.requestSubmit();
-      } else {
-        form.submit();
-      }
-    });
-  });
-</script>
