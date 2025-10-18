@@ -169,14 +169,3 @@
     </div>
     </div>
 </div>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  var modalEl = document.getElementById('showFaultModal-{{ $fault->id }}');
-  if (modalEl) {
-    modalEl.addEventListener('shown.bs.modal', function () {
-      var scroller = document.getElementById('remarksScroller-{{ $fault->id }}');
-      if (scroller) { scroller.scrollTop = scroller.scrollHeight; }
-    });
-  }
-});
-</script>
