@@ -93,6 +93,8 @@ Assign Faults
     </div>
     <!-- /.card-body -->
 </div>
+
+
  
  </section>
 @endsection

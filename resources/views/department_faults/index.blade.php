@@ -59,7 +59,7 @@ Department Faults
                             </span>
                         </td>
                         <td>
-                            <button class="btn btn-sm btn-outline-success" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                            <button class="btn btn-outline-success" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                 <i class="fas fa-eye me-1"></i>View
                             </button>
                         </td>

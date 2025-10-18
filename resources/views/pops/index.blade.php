@@ -55,12 +55,12 @@ Pops
                         <td>{{ $pop->pop}}</td>
                         <td>
                             @can('pop-edit')
-                            <a href="{{ route('pops.edit',$pop->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
+                            <a href="{{ route('pops.edit',$pop->id) }}" class="btn btn-outline-primary me-1"  >
                                 <i class="fas fa-edit me-1"></i>Edit
                             </a> 
                             @endcan
                             
-                            <button type="button" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#popViewModal{{ $pop->id }}">
+                            <button type="button" class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#popViewModal{{ $pop->id }}">
                                 <i class="fas fa-eye me-1"></i>View
                             </button>
                         </td>

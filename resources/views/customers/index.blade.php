@@ -16,7 +16,7 @@ Customers
         <h3 class="card-title">Customers</h3>
         <div class="card-tools">
             @can('customer-create')
-            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#customerCreateModal"><i class="fas fa-plus-circle"></i> Create Customer(s) </button>
+            <button class="btn btn-primary " data-bs-toggle="modal" data-bs-target="#customerCreateModal"><i class="fas fa-plus-circle"></i> Create Customer(s) </button>
             @endcan            
         </div>
     </div>
@@ -56,16 +56,16 @@ Customers
                         <td>{{ $customer->accountManager }}</td>
                         <td>{{ $customer->account_number }}</td>
                         <td>
-                            <button type="button" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#customerViewModal{{ $customer->id }}">
+                            <button type="button" class="btn  btn-outline-success"  data-bs-toggle="modal" data-bs-target="#customerViewModal{{ $customer->id }}">
                                 <i class="fas fa-eye me-1"></i>View
                             </button>
                             @can('customer-edit')
-                            <button type="button" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#customerEditModal{{ $customer->id }}">
+                            <button type="button" class="btn  btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#customerEditModal{{ $customer->id }}">
                                 <i class="fas fa-edit me-1"></i>Edit
                             </button>
                             @endcan
                             @can('customer-delete')
-                            <button type="button" class="btn btn-outline-danger btn-sm" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#customerDeleteModal{{ $customer->id }}">
+                            <button type="button" class="btn btn-outline-danger "  data-bs-toggle="modal" data-bs-target="#customerDeleteModal{{ $customer->id }}">
                                 <i class="fas fa-trash me-1"></i>Delete
                             </button> 
                             @endcan

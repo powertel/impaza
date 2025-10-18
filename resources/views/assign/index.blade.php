@@ -72,26 +72,26 @@ Assigned Faults
                         </td>
                         <td>{{ $fault->name ?? '—' }}</td>
                         <td>
-                            <div class="btn-group btn-group-sm gap-2" role="group" aria-label="Actions">
+                            <div class="btn-group btn-group gap-2" role="group" aria-label="Actions">
                                 @can('assign-fault')
                                     @if ((int)($fault->status_id ?? 0) === 2 && empty($fault->assignedTo))
-                                    <button type="button" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#assignModal-{{ $fault->id }}">
+                                    <button type="button" class="btn btn-sm btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#assignModal-{{ $fault->id }}">
                                         <i class="fas fa-user-plus me-1"></i>Assign
                                     </button>
                                     @endif
                                 @endcan
                                 @can('re-assign-fault')
                                 @if ((int)($fault->status_id ?? 0) === 3)
-                                <button type="button" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#reassignModal-{{ $fault->id }}">
+                                <button type="button" class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#reassignModal-{{ $fault->id }}">
                                     <i class="fas fa-save me-1"></i>Re-Assign
                                 </button>
                                 @else
-                                <button class="btn btn-sm btn-outline-secondary" disabled title="Re-assignment locked after initial stage" style="padding:0px 2px;">
+                                <button class="btn btn-outline-secondary" disabled title="Re-assignment locked after initial stage" >
                                     <i class="fas fa-lock me-1"></i>Re-Assign
                                 </button>
                                 @endif
                                 @endcan
-                                <button class="btn btn-sm btn-outline-success" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                                <button class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                     <i class="fas fa-eye me-1"></i>View
                                 </button>
                             </div>

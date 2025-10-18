@@ -58,11 +58,11 @@ Locations
                         <td>{{ $location->suburb}}</td>
                         <td>
                             @can('location-edit')
-                            <button class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#locationEditModal{{ $location->id }}">
+                            <button class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#locationEditModal{{ $location->id }}">
                                <i class="fas fa-edit me-1"></i> Edit
                             </button>
                             @endcan
-                            <button class="btn btn-sm btn-outline-success" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#locationViewModal{{ $location->id }}">
+                            <button class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#locationViewModal{{ $location->id }}">
                                <i class="fas fa-eye me-1"></i> View
                             </button>
                         </td>

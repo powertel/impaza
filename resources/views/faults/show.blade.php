@@ -1,6 +1,6 @@
 <!-- Show Fault Modal (Modernized) -->
 <div class="modal custom-modal fade" id="showFaultModal-{{ $fault->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="showFaultModalLabel-{{ $fault->id }}" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content rounded-4 border-0 shadow-lg">
             <div class="modal-header border-0">
                 <div class="d-flex align-items-center">

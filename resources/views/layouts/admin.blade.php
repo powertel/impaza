@@ -140,7 +140,13 @@
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/faults-modals.js') }}"></script>
 
-        
+
+        @yield('scripts')
+
+        @include('partials.scripts')
+        @include('layouts.partials.pagination')
+
+        @section('scripts')
         <script>
             window.addEventListener('load', function()
                 {
@@ -228,15 +234,6 @@
             });
 
         </script>
-
-
-
-        @yield('scripts')
-
-        @include('partials.scripts')
-        @include('layouts.partials.pagination')
-
-        @section('scripts')
         @endsection
 
         @include('partials.idle_logout')
