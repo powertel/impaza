@@ -73,11 +73,11 @@ Users
 
                         <td>
                             <form action="{{ route('users.destroy',$user->id) }}" method="POST">
-                                <button type="button" class="btn btn-outline-success btn-sm" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#showUserModal-{{ $user->id }}">
+                                <button type="button" class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showUserModal-{{ $user->id }}">
                                 <i class="fas fa-eye me-1"></i> View
                                 </button>
                                 @can('user-edit')
-                                <button type="button" class="btn btn-outline-primary btn-sm" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#editUserModal-{{ $user->id }}">
+                                <button type="button" class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#editUserModal-{{ $user->id }}">
                                 <i class="fas fa-edit me-1"></i>  Edit
                                 </button>
                                 @endcan

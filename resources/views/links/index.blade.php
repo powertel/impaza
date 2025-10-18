@@ -65,13 +65,13 @@ links
                         <td>
                             <form name="theForm" action="{{ route('links.destroy',$link->id) }}" method="POST" class="d-inline">
                                 @can('link-list')
-                                <button type="button" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" 
+                                <button type="button" class="btn btn-outline-success"  
                                         data-bs-toggle="modal" data-bs-target="#linkViewModal{{ $link->id }}">
                                     <i class="fas fa-eye me-1"></i>View
                                 </button>
                                 @endcan
                                 @can('link-edit')
-                                <button type="button" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" 
+                                <button type="button" class="btn btn-outline-primary"  
                                         data-bs-toggle="modal" data-bs-target="#linkEditModal{{ $link->id }}">
                                     <i class="fas fa-edit me-1"></i>Edit
                                 </button>
@@ -79,7 +79,7 @@ links
                                 @csrf
                                 @method('DELETE')
                                 @can('link-delete') 
-                                <button type="button" class="btn btn-outline-danger btn-sm show_confirm" data-toggle="tooltip" title='Delete' style="padding:0px 2px;">
+                                <button type="button" class="btn btn-outline-danger show_confirm" data-toggle="tooltip" title='Delete' >
                                     <i class="fas fa-trash me-1"></i>Delete
                                 </button>
                                 @endcan

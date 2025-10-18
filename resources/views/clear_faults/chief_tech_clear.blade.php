@@ -62,11 +62,11 @@ Clear Faults
                         </td>
                         <td>
                             @can('chief-tech-clear-faults-clear')
-                                <button type="button" class="btn btn-sm btn-outline-primary" style="padding:0px 8px;" data-bs-toggle="modal" data-bs-target="#chiefTechClearModal-{{ $fault->id }}">
+                                <button type="button" class="btn btn-outline-primary" style="padding:0px 8px;" data-bs-toggle="modal" data-bs-target="#chiefTechClearModal-{{ $fault->id }}">
                                     <i class="fas fa-save me-1"></i> Clear
                                 </button>
                             @endcan
-                            <button type="button" class="btn btn-sm btn-outline-success" style="padding:0px 8px;" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                            <button type="button" class="btn btn-outline-success" style="padding:0px 8px;" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                 <i class="fas fa-eye me-1"></i> View
                             </button>
                         </td>

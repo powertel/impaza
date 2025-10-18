@@ -61,22 +61,22 @@ Finance
                         </td>
                         <td>
                             <form  style="margin-block-end: 0px;" action="{{ route('disconnect',$link->id) }}" method="POST">
-                                <a href="{{ route('finance.show',$link->id) }}" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" >
+                                <a href="{{ route('finance.show',$link->id) }}" class="btn btn-sm btn-outline-success"  >
                                    <i class="fas fa-eye me-1"></i> View
                                 </a>
-                                <a href="{{ route('finance.edit',$link->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
+                                <a href="{{ route('finance.edit',$link->id) }}" class="btn btn-sm btn-outline-primary"  >
                                    <i class="fas fa-edit me-1"></i> Edit
                                 </a>
                                 @if ($link->link_status==='Pending')
                                 @can('finance-link-update')
-                                        <a href="{{ route('finance.edit',$link->id) }}" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" >
+                                        <a href="{{ route('finance.edit',$link->id) }}" class="btn btn-sm btn-outline-primary"  >
                                            <i class="fas fa-save me-1"></i> Approve
                                         </a>
                                 @endcan
                                 @elseif ($link->link_status==='Connected')
                                 @csrf
                                 @method('PUT')
-                                <button type="submit" class="btn btn-outline-danger btn-sm" style="padding:0px 2px;">
+                                <button type="submit" class="btn btn-outline-danger btn-sm" >
                                     <i class="fas fa-pencil me-1"></i>Disconnect
                                 </button>
                                 @elseif ($link->link_status==='Disconnected')
@@ -85,7 +85,7 @@ Finance
                             <form  style="margin-block-end: 0px;" action="{{ route('reconnect',$link->id) }}" method="POST">
                                 @csrf
                                 @method('PUT')
-                                <button type="submit" class="btn btn-outline-priamry btn-sm" style="padding:0px 2px;">
+                                <button type="submit" class="btn btn-outline-priamry btn-sm" >
                                     <i class="fas fa-save me-1"></i>Reconnect
                                 </button>
                             </form> 

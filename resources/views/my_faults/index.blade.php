@@ -65,12 +65,12 @@ My Faults
                         <td>
 
                         @can('noc-clear-faults-clear')
-                            <button class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#nocClearModal-{{ $fault->id }}">
+                            <button class="btn btn-sm btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#nocClearModal-{{ $fault->id }}">
                                 <i class="fas fa-save me-1"></i>Clear
                             </button>
                         @endcan
                         @can('chief-tech-clear-faults-clear')
-                            <button class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#chiefTechClearModal-{{ $fault->id }}">
+                            <button class="btn btn-sm btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#chiefTechClearModal-{{ $fault->id }}">
                                 <i class="fas fa-save me-1"></i>Clear
                             </button>
                         @endcan
@@ -79,21 +79,21 @@ My Faults
                             @if ($fault->description==='Fault is under rectification')
 
                             @can('rectify-fault')
-                                <button class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#rectifyEditModal-{{ $fault->id }}">
+                                <button class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#rectifyEditModal-{{ $fault->id }}">
                                     <i class="fas fa-save me-1"></i>Rectify
                                 </button>
                             @endcan  
                             @can('request-permit')
-                                <button class="btn btn-sm btn-outline-warning" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#requestPermitEditModal-{{ $fault->id }}">
+                                <button class="btn btn-outline-warning"  data-bs-toggle="modal" data-bs-target="#requestPermitEditModal-{{ $fault->id }}">
                                     <i class="fas fa-pencil me-1"></i>Request Permit
                                 </button>
                             @endcan
                             @can('materials')
-                                <button class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#requestMaterialCreateModal-{{ $fault->id }}">
+                                <button class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#requestMaterialCreateModal-{{ $fault->id }}">
                                     <i class="fas fa-pencil me-1"></i>Request Material
                                 </button>
                             @endcan
-                            <button class="btn btn-sm btn-outline-success" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                            <button class="btn  btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                 <i class="fas fa-eye me-1"></i>View
                             </button>
                             @endif

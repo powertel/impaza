@@ -72,10 +72,10 @@ Assigned Faults
                         </td>
                         <td>{{ $fault->name ?? '—' }}</td>
                         <td>
-                            <div class="btn-group btn-group-sm gap-2" role="group" aria-label="Actions">
+                            <div class="btn-group btn-group gap-2" role="group" aria-label="Actions">
                                 @can('assign-fault')
                                     @if ((int)($fault->status_id ?? 0) === 2 && empty($fault->assignedTo))
-                                    <button type="button" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#assignModal-{{ $fault->id }}">
+                                    <button type="button" class="btn btn-sm btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#assignModal-{{ $fault->id }}">
                                         <i class="fas fa-user-plus me-1"></i>Assign
                                     </button>
                                     @endif

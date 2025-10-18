@@ -86,7 +86,7 @@ Faults
                             </span>
                         </td>
                         <td class="text-nowrap">
-                            <div class="btn-group btn-group-sm gap-2" role="group" aria-label="Actions">
+                            <div class="btn-group btn-group gap-2" role="group" aria-label="Actions">
                                 @can('fault-edit')
                                   @if ($fault->status_id == 1)
                                     <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editFaultModal-{{ $fault->id }}">
