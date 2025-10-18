@@ -17,6 +17,7 @@ use App\Models\FaultSection;
 use App\Models\UserStatus;
 use Illuminate\Support\Facades\DB;
 use App\Services\FaultLifecycle;
+use Illuminate\Support\Facades\Log;
 use App\Models\AutoAssignSetting;
 
 class AssignController extends Controller
@@ -24,7 +25,7 @@ class AssignController extends Controller
     function __construct()
     {
         $this->middleware('permission:assigned-fault-list', ['only' => ['index','create']]);
-        $this->middleware('permission:assign-fault', ['only' => ['store']]);
+        $this->middleware('permission:assign-fault', ['only' => ['store','assignFault']]);
         $this->middleware('permission:re-assign-fault', ['only' => ['edit','update']]); 
     }
     /**
@@ -352,6 +353,98 @@ class AssignController extends Controller
 
 
 
+
+public function assignFault(Request $request)
+    {
+        $request->validate([
+            'fault_id' => 'required|integer|exists:faults,id',
+            'assignedTo' => 'required|integer|exists:users,id',
+        ]);
+
+        $faultId = (int)$request->input('fault_id');
+        $techId = (int)$request->input('assignedTo');
+        $userId = optional($request->user())->id;
+
+        $fault = Fault::find($faultId);
+        if (!$fault) {
+            Log::warning('Assign failed: fault not found', [
+                'fault_id' => $faultId,
+                'tech_id' => $techId,
+                'user_id' => $userId,
+                'origin' => $request->getSchemeAndHttpHost(),
+                'path' => $request->path(),
+            ]);
+            return back()->withErrors(['error' => 'Fault not found'])->withInput();
+        }
+
+        // Only allow assigning if the fault is unassigned and in Assessments (status 2)
+        if ((int)$fault->status_id !== 2 || !is_null($fault->assignedTo)) {
+            Log::warning('Assign failed: fault not in assignable state', [
+                'fault_id' => $fault->id,
+                'status_id' => (int)$fault->status_id,
+                'assignedTo_current' => $fault->assignedTo,
+                'tech_id' => $techId,
+                'user_id' => $userId,
+            ]);
+            return back()->withErrors(['error' => 'Fault is not in an assignable state'])->withInput();
+        }
+
+        // Enforce region parity with logged-in user
+        $faultRegion = \DB::table('cities')->where('id', $fault->city_id)->value('region');
+        if ($faultRegion !== auth()->user()->region) {
+            Log::warning('Assign failed: region mismatch', [
+                'fault_id' => $fault->id,
+                'fault_region' => $faultRegion,
+                'user_region' => auth()->user()->region,
+                'user_id' => $userId,
+            ]);
+            return back()->withErrors(['error' => 'You can only assign faults in your region'])->withInput();
+        }
+
+        // Ensure selected technician is in current section/region and eligible
+        $isTechEligible = \DB::table('users')
+            ->leftJoin('user_statuses','users.user_status','=','user_statuses.id')
+            ->where('users.id', '=', $techId)
+            ->where('users.section_id', '=', auth()->user()->section_id)
+            ->where('users.region', '=', auth()->user()->region)
+            ->where('user_statuses.status_name', '=', 'Assignable')
+            ->exists();
+
+        if (!$isTechEligible) {
+            Log::warning('Assign failed: technician not eligible', [
+                'fault_id' => $fault->id,
+                'tech_id' => $techId,
+                'user_section' => auth()->user()->section_id,
+                'user_region' => auth()->user()->region,
+                'user_id' => $userId,
+            ]);
+            return back()->withErrors(['assignedTo' => 'Selected technician is not eligible']).withInput();
+        }
+
+        // Transition to Rectification and assign technician
+        $fault->update([
+            'assignedTo' => $techId,
+            'status_id' => 3,
+        ]);
+
+        FaultLifecycle::recordStatusChange($fault, 3, $userId);
+        FaultLifecycle::startAssignment(
+            $fault,
+            $techId,
+            $userId,
+            FaultLifecycle::isOffHours(),
+            $faultRegion
+        );
+
+        Log::info('Assign success', [
+            'fault_id' => $fault->id,
+            'tech_id' => $techId,
+            'user_id' => $userId,
+            'status_id' => 3,
+        ]);
+
+        return redirect()->back()->with('success', 'Fault Assigned');
+    }
 
 /* 
 public function autoAssign(Request $request, $id)

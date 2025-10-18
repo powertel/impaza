@@ -44,7 +44,9 @@ use App\Http\Controllers\TechnicianConfigController;
 */
 
 Route::get('/', function () {
-    return view('auth.login');
+    return Auth::check()
+        ? redirect()->route('home')
+        : redirect()->route('login');
 });
 
 Auth::routes();
@@ -72,6 +74,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('account_managers', AccountManagerController::class);
     Route::resource('assessments', AssessmentController::class);
     Route::resource('rectify', RectificationController::class);
+    Route::post('assign/perform', [AssignController::class, 'assignFault'])->name('assign.perform');
     Route::resource('assign', AssignController::class);
     Route::resource('chief-tech-clear', ChiefTechClearFaultsController::class);
     Route::resource('noc-clear', NocClearFaultsController::class);
