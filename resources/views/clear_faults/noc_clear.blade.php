@@ -62,14 +62,14 @@ Clear Faults
 
                         <td>
                             @can('noc-clear-faults-clear')
-                                <button type="button" class="btn btn-outline-primary" style="padding:0px 8px;" data-bs-toggle="modal" data-bs-target="#nocClearModal-{{ $fault->id }}">
+                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#nocClearModal-{{ $fault->id }}">
                                     <i class="fas fa-save me-1"></i> Clear
                                 </button>
-                                <button type="button" class="btn  btn-outline-danger" style="padding:0px 8px;" data-bs-toggle="modal" data-bs-target="#nocRevokeModal-{{ $fault->id }}">
+                                <button type="button" class="btn  btn-outline-danger" data-bs-toggle="modal" data-bs-target="#nocRevokeModal-{{ $fault->id }}">
                                     <i class="fas fa-undo me-1"></i> Revoke
                                 </button>
                             @endcan
-                            <button type="button" class="btn  btn-outline-success" style="padding:0px 8px;" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                            <button type="button" class="btn  btn-outline-success" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                 <i class="fas fa-eye me-1"></i> View
                             </button>
                         </td>
