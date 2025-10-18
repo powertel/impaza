@@ -154,7 +154,7 @@
                         <button
                             type="button"
                             class="close"
-                            data-dismiss="modal"
+                            data-bs-dismiss="modal"
                             aria-label="Close"
                         >
                             <span aria-hidden="true">&times;</span>
@@ -269,7 +269,7 @@
                             <button
                                 type="button"
                                 class="btn btn-lg btn-danger"
-                                data-dismiss="modal"
+                                data-bs-dismiss="modal"
                             >
                                 Close
                             </button>
@@ -390,7 +390,7 @@ export default {
             this.form.fill(user);
             this.form.role = user.roles[0].id;
             this.form.permissions = user.userPermissions;
-            $("#createUser").modal("show");
+            window.bootstrap.Modal.getOrCreateInstance(document.getElementById('createUser')).show();
         },
         getUsers() {
             this.loading = true;
@@ -409,6 +409,7 @@ export default {
             $("#viewUser").modal("show");
             this.img = "http://localhost:8000/img/" + user.photo;
             this.user = user;
+            window.bootstrap.Modal.getOrCreateInstance(document.getElementById('viewUser')).show();
         },
         getRoles() {
             axios.get("/getAllRoles").then((response) => {
@@ -429,7 +430,7 @@ export default {
                     this.load = true;
                     this.$toastr.s("user create succefully", "Created");
                     Fire.$emit("loadUser");
-                    $("#createUser").modal("hide");
+                    window.bootstrap.Modal.getOrCreateInstance(document.getElementById('createUser')).hide();
                     this.form.reset();
                 })
                 .catch(() => {
@@ -449,7 +450,7 @@ export default {
                         "Created"
                     );
                     Fire.$emit("loadUser");
-                    $("#createUser").modal("hide");
+                    window.bootstrap.Modal.getOrCreateInstance(document.getElementById('createUser')).hide();
                     this.form.reset();
                 })
                 .catch(() => {
