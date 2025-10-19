@@ -11,9 +11,11 @@ class UserStatus extends Model
     protected $fillable = [
         'name'
     ];
-
     const STATUS_COLOR = [
-        'Active'=> '  #90EE90',
-        'Inactive'=>'#ff8080',
+        'Assignable'    => '#90EE90',
+        'Unassignable'  => '#ff8080',
+        'Standby'       => '#FFD700',
+        'On Leave'      => '#FFA500',
+        'Away'          => '#DDA0DD',
     ];
 }
