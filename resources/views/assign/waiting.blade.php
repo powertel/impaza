@@ -45,6 +45,7 @@ Assign Faults
                             <th>Address</th>
                             <th>Link</th>
                             <th>Status</th>
+                            <th>Fault Age</th>
                             <th>RFO</th>
                             <th>Created</th>
                             <th>Actions</th>
@@ -65,6 +66,9 @@ Assign Faults
                                     <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
                                         {{ $fault->description }}
                                     </span>
+                                </td>
+                                <td>
+                                    <span class="age-ticker" data-started-at="{{ $fault->stage_started_at ?? '' }}"></span>
                                 </td>
                                 <td>{{ $fault->RFO }}</td>
                                 <td>{{ \Carbon\Carbon::parse($fault->created_at)->format('Y-m-d H:i') }}</td>

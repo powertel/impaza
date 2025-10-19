@@ -70,4 +70,6 @@
   .dashboard-page .table tbody tr:hover { background-color: #f8fafc; }
   .dashboard-page .table tbody td { border-top: 1px solid #f1f5f9; }
   .dashboard-page .table .no-data td { text-align: center; padding: 16px; }
+  /* Age ticker style */
+  .age-ticker { color: #dc2626; font-weight: 700; }
 </style>

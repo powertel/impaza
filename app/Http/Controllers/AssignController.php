@@ -48,6 +48,11 @@ class AssignController extends Controller
             ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
             ->leftjoin('pops','faults.pop_id','=','pops.id')
             ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
+            ->leftjoin('fault_stage_logs as fsl', function($join) {
+                $join->on('fsl.fault_id','=','faults.id');
+                $join->on('fsl.status_id','=','faults.status_id');
+                $join->whereNull('fsl.ended_at');
+            })
             ->orderBy('faults.created_at', 'desc')
             ->where('fault_section.section_id','=',auth()->user()->section_id)
             ->where('cities.region','=',auth()->user()->region)
@@ -56,7 +61,7 @@ class AssignController extends Controller
             ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
                 'account_manager_users.name as accountManager','faults.suspectedRfo_id','links.link','statuses.description','users.name','faults.status_id as status_id',
                 'cities.city as city','cities.region as region','faults.city_id as city_id','suburbs.suburb as suburb','pops.pop as pop','faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at',
-                'reasons_for_outages.RFO as RFO']);
+                'reasons_for_outages.RFO as RFO', 'fsl.started_at as stage_started_at']);
 
         // Collect remarks grouped by fault_id for conversation modal
         $faultIds = $faults->pluck('id');
@@ -111,6 +116,12 @@ class AssignController extends Controller
             ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
             ->leftjoin('pops','faults.pop_id','=','pops.id')
             ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
+            // Join open stage for current status to get start time
+            ->leftjoin('fault_stage_logs as fsl', function($join) {
+                $join->on('fsl.fault_id','=','faults.id');
+                $join->on('fsl.status_id','=','faults.status_id');
+                $join->whereNull('fsl.ended_at');
+            })
             ->orderBy('faults.created_at', 'desc')
             ->where('fault_section.section_id','=',auth()->user()->section_id)
             ->where('faults.status_id','=',2)
@@ -119,7 +130,7 @@ class AssignController extends Controller
             ->get(['faults.id','faults.fault_ref_number','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
                 'account_manager_users.name as accountManager','faults.suspectedRfo_id','links.link','statuses.description','users.name','faults.status_id as status_id',
                 'cities.city as city','cities.region as region','faults.city_id as city_id','suburbs.suburb as suburb','pops.pop as pop','faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at',
-                'reasons_for_outages.RFO as RFO']);
+                'reasons_for_outages.RFO as RFO', 'fsl.started_at as stage_started_at']);
 
         // Collect remarks grouped by fault_id for conversation modal
         $faultIds = $faults->pluck('id');
