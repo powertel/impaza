@@ -9,9 +9,9 @@ Dashboard
 @section('content')
 <section class="content dashboard-page">
   @php
-    $periodLabel = isset($selectedMonth) && $selectedMonth
-      ? \Carbon\Carbon::create(null, $selectedMonth, 1)->format('F') . ' ' . $selectedYear
-      : (string)$selectedYear;
+    $periodLabel = ($selectedYear ?? null)
+      ? (($selectedMonth ?? null) ? \Carbon\Carbon::create(null, $selectedMonth, 1)->format('F') . ' ' . $selectedYear : (string)$selectedYear)
+      : 'All Years';
   @endphp
 
   <!-- Top filter toolbar -->
@@ -22,7 +22,7 @@ Dashboard
           <form method="GET" action="{{ route('home') }}" class="d-flex align-items-center" id="dashboardPeriodForm">
             <div class="input-group input-group-sm me-2" style="width:auto;">
               <div class="input-group-prepend"><span class="input-group-text">Month</span></div>
-              <select name="month" class="form-select form-select-sm" style="width:auto;">
+              <select name="month" class="form-select form-select-sm" style="width:auto;" {{ ($selectedYear ?? null) ? '' : 'disabled' }}>
                 <option value="">All</option>
                 @foreach(($availableMonths ?? []) as $m)
                   <option value="{{ $m }}" {{ ($selectedMonth ?? null) == $m ? 'selected' : '' }}>{{ \Carbon\Carbon::create(null,$m,1)->format('F') }}</option>
@@ -32,6 +32,7 @@ Dashboard
             <div class="input-group input-group-sm me-2" style="width:auto;">
               <div class="input-group-prepend"><span class="input-group-text">Year</span></div>
               <select name="year" class="form-select form-select-sm" style="width:auto;">
+                <option value="">All</option>
                 @foreach(($availableYears ?? []) as $y)
                   <option value="{{ $y }}" {{ ($selectedYear ?? null) == $y ? 'selected' : '' }}>{{ $y }}</option>
                 @endforeach
@@ -241,7 +242,7 @@ Dashboard
         <div class="card-body p-2">
           <div class="table-responsive">
 
-           <table class="table table-hover  js-paginated-table" id="dashboard-recent-faults" data-page-size="10" data-page-size-control="#dashboardRecentPageSize" data-pager="#dashboardRecentPager" data-search="#dashboardRecentSearch">
+           <table class="table table-hover table-sm js-paginated-table" id="dashboard-recent-faults" data-page-size="10" data-page-size-control="#dashboardRecentPageSize" data-pager="#dashboardRecentPager" data-search="#dashboardRecentSearch">
               <thead>
                 <tr>
                   <th>ID</th>
@@ -292,6 +293,19 @@ Dashboard
         form.submit();
       });
     });
+    var yearSel = form.querySelector('select[name=year]');
+    var monthSel = form.querySelector('select[name=month]');
+    function toggleMonth(){
+      if(!yearSel || !monthSel) return;
+      if(!yearSel.value){
+        monthSel.disabled = true;
+        monthSel.value = '';
+      } else {
+        monthSel.disabled = false;
+      }
+    }
+    toggleMonth();
+    if(yearSel){ yearSel.addEventListener('change', toggleMonth); }
   })();
 </script>
 @endsection
