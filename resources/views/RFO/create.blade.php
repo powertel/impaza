@@ -1,45 +1,27 @@
-@extends('layouts.admin')
 
-@section('title')
-Reasons For Outage
-@endsection
-@include('partials.css')
-@section('content')
-
-<section class="content">
-    <div class="col d-flex justify-content-center">
-        <div class="card w-50">
-            <div class="card-header">
-                <h3 class="card-title">
-                    Create RFO
-                </h3>
-            </div>
-
-            <div class="card-body">
-                <form action="{{ route('rfos.store') }}" method="POST">
-                {{ csrf_field() }}
-
-                    <div class="form-group row">
-                        <label for="RFO" class="col-sm-3 col-form-label">RFO</label>
-                        <div class="col-sm-9">
-                            <input type="text"  class="form-control @error('RFO') is-invalid @enderror" name="RFO" placeholder="Reason For Outage" value="{{ old('RFO') }}">
-                            @error ('RFO')
-                                <div class="alert-danger">
-                                     {{$message }}
-                                </div>
-                            @enderror
-
-                        </div>
-                    </div>
-                    <div class="card-footer">
-                        <button type="submit" onclick="return submitResult()" class="btn btn-success btn-sm" >{{ __('Save') }}</button>
-                        <a type="button" class="btn btn-danger btn-sm" href="{{ route('rfos.index') }}">{{ __('Cancel') }}</a>
-
-                    </div>
-                </form>
-            </div>
+<div class="modal fade" id="createRfoModal" tabindex="-1" aria-labelledby="createRfoModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createRfoModalLabel">Create Reason For Outage</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{{ route('rfos.store') }}" method="POST">
+        @csrf
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label" for="createRfoInput">Reason For Outage</label>
+            <input type="text" id="createRfoInput" name="RFO" class="form-control @error('RFO') is-invalid @enderror" placeholder="Reason For Outage" value="{{ old('RFO') }}" required>
+            @error('RFO')
+              <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+          </div>
         </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success btn-sm">Save</button>
+        </div>
+      </form>
     </div>
-</section>
-@endsection
-
+  </div>
+</div>

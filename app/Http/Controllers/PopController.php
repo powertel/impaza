@@ -28,7 +28,7 @@ class PopController extends Controller
             ->leftjoin('cities','pops.city_id','=','cities.id')
             ->leftjoin('suburbs','pops.suburb_id','=','suburbs.id')
             ->orderBy('suburbs.created_at', 'desc')
-            ->get(['pops.id','pops.pop','suburbs.suburb','cities.city']);
+            ->get(['pops.id','pops.pop','pops.city_id','pops.suburb_id','suburbs.suburb','cities.city']);
         // Provide datasets for modal-based create/edit on index
         $cities = City::all();
         $suburbs = Suburb::all();
@@ -99,7 +99,6 @@ class PopController extends Controller
                 return back()->with('fail','Something went wrong');
             }
         }
-    
     }
 
     /**
@@ -147,7 +146,6 @@ class PopController extends Controller
      */
     public function update(Request $request, $id)
     {
-
         request()->validate([
             'city_id' => 'required',
             'suburb_id' => 'required',

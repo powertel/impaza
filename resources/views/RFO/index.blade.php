@@ -13,9 +13,7 @@ RFO
     <div class="card-header">
         <h3 class="card-title">Reasons For Outage</h3>
         <div class="card-tools">
-           
-            <a  class="btn btn-primary btn-sm" href="{{ route('rfos.create') }}"><i class="fas fa-plus-circle"></i>Create New RFO </a>
-          
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createRfoModal"><i class="fas fa-plus-circle"></i>Create New RFO </button>
         </div>
     </div>
     <!-- /.card-header -->
@@ -63,6 +61,7 @@ RFO
                 </tbody>
             </table>
             <div id="rfosPager" class="mt-2"></div>
+            @include('RFO.create')
         </div>
     </div>
     <!-- /.card-body -->

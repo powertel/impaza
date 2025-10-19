@@ -67,8 +67,10 @@ Users
                         <td>{{ $user->section}}</td>
                     <!--  <td>{{ $user->status_name}}</td> -->
 
-                        <td style="background-color: {{ App\Models\UserStatus::STATUS_COLOR[ $user->status_name ] ?? 'none' }};">
-                        <strong>{{$user->status_name}}</strong>
+                        <td class="text-nowrap">
+                            <span class="badge rounded-pill" style="background-color: {{ App\Models\UserStatus::STATUS_COLOR[ $user->status_name ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
+                                {{ $user->status_name }}
+                            </span>
                         </td>
 
                         <td>
