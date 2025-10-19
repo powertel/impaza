@@ -45,6 +45,7 @@ Assess Faults
                         <th>Account Manager</th>
                         <th>Link Name</th>
                         <th>Status</th>
+                        <th>Fault Age</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -60,6 +61,9 @@ Assess Faults
                             <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: #fff; padding: 0.5rem 0.75rem; font-weight: 600;">
                                 {{$fault->description}}
                             </span>
+                        </td>
+                        <td>
+                            <span class="age-ticker" data-started-at="{{ $fault->stage_started_at ?? '' }}"></span>
                         </td>
                         <td class="text-nowrap">
                             <div class="btn-group btn-group gap-2" role="group" aria-label="Actions">

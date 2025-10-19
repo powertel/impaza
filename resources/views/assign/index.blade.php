@@ -38,7 +38,7 @@ Assign Faults
                     </div>
                 </div>
                 <table class="table  table-hover align-middle js-paginated-table" id="assigned-faults-list" style="font-size:14px" data-page-size="20" data-page-size-control="#assignedfaultsPageSize" data-pager="#assignedfaultsPager" data-search="#assignedfaultsSearch">
-                    <thead class="theah-light">
+                    <thead class="thead-light">
                         <tr>
                             <th>No.</th>
                             <th>Customer</th>
@@ -46,9 +46,9 @@ Assign Faults
                             <th>City</th>
                             <th>Suburb</th>
                             <th>POP</th>
-                            <th>Service Type</th>
                             <th>Priority</th>
                             <th>Status</th>
+                            <th>Fault Age</th>
                             <th>Assigned To</th>
                             <th>Actions</th>
                         </tr>
@@ -62,31 +62,43 @@ Assign Faults
                                 <td>{{ $fault->city }}</td>
                                 <td>{{ $fault->suburb }}</td>
                                 <td>{{ $fault->pop }}</td>
-                                <td>{{ $fault->serviceType }}</td>
-                                <td>{{ $fault->priorityLevel }}</td>
+                                <td>
+                                    @php
+                                        $priorityColors = [
+                                            'low'    => '#28a745',
+                                            'medium' => '#ffc107',
+                                            'high'   => '#dc3545'
+                                        ];
+                                        $priority = strtolower(trim($fault->priorityLevel ?? ''));
+                                    @endphp
+                                    <span class="badge rounded-pill" style="background-color: {{ $priorityColors[$priority] ?? '#6c757d' }}; color: white; padding: 0.5rem 0.75rem; font-weight: 600;">
+                                        {{ ucfirst($fault->priorityLevel) }}
+                                    </span>
+                                </td>
                                 <td>
                                     <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
                                         {{ $fault->description }}
                                     </span>
                                 </td>
+                                <td>
+                                    <span class="age-ticker" data-started-at="{{ $fault->stage_started_at ?? '' }}"></span>
+                                </td>
                                 <td>{{ $fault->name ?? '—' }}</td>
                                 <td>
-                                    
-                                        @can('re-assign-fault')
-                                        @if ((int)($fault->status_id ?? 0) === 3)
-                                        <button type="button" class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#reassignModal-{{ $fault->id }}">
-                                            <i class="fas fa-save me-1"></i>Re-Assign
-                                        </button>
-                                        @else
-                                        <button class="btn btn-outline-secondary" disabled title="Re-assignment locked after initial stage" >
-                                            <i class="fas fa-lock me-1"></i>Re-Assign
-                                        </button>
-                                        @endif
-                                        @endcan
-                                        <button class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
-                                            <i class="fas fa-eye me-1"></i>View
-                                        </button>
-                                
+                                    @can('re-assign-fault')
+                                    @if ((int)($fault->status_id ?? 0) === 3)
+                                    <button type="button" class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#reassignModal-{{ $fault->id }}">
+                                        <i class="fas fa-save me-1"></i>Re-Assign
+                                    </button>
+                                    @else
+                                    <button class="btn btn-outline-secondary" disabled title="Re-assignment locked after initial stage" >
+                                        <i class="fas fa-lock me-1"></i>Re-Assign
+                                    </button>
+                                    @endif
+                                    @endcan
+                                    <button class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                                        <i class="fas fa-eye me-1"></i>View
+                                    </button>
                                 </td>
                             </tr>
                         @endforeach

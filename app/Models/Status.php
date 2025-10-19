@@ -14,12 +14,20 @@ class Status extends Model
         'description',
     ];
     const STATUS_COLOR = [
-        'Waiting for assessment'=>'  #ff8080',
-        'Fault has been assessed'=>'#90EE90',
-        'Fault is under rectification'=>'#FFFF00',
-        'Fault has been cleared by Technician'=>'#A9A9A9',
-        'Fault has been cleared by CT'=>'#ADFF2F',
-        'Fault has been cleared by NOC'=>'#4682B4'
+        // Pending / triage
+        'Waiting for assessment' => '#6b7280',          // gray-500
+        'Fault has been assessed' => '#6366f1',         // indigo-500
+        // In progress
+        'Fault is under rectification' => '#f59e0b',    // amber-500
+        // Cleared states
+        'Fault has been cleared by Technician' => '#84cc16', // lime-500
+        'Fault has been cleared by CT' => '#22c55e',    // emerald-500
+        'Fault has been cleared by NOC' => '#16a34a',   // emerald-600
+        // Additional lifecycle
+        'Fault has been refered' => '#a855f7',          // purple-500 (referral)
+        'Fault has been parked' => '#94a3b8',           // slate-400 (paused)
+        'Fault has been revoked' => '#ef4444',          // red-500 (reversed)
+        'Fault has been under escalated' => '#dc2626',  // red-600 (escalated)
     ];
 
 }

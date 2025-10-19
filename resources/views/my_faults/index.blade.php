@@ -44,6 +44,7 @@ My Faults
                         <th>Account Manager</th>
                         <th>Link Name</th>
                         <th>Status</th>
+                        <th>Fault Age</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -54,13 +55,13 @@ My Faults
                         <td>{{ $fault->customer }}</td>
                         <td>{{ $fault->accountManager }}</td>
                         <td>{{ $fault->link }}</td>
-                        <!-- <td style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? 'none' }};">
-                            <strong>{{$fault->description}}</strong>
-                        </td> -->
                         <td class="text-nowrap">
                             <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
                                 {{$fault->description}}
                             </span>
+                        </td>
+                        <td>
+                            <span class="age-ticker" data-started-at="{{ $fault->stage_started_at ?? '' }}"></span>
                         </td>
                         <td>
 

@@ -43,6 +43,12 @@ class ChiefTechClearFaultsController extends Controller
             ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
             ->leftjoin('pops','faults.pop_id','=','pops.id')
             ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
+            // Join open stage for current status to get start time
+            ->leftjoin('fault_stage_logs as fsl', function($join) {
+                $join->on('fsl.fault_id','=','faults.id');
+                $join->on('fsl.status_id','=','faults.status_id');
+                $join->whereNull('fsl.ended_at');
+            })
             ->orderBy('faults.created_at', 'desc')
             ->where('faults.status_id','=',4)
             ->where('users.section_id','=',auth()->user()->section_id)
@@ -65,7 +71,8 @@ class ChiefTechClearFaultsController extends Controller
                 'cities.city',
                 'suburbs.suburb',
                 'pops.pop',
-                'reasons_for_outages.RFO as RFO'
+                'reasons_for_outages.RFO as RFO',
+                'fsl.started_at as stage_started_at'
             ]);
 
         // Collect remarks for all listed faults and group by fault_id

@@ -266,6 +266,69 @@ $('#city').on('change',function () {
     });
   });
 </script>
+
+{{-- Age ticker: live fault age since stage start --}}
+<script>
+(function(){
+  if (window.__ageTickerInit) return; // guard against double init across partial includes
+  window.__ageTickerInit = true;
+
+  function parseStartedAt(val) {
+    if (!val) return null;
+    // Normalize common "YYYY-MM-DD HH:mm:ss" to ISO by replacing space with 'T'
+    const iso = String(val).replace(' ', 'T');
+    const d = new Date(iso);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function formatDuration(ms) {
+    if (ms < 0) ms = 0;
+    const totalSec = Math.floor(ms / 1000);
+    let rem = totalSec;
+    const days = Math.floor(rem / 86400); rem %= 86400;
+    const hours = Math.floor(rem / 3600); rem %= 3600;
+    const minutes = Math.floor(rem / 60); const seconds = rem % 60;
+    const parts = [];
+    if (days) parts.push(days + ' day' + (days !== 1 ? 's' : ''));
+    if (hours || days) parts.push(hours + ' hour' + (hours !== 1 ? 's' : ''));
+    parts.push(minutes + ' minute' + (minutes !== 1 ? 's' : ''));
+    parts.push(seconds + ' second' + (seconds !== 1 ? 's' : ''));
+    return parts.join(' ');
+  }
+
+  function updateAll() {
+    const nodes = document.querySelectorAll('.age-ticker');
+    const now = Date.now();
+    nodes.forEach(function(el){
+      const startedRaw = el.dataset.startedAt || el.getAttribute('data-started-at');
+      const start = parseStartedAt(startedRaw);
+      if (!start) { el.textContent = '—'; return; }
+      const ms = now - start.getTime();
+      el.textContent = formatDuration(ms);
+      if (!el.title) { el.title = 'Started at: ' + start.toLocaleString(); }
+    });
+  }
+
+  function initAgeTicker(){
+    updateAll();
+    // Refresh once per second
+    if (!window.__ageTickerInterval) {
+      window.__ageTickerInterval = setInterval(updateAll, 1000);
+    }
+    // Recalculate when modals open (content may be injected dynamically)
+    document.querySelectorAll('.modal').forEach(function(m){
+      m.addEventListener('shown.bs.modal', updateAll);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAgeTicker);
+  } else {
+    initAgeTicker();
+  }
+})();
+</script>
+
 {{-- Customers repeater helpers --}}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
