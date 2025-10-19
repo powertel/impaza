@@ -39,12 +39,19 @@
   .dashboard-page .stat-card { border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 2px rgba(16,24,40,.06); }
   .dashboard-page .stat-title { font-size: 12px; color: #6b7280; }
   .dashboard-page .stat-value { font-size: 1.1rem; font-weight: 700; color: #111827; }
+  .dashboard-page .stat-card .card-body { padding: .75rem 1rem; }
 
   .dashboard-page .metric-icon { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
   .dashboard-page .metric-icon.icon-faults { background: #eef4ff; color: #1f5cff; }
   .dashboard-page .metric-icon.icon-customers { background: #e8fff2; color: #16a34a; }
   .dashboard-page .metric-icon.icon-links { background: #fff7ed; color: #f97316; }
   .dashboard-page .metric-icon.icon-open { background: #f1f5f9; color: #0ea5e9; }
+
+  /* Compact stat cards */
+  .dashboard-page .stat-card-sm .card-body { padding: .5rem .75rem; }
+  .dashboard-page .stat-card-sm .stat-title { font-size: 11px; }
+  .dashboard-page .stat-card-sm .stat-value { font-size: 1rem; }
+  .dashboard-page .stat-card-sm .metric-icon { width: 28px; height: 28px; }
 
   .dashboard-page .toolbar-card { border: 1px solid #e5e7eb; background:#fff; box-shadow: 0 1px 2px rgba(16,24,40,.06); }
   .dashboard-page .toolbar-card .btn { font-weight: 500; }

@@ -38,7 +38,7 @@ Dashboard
                 @endforeach
               </select>
             </div>
-            <button type="submit" class="btn btn-primary btn-sm me-2"><i class="fas fa-filter"></i> Apply</button>
+            <!-- <button type="submit" class="btn btn-primary btn-sm me-2"><i class="fas fa-filter"></i> Apply</button> -->
             <a href="{{ route('home') }}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-undo"></i> Reset</a>
           </form>
           <div class="text-muted small">Showing period: <strong>{{ $periodLabel }}</strong></div>
@@ -50,7 +50,7 @@ Dashboard
   <div class="row">
     <!-- Stat cards -->
     <div class="col-xl-3 col-md-6 mb-3">
-      <div class="card stat-card">
+      <div class="card stat-card stat-card-sm">
         <div class="card-body">
           <div class="d-flex align-items-center justify-content-between">
             <div>
@@ -65,7 +65,7 @@ Dashboard
       </div>
     </div>
     <div class="col-xl-3 col-md-6 mb-3">
-      <div class="card stat-card">
+      <div class="card stat-card stat-card-sm">
         <div class="card-body">
           <div class="d-flex align-items-center justify-content-between">
             <div>
@@ -80,7 +80,7 @@ Dashboard
       </div>
     </div>
     <div class="col-xl-3 col-md-6 mb-3">
-      <div class="card stat-card">
+      <div class="card stat-card stat-card-sm">
         <div class="card-body">
           <div class="d-flex align-items-center justify-content-between">
             <div>
@@ -95,7 +95,7 @@ Dashboard
       </div>
     </div>
     <div class="col-xl-3 col-md-6 mb-3">
-      <div class="card stat-card">
+      <div class="card stat-card stat-card-sm">
         <div class="card-body">
           <div class="d-flex align-items-center justify-content-between">
             <div>
@@ -111,11 +111,11 @@ Dashboard
     </div>
   </div>
 
-  <!-- New Metrics Row -->
+  <!-- Metrics Row (non-age) -->
   <div class="row">
     @can('dashboard-open-faults')
     <div class="col-xl-3 col-md-6 mb-3">
-      <div class="card stat-card">
+      <div class="card stat-card stat-card-sm">
         <div class="card-body">
           <div class="d-flex align-items-center justify-content-between">
             <div>
@@ -131,42 +131,9 @@ Dashboard
     </div>
     @endcan
 
-    @can('dashboard-fault-age')
-    <div class="col-xl-3 col-md-6 mb-3">
-      <div class="card stat-card">
-        <div class="card-body">
-          <div class="d-flex align-items-center justify-content-between">
-            <div>
-              <div class="text-muted stat-title">Avg Open Age</div>
-              <div class="h6 mb-0 stat-value">{{ \Carbon\CarbonInterval::seconds($avgOpenAgeSec ?? 0)->cascade()->forHumans() }}</div>
-            </div>
-            <div class="metric-icon">
-              <i class="fas fa-hourglass-half"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-xl-3 col-md-6 mb-3">
-      <div class="card stat-card">
-        <div class="card-body">
-          <div class="d-flex align-items-center justify-content-between">
-            <div>
-              <div class="text-muted stat-title">Oldest Open Age</div>
-              <div class="h6 mb-0 stat-value">{{ \Carbon\CarbonInterval::seconds($maxOpenAgeSec ?? 0)->cascade()->forHumans() }}</div>
-            </div>
-            <div class="metric-icon">
-              <i class="fas fa-hourglass-end"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    @endcan
-
     @can('dashboard-resolution-metrics')
     <div class="col-xl-3 col-md-6 mb-3">
-      <div class="card stat-card">
+      <div class="card stat-card stat-card-sm">
         <div class="card-body">
           <div class="d-flex align-items-center justify-content-between">
             <div>
@@ -182,6 +149,53 @@ Dashboard
     </div>
     @endcan
   </div>
+
+  <!-- Age Metrics Section -->
+  @can('dashboard-fault-age')
+  <div class="row">
+    <div class="col">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Open Age ({{ $periodLabel }})</h3>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-xl-6 col-md-6 mb-3">
+              <div class="card stat-card stat-card-sm">
+                <div class="card-body">
+                  <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                      <div class="text-muted stat-title">Avg Open Age</div>
+                      <div class="h6 mb-0 stat-value">{{ \Carbon\CarbonInterval::seconds($avgOpenAgeSec ?? 0)->cascade()->forHumans() }}</div>
+                    </div>
+                    <div class="metric-icon">
+                      <i class="fas fa-hourglass-half"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-6 col-md-6 mb-3">
+              <div class="card stat-card stat-card-sm">
+                <div class="card-body">
+                  <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                      <div class="text-muted stat-title">Oldest Open Age</div>
+                      <div class="h6 mb-0 stat-value">{{ \Carbon\CarbonInterval::seconds($maxOpenAgeSec ?? 0)->cascade()->forHumans() }}</div>
+                    </div>
+                    <div class="metric-icon">
+                      <i class="fas fa-hourglass-end"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  @endcan
 
   <!-- Technician Performance -->
   @can('dashboard-resolution-metrics')
