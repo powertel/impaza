@@ -44,8 +44,8 @@ class NocClearFaultsController extends Controller
             ->leftjoin('pops','faults.pop_id','=','pops.id')
             ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
             ->orderBy('faults.created_at', 'desc')
-            // Show faults cleared by Technician (CLT: status_id = 4) for NOC review
-            ->where('faults.status_id','=',4)
+            // Show faults cleared by Technician (CLT: status_id = 5) for NOC review
+            ->where('faults.status_id','=',5)
             ->get([
                 'faults.id',
                 'customers.customer',
