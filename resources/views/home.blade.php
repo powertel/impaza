@@ -204,11 +204,20 @@ Dashboard
       <div class="card">
         <div class="card-header">
           <h3 class="card-title">Technician Performance ({{ $periodLabel }})</h3>
+          <div class="card-tools">
+           <input id="techPerformanceSearch" type="text" class="form-control form-control-sm rounded-pill d-inline-block w-auto" placeholder="Search">
+            <select id="techPerformancePageSize" class="form-control form-control-sm rounded-pill d-inline-block w-auto">
+              <option value="10">10</option>
+              <option value="20" selected>20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
         </div>
         <div class="card-body p-2">
           <div class="table-responsive">
-            <table class="table table-hover table-sm">
-              <thead>
+            <table class="table table-hover js-paginated-table" id="dashboard-recent-faults" data-page-size="10" data-page-size-control="#techPerformancePageSize" data-pager="#techPerformancePager" data-search="#techPerformanceSearch">
+              <thead class="table-light">
                 <tr>
                   <th>Technician</th>
                   <th>Avg Resolution Time</th>
@@ -230,6 +239,9 @@ Dashboard
               </tbody>
             </table>
           </div>
+          <div class="card-footer">
+            <div id="techPerformancePager" class="pagination pagination-sm justify-content-end"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -243,15 +255,15 @@ Dashboard
       <div class="card">
         <div class="card-header">
           <h3 class="card-title">Recent Faults ({{ $periodLabel }})</h3>
-         <div class="card-tools">
+          <div class="card-tools">
            <input id="dashboardRecentSearch" type="text" class="form-control form-control-sm rounded-pill d-inline-block w-auto" placeholder="Search">
-           <select id="dashboardRecentPageSize" class="form-control form-control-sm rounded-pill d-inline-block w-auto">
-            <option value="10">10</option>
-           <option value="20" selected>20</option>
-           <option value="50">50</option>
-             <option value="100">100</option>
-          </select>
-        </div>
+            <select id="dashboardRecentPageSize" class="form-control form-control-sm rounded-pill d-inline-block w-auto">
+              <option value="10">10</option>
+              <option value="20" selected>20</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
         </div>
         <div class="card-body p-2">
           <div class="table-responsive">
