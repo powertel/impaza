@@ -55,9 +55,9 @@ Pops
                         <td>{{ $pop->pop}}</td>
                         <td>
                             @can('pop-edit')
-                            <a href="{{ route('pops.edit',$pop->id) }}" class="btn btn-outline-primary me-1"  >
+                            <button type="button" class="btn btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#popEditModal{{ $pop->id }}">
                                 <i class="fas fa-edit me-1"></i>Edit
-                            </a> 
+                            </button>
                             @endcan
                             
                             <button type="button" class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#popViewModal{{ $pop->id }}">
@@ -73,7 +73,8 @@ Pops
      </div>
      <!-- /.card-body -->
         @include('pops.create_modal')
-  @include('pops.view_modal')
+        @include('pops.view_modal')
+        @include('pops.edit_modal')
  </div>
  
   
