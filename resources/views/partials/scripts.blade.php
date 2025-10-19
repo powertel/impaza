@@ -1342,4 +1342,29 @@ $('#city').on('change',function () {
   });
 </script>
 
+{{-- Submit buttons processing state --}}
+<script>
+  document.addEventListener('submit', function(ev) {
+    if (ev.defaultPrevented) return;
+
+    var form = ev.target;
+    // Prefer the actual clicked submit button; fallback to first submit control
+    var submitter = ev.submitter || form.querySelector('button[type="submit"], input[type="submit"]');
+    if (!submitter) return;
+
+    var processingText = submitter.getAttribute('data-processing-text') || 'Processing';
+
+    if (submitter.tagName && submitter.tagName.toLowerCase() === 'button') {
+      submitter.dataset.originalText = submitter.textContent;
+      submitter.textContent = processingText;
+    } else {
+      submitter.dataset.originalText = submitter.value;
+      submitter.value = processingText;
+    }
+
+    // Prevent double-submits
+    submitter.disabled = true;
+  });
+</script>
+
 
