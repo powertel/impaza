@@ -56,11 +56,11 @@ Account Managers
                         <td>{{ $acc_manager->name ?? '—' }}</td>
                         <td>
                             <form action="{{ route('account_managers.destroy',$acc_manager->id) }}" method="POST">
-                                <button type="button" class="btn btn-sm btn-outline-success" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#accountManagerViewModal{{ $acc_manager->id }}">
+                                <button type="button" class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#accountManagerViewModal{{ $acc_manager->id }}">
                                     <i class="fas fa-eye me-1"></i>View
                                 </button>
                                 @can('account-manager-edit')
-                                <button type="button" class="btn btn-sm btn-outline-primary" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#accountManagerEditModal{{ $acc_manager->id }}">
+                                <button type="button" class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#accountManagerEditModal{{ $acc_manager->id }}">
                                     <i class="fas fa-edit me-1"></i>Edit
                                 </button>
                                 @endcan
@@ -68,7 +68,7 @@ Account Managers
                                 @csrf
                                 @method('DELETE')
                                 @can('account-manager-delete')
-                                <button type="button" class="btn btn-outline-danger btn-sm show_confirm" data-toggle="tooltip" title='Delete' style="padding:0px 2px;">
+                                <button type="button" class="btn btn-outline-danger show_confirm" data-toggle="tooltip" title='Delete' >
                                 <i class="fas fa-trash me-1"></i>  Delete
                                 </button> 
                                 @endcan

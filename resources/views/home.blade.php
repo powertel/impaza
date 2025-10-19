@@ -142,13 +142,57 @@ Dashboard
             </div>
             <div class="metric-icon">
               <i class="fas fa-stopwatch"></i>
-            </div>
           </div>
         </div>
       </div>
     </div>
     @endcan
   </div>
+
+  @can('my-fault-list')
+  <div class="row">
+    <div class="col-xl-3 col-md-6 mb-3">
+      <div class="card stat-card stat-card-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="text-muted stat-title">My Completion Rate ({{ $periodLabel }})</div>
+              <div class="h4 mb-0 stat-value">{{ number_format(($myCompletionRate ?? 0), 1) }}%</div>
+              <div class="small text-muted">Assigned: {{ $myAssignedCount ?? 0 }} · Resolved: {{ $myResolvedCount ?? 0 }}</div>
+              @php
+                $rate = (float)($myCompletionRate ?? 0);
+                $rateWidth = (int)min(max($rate, 0), 100);
+                $rateClass = $rate >= 80 ? 'bg-success' : ($rate >= 50 ? 'bg-warning' : 'bg-danger');
+              @endphp
+              <div class="progress progress-sm rounded-pill mt-2" style="height:6px;">
+                <div class="progress-bar {{ $rateClass }}" role="progressbar" style="width: {{ $rateWidth }}%;" aria-valuenow="{{ $rateWidth }}" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+            <div class="metric-icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-3">
+      <div class="card stat-card stat-card-sm">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="text-muted stat-title">My Avg Resolution ({{ $periodLabel }})</div>
+              <div class="h6 mb-0 stat-value">{{ \Carbon\CarbonInterval::seconds($myAvgResolutionSec ?? 0)->cascade()->forHumans() }}</div>
+              <div class="small text-muted">Resolved Tickets: {{ $myResolvedCount ?? 0 }}</div>
+            </div>
+            <div class="metric-icon">
+              <i class="fas fa-user-clock"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  @endcan
 
   <!-- Age Metrics Section -->
   @can('dashboard-fault-age')

@@ -149,11 +149,30 @@ class HomeController extends Controller
             ->orderBy('avg_sec','asc')
             ->limit(5)
             ->get();
+
+        // My technician stats (for logged-in user)
+        $userId = auth()->id();
+        $myAssignedQuery = DB::table('fault_assignments')->where('user_id', $userId);
+        if ($fromDate && $toDate) {
+            $myAssignedQuery->whereBetween('assigned_at', [$fromDate, $toDate]);
+        }
+        $myAssignedCount = $myAssignedQuery->count();
+
+        $myResolvedQuery = DB::table('fault_assignments')
+            ->where('user_id', $userId)
+            ->whereNotNull('resolved_at');
+        if ($fromDate && $toDate) {
+            $myResolvedQuery->whereBetween('resolved_at', [$fromDate, $toDate]);
+        }
+        $myResolvedCount = $myResolvedQuery->count();
+        $myAvgResolutionSec = (int)floor($myResolvedQuery->avg('duration_seconds') ?? 0);
+        $myCompletionRate = $myAssignedCount > 0 ? round(($myResolvedCount / $myAssignedCount) * 100, 1) : 0;
     
         return view('home', compact(
             'faultCount','customerCount','linkCount','recentFaults',
             'openFaultsCount','avgOpenAgeSec','maxOpenAgeSec','avgResolutionSec','techResolutionAverages',
-            'availableYears','availableMonths','selectedYear','selectedMonth'
+            'availableYears','availableMonths','selectedYear','selectedMonth',
+            'myAssignedCount','myResolvedCount','myAvgResolutionSec','myCompletionRate'
         ));
     }
 }
