@@ -83,7 +83,7 @@ Assign Faults
                                 <td>
                                     <span class="age-ticker" data-started-at="{{ $fault->stage_started_at ?? '' }}"></span>
                                 </td>
-                                <td>{{ $fault->name ?? '—' }}</td>
+                                <td class="{{ $fault->assignedTo ? 'fw-bold' : 'text-muted' }}">{{ $fault->name ?: 'Not yet assigned' }}</td>
                                 <td>
                                     @can('re-assign-fault')
                                     @if ((int)($fault->status_id ?? 0) === 3)
