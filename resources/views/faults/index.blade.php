@@ -73,9 +73,9 @@ Faults
                         <!--<td>{{$fault->id}}</td>-->
                         <td>{{$fault->fault_ref_number}}</td>
                         <td>{{$fault->customer }}</td>
-                        <td>{{$fault->accountManager }}</td>
+                        <td >{{$fault->accountManager }}</td>
                         <td>{{$fault->link }}</td>
-                        <td>{{$fault->assignedTo}}</td>
+                        <td class="{{ $fault->assignedTo ? 'fw-bold' : 'text-muted' }}">{{ $fault->assignedTo ?: 'Not yet assigned' }}</td>
                         <td>
                         {{ Carbon\Carbon::parse($fault->created_at)->format('j F Y h:i a') }}
                         </td>
