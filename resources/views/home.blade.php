@@ -72,22 +72,119 @@ Dashboard
     </div>
   </div>
 
-  <!-- Toolbar -->
+  <!-- New Metrics Row -->
+  <div class="row">
+    @can('dashboard-open-faults')
+    <div class="col-xl-3 col-md-6 mb-3">
+      <div class="card stat-card">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="text-muted stat-title">Open Faults</div>
+              <div class="h4 mb-0 stat-value">{{ $openFaultsCount ?? 0 }}</div>
+            </div>
+            <div class="metric-icon icon-open">
+              <i class="fas fa-exclamation-circle"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    @endcan
+
+    @can('dashboard-fault-age')
+    <div class="col-xl-3 col-md-6 mb-3">
+      <div class="card stat-card">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="text-muted stat-title">Avg Open Age</div>
+              <div class="h6 mb-0 stat-value">{{ \Carbon\CarbonInterval::seconds($avgOpenAgeSec ?? 0)->cascade()->forHumans() }}</div>
+            </div>
+            <div class="metric-icon">
+              <i class="fas fa-hourglass-half"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-3">
+      <div class="card stat-card">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="text-muted stat-title">Oldest Open Age</div>
+              <div class="h6 mb-0 stat-value">{{ \Carbon\CarbonInterval::seconds($maxOpenAgeSec ?? 0)->cascade()->forHumans() }}</div>
+            </div>
+            <div class="metric-icon">
+              <i class="fas fa-hourglass-end"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    @endcan
+
+    @can('dashboard-resolution-metrics')
+    <div class="col-xl-3 col-md-6 mb-3">
+      <div class="card stat-card">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="text-muted stat-title">Avg Resolution (30d)</div>
+              <div class="h6 mb-0 stat-value">{{ \Carbon\CarbonInterval::seconds($avgResolutionSec ?? 0)->cascade()->forHumans() }}</div>
+            </div>
+            <div class="metric-icon">
+              <i class="fas fa-stopwatch"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    @endcan
+  </div>
+
+  <!-- Technician Performance -->
+  @can('dashboard-resolution-metrics')
   <div class="row mb-3">
     <div class="col">
-      <div class="card toolbar-card">
-        <div class="card-body d-flex align-items-center justify-content-between py-2">
-          <div class="d-flex align-items-center gap-2">
-            <button class="btn btn-outline-secondary btn-sm rounded-pill"><i class="fas fa-filter"></i> Filters</button>
-            <button class="btn btn-outline-secondary btn-sm rounded-pill"><i class="fas fa-download"></i> Export</button>
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Technician Performance (Last 30 Days)</h3>
+        </div>
+        <div class="card-body p-2">
+          <div class="table-responsive">
+            <table class="table table-hover table-sm">
+              <thead>
+                <tr>
+                  <th>Technician</th>
+                  <th>Avg Resolution Time</th>
+                  <th>Tickets</th>
+                </tr>
+              </thead>
+              <tbody>
+                @forelse(($techResolutionAverages ?? []) as $t)
+                <tr>
+                  <td>{{ $t->name ?? '—' }}</td>
+                  <td>{{ \Carbon\CarbonInterval::seconds((int)($t->avg_sec ?? 0))->cascade()->forHumans() }}</td>
+                  <td>{{ $t->tickets }}</td>
+                </tr>
+                @empty
+                <tr class="no-data">
+                  <td class="text-muted" colspan="3">No resolution data</td>
+                </tr>
+                @endforelse
+              </tbody>
+            </table>
           </div>
-          <a class="btn btn-primary btn-sm rounded-pill" href="{{ route('faults.index') }}"><i class="fas fa-plus-circle"></i> Log Fault</a>
         </div>
       </div>
     </div>
   </div>
+  @endcan
 
   <!-- Table -->
+  @can('dashboard-recent-faults')
   <div class="row">
     <div class="col">
       <div class="card">
@@ -139,6 +236,7 @@ Dashboard
       </div>
     </div>
   </div>
+  @endcan
 </section>
 @endsection
 

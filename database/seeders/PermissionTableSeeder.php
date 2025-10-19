@@ -93,7 +93,13 @@ class PermissionTableSeeder extends Seeder
             'noc-clear-faults-clear',
             'chief-tech-clear-faults-clear',
             'technician-configuration',
-            'assign-fault'
+            'assign-fault',
+
+            // Dashboard permissions
+            'dashboard-open-faults',
+            'dashboard-fault-age',
+            'dashboard-resolution-metrics',
+            'dashboard-recent-faults',
          ];
 
          foreach ($permissions as $permission) {
