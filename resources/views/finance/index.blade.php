@@ -83,8 +83,6 @@ Finance
                             @else
                             @endif
                         </td>
-
-                        </td>
                     </tr>
                     @endforeach
                 </tbody>  
