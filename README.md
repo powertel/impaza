@@ -1,64 +1,55 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Impaza
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Impaza is a Laravel 9 application for operations and fault management across NOC, technicians, departments, finance, and customers. It tracks faults through assignment, rectification, and clearance with activity logs.
 
-## About Laravel
+## Features
+- Role-based access control (Spatie Permissions)
+- Fault lifecycle: create, assign, rectify, clear
+- Sections/departments, technicians, materials, permits
+- Customers, links, POPs, stores, cities/suburbs
+- Remarks, stage logs, and seedable statuses/RFO
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Tech Stack
+- PHP 8.0+, Laravel 9
+- MySQL 8, Redis
+- Nginx + PHP-FPM (Docker)
+- Laravel Mix + Vue 2 + Bootstrap 5
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Quick Start (Local)
+Prereqs: PHP 8.0+, Composer, Node.js + npm, MySQL 8
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1. Copy env: `cp ".env - Copy.example" .env` (Windows: `copy ".env - Copy.example" ".env"`)
+2. Configure `.env` (`APP_URL`, `DB_*`, etc.)
+3. Install deps: `composer install` and `npm install`
+4. App key: `php artisan key:generate`
+5. Migrate + seed: `php artisan migrate --seed`
+6. Build assets: `npm run dev`
+7. Serve: `php artisan serve` → http://localhost:8000
 
-## Learning Laravel
+## Docker Development
+1. Copy env: `cp .env-docker.example .env`
+2. Build & start: `docker compose up -d --build`
+3. Dev overlay (live code mounts):
+   `docker compose -f compose.yaml -f compose.dev.yaml up -d`
+4. App: http://localhost:8080
+5. phpMyAdmin: http://localhost:8081 (DB host: `mysql`, user `root`, pass `root`)
+   - Host DB port: `3307`
+   - Redis host port: `6380`
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Testing
+- Run tests: `php artisan test`
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Common Tasks
+- Seed admin user: `php artisan db:seed --class=CreateAdminUserSeeder`
+- Clear caches: `php artisan optimize:clear`
 
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+## Project Structure
+- `app/` domain models, services (e.g., `Services/FaultLifecycle.php`)
+- `resources/views/` pages (faults, assign, clear_faults, technicians, finance)
+- `routes/` HTTP & API routes
+- `database/seeders/` initial data
+- `public/` compiled assets
+- `docker/` PHP-FPM & Nginx images
 
 ## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Open issues or PRs and follow Laravel best practices.
