@@ -232,8 +232,17 @@ class UserController extends Controller
     }
 
     //user profile
-    public function profile(){
-        return view('profile.index');
+    public function profile() {
+        $u = auth()->user();
+        if (!$u) return view('profile.index'); // or redirect to login
+
+        $profile = \App\Models\User::leftJoin('departments','users.department_id','=','departments.id')
+            ->leftJoin('sections','users.section_id','=','sections.id')
+            ->leftJoin('positions','users.position_id','=','positions.id')
+            ->where('users.id', $u->id)
+            ->get(['users.*','departments.department','sections.section','positions.position'])
+            ->first();
+        return view('profile.index', ['user' => $profile]);
     }
 
     public function postProfile(Request $request){
