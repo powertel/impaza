@@ -84,8 +84,11 @@ Assign Faults
                                     <button class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                         <i class="fas fa-eye me-1"></i>View
                                     </button>
+
                                 </td>
                             </tr>
+                                @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
+                               
                         @endforeach
                     </tbody>
                 </table>
@@ -93,7 +96,6 @@ Assign Faults
             </div>   
             @foreach($faults as $fault)
                 @include('assign.assign_modal', ['fault' => $fault, 'technicians' => ($techniciansByFault[$fault->id] ?? $technicians)])
-                @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
             @endforeach
         </div>
         <!-- /.card-body -->
