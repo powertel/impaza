@@ -11,9 +11,7 @@ class RFOController extends Controller
     function __construct()
     {
          $this->middleware('permission:assessment-fault-list|assessment-fault-create|assessment-fault-edit|assessment-fault-delete', ['only' => ['index','store']]);
-         $this->middleware('permission:assessment-fault-create', ['only' => ['create','store']]);
-         $this->middleware('permission:assessment-fault-edit', ['only' => ['edit','update']]);
-         $this->middleware('permission:assessment-fault-delete', ['only' => ['destroy']]);
+
     }
     /**
      * Display a listing of the resource.
