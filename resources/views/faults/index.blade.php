@@ -79,7 +79,7 @@ Faults
                         <td>
                         {{ Carbon\Carbon::parse($fault->created_at)->format('j F Y h:i a') }}
                         </td>
-                        <td> {{$fault->reportedBy}}</td>
+                        <td class="text-muted"> {{$fault->reportedBy}}</td>
                         <td class="text-nowrap">
                             <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
                                 {{$fault->description}}
