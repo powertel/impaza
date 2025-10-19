@@ -62,7 +62,7 @@ Clear Faults
                             </span>
                         </td>
                         <td>
-                            <span class="age-ticker" data-started-at="{{ $fault->stage_started_at ?? '' }}"></span>
+                            <span class="badge rounded-pill bg-light text-danger age-ticker fs-6" data-started-at="{{ $fault->stage_started_at ?? '' }}"></span>
                         </td>
                         <td>
                             @can('chief-tech-clear-faults-clear')
