@@ -46,7 +46,6 @@ Assign Faults
                             <th>City</th>
                             <th>Suburb</th>
                             <th>POP</th>
-                            <th>Service Type</th>
                             <th>Priority</th>
                             <th>Status</th>
                             <th>Fault Age</th>
@@ -63,8 +62,19 @@ Assign Faults
                                 <td>{{ $fault->city }}</td>
                                 <td>{{ $fault->suburb }}</td>
                                 <td>{{ $fault->pop }}</td>
-                                <td>{{ $fault->serviceType }}</td>
-                                <td>{{ $fault->priorityLevel }}</td>
+                                <td>
+                                    @php
+                                        $priorityColors = [
+                                            'low'    => '#28a745',
+                                            'medium' => '#ffc107',
+                                            'high'   => '#dc3545'
+                                        ];
+                                        $priority = strtolower(trim($fault->priorityLevel ?? ''));
+                                    @endphp
+                                    <span class="badge rounded-pill" style="background-color: {{ $priorityColors[$priority] ?? '#6c757d' }}; color: white; padding: 0.5rem 0.75rem; font-weight: 600;">
+                                        {{ ucfirst($fault->priorityLevel) }}
+                                    </span>
+                                </td>
                                 <td>
                                     <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
                                         {{ $fault->description }}

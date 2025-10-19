@@ -41,12 +41,10 @@ Assign Faults
                         <tr>
                             <th>Fault ID</th>
                             <th>Customer</th>
-                            <th>Contact</th>
-                            <th>Address</th>
                             <th>Link</th>
+                            <th>Priority</th>
                             <th>Status</th>
                             <th>Fault Age</th>
-                            <th>RFO</th>
                             <th>Created</th>
                             <th>Actions</th>
                         </tr>
@@ -56,12 +54,20 @@ Assign Faults
                             <tr>
                                 <td>{{ $fault->fault_ref_number }}</td>
                                 <td>{{ $fault->customer }}</td>
-                                <td>
-                                    {{ $fault->contactName }}<br>
-                                
-                                </td>
-                                <td>{{ $fault->address }}</td>
                                 <td>{{ $fault->link }}</td>
+                                <td>
+                                    @php
+                                        $priorityColors = [
+                                            'low'    => '#28a745',
+                                            'medium' => '#ffc107',
+                                            'high'   => '#dc3545'
+                                        ];
+                                        $priority = strtolower(trim($fault->priorityLevel ?? ''));
+                                    @endphp
+                                    <span class="badge rounded-pill" style="background-color: {{ $priorityColors[$priority] ?? '#6c757d' }}; color: white; padding: 0.5rem 0.75rem; font-weight: 600;">
+                                        {{ ucfirst($fault->priorityLevel) }}
+                                    </span>
+                                </td>
                                 <td>
                                     <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
                                         {{ $fault->description }}
@@ -70,7 +76,6 @@ Assign Faults
                                 <td>
                                     <span class="age-ticker" data-started-at="{{ $fault->stage_started_at ?? '' }}"></span>
                                 </td>
-                                <td>{{ $fault->RFO }}</td>
                                 <td>{{ \Carbon\Carbon::parse($fault->created_at)->format('Y-m-d H:i') }}</td>
                                 <td>
                                     @can('assign-fault')
