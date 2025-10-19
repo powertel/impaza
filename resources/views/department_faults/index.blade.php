@@ -52,14 +52,14 @@ Department Faults
                         <td>{{ $fault->customer }}</td>
                         <td>{{ $fault->accountManager }}</td>
                         <td>{{ $fault->link }}</td>
-                        <td>{{ $fault->name }}</td>
+                        <td class="{{ $fault->name ? 'fw-bold' : 'text-muted' }}">{{ $fault->name ?: 'Not yet assigned' }}</td>
                         <td class="text-nowrap">
                             <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
                                 {{$fault->description}}
                             </span>
                         </td>
                         <td>
-                            <button class="btn btn-outline-success" style="padding:0px 2px;" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                            <button class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                 <i class="fas fa-eye me-1"></i>View
                             </button>
                         </td>

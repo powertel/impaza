@@ -73,7 +73,7 @@
                   <div>
                     <small class="text-muted">Status</small>
                     <div class="fw-semibold">
-                      <span class="badge rounded-pill" style="background-color: {{ App\Models\UserStatus::STATUS_COLOR[ $user->status_name ] ?? '#6c757d' }}; color: #fff;">{{ $user->status_name }}</span>
+                      <span class="badge rounded-pill" style="background-color: {{ App\Models\UserStatus::STATUS_COLOR[ $user->status_name ] ?? '#6c757d' }}; color: black;">{{ $user->status_name }}</span>
                     </div>
                   </div>
                 </li>
