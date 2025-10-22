@@ -70,6 +70,10 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('cities', CityController::class);
     Route::resource('locations', LocationController::class);
     Route::resource('links', LinkController::class);
+    // AJAX: fetch links for a given customer
+    Route::get('links/customer/{customer}', [LinkController::class, 'linksForCustomer'])->name('links.by-customer');
+    // AJAX: autosave updates for a link
+    Route::post('links/{link}/autosave', [LinkController::class, 'autosave'])->name('links.autosave');
     Route::resource('pops', PopController::class);
     Route::resource('account_managers', AccountManagerController::class);
     Route::resource('assessments', AssessmentController::class);

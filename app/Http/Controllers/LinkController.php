@@ -282,4 +282,48 @@ class LinkController extends Controller
                        
     }
 
+    /**
+     * Return links for a specific customer (AJAX JSON).
+     */
+    public function linksForCustomer($customerId)
+    {
+        $this->middleware('permission:link-edit');
+        $links = Link::where('customer_id', $customerId)->get([
+            'id','link','city_id','suburb_id','pop_id','linkType_id','customer_id'
+        ]);
+        return response()->json($links);
+    }
+
+    /**
+     * Autosave link updates via AJAX for selected fields.
+     */
+    public function autosave(Request $request, $id)
+    {
+        $this->middleware('permission:link-edit');
+        $link = Link::findOrFail($id);
+
+        $rules = [];
+        if ($request->has('link')) {
+            $rules['link'] = ['required','string', Rule::unique('links','link')->ignore($id)];
+        }
+        if ($request->has('city_id')) {
+            $rules['city_id'] = ['required','exists:cities,id'];
+        }
+        if ($request->has('suburb_id')) {
+            $rules['suburb_id'] = ['required','exists:suburbs,id'];
+        }
+        if ($request->has('pop_id')) {
+            $rules['pop_id'] = ['required','exists:pops,id'];
+        }
+        if ($request->has('linkType_id')) {
+            $rules['linkType_id'] = ['required','exists:link_types,id'];
+        }
+
+        $validated = $request->validate($rules);
+
+        $link->fill($validated);
+        $link->save();
+
+        return response()->json(['ok' => true]);
+    }
 }
