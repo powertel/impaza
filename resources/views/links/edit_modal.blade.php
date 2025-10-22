@@ -45,6 +45,7 @@
               <select name="service_type" class="form-select">
                 <option value="" {{ empty($full?->service_type) ? 'selected disabled' : '' }}>Select Service Type</option>
                 <option value="Internet" {{ ($full && $full->service_type === 'Internet') ? 'selected' : '' }}>Internet</option>
+
                 <option value="VPN" {{ ($full && $full->service_type === 'VPN') ? 'selected' : '' }}>VPN</option>
                 <option value="Carrier Services" {{ ($full && $full->service_type === 'Carrier Services') ? 'selected' : '' }}>Carrier Services</option>
                 <option value="E-Vending" {{ ($full && $full->service_type === 'E-Vending') ? 'selected' : '' }}>E-Vending</option>
@@ -55,22 +56,22 @@
               <input type="text" name="capacity" value="{{ $full ? $full->capacity : '' }}" class="form-control" placeholder="e.g. 100Mbps">
             </div>
 
-+           <div class="col-md-4">
-+             <label class="form-label">Contract Number</label>
-+             <input type="text" name="contract_number" value="{{ $full ? $full->contract_number : '' }}" class="form-control" placeholder="e.g. CTR-2025-001">
-+           </div>
-+           <div class="col-md-4">
-+             <label class="form-label">SAP Codes</label>
-+             <input type="text" name="sapcodes" value="{{ $full ? $full->sapcodes : '' }}" class="form-control" placeholder="e.g. SAP-ABC-123">
-+           </div>
-+           <div class="col-md-4">
-+             <label class="form-label">Quantity</label>
-+             <input type="number" name="quantity" value="{{ $full ? $full->quantity : '' }}" class="form-control" min="0" placeholder="e.g. 1">
-+           </div>
-+           <div class="col-md-12">
-+             <label class="form-label">Comment</label>
-+             <input type="text" name="comment" value="{{ $full ? $full->comment : '' }}" class="form-control" placeholder="Optional notes">
-+           </div>
+           <div class="col-md-4">
+             <label class="form-label">Contract Number</label>
+             <input type="text" name="contract_number" value="{{ $full ? $full->contract_number : '' }}" class="form-control" placeholder="e.g. CTR-2025-001" readonly>
+           </div>
+           <div class="col-md-4"> 
+            <label class="form-label">SAP Codes</label> 
+            <input type="text" name="sapcodes" value="{{ $full ? $full->sapcodes : '' }}" class="form-control" placeholder="e.g. SAP-ABC-123" readonly>
+           </div>
+           <div class="col-md-4">
+             <label class="form-label">Quantity</label>
+             <input type="number" name="quantity" value="{{ $full ? $full->quantity : '' }}" class="form-control" min="0" placeholder="e.g. 1" readonly>
+           </div>
+           <div class="col-md-12">
+             <label class="form-label">Comment</label>
+             <input type="text" name="comment" value="{{ $full ? $full->comment : '' }}" class="form-control" placeholder="Optional notes" readonly>
+           </div>
             <div class="col-md-4">
               <label class="form-label">City/Town</label>
               <select name="city_id" class="form-select" required>

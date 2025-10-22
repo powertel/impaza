@@ -18,7 +18,7 @@
           </div>
           <div class="mb-3">
             <label class="form-label">Account Number</label>
-            <input type="text" name="account_number" class="form-control account-number-input" value="{{ $customer->account_number ?? '' }}" required data-ignore-id="{{ $customer->id }}">
+            <input type="text" name="account_number" class="form-control account-number-input" value="{{ $customer->account_number ?? '' }}" required data-ignore-id="{{ $customer->id }}" readonly>
             <div class="invalid-feedback">This account number already exists.</div>
           </div>
           <div class="mb-3">
