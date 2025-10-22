@@ -8,6 +8,16 @@ use App\Models\FaultAssignment;
 use App\Models\Status;
 use App\Models\AutoAssignSetting;
 use Illuminate\Support\Carbon;
+use App\Jobs\SendInfobipMessage;
+use App\Models\User;
+use App\Models\Section;
+use App\Models\FaultSection;
+use App\Models\City;
+use App\Models\Position;
+use App\Models\Link;
+use App\Models\Customer;
+use Illuminate\Support\Facades\Log;
+use App\Jobs\SendInfobipTemplateMessage;
 
 class FaultLifecycle
 {
@@ -21,11 +31,34 @@ class FaultLifecycle
             FaultStageLog::endStage($fault->id, $actorUserId);
             self::resolveAssignment($fault);
         }
+
+        // Dispatch Infobip notifications for lifecycle changes
+        self::notifyStatusChange($fault, $toStatusId);
     }
 
     public static function startAssignment(Fault $fault, int $userId, ?int $actorUserId = null, bool $isStandby = false, ?string $region = null): void
     {
         FaultAssignment::start($fault->id, $userId, $actorUserId, $isStandby, $region);
+
+        // Notify assigned technician
+        $assigned = User::find($userId);
+        if ($assigned && $assigned->phonenumber) {
+            Log::info("Infobip: Fault {$fault->fault_ref_number} assigned to technician", [
+                'technician_id' => $userId,
+                'technician_name' => $assigned->name ?? 'Unknown',
+                'phone' => $assigned->phonenumber,
+                'is_standby' => $isStandby
+            ]);
+            $summary = self::faultSummary($fault);
+            $text = "Fault {$fault->fault_ref_number}: Technician assigned\n{$summary}";
+            SendInfobipMessage::dispatch([$assigned->phonenumber], $text);
+        } else {
+            Log::warning("Infobip: Cannot notify assigned technician - no phone number", [
+                'fault_ref' => $fault->fault_ref_number,
+                'technician_id' => $userId,
+                'technician_name' => $assigned->name ?? 'Unknown'
+            ]);
+        }
     }
 
     public static function resolveAssignment(Fault $fault): void
@@ -103,5 +136,202 @@ class FaultLifecycle
             $cachedId = (int)(Status::where('status_code', 'CLN')->value('id') ?? 6);
         }
         return $cachedId;
+    }
+
+    protected static function notifyStatusChange(Fault $fault, int $toStatusId): void
+    {
+        $desc = Status::find($toStatusId)->description ?? 'Status changed';
+        $summary = self::faultSummary($fault);
+        $text = "Fault {$fault->fault_ref_number}: {$desc}\n{$summary}";
+
+        // 1: Waiting for assessment -> notify NOC section technicians
+        if ($toStatusId === 1) {
+            Log::info("Infobip: Fault {$fault->fault_ref_number} created, notifying NOC technicians");
+            $nocSectionId = Section::whereIn('section', ['NOC', 'Network Operating Centre'])->value('id');
+            if ($nocSectionId) {
+                $recipients = User::where('section_id', $nocSectionId)
+                    ->whereNotNull('phonenumber')
+                    ->pluck('phonenumber')
+                    ->all();
+                if (!empty($recipients)) {
+                    Log::info("Infobip: Dispatching message to " . count($recipients) . " NOC technicians", [
+                        'fault_ref' => $fault->fault_ref_number,
+                        'recipients' => $recipients
+                    ]);
+                    SendInfobipMessage::dispatch($recipients, $text);
+                } else {
+                    Log::warning("Infobip: No NOC technicians with phone numbers found for fault {$fault->fault_ref_number}");
+                }
+            } else {
+                Log::warning("Infobip: NOC section not found for fault {$fault->fault_ref_number}");
+            }
+        }
+
+        // 2: Assessed -> notify section chief technician for the fault's region
+        if ($toStatusId === 2) {
+            Log::info("Infobip: Fault {$fault->fault_ref_number} assessed, notifying chief technicians");
+            $sectionId = FaultSection::where('fault_id', $fault->id)->value('section_id');
+            $region = City::where('id', $fault->city_id)->value('region');
+            if ($sectionId && $region) {
+                $chiefPositionIds = Position::where('position', 'Chief Technician')->pluck('id')->all();
+                $recipients = User::where('section_id', $sectionId)
+                    ->whereIn('position_id', $chiefPositionIds)
+                    ->where('region', $region)
+                    ->whereNotNull('phonenumber')
+                    ->pluck('phonenumber')
+                    ->all();
+                if (!empty($recipients)) {
+                    Log::info("Infobip: Dispatching message to " . count($recipients) . " chief technicians", [
+                        'fault_ref' => $fault->fault_ref_number,
+                        'section_id' => $sectionId,
+                        'region' => $region,
+                        'recipients' => $recipients
+                    ]);
+                    SendInfobipMessage::dispatch($recipients, $text);
+                } else {
+                    Log::warning("Infobip: No chief technicians with phone numbers found for fault {$fault->fault_ref_number}", [
+                        'section_id' => $sectionId,
+                        'region' => $region
+                    ]);
+                }
+            } else {
+                Log::warning("Infobip: Missing section or region for fault {$fault->fault_ref_number}", [
+                    'section_id' => $sectionId,
+                    'region' => $region
+                ]);
+            }
+        }
+
+        // Notify customer for key statuses (logged, assessed, resolved)
+        self::notifyCustomerStatus($fault, $toStatusId, $text);
+
+        // 3+ progression updates -> notify currently assigned technician if present
+        if (in_array($toStatusId, [3, 4, 5, self::nocClearedId()], true)) {
+            Log::info("Infobip: Fault {$fault->fault_ref_number} status updated to {$toStatusId}, notifying assigned technician");
+            self::notifyAssignedTech($fault, $text);
+        }
+    }
+
+    protected static function notifyAssignedTech(Fault $fault, string $text): void
+    {
+        if ($fault->assignedTo) {
+            $assigned = User::find($fault->assignedTo);
+            if ($assigned && $assigned->phonenumber) {
+                Log::info("Infobip: Dispatching message to assigned technician", [
+                    'fault_ref' => $fault->fault_ref_number,
+                    'technician_id' => $assigned->id,
+                    'technician_name' => $assigned->name ?? 'Unknown',
+                    'phone' => $assigned->phonenumber
+                ]);
+                SendInfobipMessage::dispatch([$assigned->phonenumber], $text);
+                // Customer notification: assignment update
+                $customerPhones = [];
+                if (!empty($fault->phoneNumber)) {
+                    $customerPhones[] = $fault->phoneNumber;
+                } elseif (!empty($fault->customer_id)) {
+                    $customer = Customer::find($fault->customer_id);
+                    if ($customer && !empty($customer->contact_number)) {
+                        $customerPhones[] = $customer->contact_number;
+                    }
+                }
+
+                if (!empty($customerPhones)) {
+                    $templateName = env('INFOBIP_STATUS_TEMPLATE');
+                    if (!empty($templateName)) {
+                        SendInfobipTemplateMessage::dispatch(
+                            $customerPhones,
+                            $templateName,
+                            'en',
+                            [
+                                $fault->fault_ref_number ?? '',
+                                'Technician assigned: ' . ($assigned->name ?? ''),
+                            ]
+                        );
+                        Log::info('Infobip: Customer notified (template) about assignment', [
+                            'fault' => $fault->fault_ref_number,
+                            'assigned_to' => $assigned->name ?? 'Unknown',
+                        ]);
+                    } else {
+                        SendInfobipMessage::dispatch($customerPhones, $text);
+                        Log::info('Infobip: Customer notified (text) about assignment', [
+                            'fault' => $fault->fault_ref_number,
+                            'assigned_to' => $assigned->name ?? 'Unknown',
+                        ]);
+                    }
+                }
+            } else {
+                Log::warning("Infobip: Assigned technician has no phone number for fault {$fault->fault_ref_number}", [
+                    'technician_id' => $fault->assignedTo,
+                    'technician_name' => $assigned->name ?? 'Unknown'
+                ]);
+            }
+        } else {
+            Log::info("Infobip: No technician assigned to fault {$fault->fault_ref_number}");
+        }
+    }
+
+    protected static function notifyCustomerStatus(Fault $fault, int $toStatusId, string $text): void
+    {
+        // Only send for: 1 (logged/waiting assessment), 2 (assessed), NOC cleared (resolved)
+        $shouldSend = in_array($toStatusId, [1, 2, self::nocClearedId()], true);
+        if (!$shouldSend) {
+            return;
+        }
+
+        $desc = Status::where('id', $toStatusId)->value('status') ?? 'Status updated';
+
+        $customerPhones = [];
+        if (!empty($fault->phoneNumber)) {
+            $customerPhones[] = $fault->phoneNumber;
+        } elseif (!empty($fault->customer_id)) {
+            $customer = Customer::find($fault->customer_id);
+            if ($customer && !empty($customer->contact_number)) {
+                $customerPhones[] = $customer->contact_number;
+            }
+        }
+
+        if (empty($customerPhones)) {
+            Log::warning('Infobip: No customer phone found for status update', [
+                'fault' => $fault->fault_ref_number,
+                'toStatusId' => $toStatusId,
+            ]);
+            return;
+        }
+
+        $templateName = env('INFOBIP_STATUS_TEMPLATE');
+        if (!empty($templateName)) {
+            SendInfobipTemplateMessage::dispatch(
+                $customerPhones,
+                $templateName,
+                'en',
+                [
+                    $fault->fault_ref_number ?? '',
+                    $desc,
+                ]
+            );
+            Log::info('Infobip: Customer notified (template) for status', [
+                'fault' => $fault->fault_ref_number,
+                'status' => $desc,
+                'recipients' => $customerPhones,
+            ]);
+        } else {
+            SendInfobipMessage::dispatch($customerPhones, $text);
+            Log::info('Infobip: Customer notified (text) for status', [
+                'fault' => $fault->fault_ref_number,
+                'status' => $desc,
+                'recipients' => $customerPhones,
+            ]);
+        }
+    }
+
+    protected static function faultSummary(Fault $fault): string
+    {
+        $customerModel = $fault->customer_id ? Customer::find($fault->customer_id) : null;
+        $customer = $customerModel ? ($customerModel->customer ?? '') : '';
+        $city = optional($fault->city)->city ?? '';
+        $suburb = optional($fault->suburb)->suburb ?? '';
+        $link = $fault->link_id ? Link::find($fault->link_id) : null;
+        $linkName = $link ? ($link->link ?? '') : '';
+        return trim("Customer: {$customer}\nCity/Suburb: {$city} / {$suburb}\nLink: {$linkName}");
     }
 }

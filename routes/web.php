@@ -129,6 +129,137 @@ Route::get('getusers', [UserController::class,'getUsers'])->name('getusers');
 
 Route::put('auto', [AssessmentController::class,'assign']);
 
+// Test routes for Infobip integration (remove in production)
+Route::view('/test-infobip', 'test-infobip')->name('test-infobip');
+
+Route::post('/test-infobip-send', function (\Illuminate\Http\Request $request) {
+    $validated = $request->validate([
+        'phone' => ['required', 'string', 'min:3'],
+        'message' => ['required', 'string', 'min:1'],
+    ]);
+
+    \Log::info('Test Infobip send attempt', [
+        'phone' => $validated['phone'],
+    ]);
+
+    // Probe env and config presence to debug missing configuration
+    $envApiKey = env('INFOBIP_API_KEY');
+    $envWhatsapp = env('INFOBIP_WHATSAPP_NUMBER');
+    \Log::info('Infobip config probe', [
+        'env_api_key_set' => !empty($envApiKey),
+        'env_whatsapp_set' => !empty($envWhatsapp),
+        'cfg_api_key_set' => !empty(config('services.infobip.api_key')),
+        'cfg_whatsapp_set' => !empty(config('services.infobip.whatsapp_number')),
+        'base_url' => config('services.infobip.base_url'),
+    ]);
+
+    try {
+        $service = app(\App\Services\InfobipService::class);
+        $result = $service->sendWhatsAppTextDetailed($validated['phone'], $validated['message']);
+
+        \Log::info('Test Infobip send result', [
+            'success' => $result['success'] ?? null,
+            'status' => $result['status'] ?? null,
+            'body' => is_string($result['body'] ?? null) ? substr($result['body'], 0, 500) : $result['body'],
+        ]);
+
+        return response()->json([
+            'success' => $result['success'],
+            'status' => $result['status'],
+            'body' => $result['body'],
+            // Align keys with test page expectations
+            'message' => $result['success'] ? 'Message sent to Infobip' : 'Failed to send message',
+            'result' => $result['body'],
+            'messageId' => (is_array($result['body'] ?? null) && isset($result['body']['messages'][0]['messageId'])) ? $result['body']['messages'][0]['messageId'] : null,
+        ], $result['success'] ? 200 : ($result['status'] ?: 400));
+    } catch (\Throwable $e) {
+        \Log::error('Test Infobip send exception', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+        return response()->json([
+            'success' => false,
+            'error' => 'Exception during send',
+            'message' => $e->getMessage(),
+            'result' => null,
+            'messageId' => null,
+        ], 500);
+    }
+})->name('test.infobip.send');
+
+// Status check route for Infobip WhatsApp messages
+Route::post('/test-infobip-send-template', function (\Illuminate\Http\Request $request, \App\Services\InfobipService $svc) {
+    $to = $request->input('to');
+    $templateName = $request->input('templateName');
+    $language = $request->input('language', 'en');
+    $placeholders = $request->input('placeholders', []);
+
+    if (is_string($placeholders)) {
+        $placeholders = array_values(array_filter(array_map('trim', explode(',', $placeholders)), fn($x) => $x !== ''));
+    }
+
+    if (!$to || !$templateName) {
+        return response()->json([
+            'message' => 'Missing required fields: to, templateName',
+            'result' => null,
+            'messageId' => null,
+            'status' => 422,
+        ], 422);
+    }
+
+    $res = $svc->sendWhatsAppTemplateDetailed($to, $templateName, $language, is_array($placeholders) ? $placeholders : []);
+
+    $messageId = null;
+    if (is_array($res['body'])) {
+        if (isset($res['body']['messages'][0]['messageId'])) {
+            $messageId = $res['body']['messages'][0]['messageId'];
+        } elseif (isset($res['body']['messageId'])) {
+            $messageId = $res['body']['messageId'];
+        }
+    }
+
+    return response()->json([
+        'message' => $res['success'] ? 'Template sent successfully!' : 'Template send failed',
+        'result' => $res['body'],
+        'messageId' => $messageId,
+        'status' => $res['status'],
+    ], $res['success'] ? 200 : 400);
+});
+// Status check route for Infobip WhatsApp messages
+Route::get('/test-infobip-status', function (\Illuminate\Http\Request $request) {
+    $request->validate([
+        'messageId' => ['required', 'string', 'min:10'],
+    ]);
+
+    $messageId = $request->query('messageId');
+    try {
+        $service = app(\App\Services\InfobipService::class);
+        $result = $service->getWhatsAppMessageStatus($messageId);
+
+        \Log::info('Test Infobip status result', [
+            'success' => $result['success'] ?? null,
+            'status' => $result['status'] ?? null,
+            'body' => is_string($result['body'] ?? null) ? substr($result['body'], 0, 500) : $result['body'],
+        ]);
+
+        return response()->json([
+            'success' => $result['success'],
+            'status' => $result['status'],
+            'body' => $result['body'],
+        ], $result['success'] ? 200 : ($result['status'] ?: 400));
+    } catch (\Throwable $e) {
+        \Log::error('Test Infobip status exception', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+        return response()->json([
+            'success' => false,
+            'error' => 'Exception during status query',
+            'message' => $e->getMessage(),
+        ], 500);
+    }
+})->name('test.infobip.status');
+
 
 
 
