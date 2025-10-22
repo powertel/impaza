@@ -45,6 +45,8 @@ Customers
                         <th>Customer</th>
                         <th>Account Manager</th>
                         <th>Account Number</th>
++                       <th>Address</th>
++                       <th>Contact Number</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -55,6 +57,8 @@ Customers
                         <td>{{ $customer->customer}}</td>
                         <td>{{ $customer->accountManager }}</td>
                         <td>{{ $customer->account_number }}</td>
++                       <td>{{ $customer->address ?? '' }}</td>
++                       <td>{{ $customer->contact_number ?? '' }}</td>
                         <td>
                             <button type="button" class="btn  btn-outline-success"  data-bs-toggle="modal" data-bs-target="#customerViewModal{{ $customer->id }}">
                                 <i class="fas fa-eye me-1"></i>View

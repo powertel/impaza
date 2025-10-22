@@ -13,6 +13,10 @@
           <dd class="col-sm-7">{{ $customer->customer }}</dd>
           <dt class="col-sm-5">Account Number</dt>
           <dd class="col-sm-7">{{ $customer->account_number }}</dd>
+          <dt class="col-sm-5">Address</dt>
+          <dd class="col-sm-7">{{ $customer->address ?? '' }}</dd>
+          <dt class="col-sm-5">Contact Number</dt>
+          <dd class="col-sm-7">{{ $customer->contact_number ?? '' }}</dd>
           @php
             $manager = DB::table('account_managers')
               ->leftJoin('users','account_managers.user_id','=','users.id')

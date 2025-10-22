@@ -66,6 +66,24 @@
                     <input type="text" name="items[0][capacity]" class="form-control" placeholder="e.g. 100Mbps">
                   </div>
 
+                  <!-- Row 2b: Contract Number, SAP Codes, Quantity, Comment -->
+                  <div class="w-100"></div>
+                  <div class="col-md-3">
+                    <label class="form-label">Contract Number</label>
+                    <input type="text" name="items[0][contract_number]" class="form-control" placeholder="e.g. CTR-2025-001">
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">SAP Codes</label>
+                    <input type="text" name="items[0][sapcodes]" class="form-control" placeholder="e.g. SAP-ABC-123">
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">Quantity</label>
+                    <input type="number" name="items[0][quantity]" class="form-control" min="0" placeholder="e.g. 1">
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">Comment</label>
+                    <input type="text" name="items[0][comment]" class="form-control" placeholder="Optional notes">
+                  </div>
                   <!-- Row 3: City/Town, Location, Pop -->
                   <div class="w-100"></div>
                   <div class="col-md-3">

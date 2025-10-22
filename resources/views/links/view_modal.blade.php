@@ -34,17 +34,48 @@
           </div>
           <div class="w-100"></div>
           <div class="col-md-4">
-            <label class="form-label">JCC Number</label>
-            <div class="form-control bg-light">{{ $link->jcc_number ?? '—' }}</div>
+            <div class="mb-3">
+              <small class="text-muted">JCC Number</small>
+              <div class="fs-6">{{ $link->jcc_number ?? '—' }}</div>
+            </div>
           </div>
           <div class="col-md-4">
-            <label class="form-label">Service Type</label>
-            <div class="form-control bg-light">{{ $link->service_type ?? '—' }}</div>
+            <div class="mb-3">
+              <small class="text-muted">Service Type</small>
+              <div class="fs-6">{{ $link->service_type ?? '—' }}</div>
+            </div>
           </div>
           <div class="col-md-4">
-            <label class="form-label">Capacity</label>
-            <div class="form-control bg-light">{{ $link->capacity ?? '—' }}</div>
+            <div class="mb-3">
+              <small class="text-muted">Capacity</small>
+              <div class="fs-6">{{ $link->capacity ?? '—' }}</div>
+            </div>
           </div>
++
++          <div class="col-md-4">
++            <div class="mb-3">
++              <small class="text-muted">Contract Number</small>
++              <div class="fs-6">{{ $link->contract_number ?? '—' }}</div>
++            </div>
++          </div>
++          <div class="col-md-4">
++            <div class="mb-3">
++              <small class="text-muted">SAP Codes</small>
++              <div class="fs-6">{{ $link->sapcodes ?? '—' }}</div>
++            </div>
++          </div>
++          <div class="col-md-4">
++            <div class="mb-3">
++              <small class="text-muted">Quantity</small>
++              <div class="fs-6">{{ $link->quantity ?? '—' }}</div>
++            </div>
++          </div>
++          <div class="col-md-12">
++            <div class="mb-3">
++              <small class="text-muted">Comment</small>
++              <div class="fs-6">{{ $link->comment ?? '—' }}</div>
++            </div>
++          </div>
         </div>
       </div>
       <div class="modal-footer">

@@ -27,12 +27,20 @@
               <option value="" disabled {{ empty($customer->account_manager_id) ? 'selected' : '' }}>Select Account Manager</option>
               @isset($accountManagers)
                 @foreach($accountManagers as $am)
-                  <option value="{{ $am->am_id }}" {{ (int)$customer->account_manager_id === (int)$am->user_id ? 'selected' : '' }}>
+                  <option value="{{ $am->am_id }}" {{ (int)$customer->account_manager_id === (int)$am->am_id ? 'selected' : '' }}>
                     {{ $am->name ?? ('User #'.$am->user_id) }}
                   </option>
                 @endforeach
               @endisset
             </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Address</label>
+            <input type="text" name="address" class="form-control" value="{{ $customer->address ?? '' }}" placeholder="Address">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Contact Number</label>
+            <input type="text" name="contact_number" class="form-control" value="{{ $customer->contact_number ?? '' }}" placeholder="Contact Number">
           </div>
         </div>
         <div class="modal-footer">
