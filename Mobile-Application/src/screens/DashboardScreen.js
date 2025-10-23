@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AntDesign } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -31,66 +31,68 @@ export default function DashboardScreen() {
 
   return (
     <SafeAreaView style={[styles.screen, { paddingTop: insets.top + 1.5 }]} edges={['top','left','right']}>
-      <View style={styles.headerRow}>
-        <View>
-          <Text style={styles.greeting}>Hi, Technician 👋</Text>
-          <Text style={styles.subtitle}>Create a better future for yourself here</Text>
-        </View>
-        <TouchableOpacity style={styles.avatar}><Text style={styles.avatarText}>IM</Text></TouchableOpacity>
-      </View>
-
-      <View style={styles.searchBox}>
-        <AntDesign name="search1" size={18} color="#9CA3AF" />
-        <TextInput placeholder="Search..." style={styles.searchInput} />
-      </View>
-
-      <View style={styles.cardLight}>
-        <View style={styles.cardRow}>
-          <View style={styles.iconCircle}><AntDesign name="twitter" size={20} color="#1DA1F2" /></View>
-          <View style={{flex:1}}>
-            <Text style={styles.cardTitle}>System Status</Text>
-            <Text style={styles.cardSub}>All services operational</Text>
+      <ScrollView contentContainerStyle={{ paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
+        <View style={styles.headerRow}>
+          <View>
+            <Text style={styles.greeting}>Hi, Technician 👋</Text>
+            <Text style={styles.subtitle}>Create a better future for yourself here</Text>
           </View>
-          <View style={styles.badge}><Text style={styles.badgeText}>OK</Text></View>
+          <TouchableOpacity style={styles.avatar}><Text style={styles.avatarText}>IM</Text></TouchableOpacity>
         </View>
-      </View>
-
-      <Text style={styles.sectionTitle}>Technician Stats</Text>
-      <View style={styles.statsCard}>
-        <View style={styles.statsRow}>
-          <View style={styles.statItem}><Text style={styles.statLabel}>Assigned</Text><Text style={styles.statValue}>{stats.assigned}</Text></View>
-          <View style={styles.statItem}><Text style={styles.statLabel}>Completed</Text><Text style={styles.statValue}>{stats.completed}</Text></View>
+  
+        {/* <View style={styles.searchBox}>
+          <AntDesign name="search1" size={18} color="#9CA3AF" />
+          <TextInput placeholder="Search..." style={styles.searchInput} />
+        </View> */}
+  
+        {/*        <View style={styles.cardLight}>
+          <View style={styles.cardRow}>
+            <View style={styles.iconCircle}><AntDesign name="twitter" size={20} color="#1DA1F2" /></View>
+            <View style={{flex:1}}>
+              <Text style={styles.cardTitle}>System Status</Text>
+              <Text style={styles.cardSub}>All services operational</Text>
+            </View>
+            <View style={styles.badge}><Text style={styles.badgeText}>OK</Text></View>
+          </View>
+        </View> */}
+  
+        <Text style={styles.sectionTitle}></Text>
+        <View style={styles.statsCard}>
+          <View style={styles.statsRow}>
+            <View style={styles.statItem}><Text style={styles.statLabel}>Assigned</Text><Text style={styles.statValue}>{stats.assigned}</Text></View>
+            <View style={styles.statItem}><Text style={styles.statLabel}>Completed</Text><Text style={styles.statValue}>{stats.completed}</Text></View>
+          </View>
+          <View style={styles.statsRow}>
+            <View style={styles.statItem}><Text style={styles.statLabel}>Remaining</Text><Text style={styles.statValue}>{stats.remaining}</Text></View>
+            <View style={styles.statItem}><Text style={styles.statLabel}>Completion Rate</Text><Text style={styles.statValue}>{stats.completionRate}%</Text></View>
+          </View>
+          <View style={styles.statsRow}>
+            <View style={styles.statItem}><Text style={styles.statLabel}>Avg Completion Rate</Text><Text style={styles.statValue}>{stats.avgCompletionRate}%</Text></View>
+            <View style={styles.statItem}><Text style={styles.statLabel}>Open List</Text><TouchableOpacity style={styles.applyBtn} onPress={() => navigation.navigate('My Faults')}><Text style={styles.applyText}>View</Text></TouchableOpacity></View>
+          </View>
         </View>
-        <View style={styles.statsRow}>
-          <View style={styles.statItem}><Text style={styles.statLabel}>Remaining</Text><Text style={styles.statValue}>{stats.remaining}</Text></View>
-          <View style={styles.statItem}><Text style={styles.statLabel}>Completion Rate</Text><Text style={styles.statValue}>{stats.completionRate}%</Text></View>
+  
+        <Text style={styles.sectionTitle}>Quick Actions</Text>
+        <View style={styles.quickRow}>
+          <View style={styles.quickItem}><Text style={styles.quickTitle}>My Faults</Text><Text style={styles.quickSub}>View assigned</Text></View>
+          <View style={styles.quickItem}><Text style={styles.quickTitle}>Reports</Text><Text style={styles.quickSub}>Recent work</Text></View>
         </View>
-        <View style={styles.statsRow}>
-          <View style={styles.statItem}><Text style={styles.statLabel}>Avg Completion Rate</Text><Text style={styles.statValue}>{stats.avgCompletionRate}%</Text></View>
-          <View style={styles.statItem}><Text style={styles.statLabel}>Open List</Text><TouchableOpacity style={styles.applyBtn} onPress={() => navigation.navigate('My Faults')}><Text style={styles.applyText}>View</Text></TouchableOpacity></View>
+  
+        <Text style={styles.sectionTitle}>Recent Activity</Text>
+        <View style={styles.cardDark}>
+          <Text style={styles.darkTitle}>{stats.remaining} faults pending</Text>
+          <View style={styles.darkRow}>
+            <Text style={styles.darkChip}>High</Text>
+            <Text style={styles.darkChip}>Remote</Text>
+            <Text style={styles.darkChip}>Fiber</Text>
+          </View>
+          <TouchableOpacity style={styles.applyBtn} onPress={() => navigation.navigate('My Faults')}>
+            <Text style={styles.applyText}>Open list</Text>
+          </TouchableOpacity>
         </View>
-      </View>
-
-      <Text style={styles.sectionTitle}>Quick Actions</Text>
-      <View style={styles.quickRow}>
-        <View style={styles.quickItem}><Text style={styles.quickTitle}>My Faults</Text><Text style={styles.quickSub}>View assigned</Text></View>
-        <View style={styles.quickItem}><Text style={styles.quickTitle}>Reports</Text><Text style={styles.quickSub}>Recent work</Text></View>
-      </View>
-
-      <Text style={styles.sectionTitle}>Recent Activity</Text>
-      <View style={styles.cardDark}>
-        <Text style={styles.darkTitle}>{stats.remaining} faults pending</Text>
-        <View style={styles.darkRow}>
-          <Text style={styles.darkChip}>High</Text>
-          <Text style={styles.darkChip}>Remote</Text>
-          <Text style={styles.darkChip}>Fiber</Text>
-        </View>
-        <TouchableOpacity style={styles.applyBtn} onPress={() => navigation.navigate('My Faults')}>
-          <Text style={styles.applyText}>Open list</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
-  );
+      </ScrollView>
+     </SafeAreaView>
+    );
 }
 
 const blue = '#0A66CC';

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { AntDesign, FontAwesome } from '@expo/vector-icons';
@@ -31,55 +31,57 @@ export default function SignInScreen() {
 
   return (
     <SafeAreaView style={styles.screen} edges={["top","left","right"]}> 
-      <View style={styles.wrapper}>
-        <Text style={styles.brand}>impazamon</Text>
-        <View style={styles.card}>
-          <Text style={styles.title}>Login to your Account</Text>
-
-          <View style={styles.field}> 
-            <TextInput
-              placeholder="Email"
-              style={styles.input}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              value={email}
-              onChangeText={setEmail}
-            />
-          </View>
-          <View style={styles.field}> 
-            <TextInput
-              placeholder="Password"
-              style={styles.input}
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
-            />
-          </View>
-
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-
-          <TouchableOpacity style={styles.primaryBtn} onPress={handleLogin} disabled={loading}>
-            <Text style={styles.primaryBtnText}>{loading ? 'Signing In…' : 'Sign In'}</Text>
-          </TouchableOpacity>
-
-          <Text style={styles.subtle}>Or sign in with</Text>
-          <View style={styles.socialRow}>
-            <TouchableOpacity style={styles.socialBtn}>
-              <AntDesign name="google" size={20} color="#DB4437" />
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+        <View style={styles.wrapper}>
+          <Text style={styles.brand}>impazamon</Text>
+          <View style={styles.card}>
+            <Text style={styles.title}>Login to your Account</Text>
+  
+            <View style={styles.field}> 
+              <TextInput
+                placeholder="Email"
+                style={styles.input}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                value={email}
+                onChangeText={setEmail}
+              />
+            </View>
+            <View style={styles.field}> 
+              <TextInput
+                placeholder="Password"
+                style={styles.input}
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+              />
+            </View>
+  
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+  
+            <TouchableOpacity style={styles.primaryBtn} onPress={handleLogin} disabled={loading}>
+              <Text style={styles.primaryBtnText}>{loading ? 'Signing In…' : 'Sign In'}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.socialBtn}>
-              <FontAwesome name="facebook" size={20} color="#1877F2" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.socialBtn}>
-              <AntDesign name="twitter" size={20} color="#1DA1F2" />
+  
+            <Text style={styles.subtle}>Or sign in with</Text>
+            <View style={styles.socialRow}>
+              <TouchableOpacity style={styles.socialBtn}>
+                <AntDesign name="google" size={20} color="#DB4437" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.socialBtn}>
+                <FontAwesome name="facebook" size={20} color="#1877F2" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.socialBtn}>
+                <AntDesign name="twitter" size={20} color="#1DA1F2" />
+              </TouchableOpacity>
+            </View>
+  
+            <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+              <Text style={styles.link}>Don’t have an account? Sign Up</Text>
             </TouchableOpacity>
           </View>
-
-          <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-            <Text style={styles.link}>Don’t have an account? Sign Up</Text>
-          </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

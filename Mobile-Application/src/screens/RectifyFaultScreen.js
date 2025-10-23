@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { rectifyFault } from '../services/api';
@@ -28,19 +28,21 @@ export default function RectifyFaultScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top","left","right"]}>
-      <Text style={styles.title}>Rectify Fault #{id}</Text>
-      <TextInput
-        placeholder="Enter rectification notes"
-        style={styles.input}
-        multiline
-        numberOfLines={4}
-        value={notes}
-        onChangeText={setNotes}
-      />
-      {result?.error ? <Text style={styles.error}>{result.error}</Text> : null}
-      <TouchableOpacity style={styles.primaryBtn} onPress={submit} disabled={loading}>
-        <Text style={styles.primaryBtnText}>{loading ? 'Submitting…' : 'Submit'}</Text>
-      </TouchableOpacity>
+      <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
+        <Text style={styles.title}>Rectify Fault #{id}</Text>
+        <TextInput
+          placeholder="Enter rectification notes"
+          style={styles.input}
+          multiline
+          numberOfLines={4}
+          value={notes}
+          onChangeText={setNotes}
+        />
+        {result?.error ? <Text style={styles.error}>{result.error}</Text> : null}
+        <TouchableOpacity style={styles.primaryBtn} onPress={submit} disabled={loading}>
+          <Text style={styles.primaryBtnText}>{loading ? 'Submitting…' : 'Submit'}</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
   );
 }

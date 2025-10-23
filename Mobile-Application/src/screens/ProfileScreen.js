@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { setAuthToken } from '../services/api';
@@ -15,19 +15,21 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={[styles.screen, { paddingTop: insets.top + 2}]} edges={["top","left","right"]}>
-      <View style={styles.header}> 
-        <Text style={styles.title}>Profile</Text>
-        <Text style={styles.sub}>Manage your account</Text>
-      </View>
+      <ScrollView contentContainerStyle={{ paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
+        <View style={styles.header}> 
+          <Text style={styles.title}>Profile</Text>
+          <Text style={styles.sub}>Manage your account</Text>
+        </View>
 
-      <View style={styles.card}> 
-        <Text style={styles.row}>Name: Technician</Text>
-        <Text style={styles.row}>Email: technician@example.com</Text>
-      </View>
+        <View style={styles.card}> 
+          <Text style={styles.row}>Name: Technician</Text>
+          <Text style={styles.row}>Email: technician@example.com</Text>
+        </View>
 
-      <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-        <Text style={styles.logoutText}>Logout</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { register } from '../services/api';
@@ -36,31 +36,33 @@ export default function SignUpScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top","left","right"]}>
-      <Text style={styles.brand}>Powertel</Text>
-      <Text style={styles.title}>Create an Account</Text>
+      <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
+        <Text style={styles.brand}>Powertel</Text>
+        <Text style={styles.title}>Create an Account</Text>
 
-      <View style={styles.field}> 
-        <TextInput placeholder="Full Name" style={styles.input} value={name} onChangeText={setName} />
-      </View>
-      <View style={styles.field}> 
-        <TextInput placeholder="Email" style={styles.input} autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} />
-      </View>
-      <View style={styles.field}> 
-        <TextInput placeholder="Password" style={styles.input} secureTextEntry value={password} onChangeText={setPassword} />
-      </View>
-      <View style={styles.field}> 
-        <TextInput placeholder="Confirm Password" style={styles.input} secureTextEntry value={confirm} onChangeText={setConfirm} />
-      </View>
+        <View style={styles.field}> 
+          <TextInput placeholder="Full Name" style={styles.input} value={name} onChangeText={setName} />
+        </View>
+        <View style={styles.field}> 
+          <TextInput placeholder="Email" style={styles.input} autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} />
+        </View>
+        <View style={styles.field}> 
+          <TextInput placeholder="Password" style={styles.input} secureTextEntry value={password} onChangeText={setPassword} />
+        </View>
+        <View style={styles.field}> 
+          <TextInput placeholder="Confirm Password" style={styles.input} secureTextEntry value={confirm} onChangeText={setConfirm} />
+        </View>
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+        {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      <TouchableOpacity style={styles.primaryBtn} onPress={handleRegister} disabled={loading}>
-        <Text style={styles.primaryBtnText}>{loading ? 'Creating…' : 'Continue'}</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.primaryBtn} onPress={handleRegister} disabled={loading}>
+          <Text style={styles.primaryBtnText}>{loading ? 'Creating…' : 'Continue'}</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
-        <Text style={styles.link}>Already have an account? Sign In</Text>
-      </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
+          <Text style={styles.link}>Already have an account? Sign In</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
   );
 }
