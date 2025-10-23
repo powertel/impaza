@@ -45,7 +45,7 @@ class InfobipService
             'Authorization' => 'App ' . $apiKey,
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
-        ])->post($endpoint, $payload);
+        ])->timeout(30)->post($endpoint, $payload);
 
         $success = $response->successful();
         if ($success) {
@@ -107,7 +107,7 @@ class InfobipService
             'Authorization' => 'App ' . $apiKey,
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
-        ])->post($endpoint, $payload);
+        ])->timeout(30)->post($endpoint, $payload);
 
         $body = null;
         try {
@@ -166,6 +166,7 @@ class InfobipService
             'templateName' => $templateName,
             'language' => $language,
         ];
+
         if (!empty($placeholders)) {
             $content['templateData'] = [
                 'body' => [
@@ -175,17 +176,20 @@ class InfobipService
         }
 
         $payload = [
-            'from' => ltrim($from, '+'),
-            'to' => $to,
-            'content' => $content,
+            'messages' => [
+                [
+                    'from' => ltrim($from, '+'),
+                    'to' => $to,
+                    'content' => $content,
+                ],
+            ],
         ];
 
-        Log::info('Infobip: Request payload (template)', [
+        Log::info('Infobip: Sending template WhatsApp message', [
             'endpoint' => $endpoint,
-            'from' => $payload['from'],
-            'to' => $payload['to'],
+            'from' => $payload['messages'][0]['from'],
+            'to' => $payload['messages'][0]['to'],
             'templateName' => $templateName,
-            'language' => $language,
             'placeholders_count' => count($placeholders),
         ]);
 
@@ -193,7 +197,7 @@ class InfobipService
             'Authorization' => 'App ' . $apiKey,
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
-        ])->post($endpoint, $payload);
+        ])->timeout(30)->post($endpoint, $payload);
 
         $body = null;
         try {
@@ -204,15 +208,15 @@ class InfobipService
 
         $success = $response->successful();
         if ($success) {
-            Log::info('Infobip: Template WhatsApp message sent', [
-                'to' => $payload['to'],
-                'from' => $payload['from'],
+            Log::info('Infobip: Template WhatsApp message sent successfully', [
+                'to' => $payload['messages'][0]['to'],
+                'from' => $payload['messages'][0]['from'],
                 'status' => $response->status(),
             ]);
         } else {
-            Log::error('Infobip: Template WhatsApp message failed', [
-                'to' => $payload['to'],
-                'from' => $payload['from'],
+            Log::error('Infobip: Failed to send template WhatsApp message', [
+                'to' => $payload['messages'][0]['to'],
+                'from' => $payload['messages'][0]['from'],
                 'status' => $response->status(),
                 'body' => is_string($body) ? $body : json_encode($body),
             ]);
@@ -253,7 +257,7 @@ class InfobipService
         $response = Http::withHeaders([
             'Authorization' => 'App ' . $apiKey,
             'Accept' => 'application/json',
-        ])->get($endpoint, [
+        ])->timeout(30)->get($endpoint, [
             'messageId' => $messageId,
         ]);
 

@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { register } from '../services/api';
+import { theme } from '../styles/theme';
 
 export default function SignUpScreen() {
   const navigation = useNavigation();
@@ -67,15 +68,14 @@ export default function SignUpScreen() {
   );
 }
 
-const blue = '#0A66CC';
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 24, backgroundColor: '#fff' },
-  brand: { fontSize: 24, color: blue, fontWeight: '700', textAlign: 'center', marginTop: 24 },
-  title: { fontSize: 20, fontWeight: '600', marginTop: 8, marginBottom: 24, textAlign: 'center' },
-  field: { marginBottom: 12 },
-  input: { borderWidth: 1, borderColor: '#D1D5DB', borderRadius: 8, padding: 12, fontSize: 16 },
-  primaryBtn: { backgroundColor: blue, borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginTop: 8 },
-  primaryBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  link: { marginTop: 16, color: blue, textAlign: 'center' },
-  error: { color: '#DC2626', marginBottom: 8, textAlign: 'center' }
+  container: { flex: 1, padding: theme.spacing.xl, backgroundColor: theme.colors.white },
+  brand: { fontSize: theme.fontSizes.xxl, color: theme.colors.primary, fontWeight: '700', textAlign: 'center', marginTop: theme.spacing.xl },
+  title: { fontSize: theme.fontSizes.xl, fontWeight: '600', marginTop: theme.spacing.sm, marginBottom: theme.spacing.xl, textAlign: 'center' },
+  field: { marginBottom: theme.spacing.md },
+  input: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, padding: theme.spacing.md, fontSize: theme.fontSizes.md },
+  primaryBtn: { backgroundColor: theme.colors.primary, borderRadius: theme.spacing.sm, paddingVertical: theme.spacing.md, alignItems: 'center', marginTop: theme.spacing.sm },
+  primaryBtnText: { color: theme.colors.white, fontSize: theme.fontSizes.md, fontWeight: '600' },
+  link: { marginTop: theme.spacing.lg, color: theme.colors.primary, textAlign: 'center' },
+  error: { color: theme.colors.danger, marginBottom: theme.spacing.sm, textAlign: 'center' }
 });

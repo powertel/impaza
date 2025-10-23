@@ -39,6 +39,7 @@ class FaultController extends Controller
                 'faults.contactName',
                 'faults.phoneNumber',
                 'faults.contactEmail',
+                'faults.fault_ref_number',
                 'faults.address',
                 'account_manager_users.name as accountManager',
                 'links.link',

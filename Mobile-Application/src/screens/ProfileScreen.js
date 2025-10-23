@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { setAuthToken } from '../services/api';
+import { theme } from '../styles/theme';
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
@@ -35,12 +36,12 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#F5F7FF', padding: 16 },
-  header: { marginBottom: 12 },
-  title: { fontSize: 22, fontWeight: '800', color: '#111827' },
-  sub: { color: '#6B7280', marginTop: 4 },
-  card: { backgroundColor: '#fff', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#E5E7EB' },
-  row: { marginBottom: 8, color: '#374151' },
-  logoutBtn: { backgroundColor: '#DC2626', borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginTop: 16 },
-  logoutText: { color: '#fff', fontWeight: '700' }
+  screen: { flex: 1, backgroundColor: theme.colors.background, padding: theme.spacing.lg },
+  header: { marginBottom: theme.spacing.md },
+  title: { fontSize: theme.fontSizes.xxl, fontWeight: '800', color: theme.colors.black },
+  sub: { color: theme.colors.gray, marginTop: theme.spacing.xs },
+  card: { backgroundColor: theme.colors.white, borderRadius: theme.spacing.lg, padding: theme.spacing.lg, borderWidth: 1, borderColor: theme.colors.lightGray },
+  row: { marginBottom: theme.spacing.sm, color: theme.colors.darkGray },
+  logoutBtn: { backgroundColor: theme.colors.danger, borderRadius: theme.spacing.md, paddingVertical: theme.spacing.md, alignItems: 'center', marginTop: theme.spacing.lg },
+  logoutText: { color: theme.colors.white, fontWeight: '700' }
 });
