@@ -29,12 +29,12 @@ const FaultCard = ({ item, onPress }) => {
   const age = formatDistanceToNow(item.created_at);
 
   const getPriorityStyle = (p) => {
-    switch (p?.toLowerCase()) {
-      case 'High':
+    switch (p?.trim().toLowerCase()) {
+      case 'high':
         return { bar: styles.highPriorityBar, tag: styles.highPriorityTag, text: styles.highPriorityText };
-      case 'Medium':
+      case 'medium':
         return { bar: styles.mediumPriorityBar, tag: styles.mediumPriorityTag, text: styles.mediumPriorityText };
-      case 'Low':
+      case 'low':
         return { bar: styles.lowPriorityBar, tag: styles.lowPriorityTag, text: styles.lowPriorityText };
       default:
         return { bar: styles.lowPriorityBar, tag: styles.lowPriorityTag, text: styles.lowPriorityText };
@@ -89,7 +89,7 @@ export default function FaultsListScreen() {
     if (activeFilter === 'All') {
       return faults;
     }
-    return faults.filter(fault => fault.priority?.toLowerCase() === activeFilter.toLowerCase());
+    return faults.filter(fault => fault.priority?.trim().toLowerCase() === activeFilter.toLowerCase());
   }, [faults, activeFilter]);
 
   const renderItem = ({ item }) => <FaultCard item={item} onPress={() => navigation.navigate('FaultDetail', { id: item.id })} />;
