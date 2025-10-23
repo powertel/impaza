@@ -23,18 +23,18 @@ const formatDistanceToNow = (dateString) => {
 
 const FaultCard = ({ item, onPress }) => {
   const customerName = item.customer || 'N/A';
-  const reference = item.reference_number || `ID: ${item.id}`;
+  const reference = item.fault_ref_number || `ID: ${item.id}`;
   const status = item.status || 'Unknown';
-  const priority = item.priority || 'Normal';
+  const priority = item.priorityLevel || 'Normal';
   const age = formatDistanceToNow(item.created_at);
 
   const getPriorityStyle = (p) => {
     switch (p?.toLowerCase()) {
-      case 'high':
+      case 'High':
         return { bar: styles.highPriorityBar, tag: styles.highPriorityTag, text: styles.highPriorityText };
-      case 'medium':
+      case 'Medium':
         return { bar: styles.mediumPriorityBar, tag: styles.mediumPriorityTag, text: styles.mediumPriorityText };
-      case 'low':
+      case 'Low':
         return { bar: styles.lowPriorityBar, tag: styles.lowPriorityTag, text: styles.lowPriorityText };
       default:
         return { bar: styles.lowPriorityBar, tag: styles.lowPriorityTag, text: styles.lowPriorityText };
@@ -97,7 +97,7 @@ export default function FaultsListScreen() {
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Tasks</Text>
+        <Text style={styles.headerTitle}>My Faults</Text>
         <TouchableOpacity onPress={() => {}}>
           <Feather name="plus-circle" size={28} color={theme.colors.primary} />
         </TouchableOpacity>
