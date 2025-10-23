@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { rectifyFault } from '../services/api';
+import { theme } from '../styles/theme';
 
 export default function RectifyFaultScreen() {
   const route = useRoute();
@@ -48,10 +49,10 @@ export default function RectifyFaultScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', padding: 16 },
-  title: { fontSize: 18, fontWeight: '700', color: '#111827', marginBottom: 12 },
-  input: { borderWidth: 1, borderColor: '#D1D5DB', borderRadius: 8, padding: 12, minHeight: 100, textAlignVertical: 'top' },
-  error: { color: '#DC2626', marginTop: 8 },
-  primaryBtn: { backgroundColor: '#0A66CC', borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginTop: 16 },
-  primaryBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' }
+  container: { flex: 1, backgroundColor: theme.colors.white, padding: theme.spacing.lg },
+  title: { fontSize: theme.fontSizes.lg, fontWeight: '700', color: theme.colors.black, marginBottom: theme.spacing.md },
+  input: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, padding: theme.spacing.md, minHeight: 100, textAlignVertical: 'top' },
+  error: { color: theme.colors.danger, marginTop: theme.spacing.sm },
+  primaryBtn: { backgroundColor: theme.colors.primary, borderRadius: theme.spacing.sm, paddingVertical: theme.spacing.md, alignItems: 'center', marginTop: theme.spacing.lg },
+  primaryBtnText: { color: theme.colors.white, fontSize: theme.fontSizes.md, fontWeight: '600' }
 });

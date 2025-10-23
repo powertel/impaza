@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign, Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { getTechnicianStats } from '../services/api';
+import { theme } from '../styles/theme';
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
@@ -34,111 +35,123 @@ export default function DashboardScreen() {
     const h = Math.floor(s / 3600);
     const m = Math.floor((s % 3600) / 60);
     const rem = s % 60;
-    if (h > 0) return `${h} hours ${m} minutes ${rem} seconds`;
-    if (m > 0) return `${m} minutes ${rem} seconds`;
-    return `${rem} seconds`;
+    if (h > 0) return `${h}h ${m}m ${rem}s`;
+    if (m > 0) return `${m}m ${rem}s`;
+    return `${rem}s`;
   };
 
   const rateText = (typeof stats.completionRate === 'number') ? `${stats.completionRate.toFixed(1)}%` : `${stats.completionRate}%`;
 
+  const StatCard = ({ icon, label, value, color }) => (
+    <View style={styles.statCard}>
+      <Feather name={icon} size={theme.fontSizes.xl} color={color} />
+      <Text style={styles.statLabel}>{label}</Text>
+      <Text style={styles.statValue}>{value}</Text>
+    </View>
+  );
+
   return (
-    <SafeAreaView style={[styles.screen, { paddingTop: insets.top + 1.5 }]} edges={['top','left','right']}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
-        <View style={styles.headerRow}>
-          <View>
-            <Text style={styles.greeting}>Hi, Technician 👋</Text>
-            <Text style={styles.subtitle}>Create a better future for yourself here</Text>
-          </View>
-          <TouchableOpacity style={styles.avatar}><Text style={styles.avatarText}>IM</Text></TouchableOpacity>
-        </View>
-  
-        {/* <View style={styles.searchBox}>
-          <AntDesign name="search1" size={18} color="#9CA3AF" />
-          <TextInput placeholder="Search..." style={styles.searchInput} />
-        </View> */}
-  
-        {/*        <View style={styles.cardLight}>
-          <View style={styles.cardRow}>
-            <View style={styles.iconCircle}><AntDesign name="twitter" size={20} color="#1DA1F2" /></View>
-            <View style={{flex:1}}>
-              <Text style={styles.cardTitle}>System Status</Text>
-              <Text style={styles.cardSub}>All services operational</Text>
+    <View style={styles.screen}>
+      <SafeAreaView style={{ flex: 1, paddingTop: insets.top + 1.5 }} edges={['top','left','right']}>
+        <ScrollView contentContainerStyle={{ paddingBottom: theme.spacing.lg }} showsVerticalScrollIndicator={false}>
+          <View style={styles.headerRow}>
+            <View>
+              <Text style={styles.greeting}>Hi, Technician 👋</Text>
+              <Text style={styles.subtitle}>Here's your performance overview</Text>
             </View>
-            <View style={styles.badge}><Text style={styles.badgeText}>OK</Text></View>
+            <TouchableOpacity style={styles.avatar}><Text style={styles.avatarText}>IM</Text></TouchableOpacity>
           </View>
-        </View> */}
-  
-        <Text style={styles.sectionTitle}>{stats.periodLabel ? `Technician Stats (${stats.periodLabel})` : 'Technician Stats'}</Text>
-        <View style={styles.statsCard}>
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}><Text style={styles.statLabel}>Assigned</Text><Text style={styles.statValue}>{stats.assigned}</Text></View>
-            <View style={styles.statItem}><Text style={styles.statLabel}>Resolved</Text><Text style={styles.statValue}>{stats.completed}</Text></View>
+
+          <Text style={styles.sectionTitle}>{stats.periodLabel ? `Technician Stats (${stats.periodLabel})` : 'Technician Stats'}</Text>
+          
+          <View style={styles.statsGrid}>
+            <StatCard icon="clipboard" label="Assigned" value={stats.assigned} color={theme.colors.warning} />
+            <StatCard icon="check-circle" label="Resolved" value={stats.completed} color={theme.colors.success} />
+            <StatCard icon="alert-circle" label="Remaining" value={stats.remaining} color={theme.colors.danger} />
+            <StatCard icon="pie-chart" label="Completion Rate" value={rateText} color={theme.colors.info} />
           </View>
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}><Text style={styles.statLabel}>Remaining</Text><Text style={styles.statValue}>{stats.remaining}</Text></View>
-            <View style={styles.statItem}><Text style={styles.statLabel}>Completion Rate</Text><Text style={styles.statValue}>{rateText}</Text></View>
+
+          <View style={styles.avgResolutionCard}>
+            <Feather name="clock" size={theme.fontSizes.xl} color={theme.colors.dark} />
+            <Text style={styles.avgResolutionLabel}>Avg Resolution Time</Text>
+            <Text style={styles.avgResolutionValue}>{formatDuration(stats.avgResolutionSec)}</Text>
           </View>
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}><Text style={styles.statLabel}>Avg Resolution</Text><Text style={styles.statValue}>{formatDuration(stats.avgResolutionSec)}</Text></View>
-            <View style={styles.statItem}><Text style={styles.statLabel}>Open List</Text><TouchableOpacity style={styles.applyBtn} onPress={() => navigation.navigate('My Faults')}><Text style={styles.applyText}>View</Text></TouchableOpacity></View>
-          </View>
-        </View>
-  
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <View style={styles.quickRow}>
-          <View style={styles.quickItem}><Text style={styles.quickTitle}>My Faults</Text><Text style={styles.quickSub}>View assigned</Text></View>
-          <View style={styles.quickItem}><Text style={styles.quickTitle}>Reports</Text><Text style={styles.quickSub}>Recent work</Text></View>
-        </View>
-  
-        <Text style={styles.sectionTitle}>Recent Activity</Text>
-        <View style={styles.cardDark}>
-          <Text style={styles.darkTitle}>{stats.remaining} faults pending</Text>
-          <View style={styles.darkRow}>
-            <Text style={styles.darkChip}>High</Text>
-            <Text style={styles.darkChip}>Remote</Text>
-            <Text style={styles.darkChip}>Fiber</Text>
-          </View>
-          <TouchableOpacity style={styles.applyBtn} onPress={() => navigation.navigate('My Faults')}>
-            <Text style={styles.applyText}>Open list</Text>
+
+          <TouchableOpacity style={styles.mainAction} onPress={() => navigation.navigate('My Faults')}>
+            <Text style={styles.mainActionText}>View My Faults</Text>
+            <AntDesign name="arrowright" size={theme.fontSizes.lg} color={theme.colors.white} />
           </TouchableOpacity>
-        </View>
-      </ScrollView>
-     </SafeAreaView>
+  
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <View style={styles.quickRow}>
+            <TouchableOpacity style={styles.quickItem}>
+              <Feather name="list" size={theme.fontSizes.xl} color={theme.colors.dark} />
+              <Text style={styles.quickTitle}>All Faults</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.quickItem}>
+              <Feather name="bar-chart-2" size={theme.fontSizes.xl} color={theme.colors.dark} />
+              <Text style={styles.quickTitle}>Reports</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+       </SafeAreaView>
+    </View>
     );
 }
 
-const blue = '#0A66CC';
-
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#F5F7FF', paddingHorizontal: 16, paddingBottom: 16 },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  greeting: { fontSize: 20, fontWeight: '800', color: '#111827' },
-  subtitle: { color: '#6B7280', marginTop: 4 },
-  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#E5E7EB', alignItems: 'center', justifyContent: 'center' },
-  avatarText: { fontWeight: '700', color: '#374151' },
-  searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, borderWidth: 1, borderColor: '#E5E7EB', marginBottom: 12 },
-  searchInput: { marginLeft: 8, flex: 1 },
-  cardLight: { backgroundColor: '#EEF2FF', borderRadius: 16, padding: 14, marginBottom: 16 },
-  cardRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  iconCircle: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#E0F2FE', alignItems: 'center', justifyContent: 'center', marginRight: 10 },
-  cardTitle: { fontWeight: '700', color: '#111827' },
-  cardSub: { color: '#6B7280', marginTop: 2 },
-  badge: { backgroundColor: '#DBEAFE', borderRadius: 12, paddingVertical: 6, paddingHorizontal: 10 },
-  badgeText: { color: blue, fontWeight: '700' },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#111827', marginBottom: 8 },
-  quickRow: { flexDirection: 'row', gap: 12, marginBottom: 12 },
-  quickItem: { flex: 1, backgroundColor: '#fff', borderRadius: 14, padding: 14, borderWidth: 1, borderColor: '#E5E7EB' },
-  quickTitle: { fontWeight: '700', color: '#111827' },
-  quickSub: { color: '#6B7280', marginTop: 2 },
-  cardDark: { backgroundColor: blue, borderRadius: 16, padding: 16 },
-  darkTitle: { color: '#fff', fontWeight: '800', fontSize: 16 },
-  darkRow: { flexDirection: 'row', gap: 8, marginTop: 10 },
-  darkChip: { color: '#C7D2FE', borderWidth: 1, borderColor: '#93C5FD', borderRadius: 12, paddingVertical: 4, paddingHorizontal: 8 },
-  applyBtn: { backgroundColor: '#1E3A8A', borderRadius: 10, paddingVertical: 10, alignItems: 'center', marginTop: 12 },
-  applyText: { color: '#fff', fontWeight: '700' },
-  statsCard: { backgroundColor: '#fff', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#E5E7EB', marginBottom: 16 },
-  statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  statItem: { flex: 1 },
-  statLabel: { color: '#6B7280' },
-  statValue: { fontSize: 18, fontWeight: '700', color: '#111827' }
+  screen: { flex: 1, backgroundColor: theme.colors.white },
+  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.xl, paddingHorizontal: theme.spacing.lg },
+  greeting: { fontSize: theme.fontSizes.xxl, fontWeight: 'bold', color: theme.colors.dark },
+  subtitle: { color: theme.colors.gray, marginTop: theme.spacing.xs, fontSize: theme.fontSizes.sm },
+  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: theme.colors.lightGray, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { fontWeight: 'bold', color: theme.colors.dark, fontSize: theme.fontSizes.md },
+  sectionTitle: { fontSize: theme.fontSizes.lg, fontWeight: 'bold', color: theme.colors.dark, marginBottom: theme.spacing.md, paddingHorizontal: theme.spacing.lg },
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingHorizontal: theme.spacing.lg,
+    marginBottom: theme.spacing.md,
+  },
+  statCard: {
+    backgroundColor: theme.colors.veryLightGray,
+    borderRadius: theme.spacing.md,
+    padding: theme.spacing.md,
+    width: '48%',
+    marginBottom: theme.spacing.md,
+    alignItems: 'center',
+  },
+  statLabel: { color: theme.colors.gray, fontSize: theme.fontSizes.xs, marginTop: theme.spacing.sm },
+  statValue: { fontSize: theme.fontSizes.xxl, fontWeight: 'bold', color: theme.colors.dark, marginTop: theme.spacing.xs },
+  avgResolutionCard: {
+    backgroundColor: theme.colors.veryLightGray,
+    borderRadius: theme.spacing.md,
+    padding: theme.spacing.lg,
+    marginHorizontal: theme.spacing.lg,
+    marginBottom: theme.spacing.xl,
+    alignItems: 'center',
+  },
+  avgResolutionLabel: { color: theme.colors.gray, fontSize: theme.fontSizes.sm, marginTop: theme.spacing.sm },
+  avgResolutionValue: { fontSize: theme.fontSizes.lg, fontWeight: 'bold', color: theme.colors.dark, marginTop: theme.spacing.xs },
+  mainAction: {
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.spacing.md,
+    paddingVertical: theme.spacing.lg - 2,
+    marginHorizontal: theme.spacing.lg,
+    marginBottom: theme.spacing.xl,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  mainActionText: { color: theme.colors.white, fontWeight: 'bold', fontSize: theme.fontSizes.md, marginRight: theme.spacing.sm },
+  quickRow: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: theme.spacing.lg },
+  quickItem: {
+    backgroundColor: theme.colors.veryLightGray,
+    borderRadius: theme.spacing.md,
+    padding: theme.spacing.lg,
+    width: '48%',
+    alignItems: 'center',
+  },
+  quickTitle: { fontWeight: 'bold', color: theme.colors.dark, fontSize: theme.fontSizes.sm, marginTop: theme.spacing.sm },
 });

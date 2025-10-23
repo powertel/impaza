@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { AntDesign, FontAwesome } from '@expo/vector-icons';
 import { login } from '../services/api';
+import { theme } from '../styles/theme';
 
 export default function SignInScreen() {
   const navigation = useNavigation();
@@ -63,7 +64,7 @@ export default function SignInScreen() {
               <Text style={styles.primaryBtnText}>{loading ? 'Signing In…' : 'Sign In'}</Text>
             </TouchableOpacity>
   
-            <Text style={styles.subtle}>Or sign in with</Text>
+            {/* <Text style={styles.subtle}>Or sign in with</Text>
             <View style={styles.socialRow}>
               <TouchableOpacity style={styles.socialBtn}>
                 <AntDesign name="google" size={20} color="#DB4437" />
@@ -78,7 +79,7 @@ export default function SignInScreen() {
   
             <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
               <Text style={styles.link}>Don’t have an account? Sign Up</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </View>
       </ScrollView>
@@ -86,21 +87,19 @@ export default function SignInScreen() {
   );
 }
 
-const blue = '#0A66CC';
-
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#EEF2FF' },
-  wrapper: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16 },
-  brand: { fontSize: 28, color: blue, fontWeight: '800', marginBottom: 16 },
-  card: { width: '100%', maxWidth: 380, backgroundColor: '#fff', borderRadius: 24, padding: 24, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 4 },
-  title: { fontSize: 20, fontWeight: '700', color: '#111827', textAlign: 'center', marginBottom: 16 },
-  field: { marginBottom: 12 },
-  input: { borderWidth: 1, borderColor: '#D1D5DB', borderRadius: 10, padding: 12, fontSize: 16, backgroundColor: '#F9FAFB' },
-  primaryBtn: { backgroundColor: blue, borderRadius: 10, paddingVertical: 14, alignItems: 'center', marginTop: 8 },
-  primaryBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  subtle: { textAlign: 'center', color: '#6B7280', marginTop: 16 },
-  socialRow: { flexDirection: 'row', justifyContent: 'center', gap: 12, marginTop: 8 },
-  socialBtn: { borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 10, padding: 10, backgroundColor: '#F9FAFB' },
-  link: { marginTop: 16, color: blue, textAlign: 'center', fontWeight: '600' },
-  error: { color: '#DC2626', marginBottom: 8, textAlign: 'center' }
+  screen: { flex: 1, backgroundColor: theme.colors.background },
+  wrapper: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: theme.spacing.lg },
+  brand: { fontSize: 28, color: theme.colors.primary, fontWeight: '800', marginBottom: theme.spacing.lg },
+  card: { width: '100%', maxWidth: 380, backgroundColor: theme.colors.white, borderRadius: 24, padding: 24, shadowColor: theme.colors.black, shadowOpacity: 0.1, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 4 },
+  title: { fontSize: theme.fontSizes.xl, fontWeight: '700', color: theme.colors.black, textAlign: 'center', marginBottom: theme.spacing.lg },
+  field: { marginBottom: theme.spacing.md },
+  input: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.md, padding: theme.spacing.md, fontSize: theme.fontSizes.md, backgroundColor: theme.colors.background },
+  primaryBtn: { backgroundColor: theme.colors.primary, borderRadius: theme.spacing.md, paddingVertical: theme.spacing.md, alignItems: 'center', marginTop: theme.spacing.sm },
+  primaryBtnText: { color: theme.colors.white, fontSize: theme.fontSizes.md, fontWeight: '700' },
+  subtle: { textAlign: 'center', color: theme.colors.gray, marginTop: theme.spacing.lg },
+  socialRow: { flexDirection: 'row', justifyContent: 'center', gap: theme.spacing.md, marginTop: theme.spacing.sm },
+  socialBtn: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.md, padding: theme.spacing.md, backgroundColor: theme.colors.background },
+  link: { marginTop: theme.spacing.lg, color: theme.colors.primary, textAlign: 'center', fontWeight: '600' },
+  error: { color: theme.colors.danger, marginBottom: theme.spacing.sm, textAlign: 'center' }
 });

@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, RefreshControl } fr
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { getMyFaults } from '../services/api';
+import { theme } from '../styles/theme';
 
 export default function FaultsListScreen() {
   const navigation = useNavigation();
@@ -52,11 +53,11 @@ export default function FaultsListScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', paddingHorizontal: 16 },
-  header: { fontSize: 22, fontWeight: '700', color: '#0A66CC', textAlign: 'center', marginVertical: 16 },
-  card: { borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 10, padding: 12, marginBottom: 10 },
-  cardTitle: { fontSize: 16, fontWeight: '600' },
-  cardSub: { fontSize: 14, color: '#6B7280', marginTop: 4 },
-  cardMeta: { fontSize: 12, color: '#9CA3AF', marginTop: 4 },
-  empty: { textAlign: 'center', color: '#6B7280' }
+  container: { flex: 1, backgroundColor: theme.colors.white, paddingHorizontal: theme.spacing.lg },
+  header: { fontSize: theme.fontSizes.xxl, fontWeight: '700', color: theme.colors.primary, textAlign: 'center', marginVertical: theme.spacing.lg },
+  card: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.md, padding: theme.spacing.md, marginBottom: theme.spacing.md },
+  cardTitle: { fontSize: theme.fontSizes.md, fontWeight: '600' },
+  cardSub: { fontSize: theme.fontSizes.sm, color: theme.colors.gray, marginTop: theme.spacing.xs },
+  cardMeta: { fontSize: theme.fontSizes.xs, color: theme.colors.gray, marginTop: theme.spacing.xs },
+  empty: { textAlign: 'center', color: theme.colors.gray }
 });

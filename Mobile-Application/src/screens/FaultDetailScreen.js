@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { getFault } from '../services/api';
+import { theme } from '../styles/theme';
 
 export default function FaultDetailScreen() {
   const route = useRoute();
@@ -52,9 +53,9 @@ export default function FaultDetailScreen() {
 
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  container: { flex: 1, backgroundColor: '#fff', padding: 16 },
-  title: { fontSize: 18, fontWeight: '700', color: '#111827', marginBottom: 12 },
-  row: { marginBottom: 8, color: '#374151' },
-  primaryBtn: { backgroundColor: '#0A66CC', borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginTop: 24 },
-  primaryBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' }
+  container: { flex: 1, backgroundColor: theme.colors.white, padding: theme.spacing.lg },
+  title: { fontSize: theme.fontSizes.lg, fontWeight: '700', color: theme.colors.black, marginBottom: theme.spacing.md },
+  row: { marginBottom: theme.spacing.sm, color: theme.colors.darkGray },
+  primaryBtn: { backgroundColor: theme.colors.primary, borderRadius: theme.spacing.sm, paddingVertical: theme.spacing.md, alignItems: 'center', marginTop: theme.spacing.xl },
+  primaryBtnText: { color: theme.colors.white, fontSize: theme.fontSizes.md, fontWeight: '600' }
 });
