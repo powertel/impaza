@@ -34,7 +34,7 @@ export default function SignInScreen() {
     <SafeAreaView style={styles.screen} edges={["top","left","right"]}> 
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
         <View style={styles.wrapper}>
-          <Text style={styles.brand}>impazamon</Text>
+          <Text style={styles.brand}>iMPAZAMON</Text>
           <View style={styles.card}>
             <Text style={styles.title}>Login to your Account</Text>
   
@@ -63,22 +63,9 @@ export default function SignInScreen() {
             <TouchableOpacity style={styles.primaryBtn} onPress={handleLogin} disabled={loading}>
               <Text style={styles.primaryBtnText}>{loading ? 'Signing In…' : 'Sign In'}</Text>
             </TouchableOpacity>
-  
-            {/* <Text style={styles.subtle}>Or sign in with</Text>
-            <View style={styles.socialRow}>
-              <TouchableOpacity style={styles.socialBtn}>
-                <AntDesign name="google" size={20} color="#DB4437" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.socialBtn}>
-                <FontAwesome name="facebook" size={20} color="#1877F2" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.socialBtn}>
-                <AntDesign name="twitter" size={20} color="#1DA1F2" />
-              </TouchableOpacity>
-            </View>
-  
-            <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-              <Text style={styles.link}>Don’t have an account? Sign Up</Text>
+
+            {/* <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+              <Text style={styles.link}>Forgot Password?</Text>
             </TouchableOpacity> */}
           </View>
         </View>
