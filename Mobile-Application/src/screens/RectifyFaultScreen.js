@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { rectifyFault } from '../services/api';
 
@@ -26,7 +27,7 @@ export default function RectifyFaultScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top","left","right"]}>
       <Text style={styles.title}>Rectify Fault #{id}</Text>
       <TextInput
         placeholder="Enter rectification notes"
@@ -47,8 +48,8 @@ export default function RectifyFaultScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', padding: 16 },
   title: { fontSize: 18, fontWeight: '700', color: '#111827', marginBottom: 12 },
-  input: { borderWidth: 1, borderColor: '#D1D5DB', borderRadius: 8, padding: 12, minHeight: 120, textAlignVertical: 'top' },
+  input: { borderWidth: 1, borderColor: '#D1D5DB', borderRadius: 8, padding: 12, minHeight: 100, textAlignVertical: 'top' },
+  error: { color: '#DC2626', marginTop: 8 },
   primaryBtn: { backgroundColor: '#0A66CC', borderRadius: 8, paddingVertical: 14, alignItems: 'center', marginTop: 16 },
-  primaryBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  error: { color: '#DC2626', marginTop: 8 }
+  primaryBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' }
 });

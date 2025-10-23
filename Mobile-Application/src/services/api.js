@@ -25,7 +25,8 @@ export async function register(payload) {
 }
 
 export async function getMyFaults() {
-  return request('/mobile/faults');
+  const data = await request('/mobile/faults');
+  return Array.isArray(data) ? data : (data?.faults || []);
 }
 
 export async function getFault(id) {

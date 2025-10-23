@@ -1,10 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { setAuthToken } from '../services/api';
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
 
   const logout = () => {
     setAuthToken(null);
@@ -12,7 +14,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={[styles.screen, { paddingTop: insets.top + 2}]} edges={["top","left","right"]}>
       <View style={styles.header}> 
         <Text style={styles.title}>Profile</Text>
         <Text style={styles.sub}>Manage your account</Text>

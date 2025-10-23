@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, SafeAreaView, RefreshControl } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, RefreshControl } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { getMyFaults } from '../services/api';
 
@@ -11,8 +12,8 @@ export default function FaultsListScreen() {
   const load = async () => {
     setLoading(true);
     try {
-      const data = await getMyFaults();
-      setFaults(Array.isArray(data) ? data : []);
+      const items = await getMyFaults();
+      setFaults(Array.isArray(items) ? items : []);
     } catch (e) {
       // ignore for now
     } finally {
@@ -22,16 +23,21 @@ export default function FaultsListScreen() {
 
   useEffect(() => { load(); }, []);
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('FaultDetail', { id: item.id })}>
-      <Text style={styles.cardTitle}>{item.title || `Fault #${item.id}`}</Text>
-      <Text style={styles.cardSub}>{item.status || 'Unknown status'}</Text>
-      <Text style={styles.cardMeta}>{item.location || ''}</Text>
-    </TouchableOpacity>
-  );
+  const renderItem = ({ item }) => {
+    const title = item.customer || item.link || item.address || `Fault #${item.id}`;
+    const status = item.status || 'Unknown status';
+    const location = item.city && item.suburb ? `${item.city}, ${item.suburb}` : (item.city || item.suburb || '');
+    return (
+      <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('FaultDetail', { id: item.id })}>
+        <Text style={styles.cardTitle}>{title}</Text>
+        <Text style={styles.cardSub}>{status}</Text>
+        <Text style={styles.cardMeta}>{location}</Text>
+      </TouchableOpacity>
+    );
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top","left","right"]}>
       <Text style={styles.header}>My Faults</Text>
       <FlatList
         data={faults}

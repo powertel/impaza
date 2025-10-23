@@ -1,10 +1,36 @@
-import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AntDesign } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { getMyFaults } from '../services/api';
 
 export default function DashboardScreen() {
+  const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
+
+  const [stats, setStats] = useState({ assigned: 0, completed: 0, remaining: 0, completionRate: 0, avgCompletionRate: 0 });
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const faults = await getMyFaults();
+        const assigned = faults.length;
+        const completed = faults.filter(f => (f.status_id === 4) || (String(f.status || '').toLowerCase().includes('resolved'))).length;
+        const remaining = Math.max(assigned - completed, 0);
+        const completionRate = assigned > 0 ? Math.round((completed / assigned) * 100) : 0;
+        // Placeholder: using current completionRate as avg until historical data endpoint exists
+        const avgCompletionRate = completionRate;
+        setStats({ assigned, completed, remaining, completionRate, avgCompletionRate });
+      } catch (e) {
+        // swallow
+      }
+    };
+    load();
+  }, []);
+
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView style={[styles.screen, { paddingTop: insets.top + 1.5 }]} edges={['top','left','right']}>
       <View style={styles.headerRow}>
         <View>
           <Text style={styles.greeting}>Hi, Technician 👋</Text>
@@ -29,6 +55,22 @@ export default function DashboardScreen() {
         </View>
       </View>
 
+      <Text style={styles.sectionTitle}>Technician Stats</Text>
+      <View style={styles.statsCard}>
+        <View style={styles.statsRow}>
+          <View style={styles.statItem}><Text style={styles.statLabel}>Assigned</Text><Text style={styles.statValue}>{stats.assigned}</Text></View>
+          <View style={styles.statItem}><Text style={styles.statLabel}>Completed</Text><Text style={styles.statValue}>{stats.completed}</Text></View>
+        </View>
+        <View style={styles.statsRow}>
+          <View style={styles.statItem}><Text style={styles.statLabel}>Remaining</Text><Text style={styles.statValue}>{stats.remaining}</Text></View>
+          <View style={styles.statItem}><Text style={styles.statLabel}>Completion Rate</Text><Text style={styles.statValue}>{stats.completionRate}%</Text></View>
+        </View>
+        <View style={styles.statsRow}>
+          <View style={styles.statItem}><Text style={styles.statLabel}>Avg Completion Rate</Text><Text style={styles.statValue}>{stats.avgCompletionRate}%</Text></View>
+          <View style={styles.statItem}><Text style={styles.statLabel}>Open List</Text><TouchableOpacity style={styles.applyBtn} onPress={() => navigation.navigate('My Faults')}><Text style={styles.applyText}>View</Text></TouchableOpacity></View>
+        </View>
+      </View>
+
       <Text style={styles.sectionTitle}>Quick Actions</Text>
       <View style={styles.quickRow}>
         <View style={styles.quickItem}><Text style={styles.quickTitle}>My Faults</Text><Text style={styles.quickSub}>View assigned</Text></View>
@@ -37,13 +79,15 @@ export default function DashboardScreen() {
 
       <Text style={styles.sectionTitle}>Recent Activity</Text>
       <View style={styles.cardDark}>
-        <Text style={styles.darkTitle}>2 faults pending</Text>
+        <Text style={styles.darkTitle}>{stats.remaining} faults pending</Text>
         <View style={styles.darkRow}>
           <Text style={styles.darkChip}>High</Text>
           <Text style={styles.darkChip}>Remote</Text>
           <Text style={styles.darkChip}>Fiber</Text>
         </View>
-        <TouchableOpacity style={styles.applyBtn}><Text style={styles.applyText}>Open list</Text></TouchableOpacity>
+        <TouchableOpacity style={styles.applyBtn} onPress={() => navigation.navigate('My Faults')}>
+          <Text style={styles.applyText}>Open list</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -52,7 +96,7 @@ export default function DashboardScreen() {
 const blue = '#0A66CC';
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#F5F7FF', padding: 16 },
+  screen: { flex: 1, backgroundColor: '#F5F7FF', paddingHorizontal: 16, paddingBottom: 16 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   greeting: { fontSize: 20, fontWeight: '800', color: '#111827' },
   subtitle: { color: '#6B7280', marginTop: 4 },
@@ -77,5 +121,10 @@ const styles = StyleSheet.create({
   darkRow: { flexDirection: 'row', gap: 8, marginTop: 10 },
   darkChip: { color: '#C7D2FE', borderWidth: 1, borderColor: '#93C5FD', borderRadius: 12, paddingVertical: 4, paddingHorizontal: 8 },
   applyBtn: { backgroundColor: '#1E3A8A', borderRadius: 10, paddingVertical: 10, alignItems: 'center', marginTop: 12 },
-  applyText: { color: '#fff', fontWeight: '700' }
+  applyText: { color: '#fff', fontWeight: '700' },
+  statsCard: { backgroundColor: '#fff', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#E5E7EB', marginBottom: 16 },
+  statsRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+  statItem: { flex: 1 },
+  statLabel: { color: '#6B7280' },
+  statValue: { fontSize: 18, fontWeight: '700', color: '#111827' }
 });

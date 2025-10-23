@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { getFault } from '../services/api';
 
@@ -27,14 +28,14 @@ export default function FaultDetailScreen() {
 
   if (loading || !fault) {
     return (
-      <SafeAreaView style={styles.center}> 
+      <SafeAreaView style={styles.center} edges={["top","left","right"]}> 
         <ActivityIndicator />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top","left","right"]}>
       <Text style={styles.title}>{fault.title || `Fault #${fault.id}`}</Text>
       <Text style={styles.row}>Status: {fault.status}</Text>
       <Text style={styles.row}>Location: {fault.location}</Text>

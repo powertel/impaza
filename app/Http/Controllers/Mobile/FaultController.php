@@ -42,6 +42,7 @@ class FaultController extends Controller
                 'faults.address',
                 'account_manager_users.name as accountManager',
                 'links.link',
+                'statuses.id as status_id',
                 'statuses.description as status',
                 'faults.serviceType',
                 'faults.serviceAttribute',

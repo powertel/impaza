@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { AntDesign, FontAwesome } from '@expo/vector-icons';
 import { login } from '../services/api';
@@ -29,7 +30,7 @@ export default function SignInScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.screen}> 
+    <SafeAreaView style={styles.screen} edges={["top","left","right"]}> 
       <View style={styles.wrapper}>
         <Text style={styles.brand}>impazamon</Text>
         <View style={styles.card}>
