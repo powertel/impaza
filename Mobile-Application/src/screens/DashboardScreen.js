@@ -3,31 +3,43 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AntDesign } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { getMyFaults } from '../services/api';
+import { getTechnicianStats } from '../services/api';
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
 
-  const [stats, setStats] = useState({ assigned: 0, completed: 0, remaining: 0, completionRate: 0, avgCompletionRate: 0 });
+  const [stats, setStats] = useState({ assigned: 0, completed: 0, remaining: 0, completionRate: 0, avgResolutionSec: 0, periodLabel: '' });
 
   useEffect(() => {
     const load = async () => {
       try {
-        const faults = await getMyFaults();
-        const assigned = faults.length;
-        const completed = faults.filter(f => (f.status_id === 4) || (String(f.status || '').toLowerCase().includes('resolved'))).length;
-        const remaining = Math.max(assigned - completed, 0);
-        const completionRate = assigned > 0 ? Math.round((completed / assigned) * 100) : 0;
-        // Placeholder: using current completionRate as avg until historical data endpoint exists
-        const avgCompletionRate = completionRate;
-        setStats({ assigned, completed, remaining, completionRate, avgCompletionRate });
+        const data = await getTechnicianStats();
+        const assigned = data?.assigned ?? 0;
+        const completed = data?.resolved ?? 0;
+        const remaining = data?.remaining ?? Math.max(assigned - completed, 0);
+        const completionRate = (typeof data?.completionRate === 'number') ? data.completionRate : (assigned > 0 ? Math.round((completed / assigned) * 100) : 0);
+        const avgResolutionSec = data?.avgResolutionSec ?? 0;
+        const periodLabel = data?.periodLabel ?? '';
+        setStats({ assigned, completed, remaining, completionRate, avgResolutionSec, periodLabel });
       } catch (e) {
         // swallow
       }
     };
     load();
   }, []);
+
+  const formatDuration = (sec) => {
+    const s = Math.max(0, parseInt(sec, 10) || 0);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const rem = s % 60;
+    if (h > 0) return `${h} hours ${m} minutes ${rem} seconds`;
+    if (m > 0) return `${m} minutes ${rem} seconds`;
+    return `${rem} seconds`;
+  };
+
+  const rateText = (typeof stats.completionRate === 'number') ? `${stats.completionRate.toFixed(1)}%` : `${stats.completionRate}%`;
 
   return (
     <SafeAreaView style={[styles.screen, { paddingTop: insets.top + 1.5 }]} edges={['top','left','right']}>
@@ -56,18 +68,18 @@ export default function DashboardScreen() {
           </View>
         </View> */}
   
-        <Text style={styles.sectionTitle}></Text>
+        <Text style={styles.sectionTitle}>{stats.periodLabel ? `Technician Stats (${stats.periodLabel})` : 'Technician Stats'}</Text>
         <View style={styles.statsCard}>
           <View style={styles.statsRow}>
             <View style={styles.statItem}><Text style={styles.statLabel}>Assigned</Text><Text style={styles.statValue}>{stats.assigned}</Text></View>
-            <View style={styles.statItem}><Text style={styles.statLabel}>Completed</Text><Text style={styles.statValue}>{stats.completed}</Text></View>
+            <View style={styles.statItem}><Text style={styles.statLabel}>Resolved</Text><Text style={styles.statValue}>{stats.completed}</Text></View>
           </View>
           <View style={styles.statsRow}>
             <View style={styles.statItem}><Text style={styles.statLabel}>Remaining</Text><Text style={styles.statValue}>{stats.remaining}</Text></View>
-            <View style={styles.statItem}><Text style={styles.statLabel}>Completion Rate</Text><Text style={styles.statValue}>{stats.completionRate}%</Text></View>
+            <View style={styles.statItem}><Text style={styles.statLabel}>Completion Rate</Text><Text style={styles.statValue}>{rateText}</Text></View>
           </View>
           <View style={styles.statsRow}>
-            <View style={styles.statItem}><Text style={styles.statLabel}>Avg Completion Rate</Text><Text style={styles.statValue}>{stats.avgCompletionRate}%</Text></View>
+            <View style={styles.statItem}><Text style={styles.statLabel}>Avg Resolution</Text><Text style={styles.statValue}>{formatDuration(stats.avgResolutionSec)}</Text></View>
             <View style={styles.statItem}><Text style={styles.statLabel}>Open List</Text><TouchableOpacity style={styles.applyBtn} onPress={() => navigation.navigate('My Faults')}><Text style={styles.applyText}>View</Text></TouchableOpacity></View>
           </View>
         </View>

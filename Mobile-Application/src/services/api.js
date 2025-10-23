@@ -36,3 +36,8 @@ export async function getFault(id) {
 export async function rectifyFault(id, payload) {
   return request(`/mobile/faults/${id}/rectify`, { method: 'POST', body: JSON.stringify(payload) });
 }
+
+export async function getTechnicianStats(params = {}) {
+  const query = Object.keys(params || {}).length ? `?${new URLSearchParams(params).toString()}` : '';
+  return request(`/mobile/technician-stats${query}`);
+}

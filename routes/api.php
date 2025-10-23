@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Mobile\AuthController;
 use App\Http\Controllers\Mobile\FaultController;
+use App\Http\Controllers\Mobile\StatsController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -30,5 +31,6 @@ Route::prefix('mobile')->group(function () {
         Route::get('faults', [FaultController::class, 'index']);
         Route::get('faults/{fault}', [FaultController::class, 'show']);
         Route::post('faults/{fault}/rectify', [FaultController::class, 'rectify']);
+        Route::get('technician-stats', [StatsController::class, 'myStats']);
     });
 });
