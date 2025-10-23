@@ -2,7 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\FaultController;
+use App\Http\Controllers\Mobile\AuthController;
+use App\Http\Controllers\Mobile\FaultController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -18,4 +19,16 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('getfaults', [FaultController::class,'faults']);
+
+// Mobile API routes
+
+Route::prefix('mobile')->group(function () {
+    Route::post('register', [AuthController::class, 'register']);
+    Route::post('login', [AuthController::class, 'login']);
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('faults', [FaultController::class, 'index']);
+        Route::get('faults/{fault}', [FaultController::class, 'show']);
+        Route::post('faults/{fault}/rectify', [FaultController::class, 'rectify']);
+    });
+});
