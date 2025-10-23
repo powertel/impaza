@@ -13,30 +13,17 @@ class Customer extends Model
         'customer',
         'account_number',
         'account_manager_id',
-        'city_id',
-        'suburb_id',
-        'pop_id',
+        'address',
+        'contact_number',
     ];
 
     public function links()
     {
         return $this->hasMany(Link::class);
     }
-    public function city()
-    {
-        return $this->belongsTo(City::class);
-    }
-    public function suburb()
-    {
-        return $this->belongsTo(Suburb::class);
-    }
-    public function pop()
-    {
-        return $this->belongsTo(Pop::class);
-    }
 
     public function accountManager()
     {
-        return $this->belongsTo(User::class, 'account_manager_id');
+        return $this->belongsTo(AccountManager::class, 'account_manager_id');
     }
 }

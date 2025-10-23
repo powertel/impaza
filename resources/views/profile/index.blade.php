@@ -106,7 +106,7 @@ Profile
                 </div>
                 <div class="form-group col-md-6">
                   <label for="phone">Phone Number</label>
-                  <input type="text" name="phonenumber" id="phone" class="form-control @error('phonenumber') is-invalid @enderror" placeholder="Phone Number" value="{{ optional($user)->phonenumber }}" required>
+                  <input type="text" name="phonenumber" id="phone" class="form-control @error('phonenumber') is-invalid @enderror" placeholder="e.g 263786533333" value="{{ optional($user)->phonenumber }}" required>
                   @error('phonenumber')
                     <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                   @enderror

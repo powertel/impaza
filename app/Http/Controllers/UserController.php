@@ -34,7 +34,7 @@ class UserController extends Controller
                 ->leftjoin('sections','users.section_id','=','sections.id')
                 ->leftjoin('positions','users.position_id','=','positions.id')
                 ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
-                ->get(['users.id','users.name','users.email','users.department_id','users.position_id','users.section_id','sections.section','departments.department','positions.position','user_statuses.status_name','users.region']);
+                ->get(['users.id','users.name','users.email','users.department_id','users.position_id','users.section_id','users.phonenumber','sections.section','departments.department','positions.position','user_statuses.status_name','users.region']);
         
         // Provide supporting datasets for modal-based create/edit in index
         $roles = Role::pluck('name','name')->all();
@@ -101,7 +101,8 @@ class UserController extends Controller
                 'section_id' => 'required',
                 'position_id' => 'required',
                 'roles' => 'required',
-                'region' => 'nullable|string'
+                'region' => 'nullable|string',
+                'phonenumber' => ['nullable','string','max:32','regex:/^\+?[0-9\s-]{7,20}$/']
             ]);
 
             $input = $request->all();
@@ -198,9 +199,18 @@ class UserController extends Controller
             'password' => 'same:confirm-password',
             'roles' => 'required',
             'region' => 'nullable|string',
+            'phonenumber' => ['nullable','string','max:32','regex:/^\+?[0-9\s-]{7,20}$/'],
         ]);
 
         $input = $request->all();
+        if (!empty($input['phonenumber'])) {
+            // normalize: trim spaces and collapse into digits plus optional leading '+'
+            $normalized = preg_replace('/[^0-9+]/', '', $input['phonenumber']);
+            // keep only first '+' if present
+            $normalized = ltrim($normalized, '+');
+            $normalized = (strpos($input['phonenumber'], '+') === 0 ? '+' : '') . $normalized;
+            $input['phonenumber'] = $normalized;
+        }
         if(!empty($input['password'])){
             $input['password'] = Hash::make($input['password']);
         }else{
@@ -208,13 +218,13 @@ class UserController extends Controller
         }
 
         $user = User::find($id);
-         $user->update($input);
+        $user->update($input);
         DB::table('model_has_roles')->where('model_id',$id)->delete();
 
         $user->assignRole($request->input('roles'));
 
         return redirect()->route('users.index')
-        ->with('success','');
+        ->with('success','User updated');
 
     }
 

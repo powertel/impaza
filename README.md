@@ -36,6 +36,26 @@ Prereqs: PHP 8.0+, Composer, Node.js + npm, MySQL 8
    - Host DB port: `3307`
    - Redis host port: `6380`
 
+## Infobip WhatsApp
+Configure these env vars for WhatsApp notifications via Infobip:
+- `INFOBIP_BASE_URL` (e.g., `https://api.infobip.com` or your regional subdomain)
+- `INFOBIP_API_KEY` (Infobip API key)
+- `INFOBIP_WHATSAPP_NUMBER` (your sender number/MSISDN, include `+`)
+- `INFOBIP_DEFAULT_COUNTRY_CODE` (used for normalizing local numbers, e.g., `+263`)
+- `INFOBIP_STATUS_TEMPLATE` (approved WhatsApp template name used for customer notifications)
+
+Template placeholders used by customer notifications (default order):
+- `[fault_ref_number, status_desc]`
+
+Test helpers:
+- Send text: `POST /test-infobip-send` (`phone`, `message`)
+- Send template: `POST /test-infobip-send-template` (`to`, `templateName`, `language`, optional `placeholders`)
+- Check status: `GET /test-infobip-status?messageId=...`
+
+Notes:
+- Templates bypass 24-hour session limits; text messages may fail with `7010 No session` if inactive.
+- Ensure recipients are in E.164 format; the app normalizes common local formats using `INFOBIP_DEFAULT_COUNTRY_CODE`.
+
 ## Testing
 - Run tests: `php artisan test`
 

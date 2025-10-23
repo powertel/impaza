@@ -83,7 +83,11 @@ class LinkController extends Controller
                 'items.*.linkType_id' => 'required|exists:link_types,id',
                 'items.*.pop_id' => 'required|exists:pops,id',
                 'items.*.link' => 'required|string|unique:links,link',
+                'items.*.contract_number' => 'nullable|string|max:255',
                 'items.*.jcc_number' => 'nullable|string|max:255|unique:links,jcc_number',
+                'items.*.sapcodes' => 'nullable|string|max:255',
+                'items.*.comment' => 'nullable|string|max:500',
+                'items.*.quantity' => 'nullable|integer|min:0',
                 'items.*.service_type' => 'nullable|string|in:Internet,VPN,Carrier Services,E-Vending',
                 'items.*.capacity' => 'nullable|string|max:255',
             ]);
@@ -98,7 +102,11 @@ class LinkController extends Controller
                     'linkType_id' => $item['linkType_id'],
                     'pop_id' => $item['pop_id'],
                     'link' => $item['link'],
+                    'contract_number' => $item['contract_number'] ?? null,
                     'jcc_number' => $item['jcc_number'] ?? null,
+                    'sapcodes' => $item['sapcodes'] ?? null,
+                    'comment' => $item['comment'] ?? null,
+                    'quantity' => $item['quantity'] ?? null,
                     'service_type' => $item['service_type'] ?? null,
                     'capacity' => $item['capacity'] ?? null,
                     'link_status' => 1,
@@ -117,7 +125,11 @@ class LinkController extends Controller
                 'pop_id' => 'required|exists:pops,id',
                 'customer_id' => 'required|exists:customers,id',
                 'link' => 'required|string|unique:links,link',
+                'contract_number' => 'nullable|string|max:255',
                 'jcc_number' => 'nullable|string|max:255|unique:links,jcc_number',
+                'sapcodes' => 'nullable|string|max:255',
+                'comment' => 'nullable|string|max:500',
+                'quantity' => 'nullable|integer|min:0',
                 'service_type' => 'nullable|string|in:Internet,VPN,Carrier Services,E-Vending',
                 'capacity' => 'nullable|string|max:255',
             ]);
@@ -195,7 +207,11 @@ class LinkController extends Controller
         // Validate link uniqueness on update (similar to customer validation)
         $validated = $request->validate([
             'link' => ['required','string', Rule::unique('links','link')->ignore($id)],
+            'contract_number' => 'nullable|string|max:255',
             'jcc_number' => ['nullable','string','max:255', Rule::unique('links','jcc_number')->ignore($id)],
+            'sapcodes' => 'nullable|string|max:255',
+            'comment' => 'nullable|string|max:500',
+            'quantity' => 'nullable|integer|min:0',
             'service_type' => 'nullable|string|in:Internet,VPN,Carrier Services,E-Vending',
             'capacity' => 'nullable|string|max:255',
         ]);
@@ -266,4 +282,48 @@ class LinkController extends Controller
                        
     }
 
+    /**
+     * Return links for a specific customer (AJAX JSON).
+     */
+    public function linksForCustomer($customerId)
+    {
+        $this->middleware('permission:link-edit');
+        $links = Link::where('customer_id', $customerId)->get([
+            'id','link','city_id','suburb_id','pop_id','linkType_id','customer_id'
+        ]);
+        return response()->json($links);
+    }
+
+    /**
+     * Autosave link updates via AJAX for selected fields.
+     */
+    public function autosave(Request $request, $id)
+    {
+        $this->middleware('permission:link-edit');
+        $link = Link::findOrFail($id);
+
+        $rules = [];
+        if ($request->has('link')) {
+            $rules['link'] = ['required','string', Rule::unique('links','link')->ignore($id)];
+        }
+        if ($request->has('city_id')) {
+            $rules['city_id'] = ['required','exists:cities,id'];
+        }
+        if ($request->has('suburb_id')) {
+            $rules['suburb_id'] = ['required','exists:suburbs,id'];
+        }
+        if ($request->has('pop_id')) {
+            $rules['pop_id'] = ['required','exists:pops,id'];
+        }
+        if ($request->has('linkType_id')) {
+            $rules['linkType_id'] = ['required','exists:link_types,id'];
+        }
+
+        $validated = $request->validate($rules);
+
+        $link->fill($validated);
+        $link->save();
+
+        return response()->json(['ok' => true]);
+    }
 }

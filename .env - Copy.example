@@ -59,3 +59,14 @@ VITE_PUSHER_SCHEME="${PUSHER_SCHEME}"
 VITE_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"
 
 
+
+# Infobip WhatsApp Configuration
+# Base API URL, API key, sender number, default country code for normalization
+INFOBIP_BASE_URL=https://api.infobip.com
+INFOBIP_API_KEY=
+INFOBIP_WHATSAPP_NUMBER=
+INFOBIP_DEFAULT_COUNTRY_CODE=+263
+# Template name used for customer notifications outside the 24h window
+INFOBIP_STATUS_TEMPLATE=
+
+

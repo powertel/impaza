@@ -10,25 +10,44 @@ class Link extends Model
     use HasFactory;
 
     protected $fillable = [
-        'link',
+        'customer_id',
+        'contract_number',
         'jcc_number',
+        'sapcodes',
+        'comment',
+        'quantity',
         'service_type',
         'capacity',
         'city_id',
         'suburb_id',
         'pop_id',
-        'link_status',
-        'contract_number',
-        'customer_id',
         'linkType_id',
+        'link_status',
+        'link',
     ];
 
     public function customer()
     {
         return $this->belongsTo(Customer::class);
     }
-    public function linktype()
+
+    public function city()
     {
-        return $this->belongsTo(LinkType::class);
+        return $this->belongsTo(City::class);
+    }
+
+    public function suburb()
+    {
+        return $this->belongsTo(Suburb::class);
+    }
+
+    public function pop()
+    {
+        return $this->belongsTo(Pop::class);
+    }
+
+    public function linkType()
+    {
+        return $this->belongsTo(LinkType::class, 'linkType_id');
     }
 }

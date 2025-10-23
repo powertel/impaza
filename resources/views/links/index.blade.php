@@ -19,6 +19,13 @@ links
                     <i class="fas fa-plus-circle"></i> Create Link
                 </button>
             @endcan
+            @can('link-edit')
+            <button type="button" class="btn btn-secondary btn-sm" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#editExistingLinksModal">
+                <i class="fas fa-search me-1"></i> Edit Existing Links
+            </button>
+            @endcan
         </div>
     </div>
     <!-- /.card-header -->
@@ -101,6 +108,12 @@ links
         'linkTypes' => $linkTypes
         ])
 
+        @include('links.search_modal', [
+            'customers' => $customers,
+            'cities' => $cities,
+            'linkTypes' => $linkTypes
+        ])
+
         @foreach($links as $lnk)
         @include('links.edit_modal', [
             'link' => $lnk,
@@ -117,6 +130,7 @@ links
 </section>
 @section('scripts')
   @include('partials.scripts')
+  @include('links.partials.scripts')
 @endsection
 @endsection
 

@@ -34,6 +34,8 @@
                         @endforeach
                       @endisset
                     </select>
+                    <input type="text" name="items[0][address]" class="form-control" placeholder="Address" />
+                    <input type="text" name="items[0][contact_number]" class="form-control" placeholder="Contact Number" />
                   </div>
                 </div>
               </div>
