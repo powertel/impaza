@@ -293,7 +293,7 @@ class AssessmentController extends Controller
             // Log transition to "Fault has been assessed" (status_id = 2)
             FaultLifecycle::recordStatusChange($fault, 2, $request->user()->id);
 
-            $fault_section = FaultSection::find($id);
+            $fault_section = FaultSection::firstOrCreate(['fault_id' => $id]);
             $fault_section -> update(
                 [
                     'fault_id'=> $fault->id,

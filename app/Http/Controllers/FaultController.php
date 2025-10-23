@@ -132,7 +132,7 @@ class FaultController extends Controller
             request()->validate([
                 'customer_id'=> 'required|exists:customers,id',
                 'contactName'=> 'required|string',
-                'phoneNumber'=> 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
+                'phoneNumber'=> ['required','string','max:32','regex:/^\+?[0-9\s-]{7,20}$/'],
                 'address'=> 'required|string',
                 'link_id'=> 'required|exists:links,id',
                 'suspectedRfo_id'=> 'required|exists:reasons_for_outages,id',
@@ -141,6 +141,7 @@ class FaultController extends Controller
             ]);
            
             $req = $request->all();
+
             // Derive location and service details from selected link
             $lnk = Link::find($request->input('link_id'));
             if($lnk){

@@ -57,7 +57,7 @@ export default function FaultDetailScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Details</Text>
           <DetailRow label="Reference" value={fault.fault_ref_number} />
-          <DetailRow label="Status" value={fault.status?.name} />
+          <DetailRow label="Status" value={fault.status} />
           <DetailRow label="Priority" value={fault.priorityLevel} />
           <DetailRow label="Reported" value={new Date(fault.created_at).toLocaleString()} />
           <DetailRow label="Service Type" value={fault.serviceType} />
@@ -67,13 +67,13 @@ export default function FaultDetailScreen() {
           <Text style={styles.sectionTitle}>Contact Person</Text>
           <DetailRow label="Name" value={fault.contactName} />
           <DetailRow label="Phone" value={fault.phoneNumber} />
-          <DetailRow label="Email" value={fault.contactEmail} />
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Location</Text>
-          <DetailRow label="City" value={fault.city?.name} />
-          <DetailRow label="Suburb" value={fault.suburb?.name} />
+          <DetailRow label="City" value={fault.city} />
+          <DetailRow label="Suburb" value={fault.suburb} />
+          <DetailRow label="Pop" value={fault.pop} />
           <DetailRow label="Address" value={fault.address} />
         </View>
 
