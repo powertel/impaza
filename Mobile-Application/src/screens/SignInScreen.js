@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { AntDesign, FontAwesome } from '@expo/vector-icons';
-import { login } from '../services/api';
+import { login as apiLogin } from '../services/api';
 import { theme } from '../styles/theme';
+import { UserContext } from '../context/UserContext';
 
 export default function SignInScreen() {
   const navigation = useNavigation();
+  const { login } = useContext(UserContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,8 +19,9 @@ export default function SignInScreen() {
     setLoading(true);
     setError(null);
     try {
-      const res = await login(email, password);
+      const res = await apiLogin(email, password);
       if (res?.token) {
+        login(res.user);
         navigation.replace('Main');
       } else {
         setError('Invalid credentials');

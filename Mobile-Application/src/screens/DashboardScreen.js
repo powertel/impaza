@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AntDesign, Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { getTechnicianStats } from '../services/api';
 import { theme } from '../styles/theme';
+import { UserContext } from '../context/UserContext';
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const { user } = useContext(UserContext);
 
   const [stats, setStats] = useState({ assigned: 0, completed: 0, remaining: 0, completionRate: 0, avgResolutionSec: 0, periodLabel: '' });
 
@@ -40,6 +42,15 @@ export default function DashboardScreen() {
     return `${rem}s`;
   };
 
+  const getInitials = (name) => {
+    if (!name) return '';
+    const names = name.split(' ');
+    if (names.length > 1) {
+      return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
+    }
+    return `${names[0][0]}`.toUpperCase();
+  };
+
   const rateText = (typeof stats.completionRate === 'number') ? `${stats.completionRate.toFixed(1)}%` : `${stats.completionRate}%`;
 
   const StatCard = ({ icon, label, value, color }) => (
@@ -56,10 +67,10 @@ export default function DashboardScreen() {
         <ScrollView contentContainerStyle={{ paddingBottom: theme.spacing.lg }} showsVerticalScrollIndicator={false}>
           <View style={styles.headerRow}>
             <View>
-              <Text style={styles.greeting}>Hi, Technician 👋</Text>
+              <Text style={styles.greeting}>Hi, {user?.name?.split(' ')[0]} 👋</Text>
               <Text style={styles.subtitle}>Here's your performance overview</Text>
             </View>
-            <TouchableOpacity style={styles.avatar}><Text style={styles.avatarText}>IM</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.avatar}><Text style={styles.avatarText}>{getInitials(user?.name)}</Text></TouchableOpacity>
           </View>
 
           <Text style={styles.sectionTitle}>{stats.periodLabel ? `Technician Stats (${stats.periodLabel})` : 'Technician Stats'}</Text>
