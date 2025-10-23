@@ -138,75 +138,36 @@ class FaultLifecycle
         return $cachedId;
     }
 
+    protected static function techClearedId(): int
+    {
+        static $cachedId = null;
+        if ($cachedId === null) {
+            $cachedId = (int)(Status::where('status_code', 'CLT')->value('id') ?? 4);
+        }
+        return $cachedId;
+    }
+
     protected static function notifyStatusChange(Fault $fault, int $toStatusId): void
     {
         $desc = Status::find($toStatusId)->description ?? 'Status changed';
         $summary = self::faultSummary($fault);
         $text = "Fault {$fault->fault_ref_number}: {$desc}\n{$summary}";
 
-        // 1: Waiting for assessment -> notify NOC section technicians
+        // 1: Waiting for assessment -> customer notification only
         if ($toStatusId === 1) {
-            Log::info("Infobip: Fault {$fault->fault_ref_number} created, notifying NOC technicians");
-            $nocSectionId = Section::whereIn('section', ['NOC', 'Network Operating Centre'])->value('id');
-            if ($nocSectionId) {
-                $recipients = User::where('section_id', $nocSectionId)
-                    ->whereNotNull('phonenumber')
-                    ->pluck('phonenumber')
-                    ->all();
-                if (!empty($recipients)) {
-                    Log::info("Infobip: Dispatching message to " . count($recipients) . " NOC technicians", [
-                        'fault_ref' => $fault->fault_ref_number,
-                        'recipients' => $recipients
-                    ]);
-                    SendInfobipMessage::dispatch($recipients, $text);
-                } else {
-                    Log::warning("Infobip: No NOC technicians with phone numbers found for fault {$fault->fault_ref_number}");
-                }
-            } else {
-                Log::warning("Infobip: NOC section not found for fault {$fault->fault_ref_number}");
-            }
+            Log::info("Infobip: Skipping NOC notifications; customer will be notified");
         }
 
-        // 2: Assessed -> notify section chief technician for the fault's region
+        // 2: Assessed -> customer notification only
         if ($toStatusId === 2) {
-            Log::info("Infobip: Fault {$fault->fault_ref_number} assessed, notifying chief technicians");
-            $sectionId = FaultSection::where('fault_id', $fault->id)->value('section_id');
-            $region = City::where('id', $fault->city_id)->value('region');
-            if ($sectionId && $region) {
-                $chiefPositionIds = Position::where('position', 'Chief Technician')->pluck('id')->all();
-                $recipients = User::where('section_id', $sectionId)
-                    ->whereIn('position_id', $chiefPositionIds)
-                    ->where('region', $region)
-                    ->whereNotNull('phonenumber')
-                    ->pluck('phonenumber')
-                    ->all();
-                if (!empty($recipients)) {
-                    Log::info("Infobip: Dispatching message to " . count($recipients) . " chief technicians", [
-                        'fault_ref' => $fault->fault_ref_number,
-                        'section_id' => $sectionId,
-                        'region' => $region,
-                        'recipients' => $recipients
-                    ]);
-                    SendInfobipMessage::dispatch($recipients, $text);
-                } else {
-                    Log::warning("Infobip: No chief technicians with phone numbers found for fault {$fault->fault_ref_number}", [
-                        'section_id' => $sectionId,
-                        'region' => $region
-                    ]);
-                }
-            } else {
-                Log::warning("Infobip: Missing section or region for fault {$fault->fault_ref_number}", [
-                    'section_id' => $sectionId,
-                    'region' => $region
-                ]);
-            }
+            Log::info("Infobip: Skipping chief technician notifications; customer will be notified");
         }
 
         // Notify customer for key statuses (logged, assessed, resolved)
         self::notifyCustomerStatus($fault, $toStatusId, $text);
 
         // 3+ progression updates -> notify currently assigned technician if present
-        if (in_array($toStatusId, [3, 4, 5, self::nocClearedId()], true)) {
+        if ($toStatusId === 3) {
             Log::info("Infobip: Fault {$fault->fault_ref_number} status updated to {$toStatusId}, notifying assigned technician");
             self::notifyAssignedTech($fault, $text);
         }
@@ -272,13 +233,13 @@ class FaultLifecycle
 
     protected static function notifyCustomerStatus(Fault $fault, int $toStatusId, string $text): void
     {
-        // Only send for: 1 (logged/waiting assessment), 2 (assessed), NOC cleared (resolved)
-        $shouldSend = in_array($toStatusId, [1, 2, self::nocClearedId()], true);
+        // Only send for: 1 (logged/waiting assessment), 2 (assessed), 3 (under rectification), 4 (cleared by technician)
+        $shouldSend = in_array($toStatusId, [1, 2, 3, 4], true);
         if (!$shouldSend) {
             return;
         }
 
-        $desc = Status::where('id', $toStatusId)->value('status') ?? 'Status updated';
+        $desc = Status::where('id', $toStatusId)->value('description') ?? 'Status updated';
 
         $customerPhones = [];
         if (!empty($fault->phoneNumber)) {
