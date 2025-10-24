@@ -141,28 +141,39 @@ class FaultController extends Controller
 
     public function addRemark(Request $request, Fault $fault)
     {
+        // Block remarks on resolved faults (status_id = 4)
+        if ((string)$fault->status_id === '4') {
+            return response()->json(['success' => false, 'message' => 'Fault is resolved; remarks are not allowed.'], 422);
+        }
+
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+        }
+
         $data = $request->validate([
             'remark' => 'required|string|min:2',
             'activity' => 'nullable|string',
             'attachment' => 'nullable|file',
         ]);
 
-        $path = null;
+        $path = '';
         if ($request->hasFile('attachment')) {
             $path = $request->file('attachment')->storePublicly('attachments', 'public');
         }
 
         $activityName = $data['activity'] ?? null;
-        $remarkActivityId = null;
+        // remarks.remarkActivity_id is NOT NULL in schema; use 0 when activity is omitted
+        $remarkActivityId = 0;
         if ($activityName) {
-            $remarkActivityId = \DB::table('remark_activities')
+            $remarkActivityId = (int) (\DB::table('remark_activities')
                 ->where('activity', '=', $activityName)
-                ->value('id');
+                ->value('id') ?? 0);
         }
 
         Remark::create([
             'remark' => $data['remark'],
-            'user_id' => $request->user()->id,
+            'user_id' => $user->id,
             'fault_id' => $fault->id,
             'remarkActivity_id' => $remarkActivityId,
             'file_path' => $path,
@@ -179,7 +190,7 @@ class FaultController extends Controller
             'attachment' => 'nullable|file',
         ]);
 
-        $path = null;
+        $path = '';
         if ($request->hasFile('attachment')) {
             $path = $request->file('attachment')->storePublicly('attachments', 'public');
         }
