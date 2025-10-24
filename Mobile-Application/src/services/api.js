@@ -30,11 +30,16 @@ export async function getMyFaults() {
 }
 
 export async function getFault(id) {
-  return request(`/mobile/faults/${id}`);
+  const data = await request(`/mobile/faults/${id}`);
+  return data;
 }
 
 export async function rectifyFault(id, payload) {
   return request(`/mobile/faults/${id}/rectify`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export async function addFaultRemark(id, payload) {
+  return request(`/mobile/faults/${id}/remarks`, { method: 'POST', body: JSON.stringify(payload) });
 }
 
 export async function getTechnicianStats(params = {}) {

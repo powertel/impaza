@@ -8,6 +8,7 @@ import SignUpScreen from '../screens/SignUpScreen';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
 import FaultDetailScreen from '../screens/FaultDetailScreen';
 import RectifyFaultScreen from '../screens/RectifyFaultScreen';
+import AddRemarkScreen from '../screens/AddRemarkScreen';
 import MainTabs from './MainTabs';
 
 const Stack = createNativeStackNavigator();
@@ -23,6 +24,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Main" component={MainTabs} options={{ headerShown: false }} />
         <Stack.Screen name="FaultDetail" component={FaultDetailScreen} options={{ title: 'Fault Details' }} />
         <Stack.Screen name="RectifyFault" component={RectifyFaultScreen} options={{ title: 'Rectify Fault' }} />
+        <Stack.Screen name="AddRemark" component={AddRemarkScreen} options={{ title: 'Add Remark' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

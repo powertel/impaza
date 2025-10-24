@@ -11,6 +11,7 @@ class Link extends Model
 
     protected $fillable = [
         'customer_id',
+        'account_number',
         'contract_number',
         'jcc_number',
         'sapcodes',

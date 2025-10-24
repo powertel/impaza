@@ -26,7 +26,7 @@ const FaultCard = ({ item, onPress }) => {
   const reference = item.fault_ref_number || `ID: ${item.id}`;
   const status = item.status || 'Unknown';
   const priority = item.priorityLevel || 'Normal';
-  const age = formatDistanceToNow(item.created_at);
+  const age = formatDistanceToNow(item.stage_started_at || item.created_at);
 
   const getPriorityStyle = (p) => {
     switch (p?.trim().toLowerCase()) {
@@ -83,13 +83,13 @@ export default function FaultsListScreen() {
 
   useEffect(() => { load(); }, []);
 
-  const priorities = ['All', 'High', 'Medium', 'Low'];
+  const filters = ['All', 'Resolved', 'Not Yet Resolved'];
 
   const filteredFaults = useMemo(() => {
-    if (activeFilter === 'All') {
-      return faults;
-    }
-    return faults.filter(fault => fault.priority?.trim().toLowerCase() === activeFilter.toLowerCase());
+    if (activeFilter === 'All') return faults;
+    if (activeFilter === 'Resolved') return faults.filter(f => String(f.status_id) === '4');
+    if (activeFilter === 'Not Yet Resolved') return faults.filter(f => String(f.status_id) === '3');
+    return faults;
   }, [faults, activeFilter]);
 
   const renderItem = ({ item }) => <FaultCard item={item} onPress={() => navigation.navigate('FaultDetail', { id: item.id })} />;
@@ -105,13 +105,13 @@ export default function FaultsListScreen() {
 
       <View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillsContainer}>
-          {priorities.map(priority => (
+          {filters.map(filter => (
             <TouchableOpacity
-              key={priority}
-              style={[styles.pill, activeFilter === priority && styles.activePill]}
-              onPress={() => setActiveFilter(priority)}
+              key={filter}
+              style={[styles.pill, activeFilter === filter && styles.activePill]}
+              onPress={() => setActiveFilter(filter)}
             >
-              <Text style={[styles.pillText, activeFilter === priority && styles.activePillText]}>{priority}</Text>
+              <Text style={[styles.pillText, activeFilter === filter && styles.activePillText]}>{filter}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>

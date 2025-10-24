@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -13,13 +14,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('faults', function (Blueprint $table) {
-            $table->string('phoneNumber', 64)->nullable()->after('customer_id')->change();
-        });
-
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('phonenumber', 64)->nullable()->after('email')->change();
-        });
+        DB::statement("ALTER TABLE faults MODIFY COLUMN phoneNumber VARCHAR(64) NULL AFTER customer_id");
+        DB::statement("ALTER TABLE users MODIFY COLUMN phonenumber VARCHAR(64) NULL AFTER email");
     }
 
     /**
@@ -29,12 +25,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('faults', function (Blueprint $table) {
-            $table->string('phoneNumber', 64)->nullable()->change();
-        });
-
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('phonenumber', 64)->nullable()->change();
-        });
+        DB::statement("ALTER TABLE faults MODIFY COLUMN phoneNumber VARCHAR(64) NULL");
+        DB::statement("ALTER TABLE users MODIFY COLUMN phonenumber VARCHAR(64) NULL");
     }
 };
