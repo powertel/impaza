@@ -1,4 +1,3 @@
-@can('assign-fault')
 <div class="modal fade" id="assignModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="assignModalLabel-{{ $fault->id }}" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -40,4 +39,4 @@
     </div>
   </div>
 </div>
-@endcan
+
