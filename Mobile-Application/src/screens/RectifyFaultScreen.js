@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { rectifyFault } from '../services/api';
@@ -19,7 +19,9 @@ export default function RectifyFaultScreen() {
     try {
       const res = await rectifyFault(id, { notes });
       setResult(res);
-      navigation.goBack();
+      Alert.alert('Success', 'Fault rectified successfully.', [
+        { text: 'OK', onPress: () => navigation.navigate('FaultDetail', { id, refetchAt: Date.now() }) }
+      ]);
     } catch (e) {
       setResult({ error: 'Failed to submit rectification.' });
     } finally {

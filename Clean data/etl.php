@@ -121,6 +121,7 @@ function upsertLinks(PDO $pdo, array $rows): void {
     $insert = $pdo->prepare("INSERT INTO links (customer_id, account_number, contract_number, jcc_number, sapcodes, comment, quantity, service_type, capacity, city_id, suburb_id, pop_id, linkType_id, link_status, link, created_at, updated_at)
                              VALUES (:cust_id, :acc, :contract, :jcc, :sap, :comment, :qty, :service, :capacity, :city, :suburb, :pop, :linkType, :status, :link, NOW(), NOW())");
     $update = $pdo->prepare("UPDATE links SET account_number=:acc, contract_number=:contract, jcc_number=:jcc, sapcodes=:sap, comment=:comment, quantity=:qty, service_type=:service, capacity=:capacity, city_id=:city, suburb_id=:suburb, pop_id=:pop, linkType_id=:linkType, link_status=:status, updated_at=NOW() WHERE id=:id");
+    $selectContract = $pdo->prepare("SELECT contract_number FROM customers WHERE id = :id");
     foreach ($rows as $r) {
         $acc = $r['account_number'] ?? '';
         $link = $r['link'] ?? '';
@@ -129,19 +130,21 @@ function upsertLinks(PDO $pdo, array $rows): void {
         if ($custId === null) continue; // avoid orphaned link
         $select->execute([':cust_id' => $custId, ':link' => $link]);
         $found = $select->fetch(PDO::FETCH_ASSOC);
+        $selectContract->execute([':id' => $custId]);
+        $contractNumber = $selectContract->fetchColumn();
         $common = [
             'acc' => $acc,
-            'contract' => null,
+            'contract' => $contractNumber ?: null,
             'jcc' => null,
             'sap' => $r['sapcodes'] ?? null,
-            'comment' => null,
+            'comment' => $link,
             'qty' => null,
             'service' => null,
             'capacity' => null,
-            'city' => 0,
-            'suburb' => 0,
-            'pop' => 0,
-            'linkType' => 0,
+            'city' => null,
+            'suburb' => null,
+            'pop' => null,
+            'linkType' => 2,
             'status' => 0,
         ];
         if ($found) {

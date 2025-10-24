@@ -29,7 +29,7 @@ export default function FaultDetailScreen() {
       }
     };
     load();
-  }, [id, isFocused]);
+  }, [id, isFocused, route.params?.refetchAt]);
 
   if (loading || !fault) {
     return (
