@@ -145,10 +145,10 @@ class FaultController extends Controller
             // Derive location and service details from selected link
             $lnk = Link::find($request->input('link_id'));
             if($lnk){
-                $req['city_id'] = $lnk->city_id;
-                $req['suburb_id'] = $lnk->suburb_id;
-                $req['pop_id'] = $lnk->pop_id;
-                $req['serviceType'] = $lnk->service_type; // map to faults.serviceType
+                $req['city_id'] = $lnk->city_id ?? null; 
+                $req['suburb_id'] = $lnk->suburb_id ?? null; 
+                $req['pop_id'] = $lnk->pop_id ?? null;
+                $req['serviceType'] = $lnk->service_type ?? null; // map to faults.serviceType
             }
             // Remove email if it is not provided anymore
             if(!$request->filled('contactEmail')){
