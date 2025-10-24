@@ -83,7 +83,92 @@ class FaultController extends Controller
 
     public function show(Fault $fault)
     {
-        return response()->json($fault);
+        // Join related tables to return enriched fault details
+        $item = \DB::table('faults')
+            ->leftJoin('customers','faults.customer_id','=','customers.id')
+            ->leftJoin('links','faults.link_id','=','links.id')
+            ->leftJoin('statuses','faults.status_id','=','statuses.id')
+            ->leftJoin('cities','faults.city_id','=','cities.id')
+            ->leftJoin('suburbs','faults.suburb_id','=','suburbs.id')
+            ->leftJoin('pops','faults.pop_id','=','pops.id')
+            ->leftJoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
+            ->leftJoin('fault_stage_logs as fsl', function($join) {
+                $join->on('fsl.fault_id','=','faults.id');
+                $join->on('fsl.status_id','=','faults.status_id');
+                $join->whereNull('fsl.ended_at');
+            })
+            ->where('faults.id','=',$fault->id)
+            ->first([
+                'faults.id',
+                'customers.customer',
+                'faults.contactName',
+                'faults.phoneNumber',
+                'faults.contactEmail',
+                'faults.fault_ref_number',
+                'faults.address',
+                'links.link',
+                'statuses.id as status_id',
+                'statuses.description as status',
+                'faults.serviceType',
+                'faults.serviceAttribute',
+                'faults.faultType',
+                'faults.priorityLevel',
+                'faults.created_at',
+                'cities.city as city',
+                'suburbs.suburb as suburb',
+                'pops.pop as pop',
+                'reasons_for_outages.RFO as RFO',
+                'fsl.started_at as stage_started_at'
+            ]);
+
+        // Collect remarks for the fault
+        $remarks = \DB::table('remarks')
+            ->leftJoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
+            ->leftJoin('users','remarks.user_id','=','users.id')
+            ->where('remarks.fault_id','=',$fault->id)
+            ->orderBy('remarks.created_at','desc')
+            ->get([
+                'remarks.id',
+                'remarks.created_at',
+                'remarks.remark',
+                'remarks.file_path',
+                'users.name',
+                'remark_activities.activity'
+            ]);
+
+        return response()->json(['fault' => $item, 'remarks' => $remarks]);
+    }
+
+    public function addRemark(Request $request, Fault $fault)
+    {
+        $data = $request->validate([
+            'remark' => 'required|string|min:2',
+            'activity' => 'nullable|string',
+            'attachment' => 'nullable|file',
+        ]);
+
+        $path = null;
+        if ($request->hasFile('attachment')) {
+            $path = $request->file('attachment')->storePublicly('attachments', 'public');
+        }
+
+        $activityName = $data['activity'] ?? null;
+        $remarkActivityId = null;
+        if ($activityName) {
+            $remarkActivityId = \DB::table('remark_activities')
+                ->where('activity', '=', $activityName)
+                ->value('id');
+        }
+
+        Remark::create([
+            'remark' => $data['remark'],
+            'user_id' => $request->user()->id,
+            'fault_id' => $fault->id,
+            'remarkActivity_id' => $remarkActivityId,
+            'file_path' => $path,
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Remark added']);
     }
 
     public function rectify(Request $request, Fault $fault)
