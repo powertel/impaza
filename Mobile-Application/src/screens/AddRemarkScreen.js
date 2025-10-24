@@ -11,7 +11,6 @@ export default function AddRemarkScreen() {
   const { id } = route.params || {};
 
   const [remark, setRemark] = useState('');
-  const [activityName, setActivityName] = useState('');
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
@@ -21,7 +20,7 @@ export default function AddRemarkScreen() {
     }
     setLoading(true);
     try {
-      await addFaultRemark(id, { remark: remark.trim(), activity_name: activityName.trim() || undefined });
+      await addFaultRemark(id, { remark: remark.trim() });
       Alert.alert('Success', 'Remark added successfully.', [
         { text: 'OK', onPress: () => navigation.goBack() }
       ]);
@@ -49,13 +48,6 @@ export default function AddRemarkScreen() {
           textAlignVertical="top"
         />
 
-        <Text style={styles.label}>Activity (optional)</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="e.g., Site visit, Link test"
-          value={activityName}
-          onChangeText={setActivityName}
-        />
 
         <TouchableOpacity style={styles.primaryBtn} onPress={submit} disabled={loading}>
           {loading ? (
