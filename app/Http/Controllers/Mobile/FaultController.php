@@ -184,6 +184,16 @@ class FaultController extends Controller
 
     public function rectify(Request $request, Fault $fault)
     {
+        // Block if already resolved
+        if ((string)$fault->status_id === '4') {
+            return response()->json(['success' => false, 'message' => 'Fault already resolved'], 422);
+        }
+
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+        }
+
         $data = $request->validate([
             'notes' => 'required|string|min:2',
             'activity' => 'nullable|string',
@@ -196,16 +206,17 @@ class FaultController extends Controller
         }
 
         $activityName = $data['activity'] ?? null;
-        $remarkActivityId = null;
+        // Default to 0 when no activity is provided to satisfy NOT NULL schema
+        $remarkActivityId = 0;
         if ($activityName) {
-            $remarkActivityId = DB::table('remark_activities')
+            $remarkActivityId = (int) (DB::table('remark_activities')
                 ->where('activity', '=', $activityName)
-                ->value('id');
+                ->value('id') ?? 0);
         }
 
         Remark::create([
             'remark' => $data['notes'],
-            'user_id' => $request->user()->id,
+            'user_id' => $user->id,
             'fault_id' => $fault->id,
             'remarkActivity_id' => $remarkActivityId,
             'file_path' => $path,
@@ -213,7 +224,7 @@ class FaultController extends Controller
 
         // Technician resolved: set status to 4 and log lifecycle
         $fault->update(['status_id' => 4]);
-        FaultLifecycle::recordStatusChange($fault, 4, $request->user()->id);
+        FaultLifecycle::recordStatusChange($fault, 4, $user->id);
         FaultLifecycle::resolveAssignment($fault);
 
         return response()->json(['success' => true, 'message' => 'Fault marked as technician resolved']);
