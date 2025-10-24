@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation, useIsFocused } from '@react-navigation/native';
 import { getFault } from '../services/api';
 import { theme } from '../styles/theme';
 
@@ -12,8 +12,10 @@ export default function FaultDetailScreen() {
   const [fault, setFault] = useState(null);
   const [remarks, setRemarks] = useState([]);
   const [loading, setLoading] = useState(false);
+  const isFocused = useIsFocused();
 
   useEffect(() => {
+    if (!isFocused) return;
     const load = async () => {
       setLoading(true);
       try {
@@ -27,7 +29,7 @@ export default function FaultDetailScreen() {
       }
     };
     load();
-  }, [id]);
+  }, [id, isFocused]);
 
   if (loading || !fault) {
     return (
