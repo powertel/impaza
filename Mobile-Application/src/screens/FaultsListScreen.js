@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, RefreshControl, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { getMyFaults } from '../services/api';
 import { theme } from '../styles/theme';
 import { Feather } from '@expo/vector-icons';
@@ -65,6 +65,7 @@ const FaultCard = ({ item, onPress }) => {
 
 export default function FaultsListScreen() {
   const navigation = useNavigation();
+  const isFocused = useIsFocused();
   const [faults, setFaults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeFilter, setActiveFilter] = useState('All');
@@ -81,7 +82,7 @@ export default function FaultsListScreen() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { if (isFocused) load(); }, [isFocused]);
 
   const filters = ['All', 'Resolved', 'Not Yet Resolved'];
 
