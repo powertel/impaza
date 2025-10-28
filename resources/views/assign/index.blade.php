@@ -40,7 +40,7 @@ Assign Faults
                 <table class="table  table-hover align-middle js-paginated-table" id="assigned-faults-list" style="font-size:14px" data-page-size="20" data-page-size-control="#assignedfaultsPageSize" data-pager="#assignedfaultsPager" data-search="#assignedfaultsSearch">
                     <thead class="thead-light">
                         <tr>
-                            <th>No.</th>
+                            <th>Ref No.</th>
                             <th>Customer</th>
                             <th>Link</th>
                             <th>City</th>
@@ -56,7 +56,7 @@ Assign Faults
                     <tbody>
                         @foreach ($faults as $fault)
                             <tr data-fault-id="{{ $fault->id }}">
-                                <td>{{ $fault->id }}</td>
+                                <td>{{ $fault->fault_ref_number }}</td>
                                 <td>{{ $fault->customer }}</td>
                                 <td>{{ $fault->link }}</td>
                                 <td>{{ $fault->city }}</td>

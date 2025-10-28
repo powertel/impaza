@@ -65,7 +65,7 @@ class DepartmentFaultController extends Controller
         ->leftjoin('statuses','faults.status_id','=','statuses.id')
         ->orderBy('faults.created_at', 'desc')
         ->where('fault_section.section_id','=',auth()->user()->section_id)
-       ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
+       ->get(['faults.id','faults.fault_ref_number','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
         'account_manager_users.name as accountManager','faults.suspectedRfo_id','links.link','statuses.description','faults.assignedTo','users.name'
        ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at','cities.city','suburbs.suburb','pops.pop','reasons_for_outages.RFO as RFO']);
 

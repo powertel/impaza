@@ -75,23 +75,28 @@
             <div class="col-md-4">
               <label class="form-label">City/Town</label>
               <select name="city_id" class="form-select" required>
+                 <option value="" selected disabled>Select City</option>
                 @foreach($cities as $city)
-                  <option value="{{ $city->id }}" {{ ($full && $full->city_id == $city->id) ? 'selected' : '' }}>{{ $city->city }}</option>
+                  <option value="{{ $city->id }}">{{ $city->city }}</option>
                 @endforeach
               </select>
             </div>
             <div class="col-md-4">
               <label class="form-label">Location</label>
+              @php $uniqueSuburbs = collect($suburbs)->unique('id'); @endphp
               <select name="suburb_id" class="form-select" required>
-                @foreach($suburbs as $sub)
+                <option value="" disabled {{ empty($full?->suburb_id) ? 'selected' : '' }}>Select Location</option>
+                @foreach($uniqueSuburbs as $sub)
                   <option value="{{ $sub->id }}" {{ ($full && $full->suburb_id == $sub->id) ? 'selected' : '' }}>{{ $sub->suburb }}</option>
                 @endforeach
               </select>
             </div>
             <div class="col-md-4">
               <label class="form-label">Pop</label>
+              @php $uniquePops = collect($pops)->unique('id'); @endphp
               <select name="pop_id" class="form-select" required>
-                @foreach($pops as $p)
+                <option value="" disabled {{ empty($full?->pop_id) ? 'selected' : '' }}>Select Pop</option>
+                @foreach($uniquePops as $p)
                   <option value="{{ $p->id }}" {{ ($full && $full->pop_id == $p->id) ? 'selected' : '' }}>{{ $p->pop }}</option>
                 @endforeach
               </select>
