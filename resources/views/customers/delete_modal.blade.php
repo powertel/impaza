@@ -14,8 +14,12 @@
         <form action="{{ route('customers.destroy', $customer->id) }}" method="POST" class="d-inline">
           @csrf
           @method('DELETE')
-          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Delete</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+            <i class="fas fa-times me-1"></i> Cancel
+          </button>
+          <button type="submit" class="btn btn-outline-danger btn-sm">
+            <i class="fas fa-trash me-1"></i> Delete
+          </button>
         </form>
       </div>
     </div>

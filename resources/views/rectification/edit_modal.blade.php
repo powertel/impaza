@@ -93,11 +93,15 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i> Cancel
+        </button>
         <form action="{{ route('rectify.update', $fault->id ) }}" method="POST" class="d-inline">
           @csrf
           @method('PUT')
-          <button type="submit" class="btn btn-success btn-sm">Restore</button>
+          <button type="submit" class="btn btn-outline-success btn-sm">
+            <i class="fas fa-undo-alt me-1"></i> Restore
+          </button>
         </form>
       </div>
   </div>
