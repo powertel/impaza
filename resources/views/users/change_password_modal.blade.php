@@ -27,8 +27,12 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" form="user-change-password-form-{{ $user->id }}" class="btn btn-warning"><i class="fas fa-save me-1"></i> Update Password</button>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i> Cancel
+        </button>
+        <button type="submit" form="user-change-password-form-{{ $user->id }}" class="btn btn-outline-warning">
+          <i class="fas fa-save me-1"></i> Update Password
+        </button>
       </div>
     </div>
   </div>
