@@ -13,7 +13,7 @@ Assign Faults
 
         <!--Card Header-->
         <div class="card-header">
-            <h3 class="card-title">Assign Faults</h3>
+            <h3 class="card-title">Assigned Faults</h3>
             <div class="card-tools">
                 
             </div>
@@ -43,9 +43,6 @@ Assign Faults
                             <th>Ref No.</th>
                             <th>Customer</th>
                             <th>Link</th>
-                            <th>City</th>
-                            <th>Suburb</th>
-                            <th>POP</th>
                             <th>Priority</th>
                             <th>Status</th>
                             <th>Fault Age</th>
@@ -59,9 +56,6 @@ Assign Faults
                                 <td>{{ $fault->fault_ref_number }}</td>
                                 <td>{{ $fault->customer }}</td>
                                 <td>{{ $fault->link }}</td>
-                                <td>{{ $fault->city }}</td>
-                                <td>{{ $fault->suburb }}</td>
-                                <td>{{ $fault->pop }}</td>
                                 <td>
                                     @php
                                         $priorityColors = [

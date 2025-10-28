@@ -3,6 +3,7 @@
 @section('title')
 links
 @endsection
+
 @include('partials.css')
 @section('content')
 <section class="content">
