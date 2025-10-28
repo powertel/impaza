@@ -116,77 +116,6 @@ class FaultController extends Controller
 
     }
 
-    /**
-     * Display the specified fault details.
-     */
-    public function show($id)
-    {
-        $fault = DB::table('faults')
-            ->leftJoin('customers', 'faults.customer_id', '=', 'customers.id')
-            ->leftJoin('links', 'faults.link_id', '=', 'links.id')
-            ->leftJoin('users as assigned_users', 'faults.assignedTo', '=', 'assigned_users.id')
-            ->leftJoin('users as reported_users', 'faults.user_id', '=', 'reported_users.id')
-            ->leftJoin('account_managers', 'customers.account_manager_id', '=', 'account_managers.id')
-            ->leftJoin('users as account_manager_users', 'account_managers.user_id', '=', 'account_manager_users.id')
-            ->leftJoin('statuses', 'faults.status_id', '=', 'statuses.id')
-            ->leftJoin('reasons_for_outages', 'faults.suspectedRfo_id', '=', 'reasons_for_outages.id')
-            ->leftJoin('cities', 'faults.city_id', '=', 'cities.id')
-            ->leftJoin('suburbs', 'faults.suburb_id', '=', 'suburbs.id')
-            ->leftJoin('pops', 'faults.pop_id', '=', 'pops.id')
-            ->where('faults.id', $id)
-            ->first([
-                'faults.id',
-                'faults.user_id',
-                'faults.fault_ref_number',
-                'customers.customer',
-                'faults.customer_id',
-                'faults.city_id',
-                'faults.suburb_id',
-                'faults.pop_id',
-                'faults.link_id',
-                'faults.status_id',
-                'faults.contactName',
-                'faults.phoneNumber',
-                'faults.contactEmail',
-                'faults.address',
-                'account_manager_users.name as accountManager',
-                'faults.suspectedRfo_id',
-                'links.link',
-                'statuses.description',
-                'assigned_users.name as assignedTo',
-                'reported_users.name as reportedBy',
-                'faults.serviceType',
-                'faults.serviceAttribute',
-                'faults.faultType',
-                'faults.priorityLevel',
-                'faults.created_at',
-                'cities.city',
-                'suburbs.suburb',
-                'pops.pop',
-                'reasons_for_outages.RFO as RFO'
-            ]);
-
-        if (!$fault) {
-            abort(404);
-        }
-
-        $remarks = DB::table('remarks')
-            ->leftJoin('remark_activities', 'remarks.remarkActivity_id', '=', 'remark_activities.id')
-            ->leftJoin('users', 'remarks.user_id', '=', 'users.id')
-            ->where('remarks.fault_id', $id)
-            ->orderBy('remarks.created_at', 'desc')
-            ->get([
-                'remarks.id',
-                'remarks.fault_id',
-                'remarks.created_at',
-                'remarks.remark',
-                'remarks.file_path',
-                'users.name',
-                'remark_activities.activity'
-            ]);
-
-        return view('faults.show', compact('fault', 'remarks'));
-    }
 
     /**
      * Display faults for customers managed by the logged-in Account Manager.
@@ -292,7 +221,7 @@ class FaultController extends Controller
                 'customer_id'=> 'required|exists:customers,id',
                 'contactName'=> 'required|string',
                 'phoneNumber'=> ['required','string','max:32','regex:/^\+?[0-9\s-]{7,20}$/'],
-                'address'=> 'required|string',
+                'address'=> 'nullable|string',
                 'link_id'=> 'required|exists:links,id',
                 'suspectedRfo_id'=> 'required|exists:reasons_for_outages,id',
                 'remark'=> 'required|string',

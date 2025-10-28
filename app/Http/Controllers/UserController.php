@@ -13,6 +13,7 @@ use Spatie\Permission\Models\Role;
 use DB;
 use Hash;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -173,7 +174,7 @@ class UserController extends Controller
                 ->where('users.id','=',$id)
                 ->get(['users.id','users.name','users.email','users.department_id','users.position_id','users.section_id','sections.section','departments.department','positions.position','users.user_status','user_statuses.status_name'])
                 ->first();
-//dd($user);
+        //dd($user);
         $roles = Role::pluck('name','name')->all();
         $userRole = $user->roles->pluck('name','name')->all();
         $department = Department::all();
@@ -193,38 +194,44 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $this->validate($request, [
-            'name' => 'required',
-            'email' => 'required|email|unique:users,email,'.$id,
-            'password' => 'same:confirm-password',
-            'roles' => 'required',
-            'region' => 'nullable|string',
-            'phonenumber' => ['nullable','string','max:32','regex:/^\+?[0-9\s-]{7,20}$/'],
-        ]);
+        try{
+            $this->validate($request, [
+                'name' => 'required',
+                'email' => 'required|email|unique:users,email,'.$id,
+                'password' => 'same:confirm-password',
+                'roles' => 'required',
+                'region' => 'nullable|string',
+                'phonenumber' => ['nullable','string','max:32','regex:/^\+?[0-9\s-]{7,20}$/'],
+            ]);
 
-        $input = $request->all();
-        if (!empty($input['phonenumber'])) {
-            // normalize: trim spaces and collapse into digits plus optional leading '+'
-            $normalized = preg_replace('/[^0-9+]/', '', $input['phonenumber']);
-            // keep only first '+' if present
-            $normalized = ltrim($normalized, '+');
-            $normalized = (strpos($input['phonenumber'], '+') === 0 ? '+' : '') . $normalized;
-            $input['phonenumber'] = $normalized;
+            $input = $request->all();
+            if (!empty($input['phonenumber'])) {
+                // normalize: trim spaces and collapse into digits plus optional leading '+'
+                $normalized = preg_replace('/[^0-9+]/', '', $input['phonenumber']);
+                // keep only first '+' if present
+                $normalized = ltrim($normalized, '+');
+                $normalized = (strpos($input['phonenumber'], '+') === 0 ? '+' : '') . $normalized;
+                $input['phonenumber'] = $normalized;
+            }
+            if(!empty($input['password'])){
+                $input['password'] = Hash::make($input['password']);
+            }else{
+                $input = Arr::except($input,array('password'));
+            }
+
+            $user = User::find($id);
+            $user->update($input);
+
+            DB::table('model_has_roles')->where('model_id',$id)->delete();
+
+            $user->assignRole($request->input('roles'));
+
+            return redirect()->route('users.index')
+            ->with('success','User updated');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Error renewing contract: ' . $e->getMessage());
         }
-        if(!empty($input['password'])){
-            $input['password'] = Hash::make($input['password']);
-        }else{
-            $input = Arr::except($input,array('password'));
-        }
-
-        $user = User::find($id);
-        $user->update($input);
-        DB::table('model_has_roles')->where('model_id',$id)->delete();
-
-        $user->assignRole($request->input('roles'));
-
-        return redirect()->route('users.index')
-        ->with('success','User updated');
 
     }
 

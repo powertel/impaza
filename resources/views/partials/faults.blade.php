@@ -158,7 +158,7 @@ $(function(){
     var requiredSelectors = [
       '#customer', 'input[name="contactName"]', 'input[name="phoneNumber"]',
       '#link', 'select[name="suspectedRfo_id"]',
-      'input[name="address"]', 'textarea[name="remark"]'
+      'textarea[name="remark"]'
     ];
     var allValid = true;
     requiredSelectors.forEach(function(sel){
