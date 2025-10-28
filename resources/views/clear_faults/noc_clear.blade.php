@@ -40,6 +40,7 @@ Clear Faults
                 <thead class="thead-light">
                     <tr>
                         <th>No.</th>
+                        <th>Ref No.</th>
                         <th>Customer</th>
                         <th>Account Manager</th>
                         <th>Link Name</th>
@@ -52,6 +53,7 @@ Clear Faults
                     @foreach ( $faults as $fault )
                     <tr >
                         <td>{{ ++$i }}</td>
+                        <td>{{$fault->fault_ref_number}}</td>
                         <td>{{ $fault->customer }}</td>
                         <td>{{ $fault->accountManager }}</td>
                         <td>{{ $fault->link }}</td>
