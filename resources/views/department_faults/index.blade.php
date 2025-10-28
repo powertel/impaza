@@ -65,11 +65,17 @@ Department Faults
                         </td>
                     </tr>
                     @endforeach
+                    @if ($faults->isEmpty())
+                        <tr>
+                            <td colspan="10" class="text-center text-muted">No Department faults</td>
+                        </tr>
+                    @endif
                 </tbody> 
             </table>
             @foreach ($faults as $fault)
                 @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
             @endforeach
+            
             <div id="departmentFaultsPager" class="mt-2"></div>
         </div>
     </div>

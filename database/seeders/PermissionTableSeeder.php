@@ -94,6 +94,7 @@ class PermissionTableSeeder extends Seeder
             'chief-tech-clear-faults-clear',
             'technician-configuration',
             'assign-fault',
+            'manage-faults',
 
             // Dashboard permissions
             'dashboard-open-faults',

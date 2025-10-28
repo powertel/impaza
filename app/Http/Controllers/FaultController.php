@@ -116,6 +116,94 @@ class FaultController extends Controller
 
     }
 
+
+    /**
+     * Display faults for customers managed by the logged-in Account Manager.
+     */
+    public function managedCustomers(Request $request)
+    {
+        $userId = $request->user()->id;
+
+        $faults = DB::table('faults')
+                ->leftjoin('customers','faults.customer_id','=','customers.id')
+                ->leftjoin('links','faults.link_id','=','links.id')
+                ->leftjoin('users as assigned_users','faults.assignedTo','=','assigned_users.id')
+                ->leftjoin('users as reported_users','faults.user_id','=','reported_users.id')
+                ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
+                ->leftjoin('users as account_manager_users','account_managers.user_id','=','account_manager_users.id')
+                ->leftjoin('statuses','faults.status_id','=','statuses.id')
+                ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
+                ->leftjoin('cities','faults.city_id','=','cities.id')
+                ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
+                ->leftjoin('pops','faults.pop_id','=','pops.id')
+                ->where('account_manager_users.id', '=', $userId)
+                ->orderBy('faults.created_at', 'desc')
+                ->get([
+                    'faults.id',
+                    'faults.user_id',
+                    'faults.fault_ref_number',
+                    'customers.customer',
+                    'faults.customer_id',
+                    'faults.city_id',
+                    'faults.suburb_id',
+                    'faults.pop_id',
+                    'faults.link_id',
+                    'faults.status_id',
+                    'faults.contactName',
+                    'faults.phoneNumber',
+                    'faults.contactEmail',
+                    'faults.address',
+                    'account_manager_users.name as accountManager',
+                    'faults.suspectedRfo_id',
+                    'links.link',
+                    'statuses.description',
+                    'assigned_users.name as assignedTo',
+                    'reported_users.name as reportedBy',
+                    'faults.serviceType',
+                    'faults.serviceAttribute',
+                    'faults.faultType',
+                    'faults.priorityLevel',
+                    'faults.created_at',
+                    'cities.city',
+                    'suburbs.suburb',
+                    'pops.pop',
+                    'reasons_for_outages.RFO as RFO'
+                ]);
+
+        // Collect remarks for all listed faults and group by fault_id
+        $faultIds = $faults->pluck('id');
+        $remarksRecords = DB::table('remarks')
+            ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
+            ->leftjoin('users','remarks.user_id','=','users.id')
+            ->whereIn('remarks.fault_id', $faultIds)
+            ->orderBy('remarks.created_at', 'desc')
+            ->get([
+                'remarks.id',
+                'remarks.fault_id',
+                'remarks.created_at',
+                'remarks.remark',
+                'remarks.file_path',
+                'users.name',
+                'remark_activities.activity'
+            ]);
+
+        $remarksByFault = $remarksRecords->groupBy('fault_id');
+
+        // Reuse supporting datasets used by the index view
+        $city = City::all();
+        $customer = DB::table('customers')
+            ->orderBy('customers.customer', 'asc')
+            ->get();
+        $location = Suburb::all();
+        $link = Link::all();
+        $pop = Pop::all();
+        $accountManager = AccountManager::all();
+        $suspectedRFO = ReasonsForOutage::all();
+
+        return view('faults.index', compact('faults','customer','city','accountManager','location','link','pop','suspectedRFO','remarksByFault'))
+            ->with('i');
+    }
+
         /**
      * Store a newly created resource in storage.
      *
@@ -133,7 +221,7 @@ class FaultController extends Controller
                 'customer_id'=> 'required|exists:customers,id',
                 'contactName'=> 'required|string',
                 'phoneNumber'=> ['required','string','max:32','regex:/^\+?[0-9\s-]{7,20}$/'],
-                'address'=> 'required|string',
+                'address'=> 'nullable|string',
                 'link_id'=> 'required|exists:links,id',
                 'suspectedRfo_id'=> 'required|exists:reasons_for_outages,id',
                 'remark'=> 'required|string',

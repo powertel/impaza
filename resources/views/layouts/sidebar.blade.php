@@ -20,7 +20,7 @@
               </a>
             </li>
 
-            @canany(['fault-list','my-fault-list','assigned-fault-list','assessment-fault-list','chief-tech-clear-faults-list','noc-clear-faults-list','department-faults-list'])
+            @canany(['fault-list','my-fault-list','assigned-fault-list','assessment-fault-list','chief-tech-clear-faults-list','noc-clear-faults-list','department-faults-list','manage-faults'])
               <li class="nav-header">Faults</li>
             @endcanany
             @can('fault-list')
@@ -39,6 +39,16 @@
               </a>
             </li>
             @endcan
+            
+            @can('manage-faults')
+            <li class="nav-item">
+              <a href="{{ route('manage.faults') }}" class="nav-link {{ request()->routeIs('manage.faults') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-user-tie"></i>
+                <p>Managed Faults</p>
+              </a>
+            </li>
+            @endcan
+            
             @can('assigned-fault-list')
             <li class="nav-item">
               <a href="{{ route('assign.index') }}" class="nav-link {{ request()->routeIs('assign.index') ? 'active' : '' }}">

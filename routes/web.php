@@ -59,6 +59,8 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('departments', DepartmentController::class);
     Route::resource('sections', SectionController::class);
     Route::resource('positions', PositionController::class);
+    // Account Managers: faults for customers they manage (place BEFORE resource to avoid capture by faults/{fault})
+    Route::get('faults/managed', [FaultController::class, 'managedCustomers'])->name('manage.faults');
     Route::resource('faults', FaultController::class);
     // Customers: client-side validation helper (must be BEFORE resource route)
     Route::get('customers/check-account-number', [CustomerController::class, 'checkAccountNumber'])->name('customers.check-account-number');

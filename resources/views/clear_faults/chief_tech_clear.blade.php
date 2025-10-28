@@ -76,6 +76,11 @@ Clear Faults
                         </td>
                     </tr>
                     @endforeach
+                    @if ($faults->isEmpty())
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No faults to Clear</td>
+                        </tr>
+                    @endif
                 </tbody> 
             </table>
             <div id="chiefTechClearPager" class="mt-2"></div>

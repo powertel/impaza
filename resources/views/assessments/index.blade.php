@@ -86,6 +86,11 @@ Assess Faults
                         </td>
                     </tr>
                     @endforeach
+                    @if ($faults->isEmpty())
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No faults to assess at the moment</td>
+                        </tr>
+                    @endif
                 </tbody> 
             </table>
             @foreach ($faults as $fault)
