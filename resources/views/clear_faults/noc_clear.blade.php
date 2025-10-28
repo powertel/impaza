@@ -77,8 +77,14 @@ Clear Faults
                                 <i class="fas fa-eye me-1"></i> View
                             </button>
                         </td>
+
                     </tr>
                     @endforeach
+                    @if ($faults->isEmpty())
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No faults to clear at the moment</td>
+                        </tr>
+                    @endif
                 </tbody> 
             </table>
             <div id="nocClearPager" class="mt-2"></div>

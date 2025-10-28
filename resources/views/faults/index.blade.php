@@ -105,6 +105,11 @@ Faults
                         </td>
                     </tr>
                     @endforeach
+                    @if ($faults->isEmpty())
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No faults to display</td>
+                        </tr>
+                    @endif
                 </tbody> 
             </table>
             @include('faults.create')

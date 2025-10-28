@@ -102,6 +102,11 @@ My Faults
                         </td>
                     </tr>
                     @endforeach
+                    @if ($faults->isEmpty())
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No faults assigned</td>
+                        </tr>
+                    @endif
                 </tbody>
             </table>
             @foreach ($faults as $fault)

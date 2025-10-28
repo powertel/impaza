@@ -102,6 +102,11 @@ Assign Faults
                                 </td>
                             </tr>
                         @endforeach
+                        @if ($faults->isEmpty())
+                            <tr>
+                                <td colspan="12" class="text-center text-muted">No faults assigned at the moment</td>
+                            </tr>
+                        @endif
                     </tbody>
                 </table>
                 <div id="assignedfaultsPager" class="mt-2"></div>

@@ -90,6 +90,11 @@ Assign Faults
                                 @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
                                
                         @endforeach
+                        @if ($faults->isEmpty())
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">No faults to assign at the moment</td>
+                            </tr>
+                        @endif
                     </tbody>
                 </table>
                 <div id="assignedfaultsPager" class="mt-2"></div>
