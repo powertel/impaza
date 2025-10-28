@@ -85,9 +85,9 @@
               <label class="form-label">Location</label>
               @php $uniqueSuburbs = collect($suburbs)->unique('id'); @endphp
               <select name="suburb_id" class="form-select" required>
-                <option value="" disabled {{ empty($full?->suburb_id) ? 'selected' : '' }}>Select Location</option>
+                <option value="" selected disabled>Select Location</option>
                 @foreach($uniqueSuburbs as $sub)
-                  <option value="{{ $sub->id }}" {{ ($full && $full->suburb_id == $sub->id) ? 'selected' : '' }}>{{ $sub->suburb }}</option>
+                  <option value="{{ $sub->id }}">{{ $sub->suburb }}</option>
                 @endforeach
               </select>
             </div>
@@ -95,9 +95,9 @@
               <label class="form-label">Pop</label>
               @php $uniquePops = collect($pops)->unique('id'); @endphp
               <select name="pop_id" class="form-select" required>
-                <option value="" disabled {{ empty($full?->pop_id) ? 'selected' : '' }}>Select Pop</option>
+                <option value="" selected disabled>Select Pop</option>
                 @foreach($uniquePops as $p)
-                  <option value="{{ $p->id }}" {{ ($full && $full->pop_id == $p->id) ? 'selected' : '' }}>{{ $p->pop }}</option>
+                  <option value="{{ $p->id }}">{{ $p->pop }}</option>
                 @endforeach
               </select>
             </div>
