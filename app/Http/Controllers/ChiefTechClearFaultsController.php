@@ -54,6 +54,7 @@ class ChiefTechClearFaultsController extends Controller
             ->where('users.section_id','=',auth()->user()->section_id)
             ->get([
                 'faults.id',
+                'faults.fault_ref_number',
                 'customers.customer',
                 'faults.contactName',
                 'faults.phoneNumber',

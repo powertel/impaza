@@ -54,6 +54,7 @@ class NocClearFaultsController extends Controller
             ->where('faults.status_id','=',5)
             ->get([
                 'faults.id',
+                'faults.fault_ref_number',
                 'customers.customer',
                 'faults.contactName',
                 'faults.phoneNumber',

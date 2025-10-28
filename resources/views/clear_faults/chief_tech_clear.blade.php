@@ -41,8 +41,8 @@ Clear Faults
                 <thead class="thead-light">
                     <tr>
                         <th>No.</th>
+                        <th>Ref No.</th>
                         <th>Customer</th>
-                        <th>Account Manager</th>
                         <th>Link Name</th>
                         <th>Status</th>
                         <th>Fault Age</th>
@@ -53,8 +53,8 @@ Clear Faults
                     @foreach ( $faults as $fault )
                     <tr >
                         <td>{{ ++$i }}</td>
+                        <td>{{ $fault->fault_ref_number}}</td>
                         <td>{{ $fault->customer }}</td>
-                        <td>{{ $fault->accountManager }}</td>
                         <td>{{ $fault->link }}</td>
                         <td class="text-nowrap">
                             <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
