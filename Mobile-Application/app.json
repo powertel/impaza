@@ -1,16 +1,24 @@
 {
   "expo": {
-    "name": "Mobile-Application",
+    "name": "iMpazamon",
     "slug": "Mobile-Application",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": false,
+    "androidStatusBar": {
+      "backgroundColor": "#F5F7FF",
+      "barStyle": "dark-content"
+    },
+    "androidNavigationBar": {
+      "backgroundColor": "#F5F7FF",
+      "barStyle": "dark-content"
+    },
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#F5F7FF"
     },
     "ios": {
       "supportsTablet": true
@@ -18,9 +26,11 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#F5F7FF"
       },
-      "edgeToEdgeEnabled": false
+      "usesCleartextTraffic": true,
+      "edgeToEdgeEnabled": false,
+      "package": "com.powerteldev.MobileApplication"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -29,7 +39,11 @@
       "enabled": true
     },
     "extra": {
-      "apiUrl": "http://192.168.19.91:8080/api"
-    }
+      "apiUrl": "http://192.168.19.91:8080/api",
+      "eas": {
+        "projectId": "152b3f73-2c00-4325-afe4-5a26e8d5b8e1"
+      }
+    },
+    "owner": "powerteldev"
   }
 }

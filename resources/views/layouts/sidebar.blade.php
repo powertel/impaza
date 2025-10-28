@@ -39,6 +39,16 @@
               </a>
             </li>
             @endcan
+            
+            @can('manage-faults')
+            <li class="nav-item">
+              <a href="{{ route('manage.faults') }}" class="nav-link {{ request()->routeIs('manage.faults') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-user-tie"></i>
+                <p>Managed Faults</p>
+              </a>
+            </li>
+            @endcan
+            
             @can('assigned-fault-list')
             <li class="nav-item">
               <a href="{{ route('assign.index') }}" class="nav-link {{ request()->routeIs('assign.index') ? 'active' : '' }}">

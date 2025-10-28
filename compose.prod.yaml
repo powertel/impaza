@@ -1,0 +1,79 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile.prod
+    container_name: impaza_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./storage:/var/www/html/storage
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+    environment:
+      TZ: Africa/Harare
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: "http://impazamon.powertel.co.zw"
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: impaza
+      DB_USERNAME: impazamon
+      DB_PASSWORD: Power@Dev25
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      REDIS_HOST: redis
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - impaza
+
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    container_name: impaza_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/default.prod.conf:/etc/nginx/conf.d/default.conf
+    environment:
+      TZ: Africa/Harare
+    depends_on:
+      - app
+    networks:
+      - impaza
+
+  mysql:
+    image: mysql:8.0
+    container_name: impaza_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: impaza
+      MYSQL_USER: impaza
+      MYSQL_PASSWORD: Power@Dev25
+      TZ: Africa/Harare
+    command: ["--default-time-zone=+02:00"]
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - impaza
+
+  redis:
+    image: redis:alpine
+    container_name: impaza_redis
+    restart: unless-stopped
+    environment:
+      TZ: Africa/Harare
+    networks:
+      - impaza
+
+networks:
+  impaza:
+    driver: bridge
+
+volumes:
+  dbdata:
