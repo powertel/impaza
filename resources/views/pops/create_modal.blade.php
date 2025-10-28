@@ -52,8 +52,12 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-success">Save</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+            <i class="fas fa-times me-1"></i> Close
+          </button>
+          <button type="submit" class="btn btn-outline-success btn-sm">
+            <i class="fas fa-save me-1"></i> Save
+          </button>
         </div>
       </form>
     </div>

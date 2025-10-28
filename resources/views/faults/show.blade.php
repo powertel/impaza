@@ -164,7 +164,9 @@
     </div>
 
     <div class="modal-footer border-0">
-        <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i> Close
+        </button>
     </div>
     </div>
     </div>

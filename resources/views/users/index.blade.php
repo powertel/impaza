@@ -83,7 +83,6 @@ Users
                                 <i class="fas fa-edit me-1"></i>  Edit
                                 </button>
                                 @endcan
-
                                <!--  @csrf
                                 @method('DELETE')
                                 @can('user-delete')
@@ -109,6 +108,7 @@ Users
 @foreach ($users as $user)
   @include('users.show_modal', ['user' => $user])
   @include('users.edit_modal', ['user' => $user, 'department' => $department, 'section' => $section, 'position' => $position, 'roles' => $roles, 'user_statuses' => $user_statuses, 'regions' => $regions])
+  @include('users.change_password_modal', ['user' => $user])
 @endforeach
 
 </section>

@@ -33,8 +33,12 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-save me-1"></i> Save</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+            <i class="fas fa-times me-1"></i> Cancel
+          </button>
+          <button type="submit" class="btn btn-outline-success btn-sm">
+            <i class="fas fa-save me-1"></i> Save
+          </button>
         </div>
       </form>
     </div>

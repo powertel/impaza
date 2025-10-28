@@ -19,8 +19,12 @@
           </dl>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-undo me-1"></i>Revoke</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+            <i class="fas fa-times me-1"></i> Cancel
+          </button>
+          <button type="submit" class="btn btn-outline-danger btn-sm">
+            <i class="fas fa-undo me-1"></i> Revoke
+          </button>
         </div>
       </form>
     </div>

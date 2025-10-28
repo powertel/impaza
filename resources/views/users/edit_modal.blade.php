@@ -89,21 +89,19 @@
             </div>
           </div>
 
-          <div class="row g-3 mt-1">
-            <div class="col-md-6">
-              <label class="form-label">Password</label>
-              <input type="password" class="form-control @error('password') is-invalid @enderror" name="password" placeholder="Password">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Confirm Password</label>
-              <input type="password" class="form-control @error('confirm-password') is-invalid @enderror" name="confirm-password" placeholder="Confirm Password">
-            </div>
-          </div>
+          <!-- Password fields removed; use dedicated Change Password modal -->
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" form="user-edit-form-{{ $user->id }}" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i> Cancel
+        </button>
+        <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#changePasswordModal-{{ $user->id }}">
+          <i class="fas fa-key me-1"></i> Change Password
+        </button>
+        <button type="submit" form="user-edit-form-{{ $user->id }}" class="btn btn-outline-primary">
+          <i class="fas fa-save me-1"></i> Save
+        </button>
       </div>
     </div>
   </div>

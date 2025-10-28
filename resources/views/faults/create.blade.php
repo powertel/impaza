@@ -88,8 +88,12 @@
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" form="UF" class="btn btn-primary">Save</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+                  <i class="fas fa-times me-1"></i> Cancel
+                </button>
+                <button type="submit" form="UF" class="btn btn-outline-primary btn-sm">
+                  <i class="fas fa-save me-1"></i> Save
+                </button>
             </div>
         </div>
     </div>
