@@ -54,8 +54,6 @@ Auth::routes();
 Route::group(['middleware' => ['auth']], function() {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::resource('users', UserController::class);
-    // Change password for a specific user (admin/edit context)
-    Route::put('users/{user}/password', [UserController::class, 'updatePassword'])->name('users.change-password');
     Route::resource('roles', RoleController::class);
     Route::resource('permission',PermissionController::class);
     Route::resource('departments', DepartmentController::class);
@@ -106,7 +104,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::put('auto/{id}/auto', [AssessmentController::class,'assign'])->name('auto');
     Route::get('stores/{id}', [StoreController::class,'findstores'])->name('stores');
 
-    // Logged-in user self password change (profile)
+    // Add change password routes
     Route::get('/password/change', [UserController::class,'getPassword'])->name('user.password.change');
     Route::post('/password/change', [UserController::class,'postPassword'])->name('user.password.update');
 

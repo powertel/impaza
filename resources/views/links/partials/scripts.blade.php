@@ -24,7 +24,13 @@
         $(popSel).empty().append('<option selected disabled>Select Pop</option>');
         if (!cityId) return;
         $.get(`/suburb/${cityId}`, function(res){
-          $.each(res, function(key, value){ $(suburbSel).append(`<option value="${key}">${value}</option>`); });
+          const seen = {};
+          $.each(res, function(key, value){
+            const id = (value && (value.id ?? value.key)) ?? key;
+            const name = (value && (value.suburb ?? value.name ?? value.text ?? value.label)) ?? value;
+            if (!id || seen[id]) return; seen[id] = 1;
+            $(suburbSel).append(`<option value="${id}">${name}</option>`);
+          });
         });
       });
     });
@@ -41,7 +47,13 @@
         $(popSel).empty().append('<option selected disabled>Select Pop</option>');
         if (!suburbId) return;
         $.get(`/pop/${suburbId}`, function(res){
-          $.each(res, function(key, value){ $(popSel).append(`<option value="${key}">${value}</option>`); });
+          const seen = {};
+          $.each(res, function(key, value){
+            const id = (value && (value.id ?? value.key)) ?? key;
+            const name = (value && (value.pop ?? value.name ?? value.text ?? value.label)) ?? value;
+            if (!id || seen[id]) return; seen[id] = 1;
+            $(popSel).append(`<option value="${id}">${name}</option>`);
+          });
         });
       });
     });
@@ -79,7 +91,7 @@
         </td>
         <td>
           <select class="form-select form-select-sm city-sel">
-            <option value="" disabled>Select City</option>
+            <option value="" selected disabled>Select City</option>
             ${cityOptionsHtml()}
           </select>
         </td>
@@ -109,12 +121,24 @@
       if (item.city_id) {
         $.get(`/suburb/${item.city_id}`, function(res){
           $(suburbSel).empty().append('<option selected disabled>Select Location</option>');
-          $.each(res, function(key, value){ $(suburbSel).append(`<option value="${key}">${value}</option>`); });
+          const seenSub = {};
+          $.each(res, function(key, value){
+            const id = (value && (value.id ?? value.key)) ?? key;
+            const name = (value && (value.suburb ?? value.name ?? value.text ?? value.label)) ?? value;
+            if (!id || seenSub[id]) return; seenSub[id] = 1;
+            $(suburbSel).append(`<option value="${id}">${name}</option>`);
+          });
           if (item.suburb_id) suburbSel.value = String(item.suburb_id);
           if (item.suburb_id) {
             $.get(`/pop/${item.suburb_id}`, function(res){
               $(popSel).empty().append('<option selected disabled>Select Pop</option>');
-              $.each(res, function(key, value){ $(popSel).append(`<option value="${key}">${value}</option>`); });
+              const seenPop = {};
+              $.each(res, function(key, value){
+                const id = (value && (value.id ?? value.key)) ?? key;
+                const name = (value && (value.pop ?? value.name ?? value.text ?? value.label)) ?? value;
+                if (!id || seenPop[id]) return; seenPop[id] = 1;
+                $(popSel).append(`<option value="${id}">${name}</option>`);
+              });
               if (item.pop_id) popSel.value = String(item.pop_id);
             });
           }
@@ -147,22 +171,13 @@
 
       citySel.addEventListener('change', function(){
         const cityId = this.value;
-        $(suburbSel).empty().append('<option selected disabled>Select Location</option>');
-        $(popSel).empty().append('<option selected disabled>Select Pop</option>');
-        if (!cityId) return;
-        $.get(`/suburb/${cityId}`, function(res){
-          $.each(res, function(key, value){ $(suburbSel).append(`<option value="${key}">${value}</option>`); });
-        });
+        // Population of suburbs/pops handled by global cascade; do autosave only
         autosave(tr, { city_id: cityId });
       });
 
       suburbSel.addEventListener('change', function(){
         const suburbId = this.value;
-        $(popSel).empty().append('<option selected disabled>Select Pop</option>');
-        if (!suburbId) return;
-        $.get(`/pop/${suburbId}`, function(res){
-          $.each(res, function(key, value){ $(popSel).append(`<option value="${key}">${value}</option>`); });
-        });
+        // Population of pops handled by global cascade; do autosave only
         autosave(tr, { suburb_id: suburbId });
       });
 
