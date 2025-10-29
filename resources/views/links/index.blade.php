@@ -33,21 +33,27 @@ links
     <div class="card-body">
         <div class="table-responsive">
             <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
-                <div class="input-group input-group-sm" style="width: 170px;">
-                    <div class="input-group-prepend"><span class="input-group-text">Show</span></div>
+                <div class="input-group input-group-sm" style="width: 200px;">
+                    <span class="input-group-text"><i class="fas fa-list me-1"></i> Show</span>
+                    @php $perPage = request('per_page', 20); @endphp
                     <select id="linksPageSize" class="form-select form-select-sm" style="width:auto;">
-                        <option value="10">10</option>
-                        <option value="20" selected>20</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                        <option value="all">All</option>
+                        <option value="10"  {{ (int)$perPage===10 ? 'selected' : '' }}>10</option>
+                        <option value="20"  {{ (int)$perPage===20 ? 'selected' : '' }}>20</option>
+                        <option value="50"  {{ (int)$perPage===50 ? 'selected' : '' }}>50</option>
+                        <option value="100" {{ (int)$perPage===100 ? 'selected' : '' }}>100</option>
                     </select>
                 </div>
-                <div class="input-group input-group-sm" style="width: 220px;">
-                    <input type="text" id="linksSearch" class="form-control" placeholder="Search Links">
-                </div>
+                <form id="linksSearchForm" method="GET" action="{{ route('links.index') }}" class="m-0">
+                    <div class="input-group input-group-sm" style="width: 360px;">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" name="q" value="{{ request('q','') }}" class="form-control" placeholder="Search all records">
+                        <input type="hidden" name="per_page" value="{{ $perPage }}">
+                        <button type="submit" class="btn btn-outline-primary"><i class="fas fa-search me-1"></i>Search</button>
+                        <a href="{{ route('links.index', ['per_page' => $perPage]) }}" class="btn btn-outline-secondary"><i class="fas fa-rotate-left me-1"></i>Reset</a>
+                    </div>
+                </form>
             </div>
-            <table  class="table table-hover js-paginated-table" data-page-size="20" data-page-size-control="#linksPageSize" data-pager="#linksPager" data-search="#linksSearch">
+            <table id="linksTable" class="table table-hover">
                 <thead class="thead-light">
                     <tr>
                         <th>No.</th>
@@ -63,7 +69,7 @@ links
                 <tbody>
                     @foreach ($links as $link)
                     <tr >
-                        <td>{{++$i}}</td>
+                        <td>{{ $links->firstItem() + $loop->index }}</td>
                         <td>{{ $link->customer}}</td>
                         <td>{{ $link->city}}</td>
                         <td>{{ $link->suburb}}</td>
@@ -96,8 +102,18 @@ links
                     </tr>
                     @endforeach
                 </tbody>  
+                    @if ($links->isEmpty())
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No Links to display</td>
+                        </tr>
+                    @endif
             </table>
-            <div id="linksPager" class="mt-2"></div>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+              <small class="text-muted">
+                Showing {{ $links->firstItem() }} to {{ $links->lastItem() }} of {{ $links->total() }} results
+              </small>
+              {{ $links->appends(request()->except('page'))->links('pagination::bootstrap-5') }}
+            </div>
         </div>
     </div>
     <!-- /.card-body -->
@@ -132,6 +148,14 @@ links
 @section('scripts')
   @include('partials.scripts')
   @include('links.partials.scripts')
+  <script>
+    document.getElementById('linksPageSize')?.addEventListener('change', function(){
+      const params = new URLSearchParams(window.location.search);
+      params.set('per_page', this.value);
+      params.delete('page');
+      window.location.search = params.toString();
+    });
+  </script>
 @endsection
 @endsection
 

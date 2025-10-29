@@ -26,17 +26,38 @@ class LinkController extends Controller
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
-     */
+    */
     public function index()
     {
-        $links = DB::table('links')
+        $perPage = (int) request('per_page', 20);
+        $perPage = in_array($perPage, [10,20,50,100]) ? $perPage : 20;
+        $q = trim((string) request('q', ''));
+
+        $linksQuery = DB::table('links')
             ->leftjoin('customers','links.customer_id','=','customers.id')
             ->leftjoin('cities','links.city_id','=','cities.id')
             ->leftjoin('suburbs','links.suburb_id','=','suburbs.id')
             ->leftjoin('pops','links.pop_id','=','pops.id')
             ->leftJoin('link_types','links.linkType_id','=','link_types.id')
             ->orderBy('cities.city', 'asc')
-            ->get(['links.id','links.jcc_number','links.link','link_types.linkType as linkType','links.service_type','links.capacity','customers.customer','cities.city','pops.pop','suburbs.suburb']);
+            ->select(['links.id','links.jcc_number','links.link','link_types.linkType as linkType','links.service_type','links.capacity','customers.customer','cities.city','pops.pop','suburbs.suburb']);
+
+        if ($q !== '') {
+            $like = "%".$q."%";
+            $linksQuery->where(function($qq) use ($like) {
+                $qq->where('customers.customer', 'like', $like)
+                   ->orWhere('cities.city', 'like', $like)
+                   ->orWhere('suburbs.suburb', 'like', $like)
+                   ->orWhere('pops.pop', 'like', $like)
+                   ->orWhere('links.link', 'like', $like)
+                   ->orWhere('links.jcc_number', 'like', $like)
+                   ->orWhere('link_types.linkType', 'like', $like)
+                   ->orWhere('links.service_type', 'like', $like)
+                   ->orWhere('links.capacity', 'like', $like);
+            });
+        }
+
+        $links = $linksQuery->paginate($perPage)->withQueryString();
         $customers = DB::table('customers')->orderBy('customers.customer', 'asc')->get();
         $cities = City::all();
         $suburbs = Suburb::all();
