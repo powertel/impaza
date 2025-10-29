@@ -24,7 +24,13 @@
         $(popSel).empty().append('<option selected disabled>Select Pop</option>');
         if (!cityId) return;
         $.get(`/suburb/${cityId}`, function(res){
-          $.each(res, function(key, value){ $(suburbSel).append(`<option value="${key}">${value}</option>`); });
+          const seen = {};
+          $.each(res, function(key, value){
+            const id = (value && (value.id ?? value.key)) ?? key;
+            const name = (value && (value.suburb ?? value.name ?? value.text ?? value.label)) ?? value;
+            if (!id || seen[id]) return; seen[id] = 1;
+            $(suburbSel).append(`<option value="${id}">${name}</option>`);
+          });
         });
       });
     });
@@ -41,7 +47,13 @@
         $(popSel).empty().append('<option selected disabled>Select Pop</option>');
         if (!suburbId) return;
         $.get(`/pop/${suburbId}`, function(res){
-          $.each(res, function(key, value){ $(popSel).append(`<option value="${key}">${value}</option>`); });
+          const seen = {};
+          $.each(res, function(key, value){
+            const id = (value && (value.id ?? value.key)) ?? key;
+            const name = (value && (value.pop ?? value.name ?? value.text ?? value.label)) ?? value;
+            if (!id || seen[id]) return; seen[id] = 1;
+            $(popSel).append(`<option value="${id}">${name}</option>`);
+          });
         });
       });
     });
@@ -109,12 +121,24 @@
       if (item.city_id) {
         $.get(`/suburb/${item.city_id}`, function(res){
           $(suburbSel).empty().append('<option selected disabled>Select Location</option>');
-          $.each(res, function(key, value){ $(suburbSel).append(`<option value="${key}">${value}</option>`); });
+          const seenSub = {};
+          $.each(res, function(key, value){
+            const id = (value && (value.id ?? value.key)) ?? key;
+            const name = (value && (value.suburb ?? value.name ?? value.text ?? value.label)) ?? value;
+            if (!id || seenSub[id]) return; seenSub[id] = 1;
+            $(suburbSel).append(`<option value="${id}">${name}</option>`);
+          });
           if (item.suburb_id) suburbSel.value = String(item.suburb_id);
           if (item.suburb_id) {
             $.get(`/pop/${item.suburb_id}`, function(res){
               $(popSel).empty().append('<option selected disabled>Select Pop</option>');
-              $.each(res, function(key, value){ $(popSel).append(`<option value="${key}">${value}</option>`); });
+              const seenPop = {};
+              $.each(res, function(key, value){
+                const id = (value && (value.id ?? value.key)) ?? key;
+                const name = (value && (value.pop ?? value.name ?? value.text ?? value.label)) ?? value;
+                if (!id || seenPop[id]) return; seenPop[id] = 1;
+                $(popSel).append(`<option value="${id}">${name}</option>`);
+              });
               if (item.pop_id) popSel.value = String(item.pop_id);
             });
           }

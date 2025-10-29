@@ -302,25 +302,6 @@ class UserController extends Controller
         return redirect()->back()->with('success', 'Password has been Changed Successfully');
     }
 
-    /**
-     * Update the password for a specific user (admin/edit context).
-     */
-    public function updatePassword(Request $request, $id)
-    {
-        $this->middleware('permission:user-edit');
-
-        $this->validate($request, [
-            'newpassword' => 'required|min:6|max:30|confirmed',
-        ]);
-
-        $user = User::findOrFail($id);
-        $user->update([
-            'password' => Hash::make($request->input('newpassword')),
-        ]);
-
-        return redirect()->back()->with('success', 'User password updated successfully');
-    }
-
     public function search(Request $request){
         $searchWord = $request->get('s');
         $users = User::where(function($query) use ($searchWord){
