@@ -26,9 +26,12 @@ class LinkController extends Controller
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
-     */
+    */
     public function index()
     {
+        $perPage = (int) request('per_page', 20);
+        $perPage = in_array($perPage, [10,20,50,100]) ? $perPage : 20;
+
         $links = DB::table('links')
             ->leftjoin('customers','links.customer_id','=','customers.id')
             ->leftjoin('cities','links.city_id','=','cities.id')
@@ -36,7 +39,9 @@ class LinkController extends Controller
             ->leftjoin('pops','links.pop_id','=','pops.id')
             ->leftJoin('link_types','links.linkType_id','=','link_types.id')
             ->orderBy('cities.city', 'asc')
-            ->get(['links.id','links.jcc_number','links.link','link_types.linkType as linkType','links.service_type','links.capacity','customers.customer','cities.city','pops.pop','suburbs.suburb']);
+            ->select(['links.id','links.jcc_number','links.link','link_types.linkType as linkType','links.service_type','links.capacity','customers.customer','cities.city','pops.pop','suburbs.suburb'])
+            ->paginate($perPage)
+            ->withQueryString();
         $customers = DB::table('customers')->orderBy('customers.customer', 'asc')->get();
         $cities = City::all();
         $suburbs = Suburb::all();
