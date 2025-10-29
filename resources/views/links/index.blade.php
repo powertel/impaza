@@ -33,8 +33,8 @@ links
     <div class="card-body">
         <div class="table-responsive">
             <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
-                <div class="input-group input-group-sm" style="width: 170px;">
-                    <div class="input-group-prepend"><span class="input-group-text">Show</span></div>
+                <div class="input-group input-group-sm" style="width: 200px;">
+                    <span class="input-group-text"><i class="fas fa-list me-1"></i> Show</span>
                     @php $perPage = request('per_page', 20); @endphp
                     <select id="linksPageSize" class="form-select form-select-sm" style="width:auto;">
                         <option value="10"  {{ (int)$perPage===10 ? 'selected' : '' }}>10</option>
@@ -43,13 +43,14 @@ links
                         <option value="100" {{ (int)$perPage===100 ? 'selected' : '' }}>100</option>
                     </select>
                 </div>
-                <form id="linksSearchForm" method="GET" action="{{ route('links.index') }}" class="d-flex gap-2 align-items-center">
-                    <div class="input-group input-group-sm" style="width: 260px;">
+                <form id="linksSearchForm" method="GET" action="{{ route('links.index') }}" class="m-0">
+                    <div class="input-group input-group-sm" style="width: 360px;">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
                         <input type="text" name="q" value="{{ request('q','') }}" class="form-control" placeholder="Search all records">
+                        <input type="hidden" name="per_page" value="{{ $perPage }}">
+                        <button type="submit" class="btn btn-outline-primary"><i class="fas fa-search me-1"></i>Search</button>
+                        <a href="{{ route('links.index', ['per_page' => $perPage]) }}" class="btn btn-outline-secondary"><i class="fas fa-rotate-left me-1"></i>Reset</a>
                     </div>
-                    <input type="hidden" name="per_page" value="{{ $perPage }}">
-                    <button type="submit" class="btn btn-sm btn-outline-primary">Search</button>
-                    <a href="{{ route('links.index', ['per_page' => $perPage]) }}" class="btn btn-sm btn-outline-secondary">Reset</a>
                 </form>
             </div>
             <table id="linksTable" class="table table-hover">
