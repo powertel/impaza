@@ -37,7 +37,11 @@ class FaultController extends Controller
      */
     public function index()
     {
-        $faults = DB::table('faults')
+        $perPage = (int) request('per_page', 20);
+        $perPage = in_array($perPage, [10,20,50,100]) ? $perPage : 20;
+        $q = trim((string) request('q', ''));
+
+        $faultsQuery = DB::table('faults')
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
                 ->leftjoin('links','faults.link_id','=','links.id')
                 ->leftjoin('users as assigned_users','faults.assignedTo','=','assigned_users.id')
@@ -50,7 +54,7 @@ class FaultController extends Controller
                 ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
                 ->leftjoin('pops','faults.pop_id','=','pops.id')
                 ->orderBy('faults.created_at', 'desc')
-                ->get([
+                ->select([
                 'faults.id',
                 'faults.user_id',
                 'faults.fault_ref_number',
@@ -81,9 +85,27 @@ class FaultController extends Controller
                 'pops.pop',
                 'reasons_for_outages.RFO as RFO'
                 ]);
+
+        if ($q !== '') {
+            $like = "%".$q."%";
+            $faultsQuery->where(function($qq) use ($like) {
+                $qq->where('faults.fault_ref_number', 'like', $like)
+                   ->orWhere('customers.customer', 'like', $like)
+                   ->orWhere('account_manager_users.name', 'like', $like)
+                   ->orWhere('links.link', 'like', $like)
+                   ->orWhere('assigned_users.name', 'like', $like)
+                   ->orWhere('reported_users.name', 'like', $like)
+                   ->orWhere('statuses.description', 'like', $like)
+                   ->orWhere('cities.city', 'like', $like)
+                   ->orWhere('suburbs.suburb', 'like', $like)
+                   ->orWhere('pops.pop', 'like', $like);
+            });
+        }
+
+        $faults = $faultsQuery->paginate($perPage)->withQueryString();
         
         // Collect remarks for all listed faults and group by fault_id
-        $faultIds = $faults->pluck('id');
+        $faultIds = $faults->getCollection()->pluck('id');
         $remarksRecords = DB::table('remarks')
             ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
             ->leftjoin('users','remarks.user_id','=','users.id')

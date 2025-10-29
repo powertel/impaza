@@ -43,7 +43,7 @@ links
                         <option value="100" {{ (int)$perPage===100 ? 'selected' : '' }}>100</option>
                     </select>
                 </div>
-                <form id="linksSearchForm" method="GET" action="{{ route('links.index') }}" class="d-flex gap-2">
+                <form id="linksSearchForm" method="GET" action="{{ route('links.index') }}" class="d-flex gap-2 align-items-center">
                     <div class="input-group input-group-sm" style="width: 260px;">
                         <input type="text" name="q" value="{{ request('q','') }}" class="form-control" placeholder="Search all records">
                     </div>
@@ -101,6 +101,11 @@ links
                     </tr>
                     @endforeach
                 </tbody>  
+                    @if ($links->isEmpty())
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No Links to display</td>
+                        </tr>
+                    @endif
             </table>
             <div class="d-flex justify-content-between align-items-center mt-3">
               <small class="text-muted">

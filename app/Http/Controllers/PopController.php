@@ -24,11 +24,26 @@ class PopController extends Controller
      */
     public function index()
     {
-        $pops = DB::table('pops')
+        $perPage = (int) request('per_page', 20);
+        $perPage = in_array($perPage, [10,20,50,100]) ? $perPage : 20;
+        $q = trim((string) request('q', ''));
+
+        $popsQuery = DB::table('pops')
             ->leftjoin('cities','pops.city_id','=','cities.id')
             ->leftjoin('suburbs','pops.suburb_id','=','suburbs.id')
             ->orderBy('suburbs.created_at', 'desc')
-            ->get(['pops.id','pops.pop','pops.city_id','pops.suburb_id','suburbs.suburb','cities.city']);
+            ->select(['pops.id','pops.pop','pops.city_id','pops.suburb_id','suburbs.suburb','cities.city']);
+
+        if ($q !== '') {
+            $like = '%'.$q.'%';
+            $popsQuery->where(function($qq) use ($like){
+                $qq->where('cities.city','like',$like)
+                   ->orWhere('suburbs.suburb','like',$like)
+                   ->orWhere('pops.pop','like',$like);
+            });
+        }
+
+        $pops = $popsQuery->paginate($perPage)->withQueryString();
         // Provide datasets for modal-based create/edit on index
         $cities = City::all();
         $suburbs = Suburb::all();

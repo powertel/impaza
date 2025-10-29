@@ -38,19 +38,24 @@ Faults
             <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
                 <div class="input-group input-group-sm" style="width: 170px;">
                     <div class="input-group-prepend"><span class="input-group-text">Show</span></div>
+                    @php $perPage = request('per_page', 20); @endphp
                     <select id="faultsPageSize" class="form-select form-select-sm" style="width:auto;">
-                        <option value="10">10</option>
-                        <option value="20" selected>20</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                        <option value="all">All</option>
+                        <option value="10"  {{ (int)$perPage===10 ? 'selected' : '' }}>10</option>
+                        <option value="20"  {{ (int)$perPage===20 ? 'selected' : '' }}>20</option>
+                        <option value="50"  {{ (int)$perPage===50 ? 'selected' : '' }}>50</option>
+                        <option value="100" {{ (int)$perPage===100 ? 'selected' : '' }}>100</option>
                     </select>
                 </div>
-                <div class="input-group input-group-sm" style="width: 220px;">
-                    <input type="text" id="faultsSearch" class="form-control" placeholder="Search faults">
-                </div>
+                <form method="GET" action="{{ route('faults.index') }}" class="d-flex gap-2">
+                    <div class="input-group input-group-sm" style="width: 280px;">
+                        <input type="text" name="q" value="{{ request('q','') }}" class="form-control" placeholder="Search faults (all records)">
+                    </div>
+                    <input type="hidden" name="per_page" value="{{ $perPage }}">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Search</button>
+                    <a href="{{ route('faults.index', ['per_page' => $perPage]) }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+                </form>
             </div>
-            <table class="table  table-hover align-middle js-paginated-table" id="faults-list" style="font-size:14px" data-page-size="20" data-page-size-control="#faultsPageSize" data-pager="#faultsPager" data-search="#faultsSearch">
+            <table class="table  table-hover align-middle" id="faults-list" style="font-size:14px">
                 <thead class="thead-light">
                     <tr>
                     <!-- <th>No.</th>-->
@@ -132,7 +137,12 @@ Faults
                     'remarks' => ($remarksByFault[$fault->id] ?? collect())
                 ])
             @endforeach
-            <div id="faultsPager" class="mt-2"></div>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+              <small class="text-muted">
+                Showing {{ $faults->firstItem() }} to {{ $faults->lastItem() }} of {{ $faults->total() }} results
+              </small>
+              {{ $faults->appends(request()->except('page'))->links('pagination::bootstrap-5') }}
+            </div>
         </div>
     </div>
     <!-- /.card-body -->
@@ -142,6 +152,14 @@ Faults
 
 @section('scripts')
     @include('partials.faults')
+    <script>
+      document.getElementById('faultsPageSize')?.addEventListener('change', function(){
+        const params = new URLSearchParams(window.location.search);
+        params.set('per_page', this.value);
+        params.delete('page');
+        window.location.search = params.toString();
+      });
+    </script>
 @endsection
 
 
