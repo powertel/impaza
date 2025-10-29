@@ -43,11 +43,16 @@ links
                         <option value="100" {{ (int)$perPage===100 ? 'selected' : '' }}>100</option>
                     </select>
                 </div>
-                <div class="input-group input-group-sm" style="width: 220px;">
-                    <input type="text" id="linksSearch" class="form-control" placeholder="Search Links">
-                </div>
+                <form id="linksSearchForm" method="GET" action="{{ route('links.index') }}" class="d-flex gap-2">
+                    <div class="input-group input-group-sm" style="width: 260px;">
+                        <input type="text" name="q" value="{{ request('q','') }}" class="form-control" placeholder="Search all records">
+                    </div>
+                    <input type="hidden" name="per_page" value="{{ $perPage }}">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Search</button>
+                    <a href="{{ route('links.index', ['per_page' => $perPage]) }}" class="btn btn-sm btn-outline-secondary">Reset</a>
+                </form>
             </div>
-            <table  class="table table-hover">
+            <table id="linksTable" class="table table-hover">
                 <thead class="thead-light">
                     <tr>
                         <th>No.</th>
