@@ -38,7 +38,9 @@
         <!-- Hidden templates for select options -->
         <div id="editLinksSelectTemplates" class="d-none">
           <select id="editLinksCitiesTpl">
-            @foreach($cities as $city)
+            
+            @php $uniqueCities = collect($cities)->unique('id'); @endphp
+            @foreach($uniqueCities as $city)
               <option value="{{ $city->id }}">{{ $city->city }}</option>
             @endforeach
           </select>

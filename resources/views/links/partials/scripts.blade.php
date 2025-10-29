@@ -91,7 +91,7 @@
         </td>
         <td>
           <select class="form-select form-select-sm city-sel">
-            <option value="" disabled>Select City</option>
+            <option value="" selected disabled>Select City</option>
             ${cityOptionsHtml()}
           </select>
         </td>
@@ -171,22 +171,13 @@
 
       citySel.addEventListener('change', function(){
         const cityId = this.value;
-        $(suburbSel).empty().append('<option selected disabled>Select Location</option>');
-        $(popSel).empty().append('<option selected disabled>Select Pop</option>');
-        if (!cityId) return;
-        $.get(`/suburb/${cityId}`, function(res){
-          $.each(res, function(key, value){ $(suburbSel).append(`<option value="${key}">${value}</option>`); });
-        });
+        // Population of suburbs/pops handled by global cascade; do autosave only
         autosave(tr, { city_id: cityId });
       });
 
       suburbSel.addEventListener('change', function(){
         const suburbId = this.value;
-        $(popSel).empty().append('<option selected disabled>Select Pop</option>');
-        if (!suburbId) return;
-        $.get(`/pop/${suburbId}`, function(res){
-          $.each(res, function(key, value){ $(popSel).append(`<option value="${key}">${value}</option>`); });
-        });
+        // Population of pops handled by global cascade; do autosave only
         autosave(tr, { suburb_id: suburbId });
       });
 
