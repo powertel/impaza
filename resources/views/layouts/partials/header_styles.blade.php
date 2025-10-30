@@ -15,11 +15,10 @@
 }
 
 /* Independent content scroll area */
-:root { --footer-height: 56px; }
 .content-wrapper {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - var(--header-height) - var(--footer-height));
+  height: calc(100vh - var(--header-height));
   min-height: 0 !important;
   overflow-y: auto; /* make whole area scrollable */
   overflow-x: hidden;
@@ -31,7 +30,7 @@
 @media (min-width: 992px) { .sidebar-mini .content-wrapper { margin-left: 240px; } }
 @media (max-width: 991.98px) { .content-wrapper { margin-left: 0; } }
 
-/* Footer restored to flow layout */
+/* Footer flows inside content-wrapper; no fixed positioning */
 .main-footer { position: static !important; }
 
 /* Faint scrollbars matching background for content area */

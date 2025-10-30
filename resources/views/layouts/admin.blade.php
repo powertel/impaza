@@ -116,11 +116,10 @@
             @include('partials.alerts')
             @yield('content')
             </div>
+            <!-- Main Footer moved inside content-wrapper to scroll with content -->
+            @include('layouts.footer')
         </div>
         <!-- /.content-wrapper -->
-
-        <!-- Main Footer -->
-      @include('layouts.footer')
     </div>
     <!-- ./wrapper -->
 
@@ -207,18 +206,7 @@
             })();
         </script>
 
-        <script>
-            (function(){
-                function setFooterHeightVar(){
-                    var footer = document.querySelector('.main-footer');
-                    var h = footer ? footer.offsetHeight : 56;
-                    document.documentElement.style.setProperty('--footer-height', h + 'px');
-                }
-                window.addEventListener('resize', setFooterHeightVar);
-                document.addEventListener('DOMContentLoaded', setFooterHeightVar);
-                setFooterHeightVar();
-            })();
-        </script>
+        
 
         <script>
             $(document).ready(function () {
