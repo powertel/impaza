@@ -31,11 +31,46 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::join('departments','users.department_id','=','departments.id')
-                ->leftjoin('sections','users.section_id','=','sections.id')
-                ->leftjoin('positions','users.position_id','=','positions.id')
-                ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
-                ->get(['users.id','users.name','users.email','users.department_id','users.position_id','users.section_id','users.phonenumber','sections.section','departments.department','positions.position','user_statuses.status_name','users.region']);
+        $perPage = (int) request('per_page', 20);
+        $perPage = in_array($perPage, [10,20,50,100]) ? $perPage : 20;
+        $q = trim((string) request('q', ''));
+
+        $usersQuery = User::query()
+            ->join('departments','users.department_id','=','departments.id')
+            ->leftJoin('sections','users.section_id','=','sections.id')
+            ->leftJoin('positions','users.position_id','=','positions.id')
+            ->leftJoin('user_statuses','users.user_status','=','user_statuses.id')
+            ->orderBy('users.name', 'asc')
+            ->select([
+                'users.id',
+                'users.name',
+                'users.email',
+                'users.department_id',
+                'users.position_id',
+                'users.section_id',
+                'users.phonenumber',
+                'users.region',
+                'sections.section',
+                'departments.department',
+                'positions.position',
+                'user_statuses.status_name',
+            ]);
+
+        if ($q !== '') {
+            $like = '%'.$q.'%';
+            $usersQuery->where(function($qq) use ($like){
+                $qq->where('users.name','like',$like)
+                   ->orWhere('users.email','like',$like)
+                   ->orWhere('departments.department','like',$like)
+                   ->orWhere('sections.section','like',$like)
+                   ->orWhere('positions.position','like',$like)
+                   ->orWhere('user_statuses.status_name','like',$like)
+                   ->orWhere('users.region','like',$like)
+                   ->orWhere('users.phonenumber','like',$like);
+            });
+        }
+
+        $users = $usersQuery->paginate($perPage)->withQueryString();
         
         // Provide supporting datasets for modal-based create/edit in index
         $roles = Role::pluck('name','name')->all();

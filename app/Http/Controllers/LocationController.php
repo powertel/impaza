@@ -24,13 +24,27 @@ class LocationController extends Controller
      */
     public function index()
     {
-        $locations = DB::table('suburbs')
+        $perPage = (int) request('per_page', 20);
+        $perPage = in_array($perPage, [10,20,50,100]) ? $perPage : 20;
+        $q = trim((string) request('q', ''));
+
+        $locationsQuery = DB::table('suburbs')
             ->leftjoin('cities','suburbs.city_id','=','cities.id')
             ->orderBy('suburbs.created_at', 'desc')
-            ->get(['suburbs.id','suburbs.suburb','cities.city']);
+            ->select(['suburbs.id','suburbs.suburb','suburbs.city_id','cities.city']);
+
+        if ($q !== '') {
+            $like = '%'.$q.'%';
+            $locationsQuery->where(function($qq) use ($like){
+                $qq->where('cities.city','like',$like)
+                   ->orWhere('suburbs.suburb','like',$like);
+            });
+        }
+
+        $locations = $locationsQuery->paginate($perPage)->withQueryString();
         $cities = City::all();
         return view('locations.index',compact('locations','cities'))
-        ->with('i');
+            ->with('i');
     }
 
     /**
