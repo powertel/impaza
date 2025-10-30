@@ -1,5 +1,5 @@
 <footer class="main-footer">
-  <div class="text-center">
-    <strong>Copyright &copy; {{ date('Y') }} <a>POWERTEL</a>.</strong> All rights reserved.
+  <div class="footer-inner d-flex justify-content-end">
+    <div class="footer-copy">&copy; {{ date('Y') }} POWERTEL</div>
   </div>
 </footer>
