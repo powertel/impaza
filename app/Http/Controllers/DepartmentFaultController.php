@@ -50,27 +50,77 @@ class DepartmentFaultController extends Controller
         return view('department_faults.index',compact('faults','autoAssign'))
         ->with('i'); */
 
-        $faults = DB::table('faults')
-        ->leftjoin('fault_section','faults.id','=','fault_section.fault_id')
-        ->leftjoin('users','faults.assignedTo','=','users.id')
-        ->leftjoin('sections','fault_section.section_id','=','sections.id')
-        ->leftjoin('customers','faults.customer_id','=','customers.id')
-        ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
-        ->leftjoin('users as account_manager_users','account_managers.user_id','=','account_manager_users.id')
-        ->leftjoin('links','faults.link_id','=','links.id')
-        ->leftjoin('cities','faults.city_id','=','cities.id')
-        ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
-        ->leftjoin('pops','faults.pop_id','=','pops.id')
-        ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
-        ->leftjoin('statuses','faults.status_id','=','statuses.id')
-        ->orderBy('faults.created_at', 'desc')
-        ->where('fault_section.section_id','=',auth()->user()->section_id)
-       ->get(['faults.id','faults.fault_ref_number','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
-        'account_manager_users.name as accountManager','faults.suspectedRfo_id','links.link','statuses.description','faults.assignedTo','users.name'
-       ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at','cities.city','suburbs.suburb','pops.pop','reasons_for_outages.RFO as RFO']);
+        // Pagination and search parameters
+        $perPage = (int) request('per_page', 20);
+        $perPage = in_array($perPage, [10,20,50,100]) ? $perPage : 20;
+        $q = trim((string) request('q', ''));
+
+        // Base query scoped to the user's section
+        $faultsQuery = DB::table('faults')
+            ->leftjoin('fault_section','faults.id','=','fault_section.fault_id')
+            ->leftjoin('users','faults.assignedTo','=','users.id')
+            ->leftjoin('sections','fault_section.section_id','=','sections.id')
+            ->leftjoin('customers','faults.customer_id','=','customers.id')
+            ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
+            ->leftjoin('users as account_manager_users','account_managers.user_id','=','account_manager_users.id')
+            ->leftjoin('links','faults.link_id','=','links.id')
+            ->leftjoin('cities','faults.city_id','=','cities.id')
+            ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
+            ->leftjoin('pops','faults.pop_id','=','pops.id')
+            ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
+            ->leftjoin('statuses','faults.status_id','=','statuses.id')
+            ->orderBy('faults.created_at', 'desc')
+            ->where('fault_section.section_id','=',auth()->user()->section_id)
+            ->select([
+                'faults.id',
+                'faults.fault_ref_number',
+                'customers.customer',
+                'faults.contactName',
+                'faults.phoneNumber',
+                'faults.contactEmail',
+                'faults.address',
+                'faults.assignedTo',
+                'account_manager_users.name as accountManager',
+                'faults.suspectedRfo_id',
+                'links.link',
+                'statuses.description',
+                'users.name',
+                'faults.serviceType',
+                'faults.serviceAttribute',
+                'faults.faultType',
+                'faults.priorityLevel',
+                'faults.created_at',
+                'cities.city',
+                'suburbs.suburb',
+                'pops.pop',
+                'reasons_for_outages.RFO as RFO'
+            ]);
+
+        // Apply search across common visible columns and related names
+        if ($q !== '') {
+            $like = "%".$q."%";
+            $faultsQuery->where(function($qq) use ($like) {
+                $qq->where('faults.fault_ref_number', 'like', $like)
+                   ->orWhere('customers.customer', 'like', $like)
+                   ->orWhere('account_manager_users.name', 'like', $like)
+                   ->orWhere('links.link', 'like', $like)
+                   ->orWhere('users.name', 'like', $like)
+                   ->orWhere('statuses.description', 'like', $like)
+                   ->orWhere('cities.city', 'like', $like)
+                   ->orWhere('suburbs.suburb', 'like', $like)
+                   ->orWhere('pops.pop', 'like', $like)
+                   // Additional contact fields to broaden matching
+                   ->orWhere('faults.contactName', 'like', $like)
+                   ->orWhere('faults.phoneNumber', 'like', $like)
+                   ->orWhere('faults.contactEmail', 'like', $like)
+                   ->orWhere('faults.address', 'like', $like);
+            });
+        }
+
+        $faults = $faultsQuery->paginate($perPage)->withQueryString();
 
         // Collect remarks for all listed faults and group by fault_id for faults.show
-        $faultIds = $faults->pluck('id');
+        $faultIds = $faults->getCollection()->pluck('id');
         $remarksRecords = DB::table('remarks')
             ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
             ->leftjoin('users','remarks.user_id','=','users.id')
@@ -88,7 +138,7 @@ class DepartmentFaultController extends Controller
 
         $remarksByFault = $remarksRecords->groupBy('fault_id');
 
-        return view('department_faults.index',compact('faults','remarksByFault'))
+        return view('department_faults.index',compact('faults','remarksByFault','perPage'))
             ->with('i');
         
     }

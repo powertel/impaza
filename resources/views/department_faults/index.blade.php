@@ -20,20 +20,25 @@ Department Faults
         <div class="table-responsive">
             <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
                 <div class="input-group input-group-sm" style="width: 170px;">
-                    <div class="input-group-prepend"><span class="input-group-text">Show</span></div>
+                    <div class="input-group-prepend"><span class="input-group-text"><i class="fas fa-list me-1"></i> Show</span></div>
                     <select id="departmentFaultsPageSize" class="form-select form-select-sm" style="width:auto;">
-                        <option value="10">10</option>
-                        <option value="20" selected>20</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                        <option value="all">All</option>
+                        <option value="10"  {{ (int)$perPage===10 ? 'selected' : '' }}>10</option>
+                        <option value="20"  {{ (int)$perPage===20 ? 'selected' : '' }}>20</option>
+                        <option value="50"  {{ (int)$perPage===50 ? 'selected' : '' }}>50</option>
+                        <option value="100" {{ (int)$perPage===100 ? 'selected' : '' }}>100</option>
                     </select>
                 </div>
-                <div class="input-group input-group-sm" style="width: 220px;">
-                    <input type="text" id="departmentFaultsSearch" class="form-control" placeholder="Search faults">
-                </div>
+                <form method="GET" action="{{ route('department_faults.index') }}" class="m-0">
+                    <div class="input-group input-group-sm" style="width: 360px;">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" name="q" value="{{ request('q','') }}" class="form-control" placeholder="Search faults (all records)">
+                        <input type="hidden" name="per_page" value="{{ $perPage }}">
+                        <button type="submit" class="btn btn-outline-primary"><i class="fas fa-search me-1"></i>Search</button>
+                        <a href="{{ route('department_faults.index', ['per_page' => $perPage]) }}" class="btn btn-outline-secondary"><i class="fas fa-rotate-left me-1"></i>Reset</a>
+                    </div>
+                </form>
             </div>
-            <table  class="table table-hover js-paginated-table" data-page-size="20" data-page-size-control="#departmentFaultsPageSize" data-pager="#departmentFaultsPager" data-search="#departmentFaultsSearch">
+            <table class="table table-hover align-middle">
                 <thead class="thead-light">
                     <tr>
                         <th>No.</th>
@@ -48,8 +53,8 @@ Department Faults
                 </thead>
                 <tbody>
                     @foreach ( $faults as $fault )
-                    <tr >
-                        <td>{{ ++$i }}</td>
+                    <tr>
+                        <td>{{ $faults->firstItem() + $loop->index }}</td>
                         <td>{{$fault->fault_ref_number}}</td>
                         <td>{{ $fault->customer }}</td>
                         <td>{{ $fault->accountManager }}</td>
@@ -67,7 +72,7 @@ Department Faults
                         </td>
                     </tr>
                     @endforeach
-                    @if ($faults->isEmpty())
+                    @if ($faults->count() === 0)
                         <tr>
                             <td colspan="10" class="text-center text-muted">No Department faults</td>
                         </tr>
@@ -77,8 +82,17 @@ Department Faults
             @foreach ($faults as $fault)
                 @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
             @endforeach
-            
-            <div id="departmentFaultsPager" class="mt-2"></div>
+            <div class="d-flex justify-content-between align-items-center mt-2">
+                <div class="text-muted">
+                    Showing {{ $faults->firstItem() ?? 0 }} to {{ $faults->lastItem() ?? 0 }} of {{ $faults->total() }} results
+                    @if (request('q'))
+                        for "{{ request('q') }}"
+                    @endif
+                </div>
+                <div>
+                    {{ $faults->links('pagination::bootstrap-5') }}
+                </div>
+            </div>
         </div>
     </div>
     <!-- /.card-body -->
@@ -98,6 +112,17 @@ Department Faults
     @include('partials.scripts')
     <script>
       window.currentUserName = @json(optional(auth()->user())->name);
+      (function(){
+        var perSelect = document.getElementById('departmentFaultsPageSize');
+        if (perSelect) {
+          perSelect.addEventListener('change', function(){
+            var params = new URLSearchParams(window.location.search);
+            params.set('per_page', String(perSelect.value));
+            params.delete('page');
+            window.location.search = params.toString();
+          });
+        }
+      })();
     </script>
 @endsection
 
