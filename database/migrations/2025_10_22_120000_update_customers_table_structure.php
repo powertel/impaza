@@ -12,29 +12,47 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Add new columns and fix foreign key for account_manager_id
+        // 1) Drop any existing FK before altering column type to avoid MySQL 3780
+        $existingFks = DB::select(<<<SQL
+            SELECT CONSTRAINT_NAME
+            FROM information_schema.KEY_COLUMN_USAGE
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = 'customers'
+              AND COLUMN_NAME = 'account_manager_id'
+              AND REFERENCED_TABLE_NAME IS NOT NULL
+        SQL);
+
+        foreach ($existingFks as $fk) {
+            $name = $fk->CONSTRAINT_NAME ?? $fk['CONSTRAINT_NAME'] ?? null;
+            if ($name) {
+                try {
+                    DB::statement("ALTER TABLE customers DROP FOREIGN KEY `$name`");
+                } catch (\Throwable $e) {
+                    // ignore if already removed
+                }
+            }
+        }
+
+        // 2) Add new columns if missing
         Schema::table('customers', function (Blueprint $table) {
-            // Add new columns if missing
             if (!Schema::hasColumn('customers', 'address')) {
                 $table->string('address')->nullable()->after('account_number');
             }
             if (!Schema::hasColumn('customers', 'contact_number')) {
                 $table->string('contact_number')->nullable()->after('address');
             }
-
-            // Ensure account_manager_id exists as unsigned BIGINT to match account_managers.id
             if (!Schema::hasColumn('customers', 'account_manager_id')) {
                 $table->unsignedBigInteger('account_manager_id')->nullable()->after('id');
             }
         });
 
-        // If account_manager_id already existed but with different type, adjust it
+        // 3) Ensure account_manager_id is BIGINT UNSIGNED to match account_managers.id
         if (Schema::hasColumn('customers', 'account_manager_id')) {
             DB::statement('ALTER TABLE customers MODIFY account_manager_id BIGINT UNSIGNED NULL');
         }
 
-        // Manage foreign key: drop if exists, then add pointing to account_managers
-        $fkExists = DB::select(<<<SQL
+        // 4) Re-add FK to account_managers(id) if not present
+        $fkAfterAlter = DB::select(<<<SQL
             SELECT CONSTRAINT_NAME
             FROM information_schema.KEY_COLUMN_USAGE
             WHERE TABLE_SCHEMA = DATABASE()
@@ -43,25 +61,7 @@ return new class extends Migration
               AND REFERENCED_TABLE_NAME IS NOT NULL
         SQL);
 
-        if (!empty($fkExists)) {
-            try {
-                DB::statement('ALTER TABLE customers DROP FOREIGN KEY customers_account_manager_id_foreign');
-            } catch (\Throwable $e) {
-                // ignore if named differently or already removed
-            }
-        }
-
-        // Add foreign key if not already present
-        $fkExistsAfterDrop = DB::select(<<<SQL
-            SELECT CONSTRAINT_NAME
-            FROM information_schema.KEY_COLUMN_USAGE
-            WHERE TABLE_SCHEMA = DATABASE()
-              AND TABLE_NAME = 'customers'
-              AND COLUMN_NAME = 'account_manager_id'
-              AND REFERENCED_TABLE_NAME IS NOT NULL
-        SQL);
-
-        if (empty($fkExistsAfterDrop)) {
+        if (empty($fkAfterAlter)) {
             DB::statement('ALTER TABLE customers ADD CONSTRAINT customers_account_manager_id_foreign FOREIGN KEY (account_manager_id) REFERENCES account_managers(id)');
         }
 
@@ -105,10 +105,23 @@ return new class extends Migration
             }
         });
 
-        // Drop FK if exists and revert column type
-        try {
-            DB::statement('ALTER TABLE customers DROP FOREIGN KEY customers_account_manager_id_foreign');
-        } catch (\Throwable $e) {}
+        // Drop any FK on account_manager_id and revert column type
+        $existingFks = DB::select(<<<SQL
+            SELECT CONSTRAINT_NAME
+            FROM information_schema.KEY_COLUMN_USAGE
+            WHERE TABLE_SCHEMA = DATABASE()
+              AND TABLE_NAME = 'customers'
+              AND COLUMN_NAME = 'account_manager_id'
+              AND REFERENCED_TABLE_NAME IS NOT NULL
+        SQL);
+        foreach ($existingFks as $fk) {
+            $name = $fk->CONSTRAINT_NAME ?? $fk['CONSTRAINT_NAME'] ?? null;
+            if ($name) {
+                try {
+                    DB::statement("ALTER TABLE customers DROP FOREIGN KEY `$name`");
+                } catch (\Throwable $e) {}
+            }
+        }
 
         if (Schema::hasColumn('customers', 'account_manager_id')) {
             DB::statement('ALTER TABLE customers MODIFY account_manager_id INT UNSIGNED NULL');
