@@ -80,6 +80,10 @@
       return Array.from(document.querySelectorAll('#editLinksLinkTypesTpl option'))
         .map(o => `<option value="${o.value}">${o.text}</option>`).join('');
     }
+    function serviceTypeOptionsHtml(){
+      return Array.from(document.querySelectorAll('#editLinksServiceTypesTpl option'))
+        .map(o => `<option value="${o.value}">${o.text}</option>`).join('');
+    }
 
     function renderRow(item){
       const tr = document.createElement('tr');
@@ -102,6 +106,14 @@
           <select class="form-select form-select-sm pop-sel"><option value="" disabled>Select Pop</option></select>
         </td>
         <td>
+          <select class="form-select form-select-sm service-type-sel">
+            ${serviceTypeOptionsHtml()}
+          </select>
+        </td>
+        <td>
+          <input type="text" class="form-control form-control-sm capacity-input" placeholder="e.g. 100Mbps" />
+        </td>
+        <td>
           <select class="form-select form-select-sm type-sel">
             <option value="" disabled>Select Type</option>
             ${typeOptionsHtml()}
@@ -114,8 +126,12 @@
       const citySel = tr.querySelector('.city-sel');
       const suburbSel = tr.querySelector('.suburb-sel');
       const popSel = tr.querySelector('.pop-sel');
+      const serviceTypeSel = tr.querySelector('.service-type-sel');
+      const capacityInput = tr.querySelector('.capacity-input');
       const typeSel = tr.querySelector('.type-sel');
       if (item.city_id) citySel.value = String(item.city_id);
+      if (item.service_type) serviceTypeSel.value = String(item.service_type);
+      if (item.capacity) capacityInput.value = String(item.capacity);
       if (item.linkType_id) typeSel.value = String(item.linkType_id);
 
       if (item.city_id) {
@@ -166,6 +182,8 @@
       const citySel = tr.querySelector('.city-sel');
       const suburbSel = tr.querySelector('.suburb-sel');
       const popSel = tr.querySelector('.pop-sel');
+      const serviceTypeSel = tr.querySelector('.service-type-sel');
+      const capacityInput = tr.querySelector('.capacity-input');
       const typeSel = tr.querySelector('.type-sel');
       const linkInput = tr.querySelector('.link-name-input');
 
@@ -184,6 +202,18 @@
       popSel.addEventListener('change', function(){
         const popId = this.value;
         autosave(tr, { pop_id: popId });
+      });
+
+      serviceTypeSel.addEventListener('change', function(){
+        const serviceType = this.value;
+        autosave(tr, { service_type: serviceType });
+      });
+
+      capacityInput.addEventListener('input', function(){
+        const capacity = this.value.trim();
+        debounce(this, function(){
+          autosave(tr, { capacity: capacity });
+        }, 500);
       });
 
       typeSel.addEventListener('change', function(){
@@ -220,11 +250,11 @@
 
     customerSel.addEventListener('change', function(){
       const custId = this.value;
-      $(tbody).empty().append('<tr><td colspan="6" class="text-center text-muted">Loading…</td></tr>');
+      $(tbody).empty().append('<tr><td colspan="8" class="text-center text-muted">Loading…</td></tr>');
       $.get(`{{ url('links/customer') }}/${custId}`, function(items){
         $(tbody).empty();
         if (!items || items.length === 0) {
-          $(tbody).append('<tr><td colspan="6" class="text-center text-muted">No links for this customer.</td></tr>');
+          $(tbody).append('<tr><td colspan="8" class="text-center text-muted">No links for this customer.</td></tr>');
           return;
         }
         items.forEach(function(item){ tbody.appendChild(renderRow(item)); });

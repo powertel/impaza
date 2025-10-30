@@ -339,6 +339,12 @@ class LinkController extends Controller
         if ($request->has('linkType_id')) {
             $rules['linkType_id'] = ['required','exists:link_types,id'];
         }
+        if ($request->has('service_type')) {
+            $rules['service_type'] = ['nullable','string','in:Internet,VPN,Carrier Services,E-Vending'];
+        }
+        if ($request->has('capacity')) {
+            $rules['capacity'] = ['nullable','string','max:50'];
+        }
 
         $validated = $request->validate($rules);
 

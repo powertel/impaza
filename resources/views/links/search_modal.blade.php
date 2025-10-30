@@ -21,16 +21,18 @@
           <table class="table table-sm align-middle">
             <thead>
               <tr>
-                <th style="width: 22%">Link</th>
-                <th style="width: 18%">City/Town</th>
-                <th style="width: 18%">Location</th>
-                <th style="width: 18%">Pop</th>
-                <th style="width: 18%">Link Type</th>
+                <th style="width: 24%">Link</th>
+                <th style="width: 14%">City/Town</th>
+                <th style="width: 14%">Location</th>
+                <th style="width: 14%">Pop</th>
+                <th style="width: 13%">Service Type</th>
+                <th style="width: 11%">Capacity</th>
+                <th style="width: 10%">Link Type</th>
                 <th style="width: 6%">#</th>
               </tr>
             </thead>
             <tbody id="editExistingLinksBody">
-              <tr class="text-center text-muted"><td colspan="6">Select a customer to load links…</td></tr>
+              <tr class="text-center text-muted"><td colspan="8">Select a customer to load links…</td></tr>
             </tbody>
           </table>
         </div>
@@ -49,10 +51,19 @@
               <option value="{{ $lt->id }}">{{ $lt->linkType }}</option>
             @endforeach
           </select>
+          <select id="editLinksServiceTypesTpl">
+            <option value="">Select Service</option>
+            <option value="Internet">Internet</option>
+            <option value="VPN">VPN</option>
+            <option value="Carrier Services">Carrier Services</option>
+            <option value="E-Vending">E-Vending</option>
+          </select>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-light border btn-sm" data-bs-dismiss="modal" onclick="location.reload()">Close</button>
+        <button type="button" class="btn btn-light border btn-sm" data-bs-dismiss="modal" onclick="location.reload()">
+          <i class="bi bi-x-lg"></i> Close
+        </button>
       </div>
     </div>
   </div>
