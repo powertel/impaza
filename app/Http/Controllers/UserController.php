@@ -21,7 +21,7 @@ class UserController extends Controller
     {
          $this->middleware('permission:user-list|user-create|user-edit|user-delete', ['only' => ['index','store']]);
          $this->middleware('permission:user-create', ['only' => ['create','store']]);
-         $this->middleware('permission:user-edit', ['only' => ['edit','update']]);
+         $this->middleware('permission:user-edit', ['only' => ['edit','update','changePassword']]);
          $this->middleware('permission:user-delete', ['only' => ['destroy']]);
     }
     /**
@@ -335,6 +335,21 @@ class UserController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Password has been Changed Successfully');
+    }
+
+    // Admin: change password for a specific user
+    public function changePassword(Request $request, $id)
+    {
+        $this->validate($request, [
+            'newpassword' => 'required|min:6|max:30|confirmed',
+        ]);
+
+        $user = User::findOrFail($id);
+        $user->update([
+            'password' => bcrypt($request->newpassword),
+        ]);
+
+        return redirect()->route('users.index')->with('success', 'Password changed successfully');
     }
 
     public function search(Request $request){

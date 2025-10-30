@@ -54,6 +54,8 @@ Auth::routes();
 Route::group(['middleware' => ['auth']], function() {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::resource('users', UserController::class);
+    // Admin change password for a specific user
+    Route::put('users/{user}/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
     Route::resource('roles', RoleController::class);
     Route::resource('permission',PermissionController::class);
     Route::resource('departments', DepartmentController::class);
