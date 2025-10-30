@@ -92,11 +92,11 @@
 /* Layout adjustments at breakpoints */
 @media (min-width: 992px) {
   .sidebar-mini .main-sidebar { width: 240px; }
-  .sidebar-mini .content-wrapper, .sidebar-mini .main-footer, .sidebar-mini .main-header { margin-left: 240px; }
+  .sidebar-mini .content-wrapper, .sidebar-mini .main-header { margin-left: 240px; }
 }
 @media (min-width: 1280px) {
   .sidebar-mini .main-sidebar { width: 240px; }
-  .sidebar-mini .content-wrapper, .sidebar-mini .main-footer, .sidebar-mini .main-header { margin-left: 240px; }
+  .sidebar-mini .content-wrapper, .sidebar-mini .main-header { margin-left: 240px; }
 }
 @media (max-width: 991.98px) {
   /* Keep consistent scrolling and header offset on small screens */

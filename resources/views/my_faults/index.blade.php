@@ -23,7 +23,7 @@ My Faults
         <div class="table-responsive">
             <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
                 <div class="input-group input-group-sm" style="width: 170px;">
-                    <div class="input-group-prepend"><span class="input-group-text">Show</span></div>
+                    <div class="input-group-prepend"><span class="input-group-text"><i class="fas fa-list me-1"></i> Show</span></div>
                     <select id="myFaultsPageSize" class="form-select form-select-sm" style="width:auto;">
                         <option value="10">10</option>
                         <option value="20" selected>20</option>
@@ -33,6 +33,7 @@ My Faults
                     </select>
                 </div>
                 <div class="input-group input-group-sm" style="width: 220px;">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
                     <input type="text" id="myFaultsSearch" class="form-control" placeholder="Search faults">
                 </div>
             </div>

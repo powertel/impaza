@@ -21,7 +21,7 @@ class UserController extends Controller
     {
          $this->middleware('permission:user-list|user-create|user-edit|user-delete', ['only' => ['index','store']]);
          $this->middleware('permission:user-create', ['only' => ['create','store']]);
-         $this->middleware('permission:user-edit', ['only' => ['edit','update']]);
+         $this->middleware('permission:user-edit', ['only' => ['edit','update','changePassword']]);
          $this->middleware('permission:user-delete', ['only' => ['destroy']]);
     }
     /**
@@ -31,11 +31,46 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::join('departments','users.department_id','=','departments.id')
-                ->leftjoin('sections','users.section_id','=','sections.id')
-                ->leftjoin('positions','users.position_id','=','positions.id')
-                ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
-                ->get(['users.id','users.name','users.email','users.department_id','users.position_id','users.section_id','users.phonenumber','sections.section','departments.department','positions.position','user_statuses.status_name','users.region']);
+        $perPage = (int) request('per_page', 20);
+        $perPage = in_array($perPage, [10,20,50,100]) ? $perPage : 20;
+        $q = trim((string) request('q', ''));
+
+        $usersQuery = User::query()
+            ->join('departments','users.department_id','=','departments.id')
+            ->leftJoin('sections','users.section_id','=','sections.id')
+            ->leftJoin('positions','users.position_id','=','positions.id')
+            ->leftJoin('user_statuses','users.user_status','=','user_statuses.id')
+            ->orderBy('users.name', 'asc')
+            ->select([
+                'users.id',
+                'users.name',
+                'users.email',
+                'users.department_id',
+                'users.position_id',
+                'users.section_id',
+                'users.phonenumber',
+                'users.region',
+                'sections.section',
+                'departments.department',
+                'positions.position',
+                'user_statuses.status_name',
+            ]);
+
+        if ($q !== '') {
+            $like = '%'.$q.'%';
+            $usersQuery->where(function($qq) use ($like){
+                $qq->where('users.name','like',$like)
+                   ->orWhere('users.email','like',$like)
+                   ->orWhere('departments.department','like',$like)
+                   ->orWhere('sections.section','like',$like)
+                   ->orWhere('positions.position','like',$like)
+                   ->orWhere('user_statuses.status_name','like',$like)
+                   ->orWhere('users.region','like',$like)
+                   ->orWhere('users.phonenumber','like',$like);
+            });
+        }
+
+        $users = $usersQuery->paginate($perPage)->withQueryString();
         
         // Provide supporting datasets for modal-based create/edit in index
         $roles = Role::pluck('name','name')->all();
@@ -300,6 +335,21 @@ class UserController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Password has been Changed Successfully');
+    }
+
+    // Admin: change password for a specific user
+    public function changePassword(Request $request, $id)
+    {
+        $this->validate($request, [
+            'newpassword' => 'required|min:6|max:30|confirmed',
+        ]);
+
+        $user = User::findOrFail($id);
+        $user->update([
+            'password' => bcrypt($request->newpassword),
+        ]);
+
+        return redirect()->route('users.index')->with('success', 'Password changed successfully');
     }
 
     public function search(Request $request){

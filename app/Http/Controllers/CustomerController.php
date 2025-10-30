@@ -77,11 +77,36 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $customers = DB::table('customers')
+        $perPage = (int) request('per_page', 20);
+        $perPage = in_array($perPage, [10,20,50,100]) ? $perPage : 20;
+        $q = trim((string) request('q', ''));
+
+        $customersQuery = DB::table('customers')
                 ->leftJoin('account_managers', 'customers.account_manager_id', '=', 'account_managers.id')
                 ->leftJoin('users as account_manager_users', 'account_managers.user_id', '=', 'account_manager_users.id')
                 ->orderBy('customers.customer', 'asc')
-                ->get(['customers.id','customers.customer','customers.account_number','customers.account_manager_id','account_manager_users.name as accountManager']);
+                ->select([
+                    'customers.id',
+                    'customers.customer',
+                    'customers.account_number',
+                    'customers.account_manager_id',
+                    'customers.address',
+                    'customers.contact_number',
+                    'account_manager_users.name as accountManager',
+                ]);
+
+        if ($q !== '') {
+            $like = '%'.$q.'%';
+            $customersQuery->where(function($qq) use ($like){
+                $qq->where('customers.customer','like',$like)
+                   ->orWhere('account_manager_users.name','like',$like)
+                   ->orWhere('customers.account_number','like',$like)
+                   ->orWhere('customers.address','like',$like)
+                   ->orWhere('customers.contact_number','like',$like);
+            });
+        }
+
+        $customers = $customersQuery->paginate($perPage)->withQueryString();
 
         // Fetch account managers joined with users for display and selection
         $accountManagers = DB::table('account_managers')
@@ -90,8 +115,7 @@ class CustomerController extends Controller
             ->orderBy('users.name', 'asc')
             ->get(['account_managers.id as am_id', 'account_managers.user_id as user_id', 'users.name as name']);
 
-        return view('customers.index',compact('customers','accountManagers'))
-        ->with('i');
+        return view('customers.index',compact('customers','accountManagers'));
     }
 
     /**

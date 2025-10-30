@@ -20,24 +20,30 @@ Users
         </div>
     </div>
     <!-- /.card-header -->
-    <div class="card-body">
+<div class="card-body">
         <div class="table-responsive">
+            @php($perPage = request('per_page', 20))
             <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
-                <div class="input-group input-group-sm" style="width: 170px;">
-                    <div class="input-group-prepend"><span class="input-group-text">Show</span></div>
+                <div class="input-group input-group-sm" style="width: 200px;">
+                    <span class="input-group-text"><i class="fas fa-list me-1"></i> Show</span>
                     <select id="usersPageSize" class="form-select form-select-sm" style="width:auto;">
-                        <option value="10">10</option>
-                        <option value="20" selected>20</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                        <option value="all">All</option>
+                        <option value="10"  {{ (int)$perPage===10 ? 'selected' : '' }}>10</option>
+                        <option value="20"  {{ (int)$perPage===20 ? 'selected' : '' }}>20</option>
+                        <option value="50"  {{ (int)$perPage===50 ? 'selected' : '' }}>50</option>
+                        <option value="100" {{ (int)$perPage===100 ? 'selected' : '' }}>100</option>
                     </select>
                 </div>
-                <div class="input-group input-group-sm" style="width: 220px;">
-                    <input type="text" id="usersSearch" class="form-control" placeholder="Search users">
-                </div>
+                <form id="usersSearchForm" method="GET" action="{{ route('users.index') }}" class="m-0">
+                    <div class="input-group input-group-sm" style="width: 360px;">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" name="q" value="{{ request('q','') }}" class="form-control" placeholder="Search all records">
+                        <input type="hidden" name="per_page" value="{{ $perPage }}">
+                        <button type="submit" class="btn btn-outline-primary"><i class="fas fa-search me-1"></i>Search</button>
+                        <a href="{{ route('users.index', ['per_page' => $perPage]) }}" class="btn btn-outline-secondary"><i class="fas fa-rotate-left me-1"></i>Reset</a>
+                    </div>
+                </form>
             </div>
-            <table  class="table table-hover js-paginated-table" data-page-size="20" data-page-size-control="#usersPageSize" data-pager="#usersPager" data-search="#usersSearch">
+            <table class="table table-hover" id="usersTable">
                 <thead class="thead-light">
                     <tr>
                         <th>No.</th>
@@ -51,9 +57,9 @@ Users
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($users as $user)
+                    @forelse ($users as $user)
                     <tr>
-                        <td>{{ ++$i }}</td>
+                        <td>{{ $users->firstItem() + $loop->index }}</td>
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
                         <td>
@@ -94,9 +100,25 @@ Users
                         </td>
 
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <i class="fas fa-info-circle me-1"></i> No users found.
+                        </td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+              <small class="text-muted">
+                @if($users->count())
+                  Showing {{ $users->firstItem() }} to {{ $users->lastItem() }} of {{ $users->total() }} results
+                @else
+                  Showing 0 results
+                @endif
+              </small>
+              {{ $users->appends(request()->except('page'))->links('pagination::bootstrap-5') }}
+            </div>
             <div id="usersPager" class="mt-2"></div>
         </div>
     </div>
@@ -116,5 +138,18 @@ Users
 
 @section('scripts')
 @include('partials.users')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sel = document.getElementById('usersPageSize');
+    if (sel) {
+        sel.addEventListener('change', function(ev) {
+            const params = new URLSearchParams(window.location.search);
+            params.set('per_page', ev.target.value);
+            params.delete('page');
+            window.location.assign(window.location.pathname + '?' + params.toString());
+        });
+    }
+});
+</script>
 @endsection
 
