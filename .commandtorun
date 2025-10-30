@@ -1,13 +1,16 @@
-docker compose up -d --build 
+docker compose -f impaza/compose.prod.yaml up -d --build
 
-docker compose exec -T app composer install --no-interaction --prefer-dist 
+# Initialize app key if not set in .env.prod
+docker compose -f impaza/compose.prod.yaml exec -T app php artisan key:generate --force
 
-docker compose exec -T app php artisan key:generate 
-
-docker compose exec -T app chmod -R 777 storage bootstrap/cache 
+# Fix permissions for Laravel writable paths
+docker compose -f impaza/compose.prod.yaml exec -T app chmod -R 775 storage bootstrap/cache
 
 Common next commands:
 
-- docker compose logs -f nginx to tail Nginx logs.
-- docker compose exec app php artisan migrate to run DB migrations.
-- docker compose exec app php artisan cache:clear if you tweak configs.
+- docker compose -f impaza/compose.prod.yaml logs -f nginx to tail Nginx logs.
+- docker compose -f impaza/compose.prod.yaml exec -T app php artisan migrate --force
+- docker compose -f impaza/compose.prod.yaml exec -T app php artisan config:cache && docker compose -f impaza/compose.prod.yaml exec -T app php artisan route:cache && docker compose -f impaza/compose.prod.yaml exec -T app php artisan view:cache
+
+docker exec impaza_mysql mysql -uroot -proot -e "CREATE USER 'impazamon'@'%' IDENTIFIED BY 'Power@Dev25'; GRANT ALL PRIVILEGES ON impaza.* TO 'impaza'@'%'; FLUSH PRIVILEGES;"
+docker exec impaza_mysql mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON impaza.* TO 'impazamon'@'%'; FLUSH PRIVILEGES;" 
