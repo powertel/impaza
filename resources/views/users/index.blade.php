@@ -23,29 +23,27 @@ Users
 <div class="card-body">
         <div class="table-responsive">
             @php($perPage = request('per_page', 20))
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
-                <div class="d-flex align-items-center gap-2">
-                    <div class="input-group input-group-sm" style="width: 160px;">
-                        <span class="input-group-text"><i class="fas fa-list-ol me-1"></i> Show</span>
-                        <select id="usersPageSize" class="form-select form-select-sm">
-                            <option value="10" {{ (string)$perPage === '10' ? 'selected' : '' }}>10</option>
-                            <option value="20" {{ (string)$perPage === '20' ? 'selected' : '' }}>20</option>
-                            <option value="50" {{ (string)$perPage === '50' ? 'selected' : '' }}>50</option>
-                            <option value="100" {{ (string)$perPage === '100' ? 'selected' : '' }}>100</option>
-                        </select>
-                    </div>
+            <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+                <div class="input-group input-group-sm" style="width: 200px;">
+                    <span class="input-group-text"><i class="fas fa-list me-1"></i> Show</span>
+                    <select id="usersPageSize" class="form-select form-select-sm" style="width:auto;">
+                        <option value="10"  {{ (int)$perPage===10 ? 'selected' : '' }}>10</option>
+                        <option value="20"  {{ (int)$perPage===20 ? 'selected' : '' }}>20</option>
+                        <option value="50"  {{ (int)$perPage===50 ? 'selected' : '' }}>50</option>
+                        <option value="100" {{ (int)$perPage===100 ? 'selected' : '' }}>100</option>
+                    </select>
                 </div>
-                <form method="GET" action="{{ route('users.index') }}" class="d-flex align-items-center" style="max-width: 320px;">
-                    <div class="input-group input-group-sm">
+                <form id="usersSearchForm" method="GET" action="{{ route('users.index') }}" class="m-0">
+                    <div class="input-group input-group-sm" style="width: 360px;">
                         <span class="input-group-text"><i class="fas fa-search"></i></span>
-                        <input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="Search users...">
+                        <input type="text" name="q" value="{{ request('q','') }}" class="form-control" placeholder="Search all records">
                         <input type="hidden" name="per_page" value="{{ $perPage }}">
-                        <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
-                        <a href="{{ route('users.index', ['per_page' => $perPage]) }}" class="btn btn-outline-secondary"><i class="fas fa-sync-alt"></i></a>
+                        <button type="submit" class="btn btn-outline-primary"><i class="fas fa-search me-1"></i>Search</button>
+                        <a href="{{ route('users.index', ['per_page' => $perPage]) }}" class="btn btn-outline-secondary"><i class="fas fa-rotate-left me-1"></i>Reset</a>
                     </div>
                 </form>
             </div>
-            <table class="table table-hover align-middle">
+            <table class="table table-hover" id="usersTable">
                 <thead class="thead-light">
                     <tr>
                         <th>No.</th>
@@ -111,14 +109,17 @@ Users
                     @endforelse
                 </tbody>
             </table>
-            <div class="d-flex flex-wrap justify-content-between align-items-center mt-2">
-                <div class="text-muted small">
-                    Showing {{ $users->count() ? ($users->firstItem().'–'.$users->lastItem()) : 0 }} of {{ $users->total() }} results
-                </div>
-                <div>
-                    {{ $users->onEachSide(1)->links('pagination::bootstrap-5') }}
-                </div>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+              <small class="text-muted">
+                @if($users->count())
+                  Showing {{ $users->firstItem() }} to {{ $users->lastItem() }} of {{ $users->total() }} results
+                @else
+                  Showing 0 results
+                @endif
+              </small>
+              {{ $users->appends(request()->except('page'))->links('pagination::bootstrap-5') }}
             </div>
+            <div id="usersPager" class="mt-2"></div>
         </div>
     </div>
     <!-- /.card-body -->
