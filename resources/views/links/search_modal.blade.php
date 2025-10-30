@@ -62,7 +62,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-light border btn-sm" data-bs-dismiss="modal" onclick="location.reload()">
-          <i class="bi bi-x-lg"></i> Close
+          <i class="fas fa-times me-1"></i> Close
         </button>
       </div>
     </div>
