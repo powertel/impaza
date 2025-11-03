@@ -139,6 +139,8 @@
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/modals-bridge.js') }}"></script>
     <script src="{{ asset('js/faults-modals.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ asset('js/reports.js') }}"></script>
 
 
         @yield('scripts')

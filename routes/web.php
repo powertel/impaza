@@ -31,6 +31,7 @@ use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\StoreController;
 use App\Http\Controllers\RFOController;
 use App\Http\Controllers\TechnicianConfigController;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,6 +54,8 @@ Auth::routes();
 
 Route::group(['middleware' => ['auth']], function() {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
+    // Reports dashboard
+    Route::get('/dashboard/reports', [DashboardController::class, 'reports'])->name('dashboard.reports');
     Route::resource('users', UserController::class);
     // Admin change password for a specific user
     Route::put('users/{user}/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
