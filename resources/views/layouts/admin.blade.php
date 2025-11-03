@@ -173,15 +173,7 @@
     @section('scripts')
     @endsection
 
-    <!-- jQuery (full) and Bootstrap -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Select2 -->
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <!-- Popup -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js" integrity="sha512-3gJwYpMe3QewGELv8k/BX9vcqhryRdzRMxVfq6ngyWXwo03GFEzjsUm8Q7RZcHPHksttq7/GFoxjCVUjkjvPdw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- All vendor scripts/styles are bundled locally via Mix -->
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/modals-bridge.js') }}"></script>
     <script src="{{ asset('js/faults-modals.js') }}"></script>
@@ -257,19 +249,23 @@
         
 
         <script>
-            $(document).ready(function () {
-                // Initialize Select2 globally on page load
-                $('.select2').select2();
+            (function(){
+                // Guard against missing jQuery or Select2 to avoid breaking other scripts
+                if (window.$ && $.fn && typeof $.fn.select2 === 'function') {
+                    $(document).ready(function () {
+                        // Initialize Select2 globally on page load
+                        $('.select2').select2();
 
-                // Reinitialize Select2 when any modal is shown
-                $('.modal').on('shown.bs.modal', function () {
-                    $(this).find('.select2').select2({
-                        dropdownParent: $(this), // Ensures the dropdown appears inside the modal
-                        width: '100%' // Ensures consistent styling
+                        // Reinitialize Select2 when any modal is shown
+                        $('.modal').on('shown.bs.modal', function () {
+                            $(this).find('.select2').select2({
+                                dropdownParent: $(this),
+                                width: '100%'
+                            });
+                        });
                     });
-                });
-            });
-
+                }
+            })();
         </script>
         @endsection
 

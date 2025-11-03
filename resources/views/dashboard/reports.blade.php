@@ -8,13 +8,23 @@
             <small class="text-muted">Current fault summary and activity</small>
         </div>
         <div class="d-flex gap-2">
-            <form method="get" action="{{ route('dashboard.reports') }}" class="d-inline-flex align-items-center">
-                <select name="period" class="form-select form-select-sm me-2" style="width:auto">
-                    <option value="this_month" {{ ($period ?? 'this_month')==='this_month'?'selected':'' }}>This Month</option>
+            <form method="get" action="{{ route('dashboard.reports') }}" class="d-inline-flex align-items-center gap-2">
+                <select name="month" class="form-select form-select-sm" style="width:auto">
+                    <option value="all" {{ ($selectedMonth ?? null) === null ? 'selected' : '' }}>All Months</option>
+                    @for($m = 1; $m <= 12; $m++)
+                        <option value="{{ $m }}" {{ ($selectedMonth ?? null) == $m ? 'selected' : '' }}>{{ \Carbon\Carbon::create(null, $m)->format('F') }}</option>
+                    @endfor
+                </select>
+                <select name="year" class="form-select form-select-sm" style="width:auto">
+                    <option value="all" {{ ($selectedYear ?? null) === null ? 'selected' : '' }}>All Years</option>
+                    @foreach(($availableYears ?? []) as $y)
+                        <option value="{{ $y }}" {{ ($selectedYear ?? null) == $y ? 'selected' : '' }}>{{ $y }}</option>
+                    @endforeach
                 </select>
                 <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
             </form>
-            <button class="btn btn-sm btn-outline-primary" onclick="window.print()">Export</button>
+            <a href="{{ route('dashboard.reports') }}" class="btn btn-sm btn-outline-secondary" title="Reset filters to All">Reset</a>
+            <!-- <button class="btn btn-sm btn-outline-primary" onclick="window.print()">Export</button> -->
         </div>
     </div>
 

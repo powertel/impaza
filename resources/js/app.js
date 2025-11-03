@@ -38,6 +38,13 @@ window.Form = Form;
 Vue.component(HasError.name, HasError);
 Vue.component(AlertError.name, AlertError);
 
+// Select2 JS plugin (jQuery-based)
+import "select2/dist/js/select2.min.js";
+
+// Chart.js as a global for reports.js
+import Chart from "chart.js";
+window.Chart = Chart;
+
 //require("./component");
 Vue.component("role", require("./components/role.vue").default);
 Vue.component("user", require("./components/user.vue").default);
