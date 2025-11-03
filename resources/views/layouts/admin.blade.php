@@ -65,6 +65,29 @@
         .stat-delta.down { color:#7f1d1d; background:#fee2e2; }
         .stat-delta.neutral { color:#374151; background:#f3f4f6; }
 
+        /* New card styles for modern UI */
+        .card.card-primary { background-color: #2563eb; color: #fff; }
+        .card.card-primary .stat-title, .card.card-primary .stat-value, .card.card-primary .stat-sub { color: #fff; }
+        .card.card-primary .stat-icon { background: rgba(255,255,255,0.2); box-shadow: none; }
+
+        .card.card-success { background-color: #10b981; color: #fff; }
+        .card.card-success .stat-title, .card.card-success .stat-value, .card.card-success .stat-sub { color: #fff; }
+        .card.card-success .stat-icon { background: rgba(255,255,255,0.2); box-shadow: none; }
+
+        .card.card-danger { background-color: #ef4444; color: #fff; }
+        .card.card-danger .stat-title, .card.card-danger .stat-value, .card.card-danger .stat-sub { color: #fff; }
+        .card.card-danger .stat-icon { background: rgba(255,255,255,0.2); box-shadow: none; }
+
+        .card.card-info { background-color: #3b82f6; color: #fff; }
+        .card.card-info .stat-title, .card.card-info .stat-value, .card.card-info .stat-sub { color: #fff; }
+        .card.card-info .stat-icon { background: rgba(255,255,255,0.2); box-shadow: none; }
+
+        /* Prominent card style for Total Shipments */
+        .card.card-total-shipments { background-color: #1e3a8a; color: #fff; }
+        .card.card-total-shipments .stat-title, .card.card-total-shipments .stat-value, .card.card-total-shipments .stat-sub { color: #fff; }
+        .card.card-total-shipments .stat-icon { background: rgba(255,255,255,0.2); box-shadow: none; }
+        .card.card-total-shipments .stat-value { font-size: 1.8rem; }
+
         /* Heading scale override for compact UI */
         .h1, h1 { font-size: 1.6rem; }
         .h2, h2 { font-size: 1.4rem; }
