@@ -6,6 +6,13 @@
     const homeDataEl = document.getElementById('homeData');
     if (!homeDataEl) return;
 
+    // Destroy existing charts to prevent canvas reuse errors
+    if (typeof Chart !== 'undefined' && Chart.instances) {
+      Chart.helpers.each(Chart.instances, function(instance) {
+        instance.destroy();
+      });
+    }
+
     const monthlyLabels = JSON.parse(homeDataEl.dataset.monthlyLabels || '[]');
     const monthlyCounts = JSON.parse(homeDataEl.dataset.monthlyCounts || '[]');
     const statusLabels = JSON.parse(homeDataEl.dataset.statusLabels || '[]');

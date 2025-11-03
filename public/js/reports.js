@@ -75,6 +75,11 @@
   function initCharts(data) {
     if (typeof Chart === 'undefined') return; // Chart.js not loaded
 
+    // Destroy existing charts to prevent canvas reuse errors
+    Chart.helpers.each(Chart.instances, function(instance) {
+      instance.destroy();
+    });
+
     // Ensure charts follow container height for uniform sizing
     Chart.defaults.maintainAspectRatio = false;
     Chart.defaults.responsive = true;
@@ -85,18 +90,116 @@
     Chart.defaults.plugins.tooltip.titleColor = '#fff';
     Chart.defaults.plugins.tooltip.bodyColor = '#e5e7eb';
 
-    // Monthly faults
-    if (has('chartMonthlyFaults')) new Chart(el('chartMonthlyFaults'), {
-      type: 'bar',
-      data: { labels: data.monthlyLabels, datasets: [{ label: 'Faults', data: data.monthlyCounts, backgroundColor: '#4e73df' }] },
-      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-    });
+    // Monthly faults (Performance Overview)
+    if (has('chartMonthlyFaults')) {
+      const ctx = el('chartMonthlyFaults').getContext('2d');
+      const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+      gradient.addColorStop(0, 'rgba(78, 115, 223, 0.8)');
+      gradient.addColorStop(1, 'rgba(78, 115, 223, 0.1)');
+      
+      new Chart(el('chartMonthlyFaults'), {
+        type: 'line',
+        data: { 
+          labels: data.monthlyLabels, 
+          datasets: [{ 
+            label: 'Monthly Fault Trends',
+            data: data.monthlyCounts, 
+            borderColor: '#4e73df',
+            backgroundColor: gradient,
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#4e73df',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            pointHoverBackgroundColor: '#4e73df',
+            pointHoverBorderColor: '#ffffff',
+            pointHoverBorderWidth: 3
+          }] 
+        },
+        options: { 
+          responsive: true, 
+          maintainAspectRatio: false,
+          plugins: { 
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              titleColor: '#374151',
+              bodyColor: '#6b7280',
+              borderColor: '#e5e7eb',
+              borderWidth: 1,
+              cornerRadius: 8,
+              displayColors: false,
+              titleFont: { size: 14, weight: 'bold' },
+              bodyFont: { size: 13 }
+            }
+          }, 
+          scales: { 
+            x: {
+              grid: { display: false },
+              ticks: { 
+                color: '#9ca3af',
+                font: { size: 11 }
+              }
+            },
+            y: { 
+              beginAtZero: true,
+              grid: { 
+                color: 'rgba(156, 163, 175, 0.2)',
+                drawBorder: false
+              },
+              ticks: { 
+                color: '#9ca3af',
+                font: { size: 11 }
+              }
+            } 
+          },
+          elements: {
+            point: {
+              hoverRadius: 8
+            }
+          }
+        }
+      });
+    }
 
     // SLA gauge
     if (has('chartSLA')) new Chart(el('chartSLA'), {
       type: 'doughnut',
-      data: { labels: ['Compliance','Remaining'], datasets: [{ data: [data.slaCompliance, 100 - data.slaCompliance], backgroundColor: ['#1cc88a','#e9ecef'], borderWidth: 0, hoverOffset: 2 }] },
-      options: { circumference: 180, rotation: -90, cutout: '60%', plugins: { legend: { display: false } } }
+      data: { 
+        labels: ['Compliance','Remaining'], 
+        datasets: [{ 
+          data: [data.slaCompliance, 100 - data.slaCompliance], 
+          backgroundColor: ['#1cc88a','#e9ecef'], 
+          borderWidth: 0, 
+          hoverOffset: 2 
+        }] 
+      },
+      options: { 
+        responsive: true,
+        maintainAspectRatio: false,
+        aspectRatio: 1,
+        circumference: 180, 
+        rotation: -90, 
+        cutout: '60%', 
+        plugins: { 
+          legend: { display: false } 
+        },
+        layout: {
+          padding: {
+            top: 5,
+            bottom: 5,
+            left: 5,
+            right: 5
+          }
+        },
+        animation: {
+          animateRotate: false,
+          animateScale: false
+        }
+      }
     });
 
     // Status

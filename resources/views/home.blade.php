@@ -7,6 +7,7 @@ Dashboard
 @include('partials.css')
 
 @section('content')
+<link href="{{ asset('css/dashboard.css') }}" rel="stylesheet">
 <div class="modern-dashboard">
   @php
     $periodLabel = ($selectedYear ?? null)
@@ -87,9 +88,9 @@ Dashboard
                   <p class="kpi-label">Total Faults</p>
                   <div class="kpi-trend">
                     <span class="trend-indicator trend-up">
-                      <i class="fas fa-arrow-up"></i> 12%
+                      <i class="fas fa-arrow-up"></i> 
                     </span>
-                    <span class="trend-text">vs last period</span>
+                    <span class="trend-text"></span>
                   </div>
                 </div>
               </div>
@@ -109,9 +110,9 @@ Dashboard
                   <p class="kpi-label">Active Customers</p>
                   <div class="kpi-trend">
                     <span class="trend-indicator trend-up">
-                      <i class="fas fa-arrow-up"></i> 8%
+                      <i class="fas fa-arrow-up"></i> 
                     </span>
-                    <span class="trend-text">vs last period</span>
+                    <span class="trend-text"></span>
                   </div>
                 </div>
               </div>
@@ -131,9 +132,9 @@ Dashboard
                   <p class="kpi-label">Network Links</p>
                   <div class="kpi-trend">
                     <span class="trend-indicator trend-down">
-                      <i class="fas fa-arrow-down"></i> 3%
+                      <i class="fas fa-arrow-down"></i> 
                     </span>
-                    <span class="trend-text">vs last period</span>
+                    <span class="trend-text"></span>
                   </div>
                 </div>
               </div>
@@ -154,9 +155,9 @@ Dashboard
                   <p class="kpi-label">Open Faults</p>
                   <div class="kpi-trend">
                     <span class="trend-indicator trend-down">
-                      <i class="fas fa-arrow-down"></i> 15%
+                      <i class="fas fa-arrow-down"></i> 
                     </span>
-                    <span class="trend-text">vs last period</span>
+                    <span class="trend-text"></span>
                   </div>
                 </div>
               </div>
