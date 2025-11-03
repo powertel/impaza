@@ -486,8 +486,8 @@
                                     </td>
                                     <td>{{ $f->city?->city ?? '—' }}</td>
                                     <td>
-                                        <span class="status-badge status-{{ strtolower($f->status_id) }}">
-                                            {{ $f->status_id }}
+                                        <span class="status-badge status-{{ strtolower($f->status) }}">
+                                            {{ $f->status }}
                                         </span>
                                     </td>
                                     <td>
@@ -495,6 +495,8 @@
                                             {{ $f->priorityLevel ?? 'Normal' }}
                                         </span>
                                     </td>
+
+
                                 </tr>
                             @empty
                                 <tr><td colspan="6" class="no-data">No recent faults found</td></tr>
