@@ -21,7 +21,7 @@
     <!-- KPI cards -->
     <div class="row g-3 mb-4">
         <div class="col-md-3">
-            <div class="card shadow-sm card-hover h-100">
+            <div class="card shadow-sm card-hover kpi-card h-100">
                 <div class="card-body">
                     @php
                         $faultsDeltaRaw = ($faultsLastMonth > 0) ? (($faultsThisMonth - $faultsLastMonth) / $faultsLastMonth) * 100 : 0;
@@ -43,7 +43,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card shadow-sm card-hover h-100">
+            <div class="card shadow-sm card-hover kpi-card h-100">
                 <div class="card-body">
                     @php
                         $customersDeltaRaw = ($customersLastMonth > 0) ? (($customersThisMonth - $customersLastMonth) / $customersLastMonth) * 100 : 0;
@@ -65,7 +65,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card shadow-sm card-hover h-100">
+            <div class="card shadow-sm card-hover kpi-card h-100">
                 <div class="card-body">
                     @php
                         $mttrDeltaRaw = ($mttrLastMonth > 0) ? (($mttrThisMonth - $mttrLastMonth) / $mttrLastMonth) * 100 : 0;
@@ -88,7 +88,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card shadow-sm card-hover h-100">
+            <div class="card shadow-sm card-hover kpi-card h-100">
                 <div class="card-body">
                     <div class="stat-card">
                         <div>
@@ -109,7 +109,7 @@
     <!-- Additional KPIs -->
     <div class="row g-3 mb-4">
         <div class="col-md-3">
-            <div class="card shadow-sm card-hover h-100">
+            <div class="card shadow-sm card-hover kpi-card h-100">
                 <div class="card-body">
                     @php
                         $mttaDeltaRaw = ($mttaLastMonth > 0) ? (($mttaThisMonth - $mttaLastMonth) / $mttaLastMonth) * 100 : 0;
@@ -132,7 +132,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card shadow-sm card-hover h-100">
+            <div class="card shadow-sm card-hover kpi-card h-100">
                 <div class="card-body">
                     <div class="stat-card">
                         <div>
@@ -402,7 +402,7 @@
 
     <div class="row g-3 mb-4">
         <div class="col-lg-4">
-            <div class="card shadow-sm h-100">
+            <div class="card shadow-sm ">
                 <div class="card-header bg-white">Link Status</div>
                 <div class="card-body">
                     <canvas id="chartLinkStatus" height="160"></canvas>

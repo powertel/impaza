@@ -55,7 +55,8 @@
         /* Modern KPI stat card */
         .stat-card { display:flex; align-items:center; justify-content:space-between; }
         .stat-title { color:#6b7280; font-weight:600; letter-spacing:.02em; }
-        .stat-value { color:#0f172a; font-weight:700; font-size:1.35rem; }
+        :root { --kpi-value-size: 1.1rem; --kpi-height: 110px; --chart-height: 240px; }
+        .stat-value { color:#0f172a; font-weight:700; font-size: var(--kpi-value-size); }
         .stat-sub { color:#9ca3af; font-size: .85rem; }
         .stat-right { display:flex; flex-direction:column; align-items:flex-end; gap:.35rem; }
         .stat-icon { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,#4f46e5 0%, #06b6d4 100%); box-shadow: 0 4px 12px rgba(79,70,229,.25); }
@@ -84,6 +85,11 @@
         /* Modal scrollability and whitespace control */
         #departmentCreateModal .modal-body { max-height: 70vh; overflow-y: auto; padding-bottom: 0.75rem; }
         #departmentCreateModal .repeater-items { max-height: 60vh; overflow-y: auto; }
+
+        /* Uniform KPI and chart card sizing */
+        .kpi-card .card-body { min-height: var(--kpi-height); }
+        .card .card-header { font-size: 12px; }
+        .card .card-body > canvas { height: var(--chart-height) !important; }
     </style>
 
     @include('layouts.partials.header_styles')

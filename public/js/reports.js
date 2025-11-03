@@ -75,6 +75,10 @@
   function initCharts(data) {
     if (typeof Chart === 'undefined') return; // Chart.js not loaded
 
+    // Ensure charts follow container height for uniform sizing
+    Chart.defaults.maintainAspectRatio = false;
+    Chart.defaults.responsive = true;
+
     // Monthly faults
     if (has('chartMonthlyFaults')) new Chart(el('chartMonthlyFaults'), {
       type: 'bar',
