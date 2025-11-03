@@ -33,10 +33,10 @@ class HomeController extends Controller
             ->pluck('y')
             ->toArray();
 
-        // Determine selected year; support explicit "All Years" when year param exists but empty
+        // Determine selected year; treat empty or 'all' as All Years
         $hasYearParam = $request->has('year');
         $yearInput = $request->input('year');
-        if ($hasYearParam && ($yearInput === null || $yearInput === '')) {
+        if ($hasYearParam && ($yearInput === null || $yearInput === '' || strtolower((string)$yearInput) === 'all')) {
             $selectedYear = null; // All Years
         } elseif ($hasYearParam) {
             $selectedYear = (int)$yearInput;
@@ -58,7 +58,7 @@ class HomeController extends Controller
 
         // Determine selected month (ignored if All Years)
         $selectedMonthInput = $request->input('month');
-        $selectedMonth = ($selectedMonthInput !== null && $selectedMonthInput !== '') ? (int)$selectedMonthInput : null;
+        $selectedMonth = ($selectedMonthInput !== null && $selectedMonthInput !== '' && strtolower((string)$selectedMonthInput) !== 'all') ? (int)$selectedMonthInput : null;
         if ($selectedYear === null) {
             $selectedMonth = null; // month selection disabled for All Years
         } elseif ($selectedMonth !== null && !in_array($selectedMonth, $availableMonths)) {
@@ -108,6 +108,59 @@ class HomeController extends Controller
             ->orderBy('faults.created_at','desc')
             ->limit(20)
             ->get(['faults.id','customers.customer','links.link','faults.created_at']);
+
+        // Monthly counts for charts
+        $monthlyLabels = [];
+        $monthlyCounts = [];
+        if ($selectedYear !== null) {
+            foreach (range(1,12) as $m) {
+                $monthlyLabels[] = Carbon::create(null, $m, 1)->format('M');
+                $count = DB::table('faults')
+                    ->whereYear('created_at', $selectedYear)
+                    ->whereMonth('created_at', $m)
+                    ->count();
+                $monthlyCounts[] = (int)$count;
+            }
+        } else {
+            // Last 12 months rolling
+            $cursor = Carbon::now()->startOfMonth()->subMonths(11);
+            for ($i = 0; $i < 12; $i++) {
+                $label = $cursor->format('M');
+                $next = (clone $cursor)->endOfMonth();
+                $count = DB::table('faults')
+                    ->whereBetween('created_at', [$cursor, $next])
+                    ->count();
+                $monthlyLabels[] = $label;
+                $monthlyCounts[] = (int)$count;
+                $cursor->addMonth();
+            }
+        }
+
+        // Status distribution within selected period
+        $statusQuery = DB::table('faults')
+            ->leftJoin('statuses','faults.status_id','=','statuses.id')
+            ->select('statuses.description as name', DB::raw('COUNT(*) as c'))
+            ->groupBy('faults.status_id','statuses.description');
+        if ($fromDate && $toDate) {
+            $statusQuery->whereBetween('faults.created_at', [$fromDate, $toDate]);
+        }
+        $statusRows = $statusQuery->orderBy('c','desc')->limit(6)->get();
+        $statusLabels = $statusRows->pluck('name')->map(fn($n)=>$n ?? 'Unknown')->values()->toArray();
+        $statusValues = $statusRows->pluck('c')->map(fn($x)=>(int)$x)->values()->toArray();
+
+        // Top customers by fault count (for horizontal bars)
+        $topCustQuery = DB::table('faults')
+            ->leftJoin('customers','faults.customer_id','=','customers.id')
+            ->select('customers.customer as name', DB::raw('COUNT(*) as c'))
+            ->groupBy('faults.customer_id','customers.customer')
+            ->orderBy('c','desc')
+            ->limit(5);
+        if ($fromDate && $toDate) {
+            $topCustQuery->whereBetween('faults.created_at', [$fromDate, $toDate]);
+        }
+        $topCustomers = $topCustQuery->get();
+        $topCustomerLabels = $topCustomers->pluck('name')->map(fn($n)=>$n ?? 'Unknown')->values()->toArray();
+        $topCustomerCounts = $topCustomers->pluck('c')->map(fn($x)=>(int)$x)->values()->toArray();
 
         // Dashboard metrics (permission-gated in view)
         $nocClearedId = (int)(DB::table('statuses')->where('status_code','CLN')->value('id') ?? 6);
@@ -172,7 +225,9 @@ class HomeController extends Controller
             'faultCount','customerCount','linkCount','recentFaults',
             'openFaultsCount','avgOpenAgeSec','maxOpenAgeSec','avgResolutionSec','techResolutionAverages',
             'availableYears','availableMonths','selectedYear','selectedMonth',
-            'myAssignedCount','myResolvedCount','myAvgResolutionSec','myCompletionRate'
+            'myAssignedCount','myResolvedCount','myAvgResolutionSec','myCompletionRate',
+            'monthlyLabels','monthlyCounts','statusLabels','statusValues',
+            'topCustomerLabels','topCustomerCounts'
         ));
     }
 }

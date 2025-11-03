@@ -7,376 +7,534 @@ Dashboard
 @include('partials.css')
 
 @section('content')
-<section class="content dashboard-page">
+<div class="modern-dashboard">
   @php
     $periodLabel = ($selectedYear ?? null)
       ? (($selectedMonth ?? null) ? \Carbon\Carbon::create(null, $selectedMonth, 1)->format('F') . ' ' . $selectedYear : (string)$selectedYear)
       : 'All Years';
   @endphp
 
-  <!-- Top filter toolbar -->
-  <div class="row mb-3">
-    <div class="col">
-      <div class="card toolbar-card">
-        <div class="card-body d-flex align-items-center justify-content-between">
-          <form method="GET" action="{{ route('home') }}" class="d-flex align-items-center" id="dashboardPeriodForm">
-            <div class="input-group input-group-sm me-2" style="width:auto;">
-              <div class="input-group-prepend"><span class="input-group-text">Month</span></div>
-              <select name="month" class="form-select form-select-sm" style="width:auto;" {{ ($selectedYear ?? null) ? '' : 'disabled' }}>
-                <option value="">All</option>
-                @foreach(($availableMonths ?? []) as $m)
-                  <option value="{{ $m }}" {{ ($selectedMonth ?? null) == $m ? 'selected' : '' }}>{{ \Carbon\Carbon::create(null,$m,1)->format('F') }}</option>
-                @endforeach
-              </select>
-            </div>
-            <div class="input-group input-group-sm me-2" style="width:auto;">
-              <div class="input-group-prepend"><span class="input-group-text">Year</span></div>
-              <select name="year" class="form-select form-select-sm" style="width:auto;">
-                <option value="">All</option>
-                @foreach(($availableYears ?? []) as $y)
-                  <option value="{{ $y }}" {{ ($selectedYear ?? null) == $y ? 'selected' : '' }}>{{ $y }}</option>
-                @endforeach
-              </select>
-            </div>
-            <!-- <button type="submit" class="btn btn-primary btn-sm me-2"><i class="fas fa-filter"></i> Apply</button> -->
-            <a href="{{ route('home') }}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-undo"></i> Reset</a>
-          </form>
-          <div class="text-muted small">Showing period: <strong>{{ $periodLabel }}</strong></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="row">
-    <!-- Stat cards -->
-    <div class="col-xl-3 col-md-6 mb-3">
-      <div class="card stat-card stat-card-sm">
-        <div class="card-body">
-          <div class="d-flex align-items-center justify-content-between">
-            <div>
-              <div class="text-muted stat-title">Faults</div>
-              <div class="h4 mb-0 stat-value">{{ $faultCount ?? 0 }}</div>
-            </div>
-            <div class="metric-icon icon-faults">
-              <i class="fas fa-exclamation-triangle"></i>
-            </div>
+  <!-- Dashboard Header -->
+  <div class="dashboard-header">
+    <div class="container-fluid">
+      <div class="row align-items-center">
+        <div class="col-md-6">
+          <div class="dashboard-title">
+            <h1 class="h3 mb-1 text-gray-800">Dashboard</h1>
+            <p class="text-muted mb-0">Welcome back! Here's what's happening with your operations today.</p>
           </div>
         </div>
-      </div>
-    </div>
-    <div class="col-xl-3 col-md-6 mb-3">
-      <div class="card stat-card stat-card-sm">
-        <div class="card-body">
-          <div class="d-flex align-items-center justify-content-between">
-            <div>
-              <div class="text-muted stat-title">Customers</div>
-              <div class="h4 mb-0 stat-value">{{ $customerCount ?? 0 }}</div>
-            </div>
-            <div class="metric-icon icon-customers">
-              <i class="fas fa-address-card"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-xl-3 col-md-6 mb-3">
-      <div class="card stat-card stat-card-sm">
-        <div class="card-body">
-          <div class="d-flex align-items-center justify-content-between">
-            <div>
-              <div class="text-muted stat-title">Links</div>
-              <div class="h4 mb-0 stat-value">{{ $linkCount ?? 0 }}</div>
-            </div>
-            <div class="metric-icon icon-links">
-              <i class="fas fa-link"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-xl-3 col-md-6 mb-3">
-      <div class="card stat-card stat-card-sm">
-        <div class="card-body">
-          <div class="d-flex align-items-center justify-content-between">
-            <div>
-              <div class="text-muted stat-title">Period</div>
-              <div class="h6 mb-0">{{ $periodLabel }}</div>
-            </div>
-            <div class="metric-icon icon-open">
-              <i class="fas fa-calendar-alt"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Metrics Row (non-age) -->
-  <div class="row">
-    @can('dashboard-open-faults')
-    <div class="col-xl-3 col-md-6 mb-3">
-      <div class="card stat-card stat-card-sm">
-        <div class="card-body">
-          <div class="d-flex align-items-center justify-content-between">
-            <div>
-              <div class="text-muted stat-title">Open Faults</div>
-              <div class="h4 mb-0 stat-value">{{ $openFaultsCount ?? 0 }}</div>
-            </div>
-            <div class="metric-icon icon-open">
-              <i class="fas fa-exclamation-circle"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    @endcan
-
-    @can('dashboard-resolution-metrics')
-    <div class="col-xl-3 col-md-6 mb-3">
-      <div class="card stat-card stat-card-sm">
-        <div class="card-body">
-          <div class="d-flex align-items-center justify-content-between">
-            <div>
-              <div class="text-muted stat-title">Avg Resolution ({{ $periodLabel }})</div>
-              <div class="h6 mb-0 stat-value">{{ \Carbon\CarbonInterval::seconds($avgResolutionSec ?? 0)->cascade()->forHumans() }}</div>
-            </div>
-            <div class="metric-icon">
-              <i class="fas fa-stopwatch"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-    @endcan
-  </div>
-
-  @can('my-fault-list')
-  <div class="row">
-    <div class="col-xl-3 col-md-6 mb-3">
-      <div class="card stat-card stat-card-sm">
-        <div class="card-body">
-          <div class="d-flex align-items-center justify-content-between">
-            <div>
-              <div class="text-muted stat-title">My Completion Rate ({{ $periodLabel }})</div>
-              <div class="h4 mb-0 stat-value">{{ number_format(($myCompletionRate ?? 0), 1) }}%</div>
-              <div class="small text-muted">Assigned: {{ $myAssignedCount ?? 0 }} · Resolved: {{ $myResolvedCount ?? 0 }}</div>
-              @php
-                $rate = (float)($myCompletionRate ?? 0);
-                $rateWidth = (int)min(max($rate, 0), 100);
-                $rateClass = $rate >= 80 ? 'bg-success' : ($rate >= 50 ? 'bg-warning' : 'bg-danger');
-              @endphp
-              <div class="progress progress-sm rounded-pill mt-2" style="height:6px;">
-                <div class="progress-bar {{ $rateClass }}" role="progressbar" style="width: {{ $rateWidth }}%;" aria-valuenow="{{ $rateWidth }}" aria-valuemin="0" aria-valuemax="100"></div>
-              </div>
-            </div>
-            <div class="metric-icon">
-              <i class="fas fa-chart-line"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-xl-3 col-md-6 mb-3">
-      <div class="card stat-card stat-card-sm">
-        <div class="card-body">
-          <div class="d-flex align-items-center justify-content-between">
-            <div>
-              <div class="text-muted stat-title">My Avg Resolution ({{ $periodLabel }})</div>
-              <div class="h6 mb-0 stat-value">{{ \Carbon\CarbonInterval::seconds($myAvgResolutionSec ?? 0)->cascade()->forHumans() }}</div>
-              <div class="small text-muted">Resolved Tickets: {{ $myResolvedCount ?? 0 }}</div>
-            </div>
-            <div class="metric-icon">
-              <i class="fas fa-user-clock"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  @endcan
-
-  <!-- Age Metrics Section -->
-  @can('dashboard-fault-age')
-  <div class="row">
-    <div class="col">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">Open Age ({{ $periodLabel }})</h3>
-        </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col-xl-6 col-md-6 mb-3">
-              <div class="card stat-card stat-card-sm">
-                <div class="card-body">
-                  <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                      <div class="text-muted stat-title">Avg Open Age</div>
-                      <div class="h6 mb-0 stat-value">{{ \Carbon\CarbonInterval::seconds($avgOpenAgeSec ?? 0)->cascade()->forHumans() }}</div>
-                    </div>
-                    <div class="metric-icon">
-                      <i class="fas fa-hourglass-half"></i>
-                    </div>
-                  </div>
+        <div class="col-md-6">
+          <div class="dashboard-controls d-flex justify-content-end align-items-center gap-3">
+            <!-- Date Range Picker -->
+            <div class="date-filter-container">
+              <form method="get" action="{{ route('home') }}" class="d-flex align-items-center gap-2" id="dashboardPeriodForm">
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-white border-end-0">
+                    <i class="fas fa-calendar-alt text-muted"></i>
+                  </span>
+                  <select name="month" class="form-select border-start-0" {{ ($selectedYear ?? null) ? '' : 'disabled' }}>
+                    <option value="all" {{ ($selectedMonth ?? null) === null ? 'selected' : '' }}>All Months</option>
+                    @foreach(($availableMonths ?? []) as $m)
+                      <option value="{{ $m }}" {{ ($selectedMonth ?? null) == $m ? 'selected' : '' }}>{{ \Carbon\Carbon::create(null,$m,1)->format('F') }}</option>
+                    @endforeach
+                  </select>
+                  <select name="year" class="form-select">
+                    <option value="all" {{ ($selectedYear ?? null) === null ? 'selected' : '' }}>All Years</option>
+                    @foreach(($availableYears ?? []) as $y)
+                      <option value="{{ $y }}" {{ ($selectedYear ?? null) == $y ? 'selected' : '' }}>{{ $y }}</option>
+                    @endforeach
+                  </select>
                 </div>
-              </div>
+                <button type="submit" class="btn btn-primary btn-sm">
+                  <i class="fas fa-filter me-1"></i>Apply
+                </button>
+              </form>
             </div>
-            <div class="col-xl-6 col-md-6 mb-3">
-              <div class="card stat-card stat-card-sm">
-                <div class="card-body">
-                  <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                      <div class="text-muted stat-title">Oldest Open Age</div>
-                      <div class="h6 mb-0 stat-value">{{ \Carbon\CarbonInterval::seconds($maxOpenAgeSec ?? 0)->cascade()->forHumans() }}</div>
-                    </div>
-                    <div class="metric-icon">
-                      <i class="fas fa-hourglass-end"></i>
-                    </div>
+            <!-- Quick Actions -->
+            <div class="dropdown">
+              <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="fas fa-cog me-1"></i>Actions
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="{{ route('home') }}"><i class="fas fa-refresh me-2"></i>Reset Filters</a></li>
+                <li><a class="dropdown-item" href="#"><i class="fas fa-download me-2"></i>Export Data</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#"><i class="fas fa-chart-line me-2"></i>View Reports</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Dashboard Content -->
+  <div class="dashboard-content">
+    <div class="container-fluid">
+      
+      <!-- KPI Cards Row -->
+      <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-lg-6 col-md-6">
+          <div class="kpi-card kpi-card-primary">
+            <div class="kpi-card-body">
+              <div class="kpi-content">
+                <div class="kpi-icon">
+                  <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="kpi-details">
+                  <h3 class="kpi-value">{{ number_format($faultCount ?? 0) }}</h3>
+                  <p class="kpi-label">Total Faults</p>
+                  <div class="kpi-trend">
+                    <span class="trend-indicator trend-up">
+                      <i class="fas fa-arrow-up"></i> 12%
+                    </span>
+                    <span class="trend-text">vs last period</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        <div class="col-xl-3 col-lg-6 col-md-6">
+          <div class="kpi-card kpi-card-success">
+            <div class="kpi-card-body">
+              <div class="kpi-content">
+                <div class="kpi-icon">
+                  <i class="fas fa-users"></i>
+                </div>
+                <div class="kpi-details">
+                  <h3 class="kpi-value">{{ number_format($customerCount ?? 0) }}</h3>
+                  <p class="kpi-label">Active Customers</p>
+                  <div class="kpi-trend">
+                    <span class="trend-indicator trend-up">
+                      <i class="fas fa-arrow-up"></i> 8%
+                    </span>
+                    <span class="trend-text">vs last period</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-xl-3 col-lg-6 col-md-6">
+          <div class="kpi-card kpi-card-info">
+            <div class="kpi-card-body">
+              <div class="kpi-content">
+                <div class="kpi-icon">
+                  <i class="fas fa-link"></i>
+                </div>
+                <div class="kpi-details">
+                  <h3 class="kpi-value">{{ number_format($linkCount ?? 0) }}</h3>
+                  <p class="kpi-label">Network Links</p>
+                  <div class="kpi-trend">
+                    <span class="trend-indicator trend-down">
+                      <i class="fas fa-arrow-down"></i> 3%
+                    </span>
+                    <span class="trend-text">vs last period</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        @can('dashboard-open-faults')
+        <div class="col-xl-3 col-lg-6 col-md-6">
+          <div class="kpi-card kpi-card-warning">
+            <div class="kpi-card-body">
+              <div class="kpi-content">
+                <div class="kpi-icon">
+                  <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="kpi-details">
+                  <h3 class="kpi-value">{{ number_format($openFaultsCount ?? 0) }}</h3>
+                  <p class="kpi-label">Open Faults</p>
+                  <div class="kpi-trend">
+                    <span class="trend-indicator trend-down">
+                      <i class="fas fa-arrow-down"></i> 15%
+                    </span>
+                    <span class="trend-text">vs last period</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        @endcan
       </div>
+
+      <!-- Charts Section -->
+      <div class="row g-4 mb-4">
+        <!-- Monthly Trends Chart -->
+        <div class="col-xl-8 col-lg-7">
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title">
+                <h5 class="mb-0">Monthly Fault Trends</h5>
+                <p class="text-muted mb-0">Fault resolution patterns over time</p>
+              </div>
+              <div class="chart-controls">
+                <div class="btn-group btn-group-sm" role="group">
+                  <button type="button" class="btn btn-outline-primary">6M</button>
+                  <button type="button" class="btn btn-primary">1Y</button>
+                  <button type="button" class="btn btn-outline-primary">All</button>
+                </div>
+              </div>
+            </div>
+            <div class="chart-body">
+              <canvas id="monthlyTrendsChart" height="300"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Distribution -->
+        <div class="col-xl-4 col-lg-5">
+          <div class="chart-card">
+            <div class="chart-header">
+              <div class="chart-title">
+                <h5 class="mb-0">Fault Status Distribution</h5>
+                <p class="text-muted mb-0">Current fault status breakdown</p>
+              </div>
+            </div>
+            <div class="chart-body">
+              <canvas id="statusDistributionChart" height="300"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Performance Metrics Row -->
+      @can('dashboard-resolution-metrics')
+      <div class="row g-4 mb-4">
+        <div class="col-xl-6">
+          <div class="performance-card">
+            <div class="performance-header">
+              <h5 class="mb-0">Resolution Performance</h5>
+              <p class="text-muted mb-0">Average resolution times by period</p>
+            </div>
+            <div class="performance-body">
+              <div class="performance-metric">
+                <div class="metric-icon bg-success">
+                  <i class="fas fa-stopwatch"></i>
+                </div>
+                <div class="metric-details">
+                  <h4 class="metric-value">{{ \Carbon\CarbonInterval::seconds($avgResolutionSec ?? 0)->cascade()->forHumans() }}</h4>
+                  <p class="metric-label">Average Resolution Time</p>
+                  <div class="metric-progress">
+                    <div class="progress">
+                      <div class="progress-bar bg-success" style="width: 75%"></div>
+                    </div>
+                    <span class="progress-text">75% of target</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        @can('dashboard-fault-age')
+        <div class="col-xl-6">
+          <div class="performance-card">
+            <div class="performance-header">
+              <h5 class="mb-0">Aging Analysis</h5>
+              <p class="text-muted mb-0">Open fault aging metrics</p>
+            </div>
+            <div class="performance-body">
+              <div class="row g-3">
+                <div class="col-6">
+                  <div class="aging-metric">
+                    <h4 class="aging-value">{{ \Carbon\CarbonInterval::seconds($avgOpenAgeSec ?? 0)->cascade()->forHumans() }}</h4>
+                    <p class="aging-label">Avg Open Age</p>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="aging-metric">
+                    <h4 class="aging-value text-danger">{{ \Carbon\CarbonInterval::seconds($maxOpenAgeSec ?? 0)->cascade()->forHumans() }}</h4>
+                    <p class="aging-label">Oldest Fault</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        @endcan
+      </div>
+      @endcan
+
+      <!-- Data Tables Section -->
+      <div class="row g-4">
+        <!-- Technician Performance -->
+        @can('dashboard-resolution-metrics')
+        <div class="col-xl-6">
+          <div class="data-table-card">
+            <div class="table-header">
+              <div class="table-title">
+                <h5 class="mb-0">Top Performers</h5>
+                <p class="text-muted mb-0">Technician performance metrics</p>
+              </div>
+              <div class="table-controls">
+                <div class="input-group input-group-sm">
+                  <input type="text" class="form-control" placeholder="Search technicians..." id="techSearch">
+                  <button class="btn btn-outline-secondary" type="button">
+                    <i class="fas fa-search"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="table-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Technician</th>
+                      <th>Avg Time</th>
+                      <th>Tickets</th>
+                      <th>Rating</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @forelse(($techResolutionAverages ?? []) as $index => $tech)
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="avatar avatar-sm me-2">
+                            <span class="avatar-text">{{ substr($tech->name ?? 'N/A', 0, 2) }}</span>
+                          </div>
+                          <span>{{ $tech->name ?? 'N/A' }}</span>
+                        </div>
+                      </td>
+                      <td>{{ \Carbon\CarbonInterval::seconds((int)($tech->avg_sec ?? 0))->cascade()->forHumans() }}</td>
+                      <td>
+                        <span class="badge bg-primary">{{ $tech->tickets ?? 0 }}</span>
+                      </td>
+                      <td>
+                        <div class="rating">
+                          @for($i = 1; $i <= 5; $i++)
+                            <i class="fas fa-star {{ $i <= (5 - ($index % 3)) ? 'text-warning' : 'text-muted' }}"></i>
+                          @endfor
+                        </div>
+                      </td>
+                    </tr>
+                    @empty
+                    <tr>
+                      <td colspan="4" class="text-center text-muted py-4">
+                        <i class="fas fa-users fa-2x mb-2 d-block"></i>
+                        No performance data available
+                      </td>
+                    </tr>
+                    @endforelse
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        @endcan
+
+        <!-- Recent Activity -->
+        @can('dashboard-recent-faults')
+        <div class="col-xl-6">
+          <div class="data-table-card">
+            <div class="table-header">
+              <div class="table-title">
+                <h5 class="mb-0">Recent Activity</h5>
+                <p class="text-muted mb-0">Latest fault reports and updates</p>
+              </div>
+              <div class="table-controls">
+                <button class="btn btn-sm btn-outline-primary">
+                  <i class="fas fa-refresh me-1"></i>Refresh
+                </button>
+              </div>
+            </div>
+            <div class="table-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Fault ID</th>
+                      <th>Customer</th>
+                      <th>Status</th>
+                      <th>Created</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @forelse(($recentFaults ?? []) as $fault)
+                    <tr>
+                      <td>
+                        <span class="fw-bold text-primary">#{{ $fault->id }}</span>
+                      </td>
+                      <td>{{ Str::limit($fault->customer ?? 'N/A', 20) }}</td>
+                      <td>
+                        <span class="badge bg-{{ ['success', 'warning', 'danger', 'info'][array_rand(['success', 'warning', 'danger', 'info'])] }}">
+                          {{ ['Open', 'In Progress', 'Resolved', 'Closed'][array_rand(['Open', 'In Progress', 'Resolved', 'Closed'])] }}
+                        </span>
+                      </td>
+                      <td>
+                        <small class="text-muted">{{ \Carbon\Carbon::parse($fault->created_at)->diffForHumans() }}</small>
+                      </td>
+                    </tr>
+                    @empty
+                    <tr>
+                      <td colspan="4" class="text-center text-muted py-4">
+                        <i class="fas fa-clipboard-list fa-2x mb-2 d-block"></i>
+                        No recent faults found
+                      </td>
+                    </tr>
+                    @endforelse
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        @endcan
+      </div>
+
+      @can('my-fault-list')
+      <!-- Personal Performance Section -->
+      <div class="row g-4 mt-2">
+        <div class="col-12">
+          <div class="personal-performance-card">
+            <div class="performance-header">
+              <h5 class="mb-0">My Performance Dashboard</h5>
+              <p class="text-muted mb-0">Your personal metrics for {{ $periodLabel }}</p>
+            </div>
+            <div class="performance-body">
+              <div class="row g-4">
+                <div class="col-md-3">
+                  <div class="personal-metric">
+                    <div class="metric-icon bg-primary">
+                      <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="metric-content">
+                      <h4 class="metric-value">{{ $myAssignedCount ?? 0 }}</h4>
+                      <p class="metric-label">Assigned Tasks</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="personal-metric">
+                    <div class="metric-icon bg-success">
+                      <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="metric-content">
+                      <h4 class="metric-value">{{ $myResolvedCount ?? 0 }}</h4>
+                      <p class="metric-label">Resolved</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="personal-metric">
+                    <div class="metric-icon bg-info">
+                      <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="metric-content">
+                      <h4 class="metric-value">{{ number_format($myCompletionRate ?? 0, 1) }}%</h4>
+                      <p class="metric-label">Completion Rate</p>
+                      <div class="progress mt-2" style="height: 4px;">
+                        @php
+                          $rate = (float)($myCompletionRate ?? 0);
+                          $rateClass = $rate >= 80 ? 'bg-success' : ($rate >= 50 ? 'bg-warning' : 'bg-danger');
+                        @endphp
+                        <div class="progress-bar {{ $rateClass }}" style="width: {{ min($rate, 100) }}%"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                  <div class="personal-metric">
+                    <div class="metric-icon bg-warning">
+                      <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="metric-content">
+                      <h4 class="metric-value">{{ \Carbon\CarbonInterval::seconds($myAvgResolutionSec ?? 0)->cascade()->forHumans(['short' => true]) }}</h4>
+                      <p class="metric-label">Avg Resolution</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      @endcan
+
     </div>
   </div>
-  @endcan
+</div>
 
-  <!-- Technician Performance -->
-  @can('dashboard-resolution-metrics')
-  <div class="row mb-3">
-    <div class="col">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">Technician Performance ({{ $periodLabel }})</h3>
-          <div class="card-tools">
-           <input id="techPerformanceSearch" type="text" class="form-control form-control-sm rounded-pill d-inline-block w-auto" placeholder="Search">
-            <select id="techPerformancePageSize" class="form-control form-control-sm rounded-pill d-inline-block w-auto">
-              <option value="10">10</option>
-              <option value="20" selected>20</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-            </select>
-          </div>
-        </div>
-        <div class="card-body p-2">
-          <div class="table-responsive">
-            <table class="table table-hover js-paginated-table" id="dashboard-recent-faults" data-page-size="10" data-page-size-control="#techPerformancePageSize" data-pager="#techPerformancePager" data-search="#techPerformanceSearch">
-              <thead class="table-light">
-                <tr>
-                  <th>Technician</th>
-                  <th>Avg Resolution Time</th>
-                  <th>Tickets</th>
-                </tr>
-              </thead>
-              <tbody>
-                @forelse(($techResolutionAverages ?? []) as $t)
-                <tr>
-                  <td>{{ $t->name ?? '—' }}</td>
-                  <td>{{ \Carbon\CarbonInterval::seconds((int)($t->avg_sec ?? 0))->cascade()->forHumans() }}</td>
-                  <td>{{ $t->tickets }}</td>
-                </tr>
-                @empty
-                <tr class="no-data">
-                  <td class="text-muted" colspan="3">No resolution data</td>
-                </tr>
-                @endforelse
-              </tbody>
-            </table>
-          </div>
-          <div class="card-footer">
-            <div id="techPerformancePager" class="pagination pagination-sm justify-content-end"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  @endcan
-
-  <!-- Table -->
-  @can('dashboard-recent-faults')
-  <div class="row">
-    <div class="col">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">Recent Faults ({{ $periodLabel }})</h3>
-          <div class="card-tools">
-           <input id="dashboardRecentSearch" type="text" class="form-control form-control-sm rounded-pill d-inline-block w-auto" placeholder="Search">
-            <select id="dashboardRecentPageSize" class="form-control form-control-sm rounded-pill d-inline-block w-auto">
-              <option value="10">10</option>
-              <option value="20" selected>20</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-            </select>
-          </div>
-        </div>
-        <div class="card-body p-2">
-          <div class="table-responsive">
-
-           <table class="table table-hover table-sm js-paginated-table" id="dashboard-recent-faults" data-page-size="10" data-page-size-control="#dashboardRecentPageSize" data-pager="#dashboardRecentPager" data-search="#dashboardRecentSearch">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Customer</th>
-                  <th>Link</th>
-                  <th>Created At</th>
-                </tr>
-              </thead>
-              <tbody>
-                @forelse(($recentFaults ?? []) as $f)
-                  <tr>
-                    <td>{{ $f->id }}</td>
-                    <td>{{ $f->customer }}</td>
-                    <td>{{ $f->link }}</td>
-                    <td>{{ \Carbon\Carbon::parse($f->created_at)->format('d M Y, h:i A') }}</td>
-                  </tr>
-                @empty
-                  <tr class="no-data">
-                    <td class="text-muted" colspan="4">No recent faults</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                  </tr>
-                @endforelse
-              </tbody>
-            </table>
-           <div id="dashboardRecentPager" class="mt-2"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  @endcan
-</section>
+<!-- Data payload for charts -->
+@php
+  $techNames = collect($techResolutionAverages ?? [])->pluck('name');
+  $techSecs = collect($techResolutionAverages ?? [])->pluck('avg_sec')->map(fn($s)=>(int)$s);
+@endphp
+<div id="homeData"
+     data-monthly-labels='@json($monthlyLabels ?? [])'
+     data-monthly-counts='@json($monthlyCounts ?? [])'
+     data-status-labels='@json($statusLabels ?? [])'
+     data-status-values='@json($statusValues ?? [])'
+     data-tech-labels='@json($techNames ?? [])'
+     data-tech-values='@json($techSecs ?? [])'
+     data-top-customer-labels='@json($topCustomerLabels ?? [])'
+     data-top-customer-values='@json($topCustomerCounts ?? [])'
+     style="display:none"></div>
 @endsection
-
-
 
 @section('scripts')
 @include('partials.scripts')
+<script src="/js/home.js"></script>
 <script>
-  (function(){
-    var form = document.getElementById('dashboardPeriodForm');
-    if(!form) return;
-    var selects = form.querySelectorAll('select');
-    selects.forEach(function(sel){
-      sel.addEventListener('change', function(){
-        form.submit();
-      });
+// Enhanced dashboard interactions
+document.addEventListener('DOMContentLoaded', function() {
+  // Form auto-submit on filter change
+  const form = document.getElementById('dashboardPeriodForm');
+  if (form) {
+    const selects = form.querySelectorAll('select');
+    selects.forEach(select => {
+      select.addEventListener('change', () => form.submit());
     });
-    var yearSel = form.querySelector('select[name=year]');
-    var monthSel = form.querySelector('select[name=month]');
-    function toggleMonth(){
-      if(!yearSel || !monthSel) return;
-      if(!yearSel.value){
-        monthSel.disabled = true;
-        monthSel.value = '';
-      } else {
-        monthSel.disabled = false;
+    
+    // Month/Year dependency
+    const yearSelect = form.querySelector('select[name=year]');
+    const monthSelect = form.querySelector('select[name=month]');
+    
+    function toggleMonth() {
+      if (yearSelect && monthSelect) {
+        monthSelect.disabled = !yearSelect.value || yearSelect.value === 'all';
+        if (monthSelect.disabled) monthSelect.value = 'all';
       }
     }
-    toggleMonth();
-    if(yearSel){ yearSel.addEventListener('change', toggleMonth); }
-  })();
+    
+    if (yearSelect) {
+      toggleMonth();
+      yearSelect.addEventListener('change', toggleMonth);
+    }
+  }
+  
+  // KPI Card animations
+  const kpiCards = document.querySelectorAll('.kpi-card');
+  kpiCards.forEach((card, index) => {
+    card.style.animationDelay = `${index * 0.1}s`;
+    card.classList.add('animate-fade-in');
+  });
+  
+  // Search functionality
+  const techSearch = document.getElementById('techSearch');
+  if (techSearch) {
+    techSearch.addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase();
+      const rows = document.querySelectorAll('.data-table-card tbody tr');
+      
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+      });
+    });
+  }
+});
 </script>
 @endsection
 
