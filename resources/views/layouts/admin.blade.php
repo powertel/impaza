@@ -46,9 +46,47 @@
         .fa, .fas, .far, .fab { font-size: 0.9rem; }
 
         /* Cards and content elements */
-        .card { border: 1px solid #eee; border-radius: 10px; box-shadow: 0 1px 2px rgba(16,24,40,.04); }
-        .card-body { padding: 14px; }
+        .card { border: 1px solid #eef2f7; border-radius: 12px; box-shadow: 0 1px 2px rgba(16,24,40,.04); background:#fff; }
+        .card-body { padding: 16px; }
         .card-title { font-size: 14px; font-weight: 700; color: #111827; }
+        .card-header { border-bottom: 1px solid #eef2f7; font-weight: 700; color:#111827; background: linear-gradient(180deg,#f9fafb 0%,#ffffff 100%); }
+        .card-hover:hover { box-shadow: 0 8px 20px rgba(16,24,40,.08); transform: translateY(-2px); transition: all .2s ease; }
+
+        /* Modern KPI stat card */
+        .stat-card { display:flex; align-items:center; justify-content:space-between; }
+        .stat-title { color:#6b7280; font-weight:600; letter-spacing:.02em; }
+        :root { --kpi-value-size: 1.05rem; --kpi-height: 100px; --chart-height: 220px; }
+        .stat-value { color:#0f172a; font-weight:700; font-size: var(--kpi-value-size); }
+        .stat-sub { color:#9ca3af; font-size: .85rem; }
+        .stat-right { display:flex; flex-direction:column; align-items:flex-end; gap:.35rem; }
+        .stat-icon { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,#4f46e5 0%, #06b6d4 100%); box-shadow: 0 4px 12px rgba(79,70,229,.25); }
+        .stat-delta { font-size:.8rem; font-weight:600; padding:2px 8px; border-radius:999px; }
+        .stat-delta.up { color:#166534; background:#dcfce7; }
+        .stat-delta.down { color:#7f1d1d; background:#fee2e2; }
+        .stat-delta.neutral { color:#374151; background:#f3f4f6; }
+
+        /* New card styles for modern UI */
+        .card.card-primary { background-color: #2563eb; color: #fff; }
+        .card.card-primary .stat-title, .card.card-primary .stat-value, .card.card-primary .stat-sub { color: #fff; }
+        .card.card-primary .stat-icon { background: rgba(255,255,255,0.2); box-shadow: none; }
+
+        .card.card-success { background-color: #10b981; color: #fff; }
+        .card.card-success .stat-title, .card.card-success .stat-value, .card.card-success .stat-sub { color: #fff; }
+        .card.card-success .stat-icon { background: rgba(255,255,255,0.2); box-shadow: none; }
+
+        .card.card-danger { background-color: #ef4444; color: #fff; }
+        .card.card-danger .stat-title, .card.card-danger .stat-value, .card.card-danger .stat-sub { color: #fff; }
+        .card.card-danger .stat-icon { background: rgba(255,255,255,0.2); box-shadow: none; }
+
+        .card.card-info { background-color: #3b82f6; color: #fff; }
+        .card.card-info .stat-title, .card.card-info .stat-value, .card.card-info .stat-sub { color: #fff; }
+        .card.card-info .stat-icon { background: rgba(255,255,255,0.2); box-shadow: none; }
+
+        /* Prominent card style for Total Shipments */
+        .card.card-total-shipments { background-color: #1e3a8a; color: #fff; }
+        .card.card-total-shipments .stat-title, .card.card-total-shipments .stat-value, .card.card-total-shipments .stat-sub { color: #fff; }
+        .card.card-total-shipments .stat-icon { background: rgba(255,255,255,0.2); box-shadow: none; }
+        .card.card-total-shipments .stat-value { font-size: 1.8rem; }
 
         /* Heading scale override for compact UI */
         .h1, h1 { font-size: 1.6rem; }
@@ -70,6 +108,14 @@
         /* Modal scrollability and whitespace control */
         #departmentCreateModal .modal-body { max-height: 70vh; overflow-y: auto; padding-bottom: 0.75rem; }
         #departmentCreateModal .repeater-items { max-height: 60vh; overflow-y: auto; }
+
+        /* Uniform KPI and chart card sizing */
+        .kpi-card .card-body { min-height: var(--kpi-height); }
+        .card .card-header { font-size: 12px; }
+        .card .card-body > canvas { height: var(--chart-height) !important; }
+        /* Dashboard toolbar */
+        .dashboard-toolbar { display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
+        .dashboard-toolbar .form-select, .dashboard-toolbar .btn { height: 32px; }
     </style>
 
     @include('layouts.partials.header_styles')
@@ -139,6 +185,8 @@
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/modals-bridge.js') }}"></script>
     <script src="{{ asset('js/faults-modals.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ asset('js/reports.js') }}"></script>
 
 
         @yield('scripts')
