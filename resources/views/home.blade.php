@@ -275,14 +275,14 @@ Dashboard
                 <h5 class="mb-0">Top Performers</h5>
                 <p class="text-muted mb-0">Technician performance metrics</p>
               </div>
-              <div class="table-controls">
+              <!-- <div class="table-controls">
                 <div class="input-group input-group-sm">
                   <input type="text" class="form-control" placeholder="Search technicians..." id="techSearch">
                   <button class="btn btn-outline-secondary" type="button">
                     <i class="fas fa-search"></i>
                   </button>
                 </div>
-              </div>
+              </div> -->
             </div>
             <div class="table-body">
               <div class="table-responsive">
@@ -400,7 +400,7 @@ Dashboard
           <div class="personal-performance-card">
             <div class="performance-header">
               <h5 class="mb-0">My Performance Dashboard</h5>
-              <p class="text-muted mb-0">Your personal metrics for {{ $periodLabel }}</p>
+              <p class="mb-0">Your personal metrics for {{ $periodLabel }}</p>
             </div>
             <div class="performance-body">
               <div class="row g-4">

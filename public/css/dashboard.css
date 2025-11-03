@@ -1,8 +1,23 @@
 /* Modern Dashboard Styles */
 .modern-dashboard {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 25%, #2b77cb 50%, #2c5aa0 75%, #2a4a7c 100%);
   min-height: 100vh;
   padding: 0;
+  position: relative;
+}
+
+.modern-dashboard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(66, 153, 225, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(49, 130, 206, 0.2) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 /* Dashboard Header */
@@ -36,9 +51,17 @@
 }
 
 .dashboard-controls .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
   border: none;
   font-weight: 500;
+  box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3);
+  transition: all 0.3s ease;
+}
+
+.dashboard-controls .btn-primary:hover {
+  background: linear-gradient(135deg, #3182ce 0%, #2c5aa0 100%);
+  box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
+  transform: translateY(-1px);
 }
 
 /* Dashboard Content */
@@ -85,19 +108,23 @@
 }
 
 .kpi-card-primary .kpi-icon {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3);
 }
 
 .kpi-card-success .kpi-icon {
   background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
 }
 
 .kpi-card-info .kpi-icon {
-  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  background: linear-gradient(135deg, #63b3ed 0%, #4299e1 100%);
+  box-shadow: 0 4px 15px rgba(99, 179, 237, 0.3);
 }
 
 .kpi-card-warning .kpi-icon {
-  background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+  background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+  box-shadow: 0 4px 15px rgba(246, 173, 85, 0.3);
 }
 
 .kpi-details {
