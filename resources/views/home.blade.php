@@ -18,13 +18,13 @@ Dashboard
   <div class="dashboard-header">
     <div class="container-fluid">
       <div class="row align-items-center">
-        <div class="col-md-6">
+        <div class="col-md-4">
           <div class="dashboard-title">
             <h1 class="h3 mb-1 text-gray-800">Dashboard</h1>
             <p class="text-muted mb-0">Welcome back! Here's what's happening with your operations today.</p>
           </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-8">
           <div class="dashboard-controls d-flex justify-content-end align-items-center gap-3">
             <!-- Date Range Picker -->
             <div class="date-filter-container">
@@ -177,11 +177,11 @@ Dashboard
                 <p class="text-muted mb-0">Fault resolution patterns over time</p>
               </div>
               <div class="chart-controls">
-                <div class="btn-group btn-group-sm" role="group">
+                <!-- <div class="btn-group btn-group-sm" role="group">
                   <button type="button" class="btn btn-outline-primary">6M</button>
                   <button type="button" class="btn btn-primary">1Y</button>
                   <button type="button" class="btn btn-outline-primary">All</button>
-                </div>
+                </div> -->
               </div>
             </div>
             <div class="chart-body">
@@ -292,7 +292,7 @@ Dashboard
                       <th>Technician</th>
                       <th>Avg Time</th>
                       <th>Tickets</th>
-                      <th>Rating</th>
+                      <!-- <th>Rating</th> -->
                     </tr>
                   </thead>
                   <tbody>
@@ -310,13 +310,13 @@ Dashboard
                       <td>
                         <span class="badge bg-primary">{{ $tech->tickets ?? 0 }}</span>
                       </td>
-                      <td>
+                      <!-- <td>
                         <div class="rating">
                           @for($i = 1; $i <= 5; $i++)
                             <i class="fas fa-star {{ $i <= (5 - ($index % 3)) ? 'text-warning' : 'text-muted' }}"></i>
                           @endfor
-                        </div>
-                      </td>
+                        </div> 
+                      </td> -->
                     </tr>
                     @empty
                     <tr>
