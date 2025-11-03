@@ -78,6 +78,12 @@
     // Ensure charts follow container height for uniform sizing
     Chart.defaults.maintainAspectRatio = false;
     Chart.defaults.responsive = true;
+    Chart.defaults.font.family = 'Nunito, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif';
+    Chart.defaults.font.size = 11;
+    Chart.defaults.borderColor = '#eef2f7';
+    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(17,24,39,0.9)';
+    Chart.defaults.plugins.tooltip.titleColor = '#fff';
+    Chart.defaults.plugins.tooltip.bodyColor = '#e5e7eb';
 
     // Monthly faults
     if (has('chartMonthlyFaults')) new Chart(el('chartMonthlyFaults'), {

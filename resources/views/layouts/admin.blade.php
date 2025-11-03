@@ -49,13 +49,13 @@
         .card { border: 1px solid #eef2f7; border-radius: 12px; box-shadow: 0 1px 2px rgba(16,24,40,.04); background:#fff; }
         .card-body { padding: 16px; }
         .card-title { font-size: 14px; font-weight: 700; color: #111827; }
-        .card-header { border-bottom: 1px solid #eef2f7; font-weight: 700; color:#111827; }
+        .card-header { border-bottom: 1px solid #eef2f7; font-weight: 700; color:#111827; background: linear-gradient(180deg,#f9fafb 0%,#ffffff 100%); }
         .card-hover:hover { box-shadow: 0 8px 20px rgba(16,24,40,.08); transform: translateY(-2px); transition: all .2s ease; }
 
         /* Modern KPI stat card */
         .stat-card { display:flex; align-items:center; justify-content:space-between; }
         .stat-title { color:#6b7280; font-weight:600; letter-spacing:.02em; }
-        :root { --kpi-value-size: 1.1rem; --kpi-height: 110px; --chart-height: 240px; }
+        :root { --kpi-value-size: 1.05rem; --kpi-height: 100px; --chart-height: 220px; }
         .stat-value { color:#0f172a; font-weight:700; font-size: var(--kpi-value-size); }
         .stat-sub { color:#9ca3af; font-size: .85rem; }
         .stat-right { display:flex; flex-direction:column; align-items:flex-end; gap:.35rem; }
@@ -90,6 +90,9 @@
         .kpi-card .card-body { min-height: var(--kpi-height); }
         .card .card-header { font-size: 12px; }
         .card .card-body > canvas { height: var(--chart-height) !important; }
+        /* Dashboard toolbar */
+        .dashboard-toolbar { display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
+        .dashboard-toolbar .form-select, .dashboard-toolbar .btn { height: 32px; }
     </style>
 
     @include('layouts.partials.header_styles')

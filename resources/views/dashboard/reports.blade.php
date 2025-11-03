@@ -19,8 +19,8 @@
     </div>
 
     <!-- KPI cards -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
+    <div class="row row-cols-1 row-cols-md-4 g-3 mb-4">
+        <div class="col">
             <div class="card shadow-sm card-hover kpi-card h-100">
                 <div class="card-body">
                     @php
@@ -42,7 +42,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col">
             <div class="card shadow-sm card-hover kpi-card h-100">
                 <div class="card-body">
                     @php
@@ -64,7 +64,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col">
             <div class="card shadow-sm card-hover kpi-card h-100">
                 <div class="card-body">
                     @php
@@ -87,7 +87,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col">
             <div class="card shadow-sm card-hover kpi-card h-100">
                 <div class="card-body">
                     <div class="stat-card">
@@ -107,8 +107,8 @@
     </div>
 
     <!-- Additional KPIs -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
+    <div class="row row-cols-1 row-cols-md-4 g-3 mb-4">
+        <div class="col">
             <div class="card shadow-sm card-hover kpi-card h-100">
                 <div class="card-body">
                     @php
@@ -131,7 +131,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col">
             <div class="card shadow-sm card-hover kpi-card h-100">
                 <div class="card-body">
                     <div class="stat-card">
