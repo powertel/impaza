@@ -237,7 +237,7 @@
             @endcanany
             @can('reports')
             <li class="nav-item">
-              <a class="nav-link">
+              <a href="{{ route('dashboard.reports') }}" class="nav-link {{ request()->routeIs('dashboard.reports') ? 'active' : '' }}">
                 <i class="nav-icon fas fa-chart-bar"></i>
                 <p>Reports</p>
               </a>

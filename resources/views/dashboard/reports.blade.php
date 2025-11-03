@@ -1,523 +1,515 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="container py-4">
-    <div class="d-flex align-items-center justify-content-between mb-3">
-        <div>
-            <h2 class="mb-0">Operations Overview</h2>
-            <small class="text-muted">Current fault summary and activity</small>
+<link href="{{ asset('css/reports.css') }}" rel="stylesheet">
+
+<div class="modern-dashboard">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="dashboard-title-section">
+            <h1 class="dashboard-title">Operations Analytics</h1>
+            <p class="dashboard-subtitle">Comprehensive fault management and performance insights</p>
         </div>
-        <div class="d-flex gap-2">
-            <form method="get" action="{{ route('dashboard.reports') }}" class="d-inline-flex align-items-center">
-                <select name="period" class="form-select form-select-sm me-2" style="width:auto">
-                    <option value="this_month" {{ ($period ?? 'this_month')==='this_month'?'selected':'' }}>This Month</option>
-                </select>
-                <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+        
+        <div class="dashboard-controls">
+            <form method="get" action="{{ route('dashboard.reports') }}" class="filter-form" id="reportsFilterForm">
+                <div class="filter-group">
+                    <label for="month">Period</label>
+                    <select name="month" id="month" class="filter-select">
+                        <option value="all" {{ ($selectedMonth ?? null) === null ? 'selected' : '' }}>All Months</option>
+                        @for($m = 1; $m <= 12; $m++)
+                            <option value="{{ $m }}" {{ ($selectedMonth ?? null) == $m ? 'selected' : '' }}>{{ \Carbon\Carbon::create(null, $m)->format('F') }}</option>
+                        @endfor
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="year">Year</label>
+                    <select name="year" id="year" class="filter-select">
+                        <option value="all" {{ ($selectedYear ?? null) === null ? 'selected' : '' }}>All Years</option>
+                        @foreach(($availableYears ?? []) as $y)
+                            <option value="{{ $y }}" {{ ($selectedYear ?? null) == $y ? 'selected' : '' }}>{{ $y }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-filter"></i> Apply Filters
+                </button>
             </form>
-            <button class="btn btn-sm btn-outline-primary" onclick="window.print()">Export</button>
+            
+            <div class="action-dropdown">
+                <button class="btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{ route('dashboard.reports') }}"><i class="fas fa-refresh"></i> Reset Filters</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="window.print()"><i class="fas fa-print"></i> Export Report</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-download"></i> Download PDF</a></li>
+                </ul>
+            </div>
         </div>
     </div>
 
-    <!-- KPI cards -->
-    <div class="row row-cols-1 row-cols-md-4 g-3 mb-4">
-        <div class="col">
-            <div class="card shadow-sm card-hover kpi-card h-100 card-total-shipments">
-                <div class="card-body">
+    <!-- Primary KPI Cards -->
+    <div class="kpi-grid">
+        <div class="kpi-card kpi-primary">
+            <div class="kpi-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-value">{{ number_format($faultsThisMonth) }}</div>
+                <div class="kpi-label">Total Faults</div>
+                <div class="kpi-trend">
                     @php
                         $faultsDeltaRaw = ($faultsLastMonth > 0) ? (($faultsThisMonth - $faultsLastMonth) / $faultsLastMonth) * 100 : 0;
                         $faultsDelta = round($faultsDeltaRaw, 1);
                         $faultsDirection = $faultsDelta >= 0 ? 'up' : 'down';
                     @endphp
-                    <div class="stat-card">
-                        <div>
-                            <div class="stat-title">Total Faults</div>
-                            <div class="stat-value">{{ number_format($faultsThisMonth) }}</div>
-                            <div class="stat-sub">Last month: {{ number_format($faultsLastMonth) }}</div>
-                        </div>
-                        <div class="stat-right">
-                            <div class="stat-icon"><i class="fas fa-bug"></i></div>
-                            <div class="stat-delta {{ $faultsDirection }}">{{ $faultsDelta >= 0 ? '+' : '' }}{{ $faultsDelta }}%</div>
-                        </div>
-                    </div>
+                    <span class="trend-{{ $faultsDirection }}">
+                        <i class="fas fa-arrow-{{ $faultsDirection }}"></i>
+                        {{ abs($faultsDelta) }}%
+                    </span>
+                    <span class="trend-period">vs last month</span>
                 </div>
             </div>
         </div>
-        <div class="col">
-            <div class="card shadow-sm card-hover kpi-card h-100 card-info">
-                <div class="card-body">
+
+        <div class="kpi-card kpi-success">
+            <div class="kpi-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-value">{{ number_format($customersThisMonth) }}</div>
+                <div class="kpi-label">Active Customers</div>
+                <div class="kpi-trend">
                     @php
                         $customersDeltaRaw = ($customersLastMonth > 0) ? (($customersThisMonth - $customersLastMonth) / $customersLastMonth) * 100 : 0;
                         $customersDelta = round($customersDeltaRaw, 1);
                         $customersDirection = $customersDelta >= 0 ? 'up' : 'down';
                     @endphp
-                    <div class="stat-card">
-                        <div>
-                            <div class="stat-title">New Customers</div>
-                            <div class="stat-value">{{ number_format($customersThisMonth) }}</div>
-                            <div class="stat-sub">Last month: {{ number_format($customersLastMonth) }}</div>
-                        </div>
-                        <div class="stat-right">
-                            <div class="stat-icon"><i class="fas fa-user-plus"></i></div>
-                            <div class="stat-delta {{ $customersDirection }}">{{ $customersDelta >= 0 ? '+' : '' }}{{ $customersDelta }}%</div>
-                        </div>
-                    </div>
+                    <span class="trend-{{ $customersDirection }}">
+                        <i class="fas fa-arrow-{{ $customersDirection }}"></i>
+                        {{ abs($customersDelta) }}%
+                    </span>
+                    <span class="trend-period">vs last month</span>
                 </div>
             </div>
         </div>
-        <div class="col">
-            <div class="card shadow-sm card-hover kpi-card h-100 card-success">
-                <div class="card-body">
+
+        <div class="kpi-card kpi-warning">
+            <div class="kpi-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-value">{{ gmdate('H\h i\m', $mttrThisMonth) }}</div>
+                <div class="kpi-label">Avg MTTR</div>
+                <div class="kpi-trend">
                     @php
                         $mttrDeltaRaw = ($mttrLastMonth > 0) ? (($mttrThisMonth - $mttrLastMonth) / $mttrLastMonth) * 100 : 0;
                         $mttrDelta = round($mttrDeltaRaw, 1);
-                        // For MTTR, a negative delta is improvement (green)
                         $mttrDirection = $mttrDeltaRaw <= 0 ? 'up' : 'down';
                     @endphp
-                    <div class="stat-card">
-                        <div>
-                            <div class="stat-title">Avg MTTR</div>
-                            <div class="stat-value">{{ gmdate('H\h i\m', $mttrThisMonth) }}</div>
-                            <div class="stat-sub">Last month: {{ gmdate('H\h i\m', $mttrLastMonth) }}</div>
-                        </div>
-                        <div class="stat-right">
-                            <div class="stat-icon"><i class="fas fa-clock"></i></div>
-                            <div class="stat-delta {{ $mttrDirection }}">{{ $mttrDelta >= 0 ? '+' : '' }}{{ $mttrDelta }}%</div>
-                        </div>
-                    </div>
+                    <span class="trend-{{ $mttrDirection }}">
+                        <i class="fas fa-arrow-{{ $mttrDirection == 'up' ? 'down' : 'up' }}"></i>
+                        {{ abs($mttrDelta) }}%
+                    </span>
+                    <span class="trend-period">vs last month</span>
                 </div>
             </div>
         </div>
-        <div class="col">
-            <div class="card shadow-sm card-hover kpi-card h-100 card-danger">
-                <div class="card-body">
-                    <div class="stat-card">
-                        <div>
-                            <div class="stat-title">SLA Compliance</div>
-                            <div class="stat-value">{{ $slaCompliance }}%</div>
-                            <div class="stat-sub">Target: &lt; 24h</div>
-                        </div>
-                        <div class="stat-right">
-                            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-                            <div class="stat-delta neutral">—</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Additional KPIs -->
-    <div class="row row-cols-1 row-cols-md-4 g-3 mb-4">
-        <div class="col">
-            <div class="card shadow-sm card-hover kpi-card h-100 card-info">
-                <div class="card-body">
+        <div class="kpi-card kpi-info">
+            <div class="kpi-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-value">{{ $slaCompliance }}%</div>
+                <div class="kpi-label">SLA Compliance</div>
+                <div class="kpi-trend">
+                    <span class="trend-neutral">
+                        <i class="fas fa-target"></i>
+                        Target: &lt; 24h
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="kpi-card kpi-secondary">
+            <div class="kpi-icon">
+                <i class="fas fa-stopwatch"></i>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-value">{{ gmdate('H\h i\m', $mttaThisMonth) }}</div>
+                <div class="kpi-label">Avg MTTA</div>
+                <div class="kpi-trend">
                     @php
                         $mttaDeltaRaw = ($mttaLastMonth > 0) ? (($mttaThisMonth - $mttaLastMonth) / $mttaLastMonth) * 100 : 0;
                         $mttaDelta = round($mttaDeltaRaw, 1);
-                        // MTTA improvement is negative delta
                         $mttaDirection = $mttaDeltaRaw <= 0 ? 'up' : 'down';
                     @endphp
-                    <div class="stat-card">
-                        <div>
-                            <div class="stat-title">Avg MTTA</div>
-                            <div class="stat-value">{{ gmdate('H\h i\m', $mttaThisMonth) }}</div>
-                            <div class="stat-sub">Last month: {{ gmdate('H\h i\m', $mttaLastMonth) }}</div>
-                        </div>
-                        <div class="stat-right">
-                            <div class="stat-icon"><i class="fas fa-stopwatch"></i></div>
-                            <div class="stat-delta {{ $mttaDirection }}">{{ $mttaDelta >= 0 ? '+' : '' }}{{ $mttaDelta }}%</div>
-                        </div>
+                    <span class="trend-{{ $mttaDirection }}">
+                        <i class="fas fa-arrow-{{ $mttaDirection == 'up' ? 'down' : 'up' }}"></i>
+                        {{ abs($mttaDelta) }}%
+                    </span>
+                    <span class="trend-period">vs last month</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="kpi-card kpi-danger">
+            <div class="kpi-icon">
+                <i class="fas fa-redo"></i>
+            </div>
+            <div class="kpi-content">
+                <div class="kpi-value">{{ $reopenRate }}%</div>
+                <div class="kpi-label">Reopen Rate</div>
+                <div class="kpi-trend">
+                    <span class="trend-neutral">
+                        <i class="fas fa-info-circle"></i>
+                        This month
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Primary Charts Section -->
+    <div class="charts-grid">
+        <div class="chart-card chart-large">
+            <div class="chart-header">
+                <h3>Performance Overview</h3>
+                <div class="chart-actions">
+                    <button class="chart-action" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+                    <button class="chart-action" title="Fullscreen"><i class="fas fa-expand"></i></button>
+                </div>
+            </div>
+            <div class="chart-body">
+                <canvas id="chartMonthlyFaults"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>SLA Overview</h3>
+            </div>
+            <div class="chart-body">
+                <canvas id="chartSLA"></canvas>
+                <div class="chart-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Stages</span>
+                        <span class="stat-value">{{ number_format($faultsThisMonth) }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Avg MTTR</span>
+                        <span class="stat-value">{{ gmdate('H\h i\m', $mttrThisMonth) }}</span>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col">
-            <div class="card shadow-sm card-hover kpi-card h-100 card-danger">
-                <div class="card-body">
-                    <div class="stat-card">
-                        <div>
-                            <div class="stat-title">Reopen Rate</div>
-                            <div class="stat-value">{{ $reopenRate }}%</div>
-                            <div class="stat-sub">Reopened vs created (this month)</div>
-                        </div>
-                        <div class="stat-right">
-                            <div class="stat-icon"><i class="fas fa-redo"></i></div>
-                            <div class="stat-delta neutral">—</div>
-                        </div>
+    </div>
+
+    <!-- Secondary Charts Grid -->
+    <div class="charts-grid-secondary">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>Fault Status Distribution</h3>
+            </div>
+            <div class="chart-body">
+                <canvas id="chartStatus"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>RFO Analysis</h3>
+            </div>
+            <div class="chart-body">
+                <canvas id="chartRFO"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>Suspected RFO</h3>
+            </div>
+            <div class="chart-body">
+                <canvas id="chartSuspectedRFO"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>RFO Trends</h3>
+            </div>
+            <div class="chart-body">
+                <canvas id="chartRFOMonthly"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Analytics Section -->
+    <div class="analytics-section">
+        <h2 class="section-title">Advanced Analytics</h2>
+        
+        <div class="charts-grid-advanced">
+            <div class="chart-card chart-wide">
+                <div class="chart-header">
+                    <h3>Priority × Fault Type Matrix</h3>
+                </div>
+                <div class="chart-body">
+                    <canvas id="chartPriorityHeat"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Customer Impact (Count)</h3>
+                </div>
+                <div class="chart-body">
+                    <canvas id="chartCustomerCount"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Customer Impact (Duration)</h3>
+                </div>
+                <div class="chart-body">
+                    <canvas id="chartCustomerDuration"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Service Impact by Type</h3>
+                </div>
+                <div class="chart-body">
+                    <canvas id="chartServiceType"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Geographic Distribution</h3>
+                </div>
+                <div class="chart-body">
+                    <canvas id="chartCityFaults"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Account Manager Performance</h3>
+                </div>
+                <div class="chart-body">
+                    <canvas id="chartAMFaults"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Metrics Section -->
+    <div class="performance-section">
+        <h2 class="section-title">Performance Metrics</h2>
+        
+        <div class="performance-grid">
+            <div class="performance-card">
+                <div class="performance-header">
+                    <h3>SLA by Priority</h3>
+                    <div class="performance-score">
+                        <span class="score-value">{{ $slaCompliance }}%</span>
+                        <span class="score-label">Compliance</span>
+                    </div>
+                </div>
+                <div class="performance-body">
+                    <canvas id="chartSLAPriority"></canvas>
+                </div>
+            </div>
+
+            <div class="performance-card">
+                <div class="performance-header">
+                    <h3>Stage Bottlenecks</h3>
+                    <div class="performance-indicator">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                </div>
+                <div class="performance-body">
+                    <canvas id="chartStageBottlenecks"></canvas>
+                </div>
+            </div>
+
+            <div class="performance-card">
+                <div class="performance-header">
+                    <h3>Workload Distribution</h3>
+                    <div class="performance-indicator">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                </div>
+                <div class="performance-body">
+                    <canvas id="chartSectionWorkload"></canvas>
+                </div>
+            </div>
+
+            <div class="performance-card">
+                <div class="performance-header">
+                    <h3>Technician Load</h3>
+                    <div class="performance-indicator">
+                        <i class="fas fa-user-cog"></i>
+                    </div>
+                </div>
+                <div class="performance-body">
+                    <canvas id="chartTechLoad"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Tables Section -->
+    <div class="tables-section">
+        <h2 class="section-title">Detailed Analysis</h2>
+        
+        <div class="tables-grid">
+            <div class="data-table-card">
+                <div class="table-header">
+                    <h3>Portfolio Summary</h3>
+                    <div class="table-actions">
+                        <!-- <button class="table-action" title="Export"><i class="fas fa-download"></i></button>
+                        <button class="table-action" title="Refresh"><i class="fas fa-sync-alt"></i></button> -->
+                    </div>
+                </div>
+                <div class="table-body">
+                    <div class="table-responsive">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Links</th>
+                                    <th>Open Faults</th>
+                                    <th>Recent RFOs</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($portfolioRows as $row)
+                                    <tr>
+                                        <td>
+                                            <div class="customer-info">
+                                                <div class="customer-avatar">{{ substr($row['customer'], 0, 2) }}</div>
+                                                <span>{{ $row['customer'] }}</span>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge badge-info">{{ $row['links'] }}</span></td>
+                                        <td><span class="badge badge-warning">{{ $row['open_faults'] }}</span></td>
+                                        <td><span class="badge badge-danger">{{ $row['recent_rfos'] }}</span></td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="4" class="no-data">No portfolio data available</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-table-card">
+                <div class="table-header">
+                    <h3>Churn Risk Analysis</h3>
+                    <div class="risk-indicator high">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        High Risk
+                    </div>
+                </div>
+                <div class="table-body">
+                    <div class="table-responsive">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Fault Increase</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($churnRows as $row)
+                                    <tr>
+                                        <td>
+                                            <div class="customer-info">
+                                                <div class="customer-avatar">{{ substr($row['customer'], 0, 2) }}</div>
+                                                <span>{{ $row['customer'] }}</span>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge badge-danger">{{ $row['delta'] }}</span></td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="2" class="no-data">No churn signals detected</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-lg-8">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Performance Overview</div>
-                <div class="card-body">
-                    <canvas id="chartMonthlyFaults" height="110"></canvas>
-                </div>
+        <!-- Recent Activity Table -->
+        <div class="data-table-card table-full-width">
+            <div class="table-header">
+                <h3>Recent Fault Activity</h3>
+                <!-- <div class="table-search">
+                    <input type="text" placeholder="Search faults..." class="search-input">
+                    <i class="fas fa-search"></i>
+                </div> -->
             </div>
-        </div>
-        <div class="col-lg-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">SLA Overview</div>
-                <div class="card-body">
-                    <canvas id="chartSLA" height="180"></canvas>
-                    <div class="d-flex justify-content-between mt-3">
-                        <div>
-                            <div class="text-muted">Number of Stages</div>
-                            <div class="h6 mb-0">{{ number_format($faultsThisMonth) }}</div>
-                        </div>
-                        <div>
-                            <div class="text-muted">Avg MTTR</div>
-                            <div class="h6 mb-0">{{ gmdate('H\h i\m', $mttrThisMonth) }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Faults by Status</div>
-                <div class="card-body">
-                    <canvas id="chartStatus" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">RFO Distribution</div>
-                <div class="card-body">
-                    <canvas id="chartRFO" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Suspected RFO Distribution</div>
-                <div class="card-body">
-                    <canvas id="chartSuspectedRFO" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">RFO Trend (Monthly)</div>
-                <div class="card-body">
-                    <canvas id="chartRFOMonthly" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <div class="col-lg-12">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Priority × Fault Type</div>
-                <div class="card-body">
-                    <canvas id="chartPriorityHeat" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Customer Impact (Count)</div>
-                <div class="card-body">
-                    <canvas id="chartCustomerCount" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Customer Impact (Duration)</div>
-                <div class="card-body">
-                    <canvas id="chartCustomerDuration" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Service Impact by Type</div>
-                <div class="card-body">
-                    <canvas id="chartServiceType" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Faults by City</div>
-                <div class="card-body">
-                    <canvas id="chartCityFaults" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Account Manager Faults</div>
-                <div class="card-body">
-                    <canvas id="chartAMFaults" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Account Manager MTTR</div>
-                <div class="card-body">
-                    <canvas id="chartAMMttr" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">SLA by Priority</div>
-                <div class="card-body">
-                    <canvas id="chartSLAPriority" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Stage Bottlenecks</div>
-                <div class="card-body">
-                    <canvas id="chartStageBottlenecks" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Workload by Section</div>
-                <div class="card-body">
-                    <canvas id="chartSectionWorkload" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Technician Load (Open vs Resolved)</div>
-                <div class="card-body">
-                    <canvas id="chartTechLoad" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Standby Effectiveness</div>
-                <div class="card-body">
-                    <canvas id="chartStandby" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Regional Performance</div>
-                <div class="card-body">
-                    <canvas id="chartRegionalPerf" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Portfolio & Churn tables -->
-    <div class="row g-3 mb-4">
-        <div class="col-lg-7">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Portfolio Summary</div>
+            <div class="table-body">
                 <div class="table-responsive">
-                    <table class="table table-sm table-hover mb-0">
-                        <thead class="table-light">
+                    <table class="modern-table">
+                        <thead>
                             <tr>
+                                <th>Fault Reference</th>
+                                <th>Date Created</th>
                                 <th>Customer</th>
-                                <th>Links</th>
-                                <th>Open Faults</th>
-                                <th>Recent RFOs</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                                <th>Priority</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($portfolioRows as $row)
+                            @forelse($recentFaults as $f)
                                 <tr>
-                                    <td>{{ $row['customer'] }}</td>
-                                    <td>{{ $row['links'] }}</td>
-                                    <td>{{ $row['open_faults'] }}</td>
-                                    <td>{{ $row['recent_rfos'] }}</td>
+                                    <td>
+                                        <span class="fault-ref">{{ $f->fault_ref_number }}</span>
+                                    </td>
+                                    <td>{{ $f->created_at?->format('M d, Y H:i') }}</td>
+                                    <td>
+                                        <div class="customer-info">
+                                            <div class="customer-avatar">{{ substr($f->customer, 0, 2) }}</div>
+                                            <span>{{ $f->customer }}</span>
+                                        </div>
+                                    </td>
+                                    <td>{{ $f->city?->city ?? '—' }}</td>
+                                    <td>
+                                        <span class="status-badge status-{{ strtolower($f->status) }}">
+                                            {{ $f->status }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="priority-badge priority-{{ strtolower($f->priorityLevel ?? 'normal') }}">
+                                            {{ $f->priorityLevel ?? 'Normal' }}
+                                        </span>
+                                    </td>
+
+
                                 </tr>
                             @empty
-                                <tr><td colspan="4" class="text-center text-muted">No portfolio data</td></tr>
+                                <tr><td colspan="6" class="no-data">No recent faults found</td></tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-5">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Churn Risk (MoM Increase)</div>
-                <div class="table-responsive">
-                    <table class="table table-sm table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Customer</th>
-                                <th>Faults Δ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($churnRows as $row)
-                                <tr>
-                                    <td>{{ $row['customer'] }}</td>
-                                    <td>{{ $row['delta'] }}</td>
-                                </tr>
-                            @empty
-                                <tr><td colspan="2" class="text-center text-muted">No churn signals</td></tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <div class="col-lg-4">
-            <div class="card shadow-sm ">
-                <div class="card-header bg-white">Link Status</div>
-                <div class="card-body">
-                    <canvas id="chartLinkStatus" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Link Service Type</div>
-                <div class="card-body">
-                    <canvas id="chartLinkServiceType" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Link Capacity</div>
-                <div class="card-body">
-                    <canvas id="chartLinkCapacity" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Activation Pipeline</div>
-                <div class="card-body">
-                    <canvas id="chartActivation" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Link Health (Repeated Faults)</div>
-                <div class="card-body">
-                    <canvas id="chartLinkHealth" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Links per City</div>
-                <div class="card-body">
-                    <canvas id="chartLinksPerCity" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Coverage Gap (Faults per Link)</div>
-                <div class="card-body">
-                    <canvas id="chartCoverageGap" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-3 mb-4">
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Technician Workload (Open)</div>
-                <div class="card-body">
-                    <canvas id="chartWorkload" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">Link Inventory by Type</div>
-                <div class="card-body">
-                    <canvas id="chartLinkInventory" height="160"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Recent faults table -->
-    <div class="card shadow-sm">
-        <div class="card-header bg-white">Recent Faults</div>
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Fault Ref</th>
-                        <th>Date</th>
-                        <th>Customer</th>
-                        <th>City</th>
-                        <th>Status</th>
-                        <th>Priority</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($recentFaults as $f)
-                        <tr>
-                            <td>{{ $f->fault_ref_number }}</td>
-                            <td>{{ $f->created_at?->format('Y-m-d H:i') }}</td>
-                            <td>{{ $f->customer }}</td>
-                            <td>{{ $f->city?->city ?? '—' }}</td>
-                            <td>{{ $f->status_id }}</td>
-                            <td>{{ $f->priorityLevel ?? '—' }}</td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="6" class="text-center text-muted">No recent faults</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
         </div>
     </div>
 </div>
 
+<!-- Hidden data payload for charts -->
 <div id="reportsData" style="display:none"
      data-monthly-labels='@json($monthlyLabels)'
      data-monthly-counts='@json($monthlyCounts)'
@@ -577,4 +569,41 @@
      data-mtta-this-month='@json($mttaThisMonth)'
      data-mtta-last-month='@json($mttaLastMonth)'
      data-reopen-rate='@json($reopenRate)'></div>
+
+<script>
+// Auto-submit form on filter change
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('reportsFilterForm');
+    const selects = filterForm.querySelectorAll('select');
+    
+    selects.forEach(select => {
+        select.addEventListener('change', function() {
+            filterForm.submit();
+        });
+    });
+
+    // Search functionality
+    const searchInput = document.querySelector('.search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const tableRows = document.querySelectorAll('.modern-table tbody tr');
+            
+            tableRows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    }
+
+    // KPI card animations
+    const kpiCards = document.querySelectorAll('.kpi-card');
+    kpiCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('animate-in');
+    });
+});
+</script>
+
+<script src="{{ asset('js/reports.js') }}"></script>
 @endsection
