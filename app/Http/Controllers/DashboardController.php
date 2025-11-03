@@ -383,6 +383,9 @@ class DashboardController extends Controller
 
         // Recent faults
         $recentFaults = Fault::with(['city','suburb'])
+            ->leftJoin('links', 'faults.link_id', '=', 'links.id')
+            ->leftJoin('customers', 'faults.customer_id', '=', 'customers.id')
+            ->select('faults.*', 'links.service_type', 'links.capacity', 'customers.customer')
             ->orderByDesc('created_at')
             ->limit(10)
             ->get();

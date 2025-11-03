@@ -46,9 +46,23 @@
         .fa, .fas, .far, .fab { font-size: 0.9rem; }
 
         /* Cards and content elements */
-        .card { border: 1px solid #eee; border-radius: 10px; box-shadow: 0 1px 2px rgba(16,24,40,.04); }
-        .card-body { padding: 14px; }
+        .card { border: 1px solid #eef2f7; border-radius: 12px; box-shadow: 0 1px 2px rgba(16,24,40,.04); background:#fff; }
+        .card-body { padding: 16px; }
         .card-title { font-size: 14px; font-weight: 700; color: #111827; }
+        .card-header { border-bottom: 1px solid #eef2f7; font-weight: 700; color:#111827; }
+        .card-hover:hover { box-shadow: 0 8px 20px rgba(16,24,40,.08); transform: translateY(-2px); transition: all .2s ease; }
+
+        /* Modern KPI stat card */
+        .stat-card { display:flex; align-items:center; justify-content:space-between; }
+        .stat-title { color:#6b7280; font-weight:600; letter-spacing:.02em; }
+        .stat-value { color:#0f172a; font-weight:700; font-size:1.35rem; }
+        .stat-sub { color:#9ca3af; font-size: .85rem; }
+        .stat-right { display:flex; flex-direction:column; align-items:flex-end; gap:.35rem; }
+        .stat-icon { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(135deg,#4f46e5 0%, #06b6d4 100%); box-shadow: 0 4px 12px rgba(79,70,229,.25); }
+        .stat-delta { font-size:.8rem; font-weight:600; padding:2px 8px; border-radius:999px; }
+        .stat-delta.up { color:#166534; background:#dcfce7; }
+        .stat-delta.down { color:#7f1d1d; background:#fee2e2; }
+        .stat-delta.neutral { color:#374151; background:#f3f4f6; }
 
         /* Heading scale override for compact UI */
         .h1, h1 { font-size: 1.6rem; }

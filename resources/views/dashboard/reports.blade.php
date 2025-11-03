@@ -21,45 +21,86 @@
     <!-- KPI cards -->
     <div class="row g-3 mb-4">
         <div class="col-md-3">
-            <div class="card shadow-sm h-100">
+            <div class="card shadow-sm card-hover h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
+                    @php
+                        $faultsDeltaRaw = ($faultsLastMonth > 0) ? (($faultsThisMonth - $faultsLastMonth) / $faultsLastMonth) * 100 : 0;
+                        $faultsDelta = round($faultsDeltaRaw, 1);
+                        $faultsDirection = $faultsDelta >= 0 ? 'up' : 'down';
+                    @endphp
+                    <div class="stat-card">
                         <div>
-                            <div class="text-muted">Total Faults</div>
-                            <div class="h3 mb-0">{{ number_format($faultsThisMonth) }}</div>
-                            <small class="text-muted">Last month: {{ number_format($faultsLastMonth) }}</small>
+                            <div class="stat-title">Total Faults</div>
+                            <div class="stat-value">{{ number_format($faultsThisMonth) }}</div>
+                            <div class="stat-sub">Last month: {{ number_format($faultsLastMonth) }}</div>
                         </div>
-                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
-                            <i class="bi bi-bug"></i>
+                        <div class="stat-right">
+                            <div class="stat-icon"><i class="fas fa-bug"></i></div>
+                            <div class="stat-delta {{ $faultsDirection }}">{{ $faultsDelta >= 0 ? '+' : '' }}{{ $faultsDelta }}%</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card shadow-sm h-100">
+            <div class="card shadow-sm card-hover h-100">
                 <div class="card-body">
-                    <div class="text-muted">New Customers</div>
-                    <div class="h3 mb-0">{{ number_format($customersThisMonth) }}</div>
-                    <small class="text-muted">Last month: {{ number_format($customersLastMonth) }}</small>
+                    @php
+                        $customersDeltaRaw = ($customersLastMonth > 0) ? (($customersThisMonth - $customersLastMonth) / $customersLastMonth) * 100 : 0;
+                        $customersDelta = round($customersDeltaRaw, 1);
+                        $customersDirection = $customersDelta >= 0 ? 'up' : 'down';
+                    @endphp
+                    <div class="stat-card">
+                        <div>
+                            <div class="stat-title">New Customers</div>
+                            <div class="stat-value">{{ number_format($customersThisMonth) }}</div>
+                            <div class="stat-sub">Last month: {{ number_format($customersLastMonth) }}</div>
+                        </div>
+                        <div class="stat-right">
+                            <div class="stat-icon"><i class="fas fa-user-plus"></i></div>
+                            <div class="stat-delta {{ $customersDirection }}">{{ $customersDelta >= 0 ? '+' : '' }}{{ $customersDelta }}%</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card shadow-sm h-100">
+            <div class="card shadow-sm card-hover h-100">
                 <div class="card-body">
-                    <div class="text-muted">Avg MTTR</div>
-                    <div class="h3 mb-0">{{ gmdate('H\h i\m', $mttrThisMonth) }}</div>
-                    <small class="text-muted">Last month: {{ gmdate('H\h i\m', $mttrLastMonth) }}</small>
+                    @php
+                        $mttrDeltaRaw = ($mttrLastMonth > 0) ? (($mttrThisMonth - $mttrLastMonth) / $mttrLastMonth) * 100 : 0;
+                        $mttrDelta = round($mttrDeltaRaw, 1);
+                        // For MTTR, a negative delta is improvement (green)
+                        $mttrDirection = $mttrDeltaRaw <= 0 ? 'up' : 'down';
+                    @endphp
+                    <div class="stat-card">
+                        <div>
+                            <div class="stat-title">Avg MTTR</div>
+                            <div class="stat-value">{{ gmdate('H\h i\m', $mttrThisMonth) }}</div>
+                            <div class="stat-sub">Last month: {{ gmdate('H\h i\m', $mttrLastMonth) }}</div>
+                        </div>
+                        <div class="stat-right">
+                            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                            <div class="stat-delta {{ $mttrDirection }}">{{ $mttrDelta >= 0 ? '+' : '' }}{{ $mttrDelta }}%</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card shadow-sm h-100">
+            <div class="card shadow-sm card-hover h-100">
                 <div class="card-body">
-                    <div class="text-muted">SLA Compliance</div>
-                    <div class="h3 mb-0">{{ $slaCompliance }}%</div>
-                    <small class="text-muted">Target: &lt; 24h</small>
+                    <div class="stat-card">
+                        <div>
+                            <div class="stat-title">SLA Compliance</div>
+                            <div class="stat-value">{{ $slaCompliance }}%</div>
+                            <div class="stat-sub">Target: &lt; 24h</div>
+                        </div>
+                        <div class="stat-right">
+                            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                            <div class="stat-delta neutral">—</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -68,20 +109,42 @@
     <!-- Additional KPIs -->
     <div class="row g-3 mb-4">
         <div class="col-md-3">
-            <div class="card shadow-sm h-100">
+            <div class="card shadow-sm card-hover h-100">
                 <div class="card-body">
-                    <div class="text-muted">Avg MTTA</div>
-                    <div class="h3 mb-0">{{ gmdate('H\h i\m', $mttaThisMonth) }}</div>
-                    <small class="text-muted">Last month: {{ gmdate('H\h i\m', $mttaLastMonth) }}</small>
+                    @php
+                        $mttaDeltaRaw = ($mttaLastMonth > 0) ? (($mttaThisMonth - $mttaLastMonth) / $mttaLastMonth) * 100 : 0;
+                        $mttaDelta = round($mttaDeltaRaw, 1);
+                        // MTTA improvement is negative delta
+                        $mttaDirection = $mttaDeltaRaw <= 0 ? 'up' : 'down';
+                    @endphp
+                    <div class="stat-card">
+                        <div>
+                            <div class="stat-title">Avg MTTA</div>
+                            <div class="stat-value">{{ gmdate('H\h i\m', $mttaThisMonth) }}</div>
+                            <div class="stat-sub">Last month: {{ gmdate('H\h i\m', $mttaLastMonth) }}</div>
+                        </div>
+                        <div class="stat-right">
+                            <div class="stat-icon"><i class="fas fa-stopwatch"></i></div>
+                            <div class="stat-delta {{ $mttaDirection }}">{{ $mttaDelta >= 0 ? '+' : '' }}{{ $mttaDelta }}%</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card shadow-sm h-100">
+            <div class="card shadow-sm card-hover h-100">
                 <div class="card-body">
-                    <div class="text-muted">Reopen Rate</div>
-                    <div class="h3 mb-0">{{ $reopenRate }}%</div>
-                    <small class="text-muted">Reopened vs created (this month)</small>
+                    <div class="stat-card">
+                        <div>
+                            <div class="stat-title">Reopen Rate</div>
+                            <div class="stat-value">{{ $reopenRate }}%</div>
+                            <div class="stat-sub">Reopened vs created (this month)</div>
+                        </div>
+                        <div class="stat-right">
+                            <div class="stat-icon"><i class="fas fa-redo"></i></div>
+                            <div class="stat-delta neutral">—</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -441,7 +504,7 @@
                         <tr>
                             <td>{{ $f->fault_ref_number }}</td>
                             <td>{{ $f->created_at?->format('Y-m-d H:i') }}</td>
-                            <td>{{ $f->customer_id }}</td>
+                            <td>{{ $f->customer }}</td>
                             <td>{{ $f->city?->city ?? '—' }}</td>
                             <td>{{ $f->status_id }}</td>
                             <td>{{ $f->priorityLevel ?? '—' }}</td>
