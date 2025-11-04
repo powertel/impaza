@@ -9,7 +9,7 @@ docker compose -f impaza/compose.prod.yaml exec -T app chmod -R 775 storage boot
 #Certificates
 docker compose -f compose.prod.yaml run --rm --entrypoint "/bin/sh -c 'mkdir -p /etc/letsencrypt/live/impazamon.powertel.co.zw && openssl req -x509 -nodes -newkey rsa:2048 -days 1 -keyout /etc/letsencrypt/live/impazamon.powertel.co.zw/privkey.pem -out /etc/letsencrypt/live/impazamon.powertel.co.zw/fullchain.pem -subj \"/CN=impazamon.powertel.co.zw\"'" certbot 
 docker compose -f compose.prod.yaml restart nginx && docker compose -f compose.prod.yaml run --rm --entrypoint "certbot certonly --webroot -w /var/www/certbot --email development@powertel.co.zw --agree-tos -d impazamon.powertel.co.zw --rsa-key-size 4096" certbot && docker compose -f compose.prod.yaml exec nginx nginx -s reload 
-
+docker compose -f compose.prod.yaml run --rm certbot renew
 
 Common next commands:
 
