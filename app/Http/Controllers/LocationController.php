@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\City;
-use App\Models\suburb;
+use App\Models\Suburb;
 use DB;
 
 class LocationController extends Controller
