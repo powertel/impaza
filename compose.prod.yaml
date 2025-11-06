@@ -87,30 +87,6 @@ services:
     networks:
       - impaza
 
-  dbbackup:
-    image: alpine:3.20
-    container_name: impaza_dbbackup
-    restart: unless-stopped
-    environment:
-      TZ: Africa/Harare
-      MYSQL_HOST: mysql
-      MYSQL_PORT: 3306
-      MYSQL_DATABASE: impaza
-      MYSQL_USER: impaza
-      MYSQL_PASSWORD: Power@Dev25
-      REMOTE_USER: backup
-      REMOTE_HOST: 192.168.15.64
-      REMOTE_PATH: /backups/impaza
-      BACKUP_SCHEDULE: "0 2 * * *"
-    volumes:
-      - ./scripts/backup:/opt/backup:ro
-      - ./secrets/backup_ssh:/root/.ssh:ro
-    depends_on:
-      - mysql
-    networks:
-      - impaza
-    entrypoint: /bin/sh -c "apk add --no-cache mysql-client openssh-client tzdata && echo \"$BACKUP_SCHEDULE /opt/backup/backup-db.sh >> /var/log/backup.log 2>&1\" > /etc/crontabs/root && crond -f -l 8"
-
 networks:
   impaza:
     driver: bridge
