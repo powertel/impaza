@@ -90,6 +90,5 @@ services:
 networks:
   impaza:
     driver: bridge
-
 volumes:
   dbdata:
