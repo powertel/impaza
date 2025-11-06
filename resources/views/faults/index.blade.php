@@ -54,7 +54,7 @@ Faults
                         @php $statusFilter = request('status', 'all'); @endphp
                         <select name="status" id="faultsStatusFilter" class="form-select form-select-sm" style="width:auto;">
                             <option value="all"   {{ $statusFilter === 'all' ? 'selected' : '' }}>All</option>
-                            <option value="lt4"   {{ $statusFilter === 'lt4' ? 'selected' : '' }}>Open (1–3)</option>
+                            <option value="lt4"   {{ $statusFilter === 'lt4' ? 'selected' : '' }}>Not Resolved</option>
                             @foreach(($openStatuses ?? collect()) as $st)
                                 <option value="{{ $st->id }}" {{ $statusFilter == (string)$st->id ? 'selected' : '' }}>{{ $st->description }}</option>
                             @endforeach
@@ -64,7 +64,7 @@ Faults
                             <span class="input-group-text"><i class="fas fa-clock me-1"></i> Age</span>
                         </div>
                         @php $ageFilter = request('age', 'all'); @endphp
-                        <select name="age" id="faultsAgeFilter" class="form-select form-select-sm" style="width:auto;">
+                        <select name="age" id="faultsAgeFilter" class="form-select form-select-sm me-1" style="width:50px;">
                             <option value="all"    {{ $ageFilter === 'all' ? 'selected' : '' }}>All</option>
                             <option value="today"  {{ $ageFilter === 'today' ? 'selected' : '' }}>Today</option>
                             <option value="lt72"   {{ $ageFilter === 'lt72' ? 'selected' : '' }}>Within 72 hours</option>
