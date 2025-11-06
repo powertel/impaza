@@ -47,7 +47,30 @@ Faults
                     </select>
                 </div>
                 <form method="GET" action="{{ route('faults.index') }}" class="m-0">
-                    <div class="input-group input-group-sm" style="width: 360px;">
+                    <div class="input-group input-group-sm" style="width: 760px; max-width: 100%;">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-filter me-1"></i> Status</span>
+                        </div>
+                        @php $statusFilter = request('status', 'all'); @endphp
+                        <select name="status" id="faultsStatusFilter" class="form-select form-select-sm" style="width:auto;">
+                            <option value="all"   {{ $statusFilter === 'all' ? 'selected' : '' }}>All</option>
+                            <option value="lt4"   {{ $statusFilter === 'lt4' ? 'selected' : '' }}>Open (1–3)</option>
+                            @foreach(($openStatuses ?? collect()) as $st)
+                                <option value="{{ $st->id }}" {{ $statusFilter == (string)$st->id ? 'selected' : '' }}>{{ $st->description }}</option>
+                            @endforeach
+                        </select>
+
+                        <div class="input-group-prepend ms-2">
+                            <span class="input-group-text"><i class="fas fa-clock me-1"></i> Age</span>
+                        </div>
+                        @php $ageFilter = request('age', 'all'); @endphp
+                        <select name="age" id="faultsAgeFilter" class="form-select form-select-sm" style="width:auto;">
+                            <option value="all"    {{ $ageFilter === 'all' ? 'selected' : '' }}>All</option>
+                            <option value="today"  {{ $ageFilter === 'today' ? 'selected' : '' }}>Today</option>
+                            <option value="lt72"   {{ $ageFilter === 'lt72' ? 'selected' : '' }}>Within 72 hours</option>
+                            <option value="gt72"   {{ $ageFilter === 'gt72' ? 'selected' : '' }}>Over 72 hours</option>
+                        </select>
+
                         <span class="input-group-text"><i class="fas fa-search"></i></span>
                         <input type="text" name="q" value="{{ request('q','') }}" class="form-control" placeholder="Search all records">
                         <input type="hidden" name="per_page" value="{{ $perPage }}">
@@ -159,6 +182,13 @@ Faults
         params.set('per_page', this.value);
         params.delete('page');
         window.location.search = params.toString();
+      });
+      // Auto-submit on filter change
+      document.getElementById('faultsStatusFilter')?.addEventListener('change', function(){
+        this.form?.submit();
+      });
+      document.getElementById('faultsAgeFilter')?.addEventListener('change', function(){
+        this.form?.submit();
       });
     </script>
 @endsection
