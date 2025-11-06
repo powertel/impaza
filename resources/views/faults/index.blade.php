@@ -54,7 +54,7 @@ Faults
                         @php $statusFilter = request('status', 'all'); @endphp
                         <select name="status" id="faultsStatusFilter" class="form-select form-select-sm" style="width:auto;">
                             <option value="all"   {{ $statusFilter === 'all' ? 'selected' : '' }}>All</option>
-                            <option value="lt4"   {{ $statusFilter === 'lt4' ? 'selected' : '' }}>Not Resolved</option>
+                            <option value="lt4"   {{ $statusFilter === 'lt4' ? 'selected' : '' }}>Open Faults</option>
                             @foreach(($openStatuses ?? collect()) as $st)
                                 <option value="{{ $st->id }}" {{ $statusFilter == (string)$st->id ? 'selected' : '' }}>{{ $st->description }}</option>
                             @endforeach
