@@ -34,7 +34,13 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        if (!Auth::attempt($credentials)) {
+        // Enforce access flag in attempt: only allow is_access = 0 (enabled)
+        if (!Auth::attempt(array_merge($credentials, ['is_access' => 0]))) {
+            // Provide clearer error if credentials are correct but account disabled
+            $userProbe = User::where('email', $credentials['email'])->first();
+            if ($userProbe && Hash::check($credentials['password'], $userProbe->password) && (int)($userProbe->is_access ?? 0) !== 0) {
+                return response()->json(['message' => 'Account disabled'], 403);
+            }
             return response()->json(['message' => 'Invalid credentials'], 422);
         }
 

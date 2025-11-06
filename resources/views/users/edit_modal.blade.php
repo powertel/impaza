@@ -84,6 +84,17 @@
 
           <div class="row g-3 mt-1">
             <div class="col-md-6">
+              <label class="form-label">Access</label>
+              <select class="form-select @error('is_access') is-invalid @enderror" name="is_access">
+                <option value="0" {{ (string)($user->is_access ?? '0')==='0' ? 'selected' : '' }}>Enabled</option>
+                <option value="1" {{ (string)($user->is_access ?? '0')==='1' ? 'selected' : '' }}>Disabled</option>
+              </select>
+              <small class="text-muted">Only Enabled (0) users can sign in.</small>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-1">
+            <div class="col-md-6">
               <label class="form-label">Phone Number</label>
               <input type="tel" class="form-control @error('phonenumber') is-invalid @enderror" name="phonenumber" value="{{ $user->phonenumber }}" placeholder="e.g. 0976123456">
             </div>
