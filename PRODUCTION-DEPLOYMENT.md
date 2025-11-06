@@ -168,6 +168,7 @@ The `dbbackup` service performs scheduled nightly backups and uploads them to a 
    - Create destination folder: `sudo mkdir -p /backups/impaza && sudo chown backup:backup /backups/impaza`
 
 2. SSH key setup on production host
+   - Create secrets directory: `mkdir -p secrets/backup_ssh`
    - Generate an SSH key (no passphrase): `ssh-keygen -t ed25519 -f secrets/backup_ssh/id_rsa`
    - Copy public key to remote: `ssh-copy-id -i secrets/backup_ssh/id_rsa.pub backup@192.168.15.64`
    - Optional: add remote host to known_hosts: `ssh-keyscan 192.168.15.64 >> secrets/backup_ssh/known_hosts`
