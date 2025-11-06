@@ -159,6 +159,37 @@ docker-compose -f compose.prod.yaml exec mysql mysqldump -u root -p impaza > bac
 docker-compose -f compose.prod.yaml exec -T mysql mysql -u root -p impaza < backup_file.sql
 ```
 
+### Automated Remote Backups (192.168.15.64)
+
+The `dbbackup` service performs scheduled nightly backups and uploads them to a remote machine.
+
+1. Prerequisites on remote (192.168.15.64)
+   - Create a user for backups: `sudo adduser backup`
+   - Create destination folder: `sudo mkdir -p /backups/impaza && sudo chown backup:backup /backups/impaza`
+
+2. SSH key setup on production host
+   - Generate an SSH key (no passphrase): `ssh-keygen -t ed25519 -f secrets/backup_ssh/id_rsa`
+   - Copy public key to remote: `ssh-copy-id -i secrets/backup_ssh/id_rsa.pub backup@192.168.15.64`
+   - Optional: add remote host to known_hosts: `ssh-keyscan 192.168.15.64 >> secrets/backup_ssh/known_hosts`
+
+3. Start backup service
+```bash
+docker-compose -f compose.prod.yaml up -d dbbackup
+docker-compose -f compose.prod.yaml logs -f dbbackup
+```
+
+4. On-demand test backup
+```bash
+docker-compose -f compose.prod.yaml exec dbbackup /opt/backup/backup-db.sh
+```
+
+5. Configuration
+- Schedule: `BACKUP_SCHEDULE` env in `compose.prod.yaml` (default `0 2 * * *`)
+- Remote target: `REMOTE_USER`, `REMOTE_HOST`, `REMOTE_PATH` envs in `compose.prod.yaml`
+- MySQL connection: `MYSQL_*` envs (host `mysql` within the Compose network)
+
+Backups are compressed (`.sql.gz`) and copied to `/backups/impaza` on the remote machine.
+
 ### Application Files Backup
 ```bash
 # Backup storage directory
