@@ -15,5 +15,3 @@ yarn-error.log
 /.vscode
 /# Local Docker data (DB files, caches)
 /data/
-/# Local secrets for backup (SSH keys, known_hosts)
-/secrets/backup_ssh/
