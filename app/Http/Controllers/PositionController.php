@@ -26,6 +26,8 @@ class PositionController extends Controller
     public function index()
     {
         $positions = DB::table('positions')
+            ->join('sections', 'positions.section_id', '=', 'sections.id')
+            ->select('positions.*', 'sections.section')
             ->orderBy('positions.position', 'asc')
             ->get();
         $department = Department::all();

@@ -39,6 +39,7 @@ Positions
                 <thead class="thead-light">
                     <tr>
                         <th>No.</th>
+                        <th>Section</th>
                         <th>Positions</th>
                         <th>Action</th>
                     </tr>
@@ -47,6 +48,7 @@ Positions
                     @foreach ($positions as $position)
                     <tr >
                         <td>{{++$i}}</td>
+                        <td>{{ $position->section }}</td>
                         <td>{{ $position->position}}</td>
                         <td>
                             @can('department-edit')
