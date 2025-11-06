@@ -1,6 +1,9 @@
 import Constants from 'expo-constants';
 
-const API_URL = (Constants?.expoConfig?.extra?.apiUrl || process.env.EXPO_PUBLIC_API_URL || 'http://192.168.19.91:8080/api');
+// Prefer Expo config (app.json/eas.json) for API URL. Avoid using process.env
+// to prevent accidental overrides with local IPs during web dev.
+const CONFIG_API_URL = Constants?.expoConfig?.extra?.apiUrl || Constants?.manifest?.extra?.apiUrl;
+const API_URL = CONFIG_API_URL || 'https://impazamon.powertel.co.zw/';
 if (__DEV__) console.log('API_URL', API_URL);
 
 let authToken = null;

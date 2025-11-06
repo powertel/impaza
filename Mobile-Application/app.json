@@ -36,14 +36,18 @@
       "favicon": "./assets/favicon.png"
     },
     "updates": {
-      "enabled": true
+      "enabled": true,
+      "url": "https://u.expo.dev/152b3f73-2c00-4325-afe4-5a26e8d5b8e1"
     },
     "extra": {
-      "apiUrl": "http://192.168.19.91:8080/api",
+      "apiUrl": "https://impazamon.powertel.co.zw/api",
       "eas": {
         "projectId": "152b3f73-2c00-4325-afe4-5a26e8d5b8e1"
       }
     },
-    "owner": "powerteldev"
+    "owner": "powerteldev",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
   }
 }
