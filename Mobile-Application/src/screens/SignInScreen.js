@@ -24,7 +24,8 @@ export default function SignInScreen() {
         login(res.user);
         navigation.replace('Main');
       } else {
-        setError('Invalid credentials');
+        const message = res?.error || res?.message || (res?.status === 405 ? 'Method Not Allowed' : 'Invalid credentials');
+        setError(typeof message === 'string' ? message : 'Invalid credentials');
       }
     } catch (e) {
       setError('Unable to sign in');
