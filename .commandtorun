@@ -1,10 +1,11 @@
-docker compose -f impaza/compose.prod.yaml up -d --build
+docker compose -f compose.prod.yaml up -d --build
+docker compose -f compose.prod.yaml stop
 
 # Initialize app key if not set in .env.prod
-docker compose -f impaza/compose.prod.yaml exec -T app php artisan key:generate --force
+docker compose -f compose.prod.yaml exec -T app php artisan key:generate --force
 
 # Fix permissions for Laravel writable paths
-docker compose -f impaza/compose.prod.yaml exec -T app chmod -R 775 storage bootstrap/cache
+docker compose -f compose.prod.yaml exec -T app chmod -R 775 storage bootstrap/cache
 
 docker compose -f compose.prod.yaml exec app sh -lc 'chown -R www-data:www-data storage bootstrap/cache && chmod -R 775 storage bootstrap/cache && php artisan config:clear' 
 docker compose -f compose.prod.yaml exec app sh -lc "php -r \"require __DIR__.'/bootstrap/app.php'; \$app->make(Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap(); \\Log::info('Docker log write test'); echo 'Logged';\"" && tail -n 100 storage/logs/laravel.log || true 
@@ -16,9 +17,9 @@ docker compose -f compose.prod.yaml run --rm certbot renew
 
 Common next commands:
 
-- docker compose -f impaza/compose.prod.yaml logs -f nginx to tail Nginx logs.
-- docker compose -f impaza/compose.prod.yaml exec -T app php artisan migrate --force
-- docker compose -f impaza/compose.prod.yaml exec -T app php artisan config:cache && docker compose -f impaza/compose.prod.yaml exec -T app php artisan route:cache && docker compose -f impaza/compose.prod.yaml exec -T app php artisan view:cache
+- docker compose -f compose.prod.yaml logs -f nginx to tail Nginx logs.
+- docker compose -f compose.prod.yaml exec -T app php artisan migrate --force
+- docker compose -f compose.prod.yaml exec -T app php artisan config:cache && docker compose -f compose.prod.yaml exec -T app php artisan route:cache && docker compose -f compose.prod.yaml exec -T app php artisan view:cache
 
 docker exec impaza_mysql mysql -uroot -proot -e "CREATE USER 'impazamon'@'%' IDENTIFIED BY 'Power@Dev25'; GRANT ALL PRIVILEGES ON impaza.* TO 'impaza'@'%'; FLUSH PRIVILEGES;"
 docker exec impaza_mysql mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON impaza.* TO 'impazamon'@'%'; FLUSH PRIVILEGES;" 
