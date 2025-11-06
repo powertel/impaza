@@ -17,6 +17,7 @@ use DB;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use App\Services\FaultLifecycle;
+use Carbon\Carbon;
  
 
 
@@ -40,6 +41,8 @@ class FaultController extends Controller
         $perPage = (int) request('per_page', 20);
         $perPage = in_array($perPage, [10,20,50,100]) ? $perPage : 20;
         $q = trim((string) request('q', ''));
+        $statusFilter = request('status', 'all');
+        $ageFilter = request('age', 'all');
 
         $faultsQuery = DB::table('faults')
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
@@ -102,6 +105,22 @@ class FaultController extends Controller
             });
         }
 
+        // Status filter: 'lt4' or specific 1/2/3
+        if ($statusFilter === 'lt4') {
+            $faultsQuery->where('faults.status_id', '<', 4);
+        } elseif (in_array($statusFilter, ['1','2','3'], true)) {
+            $faultsQuery->where('faults.status_id', '=', (int)$statusFilter);
+        }
+
+        // Age filter: today / within 72 hours / over 72 hours
+        if ($ageFilter === 'today') {
+            $faultsQuery->whereDate('faults.created_at', Carbon::today());
+        } elseif ($ageFilter === 'lt72') {
+            $faultsQuery->where('faults.created_at', '>=', Carbon::now()->subHours(72));
+        } elseif ($ageFilter === 'gt72') {
+            $faultsQuery->where('faults.created_at', '<', Carbon::now()->subHours(72));
+        }
+
         $faults = $faultsQuery->paginate($perPage)->withQueryString();
         
         // Collect remarks for all listed faults and group by fault_id
@@ -132,8 +151,13 @@ class FaultController extends Controller
         $pop = Pop::all();
         $accountManager = AccountManager::all();
         $suspectedRFO = ReasonsForOutage::all();
+        // Load open statuses (< 4) for dynamic filter options
+        $openStatuses = DB::table('statuses')
+            ->where('id','<',4)
+            ->orderBy('id','asc')
+            ->get(['id','description']);
 
-        return view('faults.index',compact('faults','customer','city','accountManager','location','link','pop','suspectedRFO','remarksByFault'))
+        return view('faults.index',compact('faults','customer','city','accountManager','location','link','pop','suspectedRFO','remarksByFault','openStatuses'))
         ->with('i');
 
     }
