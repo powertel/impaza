@@ -91,9 +91,6 @@
               </select>
               <small class="text-muted">Only Enabled (0) users can sign in.</small>
             </div>
-          </div>
-
-          <div class="row g-3 mt-1">
             <div class="col-md-6">
               <label class="form-label">Phone Number</label>
               <input type="tel" class="form-control @error('phonenumber') is-invalid @enderror" name="phonenumber" value="{{ $user->phonenumber }}" placeholder="e.g. 0976123456">
