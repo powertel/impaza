@@ -21,7 +21,7 @@ class UserController extends Controller
     {
          $this->middleware('permission:user-list|user-create|user-edit|user-delete', ['only' => ['index','store']]);
          $this->middleware('permission:user-create', ['only' => ['create','store']]);
-         $this->middleware('permission:user-edit', ['only' => ['edit','update','changePassword']]);
+         $this->middleware('permission:user-edit', ['only' => ['edit','update','changePassword','updateAccess']]);
          $this->middleware('permission:user-delete', ['only' => ['destroy']]);
     }
     /**
@@ -50,6 +50,7 @@ class UserController extends Controller
                 'users.section_id',
                 'users.phonenumber',
                 'users.region',
+                'users.is_access',
                 'sections.section',
                 'departments.department',
                 'positions.position',
@@ -138,7 +139,8 @@ class UserController extends Controller
                 'position_id' => 'required',
                 'roles' => 'required',
                 'region' => 'nullable|string',
-                'phonenumber' => ['nullable','string','max:32','regex:/^\+?[0-9\s-]{7,20}$/']
+                'phonenumber' => ['nullable','string','max:32','regex:/^\+?[0-9\s-]{7,20}$/'],
+                'is_access' => 'required|in:0,1',
             ]);
 
             $input = $request->all();
@@ -148,6 +150,9 @@ class UserController extends Controller
             if (!empty($currentUserRegion)) {
                 $input['region'] = $currentUserRegion;
             }
+
+            // Normalize is_access to int 0/1
+            $input['is_access'] = (int)($input['is_access'] ?? 0) === 1 ? 1 : 0;
 
             $user = User::create($input);
             $user->assignRole($request->input('roles'));
@@ -237,6 +242,7 @@ class UserController extends Controller
                 'roles' => 'required',
                 'region' => 'nullable|string',
                 'phonenumber' => ['nullable','string','max:32','regex:/^\+?[0-9\s-]{7,20}$/'],
+                'is_access' => 'nullable|in:0,1',
             ]);
 
             $input = $request->all();
@@ -254,6 +260,11 @@ class UserController extends Controller
                 $input = Arr::except($input,array('password'));
             }
 
+            // Normalize is_access if provided
+            if (array_key_exists('is_access', $input)) {
+                $input['is_access'] = (int)($input['is_access'] ?? 0) === 1 ? 1 : 0;
+            }
+
             $user = User::find($id);
             $user->update($input);
 
@@ -268,6 +279,19 @@ class UserController extends Controller
             return redirect()->back()->with('error', 'Error renewing contract: ' . $e->getMessage());
         }
 
+    }
+
+    /**
+     * Update access (enable/disable) for a user via modal.
+     */
+    public function updateAccess(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'is_access' => 'required|in:0,1',
+        ]);
+        $user = User::findOrFail($id);
+        $user->update(['is_access' => (int)$validated['is_access']]);
+        return redirect()->route('users.index')->with('success', 'User access updated');
     }
 
     /**

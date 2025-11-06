@@ -10,13 +10,17 @@
         <form id="user-create-form" action="{{ route('users.store') }}" method="POST">
           {{ csrf_field() }}
           <div class="row g-3">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="name" class="form-label">Name</label>
               <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" placeholder="Name" value="{{ old('name') }}">
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label for="email" class="form-label">Email</label>
               <input type="email" class="form-control @error('email') is-invalid @enderror" name="email" placeholder="Email" value="{{ old('email') }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Phone Number</label>
+              <input type="tel" class="form-control @error('phonenumber') is-invalid @enderror" name="phonenumber" placeholder="e.g. 263776123456" value="{{ old('phonenumber') }}">
             </div>
           </div>
 
@@ -79,7 +83,7 @@
                 @endforeach
               </select>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
               <label class="form-label">Region</label>
               <select class="form-select @error('region') is-invalid @enderror" name="region">
                 <option value="" disabled {{ old('region', $currentUserRegion ?? '') ? '' : 'selected' }}>Select Region</option>
@@ -91,12 +95,13 @@
               </select>
               <small class="text-muted">Defaults to your region: {{ $currentUserRegion ?? 'Not set' }}</small>
             </div>
-          </div>
-
-          <div class="row g-3 mt-1">
-            <div class="col-md-6">
-              <label class="form-label">Phone Number</label>
-              <input type="tel" class="form-control @error('phonenumber') is-invalid @enderror" name="phonenumber" placeholder="e.g. 263776123456" value="{{ old('phonenumber') }}">
+            <div class="col-md-3">
+              <label class="form-label">Access</label>
+              <select class="form-select @error('is_access') is-invalid @enderror" name="is_access">
+                <option value="0" {{ old('is_access','0')==='0' ? 'selected' : '' }}>Enabled</option>
+                <option value="1" {{ old('is_access')==='1' ? 'selected' : '' }}>Disabled</option>
+              </select>
+              <small class="text-muted">Only Enabled users can sign in.</small>
             </div>
           </div>
 

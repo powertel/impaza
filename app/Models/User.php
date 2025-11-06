@@ -27,6 +27,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'position_id',
         'phonenumber',
         'user_status',
+        'is_access',
         'region',
         'weekly_standby',
         'weekend_standby'
@@ -51,6 +52,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'weekly_standby' => 'boolean',
         'weekend_standby' => 'boolean',
+        'is_access' => 'boolean',
     ];
 
     public function remarks()

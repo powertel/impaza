@@ -57,6 +57,8 @@ Route::group(['middleware' => ['auth']], function() {
     // Reports dashboard
     Route::get('/dashboard/reports', [DashboardController::class, 'reports'])->name('dashboard.reports');
     Route::resource('users', UserController::class);
+    // Toggle user access (enable/disable)
+    Route::patch('users/{user}/access', [UserController::class, 'updateAccess'])->name('users.access');
     // Admin change password for a specific user
     Route::put('users/{user}/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
     Route::resource('roles', RoleController::class);

@@ -77,6 +77,9 @@ Users
                             <span class="badge rounded-pill" style="background-color: {{ App\Models\UserStatus::STATUS_COLOR[ $user->status_name ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
                                 {{ $user->status_name }}
                             </span>
+                            <span class="badge rounded-pill ms-2 {{ ((int)($user->is_access ?? 0) === 0) ? 'bg-success' : 'bg-danger' }}">
+                                {{ ((int)($user->is_access ?? 0) === 0) ? 'Enabled' : 'Disabled' }}
+                            </span>
                         </td>
 
                         <td>
@@ -87,6 +90,10 @@ Users
                                 @can('user-edit')
                                 <button type="button" class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#editUserModal-{{ $user->id }}">
                                 <i class="fas fa-edit me-1"></i>  Edit
+                                </button>
+                                <button type="button" class="btn {{ ((int)($user->is_access ?? 0) === 0) ? 'btn-outline-danger' : 'btn-outline-success' }}" data-bs-toggle="modal" data-bs-target="#accessUserModal-{{ $user->id }}">
+                                  <i class="fas fa-user-lock me-1"></i>
+                                  {{ ((int)($user->is_access ?? 0) === 0) ? 'Disable' : 'Enable' }}
                                 </button>
                                 @endcan
                                <!--  @csrf
@@ -130,6 +137,7 @@ Users
 @foreach ($users as $user)
   @include('users.show_modal', ['user' => $user])
   @include('users.edit_modal', ['user' => $user, 'department' => $department, 'section' => $section, 'position' => $position, 'roles' => $roles, 'user_statuses' => $user_statuses, 'regions' => $regions])
+  @include('users.access_modal', ['user' => $user])
   @include('users.change_password_modal', ['user' => $user])
 @endforeach
 
