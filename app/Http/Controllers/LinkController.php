@@ -310,7 +310,7 @@ class LinkController extends Controller
     {
         $this->middleware('permission:link-edit');
         $links = Link::where('customer_id', $customerId)->get([
-            'id','link','city_id','suburb_id','pop_id','linkType_id','customer_id'
+            'id','link','city_id','suburb_id','pop_id','linkType_id','customer_id','service_type'
         ]);
         return response()->json($links);
     }
