@@ -133,7 +133,9 @@
                                     <div class="fw-normal">{{ $remark->remark }}</div>
                                     @if($remark->file_path)
                                         <div class="mt-2">
-                                            <img src="{{ asset('storage/'.$remark->file_path) }}" alt="Attachment" class="img-fluid rounded" style="max-height: 160px; object-fit: cover;">
+                                            <a href="#" class="d-inline-block text-decoration-none" data-bs-toggle="modal" data-bs-target="#PicModal-{{ $remark->id }}" aria-controls="PicModal-{{ $remark->id }}" title="View attachment">
+                                                <img src="{{ asset('storage/'.$remark->file_path) }}" alt="Attachment" class="img-fluid rounded" style="max-height: 160px; object-fit: cover; cursor: pointer;">
+                                            </a>
                                             <button type="button" class="btn btn-link btn-sm text-decoration-none" data-bs-toggle="modal" data-bs-target="#PicModal-{{ $remark->id }}">View</button>
                                         </div>
 
