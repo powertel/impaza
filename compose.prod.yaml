@@ -43,6 +43,8 @@ services:
     volumes:
       - ./docker/nginx/default.prod.conf:/etc/nginx/conf.d/default.conf
       - /var/www/html/impaza/storage:/var/www/html/storage:ro
+      # Directly mount public storage into Nginx web root to ensure /storage/* is served
+      - /var/www/html/impaza/storage/app/public:/var/www/html/public/storage:ro
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
     environment:
