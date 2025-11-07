@@ -72,7 +72,7 @@ services:
       TZ: Africa/Harare
     command: ["--default-time-zone=+02:00"]
     volumes:
-      - ./data/mysql:/var/lib/mysql
+      - dbdata:/var/lib/mysql
     ports:
       - "3306:3306"  # mapped to avoid host 3306 conflicts
     networks:
@@ -90,5 +90,6 @@ services:
 networks:
   impaza:
     driver: bridge
+
 volumes:
   dbdata:
