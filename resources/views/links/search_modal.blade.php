@@ -54,7 +54,8 @@
           <select id="editLinksServiceTypesTpl">
             <option value="">Select Service</option>
             <option value="Internet">Internet</option>
-            <option value="VPN">VPN</option>
+            <option value="Metro VPN">Metro VPN</option>
+            <option value="Intercity VPN">Intercity VPN</option>
             <option value="Carrier Services">Carrier Services</option>
             <option value="E-Vending">E-Vending</option>
           </select>
