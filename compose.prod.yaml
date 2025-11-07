@@ -61,7 +61,7 @@ services:
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
   mysql:
-    image: mysql:8.0
+    image: mysql:8.0.44
     container_name: impaza_mysql
     restart: unless-stopped
     environment:
