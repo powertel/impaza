@@ -109,7 +109,7 @@ class LinkController extends Controller
                 'items.*.sapcodes' => 'nullable|string|max:255',
                 'items.*.comment' => 'nullable|string|max:500',
                 'items.*.quantity' => 'nullable|integer|min:0',
-                'items.*.service_type' => 'nullable|string|in:Internet,VPN,Carrier Services,E-Vending',
+                'items.*.service_type' => 'nullable|string|in:Internet,Metro VPN,Intercity VPN,Carrier Services,E-Vending',
                 'items.*.capacity' => 'nullable|string|max:255',
             ]);
 
@@ -151,7 +151,7 @@ class LinkController extends Controller
                 'sapcodes' => 'nullable|string|max:255',
                 'comment' => 'nullable|string|max:500',
                 'quantity' => 'nullable|integer|min:0',
-                'service_type' => 'nullable|string|in:Internet,VPN,Carrier Services,E-Vending',
+                'service_type' => 'nullable|string|in:Internet,Metro VPN,Intercity VPN,Carrier Services,E-Vending',
                 'capacity' => 'nullable|string|max:255',
             ]);
             $req = $request->all();
@@ -233,7 +233,7 @@ class LinkController extends Controller
             'sapcodes' => 'nullable|string|max:255',
             'comment' => 'nullable|string|max:500',
             'quantity' => 'nullable|integer|min:0',
-            'service_type' => 'nullable|string|in:Internet,VPN,Carrier Services,E-Vending',
+            'service_type' => 'nullable|string|in:Internet,Metro VPN,Intercity VPN,Carrier Services,E-Vending',
             'capacity' => 'nullable|string|max:255',
         ]);
         $link->update($request->all());
@@ -340,7 +340,7 @@ class LinkController extends Controller
             $rules['linkType_id'] = ['required','exists:link_types,id'];
         }
         if ($request->has('service_type')) {
-            $rules['service_type'] = ['nullable','string','in:Internet,VPN,Carrier Services,E-Vending'];
+            $rules['service_type'] = ['nullable','string','in:Internet,Metro VPN,Intercity VPN,Carrier Services,E-Vending'];
         }
         if ($request->has('capacity')) {
             $rules['capacity'] = ['nullable','string','max:50'];

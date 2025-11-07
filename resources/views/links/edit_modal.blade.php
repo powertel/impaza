@@ -45,8 +45,8 @@
               <select name="service_type" class="form-select">
                 <option value="" {{ empty($full?->service_type) ? 'selected disabled' : '' }}>Select Service Type</option>
                 <option value="Internet" {{ ($full && $full->service_type === 'Internet') ? 'selected' : '' }}>Internet</option>
-
-                <option value="VPN" {{ ($full && $full->service_type === 'VPN') ? 'selected' : '' }}>VPN</option>
+                <option value="Metro VPN" {{ ($full && $full->service_type === 'Metro VPN') ? 'selected' : '' }}>Metro VPN</option>
+                <option value="Intercity VPN" {{ ($full && $full->service_type === 'Intercity VPN') ? 'selected' : '' }}>Intercity VPN</option>
                 <option value="Carrier Services" {{ ($full && $full->service_type === 'Carrier Services') ? 'selected' : '' }}>Carrier Services</option>
                 <option value="E-Vending" {{ ($full && $full->service_type === 'E-Vending') ? 'selected' : '' }}>E-Vending</option>
               </select>
