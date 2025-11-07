@@ -67,7 +67,9 @@ $(document).off('change', '#city').on('change', '#city', function () {
                         $("#link").empty();
                         $("#link").append('<option  selected Disabled>Select Link</option>');
                         $.each(res, function (key, value) {
-                            $("#link").append('<option value="' + key + '">' + value + '</option>');
+                            // value is now an object with id, link, city, suburb
+                            var text = value.link + ' - ' + (value.city || '') + ' - ' + (value.suburb || '');
+                            $("#link").append('<option value="' + value.id + '">' + text + '</option>');
                         });
 
                     } else {
@@ -79,6 +81,7 @@ $(document).off('change', '#city').on('change', '#city', function () {
             $("#link").empty();
         }
     });
+</script>
 </script>
 
 <script>

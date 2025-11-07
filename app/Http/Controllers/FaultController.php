@@ -560,7 +560,20 @@ class FaultController extends Controller
 
     public function findLink($customerId)
     {
-        $links = Link::where('customer_id', $customerId)->pluck('link', 'id');
+        $links = Link::with(['city', 'suburb'])
+                     ->where('customer_id', $customerId)
+                     ->get()
+                     ->mapWithKeys(function ($link) {
+                         return [
+                             $link->id => [
+                                 'id'     => $link->id,
+                                 'link'   => $link->link,
+                                 'city'   => $link->city->city ?? null,
+                                 'suburb' => $link->suburb->suburb ?? null,
+                             ]
+                         ];
+                     });
+
         return response()->json($links);
     }
 }
