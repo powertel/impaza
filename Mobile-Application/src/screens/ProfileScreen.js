@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { setAuthToken, getProfile, updateProfile, changePassword } from '../services/api';
 import { theme } from '../styles/theme';
 import { UserContext } from '../context/UserContext';
+import { FontAwesome } from '@expo/vector-icons';
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
@@ -21,6 +22,8 @@ export default function ProfileScreen() {
   const [error, setError] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [newPasswordVisible, setNewPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -135,11 +138,33 @@ export default function ProfileScreen() {
           <Text style={styles.sectionTitle}>Change Password</Text>
           <View style={styles.field}> 
             <Text style={styles.label}>New Password</Text>
-            <TextInput style={styles.input} value={newPassword} onChangeText={setNewPassword} secureTextEntry placeholder="New password" />
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={[styles.input, styles.passwordInput]}
+                value={newPassword}
+                onChangeText={setNewPassword}
+                secureTextEntry={!newPasswordVisible}
+                placeholder="New password"
+              />
+              <TouchableOpacity style={styles.eyeToggleInside} onPress={() => setNewPasswordVisible(v => !v)}>
+                <FontAwesome name={newPasswordVisible ? 'eye-slash' : 'eye'} size={theme.fontSizes.lg} color={theme.colors.dark} />
+              </TouchableOpacity>
+            </View>
           </View>
           <View style={styles.field}> 
             <Text style={styles.label}>Confirm Password</Text>
-            <TextInput style={styles.input} value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry placeholder="Confirm password" />
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={[styles.input, styles.passwordInput]}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry={!confirmPasswordVisible}
+                placeholder="Confirm password"
+              />
+              <TouchableOpacity style={styles.eyeToggleInside} onPress={() => setConfirmPasswordVisible(v => !v)}>
+                <FontAwesome name={confirmPasswordVisible ? 'eye-slash' : 'eye'} size={theme.fontSizes.lg} color={theme.colors.dark} />
+              </TouchableOpacity>
+            </View>
           </View>
           <TouchableOpacity style={styles.secondaryBtn} onPress={handleChangePassword} disabled={pwLoading}>
             <Text style={styles.secondaryBtnText}>{pwLoading ? 'Changing…' : 'Update Password'}</Text>
@@ -163,6 +188,9 @@ const styles = StyleSheet.create({
   field: { marginBottom: theme.spacing.md },
   label: { color: theme.colors.darkGray, marginBottom: theme.spacing.xs },
   input: { backgroundColor: theme.colors.input, padding: theme.spacing.md, borderRadius: theme.spacing.xs, borderWidth: 1, borderColor: theme.colors.border },
+  inputContainer: { position: 'relative' },
+  passwordInput: { paddingRight: theme.spacing.xl },
+  eyeToggleInside: { position: 'absolute', right: theme.spacing.md, top: 0, bottom: 0, justifyContent: 'center' },
   success: { color: theme.colors.success, marginTop: theme.spacing.sm },
   error: { color: theme.colors.danger, marginTop: theme.spacing.sm },
   sectionTitle: { fontSize: theme.fontSizes.lg, fontWeight: '700', color: theme.colors.black, marginBottom: theme.spacing.sm },
