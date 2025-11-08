@@ -12,6 +12,13 @@ export const colors = {
   gray: '#888',
   lightGray: '#eee',
   veryLightGray: '#f7f7f7',
+  // Added tokens for consistent theming across screens
+  background: '#F7F9FC',
+  text: '#1F2937',
+  darkGray: '#4B5563',
+  border: '#E5E7EB',
+  input: '#FFFFFF',
+  inputDisabled: '#F3F4F6',
 };
 
 export const fontSizes = {

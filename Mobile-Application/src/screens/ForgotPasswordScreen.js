@@ -22,6 +22,7 @@ export default function ForgotPasswordScreen({ navigation }) {
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
+          placeholderTextColor={theme.colors.gray}
         />
       </View>
       <TouchableOpacity style={styles.primaryBtn} onPress={handlePasswordReset}>
@@ -37,29 +38,30 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.white,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: theme.spacing.m,
+    padding: theme.spacing.md,
   },
   title: {
     fontSize: theme.fontSizes.xl,
     fontWeight: 'bold',
-    marginBottom: theme.spacing.l,
+    marginBottom: theme.spacing.lg,
     color: theme.colors.text,
   },
   field: {
     width: '100%',
-    marginBottom: theme.spacing.m,
+    marginBottom: theme.spacing.md,
   },
   input: {
     backgroundColor: theme.colors.input,
-    padding: theme.spacing.m,
+    padding: theme.spacing.md,
     borderRadius: theme.spacing.xs,
     borderWidth: 1,
     borderColor: theme.colors.border,
     width: '100%',
+    color: theme.colors.text,
   },
   primaryBtn: {
     backgroundColor: theme.colors.primary,
-    padding: theme.spacing.m,
+    padding: theme.spacing.md,
     borderRadius: theme.spacing.xs,
     alignItems: 'center',
     width: '100%',
@@ -67,6 +69,6 @@ const styles = StyleSheet.create({
   primaryBtnText: {
     color: theme.colors.white,
     fontWeight: 'bold',
-    fontSize: theme.fontSizes.m,
+    fontSize: theme.fontSizes.md,
   },
 });
