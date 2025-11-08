@@ -12,6 +12,7 @@ export default function SignInScreen() {
   const { login } = useContext(UserContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -52,14 +53,17 @@ export default function SignInScreen() {
                 onChangeText={setEmail}
               />
             </View>
-            <View style={styles.field}> 
+            <View style={[styles.field, styles.passwordContainer]}> 
               <TextInput
                 placeholder="Password"
-                style={styles.input}
-                secureTextEntry
+                style={[styles.input, styles.passwordInput]}
+                secureTextEntry={!passwordVisible}
                 value={password}
                 onChangeText={setPassword}
               />
+              <TouchableOpacity style={styles.eyeToggleInside} onPress={() => setPasswordVisible(v => !v)}>
+                <FontAwesome name={passwordVisible ? 'eye-slash' : 'eye'} size={theme.fontSizes.lg} color={theme.colors.dark} />
+              </TouchableOpacity>
             </View>
   
             {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -86,6 +90,11 @@ const styles = StyleSheet.create({
   title: { fontSize: theme.fontSizes.xl, fontWeight: '700', color: theme.colors.black, textAlign: 'center', marginBottom: theme.spacing.lg },
   field: { marginBottom: theme.spacing.md },
   input: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.md, padding: theme.spacing.md, fontSize: theme.fontSizes.md, backgroundColor: theme.colors.background },
+  passwordRow: { flexDirection: 'row', alignItems: 'center' },
+  passwordContainer: { position: 'relative' },
+  passwordInput: { paddingRight: theme.spacing.xl },
+  eyeToggle: { marginLeft: theme.spacing.sm, padding: theme.spacing.xs },
+  eyeToggleInside: { position: 'absolute', right: theme.spacing.md, top: 0, bottom: 0, justifyContent: 'center' },
   primaryBtn: { backgroundColor: theme.colors.primary, borderRadius: theme.spacing.md, paddingVertical: theme.spacing.md, alignItems: 'center', marginTop: theme.spacing.sm },
   primaryBtnText: { color: theme.colors.white, fontSize: theme.fontSizes.md, fontWeight: '700' },
   subtle: { textAlign: 'center', color: theme.colors.gray, marginTop: theme.spacing.lg },
