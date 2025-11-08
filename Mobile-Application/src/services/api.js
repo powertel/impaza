@@ -27,6 +27,21 @@ export async function register(payload) {
   return request('/mobile/register', { method: 'POST', body: JSON.stringify(payload) });
 }
 
+// Profile endpoints
+export async function getProfile() {
+  const data = await request('/mobile/profile');
+  return data?.user || null;
+}
+
+export async function updateProfile(payload) {
+  return request('/mobile/profile', { method: 'PUT', body: JSON.stringify(payload) });
+}
+
+export async function changePassword(payload) {
+  // payload: { newpassword, newpassword_confirmation }
+  return request('/mobile/profile/password', { method: 'POST', body: JSON.stringify(payload) });
+}
+
 export async function getMyFaults() {
   const data = await request('/mobile/faults');
   return Array.isArray(data) ? data : (data?.faults || []);
