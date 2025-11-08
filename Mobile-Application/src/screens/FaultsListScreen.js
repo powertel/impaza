@@ -99,9 +99,14 @@ export default function FaultsListScreen() {
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>My Faults</Text>
-        <TouchableOpacity onPress={() => {}}>
-          <Feather name="plus-circle" size={28} color={theme.colors.primary} />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <TouchableOpacity onPress={load} style={{ marginRight: theme.spacing.md }} accessibilityLabel="Refresh faults">
+            <Feather name="refresh-ccw" size={22} color={theme.colors.dark} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => {}} accessibilityLabel="Add new fault">
+            <Feather name="plus-circle" size={28} color={theme.colors.primary} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View>

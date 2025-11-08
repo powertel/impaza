@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AntDesign, Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { getTechnicianStats } from '../services/api';
+import { getTechnicianStats, setAuthToken } from '../services/api';
 import { theme } from '../styles/theme';
 import { UserContext } from '../context/UserContext';
 
@@ -13,24 +13,27 @@ export default function DashboardScreen() {
   const { user } = useContext(UserContext);
 
   const [stats, setStats] = useState({ assigned: 0, completed: 0, remaining: 0, completionRate: 0, avgResolutionSec: 0, periodLabel: '' });
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const data = await getTechnicianStats();
-        const assigned = data?.assigned ?? 0;
-        const completed = data?.resolved ?? 0;
-        const remaining = data?.remaining ?? Math.max(assigned - completed, 0);
-        const completionRate = (typeof data?.completionRate === 'number') ? data.completionRate : (assigned > 0 ? Math.round((completed / assigned) * 100) : 0);
-        const avgResolutionSec = data?.avgResolutionSec ?? 0;
-        const periodLabel = data?.periodLabel ?? '';
-        setStats({ assigned, completed, remaining, completionRate, avgResolutionSec, periodLabel });
-      } catch (e) {
-        // swallow
-      }
-    };
-    load();
-  }, []);
+  const loadStats = async () => {
+    setRefreshing(true);
+    try {
+      const data = await getTechnicianStats();
+      const assigned = data?.assigned ?? 0;
+      const completed = data?.resolved ?? 0;
+      const remaining = data?.remaining ?? Math.max(assigned - completed, 0);
+      const completionRate = (typeof data?.completionRate === 'number') ? data.completionRate : (assigned > 0 ? Math.round((completed / assigned) * 100) : 0);
+      const avgResolutionSec = data?.avgResolutionSec ?? 0;
+      const periodLabel = data?.periodLabel ?? '';
+      setStats({ assigned, completed, remaining, completionRate, avgResolutionSec, periodLabel });
+    } catch (e) {
+      // swallow
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => { loadStats(); }, []);
 
   const formatDuration = (sec) => {
     const s = Math.max(0, parseInt(sec, 10) || 0);
@@ -53,6 +56,11 @@ export default function DashboardScreen() {
 
   const rateText = (typeof stats.completionRate === 'number') ? `${stats.completionRate.toFixed(1)}%` : `${stats.completionRate}%`;
 
+  const logout = () => {
+    setAuthToken(null);
+    navigation.reset({ index: 0, routes: [{ name: 'SignIn' }] });
+  };
+
   const StatCard = ({ icon, label, value, color }) => (
     <View style={styles.statCard}>
       <Feather name={icon} size={theme.fontSizes.xl} color={color} />
@@ -64,13 +72,20 @@ export default function DashboardScreen() {
   return (
     <View style={styles.screen}>
       <SafeAreaView style={{ flex: 1, paddingTop: insets.top + 1.5 }} edges={['top','left','right']}>
-        <ScrollView contentContainerStyle={{ paddingBottom: theme.spacing.lg }} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={{ paddingBottom: theme.spacing.lg }} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadStats} />}>
           <View style={styles.headerRow}>
             <View>
               <Text style={styles.greeting}>Hi, {user?.name?.split(' ')[0]} 👋</Text>
               <Text style={styles.subtitle}>Here's your performance overview</Text>
             </View>
-            <TouchableOpacity style={styles.avatar}><Text style={styles.avatarText}>{getInitials(user?.name)}</Text></TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <TouchableOpacity onPress={loadStats} style={{ marginRight: theme.spacing.md }} accessibilityLabel="Refresh stats">
+                <Feather name="refresh-ccw" size={22} color={theme.colors.dark} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={logout} style={{ paddingHorizontal: 8, paddingVertical: 6 }} accessibilityLabel="Logout">
+                <Feather name="power" size={22} color={theme.colors.danger} />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <Text style={styles.sectionTitle}>{stats.periodLabel ? `Technician Stats (${stats.periodLabel})` : 'Technician Stats'}</Text>

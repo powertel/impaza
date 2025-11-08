@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Linking } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, ScrollView, Linking, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation, useIsFocused } from '@react-navigation/native';
 import { getFault } from '../services/api';
@@ -13,22 +13,26 @@ export default function FaultDetailScreen() {
   const [remarks, setRemarks] = useState([]);
   const [loading, setLoading] = useState(false);
   const isFocused = useIsFocused();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadFault = async () => {
+    setRefreshing(true);
+    setLoading(true);
+    try {
+      const data = await getFault(id);
+      setFault(data?.fault || data);
+      setRemarks(data?.remarks || []);
+    } catch (e) {
+      // ignore errors for now
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     if (!isFocused) return;
-    const load = async () => {
-      setLoading(true);
-      try {
-        const data = await getFault(id);
-        setFault(data?.fault || data);
-        setRemarks(data?.remarks || []);
-      } catch (e) {
-        // ignore errors for now
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+    loadFault();
   }, [id, isFocused, route.params?.refetchAt]);
 
   if (loading || !fault) {
@@ -55,7 +59,7 @@ export default function FaultDetailScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top","left","right"]}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 24 }} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadFault} />}>
         <Text style={styles.title}>{fault.customer || `Fault #${fault.id}`}</Text>
         
         <View style={styles.section}>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { setAuthToken, getProfile, updateProfile, changePassword } from '../services/api';
@@ -16,6 +16,7 @@ export default function ProfileScreen() {
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState(user?.phonenumber || '');
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [pwLoading, setPwLoading] = useState(false);
   const [message, setMessage] = useState(null);
@@ -25,26 +26,27 @@ export default function ProfileScreen() {
   const [newPasswordVisible, setNewPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 
-  useEffect(() => {
+  const loadProfile = async () => {
+    setRefreshing(true);
     let mounted = true;
-    const load = async () => {
-      try {
-        setLoading(true);
-        const profile = await getProfile();
-        if (mounted && profile) {
-          setName(profile.name || '');
-          setEmail(profile.email || '');
-          setPhone(profile.phonenumber || '');
-        }
-      } catch (e) {
-        // ignore
-      } finally {
-        setLoading(false);
+    try {
+      setLoading(true);
+      const profile = await getProfile();
+      if (mounted && profile) {
+        setName(profile.name || '');
+        setEmail(profile.email || '');
+        setPhone(profile.phonenumber || '');
       }
-    };
-    load();
+    } catch (e) {
+      // ignore
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
     return () => { mounted = false; };
-  }, []);
+  };
+
+  useEffect(() => { loadProfile(); }, []);
 
   const logout = () => {
     setAuthToken(null);
@@ -100,9 +102,14 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={[styles.screen, { paddingTop: insets.top + 2}]} edges={["top","left","right"]}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 24 }} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={loadProfile} />}>
         <View style={styles.header}> 
-          <Text style={styles.title}>Profile</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Text style={styles.title}>Profile</Text>
+            <TouchableOpacity onPress={loadProfile} style={{ paddingHorizontal: 8, paddingVertical: 4 }}>
+              <FontAwesome name="refresh" size={20} color={theme.colors.dark} />
+            </TouchableOpacity>
+          </View>
           <Text style={styles.sub}>Manage your account</Text>
         </View>
 
