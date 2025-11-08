@@ -40,6 +40,7 @@ export default function RectifyFaultScreen() {
           numberOfLines={4}
           value={notes}
           onChangeText={setNotes}
+          placeholderTextColor={theme.colors.gray}
         />
         {result?.error ? <Text style={styles.error}>{result.error}</Text> : null}
         <TouchableOpacity style={styles.primaryBtn} onPress={submit} disabled={loading}>
@@ -53,7 +54,7 @@ export default function RectifyFaultScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.white, padding: theme.spacing.lg },
   title: { fontSize: theme.fontSizes.lg, fontWeight: '700', color: theme.colors.black, marginBottom: theme.spacing.md },
-  input: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, padding: theme.spacing.md, minHeight: 100, textAlignVertical: 'top' },
+  input: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, padding: theme.spacing.md, minHeight: 100, textAlignVertical: 'top', color: theme.colors.text, backgroundColor: theme.colors.input },
   error: { color: theme.colors.danger, marginTop: theme.spacing.sm },
   primaryBtn: { backgroundColor: theme.colors.primary, borderRadius: theme.spacing.sm, paddingVertical: theme.spacing.md, alignItems: 'center', marginTop: theme.spacing.lg },
   primaryBtnText: { color: theme.colors.white, fontSize: theme.fontSizes.md, fontWeight: '600' }

@@ -55,6 +55,7 @@ export default function SignInScreen() {
               <TextInput
                 placeholder="Email"
                 style={styles.input}
+                placeholderTextColor={theme.colors.gray}
                 autoCapitalize="none"
                 keyboardType="email-address"
                 value={email}
@@ -65,6 +66,7 @@ export default function SignInScreen() {
               <TextInput
                 placeholder="Password"
                 style={[styles.input, styles.passwordInput]}
+                placeholderTextColor={theme.colors.gray}
                 secureTextEntry={!passwordVisible}
                 value={password}
                 onChangeText={setPassword}
@@ -97,7 +99,7 @@ const styles = StyleSheet.create({
   card: { width: '100%', maxWidth: 380, backgroundColor: theme.colors.white, borderRadius: 24, padding: 24, shadowColor: theme.colors.black, shadowOpacity: 0.1, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 4 },
   title: { fontSize: theme.fontSizes.xl, fontWeight: '700', color: theme.colors.black, textAlign: 'center', marginBottom: theme.spacing.lg },
   field: { marginBottom: theme.spacing.md },
-  input: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.md, padding: theme.spacing.md, fontSize: theme.fontSizes.md, backgroundColor: theme.colors.background },
+  input: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.md, padding: theme.spacing.md, fontSize: theme.fontSizes.md, backgroundColor: theme.colors.background, color: theme.colors.text },
   passwordRow: { flexDirection: 'row', alignItems: 'center' },
   passwordContainer: { position: 'relative' },
   passwordInput: { paddingRight: theme.spacing.xl },

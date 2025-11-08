@@ -46,6 +46,7 @@ export default function AddRemarkScreen() {
           multiline
           numberOfLines={5}
           textAlignVertical="top"
+          placeholderTextColor={theme.colors.gray}
         />
 
 
@@ -72,7 +73,7 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: theme.fontSizes.sm, color: theme.colors.gray, marginBottom: theme.spacing.lg },
   label: { fontSize: theme.fontSizes.sm, color: theme.colors.gray, marginBottom: theme.spacing.xs },
   input: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.sm, marginBottom: theme.spacing.lg, fontSize: theme.fontSizes.md, color: theme.colors.dark },
-  inputMultiline: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.md, marginBottom: theme.spacing.lg, fontSize: theme.fontSizes.md, minHeight: 120, color: theme.colors.dark },
+  inputMultiline: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, paddingHorizontal: theme.spacing.md, paddingVertical: theme.spacing.md, marginBottom: theme.spacing.lg, fontSize: theme.fontSizes.md, minHeight: 120, color: theme.colors.text, backgroundColor: theme.colors.input },
   primaryBtn: { backgroundColor: theme.colors.primary, borderRadius: theme.spacing.sm, paddingVertical: theme.spacing.md, alignItems: 'center' },
   primaryBtnText: { color: theme.colors.white, fontSize: theme.fontSizes.md, fontWeight: '600' },
   secondaryBtn: { backgroundColor: theme.colors.white, borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, paddingVertical: theme.spacing.md, alignItems: 'center', marginTop: theme.spacing.md },

@@ -42,16 +42,16 @@ export default function SignUpScreen() {
         <Text style={styles.title}>Create an Account</Text>
 
         <View style={styles.field}> 
-          <TextInput placeholder="Full Name" style={styles.input} value={name} onChangeText={setName} />
+          <TextInput placeholder="Full Name" placeholderTextColor={theme.colors.gray} style={styles.input} value={name} onChangeText={setName} />
         </View>
         <View style={styles.field}> 
-          <TextInput placeholder="Email" style={styles.input} autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} />
+          <TextInput placeholder="Email" placeholderTextColor={theme.colors.gray} style={styles.input} autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} />
         </View>
         <View style={styles.field}> 
-          <TextInput placeholder="Password" style={styles.input} secureTextEntry value={password} onChangeText={setPassword} />
+          <TextInput placeholder="Password" placeholderTextColor={theme.colors.gray} style={styles.input} secureTextEntry value={password} onChangeText={setPassword} />
         </View>
         <View style={styles.field}> 
-          <TextInput placeholder="Confirm Password" style={styles.input} secureTextEntry value={confirm} onChangeText={setConfirm} />
+          <TextInput placeholder="Confirm Password" placeholderTextColor={theme.colors.gray} style={styles.input} secureTextEntry value={confirm} onChangeText={setConfirm} />
         </View>
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
   brand: { fontSize: theme.fontSizes.xxl, color: theme.colors.primary, fontWeight: '700', textAlign: 'center', marginTop: theme.spacing.xl },
   title: { fontSize: theme.fontSizes.xl, fontWeight: '600', marginTop: theme.spacing.sm, marginBottom: theme.spacing.xl, textAlign: 'center' },
   field: { marginBottom: theme.spacing.md },
-  input: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, padding: theme.spacing.md, fontSize: theme.fontSizes.md },
+  input: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, padding: theme.spacing.md, fontSize: theme.fontSizes.md, color: theme.colors.text, backgroundColor: theme.colors.input },
   primaryBtn: { backgroundColor: theme.colors.primary, borderRadius: theme.spacing.sm, paddingVertical: theme.spacing.md, alignItems: 'center', marginTop: theme.spacing.sm },
   primaryBtnText: { color: theme.colors.white, fontSize: theme.fontSizes.md, fontWeight: '600' },
   link: { marginTop: theme.spacing.lg, color: theme.colors.primary, textAlign: 'center' },

@@ -113,15 +113,15 @@ export default function ProfileScreen() {
             <>
               <View style={styles.field}> 
                 <Text style={styles.label}>Full Name</Text>
-                <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="Your name" />
+                <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="Your name" placeholderTextColor={theme.colors.gray} />
               </View>
               <View style={styles.field}> 
                 <Text style={styles.label}>Email</Text>
-                <TextInput style={[styles.input, { backgroundColor: theme.colors.inputDisabled }]} value={email} editable={false} placeholder="Email" />
+                <TextInput style={[styles.input, { backgroundColor: theme.colors.inputDisabled }]} value={email} editable={false} placeholder="Email" placeholderTextColor={theme.colors.gray} />
               </View>
               <View style={styles.field}> 
                 <Text style={styles.label}>Phone Number</Text>
-                <TextInput style={styles.input} value={phone} onChangeText={setPhone} placeholder="Phone" keyboardType="phone-pad" />
+                <TextInput style={styles.input} value={phone} onChangeText={setPhone} placeholder="Phone" keyboardType="phone-pad" placeholderTextColor={theme.colors.gray} />
               </View>
 
               {message ? <Text style={styles.success}>{message}</Text> : null}
@@ -145,6 +145,7 @@ export default function ProfileScreen() {
                 onChangeText={setNewPassword}
                 secureTextEntry={!newPasswordVisible}
                 placeholder="New password"
+                placeholderTextColor={theme.colors.gray}
               />
               <TouchableOpacity style={styles.eyeToggleInside} onPress={() => setNewPasswordVisible(v => !v)}>
                 <FontAwesome name={newPasswordVisible ? 'eye-slash' : 'eye'} size={theme.fontSizes.lg} color={theme.colors.dark} />
@@ -160,6 +161,7 @@ export default function ProfileScreen() {
                 onChangeText={setConfirmPassword}
                 secureTextEntry={!confirmPasswordVisible}
                 placeholder="Confirm password"
+                placeholderTextColor={theme.colors.gray}
               />
               <TouchableOpacity style={styles.eyeToggleInside} onPress={() => setConfirmPasswordVisible(v => !v)}>
                 <FontAwesome name={confirmPasswordVisible ? 'eye-slash' : 'eye'} size={theme.fontSizes.lg} color={theme.colors.dark} />
@@ -187,7 +189,7 @@ const styles = StyleSheet.create({
   card: { backgroundColor: theme.colors.white, borderRadius: theme.spacing.lg, padding: theme.spacing.lg, borderWidth: 1, borderColor: theme.colors.lightGray, marginBottom: theme.spacing.lg },
   field: { marginBottom: theme.spacing.md },
   label: { color: theme.colors.darkGray, marginBottom: theme.spacing.xs },
-  input: { backgroundColor: theme.colors.input, padding: theme.spacing.md, borderRadius: theme.spacing.xs, borderWidth: 1, borderColor: theme.colors.border },
+  input: { backgroundColor: theme.colors.input, padding: theme.spacing.md, borderRadius: theme.spacing.xs, borderWidth: 1, borderColor: theme.colors.border, color: theme.colors.text },
   inputContainer: { position: 'relative' },
   passwordInput: { paddingRight: theme.spacing.xl },
   eyeToggleInside: { position: 'absolute', right: theme.spacing.md, top: 0, bottom: 0, justifyContent: 'center' },
