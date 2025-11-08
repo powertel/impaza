@@ -39,6 +39,14 @@ export default function SignInScreen() {
     <SafeAreaView style={styles.screen} edges={["top","left","right"]}> 
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
         <View style={styles.wrapper}>
+          <View style={styles.bgIcons} pointerEvents="none">
+            <FontAwesome name="bolt" size={72} style={[styles.bgIcon, styles.icon1]} />
+            <FontAwesome name="wrench" size={64} style={[styles.bgIcon, styles.icon2]} />
+            <FontAwesome name="cog" size={80} style={[styles.bgIcon, styles.icon3]} />
+            <FontAwesome name="bolt" size={56} style={[styles.bgIcon, styles.icon4]} />
+            <FontAwesome name="wrench" size={48} style={[styles.bgIcon, styles.icon5]} />
+          </View>
+
           <Text style={styles.brand}>iMPAZAMON</Text>
           <View style={styles.card}>
             <Text style={styles.title}>Login to your Account</Text>
@@ -83,8 +91,8 @@ export default function SignInScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: theme.colors.background },
-  wrapper: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: theme.spacing.lg },
+  screen: { flex: 1, backgroundColor: '#E9F3FF' },
+  wrapper: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: theme.spacing.lg, position: 'relative' },
   brand: { fontSize: 28, color: theme.colors.primary, fontWeight: '800', marginBottom: theme.spacing.lg },
   card: { width: '100%', maxWidth: 380, backgroundColor: theme.colors.white, borderRadius: 24, padding: 24, shadowColor: theme.colors.black, shadowOpacity: 0.1, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 4 },
   title: { fontSize: theme.fontSizes.xl, fontWeight: '700', color: theme.colors.black, textAlign: 'center', marginBottom: theme.spacing.lg },
@@ -101,5 +109,12 @@ const styles = StyleSheet.create({
   socialRow: { flexDirection: 'row', justifyContent: 'center', gap: theme.spacing.md, marginTop: theme.spacing.sm },
   socialBtn: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.md, padding: theme.spacing.md, backgroundColor: theme.colors.background },
   link: { marginTop: theme.spacing.lg, color: theme.colors.primary, textAlign: 'center', fontWeight: '600' },
-  error: { color: theme.colors.danger, marginBottom: theme.spacing.sm, textAlign: 'center' }
+  error: { color: theme.colors.danger, marginBottom: theme.spacing.sm, textAlign: 'center' },
+  bgIcons: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+  bgIcon: { position: 'absolute', color: theme.colors.primary, opacity: 0.2 },
+  icon1: { top: 40, left: 30, transform: [{ rotate: '15deg' }] },
+  icon2: { bottom: 60, right: 40, transform: [{ rotate: '-20deg' }] },
+  icon3: { top: 160, right: 80, transform: [{ rotate: '35deg' }] },
+  icon4: { bottom: 140, left: 70, transform: [{ rotate: '5deg' }] },
+  icon5: { top: 300, left: 220, transform: [{ rotate: '-10deg' }] }
 });
