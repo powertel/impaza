@@ -29,7 +29,7 @@
 
         /* Tables */
         .table { font-size: 12px; }
-        .table thead th { font-size: 11px; color: #6b7280; font-weight: 700; }
+        .table thead th { font-size: 11px; color:  #b9d2ff; font-weight: 700; }
         .table tbody td { font-size: 12px; }
 
         /* Breadcrumbs */

@@ -6,6 +6,15 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
+/* Card header styling */
+.card .card-header {
+  background: linear-gradient(180deg, #eaf3ff 0%, #dbeaff 100%);
+  border-bottom: 1px solid #b9d2ff;
+  padding: 8px 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+
 .card .card-body .filter-toolbar .input-group-text {
   background-color: #1e73ff;
   color: #ffffff;
@@ -58,4 +67,11 @@
 #faultsAgeFilter.age-select-gt72 {
   color: #b91c1c;
   background-color: #fee2e2;
+}
+
+/* thead-light styling */
+.thead-light {
+  background: linear-gradient(180deg, #eaf3ff 0%, #dbeaff 100%);
+  color: #1e73ff;
+  border-bottom: 1px solid #b9d2ff;
 }
