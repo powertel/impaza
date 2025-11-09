@@ -276,19 +276,45 @@ class DepartmentFaultController extends Controller
         if (!$settings || !($settings->auto_assign_enabled ?? false)) {
             return; // disabled
         }
+
+        // Explicit scope fields take precedence; fallback to updater
+        $scopeSectionId = $settings->scope_section_id ?? null;
+        $scopeRegion = $settings->scope_region ?? null;
+        if (empty($scopeSectionId) || empty($scopeRegion)) {
+            $scopeUser = null;
+            if (!empty($settings->updated_by)) {
+                $scopeUser = \App\Models\User::find((int)$settings->updated_by);
+            }
+            $scopeSectionId = $scopeSectionId ?: ($scopeUser->section_id ?? null);
+            $scopeRegion = $scopeRegion ?: ($scopeUser->region ?? null);
+        }
+
+        // If the requested section does not match scope section, do nothing
+        if (!empty($scopeSectionId) && (int)$scopeSectionId !== (int)$section_id) {
+            return;
+        }
    
         $users = User::join('departments','users.department_id','=','departments.id')
             ->leftjoin('sections','users.section_id','=','sections.id')
             ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
             ->where('sections.id','=',$section_id)
             ->where('user_statuses.status_name','=','active')
+            // Limit to scope region if available
+            ->when(!empty($scopeRegion), function($q) use ($scopeRegion) {
+                $q->where('users.region', '=', $scopeRegion);
+            })
             ->pluck('users.id')
             ->toArray();
 
         $faults = DB::table('fault_section')
             ->leftjoin('faults','fault_section.fault_id','=','faults.id')
+            ->leftJoin('cities', 'faults.city_id', '=', 'cities.id')
             ->whereNull('faults.assignedTo')
             ->where('fault_section.section_id','=',$section_id)
+            // Limit to scope region if available
+            ->when(!empty($scopeRegion), function($q) use ($scopeRegion) {
+                $q->where('cities.region', '=', $scopeRegion);
+            })
             ->pluck('faults.id')
             ->toArray();
 

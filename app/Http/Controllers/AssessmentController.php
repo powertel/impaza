@@ -341,6 +341,28 @@ class AssessmentController extends Controller
             return; // Auto-assign disabled; do nothing
         }
 
+        // Scope by explicit settings when provided; fallback to updater's section/region
+        $scopeSectionId = $settings->scope_section_id ?? null;
+        $scopeRegion = $settings->scope_region ?? null;
+        if (empty($scopeSectionId) || empty($scopeRegion)) {
+            $scopeUser = null;
+            if (!empty($settings->updated_by)) {
+                $scopeUser = \App\Models\User::find((int)$settings->updated_by);
+            }
+            $scopeSectionId = $scopeSectionId ?: ($scopeUser->section_id ?? null);
+            $scopeRegion = $scopeRegion ?: ($scopeUser->region ?? null);
+        }
+
+        // If the assessed fault's section does not match scope section, do nothing
+        if (!empty($scopeSectionId) && (int)$scopeSectionId !== (int)$section_id) {
+            \Log::info('Auto-assign skipped: section mismatch with scope', [
+                'assessed_section_id' => (int)$section_id,
+                'scope_section_id' => (int)$scopeSectionId,
+                'scope_region' => $scopeRegion,
+            ]);
+            return;
+        }
+
         $considerRegion = (bool)($settings->consider_region ?? true);
         $considerLeave = (bool)($settings->consider_leave ?? true);
         $isOffHours = \App\Services\FaultLifecycle::isOffHours();
@@ -367,18 +389,44 @@ class AssessmentController extends Controller
                 } else {
                     $q->where('users.weekly_standby', '=', true);
                 }
+            })
+            // Enforce scope region for technician selection when available
+            ->when(!empty($scopeRegion), function($q) use ($scopeRegion) {
+                $q->where('users.region', '=', $scopeRegion);
             });
 
         // Fault list by section
         $faults = DB::table('fault_section')
             ->leftjoin('faults','fault_section.fault_id','=','faults.id')
+            ->leftJoin('cities', 'faults.city_id', '=', 'cities.id')
             ->whereNull('faults.assignedTo')
             ->where('fault_section.section_id','=',$section_id)
+            // Limit to scope region if available
+            ->when(!empty($scopeRegion), function($q) use ($scopeRegion) {
+                $q->where('cities.region', '=', $scopeRegion);
+            })
             ->pluck('faults.id')
             ->toArray();
 
         // If region consideration is enabled, we'll assign per fault using region-aware filtering
         $users = $usersQuery->pluck('users.id')->toArray();
+        if (empty($users)) {
+            // Relax criteria: drop region and standby gating, allow Assignable in section
+            $users = User::join('departments','users.department_id','=','departments.id')
+                ->leftjoin('sections','users.section_id','=','sections.id')
+                ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
+                ->where('sections.id','=',$section_id)
+                ->where('user_statuses.status_name', '=', 'Assignable')
+                ->whereNotIn('user_statuses.status_name', $considerLeave ? ['Unassignable','On Leave'] : ['Unassignable'])
+                ->pluck('users.id')
+                ->toArray();
+            \Log::warning('Auto-assign fallback: relaxed technician pool used', [
+                'section_id' => (int)$section_id,
+                'scope_region' => $scopeRegion,
+                'off_hours' => $isOffHours,
+                'weekend_off' => $isWeekendOff,
+            ]);
+        }
 			
 			
 
@@ -408,7 +456,8 @@ class AssessmentController extends Controller
                     ->leftjoin('sections','users.section_id','=','sections.id')
                     ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
                     ->where('sections.id','=',$section_id)
-                    ->where('users.region', '=', $faultRegion)
+                    // Enforce scope region when available; otherwise use fault region
+                    ->where('users.region', '=', !empty($scopeRegion) ? $scopeRegion : $faultRegion)
                     ->where(function($q) use ($isOffHours) {
                         if ($isOffHours) {
                             $q->whereIn('user_statuses.status_name', ['Standby','Assignable']);
@@ -433,6 +482,14 @@ class AssessmentController extends Controller
             }
 
             if (empty($eligibleUsers)) {
+                \Log::info('Auto-assign skipped for fault: no eligible technicians', [
+                    'fault_id' => $autoAssign,
+                    'section_id' => (int)$section_id,
+                    'scope_region' => $scopeRegion,
+                    'consider_region' => $considerRegion,
+                    'off_hours' => $isOffHours,
+                    'weekend_off' => $isWeekendOff,
+                ]);
                 continue;
             }
 

@@ -47,6 +47,27 @@ Technician Settings
               </div>
             </div>
 
+            <div class="row g-3 mt-2">
+              <div class="col-md-6">
+                <label class="form-label">Scope Section</label>
+                <select name="scope_section_id" class="form-select">
+                  <option value="">Not set</option>
+                  @foreach($sections as $s)
+                    <option value="{{ $s->id }}" {{ (int)($settings->scope_section_id ?? 0) === (int)$s->id ? 'selected' : '' }}>{{ $s->section }}</option>
+                  @endforeach
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Scope Region</label>
+                <select name="scope_region" class="form-select">
+                  <option value="">Not set</option>
+                  @foreach($regions as $region)
+                    <option value="{{ $region }}" {{ ($settings->scope_region ?? '') === $region ? 'selected' : '' }}>{{ $region }}</option>
+                  @endforeach
+                </select>
+              </div>
+            </div>
+
             <div class="mt-3">
               <button type="submit" class="btn btn-primary">Save Settings</button>
             </div>
