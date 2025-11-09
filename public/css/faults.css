@@ -69,9 +69,4 @@
   background-color: #fee2e2;
 }
 
-/* thead-light styling */
-.thead-light {
-  background: linear-gradient(180deg, #eaf3ff 0%, #dbeaff 100%);
-  color: #1e73ff;
-  border-bottom: 1px solid #b9d2ff;
-}
+

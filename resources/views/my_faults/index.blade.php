@@ -38,7 +38,7 @@ My Faults
                 </div>
             </div>
             <table  class="table table-hover js-paginated-table" data-page-size="20" data-page-size-control="#myFaultsPageSize" data-pager="#myFaultsPager" data-search="#myFaultsSearch">
-                <thead class="thead-light">
+<thead>
                     <tr>
                         <th>No.</th>
                         <th>Customer</th>

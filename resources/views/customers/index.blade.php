@@ -45,7 +45,7 @@ Customers
                 </form>
             </div>
             <table  class="table table-hover">
-                <thead class="thead-light">
+<thead>
                     <tr>
                         <th>No.</th>
                         <th>Customer</th>

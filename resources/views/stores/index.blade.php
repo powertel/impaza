@@ -37,7 +37,7 @@ Stores
             </div>
         </div>
         <table  class="table table-hover js-paginated-table" id="material" style="font-size:14px" data-page-size="20" data-page-size-control="#storesPageSize" data-pager="#storesPager" data-search="#storesSearch">
-            <thead class="thead-light">
+<thead>
                 <tr>
                     <th>Fault Ref. No.</th>
                     <th>Fault Name</th>

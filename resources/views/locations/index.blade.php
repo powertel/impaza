@@ -46,7 +46,7 @@ Locations
             </div>
 
             <table class="table table-hover align-middle">
-                <thead class="thead-light">
+<thead>
                     <tr>
                         <th>No.</th>
                         <th>City</th>

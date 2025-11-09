@@ -34,7 +34,7 @@ Finance
                 </div>
             </div>
             <table  class="table table-hover js-paginated-table" data-page-size="20" data-page-size-control="#financePageSize" data-pager="#financePager" data-search="#financeSearch">
-                <thead class="thead-light">
+                    <thead>
                     <tr>
                         <th>No.</th>
                         <th>Customer</th>

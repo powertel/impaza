@@ -41,7 +41,7 @@ Assign Faults
                     </div>
                 </div>
                 <table class="table  table-hover align-middle js-paginated-table" id="assigned-faults-list" style="font-size:14px" data-page-size="20" data-page-size-control="#assignedfaultsPageSize" data-pager="#assignedfaultsPager" data-search="#assignedfaultsSearch">
-                    <thead class="thead-light">
+                    <thead>
                         <tr>
                             <th>Ref No.</th>
                             <th>Customer</th>

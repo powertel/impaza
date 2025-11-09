@@ -36,7 +36,7 @@
                     </div>
                 </div>
                 <table class="table table-hover text-nowrap js-paginated-table" data-page-size="20" data-page-size-control="#permissionPageSize" data-pager="#permissionPager" data-search="#permissionSearch">
-                    <thead class="thead-light">
+                    <thead>
                         <tr>
                             <th>ID</th>
                             <th>Name</th>

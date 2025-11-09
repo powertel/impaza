@@ -40,7 +40,7 @@ Assess Faults
                 </div>
             </div>
             <table  class="table table-hover js-paginated-table" data-page-size="20" data-page-size-control="#assessmentsPageSize" data-pager="#assessmentsPager" data-search="#assessmentsSearch">
-                <thead class="thead-light">
+<thead>
                     <tr>
                         <th>No.</th>
                         <th>Ref No.</th>

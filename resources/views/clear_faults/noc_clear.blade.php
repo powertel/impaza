@@ -40,7 +40,7 @@ Clear Faults
                 </div>
             </div>
             <table  class="table table-hover js-paginated-table" data-page-size="20" data-page-size-control="#nocClearPageSize" data-pager="#nocClearPager" data-search="#nocClearSearch">
-                <thead class="thead-light">
+<thead>
                     <tr>
                         <th>No.</th>
                         <th>Ref No.</th>

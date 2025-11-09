@@ -83,7 +83,7 @@ Faults
                 </form>
             </div>
             <table class="table  table-hover align-middle" id="faults-list" style="font-size:14px">
-                <thead class="thead-light">
+<thead>
                     <tr>
                     <!-- <th>No.</th>-->
                     <!-- <th>fault No.</th>-->
