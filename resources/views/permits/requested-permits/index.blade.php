@@ -43,7 +43,7 @@ Requested Permits
                         <th>Customer Name</th>
                         <th>Date of Request</th>
                         <th>Technician</th>
-                        <th>Actions</th>
+                            <th>Action(s)</th>
                     </tr>
                 </thead>
                 <tbody>

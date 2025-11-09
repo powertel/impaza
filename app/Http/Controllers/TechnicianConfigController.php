@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AutoAssignSetting;
+use App\Models\Section;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,9 @@ class TechnicianConfigController extends Controller
                 'auto_assign_enabled' => false,
             ]);
         }
-        return view('technicians.auto', compact('settings'));
+        $regions = DB::table('cities')->select('region')->whereNotNull('region')->distinct()->orderBy('region')->pluck('region');
+        $sections = Section::query()->orderBy('section')->get(['id','section']);
+        return view('technicians.auto', compact('settings','regions','sections'));
     }
 
     // Technician configuration page only
@@ -41,11 +44,19 @@ class TechnicianConfigController extends Controller
             ]);
         }
         $regions = DB::table('cities')->select('region')->whereNotNull('region')->distinct()->orderBy('region')->pluck('region');
-        $technicians = User::leftJoin('sections','users.section_id','=','sections.id')
+        $sections = Section::query()->orderBy('section')->get(['id','section']);
+        $techniciansQuery = User::leftJoin('sections','users.section_id','=','sections.id')
             ->leftJoin('user_statuses','users.user_status','=','user_statuses.id')
-            ->orderBy('users.name','asc')
-            ->get(['users.id','users.name','sections.section','users.region','users.weekly_standby','users.weekend_standby','user_statuses.status_name']);
-        return view('technicians.config', compact('settings','regions','technicians'));
+            ->orderBy('users.name','asc');
+
+        // Limit technicians list to the logged-in user's section when available
+        $currentUser = auth()->user();
+        if ($currentUser && $currentUser->section_id) {
+            $techniciansQuery->where('users.section_id', $currentUser->section_id);
+        }
+
+        $technicians = $techniciansQuery->get(['users.id','users.name','sections.section','users.region','users.weekly_standby','users.weekend_standby','user_statuses.status_name']);
+        return view('technicians.config', compact('settings','regions','sections','technicians'));
     }
 
     public function updateSettings(Request $request)
@@ -57,6 +68,8 @@ class TechnicianConfigController extends Controller
             'consider_leave' => 'nullable|boolean',
             'consider_region' => 'nullable|boolean',
             'auto_assign_enabled' => 'nullable|boolean',
+            'scope_section_id' => 'nullable|integer',
+            'scope_region' => 'nullable|string',
         ]);
 
         // Normalize checkboxes
@@ -65,6 +78,15 @@ class TechnicianConfigController extends Controller
         $data['consider_region'] = (bool)($data['consider_region'] ?? false);
         $data['auto_assign_enabled'] = (bool)($data['auto_assign_enabled'] ?? false);
 
+        // Default scope to the saving user's section/region if not explicitly provided
+        $savingUser = $request->user();
+        if (empty($data['scope_section_id'])) {
+            $data['scope_section_id'] = optional($savingUser)->section_id;
+        }
+        if (empty($data['scope_region'])) {
+            $data['scope_region'] = optional($savingUser)->region;
+        }
+
         $settings = AutoAssignSetting::query()->first();
         if ($settings) {
             $settings->update($data + ['updated_by' => auth()->id()]);
@@ -72,7 +94,7 @@ class TechnicianConfigController extends Controller
             AutoAssignSetting::create($data + ['updated_by' => auth()->id()]);
         }
 
-        return redirect()->route('technicians.settings')->with('success', 'Auto-assign settings updated');
+        return redirect()->back()->with('success', 'Auto-assign settings saved successfully');
     }
 
     // Ajax save global setting
@@ -109,6 +131,12 @@ class TechnicianConfigController extends Controller
             if (!is_string($value)) {
                 return response()->json(['error' => 'Invalid time format'], 422);
             }
+        }
+        if ($key === 'scope_section_id') {
+            $value = $value ? (int)$value : null;
+        }
+        if ($key === 'scope_region') {
+            $value = $value ?: null;
         }
 
         $settings->update([$key => $value, 'updated_by' => optional($request->user())->id]);

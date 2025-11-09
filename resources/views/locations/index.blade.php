@@ -46,12 +46,12 @@ Locations
             </div>
 
             <table class="table table-hover align-middle">
-<thead>
+                <thead>
                     <tr>
                         <th>No.</th>
                         <th>City</th>
                         <th>Location</th>
-                        <th>Actions</th>
+                        <th>Action(s)</th>
                     </tr>
                 </thead>
                 <tbody>

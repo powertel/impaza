@@ -4,15 +4,19 @@
 Technician Configuration
 @endsection
 
+@include('partials.css')
+
 @section('content')
 <section class="content">
   <div class="row">
     <div class="col-md-12">
       <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card-header">
           <h3 class="card-title">Technician Configuration</h3>
-          <div>
-            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#autoSettingsModal">Auto-Assign Settings</button>
+          <div class="card-tools">
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#autoSettingsModal">
+              <i class="fas fa-cog"></i> Auto-Assign Settings
+            </button>
           </div>
         </div>
         <div class="card-body">
@@ -59,12 +63,14 @@ Technician Configuration
                       </td>
                       <td>
                         <input type="hidden" name="user_id[]" value="{{ $t->id }}">
-                        <select name="region[]" class="form-select form-select-sm js-user-setting" data-field="region">
+                        <input type="hidden" name="region[]" value="{{ $t->region }}">
+                        <span class="form-control-plaintext form-control-sm">{{ $t->region ?: 'Not set' }}</span>
+                        <!-- <select name="region[]" class="form-select form-select-sm js-user-setting" data-field="region">
                           <option value="">Not set</option>
                           @foreach($regions as $region)
-                            <option value="{{ $region }}" {{ $t->region === $region ? 'selected' : '' }}>{{ $region }}</option>
+                            <option value="{{ $region }}" {{ $t->region === $region ? 'selected' : '' }} readonly>{{ $region }}</option>
                           @endforeach
-                        </select>
+                        </select> -->
                       </td>
                       <td>
                         <input type="checkbox" class="form-check-input js-user-setting" data-field="weekly_standby" {{ $t->weekly_standby ? 'checked' : '' }}>
@@ -109,6 +115,27 @@ Technician Configuration
               <div class="col-md-6">
                 <label class="form-label">Weekly Standby End</label>
                 <input type="time" name="standby_end_time" class="form-control js-setting" value="{{ old('standby_end_time', \Carbon\Carbon::parse($settings->standby_end_time ?? '06:00:00')->format('H:i')) }}" data-field="standby_end_time">
+              </div>
+            </div>
+
+            <div class="row g-2 mt-2">
+              <div class="col-md-6">
+                <label class="form-label">Scope Section</label>
+                <select name="scope_section_id" class="form-select">
+                  <option value="">Not set</option>
+                  @foreach($sections as $s)
+                    <option value="{{ $s->id }}" {{ (int)($settings->scope_section_id ?? 0) === (int)$s->id ? 'selected' : '' }}>{{ $s->section }}</option>
+                  @endforeach
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Scope Region</label>
+                <select name="scope_region" class="form-select">
+                  <option value="">Not set</option>
+                  @foreach($regions as $region)
+                    <option value="{{ $region }}" {{ ($settings->scope_region ?? '') === $region ? 'selected' : '' }}>{{ $region }}</option>
+                  @endforeach
+                </select>
               </div>
             </div>
 

@@ -38,7 +38,7 @@ My Faults
                 </div>
             </div>
             <table  class="table table-hover js-paginated-table" data-page-size="20" data-page-size-control="#myFaultsPageSize" data-pager="#myFaultsPager" data-search="#myFaultsSearch">
-<thead>
+                <thead>
                     <tr>
                         <th>No.</th>
                         <th>Customer</th>
@@ -46,7 +46,7 @@ My Faults
                         <th>Link Name</th>
                         <th>Status</th>
                         <th>Fault Age</th>
-                        <th>Actions</th>
+                        <th>Action(s)</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -43,13 +43,13 @@ Pops
                 </form>
             </div>
             <table  class="table table-hover">
-<thead>
+                <thead>
                     <tr>
                         <th>No.</th>
                         <th>City/Town</th>
                         <th>Location</th>
                         <th>Pop</th>
-                        <th>Actions</th>
+                            <th>Action(s)</th>
                     </tr>
                 </thead>
                 <tbody>

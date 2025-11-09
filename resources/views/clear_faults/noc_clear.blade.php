@@ -21,7 +21,7 @@ Clear Faults
     <!-- /.card-header -->
     <div class="card-body">
         <div class="table-responsive">
-        <div class="filter-toolbar d-flex justify-content-end align-items-center gap-2 mb-2">
+            <div class="filter-toolbar d-flex justify-content-end align-items-center gap-2 mb-2">
                 <div class="input-group input-group-sm" style="width: 170px;">
                     <div class="input-group-prepend">
                         <span class="input-group-text"><i class="fas fa-list me-1"></i> Show</span>
@@ -40,7 +40,7 @@ Clear Faults
                 </div>
             </div>
             <table  class="table table-hover js-paginated-table" data-page-size="20" data-page-size-control="#nocClearPageSize" data-pager="#nocClearPager" data-search="#nocClearSearch">
-<thead>
+                <thead>
                     <tr>
                         <th>No.</th>
                         <th>Ref No.</th>
@@ -49,7 +49,7 @@ Clear Faults
                         <th>Link Name</th>
                         <th>Status</th>
                         <th>Fault Age</th>
-                        <th>Actions</th>
+                        <th>Action(s)</th>
                     </tr>
                 </thead>
                 <tbody>

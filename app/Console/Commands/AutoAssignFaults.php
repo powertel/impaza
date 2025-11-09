@@ -37,11 +37,34 @@ class AutoAssignFaults extends Command
             return Command::SUCCESS;
         }
 
+        // Explicit scope fields take precedence; fallback to updater
+        $scopeSectionId = $settings->scope_section_id ?? null;
+        $scopeRegion = $settings->scope_region ?? null;
+        if (empty($scopeSectionId) || empty($scopeRegion)) {
+            $scopeUser = null;
+            if (!empty($settings->updated_by)) {
+                $scopeUser = \App\Models\User::find((int)$settings->updated_by);
+            }
+            $scopeSectionId = $scopeSectionId ?: ($scopeUser->section_id ?? null);
+            $scopeRegion = $scopeRegion ?: ($scopeUser->region ?? null);
+        }
+
         // Find assessed faults with no technician yet assigned
-        $faults = DB::table('faults')
+        $faultsQuery = DB::table('faults')
             ->leftJoin('fault_section', 'faults.id', '=', 'fault_section.fault_id')
+            ->leftJoin('cities', 'faults.city_id', '=', 'cities.id')
             ->where('faults.status_id', '=', 2) // Fault has been assessed
-            ->whereNull('faults.assignedTo')
+            ->whereNull('faults.assignedTo');
+
+        // Apply scoping if updater has section/region
+        if (!empty($scopeSectionId)) {
+            $faultsQuery->where('fault_section.section_id', '=', $scopeSectionId);
+        }
+        if (!empty($scopeRegion)) {
+            $faultsQuery->where('cities.region', '=', $scopeRegion);
+        }
+
+        $faults = $faultsQuery
             ->select(['faults.id', 'faults.city_id', 'fault_section.section_id'])
             ->get();
 
@@ -84,7 +107,10 @@ class AutoAssignFaults extends Command
                     }
                 });
 
-            if ($considerRegion && $faultRegion) {
+            // Enforce scope region for technician selection when available
+            if (!empty($scopeRegion)) {
+                $query->where('users.region', '=', $scopeRegion);
+            } elseif ($considerRegion && $faultRegion) {
                 $query->where('users.region', '=', $faultRegion);
             }
 

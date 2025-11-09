@@ -44,7 +44,7 @@ Users
                 </form>
             </div>
             <table class="table table-hover" id="usersTable">
-<thead>
+                <thead>
                     <tr>
                         <th>No.</th>
                         <th>Name</th>
@@ -53,7 +53,7 @@ Users
                         <th>Department</th>
                         <th>Section</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th>Action(s)</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -41,12 +41,12 @@ Cities
                 </div>
             </div>
             <table  class="table table-hover js-paginated-table" data-page-size="20" data-page-size-control="#citiesPageSize" data-pager="#citiesPager" data-search="#citiesSearch">
-<thead>
+                <thead>
                     <tr>
                         <th>No.</th>
                         <th>City/Town</th>
                         <th>Region</th>
-                        <th>Actions</th>
+                            <th>Action(s)</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -54,7 +54,7 @@ links
                 </form>
             </div>
             <table id="linksTable" class="table table-hover">
-<thead>
+                <thead>
                     <tr>
                         <th>No.</th>
                         <th>Customer</th>
@@ -62,8 +62,7 @@ links
                         <th>Location</th>
                         <th>Pop</th>
                         <th>link</th>
-                        <th>Actions</th>
-
+                        <th>Action(s)</th>
                     </tr>
                 </thead>
                 <tbody>

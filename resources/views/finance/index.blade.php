@@ -42,7 +42,7 @@ Finance
                         <th>City/Town</th>
                         <th>link</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th>Action(s)</th>
                         <th></th>
                     </tr>
                 </thead>

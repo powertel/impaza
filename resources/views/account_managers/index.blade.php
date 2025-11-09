@@ -48,7 +48,7 @@ Account Managers
                     <tr>
                         <th>No.</th>
                         <th>Account Manager</th>
-                        <th>Actions</th>
+            <th>Action(s)</th>
                     </tr>
                 </thead>
                 <tbody>
