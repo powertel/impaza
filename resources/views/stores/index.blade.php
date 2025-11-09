@@ -21,7 +21,7 @@ Stores
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+            <div class="filter-toolbar d-flex justify-content-end align-items-center gap-2 mb-2">
             <div class="input-group input-group-sm" style="width: 170px;">
                 <div class="input-group-prepend"><span class="input-group-text">Show</span></div>
                 <select id="storesPageSize" class="form-select form-select-sm" style="width:auto;">
@@ -37,7 +37,7 @@ Stores
             </div>
         </div>
         <table  class="table table-hover js-paginated-table" id="material" style="font-size:14px" data-page-size="20" data-page-size-control="#storesPageSize" data-pager="#storesPager" data-search="#storesSearch">
-            <thead class="thead-light">
+<thead>
                 <tr>
                     <th>Fault Ref. No.</th>
                     <th>Fault Name</th>

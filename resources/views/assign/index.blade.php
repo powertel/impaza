@@ -22,7 +22,7 @@ Assign Faults
         <div class="card-body">
             <div class="table-responsive">
 
-                <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+                <div class="filter-toolbar d-flex justify-content-end align-items-center gap-2 mb-2">
                     <div class="input-group input-group-sm" style="width: 170px;">
                         <div class="input-group-prepend">
                             <span class="input-group-text"><i class="fas fa-list me-1"></i> Show</span>
@@ -41,7 +41,7 @@ Assign Faults
                     </div>
                 </div>
                 <table class="table  table-hover align-middle js-paginated-table" id="assigned-faults-list" style="font-size:14px" data-page-size="20" data-page-size-control="#assignedfaultsPageSize" data-pager="#assignedfaultsPager" data-search="#assignedfaultsSearch">
-                    <thead class="thead-light">
+                    <thead>
                         <tr>
                             <th>Ref No.</th>
                             <th>Customer</th>

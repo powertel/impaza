@@ -51,7 +51,7 @@ Roles
     </div>
     <div class="card-body">
         <div class="table-responsive">
-          <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+          <div class="filter-toolbar d-flex justify-content-end align-items-center gap-2 mb-2">
             <div class="input-group input-group-sm" style="width: 170px;">
                 <div class="input-group-prepend">
                   <span class="input-group-text"><i class="fas fa-list me-1"></i> Show</span>
@@ -70,7 +70,7 @@ Roles
             </div>
           </div>
           <table class="table table-hover table-hover align-middle js-paginated-table" data-page-size="20" data-page-size-control="#rolesPageSize" data-pager="#rolesPager" data-search="#rolesSearch">
-              <thead class="thead-light">
+<thead>
                   <tr>
                       <th style="width:60px">#</th>
                       <th>Role</th>

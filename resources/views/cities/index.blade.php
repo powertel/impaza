@@ -22,7 +22,7 @@ Cities
     <!-- /.card-header -->
     <div class="card-body">
         <div class="table-responsive">
-            <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+            <div class="filter-toolbar d-flex justify-content-end align-items-center gap-2 mb-2">
                 <div class="input-group input-group-sm" style="width: 170px;">
                     <div class="input-group-prepend">
                         <span class="input-group-text"><i class="fas fa-list me-1"></i> Show</span>
@@ -41,7 +41,7 @@ Cities
                 </div>
             </div>
             <table  class="table table-hover js-paginated-table" data-page-size="20" data-page-size-control="#citiesPageSize" data-pager="#citiesPager" data-search="#citiesSearch">
-                <thead class="thead-light">
+<thead>
                     <tr>
                         <th>No.</th>
                         <th>City/Town</th>
