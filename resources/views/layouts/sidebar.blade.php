@@ -44,7 +44,7 @@
             <li class="nav-item">
               <a href="{{ route('manage.faults') }}" class="nav-link {{ request()->routeIs('manage.faults') ? 'active' : '' }}">
                 <i class="nav-icon fas fa-user-tie"></i>
-                <p>Managed Faults</p>
+                <p>Managed</p>
               </a>
             </li>
             @endcan

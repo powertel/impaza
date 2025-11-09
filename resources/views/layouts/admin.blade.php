@@ -19,11 +19,13 @@
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('css/dashboard.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/faults.css') }}" rel="stylesheet">
 
     <style>
         /* Global compact typography to match */
         html, body { font-size: 12px; color: #111827; }
         .content-wrapper { background: #f5f7fb; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
 
         /* Tables */
         .table { font-size: 12px; }
@@ -50,7 +52,7 @@
         .card { border: 1px solid #eef2f7; border-radius: 12px; box-shadow: 0 1px 2px rgba(16,24,40,.04); background:#fff; }
         .card-body { padding: 16px; }
         .card-title { font-size: 14px; font-weight: 700; color: #111827; }
-        .card-header { border-bottom: 1px solid #eef2f7; font-weight: 700; color:#111827; background: linear-gradient(180deg,#f9fafb 0%,#ffffff 100%); }
+        .card-header { border-bottom: 1px solid  #b9d2ff; font-weight: 700; color:#111827; background-color:  #b9d2ff; }
         .card-hover:hover { box-shadow: 0 8px 20px rgba(16,24,40,.08); transform: translateY(-2px); transition: all .2s ease; }
 
         /* Modern KPI stat card */

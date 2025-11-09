@@ -23,7 +23,7 @@ Users
 <div class="card-body">
         <div class="table-responsive">
             @php($perPage = request('per_page', 20))
-            <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+            <div class="filter-toolbar d-flex justify-content-end align-items-center gap-2 mb-2">
                 <div class="input-group input-group-sm" style="width: 200px;">
                     <span class="input-group-text"><i class="fas fa-list me-1"></i> Show</span>
                     <select id="usersPageSize" class="form-select form-select-sm" style="width:auto;">

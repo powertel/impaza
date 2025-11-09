@@ -1,0 +1,61 @@
+/* iMPAZA: Faults page blue-themed toolbar and age select */
+.card .card-body .filter-toolbar {
+  background: linear-gradient(180deg, #eaf3ff 0%, #dbeaff 100%);
+  border: 1px solid #b9d2ff;
+  padding: 8px 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.card .card-body .filter-toolbar .input-group-text {
+  background-color: #1e73ff;
+  color: #ffffff;
+  border-color: #1e73ff;
+}
+
+.card .card-body .filter-toolbar .form-select,
+.card .card-body .filter-toolbar .form-control {
+  border-color: #82aefb;
+}
+
+.card .card-body .filter-toolbar .form-select:focus,
+.card .card-body .filter-toolbar .form-control:focus {
+  border-color: #1e73ff;
+  box-shadow: 0 0 0 0.2rem rgba(30, 115, 255, 0.2);
+}
+
+.card .card-body .filter-toolbar .btn.btn-outline-primary {
+  color: #1e73ff;
+  border-color: #1e73ff;
+}
+
+.card .card-body .filter-toolbar .btn.btn-outline-primary:hover {
+  background-color: #1e73ff;
+  color: #ffffff;
+}
+
+.card .card-body .filter-toolbar .btn.btn-outline-secondary:hover {
+  background-color: #f1f5fb;
+  border-color: #82aefb;
+  color: #1e73ff;
+}
+
+/* Age select state classes */
+#faultsAgeFilter.age-select-all {
+  color: #334155;
+  background-color: #ffffff;
+}
+
+#faultsAgeFilter.age-select-today {
+  color: #0b5ed7;
+  background-color: #e7f1ff;
+}
+
+#faultsAgeFilter.age-select-lt72 {
+  color: #1565c0;
+  background-color: #e3f2fd;
+}
+
+#faultsAgeFilter.age-select-gt72 {
+  color: #b91c1c;
+  background-color: #fee2e2;
+}

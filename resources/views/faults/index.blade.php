@@ -35,7 +35,7 @@ Faults
     <!-- /.card-header -->
     <div class="card-body">
         <div class="table-responsive">
-            <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+            <div class="filter-toolbar d-flex justify-content-end align-items-center gap-2 mb-2">
                 <div class="input-group input-group-sm" style="width: 200px;">
                     <span class="input-group-text"><i class="fas fa-list me-1"></i> Show</span>
                     @php $perPage = request('per_page', 20); @endphp
@@ -188,8 +188,23 @@ Faults
         this.form?.submit();
       });
       document.getElementById('faultsAgeFilter')?.addEventListener('change', function(){
+        // Update select coloration prior to submit
+        try {
+          const el = this;
+          el.classList.remove('age-select-all','age-select-today','age-select-lt72','age-select-gt72');
+          const map = { all: 'age-select-all', today: 'age-select-today', lt72: 'age-select-lt72', gt72: 'age-select-gt72' };
+          if (map[el.value]) el.classList.add(map[el.value]);
+        } catch (e) { /* noop */ }
         this.form?.submit();
       });
+      // Initial age select coloration
+      (function(){
+        const el = document.getElementById('faultsAgeFilter');
+        if (!el) return;
+        el.classList.remove('age-select-all','age-select-today','age-select-lt72','age-select-gt72');
+        const map = { all: 'age-select-all', today: 'age-select-today', lt72: 'age-select-lt72', gt72: 'age-select-gt72' };
+        if (map[el.value]) el.classList.add(map[el.value]);
+      })();
     </script>
 @endsection
 

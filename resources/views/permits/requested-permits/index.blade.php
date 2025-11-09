@@ -19,7 +19,7 @@ Requested Permits
     <!-- /.card-header -->
     <div class="card-body">
         <div class="table-responsive">
-            <div class="d-flex justify-content-end align-items-center gap-2 mb-2">
+            <div class="filter-toolbar d-flex justify-content-end align-items-center gap-2 mb-2">
                 <div class="input-group input-group-sm" style="width: 170px;">
                     <div class="input-group-prepend"><span class="input-group-text">Show</span></div>
                     <select id="requestedPermitsPageSize" class="form-select form-select-sm" style="width:auto;">
