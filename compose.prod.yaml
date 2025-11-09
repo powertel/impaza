@@ -1,3 +1,4 @@
+name: impaza
 services:
   app:
     build:
@@ -96,3 +97,5 @@ networks:
 
 volumes:
   impaza_dbdata:
+    external: true
+    name: impaza_impaza_dbdata
