@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use App\Services\FaultLifecycle;
 use App\Models\AutoAssignSetting;
+use Illuminate\Support\Facades\Log;
+
 
 class AssessmentController extends Controller
 {
@@ -355,7 +357,7 @@ class AssessmentController extends Controller
 
         // If the assessed fault's section does not match scope section, do nothing
         if (!empty($scopeSectionId) && (int)$scopeSectionId !== (int)$section_id) {
-            \Log::info('Auto-assign skipped: section mismatch with scope', [
+            Log::info('Auto-assign skipped: section mismatch with scope', [
                 'assessed_section_id' => (int)$section_id,
                 'scope_section_id' => (int)$scopeSectionId,
                 'scope_region' => $scopeRegion,
@@ -420,7 +422,7 @@ class AssessmentController extends Controller
                 ->whereNotIn('user_statuses.status_name', $considerLeave ? ['Unassignable','On Leave'] : ['Unassignable'])
                 ->pluck('users.id')
                 ->toArray();
-            \Log::warning('Auto-assign fallback: relaxed technician pool used', [
+            Log::warning('Auto-assign fallback: relaxed technician pool used', [
                 'section_id' => (int)$section_id,
                 'scope_region' => $scopeRegion,
                 'off_hours' => $isOffHours,
@@ -482,7 +484,7 @@ class AssessmentController extends Controller
             }
 
             if (empty($eligibleUsers)) {
-                \Log::info('Auto-assign skipped for fault: no eligible technicians', [
+                Log::info('Auto-assign skipped for fault: no eligible technicians', [
                     'fault_id' => $autoAssign,
                     'section_id' => (int)$section_id,
                     'scope_region' => $scopeRegion,
