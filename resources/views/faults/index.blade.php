@@ -19,8 +19,9 @@ Faults
     <div class="card-header">
         <div class="d-flex align-items-center gap-3">
             <div>
-                <h3 class="card-title mb-0 fw-bold text-dark">
-                Manage and track network faults</h3>
+                <h3 class="card-title mb-0">
+                Manage and track network faults
+                </h3>
             </div>
         </div>
         <div class="card-tools">
