@@ -70,12 +70,12 @@ Roles
             </div>
           </div>
           <table class="table table-hover table-hover align-middle js-paginated-table" data-page-size="20" data-page-size-control="#rolesPageSize" data-pager="#rolesPager" data-search="#rolesSearch">
-<thead>
+              <thead>
                   <tr>
                       <th style="width:60px">#</th>
                       <th>Role</th>
                       <th>Permissions</th>
-                      <th width="280px">Actions</th>
+                      <th width="280px">Action(s)</th>
                   </tr>
               </thead>
               <tbody>

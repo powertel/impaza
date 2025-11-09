@@ -49,7 +49,7 @@ Assess Faults
                         <th>Link Name</th>
                         <th>Status</th>
                         <th>Fault Age</th>
-                        <th>Actions</th>
+                            <th>Action(s)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -81,11 +81,11 @@ Assess Faults
                                 </button>
                                 @endcan
 
-                                @can('fault-edit')
+                                <!-- @can('fault-edit')
                                 <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editFaultModal-{{ $fault->id }}">
                                   <i class="fas fa-edit me-1"></i> Edit
                                 </button>
-                                @endcan
+                                @endcan -->
 
                                 <button class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                     <i class="fas fa-eye me-1"></i>View

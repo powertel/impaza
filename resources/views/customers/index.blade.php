@@ -45,15 +45,15 @@ Customers
                 </form>
             </div>
             <table  class="table table-hover">
-<thead>
+                <thead>
                     <tr>
                         <th>No.</th>
                         <th>Customer</th>
                         <th>Account Manager</th>
                         <th>Account Number</th>
-                          <th>Address</th>
-                          <th>Contact Number</th>
-                        <th>Actions</th>
+                        <th>Address</th>
+                        <th>Contact Number</th>
+                        <th>Action(s)</th>
                     </tr>
                 </thead>
                 <tbody>

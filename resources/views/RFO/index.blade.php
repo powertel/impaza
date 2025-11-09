@@ -42,7 +42,7 @@ RFO
                     <tr>
                         <th>No.</th>
                         <th>Reason For Outage</th>
-                        <th>Actions</th>
+                        <th>Action(s)</th>
                         
                     </tr>
                 </thead>

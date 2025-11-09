@@ -44,7 +44,7 @@ Departments
                     <tr>
                         <th>No.</th>
                         <th>Department</th>
-                        <th>Action</th>
+                        <th>Action(s)</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -39,7 +39,7 @@ Department Faults
                 </form>
             </div>
             <table class="table table-hover align-middle">
-<thead>
+                <thead>
                     <tr>
                         <th>No.</th>
                         <th>Ref No.</th>
@@ -48,7 +48,7 @@ Department Faults
                         <th>Link Name</th>
                         <th>Assigned To</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th>Action(s)</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -20,7 +20,7 @@ Faults
         <div class="d-flex align-items-center gap-3">
             <div>
                 <h3 class="card-title mb-0">
-                Manage and track network faults
+                Manage and track faults
                 </h3>
             </div>
         </div>
@@ -83,7 +83,7 @@ Faults
                 </form>
             </div>
             <table class="table  table-hover align-middle" id="faults-list" style="font-size:14px">
-<thead>
+                <thead>
                     <tr>
                     <!-- <th>No.</th>-->
                     <!-- <th>fault No.</th>-->
@@ -95,7 +95,7 @@ Faults
                         <th>Date Reported</th>
                         <th>Logged By</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th>Action(s)</th>
                     </tr>
                 </thead>
                 <tbody>

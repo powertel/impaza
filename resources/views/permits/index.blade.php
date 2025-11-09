@@ -36,7 +36,7 @@ Permits
                 </div>
             </div>
             <table  class="table table-hover js-paginated-table" data-page-size="20" data-page-size-control="#permitsPageSize" data-pager="#permitsPager" data-search="#permitsSearch">
-<thead>
+                <thead>
                     <tr>
                         <th>ID</th>
                         <th>Fault ID</th>
@@ -44,7 +44,7 @@ Permits
                         <th>Customer Name</th>
                         <th>Date of Issue</th>
                         <th>Technician</th>
-                        <th>Actions</th>
+                        <th>Action(s)</th>
                     </tr>
                 </thead>
                 <tbody>

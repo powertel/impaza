@@ -93,7 +93,7 @@
             <li class="nav-item">
               <a class="nav-link {{ request()->routeIs('noc-clear.*') ? 'active' : '' }}" href="{{ route('noc-clear.index') }}">
                 <i class="nav-icon fas fa-broom"></i>
-                <p>NOC Clear</p>
+                <p>Noc Clear</p>
               </a>
             </li>
             @endcan

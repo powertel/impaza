@@ -37,14 +37,14 @@ Stores
             </div>
         </div>
         <table  class="table table-hover js-paginated-table" id="material" style="font-size:14px" data-page-size="20" data-page-size-control="#storesPageSize" data-pager="#storesPager" data-search="#storesSearch">
-<thead>
+            <thead>
                 <tr>
                     <th>Fault Ref. No.</th>
                     <th>Fault Name</th>
                     <th>Requisition No.</th>
                     <th>SAP Ref. No.</th>
                     <th>Date Requested</th>
-                    <th>Actions</th>
+                            <th>Action(s)</th>
                 </tr>
             </thead>
             <tbody>

@@ -49,7 +49,7 @@ Assign Faults
                             <th>Status</th>
                             <th>Fault Age</th>
                             <th>Created</th>
-                            <th>Actions</th>
+                            <th>Action(s)</th>
                         </tr>
                     </thead>
                     <tbody>
