@@ -159,19 +159,8 @@ document.addEventListener('DOMContentLoaded', function () {
   // WebKit legacy
   sidebarRoot.addEventListener('mousewheel', handleWheelLock, { passive: false });
 
-  // Touch: lock scroll to the sidebar only, with a mild speed boost
-  let startY = 0;
-  sidebarRoot.addEventListener('touchstart', function (e) {
-    if (e.touches && e.touches.length) { startY = e.touches[0].clientY; }
-  }, { passive: true });
-  sidebarRoot.addEventListener('touchmove', function (e) {
-    if (!e.touches || !e.touches.length) { return; }
-    const dy = startY - e.touches[0].clientY; // positive when scrolling down
-    scrollContainer.scrollTop += dy * TOUCH_SPEED;
-    startY = e.touches[0].clientY;
-    e.preventDefault();
-    e.stopPropagation();
-  }, { passive: false });
+  // Touch: rely on native scrolling to ensure links remain tappable
+  // Avoid intercepting touch events which can block tap/click on mobile
 });
 </script>
 

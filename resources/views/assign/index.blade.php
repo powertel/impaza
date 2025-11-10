@@ -43,7 +43,7 @@ Assign Faults
                 <table class="table  table-hover align-middle js-paginated-table" id="assigned-faults-list" style="font-size:14px" data-page-size="20" data-page-size-control="#assignedfaultsPageSize" data-pager="#assignedfaultsPager" data-search="#assignedfaultsSearch">
                     <thead>
                         <tr>
-                            <th>Ref No.</th>
+                            <th>Ref. No.</th>
                             <th>Customer</th>
                             <th>Link</th>
                             <th>Priority</th>
