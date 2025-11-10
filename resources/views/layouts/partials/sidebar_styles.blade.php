@@ -133,36 +133,7 @@
 .main-sidebar .sidebar nav { overscroll-behavior: contain; scroll-behavior: smooth; }
 </style>
 
-<script>
-// Prevent scroll chaining: when scrolling inside the sidebar, do not scroll the main page
-// Attach handlers to the whole sidebar and its internal scroll container
-document.addEventListener('DOMContentLoaded', function () {
-  var sidebarRoot = document.querySelector('.main-sidebar');
-  var scrollContainer = document.querySelector('.main-sidebar .sidebar nav') || document.querySelector('.main-sidebar .sidebar');
-  if (!sidebarRoot || !scrollContainer) { return; }
-
-  const WHEEL_SPEED = 2.4; // accelerate mouse wheel scrolling
-  const TOUCH_SPEED = 1.4; // slightly faster touch scrolling
-
-  // Always handle wheel inside the sidebar, never propagate to page
-  function handleWheelLock(e) {
-    const dy = (typeof e.deltaY === 'number') ? e.deltaY : (e.wheelDelta ? -e.wheelDelta : 0);
-    scrollContainer.scrollTop += dy * WHEEL_SPEED; // faster nav scrolling
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
-  // Attach to the whole sidebar so scrolling works anywhere within it
-  sidebarRoot.addEventListener('wheel', handleWheelLock, { passive: false });
-  // Firefox legacy
-  sidebarRoot.addEventListener('DOMMouseScroll', function (e) { handleWheelLock({ deltaY: e.detail }); }, { passive: false });
-  // WebKit legacy
-  sidebarRoot.addEventListener('mousewheel', handleWheelLock, { passive: false });
-
-  // Touch: rely on native scrolling to ensure links remain tappable
-  // Avoid intercepting touch events which can block tap/click on mobile
-});
-</script>
+<!-- Custom scroll/touch interception removed to keep links tappable on mobile -->
 
 <style>
 /* Override: make only the nav scroll, keep logo/user panel pinned */
