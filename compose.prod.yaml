@@ -18,7 +18,7 @@ services:
       APP_DEBUG: "false"
       APP_URL: "https://impazamon.powertel.co.zw"
       DB_CONNECTION: mysql
-      DB_HOST: mysql
+      DB_HOST: host.docker.internal
       DB_PORT: 3306
       DB_DATABASE: impaza
       DB_USERNAME: impaza
@@ -26,8 +26,9 @@ services:
       CACHE_DRIVER: redis
       SESSION_DRIVER: redis
       REDIS_HOST: redis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
-      - mysql
       - redis
     networks:
       - impaza
@@ -64,23 +65,6 @@ services:
       - ./certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
-  mysql:
-    image: mysql:8.0.44
-    container_name: impaza_mysql
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: impaza
-      MYSQL_USER: impaza
-      MYSQL_PASSWORD: Power@Dev25
-      TZ: Africa/Harare
-    command: ["--default-time-zone=+02:00"]
-    volumes:
-     - impaza_dbdata:/var/lib/mysql
-    ports:
-      - "3306:3306"  # mapped to avoid host 3306 conflicts
-    networks:
-      - impaza
 
   redis:
     image: redis:alpine
@@ -94,8 +78,3 @@ services:
 networks:
   impaza:
     driver: bridge
-
-volumes:
-  impaza_dbdata:
-    external: true
-    name: impaza_impaza_dbdata
