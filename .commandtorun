@@ -6,6 +6,7 @@ docker compose -f compose.prod.yaml exec -T app php artisan key:generate --force
 
 # Fix permissions for Laravel writable paths
 docker compose -f compose.prod.yaml exec -T app chmod -R 775 storage bootstrap/cache
+docker compose exec app bash -lc "php artisan migrate --force && php artisan migrate:status" 
 
 docker compose -f compose.prod.yaml exec app sh -lc 'chown -R www-data:www-data storage bootstrap/cache && chmod -R 775 storage bootstrap/cache && php artisan config:clear' 
 docker compose -f compose.prod.yaml exec app sh -lc "php -r \"require __DIR__.'/bootstrap/app.php'; \$app->make(Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap(); \\Log::info('Docker log write test'); echo 'Logged';\"" && tail -n 100 storage/logs/laravel.log || true 
