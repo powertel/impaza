@@ -49,6 +49,7 @@
                 <option value="Intercity VPN" {{ ($full && $full->service_type === 'Intercity VPN') ? 'selected' : '' }}>Intercity VPN</option>
                 <option value="Carrier Services" {{ ($full && $full->service_type === 'Carrier Services') ? 'selected' : '' }}>Carrier Services</option>
                 <option value="E-Vending" {{ ($full && $full->service_type === 'E-Vending') ? 'selected' : '' }}>E-Vending</option>
+                <option value="Dark-Fibre" {{ ($full && $full->service_type === 'Dark-Fibre') ? 'selected' : '' }}>Dark-Fibre</option>
               </select>
             </div>
             <div class="col-md-4">
