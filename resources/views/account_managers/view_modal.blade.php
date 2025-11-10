@@ -31,7 +31,7 @@
             <tbody>
               @forelse($customersForManager as $c)
                 <tr>
-                  <td>{{ $c->id }}</td>
+                  <td>{{ $loop->iteration }}</td>
                   <td>{{ $c->customer }}</td>
                   <td>{{ $c->account_number }}</td>
                 </tr>
