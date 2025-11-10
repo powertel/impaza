@@ -15,7 +15,8 @@
    overflow-x: hidden !important;
    overscroll-behavior: contain;
    -webkit-overflow-scrolling: touch;
-   z-index: 1030;
+   /* Ensure sidebar sits above AdminLTE's #sidebar-overlay (z-index:1037) but below header (z-index:1040) */
+   z-index: 1039;
  }
 .main-sidebar .sidebar {
    height: 100%;
