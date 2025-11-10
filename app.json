@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "4f92c051-10ba-43f3-b546-1b7b9961038c"
+      }
+    },
+    "android": {
+      "package": "com.powerteldev.impaza"
+    }
+  }
+}
