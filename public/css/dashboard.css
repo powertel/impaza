@@ -581,41 +581,4 @@
   }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .modern-dashboard {
-    background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
-  }
-  
-  .dashboard-header {
-    background: rgba(26, 32, 44, 0.95);
-    border-bottom-color: rgba(255, 255, 255, 0.1);
-  }
-  
-  .kpi-card,
-  .chart-card,
-  .performance-card,
-  .data-table-card {
-    background: #2d3748;
-    color: #e2e8f0;
-  }
-  
-  .kpi-value,
-  .metric-value,
-  .aging-value {
-    color: #e2e8f0;
-  }
-  
-  .table-body .table th {
-    color: #a0aec0;
-    border-bottom-color: #4a5568;
-  }
-  
-  .table-body .table td {
-    border-top-color: #4a5568;
-  }
-  
-  .table-hover tbody tr:hover {
-    background-color: #4a5568;
-  }
-}
+/* Dark mode support disabled: keep consistent light UI */
