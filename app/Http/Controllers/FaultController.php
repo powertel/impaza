@@ -162,6 +162,160 @@ class FaultController extends Controller
 
     }
 
+    /**
+     * Build the base faults query honoring filters used in index.
+     */
+    protected function buildFilteredFaultsQuery(Request $request)
+    {
+        $q = trim((string) $request->query('q', ''));
+        $statusFilter = $request->query('status', 'all');
+        $ageFilter = $request->query('age', 'all');
+
+        $faultsQuery = DB::table('faults')
+                ->leftjoin('customers','faults.customer_id','=','customers.id')
+                ->leftjoin('links','faults.link_id','=','links.id')
+                ->leftjoin('users as assigned_users','faults.assignedTo','=','assigned_users.id')
+				->leftjoin('users as reported_users','faults.user_id','=','reported_users.id')
+                ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
+                ->leftjoin('users as account_manager_users','account_managers.user_id','=','account_manager_users.id')
+                ->leftjoin('statuses','faults.status_id','=','statuses.id')
+                ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
+                ->leftjoin('cities','faults.city_id','=','cities.id')
+                ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
+                ->leftjoin('pops','faults.pop_id','=','pops.id')
+                ->orderBy('faults.created_at', 'desc')
+                ->select([
+                'faults.id',
+                'faults.user_id',
+                'faults.fault_ref_number',
+                'customers.customer',
+                'faults.customer_id',
+                'faults.city_id',
+                'faults.suburb_id',
+                'faults.pop_id',
+                'faults.link_id',
+                'faults.status_id',
+                'faults.contactName',
+                'faults.phoneNumber',
+                'faults.contactEmail',
+                'faults.address',
+                'account_manager_users.name as accountManager',
+                'faults.suspectedRfo_id',
+                'links.link',
+                'statuses.description',
+                'assigned_users.name as assignedTo',
+                'reported_users.name as reportedBy',
+                'faults.serviceType',
+                'faults.serviceAttribute',
+                'faults.faultType',
+                'faults.priorityLevel',
+                'faults.created_at',
+                'cities.city',
+                'suburbs.suburb',
+                'pops.pop',
+                'reasons_for_outages.RFO as RFO'
+                ]);
+
+        if ($q !== '') {
+            $like = "%".$q."%";
+            $faultsQuery->where(function($qq) use ($like) {
+                $qq->where('faults.fault_ref_number', 'like', $like)
+                   ->orWhere('customers.customer', 'like', $like)
+                   ->orWhere('account_manager_users.name', 'like', $like)
+                   ->orWhere('links.link', 'like', $like)
+                   ->orWhere('assigned_users.name', 'like', $like)
+                   ->orWhere('reported_users.name', 'like', $like)
+                   ->orWhere('statuses.description', 'like', $like)
+                   ->orWhere('cities.city', 'like', $like)
+                   ->orWhere('suburbs.suburb', 'like', $like)
+                   ->orWhere('pops.pop', 'like', $like);
+            });
+        }
+
+        // Status filter: 'lt4' or specific 1/2/3
+        if ($statusFilter === 'lt4') {
+            $faultsQuery->where('faults.status_id', '<', 4);
+        } elseif (in_array($statusFilter, ['1','2','3'], true)) {
+            $faultsQuery->where('faults.status_id', '=', (int)$statusFilter);
+        }
+
+        // Age filter: today / within 72 hours / over 72 hours
+        if ($ageFilter === 'today') {
+            $faultsQuery->whereDate('faults.created_at', \Carbon\Carbon::today());
+        } elseif ($ageFilter === 'lt72') {
+            $faultsQuery->where('faults.created_at', '>=', \Carbon\Carbon::now()->subHours(72));
+        } elseif ($ageFilter === 'gt72') {
+            $faultsQuery->where('faults.created_at', '<', \Carbon\Carbon::now()->subHours(72));
+        }
+
+        return $faultsQuery;
+    }
+
+    /**
+     * Export faults to CSV (Excel-compatible), bypassing pagination.
+     */
+    public function exportCsv(Request $request)
+    {
+        $faults = $this->buildFilteredFaultsQuery($request)->get();
+
+        $filename = 'faults_'.date('Ymd_His').'.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ];
+
+        $columns = [
+            'Ref No', 'Customer', 'Account Manager', 'Link', 'Assigned To',
+            'Date Reported', 'Logged By', 'Status'
+        ];
+
+        $callback = function() use ($faults, $columns) {
+            $out = fopen('php://output', 'w');
+            // UTF-8 BOM for Excel
+            fwrite($out, "\xEF\xBB\xBF");
+            fputcsv($out, $columns);
+            foreach ($faults as $f) {
+                fputcsv($out, [
+                    $f->fault_ref_number,
+                    $f->customer,
+                    $f->accountManager,
+                    $f->link,
+                    $f->assignedTo,
+                    \Carbon\Carbon::parse($f->created_at)->format('Y-m-d H:i'),
+                    $f->reportedBy,
+                    $f->description,
+                ]);
+            }
+            fclose($out);
+        };
+
+        return response()->streamDownload($callback, $filename, $headers);
+    }
+
+    /**
+     * Export faults to PDF via Dompdf, bypassing pagination.
+     */
+    public function exportPdf(Request $request)
+    {
+        $faults = $this->buildFilteredFaultsQuery($request)->get();
+        $filename = 'faults_'.date('Ymd_His').'.pdf';
+
+        // If Dompdf not installed, provide a helpful error
+        if (!class_exists('Barryvdh\\DomPDF\\Facade\\Pdf')) {
+            return response()->json([
+                'message' => 'PDF export requires barryvdh/laravel-dompdf. Please install the dependency.',
+            ], 500);
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('faults.export_pdf', [
+            'faults' => $faults,
+            'generatedAt' => now()->format('Y-m-d H:i'),
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download($filename);
+    }
+
 
     /**
      * Display faults for customers managed by the logged-in Account Manager.

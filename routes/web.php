@@ -69,6 +69,9 @@ Route::group(['middleware' => ['auth']], function() {
     // Account Managers: faults for customers they manage (place BEFORE resource to avoid capture by faults/{fault})
     Route::get('faults/managed', [FaultController::class, 'managedCustomers'])->name('manage.faults');
     Route::resource('faults', FaultController::class);
+    // Exports: bypass pagination, honor current filters
+    Route::get('faults/export/pdf', [FaultController::class, 'exportPdf'])->name('faults.export.pdf');
+    Route::get('faults/export/csv', [FaultController::class, 'exportCsv'])->name('faults.export.csv');
     // Customers: client-side validation helper (must be BEFORE resource route)
     Route::get('customers/check-account-number', [CustomerController::class, 'checkAccountNumber'])->name('customers.check-account-number');
     Route::get('customers/check-customer-name', [CustomerController::class, 'checkCustomerName'])->name('customers.check-customer-name');
