@@ -32,6 +32,14 @@ Faults
                     <i class="fas fa-plus-circle"></i> Log Fault
                 </button>
             @endcan
+            <div class="btn-group ms-2">
+                <a class="btn btn-outline-secondary btn-sm" href="{{ route('faults.export.csv', request()->only('q','status','age')) }}">
+                    <i class="fas fa-file-excel me-1"></i> Export Excel
+                </a>
+                <a class="btn btn-outline-secondary btn-sm" href="{{ route('faults.export.pdf', request()->only('q','status','age')) }}">
+                    <i class="fas fa-file-pdf me-1"></i> Export PDF
+                </a>
+            </div>
             
         </div>
     </div>
