@@ -33,12 +33,21 @@ Faults
                 </button>
             @endcan
             <div class="btn-group ms-2">
-                <a class="btn btn-outline-secondary btn-sm" href="{{ route('faults.export.csv', request()->only('q','status','age')) }}">
-                    <i class="fas fa-file-excel me-1"></i> Export Excel
-                </a>
-                <a class="btn btn-outline-secondary btn-sm" href="{{ route('faults.export.pdf', request()->only('q','status','age')) }}">
-                    <i class="fas fa-file-pdf me-1"></i> Export PDF
-                </a>
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Export
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a class="dropdown-item" href="{{ route('faults.export.csv', request()->only('q','status','age')) }}">
+                            <i class="fas fa-file-excel me-1"></i> Export Excel
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ route('faults.export.pdf', request()->only('q','status','age')) }}">
+                            <i class="fas fa-file-pdf me-1"></i> Export PDF
+                        </a>
+                    </li>
+                </ul>
             </div>
             
         </div>
