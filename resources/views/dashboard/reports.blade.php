@@ -7,7 +7,7 @@
     <!-- Dashboard Header -->
     <div class="dashboard-header">
         <div class="dashboard-title-section">
-            <h1 class="dashboard-title">Operations Analytics</h1>
+            <h1 class="dashboard-title me-auto">Operations Analytics</h1>
             <p class="dashboard-subtitle">Comprehensive fault management and performance insights</p>
         </div>
         
