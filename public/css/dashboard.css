@@ -1,6 +1,6 @@
 /* Modern Dashboard Styles */
 .modern-dashboard {
-  background: linear-gradient(135deg, #8fc4f0 0%, #3182ce 25%, #2b77cb 50%, #2c5aa0 75%, #2a4a7c 100%);
+  background: #b9d2ff;
   min-height: 100vh;
   padding: 0;
   position: relative;
@@ -13,10 +13,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
-    radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(66, 153, 225, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(49, 130, 206, 0.2) 0%, transparent 50%);
+  background: none;
   pointer-events: none;
 }
 

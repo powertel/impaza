@@ -18,8 +18,13 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-success btn-sm">Save</button>
+          <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+            <i class="fas fa-times"></i>
+            Cancel</button>
+          <button type="submit" class="btn btn-outline-success btn-sm">
+            <i class="fas fa-save"></i>
+            Save
+          </button>
         </div>
       </form>
     </div>

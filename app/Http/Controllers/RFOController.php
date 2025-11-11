@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\ReasonsForOutage;
 use DB;
+use Illuminate\Support\Facades\Log;
 
 class RFOController extends Controller
 {
@@ -47,40 +48,30 @@ class RFOController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'RFO' => 'required|string|unique:reasons_for_outages',
+        ]);
 
-
-        DB::beginTransaction();
-        try{
-
-            request()->validate([
-    
-                'RFO' => 'required|string|unique:reasons_for_outages',
+        try {
+            $rfo = ReasonsForOutage::create([
+                'RFO' => $request->input('RFO'),
             ]);
 
-            $rfo =  ReasonsForOutage::create(
-                [
-                    'RFO' => $request['RFO'],
-                ]
-            );
-           
-            
-            if($rfo)
-            {
-                DB::commit();
-            }
-            else
-            {
-                DB::rollback();
-            }
             return redirect()->route('rfos.index')
-            ->with('success','assessment-fault created successfully.');
-        }
+                ->with('success','RFO created successfully.');
+        } catch (\Exception $e) {
+            Log::error('Failed to create RFO', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
+                'payload' => ['RFO' => $request->input('RFO')],
+            ]);
 
-        catch(Exception $ex)
-        {
-            DB::rollback();
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'Failed to create RFO.']);
         }
-       
+        
     }
 
 
@@ -113,28 +104,7 @@ class RFOController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, ReasonsForOutage $rfo)
-    {
-        $request->validate([
-            'RFO' => 'required|string|unique:reasons_for_outages,RFO,'.$rfo->id,
-        ]);
 
-        DB::beginTransaction();
-        try {
-            $rfo->update([
-                'RFO' => $request->input('RFO'),
-            ]);
-
-            DB::commit();
-            return redirect()->route('rfos.index')
-                ->with('success','assessment-fault updated successfully.');
-        } catch (\Exception $e) {
-            DB::rollback();
-            return redirect()->back()
-                ->withInput()
-                ->withErrors(['error' => 'Failed to update assessment-fault.']);
-        }
-    }
 
 
     /**
@@ -146,5 +116,41 @@ class RFOController extends Controller
     public function destroy($id)
     {
         //
+    }
+    
+    public function update(Request $request, ReasonsForOutage $rfo)
+    {
+        Log::info('RFO update request received', [
+            'rfo_id' => $rfo->id,
+            'http_method' => $request->method(),
+        ]);
+        $request->validate([
+            'RFO' => 'required|string|unique:reasons_for_outages,RFO,' . $rfo->id . ',id',
+        ]);
+
+
+        try {
+            $rfo->RFO = $request->input('RFO');
+            $rfo->save();
+
+            Log::info('RFO update succeeded', [
+                'rfo_id' => $rfo->id,
+            ]);
+
+            return redirect()->route('rfos.index')
+                ->with('success','RFO updated successfully.');
+        } catch (\Exception $e) {
+            Log::error('Failed to update RFO', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
+                'rfo_id' => $id,
+                'payload' => ['RFO' => $request->input('RFO')],
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'Failed to update RFO.']);
+        }
     }
 }
