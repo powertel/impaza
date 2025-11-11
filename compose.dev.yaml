@@ -10,6 +10,9 @@ services:
       - ./storage:/var/www/html/storage
       - ./bootstrap/cache:/var/www/html/bootstrap/cache
       - ./database:/var/www/html/database
+      # Mount Composer files so changes persist to host
+      - ./composer.json:/var/www/html/composer.json
+      - ./composer.lock:/var/www/html/composer.lock
       # Override OPcache with dev settings (instant revalidation)
       - ./docker/php/opcache.dev.ini:/usr/local/etc/php/conf.d/opcache.ini
     environment:
