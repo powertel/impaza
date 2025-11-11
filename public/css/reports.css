@@ -23,9 +23,15 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 2rem;
     position: relative;
     z-index: 1;
+    /* Override default dashboard.css box styling for reports */
+    margin-bottom: 1rem;
+    background: transparent;
+    backdrop-filter: none;
+    border: none;
+    padding: 0;
+    box-shadow: none;
 }
 
 .dashboard-title-section {
@@ -33,7 +39,7 @@
 }
 
 .dashboard-title {
-    font-size: 2.5rem;
+    font-size: 1.6rem;
     font-weight: 700;
     margin: 0 0 0.5rem 0;
     color: #000000; /* Solid black color */

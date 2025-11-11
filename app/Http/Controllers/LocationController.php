@@ -30,8 +30,10 @@ class LocationController extends Controller
 
         $locationsQuery = DB::table('suburbs')
             ->leftjoin('cities','suburbs.city_id','=','cities.id')
-            ->orderBy('suburbs.created_at', 'desc')
-            ->select(['suburbs.id','suburbs.suburb','suburbs.city_id','cities.city']);
+            ->select(['suburbs.id','suburbs.suburb','suburbs.city_id','cities.city'])
+            ->orderBy('cities.city', 'asc')
+            ->orderBy('suburbs.suburb', 'asc')
+            ;
 
         if ($q !== '') {
             $like = '%'.$q.'%';

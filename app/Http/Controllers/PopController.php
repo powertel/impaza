@@ -31,8 +31,11 @@ class PopController extends Controller
         $popsQuery = DB::table('pops')
             ->leftjoin('cities','pops.city_id','=','cities.id')
             ->leftjoin('suburbs','pops.suburb_id','=','suburbs.id')
-            ->orderBy('suburbs.created_at', 'desc')
-            ->select(['pops.id','pops.pop','pops.city_id','pops.suburb_id','suburbs.suburb','cities.city']);
+            ->select(['pops.id','pops.pop','pops.city_id','pops.suburb_id','suburbs.suburb','cities.city'])
+            ->orderBy('cities.city', 'asc')
+            ->orderBy('suburbs.suburb', 'asc')
+            ->orderBy('pops.pop', 'asc')
+            ;
 
         if ($q !== '') {
             $like = '%'.$q.'%';
