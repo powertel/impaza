@@ -1,7 +1,7 @@
 <style>
     .card { margin-right:4px; }
     .p-0 { padding: 10px !important; }
-    .card-header { background-color:  #b9d2ff; }
+    .card-header { background-color: #eaf2ff; border-bottom: 1px solid #d2e4ff; }
     .card-header .card-title { text-transform: uppercase; }
     .card-footer .btn { margin: 13px 12px 12px 10px;  float:right; }
 
