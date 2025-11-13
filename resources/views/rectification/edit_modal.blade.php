@@ -18,6 +18,16 @@
           </div>
         </div>
 
+        <div class="mb-3">
+          <label class="form-label">Confirmed Reason For Outage</label>
+          <select class="form-select @error('confirmedRfo_id') is-invalid @enderror" name="confirmedRfo_id" form="rectify-form-{{ $fault->id }}" id="confirmedRfoSelect-{{ $fault->id }}" required>
+            <option selected disabled>Select RFO</option>
+            @foreach(($confirmedRFO ?? []) as $confirmed_rfo)
+              <option value="{{ $confirmed_rfo->id }}">{{ $confirmed_rfo->RFO }}</option>
+            @endforeach
+          </select>
+        </div>
+
         @if(isset($remarks) && count($remarks))
         <div class="mt-4">
           <div class="d-flex align-items-center mb-2">
@@ -75,19 +85,19 @@
           <form action="/faults/{{ $fault->id }}/remarks" method="POST" enctype="multipart/form-data" class="js-remark-form" data-remarks-target="#remarksScroller-{{ $fault->id }}">
             {{ csrf_field() }}
             <div class="row g-2 align-items-end">
-              <div class="col-md-8">
+              <div class="col-md-12">
                 <label class="form-label">Add Remark</label>
-                <textarea name="remark" class="form-control @error('remark') is-invalid @enderror" rows="2" placeholder="Enter your message"></textarea>
+                <textarea name="remark" class="form-control @error('remark') is-invalid @enderror" rows="2" placeholder="Enter your message" id="rectifyRemark-{{ $fault->id }}"></textarea>
                 <input type="hidden" name="activity" value="ON RECTIFICATION">
                 <input type="hidden" name="url" value="{{ url()->current() }}">
               </div>
-              <div class="col-md-4">
+              <!-- <div class="col-md-4">
                 <label class="form-label">Attachment (optional)</label>
                 <input type="file" name="attachment" class="form-control @error('attachment') is-invalid @enderror" accept="image/png,image/jpg,image/jpeg">
-              </div>
+              </div> -->
             </div>
             <div class="mt-2">
-              <button type="submit" class="btn btn-success btn-sm float-end">Send</button>
+              <button type="submit" class="btn btn-success btn-sm float-end">Add Remark</button>
             </div>
           </form>
         </div>
@@ -96,10 +106,10 @@
         <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
           <i class="fas fa-times me-1"></i> Cancel
         </button>
-        <form action="{{ route('rectify.update', $fault->id ) }}" method="POST" class="d-inline">
+        <form action="{{ route('rectify.update', $fault->id ) }}" method="POST" class="d-inline" id="rectify-form-{{ $fault->id }}">
           @csrf
           @method('PUT')
-          <button type="submit" class="btn btn-outline-success btn-sm">
+          <button type="submit" class="btn btn-outline-success btn-sm d-none" id="restoreBtn-{{ $fault->id }}">
             <i class="fas fa-undo-alt me-1"></i> Restore
           </button>
         </form>
@@ -118,5 +128,24 @@ document.addEventListener('DOMContentLoaded', function() {
       if (scroller) { scroller.scrollTop = scroller.scrollHeight; }
     });
   }
+  var rfoSel = document.getElementById('confirmedRfoSelect-{{ $fault->id }}');
+  var remarkTa = document.getElementById('rectifyRemark-{{ $fault->id }}');
+  var restoreBtn = document.getElementById('restoreBtn-{{ $fault->id }}');
+  function updateRestoreVisibility(){
+    var hasRfo = !!(rfoSel && rfoSel.value && rfoSel.value !== '' && rfoSel.value !== 'Select RFO');
+    var hasRemark = !!(remarkTa && remarkTa.value && remarkTa.value.trim().length > 0);
+    if (restoreBtn){
+      if (hasRfo && hasRemark){
+        restoreBtn.classList.remove('d-none');
+        restoreBtn.disabled = false;
+      } else {
+        restoreBtn.classList.add('d-none');
+        restoreBtn.disabled = true;
+      }
+    }
+  }
+  if (rfoSel){ rfoSel.addEventListener('change', updateRestoreVisibility); }
+  if (remarkTa){ remarkTa.addEventListener('input', updateRestoreVisibility); }
+  updateRestoreVisibility();
 });
 </script>

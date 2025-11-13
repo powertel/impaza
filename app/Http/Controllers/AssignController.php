@@ -115,7 +115,9 @@ class AssignController extends Controller
             ->leftjoin('cities','faults.city_id','=','cities.id')
             ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
             ->leftjoin('pops','faults.pop_id','=','pops.id')
-            ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
+            ->leftjoin('reasons_for_outages as suspectedRFO','faults.suspectedRfo_id','=','suspectedRFO.id')
+            ->leftjoin('reasons_for_outages as confirmedRFO','faults.confirmedRfo_id','=','confirmedRFO.id')
+            
             // Join open stage for current status to get start time
             ->leftjoin('fault_stage_logs as fsl', function($join) {
                 $join->on('fsl.fault_id','=','faults.id');
@@ -130,7 +132,7 @@ class AssignController extends Controller
             ->get(['faults.id','faults.fault_ref_number','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
                 'account_manager_users.name as accountManager','faults.suspectedRfo_id','links.link','statuses.description','users.name','faults.status_id as status_id',
                 'cities.city as city','cities.region as region','faults.city_id as city_id','suburbs.suburb as suburb','pops.pop as pop','faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at',
-                'reasons_for_outages.RFO as RFO', 'fsl.started_at as stage_started_at']);
+                'suspectedRFO.RFO as RFO','confirmedRFO.RFO as confirmedRFO', 'fsl.started_at as stage_started_at']);
 
         // Collect remarks grouped by fault_id for conversation modal
         $faultIds = $faults->pluck('id');

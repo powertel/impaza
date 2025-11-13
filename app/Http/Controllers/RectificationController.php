@@ -153,10 +153,14 @@ class RectificationController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'confirmedRfo_id' => 'required|exists:reasons_for_outages,id',
+        ]);
+
         $fault = Fault::find($id);
-        $req= $request->all();
+        $req = $request->only(['confirmedRfo_id']);
         $req['status_id'] = 4;
-        $fault ->update($req);
+        $fault->update($req);
         // Technician resolved
         FaultLifecycle::recordStatusChange($fault, 4, $request->user()->id);
         FaultLifecycle::resolveAssignment($fault);

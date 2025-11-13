@@ -74,15 +74,15 @@
                     </div>
 
                     <div class="row g-3">
-                        <div class="mb-3 col-md-8">
+                        <div class="mb-3 col-md-12">
                             <label for="remark" class="form-label">Remarks</label>
                             <textarea name="remark" required class="form-control @error('remark') is-invalid @enderror" placeholder="Enter any additional comments" rows="3">{{ old('remark') }}</textarea>
                             <input type="hidden" name="activity" value="ON LOGGING">
                         </div>
-                        <div class="mb-3 col-md-4">
+                        <!-- <div class="mb-3 col-md-4">
                             <label for="fileToUpload" class="form-label">Attachment (optional)</label>
                             <input type="file" name="attachment" class="form-control @error('attachment') is-invalid @enderror" id="fileToUpload">
-                        </div>
+                        </div> -->
                     </div>
                 </form>
             </div>

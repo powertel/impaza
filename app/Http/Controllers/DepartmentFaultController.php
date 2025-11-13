@@ -67,7 +67,8 @@ class DepartmentFaultController extends Controller
             ->leftjoin('cities','faults.city_id','=','cities.id')
             ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
             ->leftjoin('pops','faults.pop_id','=','pops.id')
-            ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
+            ->leftjoin('reasons_for_outages as suspectedRFO','faults.suspectedRfo_id','=','suspectedRFO.id')
+            ->leftjoin('reasons_for_outages as confirmedRFO','faults.confirmedRfo_id','=','confirmedRFO.id')
             ->leftjoin('statuses','faults.status_id','=','statuses.id')
             ->orderBy('faults.created_at', 'desc')
             ->where('fault_section.section_id','=',auth()->user()->section_id)
@@ -93,7 +94,8 @@ class DepartmentFaultController extends Controller
                 'cities.city',
                 'suburbs.suburb',
                 'pops.pop',
-                'reasons_for_outages.RFO as RFO'
+                'suspectedRFO.RFO as RFO',
+                'confirmedRFO.RFO as confirmedRFO'
             ]);
 
         // Apply search across common visible columns and related names

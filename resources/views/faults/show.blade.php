@@ -102,6 +102,13 @@
                                         <div class="fw-semibold">{{ $fault->RFO }}</div>
                                     </div>
                                 </li>
+
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <small class="text-muted">Confirmed RFO</small>
+                                        <div class="fw-semibold">{{ $fault->confirmedRFO }}</div>
+                                    </div>
+                                </li>
                             </ul>
                         </div>
                     </div>
