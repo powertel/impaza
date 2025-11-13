@@ -9,6 +9,8 @@
 
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
+        <!-- Favicon -->
+    <link rel="icon" href="{{ asset('img/favicon.png') }}" type="image/png">
 
     <title>@yield('title', 'iMPAZAMON')</title>
     <!-- Scripts -->
