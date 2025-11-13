@@ -251,6 +251,12 @@ class DepartmentFaultController extends Controller
                 $join->on('fr.fault_id','=','faults.id');
                 $join->whereNull('fr.completed_at');
             })
+
+            ->leftjoin('fault_stage_logs as fsl', function($join) {
+                    $join->on('fsl.fault_id','=','faults.id');
+                    $join->on('fsl.status_id','=','faults.status_id');
+                    $join->whereNull('fsl.ended_at');
+                })
             ->orderBy('faults.created_at', 'desc')
             ->where('fr.to_section_id','=',auth()->user()->section_id)
             ->select([
@@ -277,7 +283,8 @@ class DepartmentFaultController extends Controller
                 'pops.pop',
                 'suspectedRFO.RFO as RFO',
                 'confirmedRFO.RFO as confirmedRFO',
-                'fr.id as referral_id'
+                'fr.id as referral_id',
+                'fsl.started_at as stage_started_at'
             ]);
 
         if ($q !== '') {
@@ -357,6 +364,7 @@ class DepartmentFaultController extends Controller
         ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
         ->leftjoin('pops','faults.pop_id','=','pops.id')
         ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
+        
         ->orderBy('faults.created_at', 'desc')
         ->where('fault_section.section_id','=',auth()->user()->section_id)
         ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
