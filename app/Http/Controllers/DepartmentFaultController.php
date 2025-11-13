@@ -58,6 +58,10 @@ class DepartmentFaultController extends Controller
         // Base query scoped to the user's section
         $faultsQuery = DB::table('faults')
             ->leftjoin('fault_section','faults.id','=','fault_section.fault_id')
+            ->leftJoin('fault_referrals as fr', function($join) {
+                $join->on('fr.fault_id','=','faults.id');
+                $join->whereNull('fr.completed_at');
+            })
             ->leftjoin('users','faults.assignedTo','=','users.id')
             ->leftjoin('sections','fault_section.section_id','=','sections.id')
             ->leftjoin('customers','faults.customer_id','=','customers.id')
@@ -71,7 +75,10 @@ class DepartmentFaultController extends Controller
             ->leftjoin('reasons_for_outages as confirmedRFO','faults.confirmedRfo_id','=','confirmedRFO.id')
             ->leftjoin('statuses','faults.status_id','=','statuses.id')
             ->orderBy('faults.created_at', 'desc')
-            ->where('fault_section.section_id','=',auth()->user()->section_id)
+            ->where(function($q){
+                $q->where('fault_section.section_id','=',auth()->user()->section_id)
+                  ->orWhere('fr.to_section_id','=',auth()->user()->section_id);
+            })
             ->select([
                 'faults.id',
                 'faults.fault_ref_number',
@@ -95,7 +102,8 @@ class DepartmentFaultController extends Controller
                 'suburbs.suburb',
                 'pops.pop',
                 'suspectedRFO.RFO as RFO',
-                'confirmedRFO.RFO as confirmedRFO'
+                'confirmedRFO.RFO as confirmedRFO',
+                'fr.id as referral_id'
             ]);
 
         // Apply search across common visible columns and related names
@@ -198,6 +206,27 @@ class DepartmentFaultController extends Controller
     public function update(Request $request, $id)
     {
         //
+    }
+
+    public function completeReferral(Request $request, $referralId)
+    {
+        $ref = \App\Models\FaultReferral::find($referralId);
+        if (!$ref) {
+            return back()->with('fail', 'Referral not found');
+        }
+        $fault = Fault::find($ref->fault_id);
+        if (!$fault) {
+            return back()->with('fail', 'Fault not found');
+        }
+
+        $ref->completed_at = now();
+        $ref->save();
+
+        $prev = (int)($ref->previous_status_id ?? 3);
+        $fault->update(['status_id' => $prev]);
+        \App\Services\FaultLifecycle::reopenStageForStatus($fault, $prev, $request->user()->id);
+
+        return back()->with('success', 'Referral work completed and fault returned');
     }
 
     /**

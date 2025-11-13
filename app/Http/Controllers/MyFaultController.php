@@ -11,6 +11,9 @@ use App\Models\Customer;
 use App\Models\Link;
 use App\Models\Remark;
 use App\Models\AccountManager;
+use App\Models\Section;
+use App\Models\FaultReferral;
+use App\Services\FaultLifecycle;
 use DB;
 
 class MyFaultController extends Controller
@@ -92,9 +95,58 @@ class MyFaultController extends Controller
         $remarksByFault = $remarksRecords->groupBy('fault_id');
 
         $confirmedRFO = \App\Models\ReasonsForOutage::all();
+        $sections = Section::all();
 
-        return view('my_faults.index',compact('faults','remarksByFault','confirmedRFO'))
+        return view('my_faults.index',compact('faults','remarksByFault','confirmedRFO','sections'))
         ->with('i');
+    }
+
+    public function refer(Request $request, $id)
+    {
+        $request->validate([
+            'section_id' => ['required','exists:sections,id'],
+            'remark' => ['required','string']
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $fault = Fault::find($id);
+            if (!$fault) {
+                DB::rollBack();
+                return redirect()->back()->with('fail', 'Fault not found');
+            }
+
+            $prevStatus = (int)($fault->status_id ?? 0);
+            $fault->update([
+                'status_id' => 7,
+            ]);
+
+            FaultLifecycle::recordStatusChange($fault, 7, $request->user()->id);
+
+            $section = Section::find((int)$request->input('section_id'));
+            $note = $section ? ('Referred to Section: ' . ($section->section ?? 'Section') . "\n" . $request->input('remark')) : $request->input('remark');
+
+            FaultReferral::create([
+                'fault_id' => $fault->id,
+                'from_section_id' => auth()->user()->section_id,
+                'to_section_id' => (int)$request->input('section_id'),
+                'referred_by' => $request->user()->id,
+                'previous_status_id' => $prevStatus,
+                'work_note' => $note,
+                'started_at' => now(),
+            ]);
+            Remark::create([
+                'fault_id' => $fault->id,
+                'user_id' => $request->user()->id,
+                'remark' => $note,
+            ]);
+
+            DB::commit();
+            return redirect()->route('my_faults.index')->with('success', 'Fault referred to section');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->with('fail', 'Failed to refer fault');
+        }
     }
 
     /**

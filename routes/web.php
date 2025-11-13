@@ -99,7 +99,9 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('permits', PermitController::class);
     Route::resource('finance', FinanceController::class);
     Route::resource('my_faults', MyFaultController::class);
+    Route::post('my_faults/{id}/refer', [MyFaultController::class, 'refer'])->name('my_faults.refer');
     Route::resource('department_faults', DepartmentFaultController::class);
+    Route::post('referrals/{referral}/complete', [DepartmentFaultController::class, 'completeReferral'])->name('referrals.complete');
     Route::resource('rfos', RFOController::class);
     Route::resource('request-permit', RequestPermitController::class);
     Route::resource('stores', StoreController::class);
