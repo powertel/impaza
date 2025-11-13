@@ -322,7 +322,7 @@ class DepartmentFaultController extends Controller
 
         $remarksByFault = $remarksRecords->groupBy('fault_id');
 
-        return view('department_faults.index',compact('faults','remarksByFault','perPage'))
+        return view('department_faults.referred',compact('faults','remarksByFault','perPage'))
             ->with('i');
     }
 

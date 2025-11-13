@@ -78,7 +78,7 @@ My Faults
                         @endcan
 
                         <!--<a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>-->
-                            @if ($fault->description==='Fault is under rectification')
+                        @if ($fault->description==='Fault is under rectification')
 
                             @can('rectify-fault')
                                 <button class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#rectifyEditModal-{{ $fault->id }}">
@@ -90,15 +90,15 @@ My Faults
                                     <i class="fas fa-pencil me-1"></i>Request Permit
                                 </button>
                             @endcan
-                        @can('materials')
-                            <button class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#requestMaterialCreateModal-{{ $fault->id }}">
-                                <i class="fas fa-pencil me-1"></i>Request Material
+                            @can('materials')
+                                <button class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#requestMaterialCreateModal-{{ $fault->id }}">
+                                    <i class="fas fa-pencil me-1"></i>Request Material
+                                </button>
+                            @endcan
+                            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#referModal-{{ $fault->id }}">
+                                <i class="fas fa-share me-1"></i>Refer
                             </button>
-                        @endcan
-                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#referModal-{{ $fault->id }}">
-                            <i class="fas fa-share me-1"></i>Refer
-                        </button>
-                        
+                            
                         @endif
                             <button class="btn  btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                 <i class="fas fa-eye me-1"></i>View
