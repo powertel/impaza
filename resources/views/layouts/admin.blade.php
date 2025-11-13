@@ -12,6 +12,9 @@
 
     <title>@yield('title')</title>
 
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('img/favicon.png') }}" type="image/png">
+
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">

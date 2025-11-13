@@ -1,13 +1,17 @@
 <!-- Main Sidebar Container -->
-<aside class="main-sidebar sidebar-light-primary elevation-4" style="background:#fff;border-right:1px solid #eee;">
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+
+
     <!-- Sidebar -->
     <div class="sidebar" style="display: flex; flex-direction: column; min-height: 0;">
         <!-- Sidebar user panel (optional) -->
-        <div class="user-panel d-flex" style="flex: 0 0 auto;">
-            <div class="info">
-                <h3 class="d-block" style="color: orange;">IMPAZAMON</h3>
+        <div class="user-panel d-flex bg-transparent p-2" style="flex: 0 0 auto;">
+            <div class="image" style="width: 100%; text-align: left;">
+                <img src="{{ asset('img/impazamon-v2.png') }}" alt="Logo" style="max-height: none; width: 90%; margin-left: 0;">
             </div>
         </div>
+
+        
 
         <!-- Sidebar Menu -->
         <nav class="mt-2" style="flex: 1 1 auto;">
