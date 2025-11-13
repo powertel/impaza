@@ -97,7 +97,7 @@ export default function FaultDetailScreen() {
           </View>
         )}
 
-        {String(fault.status_id) !== '4' && (
+        {String(fault.status_id) == '3' && (
           <TouchableOpacity style={styles.secondaryBtn} onPress={() => navigation.navigate('AddRemark', { id })}>
             <Text style={styles.secondaryBtnText}>Add Remark</Text>
           </TouchableOpacity>
