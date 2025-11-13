@@ -39,7 +39,8 @@ class MyFaultController extends Controller
                 ->leftjoin('cities','faults.city_id','=','cities.id')
                 ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
                 ->leftjoin('pops','faults.pop_id','=','pops.id')
-                ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
+                ->leftjoin('reasons_for_outages as suspectedRFO','faults.suspectedRfo_id','=','suspectedRFO.id')
+                ->leftjoin('reasons_for_outages as confirmedRFO','faults.confirmedRfo_id','=','confirmedRFO.id')
                 // Join open stage for current status to get start time
                 ->leftjoin('fault_stage_logs as fsl', function($join) {
                     $join->on('fsl.fault_id','=','faults.id');
@@ -66,7 +67,9 @@ class MyFaultController extends Controller
                     'cities.city as city',
                     'suburbs.suburb as suburb',
                     'pops.pop as pop',
-                    'reasons_for_outages.RFO as RFO',
+                    'suspectedRFO.RFO as RFO',
+                    'faults.confirmedRfo_id',
+                    'confirmedRFO.RFO as confirmedRFO',
                     'fsl.started_at as stage_started_at'
                 ]);
         // Collect remarks for all listed faults and group by fault_id
@@ -88,7 +91,9 @@ class MyFaultController extends Controller
 
         $remarksByFault = $remarksRecords->groupBy('fault_id');
 
-        return view('my_faults.index',compact('faults','remarksByFault'))
+        $confirmedRFO = \App\Models\ReasonsForOutage::all();
+
+        return view('my_faults.index',compact('faults','remarksByFault','confirmedRFO'))
         ->with('i');
     }
 

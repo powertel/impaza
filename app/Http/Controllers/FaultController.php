@@ -52,7 +52,8 @@ class FaultController extends Controller
                 ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
                 ->leftjoin('users as account_manager_users','account_managers.user_id','=','account_manager_users.id')
                 ->leftjoin('statuses','faults.status_id','=','statuses.id')
-                ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
+                ->leftjoin('reasons_for_outages as suspectedRFO','faults.suspectedRfo_id','=','suspectedRFO.id')
+                ->leftjoin('reasons_for_outages as confirmedRFO','faults.confirmedRfo_id','=','confirmedRFO.id')
                 ->leftjoin('cities','faults.city_id','=','cities.id')
                 ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
                 ->leftjoin('pops','faults.pop_id','=','pops.id')
@@ -86,7 +87,9 @@ class FaultController extends Controller
                 'cities.city',
                 'suburbs.suburb',
                 'pops.pop',
-                'reasons_for_outages.RFO as RFO'
+                'suspectedRFO.RFO as RFO',
+                'faults.confirmedRfo_id',
+                'confirmedRFO.RFO as confirmedRFO'
                 ]);
 
         if ($q !== '') {
@@ -336,7 +339,8 @@ class FaultController extends Controller
                 ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
                 ->leftjoin('users as account_manager_users','account_managers.user_id','=','account_manager_users.id')
                 ->leftjoin('statuses','faults.status_id','=','statuses.id')
-                ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
+                ->leftjoin('reasons_for_outages as suspectedRFO','faults.suspectedRfo_id','=','suspectedRFO.id')
+                ->leftjoin('reasons_for_outages as confirmedRFO','faults.confirmedRfo_id','=','confirmedRFO.id')
                 ->leftjoin('cities','faults.city_id','=','cities.id')
                 ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
                 ->leftjoin('pops','faults.pop_id','=','pops.id')
@@ -371,7 +375,9 @@ class FaultController extends Controller
                 'cities.city',
                 'suburbs.suburb',
                 'pops.pop',
-                'reasons_for_outages.RFO as RFO'
+                'suspectedRFO.RFO as RFO',
+                'faults.confirmedRfo_id',
+                'confirmedRFO.RFO as confirmedRFO'
                 ]);
 
         if ($q !== '') {

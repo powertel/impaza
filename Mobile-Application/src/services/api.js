@@ -64,3 +64,7 @@ export async function getTechnicianStats(params = {}) {
   const query = Object.keys(params || {}).length ? `?${new URLSearchParams(params).toString()}` : '';
   return request(`/mobile/technician-stats${query}`);
 }
+
+export async function getRFOs() {
+  return request('/mobile/rfos');
+}

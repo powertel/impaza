@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Mobile;
 use App\Http\Controllers\Controller;
 use App\Models\Fault;
 use App\Models\Remark;
+use App\Models\ReasonsForOutage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Services\FaultLifecycle;
@@ -196,6 +197,7 @@ class FaultController extends Controller
 
         $data = $request->validate([
             'notes' => 'required|string|min:2',
+            'confirmedRfo_id' => 'required|exists:reasons_for_outages,id',
             'activity' => 'nullable|string',
             'attachment' => 'nullable|file',
         ]);
@@ -222,11 +224,17 @@ class FaultController extends Controller
             'file_path' => $path,
         ]);
 
-        // Technician resolved: set status to 4 and log lifecycle
-        $fault->update(['status_id' => 4]);
+        // Technician resolved: set status to 4, save confirmed RFO and log lifecycle
+        $fault->update(['status_id' => 4, 'confirmedRfo_id' => $data['confirmedRfo_id']]);
         FaultLifecycle::recordStatusChange($fault, 4, $user->id);
         FaultLifecycle::resolveAssignment($fault);
 
         return response()->json(['success' => true, 'message' => 'Fault marked as technician resolved']);
+    }
+
+    public function rfos()
+    {
+        $rfos = ReasonsForOutage::orderBy('RFO')->get(['id','RFO']);
+        return response()->json($rfos);
     }
 }

@@ -65,7 +65,8 @@ class AssessmentController extends Controller
             ->leftjoin('cities','faults.city_id','=','cities.id')
             ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
             ->leftjoin('pops','faults.pop_id','=','pops.id')
-            ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
+            ->leftjoin('reasons_for_outages as suspectedRFO','faults.suspectedRfo_id','=','suspectedRFO.id')
+            ->leftjoin('reasons_for_outages as confirmedRFO','faults.confirmedRfo_id','=','confirmedRFO.id')
             // Join open stage for current status to get start time
             ->leftjoin('fault_stage_logs as fsl', function($join) {
                 $join->on('fsl.fault_id','=','faults.id');
@@ -77,7 +78,7 @@ class AssessmentController extends Controller
             ->get(['faults.id','faults.fault_ref_number','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
                 'account_manager_users.name as accountManager','faults.suspectedRfo_id','links.link','statuses.description','users.name','faults.status_id as status_id',
                 'cities.city as city','cities.region as region','faults.city_id as city_id','suburbs.suburb as suburb','pops.pop as pop','faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at',
-                'reasons_for_outages.RFO as RFO', 'fsl.started_at as stage_started_at']);
+                'suspectedRFO.RFO as RFO','confirmedRFO.RFO as confirmedRFO', 'fsl.started_at as stage_started_at']);
         // Datasets required for modal-based actions on the assessments page
         $sections = Section::all();
         $confirmedRFO = ReasonsForOutage::all();
@@ -239,10 +240,11 @@ class AssessmentController extends Controller
         ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
         ->leftjoin('pops','faults.pop_id','=','pops.id')
         ->leftjoin('remarks','remarks.fault_id','=','faults.id')
-        ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
+        ->leftjoin('reasons_for_outages as suspectedRFO','faults.suspectedRfo_id','=','suspectedRFO.id')
+        ->leftjoin('reasons_for_outages as confirmedRFO','faults.confirmedRfo_id','=','confirmedRFO.id')
         ->leftjoin('account_managers','faults.accountManager_id','=','account_managers.id')
         ->where('faults.id','=',$id)
-        ->get(['faults.id','faults.customer_id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','reasons_for_outages.RFO',
+        ->get(['faults.id','faults.customer_id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','suspectedRFO.RFO','confirmedRFO.RFO as confirmedRFO',
         'account_managers.accountManager','faults.accountManager_id','faults.city_id','cities.city','faults.suburb_id','suburbs.suburb','faults.pop_id','pops.pop','faults.suspectedRfo_id','faults.link_id','links.link'
         ,'faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','remarks.fault_id','remarks.remark','faults.created_at'])
         ->first();
@@ -282,28 +284,33 @@ class AssessmentController extends Controller
         DB::beginTransaction();
         try{
             request()->validate([
-                'section_id'=> 'required',
                 'priorityLevel'=>'required',
                 'faultType'=>'required',
-                'confirmedRfo_id'=>'required'
             ]);
 
             $fault = Fault::find($id);
-            $req= $request->all();
+            $req = $request->only(['priorityLevel','faultType']);
             $req['status_id'] = 2;
-            $fault ->update($req);
+            $fault->update($req);
             // Log transition to "Fault has been assessed" (status_id = 2)
             FaultLifecycle::recordStatusChange($fault, 2, $request->user()->id);
 
+            $sectionId = null;
+            if ($request->input('faultType') === 'Logical') {
+                $sectionId = 1;
+            } elseif ($request->input('faultType') === 'Physical') {
+                $sectionId = 2;
+            }
+
             $fault_section = FaultSection::firstOrCreate(['fault_id' => $id]);
-            $fault_section -> update(
-                [
-                    'fault_id'=> $fault->id,
-                    'section_id' => $request['section_id'],
-                ]
-            );
-			
-			$this->autoAssign($request['section_id']);
+            $fault_section->update([
+                'fault_id' => $fault->id,
+                'section_id' => $sectionId,
+            ]);
+
+            if (!is_null($sectionId)) {
+                $this->autoAssign($sectionId);
+            }
 
           if($fault  && $fault_section)
             {
