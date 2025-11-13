@@ -108,6 +108,12 @@
                 <p>Department</p>
               </a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link {{ request()->routeIs('referred_faults.index') ? 'active' : '' }}" href="{{ route('referred_faults.index') }}">
+                <i class="nav-icon fas fa-share-square"></i>
+                <p>Referred Faults</p>
+              </a>
+            </li>
             @endcan
 
             @canany(['permit-list'])

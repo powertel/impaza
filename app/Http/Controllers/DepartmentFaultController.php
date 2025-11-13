@@ -229,6 +229,96 @@ class DepartmentFaultController extends Controller
         return back()->with('success', 'Referral work completed and fault returned');
     }
 
+    public function referred(Request $request)
+    {
+        $perPage = (int) request('per_page', 20);
+        $perPage = in_array($perPage, [10,20,50,100]) ? $perPage : 20;
+        $q = trim((string) request('q', ''));
+
+        $faultsQuery = DB::table('faults')
+            ->leftjoin('users','faults.assignedTo','=','users.id')
+            ->leftjoin('customers','faults.customer_id','=','customers.id')
+            ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
+            ->leftjoin('users as account_manager_users','account_managers.user_id','=','account_manager_users.id')
+            ->leftjoin('links','faults.link_id','=','links.id')
+            ->leftjoin('cities','faults.city_id','=','cities.id')
+            ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
+            ->leftjoin('pops','faults.pop_id','=','pops.id')
+            ->leftjoin('reasons_for_outages as suspectedRFO','faults.suspectedRfo_id','=','suspectedRFO.id')
+            ->leftjoin('reasons_for_outages as confirmedRFO','faults.confirmedRfo_id','=','confirmedRFO.id')
+            ->leftjoin('statuses','faults.status_id','=','statuses.id')
+            ->leftJoin('fault_referrals as fr', function($join) {
+                $join->on('fr.fault_id','=','faults.id');
+                $join->whereNull('fr.completed_at');
+            })
+            ->orderBy('faults.created_at', 'desc')
+            ->where('fr.to_section_id','=',auth()->user()->section_id)
+            ->select([
+                'faults.id',
+                'faults.fault_ref_number',
+                'customers.customer',
+                'faults.contactName',
+                'faults.phoneNumber',
+                'faults.contactEmail',
+                'faults.address',
+                'faults.assignedTo',
+                'account_manager_users.name as accountManager',
+                'faults.suspectedRfo_id',
+                'links.link',
+                'statuses.description',
+                'users.name',
+                'faults.serviceType',
+                'faults.serviceAttribute',
+                'faults.faultType',
+                'faults.priorityLevel',
+                'faults.created_at',
+                'cities.city',
+                'suburbs.suburb',
+                'pops.pop',
+                'suspectedRFO.RFO as RFO',
+                'confirmedRFO.RFO as confirmedRFO',
+                'fr.id as referral_id'
+            ]);
+
+        if ($q !== '') {
+            $like = "%".$q."%";
+            $faultsQuery->where(function($qq) use ($like) {
+                $qq->where('faults.fault_ref_number', 'like', $like)
+                   ->orWhere('customers.customer', 'like', $like)
+                   ->orWhere('account_manager_users.name', 'like', $like)
+                   ->orWhere('links.link', 'like', $like)
+                   ->orWhere('users.name', 'like', $like)
+                   ->orWhere('statuses.description', 'like', $like)
+                   ->orWhere('cities.city', 'like', $like)
+                   ->orWhere('suburbs.suburb', 'like', $like)
+                   ->orWhere('pops.pop', 'like', $like);
+            });
+        }
+
+        $faults = $faultsQuery->paginate($perPage)->withQueryString();
+
+        $faultIds = $faults->getCollection()->pluck('id');
+        $remarksRecords = DB::table('remarks')
+            ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
+            ->leftjoin('users','remarks.user_id','=','users.id')
+            ->whereIn('remarks.fault_id', $faultIds)
+            ->orderBy('remarks.created_at', 'desc')
+            ->get([
+                'remarks.id',
+                'remarks.fault_id',
+                'remarks.created_at',
+                'remarks.remark',
+                'remarks.file_path',
+                'users.name',
+                'remark_activities.activity'
+            ]);
+
+        $remarksByFault = $remarksRecords->groupBy('fault_id');
+
+        return view('department_faults.index',compact('faults','remarksByFault','perPage'))
+            ->with('i');
+    }
+
     /**
      * Remove the specified resource from storage.
      *
