@@ -167,8 +167,7 @@ Login
 <div id="app" style="display:none"></div>
 <div class="login-stage">
   <div class="brand-top">
-    <img src="{{ asset('img/logo_sm.png') }}" alt="iMPAZAMON logo">
-    <span>iMPAZAMON</span>
+    <img src="{{ asset('img/impazamon-v2.png') }}" alt="Logo" style="max-height: none; width: 90%; margin-left: 0;">
   </div>
 
   <div class="login-card">
@@ -196,11 +195,11 @@ Login
         @enderror
       </div>
 
-      <div class="forgot-block">
+      <!-- <div class="forgot-block">
         @if (Route::has('password.request'))
           <a class="forgot-link" href="{{ route('password.request') }}">Forgot password?</a>
         @endif
-      </div>
+      </div> -->
 
       <button type="submit" class="btn btn-primary modern">Sign in</button>
 
