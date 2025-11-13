@@ -38,35 +38,38 @@
             </div>
           </div>
 
-          <!-- Assessment Form -->
+          <!-- Assessment -->
           <div class="col-lg-7">
-            <form id="assess-form-{{ $fault->id }}" action="{{ route('assessments.update', $fault->id ) }}" method="POST">
-              @csrf
-              @method('PUT')
-
-              <div class="row g-3">
-                <div class="mb-3 col-md-6">
-                  <label class="form-label">Fault Type</label>
-                  <select class="form-select @error('faultType') is-invalid @enderror" name="faultType" required>
-                    <option selected disabled>Select Fault Type</option>
-                    <option value="Logical">Logical</option>
-                    <option value="Physical">Physical</option>
-                  </select>
-                </div>
+            <div class="card border-0 shadow-sm h-100 rounded-3">
+              <div class="card-header bg-transparent border-0">
+                <h6 class="mb-0 text-secondary"><i class="fas fa-clipboard-check me-2 text-primary"></i>Assessment</h6>
               </div>
-
-              <div class="row g-3">
-                <div class="mb-3 col-md-6">
-                  <label class="form-label">Priority Level</label>
-                  <select class="form-select @error('priorityLevel') is-invalid @enderror" name="priorityLevel" required>
-                    <option selected disabled>Select</option>
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
-                  </select>
-                </div>
+              <div class="card-body">
+                <form id="assess-form-{{ $fault->id }}" action="{{ route('assessments.update', $fault->id ) }}" method="POST">
+                  @csrf
+                  @method('PUT')
+                  <div class="row g-3">
+                    <div class="mb-3 col-md-12">
+                      <label class="form-label">Fault Type</label>
+                      <select class="form-select @error('faultType') is-invalid @enderror" name="faultType" required>
+                        <option disabled {{ old('faultType', $fault->faultType ?? null) ? '' : 'selected' }}>Select Fault Type</option>
+                        <option value="Logical" {{ old('faultType', $fault->faultType ?? '') === 'Logical' ? 'selected' : '' }}>Logical</option>
+                        <option value="Physical" {{ old('faultType', $fault->faultType ?? '') === 'Physical' ? 'selected' : '' }}>Physical</option>
+                      </select>
+                    </div>
+                    <div class="mb-3 col-md-12">
+                      <label class="form-label">Priority Level</label>
+                      <select class="form-select @error('priorityLevel') is-invalid @enderror" name="priorityLevel" required>
+                        <option disabled {{ old('priorityLevel', $fault->priorityLevel ?? null) ? '' : 'selected' }}>Select</option>
+                        <option value="Low" {{ old('priorityLevel', $fault->priorityLevel ?? '') === 'Low' ? 'selected' : '' }}>Low</option>
+                        <option value="Medium" {{ old('priorityLevel', $fault->priorityLevel ?? '') === 'Medium' ? 'selected' : '' }}>Medium</option>
+                        <option value="High" {{ old('priorityLevel', $fault->priorityLevel ?? '') === 'High' ? 'selected' : '' }}>High</option>
+                      </select>
+                    </div>
+                  </div>
+                </form>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>
