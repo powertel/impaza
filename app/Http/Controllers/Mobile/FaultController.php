@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Fault;
 use App\Models\Remark;
 use App\Models\ReasonsForOutage;
+use App\Models\Section;
+use App\Models\FaultReferral;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Services\FaultLifecycle;
@@ -236,5 +238,51 @@ class FaultController extends Controller
     {
         $rfos = ReasonsForOutage::orderBy('RFO')->get(['id','RFO']);
         return response()->json($rfos);
+    }
+
+    public function sections()
+    {
+        return response()->json(Section::orderBy('section')->get(['id','section']));
+    }
+
+    public function refer(Request $request, Fault $fault)
+    {
+        $validated = $request->validate([
+            'section_id' => ['required','exists:sections,id'],
+            'remark' => ['required','string']
+        ]);
+
+        \DB::beginTransaction();
+        try {
+            $prev = (int)($fault->status_id ?? 0);
+            $fault->update(['status_id' => 7]);
+            FaultLifecycle::recordStatusChange($fault, 7, $request->user()->id);
+            FaultLifecycle::resolveAssignment($fault);
+
+            $section = Section::find((int)$validated['section_id']);
+            $note = $section ? ('Referred to Section: ' . ($section->section ?? 'Section') . "\n" . $validated['remark']) : $validated['remark'];
+
+            FaultReferral::create([
+                'fault_id' => $fault->id,
+                'from_section_id' => $request->user()->section_id,
+                'to_section_id' => (int)$validated['section_id'],
+                'referred_by' => $request->user()->id,
+                'previous_status_id' => $prev,
+                'work_note' => $note,
+                'started_at' => now(),
+            ]);
+
+            Remark::create([
+                'fault_id' => $fault->id,
+                'user_id' => $request->user()->id,
+                'remark' => $note,
+            ]);
+
+            \DB::commit();
+            return response()->json(['success' => true]);
+        } catch (\Throwable $e) {
+            \DB::rollBack();
+            return response()->json(['success' => false, 'error' => 'Failed to refer'], 500);
+        }
     }
 }
