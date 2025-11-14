@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   label: { fontSize: theme.fontSizes.md, color: theme.colors.gray, fontWeight: '500', marginBottom: theme.spacing.xs },
   select: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, paddingVertical: theme.spacing.md, paddingHorizontal: theme.spacing.md, marginBottom: theme.spacing.md },
   selectText: { fontSize: theme.fontSizes.md, color: theme.colors.dark },
-  dropdown: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, marginBottom: theme.spacing.md, maxHeight: 220 },
+  dropdown: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, backgroundColor: theme.colors.white, marginBottom: theme.spacing.md },
   dropdownItem: { paddingVertical: theme.spacing.md, paddingHorizontal: theme.spacing.md, borderBottomWidth: 1, borderBottomColor: theme.colors.lightGray },
   dropdownItemText: { fontSize: theme.fontSizes.md, color: theme.colors.dark },
   input: { backgroundColor: theme.colors.white, borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, padding: theme.spacing.md, minHeight: 120, textAlignVertical: 'top' },
