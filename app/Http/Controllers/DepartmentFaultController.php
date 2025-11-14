@@ -14,7 +14,9 @@ use App\Models\AccountManager;
 use App\Models\Section;
 use App\Models\User;
 use App\Models\UserStatus;
+use App\Services\FaultLifecycle;
 use DB;
+
 
 class DepartmentFaultController extends Controller
 {
@@ -228,8 +230,8 @@ class DepartmentFaultController extends Controller
 
         $prev = (int)($ref->previous_status_id ?? 3);
         $fault->update(['status_id' => $prev]);
-        \App\Services\FaultLifecycle::reopenStageForStatus($fault, $prev, $request->user()->id);
-        \App\Services\FaultLifecycle::reopenAssignment($fault);
+        FaultLifecycle::reopenStageForStatus($fault, $prev, $request->user()->id);
+        FaultLifecycle::reopenAssignment($fault);
 
         Remark::create([
             'fault_id' => $fault->id,

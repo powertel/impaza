@@ -82,15 +82,31 @@ class FaultLifecycle
     {
         // Close any currently open stage (e.g., Technician Cleared)
         FaultStageLog::endStage($fault->id, $actorUserId);
+
+        // Capture the last closed duration BEFORE reopening so we can restore accurate age
+        $lastClosed = FaultStageLog::where('fault_id', $fault->id)
+            ->where('status_id', $statusId)
+            ->whereNotNull('ended_at')
+            ->orderByDesc('started_at')
+            ->first();
+        $priorSeconds = (int)($lastClosed->duration_seconds ?? 0);
+
         // Attempt to reopen the last stage for the target status
         FaultStageLog::reopenLastForStatus($fault->id, $statusId);
+
         // If there is no previous stage of that status, start a fresh one
-        $exists = FaultStageLog::where('fault_id', $fault->id)
+        $open = FaultStageLog::where('fault_id', $fault->id)
             ->where('status_id', $statusId)
             ->whereNull('ended_at')
-            ->exists();
-        if (!$exists) {
+            ->orderByDesc('started_at')
+            ->first();
+        if (!$open) {
             FaultStageLog::startStage($fault->id, $statusId, $actorUserId);
+        } else {
+            if ($priorSeconds > 0) {
+                $open->started_at = now()->subSeconds($priorSeconds);
+                $open->save();
+            }
         }
     }
 
