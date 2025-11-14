@@ -35,6 +35,7 @@ export default function FaultDetailScreen() {
     loadFault();
   }, [id, isFocused, route.params?.refetchAt]);
 
+
   if (loading || !fault) {
     return (
       <SafeAreaView style={styles.center} edges={["top","left","right"]}> 
@@ -100,6 +101,12 @@ export default function FaultDetailScreen() {
         {String(fault.status_id) == '3' && (
           <TouchableOpacity style={styles.secondaryBtn} onPress={() => navigation.navigate('AddRemark', { id })}>
             <Text style={styles.secondaryBtnText}>Add Remark</Text>
+          </TouchableOpacity>
+        )}
+
+        {String(fault.status_id) === '3' && (
+          <TouchableOpacity style={styles.secondaryBtn} onPress={() => navigation.navigate('ReferFault', { id })}>
+            <Text style={styles.secondaryBtnText}>Refer Fault</Text>
           </TouchableOpacity>
         )}
 
