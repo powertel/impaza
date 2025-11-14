@@ -122,6 +122,7 @@ class MyFaultController extends Controller
             ]);
 
             FaultLifecycle::recordStatusChange($fault, 7, $request->user()->id);
+            FaultLifecycle::resolveAssignment($fault);
 
             $section = Section::find((int)$request->input('section_id'));
             $note = $section ? ('Referred to Section: ' . ($section->section ?? 'Section') . "\n" . $request->input('remark')) : $request->input('remark');

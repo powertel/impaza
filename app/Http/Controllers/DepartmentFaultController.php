@@ -210,6 +210,10 @@ class DepartmentFaultController extends Controller
 
     public function completeReferral(Request $request, $referralId)
     {
+        $request->validate([
+            'remark' => ['required','string']
+        ]);
+
         $ref = \App\Models\FaultReferral::find($referralId);
         if (!$ref) {
             return back()->with('fail', 'Referral not found');
@@ -225,6 +229,13 @@ class DepartmentFaultController extends Controller
         $prev = (int)($ref->previous_status_id ?? 3);
         $fault->update(['status_id' => $prev]);
         \App\Services\FaultLifecycle::reopenStageForStatus($fault, $prev, $request->user()->id);
+        \App\Services\FaultLifecycle::reopenAssignment($fault);
+
+        Remark::create([
+            'fault_id' => $fault->id,
+            'user_id' => $request->user()->id,
+            'remark' => 'Referral completed: '.$request->input('remark'),
+        ]);
 
         return back()->with('success', 'Referral work completed and fault returned');
     }

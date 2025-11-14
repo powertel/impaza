@@ -69,14 +69,7 @@ Department Faults
                             <button class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                 <i class="fas fa-eye me-1"></i>View
                             </button>
-                            @if(!empty($fault->referral_id))
-                              <form action="{{ route('referrals.complete', $fault->referral_id) }}" method="POST" class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn btn-outline-primary">
-                                  <i class="fas fa-check me-1"></i>Complete Referral
-                                </button>
-                              </form>
-                            @endif
+                        
                         </td>
                     </tr>
                     @endforeach
@@ -89,6 +82,11 @@ Department Faults
             </table>
             @foreach ($faults as $fault)
                 @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
+            @endforeach
+            @foreach ($faults as $fault)
+              @if(!empty($fault->referral_id))
+                @include('department_faults.complete_referral_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
+              @endif
             @endforeach
             <div class="d-flex justify-content-between align-items-center mt-2">
                 <div class="text-muted">
