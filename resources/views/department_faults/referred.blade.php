@@ -11,7 +11,7 @@ Department Faults
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">Department Faults</h3>
+        <h3 class="card-title">Reffered Faults</h3>
         <div class="card-tools">
         </div>
     </div>
@@ -44,10 +44,11 @@ Department Faults
                         <th>No.</th>
                         <th>Ref No.</th>
                         <th>Customer</th>
-                        <th>Account Manager</th>
+                       <!--  <th>Account Manager</th> -->
                         <th>Link Name</th>
                         <th>Assigned To</th>
                         <th>Status</th>
+                        <th>Fault Age</th>
                         <th>Action(s)</th>
                     </tr>
                 </thead>
@@ -57,7 +58,7 @@ Department Faults
                         <td>{{ $faults->firstItem() + $loop->index }}</td>
                         <td>{{$fault->fault_ref_number}}</td>
                         <td>{{ $fault->customer }}</td>
-                        <td>{{ $fault->accountManager }}</td>
+                        <!-- <td>{{ $fault->accountManager }}</td> -->
                         <td>{{ $fault->link }}</td>
                         <td class="{{ $fault->name ? 'fw-bold' : 'text-muted' }}">{{ $fault->name ?: 'Not yet assigned' }}</td>
                         <td class="text-nowrap">
@@ -66,10 +67,17 @@ Department Faults
                             </span>
                         </td>
                         <td>
+                            <span class="badge rounded-pill bg-light text-danger age-ticker fs-6" data-started-at="{{ $fault->stage_started_at ?? '' }}"></span>
+                        </td>
+                        <td>
                             <button class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                 <i class="fas fa-eye me-1"></i>View
                             </button>
-                        
+                            @if(!empty($fault->referral_id))
+                              <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#completeReferralModal-{{ $fault->id }}">
+                                <i class="fas fa-check me-1"></i>Complete Referral
+                              </button>
+                            @endif
                         </td>
                     </tr>
                     @endforeach
@@ -82,11 +90,9 @@ Department Faults
             </table>
             @foreach ($faults as $fault)
                 @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
-            @endforeach
-            @foreach ($faults as $fault)
-              @if(!empty($fault->referral_id))
-                @include('department_faults.complete_referral_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
-              @endif
+                @if(!empty($fault->referral_id))
+                    @include('department_faults.complete_referral_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
+                @endif
             @endforeach
             <div class="d-flex justify-content-between align-items-center mt-2">
                 <div class="text-muted">

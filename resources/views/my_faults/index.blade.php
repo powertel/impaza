@@ -78,7 +78,7 @@ My Faults
                         @endcan
 
                         <!--<a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>-->
-                            @if ($fault->description==='Fault is under rectification')
+                        @if ($fault->description==='Fault is under rectification')
 
                             @can('rectify-fault')
                                 <button class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#rectifyEditModal-{{ $fault->id }}">
@@ -95,8 +95,11 @@ My Faults
                                     <i class="fas fa-pencil me-1"></i>Request Material
                                 </button>
                             @endcan
+                            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#referModal-{{ $fault->id }}">
+                                <i class="fas fa-share me-1"></i>Refer
+                            </button>
                             
-                            @endif
+                        @endif
                             <button class="btn  btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                 <i class="fas fa-eye me-1"></i>View
                             </button>
@@ -117,6 +120,7 @@ My Faults
                 @include('rectification.edit_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()), 'confirmedRFO' => ($confirmedRFO ?? collect()) ])
                 @include('permits.requested-permits.edit_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
                 @include('stores.create_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
+                @include('my_faults.refer_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()), 'sections' => ($sections ?? collect()) ])
                 @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
             @endforeach
             <div id="myFaultsPager" class="mt-2"></div>

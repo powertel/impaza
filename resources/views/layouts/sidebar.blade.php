@@ -24,7 +24,7 @@
               </a>
             </li>
 
-            @canany(['fault-list','my-fault-list','assigned-fault-list','assessment-fault-list','chief-tech-clear-faults-list','noc-clear-faults-list','department-faults-list','manage-faults'])
+            @canany(['fault-list','my-fault-list','assigned-fault-list','assessment-fault-list','chief-tech-clear-faults-list','noc-clear-faults-list','department-faults-list','manage-faults','referred-faults'])
               <li class="nav-header">Faults</li>
             @endcanany
             @can('fault-list')
@@ -108,6 +108,15 @@
                 <p>Department</p>
               </a>
             </li>
+            @endcan
+
+            @can('referred-faults')
+              <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('referred_faults.index') ? 'active' : '' }}" href="{{ route('referred_faults.index') }}">
+                  <i class="nav-icon fas fa-share-square"></i>
+                  <p>Referred</p>
+                </a>
+              </li>
             @endcan
 
             @canany(['permit-list'])

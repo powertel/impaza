@@ -58,6 +58,10 @@ class DepartmentFaultController extends Controller
         // Base query scoped to the user's section
         $faultsQuery = DB::table('faults')
             ->leftjoin('fault_section','faults.id','=','fault_section.fault_id')
+            ->leftJoin('fault_referrals as fr', function($join) {
+                $join->on('fr.fault_id','=','faults.id');
+                $join->whereNull('fr.completed_at');
+            })
             ->leftjoin('users','faults.assignedTo','=','users.id')
             ->leftjoin('sections','fault_section.section_id','=','sections.id')
             ->leftjoin('customers','faults.customer_id','=','customers.id')
@@ -71,7 +75,10 @@ class DepartmentFaultController extends Controller
             ->leftjoin('reasons_for_outages as confirmedRFO','faults.confirmedRfo_id','=','confirmedRFO.id')
             ->leftjoin('statuses','faults.status_id','=','statuses.id')
             ->orderBy('faults.created_at', 'desc')
-            ->where('fault_section.section_id','=',auth()->user()->section_id)
+            ->where(function($q){
+                $q->where('fault_section.section_id','=',auth()->user()->section_id)
+                  ->orWhere('fr.to_section_id','=',auth()->user()->section_id);
+            })
             ->select([
                 'faults.id',
                 'faults.fault_ref_number',
@@ -95,7 +102,8 @@ class DepartmentFaultController extends Controller
                 'suburbs.suburb',
                 'pops.pop',
                 'suspectedRFO.RFO as RFO',
-                'confirmedRFO.RFO as confirmedRFO'
+                'confirmedRFO.RFO as confirmedRFO',
+                'fr.id as referral_id'
             ]);
 
         // Apply search across common visible columns and related names
@@ -200,6 +208,135 @@ class DepartmentFaultController extends Controller
         //
     }
 
+    public function completeReferral(Request $request, $referralId)
+    {
+        $request->validate([
+            'remark' => ['required','string']
+        ]);
+
+        $ref = \App\Models\FaultReferral::find($referralId);
+        if (!$ref) {
+            return back()->with('fail', 'Referral not found');
+        }
+        $fault = Fault::find($ref->fault_id);
+        if (!$fault) {
+            return back()->with('fail', 'Fault not found');
+        }
+
+        $ref->completed_at = now();
+        $ref->save();
+
+        $prev = (int)($ref->previous_status_id ?? 3);
+        $fault->update(['status_id' => $prev]);
+        \App\Services\FaultLifecycle::reopenStageForStatus($fault, $prev, $request->user()->id);
+        \App\Services\FaultLifecycle::reopenAssignment($fault);
+
+        Remark::create([
+            'fault_id' => $fault->id,
+            'user_id' => $request->user()->id,
+            'remark' => 'Referral completed: '.$request->input('remark'),
+        ]);
+
+        return back()->with('success', 'Referral work completed and fault returned');
+    }
+
+    public function referred(Request $request)
+    {
+        $perPage = (int) request('per_page', 20);
+        $perPage = in_array($perPage, [10,20,50,100]) ? $perPage : 20;
+        $q = trim((string) request('q', ''));
+
+        $faultsQuery = DB::table('faults')
+            ->leftjoin('users','faults.assignedTo','=','users.id')
+            ->leftjoin('customers','faults.customer_id','=','customers.id')
+            ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
+            ->leftjoin('users as account_manager_users','account_managers.user_id','=','account_manager_users.id')
+            ->leftjoin('links','faults.link_id','=','links.id')
+            ->leftjoin('cities','faults.city_id','=','cities.id')
+            ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
+            ->leftjoin('pops','faults.pop_id','=','pops.id')
+            ->leftjoin('reasons_for_outages as suspectedRFO','faults.suspectedRfo_id','=','suspectedRFO.id')
+            ->leftjoin('reasons_for_outages as confirmedRFO','faults.confirmedRfo_id','=','confirmedRFO.id')
+            ->leftjoin('statuses','faults.status_id','=','statuses.id')
+            ->leftJoin('fault_referrals as fr', function($join) {
+                $join->on('fr.fault_id','=','faults.id');
+                $join->whereNull('fr.completed_at');
+            })
+
+            ->leftjoin('fault_stage_logs as fsl', function($join) {
+                    $join->on('fsl.fault_id','=','faults.id');
+                    $join->on('fsl.status_id','=','faults.status_id');
+                    $join->whereNull('fsl.ended_at');
+                })
+            ->orderBy('faults.created_at', 'desc')
+            ->where('fr.to_section_id','=',auth()->user()->section_id)
+            ->select([
+                'faults.id',
+                'faults.fault_ref_number',
+                'customers.customer',
+                'faults.contactName',
+                'faults.phoneNumber',
+                'faults.contactEmail',
+                'faults.address',
+                'faults.assignedTo',
+                'account_manager_users.name as accountManager',
+                'faults.suspectedRfo_id',
+                'links.link',
+                'statuses.description',
+                'users.name',
+                'faults.serviceType',
+                'faults.serviceAttribute',
+                'faults.faultType',
+                'faults.priorityLevel',
+                'faults.created_at',
+                'cities.city',
+                'suburbs.suburb',
+                'pops.pop',
+                'suspectedRFO.RFO as RFO',
+                'confirmedRFO.RFO as confirmedRFO',
+                'fr.id as referral_id',
+                'fsl.started_at as stage_started_at'
+            ]);
+
+        if ($q !== '') {
+            $like = "%".$q."%";
+            $faultsQuery->where(function($qq) use ($like) {
+                $qq->where('faults.fault_ref_number', 'like', $like)
+                   ->orWhere('customers.customer', 'like', $like)
+                   ->orWhere('account_manager_users.name', 'like', $like)
+                   ->orWhere('links.link', 'like', $like)
+                   ->orWhere('users.name', 'like', $like)
+                   ->orWhere('statuses.description', 'like', $like)
+                   ->orWhere('cities.city', 'like', $like)
+                   ->orWhere('suburbs.suburb', 'like', $like)
+                   ->orWhere('pops.pop', 'like', $like);
+            });
+        }
+
+        $faults = $faultsQuery->paginate($perPage)->withQueryString();
+
+        $faultIds = $faults->getCollection()->pluck('id');
+        $remarksRecords = DB::table('remarks')
+            ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
+            ->leftjoin('users','remarks.user_id','=','users.id')
+            ->whereIn('remarks.fault_id', $faultIds)
+            ->orderBy('remarks.created_at', 'desc')
+            ->get([
+                'remarks.id',
+                'remarks.fault_id',
+                'remarks.created_at',
+                'remarks.remark',
+                'remarks.file_path',
+                'users.name',
+                'remark_activities.activity'
+            ]);
+
+        $remarksByFault = $remarksRecords->groupBy('fault_id');
+
+        return view('department_faults.referred',compact('faults','remarksByFault','perPage'))
+            ->with('i');
+    }
+
     /**
      * Remove the specified resource from storage.
      *
@@ -238,6 +375,7 @@ class DepartmentFaultController extends Controller
         ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
         ->leftjoin('pops','faults.pop_id','=','pops.id')
         ->leftjoin('reasons_for_outages','faults.suspectedRfo_id','=','reasons_for_outages.id')
+        
         ->orderBy('faults.created_at', 'desc')
         ->where('fault_section.section_id','=',auth()->user()->section_id)
         ->get(['faults.id','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address',
