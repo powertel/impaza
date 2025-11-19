@@ -60,28 +60,60 @@ Finance
                             </span>
                         </td>
                         <td>
-                            <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#financeViewModal-{{ $link->id }}">
-                               <i class="fas fa-eye me-1"></i> View
-                            </button>
-                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#financeEditModal-{{ $link->id }}">
-                               <i class="fas fa-edit me-1"></i> Edit
-                            </button>
-                            @if ($link->link_status==='Pending')
-                            @can('finance-link-update')
-                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#financeEditModal-{{ $link->id }}">
-                                   <i class="fas fa-save me-1"></i> Approve
-                                </button>
-                            @endcan
-                            @elseif ($link->link_status==='Connected')
-                                <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#financeDisconnectModal-{{ $link->id }}">
-                                    <i class="fas fa-pencil me-1"></i> Disconnect
-                                </button>
-                            @elseif ($link->link_status==='Disconnected')
-                                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#financeReconnectModal-{{ $link->id }}">
-                                    <i class="fas fa-save me-1"></i> Reconnect
-                                </button>
-                            @else
-                            @endif
+                            <div class="btn-group">
+                              <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v"></i> Actions
+                              </button>
+                              <ul class="dropdown-menu dropdown-menu-end shadow p-2">
+                                  <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-bs-toggle="modal" data-bs-target="#financeViewModal-{{ $link->id }}" title="View">
+                                      <i class="fas fa-eye text-success"></i>
+                                      <span>View</span>
+                                    </a>
+                                  </li>
+                                  <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-bs-toggle="modal" data-bs-target="#financeEditModal-{{ $link->id }}" title="Edit">
+                                      <i class="fas fa-edit text-primary"></i>
+                                      <span>Edit</span>
+                                    </a>
+                                  </li>
+                                  @if ($link->link_status==='Pending')
+                                    <li>
+                                      <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-bs-toggle="modal" data-bs-target="#financeEditModal-{{ $link->id }}" title="Approve">
+                                        <i class="fas fa-check text-primary"></i>
+                                        <span>Approve</span>
+                                      </a>
+                                    </li>
+                                  @endif
+                                  <li><hr class="dropdown-divider"></li>
+                                  @if ($link->link_status==='Connected')
+                                    <li>
+                                      <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-bs-toggle="modal" data-bs-target="#financeDisconnectModal-{{ $link->id }}" title="Disconnect">
+                                        <i class="fas fa-unlink text-warning"></i>
+                                        <span class="text-warning">Disconnect</span>
+                                      </a>
+                                    </li>
+                                  @endif
+                                  @if ($link->link_status==='Disconnected')
+                                    <li>
+                                      <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-bs-toggle="modal" data-bs-target="#financeReconnectModal-{{ $link->id }}" title="Reconnect">
+                                        <i class="fas fa-plug text-success"></i>
+                                        <span class="text-success">Reconnect</span>
+                                      </a>
+                                    </li>
+                                  @endif
+                                  <li>
+                                    <form action="{{ route('decommission',$link->id) }}" method="POST" class="px-2 m-0">
+                                      @csrf
+                                      @method('PUT')
+                                      <button type="button" class="dropdown-item d-flex align-items-center gap-2 confirm_decommission" title="Decommission">
+                                        <i class="fas fa-ban text-danger"></i>
+                                        <span class="text-danger">Decommission</span>
+                                      </button>
+                                    </form>
+                                  </li>
+                              </ul>
+                            </div>
                         </td>
                     </tr>
                     @endforeach
