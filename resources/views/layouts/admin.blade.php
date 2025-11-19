@@ -13,7 +13,8 @@
     <title>@yield('title')</title>
 
     <!-- Favicon -->
-    <link rel="icon" href="{{ asset('img/favicon.png') }}" type="image/png">
+    <link rel="icon" href="{{ asset('img/Favicon.png') }}" type="image/png">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">

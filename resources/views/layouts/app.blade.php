@@ -12,7 +12,8 @@
         <!-- Favicon -->
 
     <title>@yield('title', 'iMPAZAMON')</title>
-    <link rel="icon" href="{{ asset('img/favicon.png') }}" type="image/png">
+    <link rel="icon" href="{{ asset('img/Favicon.png') }}" type="image/png">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}" defer></script>
 

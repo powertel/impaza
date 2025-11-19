@@ -535,7 +535,7 @@ class AssessmentController extends Controller
         ->where('sections.id','=','3')
         ->pluck('users.id')
         ->toArray();
-//dd($users);
+        //dd($users);
          $faults = DB::table('fault_section')
          ->leftjoin('faults','fault_section.fault_id','=','faults.id')
          ->whereNull('faults.assignedTo')
