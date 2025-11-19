@@ -26,7 +26,7 @@
               <label class="form-label">Customer</label>
               <select name="customer_id" class="form-select" required>
                 @foreach($customers as $cust)
-                  <option value="{{ $cust->id }}" {{ ($full && $full->customer_id == $cust->id) ? 'selected' : '' }}>{{ $cust->customer }}</option>
+                  <option value="{{ $cust->id }}" data-contract-number="{{ $cust->contract_number }}" {{ ($full && $full->customer_id == $cust->id) ? 'selected' : '' }}>{{ $cust->customer }}</option>
                 @endforeach
               </select>
             </div>

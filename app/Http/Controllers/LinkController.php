@@ -94,7 +94,6 @@ class LinkController extends Controller
      */
     public function store(Request $request)
     {
-        // Support both single create and batch create via repeater items
         if ($request->has('items')) {
             $request->validate([
                 'customer_id' => 'required|exists:customers,id',
@@ -112,32 +111,34 @@ class LinkController extends Controller
                 'items.*.service_type' => 'nullable|string|in:Internet,Metro VPN,Intercity VPN,Carrier Services,E-Vending,Dark-Fibre',
                 'items.*.capacity' => 'nullable|string|max:255',
             ]);
-
-            $customerId = $request->input('customer_id');
-            $created = 0;
-            foreach ($request->input('items') as $item) {
-                $data = [
-                    'customer_id' => $customerId,
-                    'city_id' => $item['city_id'],
-                    'suburb_id' => $item['suburb_id'],
-                    'linkType_id' => $item['linkType_id'],
-                    'pop_id' => $item['pop_id'],
-                    'link' => $item['link'],
-                    'contract_number' => $item['contract_number'] ?? null,
-                    'jcc_number' => $item['jcc_number'] ?? null,
-                    'sapcodes' => $item['sapcodes'] ?? null,
-                    'comment' => $item['comment'] ?? null,
-                    'quantity' => $item['quantity'] ?? null,
-                    'service_type' => $item['service_type'] ?? null,
-                    'capacity' => $item['capacity'] ?? null,
-                    'link_status' => 1,
-                ];
-                Link::create($data);
-                $created++;
+            try {
+                $customerId = $request->input('customer_id');
+                $created = 0;
+                foreach ($request->input('items') as $item) {
+                    $data = [
+                        'customer_id' => $customerId,
+                        'city_id' => $item['city_id'],
+                        'suburb_id' => $item['suburb_id'],
+                        'linkType_id' => $item['linkType_id'],
+                        'pop_id' => $item['pop_id'],
+                        'link' => $item['link'],
+                        'contract_number' => $item['contract_number'] ?? null,
+                        'jcc_number' => $item['jcc_number'] ?? null,
+                        'sapcodes' => $item['sapcodes'] ?? null,
+                        'comment' => $item['comment'] ?? null,
+                        'quantity' => $item['quantity'] ?? null,
+                        'service_type' => $item['service_type'] ?? null,
+                        'capacity' => $item['capacity'] ?? null,
+                        'link_status' => 1,
+                    ];
+                    Link::create($data);
+                    $created++;
+                }
+                return redirect()->route('links.index')
+                    ->with('success', $created.' link(s) created');
+            } catch (\Exception $e) {
+                return back()->with('error', 'Failed to create links');
             }
-
-            return redirect()->route('links.index')
-                ->with('success', $created.' link(s) created');
         } else {
             $request->validate([
                 'city_id' => 'required|exists:cities,id',
@@ -154,18 +155,14 @@ class LinkController extends Controller
                 'service_type' => 'nullable|string|in:Internet,Metro VPN,Intercity VPN,Carrier Services,E-Vending,Dark-Fibre',
                 'capacity' => 'nullable|string|max:255',
             ]);
-            $req = $request->all();
-            $req['link_status'] = 1;
-            $link = Link::create($req);
-
-            if($link)
-            {
+            try {
+                $req = $request->all();
+                $req['link_status'] = 1;
+                $link = Link::create($req);
                 return redirect()->route('links.index')
-                ->with('success','Link Created');
-            }
-            else
-            {
-                return back()->with('fail','Something went wrong');
+                    ->with('success','Link Created');
+            } catch (\Exception $e) {
+                return back()->with('error','Failed to create link');
             }
         }
     }
@@ -225,7 +222,6 @@ class LinkController extends Controller
     public function update(Request $request, $id)
     {
         $link = Link::find($id);
-        // Validate link uniqueness on update (similar to customer validation)
         $validated = $request->validate([
             'link' => ['required','string', Rule::unique('links','link')->ignore($id)],
             'contract_number' => 'nullable|string|max:255',
@@ -236,9 +232,13 @@ class LinkController extends Controller
             'service_type' => 'nullable|string|in:Internet,Metro VPN,Intercity VPN,Carrier Services,E-Vending,Dark-Fibre',
             'capacity' => 'nullable|string|max:255',
         ]);
-        $link->update($request->all());
-        return redirect(route('links.index'))
-            ->with('success','Link Updated');
+        try {
+            $link->update($request->all());
+            return redirect(route('links.index'))
+                ->with('success','Link Updated');
+        } catch (\Exception $e) {
+            return back()->with('error','Failed to update link');
+        }
     }
 
     /**

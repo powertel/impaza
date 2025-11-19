@@ -13,29 +13,48 @@
           <div class="repeater" id="customerRepeater">
             <div class="repeater-items">
               <div class="repeater-item border rounded p-3 mb-3">
-                <div class="row g-3 align-items-end">
-                  <div class="col-md-4">
+                <div class="row g-3">
+                  <div class="col-md-6">
                     <label class="form-label">Customer</label>
-                    <input type="text" name="items[0][customer]" class="form-control customer-name-input" placeholder="e.g. Acme Corp" required>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-building"></i></span>
+                      <input type="text" name="items[0][customer]" class="form-control customer-name-input" placeholder="e.g. Acme Corp" required>
+                    </div>
                     <div class="invalid-feedback">This customer name already exists.</div>
                   </div>
-                  <div class="col-md-4">
+                  <div class="col-md-6">
                     <label class="form-label">Account Number</label>
-                    <input type="text" name="items[0][account_number]" class="form-control account-number-input" placeholder="e.g. 123456789" required>
-                    <div class="invalid-feedback">This account number already exists。</div>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
+                      <input type="text" name="items[0][account_number]" class="form-control account-number-input" placeholder="e.g. 123456789" required>
+                    </div>
+                    <div class="invalid-feedback">This account number already exists.</div>
                   </div>
-                  <div class="col-md-4">
+                  <div class="col-md-6">
+                    <label class="form-label">Contract Number</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-file-contract"></i></span>
+                      <input type="text" name="items[0][contract_number]" class="form-control" placeholder="e.g. 40000001">
+                    </div>
+                  </div>
+                  <div class="col-md-6">
                     <label class="form-label">Account Manager</label>
                     <select name="items[0][account_manager_id]" class="form-select">
-                      <option value="">None</option>
+                      <option value="" selected disabled>Select Account Manager</option>
                       @isset($accountManagers)
                         @foreach($accountManagers as $am)
                           <option value="{{ $am->am_id }}">{{ $am->name ?? ('User #'.$am->user_id) }}</option>
                         @endforeach
                       @endisset
                     </select>
-                    <input type="text" name="items[0][address]" class="form-control" placeholder="Address" />
-                    <input type="text" name="items[0][contact_number]" class="form-control" placeholder="Contact Number" />
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Address</label>
+                    <input type="text" name="items[0][address]" class="form-control" placeholder="Address">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Contact Number</label>
+                    <input type="text" name="items[0][contact_number]" class="form-control" placeholder="Contact Number">
                   </div>
                 </div>
               </div>

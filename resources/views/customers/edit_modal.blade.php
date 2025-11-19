@@ -1,7 +1,7 @@
 @can('customer-edit')
 @foreach($customers as $customer)
 <div class="modal fade" id="customerEditModal{{ $customer->id }}" tabindex="-1" aria-labelledby="customerEditModalLabel{{ $customer->id }}" aria-hidden="true">
-  <div class="modal-dialog modal-md">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="customerEditModalLabel{{ $customer->id }}">Edit Customer</h5>
@@ -13,13 +13,26 @@
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">Customer</label>
-            <input type="text" name="customer" class="form-control customer-name-input" value="{{ $customer->customer }}" required data-ignore-id="{{ $customer->id }}">
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-building"></i></span>
+              <input type="text" name="customer" class="form-control customer-name-input" value="{{ $customer->customer }}" required data-ignore-id="{{ $customer->id }}">
+            </div>
             <div class="invalid-feedback">This customer name already exists.</div>
           </div>
           <div class="mb-3">
             <label class="form-label">Account Number</label>
-            <input type="text" name="account_number" class="form-control account-number-input" value="{{ $customer->account_number ?? '' }}" required data-ignore-id="{{ $customer->id }}" readonly>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
+              <input type="text" name="account_number" class="form-control account-number-input" value="{{ $customer->account_number ?? '' }}" required data-ignore-id="{{ $customer->id }}" readonly>
+            </div>
             <div class="invalid-feedback">This account number already exists.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Contract Number</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-file-contract"></i></span>
+              <input type="text" name="contract_number" class="form-control" value="{{ $customer->contract_number ?? '' }}" placeholder="e.g. CTR-00001">
+            </div>
           </div>
           <div class="mb-3">
             <label class="form-label">Account Manager</label>

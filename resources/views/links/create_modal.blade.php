@@ -14,7 +14,7 @@
             <select id="customer_id" name="customer_id" class="form-select @error('customer_id') is-invalid @enderror" required>
               <option value="" disabled selected>Select Customer</option>
               @foreach($customers as $cust)
-                <option value="{{ $cust->id }}" {{ old('customer_id') == $cust->id ? 'selected' : '' }}>{{ $cust->customer }}</option>
+                <option value="{{ $cust->id }}" data-contract-number="{{ $cust->contract_number }}" {{ old('customer_id') == $cust->id ? 'selected' : '' }}>{{ $cust->customer }}</option>
               @endforeach
             </select>
             @error('customer_id')
@@ -42,6 +42,18 @@
                       <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                   </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Link Type</label>
+                    <select name="items[0][linkType_id]" class="form-select @error('items.0.linkType_id') is-invalid @enderror" required>
+                      <option value="" disabled selected>Select Type</option>
+                      @foreach($linkTypes as $lt)
+                        <option value="{{ $lt->id }}">{{ $lt->linkType }}</option>
+                      @endforeach
+                    </select>
+                    @error('items.0.linkType_id')
+                      <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                  </div>
                   <div class="col-md-6 d-none d-md-block"></div>
 
                   <!-- Row 2: JCC Number, Service Type, Capacity -->
@@ -54,9 +66,10 @@
                   <div class="col-md-4">
                     <label class="form-label">Service Type</label>
                     <select name="items[0][service_type]" class="form-select">
-                      <option value="" selected disabled >Select Servive Type</option>
+                      <option value="" selected disabled >Select Service Type</option>
                       <option value="Internet">Internet</option>
-                      <option value="VPN">VPN</option>
+                      <option value="Metro VPN">Metro VPN</option>
+                      <option value="Intercity VPN">Intercity VPN</option>
                       <option value="Carrier Services">Carrier Services</option>
                       <option value="E-Vending">E-Vending</option>
                       <option value="Dark-Fibre">Dark-Fibre</option>
@@ -71,7 +84,7 @@
                   <div class="w-100"></div>
                   <div class="col-md-3">
                     <label class="form-label">Contract Number</label>
-                    <input type="text" name="items[0][contract_number]" class="form-control" placeholder="e.g. CTR-2025-001">
+                    <input type="text" name="items[0][contract_number]" class="form-control" placeholder="Auto-filled from customer" readonly>
                   </div>
                   <div class="col-md-3">
                     <label class="form-label">SAP Codes</label>
@@ -87,7 +100,7 @@
                   </div>
                   <!-- Row 3: City/Town, Location, Pop -->
                   <div class="w-100"></div>
-                  <div class="col-md-3">
+                  <div class="col-md-4">
                     <label class="form-label">City/Town</label>
                     <select name="items[0][city_id]" class="form-select @error('items.0.city_id') is-invalid @enderror" required>
                       <option value="" disabled selected>Select City</option>
@@ -99,7 +112,7 @@
                       <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                   </div>
-                  <div class="col-md-3">
+                  <div class="col-md-4">
                     <label class="form-label">Location</label>
                     <select name="items[0][suburb_id]" class="form-select @error('items.0.suburb_id') is-invalid @enderror" required>
                       <option value="" disabled selected>Select Location</option>
@@ -111,7 +124,7 @@
                       <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                   </div>
-                  <div class="col-md-3">
+                  <div class="col-md-4">
                     <label class="form-label">Pop</label>
                     <select name="items[0][pop_id]" class="form-select @error('items.0.pop_id') is-invalid @enderror" required>
                       <option value="" disabled selected>Select Pop</option>
@@ -127,18 +140,6 @@
 
                   <!-- Row 4: Link Type -->
                   <div class="w-100"></div>
-                  <div class="col-md-3">
-                    <label class="form-label">Link Type</label>
-                    <select name="items[0][linkType_id]" class="form-select @error('items.0.linkType_id') is-invalid @enderror" required>
-                      <option value="" disabled selected>Select Type</option>
-                      @foreach($linkTypes as $lt)
-                        <option value="{{ $lt->id }}">{{ $lt->linkType }}</option>
-                      @endforeach
-                    </select>
-                    @error('items.0.linkType_id')
-                      <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                  </div>
                 </div>
               </div>
             </div>
