@@ -68,3 +68,11 @@ export async function getTechnicianStats(params = {}) {
 export async function getRFOs() {
   return request('/mobile/rfos');
 }
+
+export async function getSections() {
+  return request('/mobile/sections');
+}
+
+export async function referFault(id, payload) {
+  return request(`/mobile/faults/${id}/refer`, { method: 'POST', body: JSON.stringify(payload) });
+}
