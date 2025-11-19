@@ -153,7 +153,7 @@ class FaultController extends Controller
         $link = Link::all();
         $pop = Pop::all();
         $accountManager = AccountManager::all();
-        $suspectedRFO = ReasonsForOutage::whereBetween('id', [1, 5])->get();
+        $suspectedRFO = ReasonsForOutage::all();
         // Load open statuses (< 4) for dynamic filter options
         $openStatuses = DB::table('statuses')
             ->where('id','<',4)
@@ -448,15 +448,12 @@ class FaultController extends Controller
             request()->validate([
                 'customer_id'=> 'required|exists:customers,id',
                 'contactName'=> 'required|string',
-                'phoneNumber'=> ['required','string','size:12','regex:/^2637\d{8}$/'],
+                'phoneNumber'=> ['required','string','max:32','regex:/^\+?[0-9\s-]{7,20}$/'],
                 'address'=> 'nullable|string',
                 'link_id'=> 'required|exists:links,id',
                 'suspectedRfo_id'=> 'required|exists:reasons_for_outages,id',
                 'remark'=> 'required|string',
                 'attachment' => 'nullable|mimes:png,jpg,jpeg|max:2048'
-            ], [
-                'phoneNumber.regex' => 'Phone number must be 12 digits starting with 2637',
-                'phoneNumber.size' => 'Phone number must be exactly 12 digits',
             ]);
            
             $req = $request->all();

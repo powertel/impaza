@@ -8,7 +8,7 @@ use App\Models\FaultAssignment;
 use App\Models\Status;
 use App\Models\AutoAssignSetting;
 use Illuminate\Support\Carbon;
-use App\Services\SmsService;
+use App\Jobs\SendInfobipMessage;
 use App\Models\User;
 use App\Models\Section;
 use App\Models\FaultSection;
@@ -43,20 +43,17 @@ class FaultLifecycle
         // Notify assigned technician
         $assigned = User::find($userId);
         if ($assigned && $assigned->phonenumber) {
-            Log::info("Notify: Fault {$fault->fault_ref_number} assigned to technician", [
+            Log::info("Infobip: Fault {$fault->fault_ref_number} assigned to technician", [
                 'technician_id' => $userId,
                 'technician_name' => $assigned->name ?? 'Unknown',
                 'phone' => $assigned->phonenumber,
                 'is_standby' => $isStandby
             ]);
-            $text = self::techAssignmentMessage($fault, $assigned);
-            $ok = app(SmsService::class)->send([$assigned->phonenumber], $text);
-            Log::info($ok ? 'Notify: SMS sent to assigned technician' : 'Notify: SMS failed to assigned technician', [
-                'ok' => $ok,
-                'phone' => $assigned->phonenumber,
-            ]);
+            $summary = self::faultSummary($fault);
+            $text = "Fault {$fault->fault_ref_number}: Technician assigned\n{$summary}";
+            SendInfobipMessage::dispatch([$assigned->phonenumber], $text);
         } else {
-            Log::warning("Notify: Cannot notify assigned technician - no phone number", [
+            Log::warning("Infobip: Cannot notify assigned technician - no phone number", [
                 'fault_ref' => $fault->fault_ref_number,
                 'technician_id' => $userId,
                 'technician_name' => $assigned->name ?? 'Unknown'
@@ -170,30 +167,11 @@ class FaultLifecycle
     {
         $desc = Status::find($toStatusId)->description ?? 'Status changed';
         $summary = self::faultSummary($fault);
-        $customerText = self::customerMessage($fault, $toStatusId);
+        $text = "Fault {$fault->fault_ref_number}: {$desc}\n{$summary}";
 
+        // 1: Waiting for assessment -> customer notification only
         if ($toStatusId === 1) {
-            $nocSectionId = 1;
-            $recipients = User::query()
-                ->where('section_id', $nocSectionId)
-                ->leftJoin('user_statuses', 'users.user_status', '=', 'user_statuses.id')
-                ->where('user_statuses.id', '=', 1)
-                ->whereNotNull('users.phonenumber')
-                ->pluck('users.phonenumber')
-                ->all();
-            if (empty($recipients)) {
-                $nocRaw = env('POWERTEL_SMS_NOC_RECIPIENTS');
-                $recipients = array_values(array_filter(array_map('trim', explode(',', (string)$nocRaw)), fn($x) => $x !== ''));
-            }
-            if (!empty($recipients)) {
-                $nocText = self::nocMessage($fault, 1);
-                $ok = app(SmsService::class)->send($recipients, $nocText);
-                Log::info($ok ? 'Notify: NOC notified (SMS) for status 1' : 'Notify: NOC SMS failed for status 1', [
-                    'ok' => $ok,
-                    'fault' => $fault->fault_ref_number,
-                    'recipients' => $recipients,
-                ]);
-            }
+            Log::info("Infobip: Skipping NOC notifications; customer will be notified");
         }
 
         // 2: Assessed -> customer notification only
@@ -202,14 +180,12 @@ class FaultLifecycle
         }
 
         // Notify customer for key statuses (logged, assessed, resolved)
-        self::notifyCustomerStatus($fault, $toStatusId, $customerText);
+        self::notifyCustomerStatus($fault, $toStatusId, $text);
 
         // 3+ progression updates -> notify currently assigned technician if present
         if ($toStatusId === 3) {
-            Log::info("Notify: Fault {$fault->fault_ref_number} status updated to {$toStatusId}, notifying assigned technician");
-            $assigned = $fault->assignedTo ? User::find($fault->assignedTo) : null;
-            $techText = $assigned ? self::techStatusMessage($fault, $assigned, $toStatusId) : "Fault {$fault->fault_ref_number}: {$desc}\n{$summary}";
-            self::notifyAssignedTech($fault, $techText);
+            Log::info("Infobip: Fault {$fault->fault_ref_number} status updated to {$toStatusId}, notifying assigned technician");
+            self::notifyAssignedTech($fault, $text);
         }
     }
 
@@ -218,17 +194,13 @@ class FaultLifecycle
         if ($fault->assignedTo) {
             $assigned = User::find($fault->assignedTo);
             if ($assigned && $assigned->phonenumber) {
-                Log::info("Notify: Dispatching SMS to assigned technician", [
+                Log::info("Infobip: Dispatching message to assigned technician", [
                     'fault_ref' => $fault->fault_ref_number,
                     'technician_id' => $assigned->id,
                     'technician_name' => $assigned->name ?? 'Unknown',
                     'phone' => $assigned->phonenumber
                 ]);
-                $okTech = app(SmsService::class)->send([$assigned->phonenumber], $text);
-                Log::info($okTech ? 'Notify: SMS sent to assigned technician' : 'Notify: SMS failed to assigned technician', [
-                    'ok' => $okTech,
-                    'phone' => $assigned->phonenumber,
-                ]);
+                SendInfobipMessage::dispatch([$assigned->phonenumber], $text);
                 // Customer notification: assignment update
                 $customerPhones = [];
                 if (!empty($fault->phoneNumber)) {
@@ -241,22 +213,37 @@ class FaultLifecycle
                 }
 
                 if (!empty($customerPhones)) {
-                    $custText = self::customerMessage($fault, 3);
-                    $okCust = app(SmsService::class)->send($customerPhones, $custText);
-                    Log::info($okCust ? 'Notify: Customer notified (SMS) about assignment' : 'Notify: Customer SMS failed for assignment', [
-                        'ok' => $okCust,
-                        'fault' => $fault->fault_ref_number,
-                        'assigned_to' => $assigned->name ?? 'Unknown',
-                    ]);
+                    $templateName = env('INFOBIP_STATUS_TEMPLATE');
+                    if (!empty($templateName)) {
+                        SendInfobipTemplateMessage::dispatch(
+                            $customerPhones,
+                            $templateName,
+                            'en',
+                            [
+                                $fault->fault_ref_number ?? '',
+                                'Technician assigned: ' . ($assigned->name ?? ''),
+                            ]
+                        );
+                        Log::info('Infobip: Customer notified (template) about assignment', [
+                            'fault' => $fault->fault_ref_number,
+                            'assigned_to' => $assigned->name ?? 'Unknown',
+                        ]);
+                    } else {
+                        SendInfobipMessage::dispatch($customerPhones, $text);
+                        Log::info('Infobip: Customer notified (text) about assignment', [
+                            'fault' => $fault->fault_ref_number,
+                            'assigned_to' => $assigned->name ?? 'Unknown',
+                        ]);
+                    }
                 }
             } else {
-                Log::warning("Notify: Assigned technician has no phone number for fault {$fault->fault_ref_number}", [
+                Log::warning("Infobip: Assigned technician has no phone number for fault {$fault->fault_ref_number}", [
                     'technician_id' => $fault->assignedTo,
                     'technician_name' => $assigned->name ?? 'Unknown'
                 ]);
             }
         } else {
-            Log::info("Notify: No technician assigned to fault {$fault->fault_ref_number}");
+            Log::info("Infobip: No technician assigned to fault {$fault->fault_ref_number}");
         }
     }
 
@@ -288,13 +275,30 @@ class FaultLifecycle
             return;
         }
 
-        $ok = app(SmsService::class)->send($customerPhones, $text);
-        Log::info($ok ? 'Notify: Customer notified (SMS) for status' : 'Notify: Customer SMS failed for status', [
-            'ok' => $ok,
-            'fault' => $fault->fault_ref_number,
-            'status' => $desc,
-            'recipients' => $customerPhones,
-        ]);
+        $templateName = env('INFOBIP_STATUS_TEMPLATE');
+        if (!empty($templateName)) {
+            SendInfobipTemplateMessage::dispatch(
+                $customerPhones,
+                $templateName,
+                'en',
+                [
+                    $fault->fault_ref_number ?? '',
+                    $desc,
+                ]
+            );
+            Log::info('Infobip: Customer notified (template) for status', [
+                'fault' => $fault->fault_ref_number,
+                'status' => $desc,
+                'recipients' => $customerPhones,
+            ]);
+        } else {
+            SendInfobipMessage::dispatch($customerPhones, $text);
+            Log::info('Infobip: Customer notified (text) for status', [
+                'fault' => $fault->fault_ref_number,
+                'status' => $desc,
+                'recipients' => $customerPhones,
+            ]);
+        }
     }
 
     protected static function faultSummary(Fault $fault): string
@@ -306,46 +310,5 @@ class FaultLifecycle
         $link = $fault->link_id ? Link::find($fault->link_id) : null;
         $linkName = $link ? ($link->link ?? '') : '';
         return trim("Customer: {$customer}\nCity/Suburb: {$city} / {$suburb}\nLink: {$linkName}");
-    }
-
-    protected static function customerMessage(Fault $fault, int $toStatusId): string
-    {
-        if ($toStatusId === 1) {
-            return "Hello. Your fault {$fault->fault_ref_number} is logged and awaiting assessment. We are on it.";
-        }
-        if ($toStatusId === 2) {
-            return "Update: Fault {$fault->fault_ref_number} has been assessed. We are preparing rectification.";
-        }
-        if ($toStatusId === 3) {
-            return "Good news: Rectification is underway for fault {$fault->fault_ref_number}. We will keep you updated.";
-        }
-        if ($toStatusId === 4) {
-            return "Resolved: Fault {$fault->fault_ref_number} was cleared by the technician. If you still experience issues, please contact us.";
-        }
-        return "Fault {$fault->fault_ref_number} status updated.";
-    }
-
-    protected static function nocMessage(Fault $fault, int $toStatusId): string
-    {
-        $summary = self::faultSummary($fault);
-        if ($toStatusId === 1) {
-            return "New fault logged {$fault->fault_ref_number}. Awaiting assessment.\n{$summary}";
-        }
-        return "Fault {$fault->fault_ref_number} updated.\n{$summary}";
-    }
-
-    protected static function techAssignmentMessage(Fault $fault, User $tech): string
-    {
-        $summary = self::faultSummary($fault);
-        return "Assignment: You are assigned to fault {$fault->fault_ref_number}.\n{$summary}";
-    }
-
-    protected static function techStatusMessage(Fault $fault, User $tech, int $toStatusId): string
-    {
-        $summary = self::faultSummary($fault);
-        if ($toStatusId === 3) {
-            return "Update: Fault {$fault->fault_ref_number} is under rectification.\n{$summary}";
-        }
-        return "Fault {$fault->fault_ref_number} status updated.\n{$summary}";
     }
 }

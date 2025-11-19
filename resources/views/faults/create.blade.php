@@ -47,22 +47,7 @@
                         </div>
                         <div class="mb-3 col-md-4">
                             <label for="phone" class="form-label">Phone Number</label>
-                            <input type="tel"
-                                   class="form-control @error('phoneNumber') is-invalid @enderror"
-                                   placeholder="e.g. 263776123456"
-                                   name="phoneNumber"
-                                   value="{{ old('phoneNumber') }}"
-                                   required
-                                   pattern="^2637\d{8}$"
-                                   minlength="12"
-                                   maxlength="12"
-                                   inputmode="numeric"
-                                   title="Phone number must be 12 digits starting with 2637">
-                            @error('phoneNumber')
-                                <div class="invalid-feedback"><strong>{{ $message }}</strong></div>
-                            @else
-                                <div class="invalid-feedback">Phone number must be 12 digits starting with 2637</div>
-                            @enderror
+                            <input type="tel" class="form-control @error('phoneNumber') is-invalid @enderror"  placeholder="e.g. 263776123456" name="phoneNumber" value="{{ old('phoneNumber') }}" >
                         </div>
 
                         <div class="mb-3 col-md-4">
