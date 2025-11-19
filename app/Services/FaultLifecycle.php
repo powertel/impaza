@@ -49,8 +49,7 @@ class FaultLifecycle
                 'phone' => $assigned->phonenumber,
                 'is_standby' => $isStandby
             ]);
-            $summary = self::faultSummary($fault);
-            $text = "Fault {$fault->fault_ref_number}: Technician assigned\n{$summary}";
+            $text = self::techAssignmentMessage($fault, $assigned);
             $ok = app(SmsService::class)->send([$assigned->phonenumber], $text);
             Log::info($ok ? 'Notify: SMS sent to assigned technician' : 'Notify: SMS failed to assigned technician', [
                 'ok' => $ok,
@@ -171,13 +170,24 @@ class FaultLifecycle
     {
         $desc = Status::find($toStatusId)->description ?? 'Status changed';
         $summary = self::faultSummary($fault);
-        $text = "Fault {$fault->fault_ref_number}: {$desc}\n{$summary}";
+        $customerText = self::customerMessage($fault, $toStatusId);
 
         if ($toStatusId === 1) {
-            $nocRaw = env('POWERTEL_SMS_NOC_RECIPIENTS');
-            $recipients = array_values(array_filter(array_map('trim', explode(',', (string)$nocRaw)), fn($x) => $x !== ''));
+            $nocSectionId = 1;
+            $recipients = User::query()
+                ->where('section_id', $nocSectionId)
+                ->leftJoin('user_statuses', 'users.user_status', '=', 'user_statuses.id')
+                ->where('user_statuses.id', '=', 1)
+                ->whereNotNull('users.phonenumber')
+                ->pluck('users.phonenumber')
+                ->all();
+            if (empty($recipients)) {
+                $nocRaw = env('POWERTEL_SMS_NOC_RECIPIENTS');
+                $recipients = array_values(array_filter(array_map('trim', explode(',', (string)$nocRaw)), fn($x) => $x !== ''));
+            }
             if (!empty($recipients)) {
-                $ok = app(SmsService::class)->send($recipients, $text);
+                $nocText = self::nocMessage($fault, 1);
+                $ok = app(SmsService::class)->send($recipients, $nocText);
                 Log::info($ok ? 'Notify: NOC notified (SMS) for status 1' : 'Notify: NOC SMS failed for status 1', [
                     'ok' => $ok,
                     'fault' => $fault->fault_ref_number,
@@ -192,12 +202,14 @@ class FaultLifecycle
         }
 
         // Notify customer for key statuses (logged, assessed, resolved)
-        self::notifyCustomerStatus($fault, $toStatusId, $text);
+        self::notifyCustomerStatus($fault, $toStatusId, $customerText);
 
         // 3+ progression updates -> notify currently assigned technician if present
         if ($toStatusId === 3) {
             Log::info("Notify: Fault {$fault->fault_ref_number} status updated to {$toStatusId}, notifying assigned technician");
-            self::notifyAssignedTech($fault, $text);
+            $assigned = $fault->assignedTo ? User::find($fault->assignedTo) : null;
+            $techText = $assigned ? self::techStatusMessage($fault, $assigned, $toStatusId) : "Fault {$fault->fault_ref_number}: {$desc}\n{$summary}";
+            self::notifyAssignedTech($fault, $techText);
         }
     }
 
@@ -229,7 +241,8 @@ class FaultLifecycle
                 }
 
                 if (!empty($customerPhones)) {
-                    $okCust = app(SmsService::class)->send($customerPhones, $text);
+                    $custText = self::customerMessage($fault, 3);
+                    $okCust = app(SmsService::class)->send($customerPhones, $custText);
                     Log::info($okCust ? 'Notify: Customer notified (SMS) about assignment' : 'Notify: Customer SMS failed for assignment', [
                         'ok' => $okCust,
                         'fault' => $fault->fault_ref_number,
@@ -293,5 +306,46 @@ class FaultLifecycle
         $link = $fault->link_id ? Link::find($fault->link_id) : null;
         $linkName = $link ? ($link->link ?? '') : '';
         return trim("Customer: {$customer}\nCity/Suburb: {$city} / {$suburb}\nLink: {$linkName}");
+    }
+
+    protected static function customerMessage(Fault $fault, int $toStatusId): string
+    {
+        if ($toStatusId === 1) {
+            return "Hello. Your fault {$fault->fault_ref_number} is logged and awaiting assessment. We are on it.";
+        }
+        if ($toStatusId === 2) {
+            return "Update: Fault {$fault->fault_ref_number} has been assessed. We are preparing rectification.";
+        }
+        if ($toStatusId === 3) {
+            return "Good news: Rectification is underway for fault {$fault->fault_ref_number}. We will keep you updated.";
+        }
+        if ($toStatusId === 4) {
+            return "Resolved: Fault {$fault->fault_ref_number} was cleared by the technician. If you still experience issues, please contact us.";
+        }
+        return "Fault {$fault->fault_ref_number} status updated.";
+    }
+
+    protected static function nocMessage(Fault $fault, int $toStatusId): string
+    {
+        $summary = self::faultSummary($fault);
+        if ($toStatusId === 1) {
+            return "New fault logged {$fault->fault_ref_number}. Awaiting assessment.\n{$summary}";
+        }
+        return "Fault {$fault->fault_ref_number} updated.\n{$summary}";
+    }
+
+    protected static function techAssignmentMessage(Fault $fault, User $tech): string
+    {
+        $summary = self::faultSummary($fault);
+        return "Assignment: You are assigned to fault {$fault->fault_ref_number}.\n{$summary}";
+    }
+
+    protected static function techStatusMessage(Fault $fault, User $tech, int $toStatusId): string
+    {
+        $summary = self::faultSummary($fault);
+        if ($toStatusId === 3) {
+            return "Update: Fault {$fault->fault_ref_number} is under rectification.\n{$summary}";
+        }
+        return "Fault {$fault->fault_ref_number} status updated.\n{$summary}";
     }
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { getSections, referFault } from '../services/api';
@@ -13,6 +13,7 @@ export default function ReferFaultScreen() {
   const [sections, setSections] = useState([]);
   const [selectedSection, setSelectedSection] = useState(null);
   const [showSectionList, setShowSectionList] = useState(false);
+  const [selectLayout, setSelectLayout] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const [notes, setNotes] = useState('');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -49,20 +50,27 @@ export default function ReferFaultScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top","left","right"]}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled" nestedScrollEnabled>
         <Text style={styles.title}>Refer Fault #{id}</Text>
 
         <Text style={styles.label}>Section</Text>
-        <TouchableOpacity style={styles.select} onPress={() => setShowSectionList(v => !v)}>
+        <TouchableOpacity style={styles.select} onPress={() => setShowSectionList(v => !v)} onLayout={(e) => setSelectLayout(e.nativeEvent.layout)}>
           <Text style={styles.selectText}>{selectedSection ? selectedSection.section : 'Select section'}</Text>
         </TouchableOpacity>
         {showSectionList && (
-          <View style={styles.dropdown}>
-            {sections.map(s => (
-              <TouchableOpacity key={s.id} style={styles.dropdownItem} onPress={() => { setSelectedSection(s); setShowSectionList(false); }}>
-                <Text style={styles.dropdownItemText}>{s.section}</Text>
-              </TouchableOpacity>
-            ))}
+          <View style={[styles.dropdownOverlay, { top: selectLayout.y + selectLayout.height + 8 }] }>
+            <FlatList
+              data={sections}
+              keyExtractor={(item) => String(item.id)}
+              style={{ maxHeight: 280 }}
+              nestedScrollEnabled
+              renderItem={({ item }) => (
+                <TouchableOpacity style={styles.dropdownItem} onPress={() => { setSelectedSection(item); setShowSectionList(false); }}>
+                  <Text style={styles.dropdownItemText}>{item.section}</Text>
+                </TouchableOpacity>
+              )}
+              ItemSeparatorComponent={() => <View style={{ height: 1, backgroundColor: theme.colors.lightGray }} />}
+            />
           </View>
         )}
 
@@ -91,7 +99,7 @@ const styles = StyleSheet.create({
   label: { fontSize: theme.fontSizes.md, color: theme.colors.gray, fontWeight: '500', marginBottom: theme.spacing.xs },
   select: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, paddingVertical: theme.spacing.md, paddingHorizontal: theme.spacing.md, marginBottom: theme.spacing.md },
   selectText: { fontSize: theme.fontSizes.md, color: theme.colors.dark },
-  dropdown: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, backgroundColor: theme.colors.white, marginBottom: theme.spacing.md },
+  dropdownOverlay: { position: 'absolute', left: theme.spacing.lg, right: theme.spacing.lg, backgroundColor: theme.colors.white, borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, paddingVertical: 4, zIndex: 1000, elevation: 8 },
   dropdownItem: { paddingVertical: theme.spacing.md, paddingHorizontal: theme.spacing.md, borderBottomWidth: 1, borderBottomColor: theme.colors.lightGray },
   dropdownItemText: { fontSize: theme.fontSizes.md, color: theme.colors.dark },
   input: { backgroundColor: theme.colors.white, borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, padding: theme.spacing.md, minHeight: 120, textAlignVertical: 'top' },
