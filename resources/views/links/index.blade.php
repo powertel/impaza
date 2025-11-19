@@ -61,7 +61,8 @@ links
                         <th>City/Town</th>
                         <th>Location</th>
                         <th>Pop</th>
-                        <th>link</th>
+                        <th>Link</th>
+                        <th>Status</th>
                         <th>Action(s)</th>
                     </tr>
                 </thead>
@@ -74,36 +75,89 @@ links
                         <td>{{ $link->suburb}}</td>
                         <td>{{ $link->pop}}</td>
                         <td>{{ $link->link}}</td>
+                        <td>
+                          @php $colors = \App\Models\LinkStatus::STATUS_COLOR; $color = $colors[$link->link_status ?? ''] ?? '#e9ecef'; @endphp
+                          <span class="badge rounded-pill" style="background-color: {{ $color }}; color: #000;">{{ $link->link_status ?? '—' }}</span>
+                        </td>
 
                         <td>
-                            <form name="theForm" action="{{ route('links.destroy',$link->id) }}" method="POST" class="d-inline">
+                            <div class="btn-group">
+                              <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v"></i> Actions
+                              </button>
+                              <ul class="dropdown-menu dropdown-menu-end shadow p-2">
                                 @can('link-list')
-                                <button type="button" class="btn btn-outline-success"  
-                                        data-bs-toggle="modal" data-bs-target="#linkViewModal{{ $link->id }}">
-                                    <i class="fas fa-eye me-1"></i>View
-                                </button>
+                                  <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-bs-toggle="modal" data-bs-target="#linkViewModal{{ $link->id }}" title="View">
+                                      <i class="fas fa-eye text-success"></i>
+                                      <span>View</span>
+                                    </a>
+                                  </li>
                                 @endcan
                                 @can('link-edit')
-                                <button type="button" class="btn btn-outline-primary"  
-                                        data-bs-toggle="modal" data-bs-target="#linkEditModal{{ $link->id }}">
-                                    <i class="fas fa-edit me-1"></i>Edit
-                                </button>
+                                  <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2" href="#" data-bs-toggle="modal" data-bs-target="#linkEditModal{{ $link->id }}" title="Edit">
+                                      <i class="fas fa-edit text-primary"></i>
+                                      <span>Edit</span>
+                                    </a>
+                                  </li>
                                 @endcan
-                                @csrf
-                                @method('DELETE')
-                                @can('link-delete') 
-                                <button type="button" class="btn btn-outline-danger show_confirm" data-toggle="tooltip" title='Delete' >
-                                    <i class="fas fa-trash me-1"></i>Delete
-                                </button>
+                                @can('link-delete')
+                                  <li>
+                                    <form action="{{ route('links.destroy',$link->id) }}" method="POST" class="px-2 m-0">
+                                      @csrf
+                                      @method('DELETE')
+                                      <button type="button" class="dropdown-item d-flex align-items-center gap-2 show_confirm" title="Delete">
+                                        <i class="fas fa-trash text-danger"></i>
+                                        <span class="text-danger">Delete</span>
+                                      </button>
+                                    </form>
+                                  </li>
                                 @endcan
-                            </form>
+                                <li><hr class="dropdown-divider"></li>
+                                @if(($link->link_status ?? '') === 'Connected')
+                                  <li>
+                                    <form action="{{ route('disconnect',$link->id) }}" method="POST" class="px-2 m-0">
+                                      @csrf
+                                      @method('PUT')
+                                      <button type="button" class="dropdown-item d-flex align-items-center gap-2 confirm_disconnect" title="Disconnect">
+                                        <i class="fas fa-unlink text-warning"></i>
+                                        <span class="text-warning">Disconnect</span>
+                                      </button>
+                                    </form>
+                                  </li>
+                                @endif
+                                @if(($link->link_status ?? '') === 'Disconnected' || ($link->link_status ?? '') === 'Decommissioned')
+                                  <li>
+                                    <form action="{{ route('reconnect',$link->id) }}" method="POST" class="px-2 m-0">
+                                      @csrf
+                                      @method('PUT')
+                                      <button type="submit" class="dropdown-item d-flex align-items-center gap-2" title="Reconnect">
+                                        <i class="fas fa-plug text-success"></i>
+                                        <span class="text-success">Reconnect</span>
+                                      </button>
+                                    </form>
+                                  </li>
+                                @endif
+                                  <li>
+                                    <form action="{{ route('decommission',$link->id) }}" method="POST" class="px-2 m-0">
+                                      @csrf
+                                      @method('PUT')
+                                      <button type="button" class="dropdown-item d-flex align-items-center gap-2 confirm_decommission" title="Decommission">
+                                        <i class="fas fa-ban text-danger"></i>
+                                        <span class="text-danger">Decommission</span>
+                                      </button>
+                                    </form>
+                                  </li>
+                              </ul>
+                            </div>
                         </td>
                     </tr>
                     @endforeach
                 </tbody>  
                     @if ($links->isEmpty())
                         <tr>
-                            <td colspan="7" class="text-center text-muted">No Links to display</td>
+                            <td colspan="8" class="text-center text-muted">No Links to display</td>
                         </tr>
                     @endif
             </table>

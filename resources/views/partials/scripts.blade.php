@@ -40,6 +40,32 @@ new swal({
 });});
 </script>
 <script>
+  $(document).on('click','.confirm_disconnect', function(e){
+    e.preventDefault();
+    var form = $(this).closest('form');
+    new swal({
+      title: 'Disconnect link?',
+      text: 'This will mark the link as Disconnected.',
+      icon: 'warning',
+      buttons: true,
+      showCancelButton: true,
+      dangerMode: true,
+    }).then(function(res){ if (res.isConfirmed) form.submit(); });
+  });
+  $(document).on('click','.confirm_decommission', function(e){
+    e.preventDefault();
+    var form = $(this).closest('form');
+    new swal({
+      title: 'Decommission link?',
+      text: 'This will mark the link as Decommissioned.',
+      icon: 'warning',
+      buttons: true,
+      showCancelButton: true,
+      dangerMode: true,
+    }).then(function(res){ if (res.isConfirmed) form.submit(); });
+  });
+</script>
+<script>
     function inlineSave(){
 
        new swal({
