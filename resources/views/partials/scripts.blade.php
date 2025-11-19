@@ -443,9 +443,11 @@ $('#city').on('change',function () {
             <select name="items[${idx}][service_type]" class="form-select">
               <option value="" selected disabled>Select Service Type</option>
               <option value="Internet">Internet</option>
-              <option value="VPN">VPN</option>
+              <option value="Metro VPN">Metro VPN</option>
+              <option value="Intercity VPN">Intercity VPN</option>
               <option value="Carrier Services">Carrier Services</option>
               <option value="E-Vending">E-Vending</option>
+              <option value="Dark-Fibre">Dark-Fibre</option>
             </select>
           </div>
           <div class="col-md-4">
@@ -530,27 +532,27 @@ $('#city').on('change',function () {
         index = itemsContainer.querySelectorAll('.repeater-item').length;
       }
     });
-    bindLinkCascades(repeater);
+    bindContractNumberAutofill(repeater);
   });
 </script>
 <script>
+  window.bindContractNumberAutofill = function(root) {
+    const scope = root || document;
+    const customerSelect = scope.querySelector('#customer_id, select[name="customer_id"]');
+    if (!customerSelect) return;
+    function updateContractNumber() {
+      const opt = customerSelect.options[customerSelect.selectedIndex];
+      const cn = opt ? (opt.getAttribute('data-contract-number') || '') : '';
+      scope.querySelectorAll('input[name="contract_number"], input[name^="items"][name$="[contract_number]"]').forEach(function(inp){
+        inp.value = cn;
+        inp.readOnly = true;
+      });
+    }
+    customerSelect.addEventListener('change', updateContractNumber);
+    updateContractNumber();
+  };
   document.addEventListener('DOMContentLoaded', function() {
-    window.bindLinkCascades = function(root) {
-      const scope = root || document;
-      const customerSelect = scope.querySelector('#customer_id, select[name="customer_id"]');
-      if (!customerSelect) return;
-      function updateContractNumber() {
-        const opt = customerSelect.options[customerSelect.selectedIndex];
-        const cn = opt ? (opt.getAttribute('data-contract-number') || '') : '';
-        scope.querySelectorAll('input[name="contract_number"], input[name^="items"][name$="[contract_number]"]').forEach(function(inp){
-          inp.value = cn;
-          inp.readOnly = true;
-        });
-      }
-      customerSelect.addEventListener('change', updateContractNumber);
-      updateContractNumber();
-    };
-    window.bindLinkCascades(document);
+    window.bindContractNumberAutofill(document);
   });
 </script>
 {{-- Account number uniqueness validation (create/edit modals and repeater) --}}

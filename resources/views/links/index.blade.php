@@ -154,6 +154,31 @@ links
       params.delete('page');
       window.location.search = params.toString();
     });
+    (function(){
+      var success = @json(session('success'));
+      var error = @json(session('error'));
+      var warning = @json(session('warning'));
+      var info = @json(session('info'));
+      function show(type, text){
+        if (!text) return;
+        if (window.toast) {
+          window.toast.fire({ icon: type, title: String(text) });
+        } else {
+          alert(String(text));
+        }
+      }
+      show('success', success);
+      show('error', error);
+      show('warning', warning);
+      show('info', info);
+    })();
+
+    // Hide inline alert banners on Links page (use JS toast only)
+    document.addEventListener('DOMContentLoaded', function(){
+      try {
+        document.querySelectorAll('.content .alert').forEach(function(el){ el.remove(); });
+      } catch (e) {}
+    });
   </script>
 @endsection
 @endsection
