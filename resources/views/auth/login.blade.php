@@ -167,7 +167,7 @@ Login
 <div id="app" style="display:none"></div>
 <div class="login-stage">
   <div class="brand-top">
-    <img src="{{ asset('img/impazamon-v2.png') }}" alt="Logo" style="max-height: none; width: 90%; margin-left: 0;">
+    <img src="{{ asset('img/impazamon-v2.png') }}" alt="Logo" style="max-height: none; width: 100%; margin-left: 0;">
   </div>
 
   <div class="login-card">
