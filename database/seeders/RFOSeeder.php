@@ -17,18 +17,27 @@ class RFOSeeder extends Seeder
     {
         $RFO = [
             'Unknown',
+            'No Fx Light',
+            'No PON Light',
+            'BTS down',
+            'Node Down',
             'Faulty Mux',
             'Faulty Board',
-            'Power Fault',
-            'UG cable Fault',
-            'Burnt Cables',
-            'Power Outage',
-            'Backbone Fault',
-            'Faulty Switch',
+            'Power fault',
+            'UTP fault',
+            'Patch lead fault',
+            'UG cable fault',
+            'OH cable fault',
+            'Burnt cables',
+            'FAS',
+            'Power outage',
+            'Backbone fault',
+            'Faulty switch',
+            'Faulty router',
             'Faulty Chassis',
-            'Converter Faulty',
-            'Faulty SW/Port',
-            'CPE Faulty'
+            'Converter faulty',
+            'Faulty SW/port',
+            'CPE faulty',
          ];
        
          foreach ($RFO as $Rfo) {
