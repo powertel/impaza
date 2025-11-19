@@ -39,7 +39,8 @@ class LinkController extends Controller
             ->leftjoin('suburbs','links.suburb_id','=','suburbs.id')
             ->leftjoin('pops','links.pop_id','=','pops.id')
             ->leftJoin('link_types','links.linkType_id','=','link_types.id')
-            ->select(['links.id','links.jcc_number','links.link','link_types.linkType as linkType','links.service_type','links.capacity','customers.customer','cities.city','pops.pop','suburbs.suburb'])
+            ->leftJoin('link_statuses','links.link_status','=','link_statuses.id')
+            ->select(['links.id','links.jcc_number','links.link','link_types.linkType as linkType','links.service_type','links.capacity','customers.customer','cities.city','pops.pop','suburbs.suburb','link_statuses.link_status as link_status'])
             ->orderBy('customers.customer', 'asc');
 
         if ($q !== '') {

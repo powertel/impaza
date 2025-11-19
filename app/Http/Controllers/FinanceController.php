@@ -139,7 +139,7 @@ return view('finance.edit',compact('link','customers','cities','suburbs','pops',
         $req= $request->all();
         $req['link_status'] = 3;
         $link ->update($req);
-        return redirect(route('finance.index'))
+        return redirect()->back()
         ->with('success','Link Disconnected');
     }
 
@@ -150,10 +150,19 @@ return view('finance.edit',compact('link','customers','cities','suburbs','pops',
         $req= $request->all();
         $req['link_status'] = 2;
         $link ->update($req);
-        return redirect(route('finance.index'))
-        ->with('success','Link Reconnnected');
+        return redirect()->back()
+        ->with('success','Link Reconnected');
     }
 
+    public function decommission(Request $request, $id)
+    {
+        $link = Link::find($id);
+        $req= $request->all();
+        $req['link_status'] = 4;
+        $link ->update($req);
+        return redirect()->back()
+            ->with('success','Link Decommissioned');
+    }
 
 
 }
