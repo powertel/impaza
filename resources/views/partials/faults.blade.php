@@ -179,9 +179,10 @@ $(function(){
       }
     });
     var phoneEl = $('input[name="phoneNumber"]');
-    var phone = phoneEl.val()||'';
+    var phone = (phoneEl.val()||'').trim();
     if(mark){
-      if(phone.replace(/\D/g,'').length < 10){ allValid = false; phoneEl.addClass('is-invalid'); } else { phoneEl.removeClass('is-invalid'); }
+      var ok = /^2637\d{8}$/.test(phone);
+      if(!ok){ allValid = false; phoneEl.addClass('is-invalid'); } else { phoneEl.removeClass('is-invalid'); }
     }
     $saveBtn.prop('disabled', !allValid);
   }
@@ -190,6 +191,12 @@ $(function(){
   $('#createFaultModal').on('shown.bs.modal', function(){ computeValidity(false); });
   // When user interacts: compute and mark invalids
   $(document).on('input change', '#createFaultModal input, #createFaultModal select, #createFaultModal textarea', function(){ computeValidity(true); });
+
+  // Normalize phone input to digits only
+  $(document).on('input', 'input[name="phoneNumber"]', function(){
+    var v = (this.value||'').replace(/\D+/g,'');
+    this.value = v;
+  });
 
   // Enhance the Customer select with Select2 inside the modal
   if($('#customer').length){
