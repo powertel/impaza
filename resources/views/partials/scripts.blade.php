@@ -343,18 +343,31 @@ $('#city').on('change',function () {
       const wrapper = document.createElement('div');
       wrapper.className = 'repeater-item border rounded p-3 mb-3';
       wrapper.innerHTML = `
-        <div class="row g-3 align-items-end">
-          <div class="col-md-4">
+        <div class="row g-3">
+          <div class="col-md-6">
             <label class="form-label">Customer</label>
-            <input type="text" name="items[${idx}][customer]" class="form-control customer-name-input" placeholder="e.g. Acme Corp" required>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-building"></i></span>
+              <input type="text" name="items[${idx}][customer]" class="form-control customer-name-input" placeholder="e.g. Acme Corp" required>
+            </div>
             <div class="invalid-feedback">This customer name already exists.</div>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-6">
             <label class="form-label">Account Number</label>
-            <input type="text" name="items[${idx}][account_number]" class="form-control account-number-input" placeholder="e.g. 123456789" required>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
+              <input type="text" name="items[${idx}][account_number]" class="form-control account-number-input" placeholder="e.g. 123456789" required>
+            </div>
             <div class="invalid-feedback">This account number already exists.</div>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-6">
+            <label class="form-label">Contract Number</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-file-contract"></i></span>
+              <input type="text" name="items[${idx}][contract_number]" class="form-control" placeholder="e.g. CTR-00001">
+            </div>
+          </div>
+          <div class="col-md-6">
             <label class="form-label">Account Manager</label>
             <select name="items[${idx}][account_manager_id]" class="form-select">
               <option value="">None</option>
@@ -364,8 +377,14 @@ $('#city').on('change',function () {
                 @endforeach
               @endisset
             </select>
-            <input type="text" name="items[${idx}][address]" class="form-control mt-2" placeholder="Address">
-            <input type="text" name="items[${idx}][contact_number]" class="form-control mt-2" placeholder="Contact Number">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Address</label>
+            <input type="text" name="items[${idx}][address]" class="form-control" placeholder="Address">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Contact Number</label>
+            <input type="text" name="items[${idx}][contact_number]" class="form-control" placeholder="Contact Number">
           </div>
         </div>
       `;
@@ -512,6 +531,26 @@ $('#city').on('change',function () {
       }
     });
     bindLinkCascades(repeater);
+  });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    window.bindLinkCascades = function(root) {
+      const scope = root || document;
+      const customerSelect = scope.querySelector('#customer_id, select[name="customer_id"]');
+      if (!customerSelect) return;
+      function updateContractNumber() {
+        const opt = customerSelect.options[customerSelect.selectedIndex];
+        const cn = opt ? (opt.getAttribute('data-contract-number') || '') : '';
+        scope.querySelectorAll('input[name="contract_number"], input[name^="items"][name$="[contract_number]"]').forEach(function(inp){
+          inp.value = cn;
+          inp.readOnly = true;
+        });
+      }
+      customerSelect.addEventListener('change', updateContractNumber);
+      updateContractNumber();
+    };
+    window.bindLinkCascades(document);
   });
 </script>
 {{-- Account number uniqueness validation (create/edit modals and repeater) --}}

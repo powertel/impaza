@@ -14,7 +14,7 @@
             <select id="customer_id" name="customer_id" class="form-select @error('customer_id') is-invalid @enderror" required>
               <option value="" disabled selected>Select Customer</option>
               @foreach($customers as $cust)
-                <option value="{{ $cust->id }}" {{ old('customer_id') == $cust->id ? 'selected' : '' }}>{{ $cust->customer }}</option>
+                <option value="{{ $cust->id }}" data-contract-number="{{ $cust->contract_number }}" {{ old('customer_id') == $cust->id ? 'selected' : '' }}>{{ $cust->customer }}</option>
               @endforeach
             </select>
             @error('customer_id')
@@ -71,7 +71,7 @@
                   <div class="w-100"></div>
                   <div class="col-md-3">
                     <label class="form-label">Contract Number</label>
-                    <input type="text" name="items[0][contract_number]" class="form-control" placeholder="e.g. CTR-2025-001">
+                    <input type="text" name="items[0][contract_number]" class="form-control" placeholder="Auto-filled from customer" readonly>
                   </div>
                   <div class="col-md-3">
                     <label class="form-label">SAP Codes</label>

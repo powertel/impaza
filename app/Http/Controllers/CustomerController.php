@@ -149,6 +149,7 @@ class CustomerController extends Controller
                     $validated = validator($item, [
                         'customer' => 'required|string|unique:customers,customer',
                         'account_number' => 'required|string|unique:customers,account_number',
+                        'contract_number' => 'nullable|string|max:100',
                         'account_manager_id' => 'nullable|integer|exists:account_managers,id',
                         'address' => 'nullable|string|max:255',
                         'contact_number' => 'nullable|string|max:50',
@@ -156,6 +157,7 @@ class CustomerController extends Controller
                     Customer::create([
                         'customer' => $validated['customer'],
                         'account_number' => $validated['account_number'],
+                        'contract_number' => $validated['contract_number'] ?? null,
                         'account_manager_id' => $validated['account_manager_id'] ?? null,
                         'address' => $validated['address'] ?? null,
                         'contact_number' => $validated['contact_number'] ?? null,
@@ -169,11 +171,12 @@ class CustomerController extends Controller
             $request->validate([
                 'customer' => 'required|string|unique:customers,customer',
                 'account_number' => 'required|string|unique:customers,account_number',
+                'contract_number' => 'nullable|string|max:100',
                 'account_manager_id' => 'nullable|integer|exists:account_managers,id',
                 'address' => 'nullable|string|max:255',
                 'contact_number' => 'nullable|string|max:50',
             ]);
-            $customer = Customer::create($request->only('customer','account_number','account_manager_id','address','contact_number'));
+            $customer = Customer::create($request->only('customer','account_number','contract_number','account_manager_id','address','contact_number'));
 
             DB::commit();
             return redirect()->route('customers.index')
@@ -240,8 +243,10 @@ class CustomerController extends Controller
         $validated = $request->validate([
             'customer' => ['required','string', Rule::unique('customers','customer')->ignore($id)],
             'account_number' => ['required','string', Rule::unique('customers','account_number')->ignore($id)],
-            // Required but not unique; 1 manager can have many customers
+            'contract_number' => ['nullable','string','max:100'],
             'account_manager_id' => ['required','integer','exists:users,id'],
+            'address' => ['nullable','string','max:255'],
+            'contact_number' => ['nullable','string','max:50'],
         ]);
         $customer->update($validated);
         return redirect(route('customers.index'))
