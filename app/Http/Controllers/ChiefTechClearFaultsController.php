@@ -32,7 +32,8 @@ class ChiefTechClearFaultsController extends Controller
      */
     public function index()
     {
-        $faults = DB::table('faults')
+        $user = auth()->user();
+        $query = DB::table('faults')
             ->leftjoin('users','faults.assignedTo','=','users.id')
             ->leftjoin('customers','faults.customer_id','=','customers.id')
             ->leftjoin('links','faults.link_id','=','links.id')
@@ -51,9 +52,16 @@ class ChiefTechClearFaultsController extends Controller
                 $join->whereNull('fsl.ended_at');
             })
             ->orderBy('faults.created_at', 'desc')
-            ->where('faults.status_id','=',4)
-            ->where('users.section_id','=',auth()->user()->section_id)
-            ->get([
+            ->where('faults.status_id','=',4);
+
+        if ((int)($user->section_id ?? 0) !== 1) {
+            $query->where('users.section_id', '=', $user->section_id);
+            if (!empty($user->region)) {
+                $query->where('cities.region', '=', $user->region);
+            }
+        }
+
+        $faults = $query->get([
                 'faults.id',
                 'faults.fault_ref_number',
                 'customers.customer',
@@ -71,6 +79,7 @@ class ChiefTechClearFaultsController extends Controller
                 'faults.priorityLevel',
                 'faults.created_at',
                 'cities.city',
+                'cities.region',
                 'suburbs.suburb',
                 'pops.pop',
                 'suspectedRFO.RFO as RFO',
