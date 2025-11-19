@@ -19,8 +19,8 @@ class SmsService
 
     public function send(array $recipients, string $message): bool
     {
-        $url = rtrim(env('POWERTEL_SMS_API_URL', 'https://powertel.co.zw/api/send_sms'), '/');
-        $apiKey = env('POWERTEL_SMS_API_KEY');
+        $url = rtrim(env('POWERTEL_SMS_API_URL', 'https://sms.powertel.co.zw/api/send_sms'), '/');
+        $apiKey = env('POWERTEL_SMS_API_KEY','76f94de53729467795b70479de96639e');
 
         if (empty($recipients) || !$message) {
             return false;
