@@ -12,6 +12,76 @@ Faults
 
 @section('content')
 <section class="content">
+<div class="row row-cols-4 g-3 mb-3">
+  <div class="col">
+    <a href="#" class="text-decoration-none faultsAgeStat" data-age="" data-status="lt4">
+      <div class="card shadow-sm border-0">
+        <div class="rounded-top" style="height:6px; background:#6c757d"></div>
+        <div class="card-body d-flex justify-content-between align-items-center py-3">
+          <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-secondary"><i class="fas fa-clipboard-list"></i></span>
+            <div>
+              <div class="text-muted small">All Open</div>
+              <div class="fw-semibold">Faults</div>
+            </div>
+          </div>
+          <div class="fs-5 fw-bold text-dark">{{ (int)($ageStats['open_total'] ?? 0) }}</div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col">
+    <a href="#" class="text-decoration-none faultsAgeStat" data-age="today" data-status="lt4">
+      <div class="card shadow-sm border-0">
+        <div class="rounded-top" style="height:6px; background:#0d6efd"></div>
+        <div class="card-body d-flex justify-content-between align-items-center py-3">
+          <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-primary"><i class="fas fa-calendar-day"></i></span>
+            <div>
+              <div class="text-muted small">Logged</div>
+              <div class="fw-semibold">Today</div>
+            </div>
+          </div>
+          <div class="fs-5 fw-bold text-dark">{{ (int)($ageStats['open_today'] ?? 0) }}</div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col">
+    <a href="#" class="text-decoration-none faultsAgeStat" data-age="lt72" data-status="lt4">
+      <div class="card shadow-sm border-0">
+        <div class="rounded-top" style="height:6px; background:#20c997"></div>
+        <div class="card-body d-flex justify-content-between align-items-center py-3">
+          <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-success"><i class="fas fa-hourglass-half"></i></span>
+            <div>
+              <div class="text-muted small">Within</div>
+              <div class="fw-semibold">72 Hours</div>
+            </div>
+          </div>
+          <div class="fs-5 fw-bold text-dark">{{ (int)($ageStats['open_lt72'] ?? 0) }}</div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col">
+    <a href="#" class="text-decoration-none faultsAgeStat" data-age="gt72" data-status="lt4">
+      <div class="card shadow-sm border-0">
+        <div class="rounded-top" style="height:6px; background:#ffc107"></div>
+        <div class="card-body d-flex justify-content-between align-items-center py-3">
+          <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-warning text-dark"><i class="fas fa-hourglass-end"></i></span>
+            <div>
+              <div class="text-muted small">Over</div>
+              <div class="fw-semibold">72 Hours</div>
+            </div>
+          </div>
+          <div class="fs-5 fw-bold text-dark">{{ (int)($ageStats['open_gt72'] ?? 0) }}</div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
 
 <div class="card">
 
@@ -225,6 +295,19 @@ Faults
         const map = { all: 'age-select-all', today: 'age-select-today', lt72: 'age-select-lt72', gt72: 'age-select-gt72' };
         if (map[el.value]) el.classList.add(map[el.value]);
       })();
+
+      // Clickable age stats cards -> set status=lt4 and age, preserve q/per_page
+      document.querySelectorAll('.faultsAgeStat').forEach(function(el){
+        el.addEventListener('click', function(e){
+          e.preventDefault();
+          const params = new URLSearchParams(window.location.search);
+          params.set('status', this.getAttribute('data-status'));
+          const age = this.getAttribute('data-age');
+          if (!age) params.delete('age'); else params.set('age', age);
+          params.delete('page');
+          window.location.search = params.toString();
+        });
+      });
     </script>
 @endsection
 

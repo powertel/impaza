@@ -160,7 +160,15 @@ class FaultController extends Controller
             ->orderBy('id','asc')
             ->get(['id','description']);
 
-        return view('faults.index',compact('faults','customer','city','accountManager','location','link','pop','suspectedRFO','remarksByFault','openStatuses'))
+        // Age stats for open faults (status_id < 4)
+        $ageStats = [
+            'open_total' => DB::table('faults')->where('status_id','<',4)->count(),
+            'open_today' => DB::table('faults')->where('status_id','<',4)->whereDate('created_at', Carbon::today())->count(),
+            'open_lt72'  => DB::table('faults')->where('status_id','<',4)->where('created_at', '>=', Carbon::now()->subHours(72))->count(),
+            'open_gt72'  => DB::table('faults')->where('status_id','<',4)->where('created_at', '<', Carbon::now()->subHours(72))->count(),
+        ];
+
+        return view('faults.index',compact('faults','customer','city','accountManager','location','link','pop','suspectedRFO','remarksByFault','openStatuses','ageStats'))
         ->with('i');
 
     }
