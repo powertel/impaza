@@ -196,9 +196,36 @@ class FaultLifecycle
             }
         }
 
-        // 2: Assessed -> customer notification only
+        // 2: Assessed -> notify Chief Technicians in the fault's region
         if ($toStatusId === 2) {
-            Log::info("Infobip: Skipping chief technician notifications; customer will be notified");
+            $region = $fault->city_id ? (City::find($fault->city_id)->region ?? null) : null;
+            $query = User::query()
+                ->join('positions','users.position_id','=','positions.id')
+                ->where('positions.position', '=', 'Chief Technician')
+                ->whereNotNull('users.phonenumber');
+            if (!empty($region)) {
+                $query->where('users.region', '=', $region);
+            }
+            $recipients = $query->pluck('users.phonenumber')->all();
+            if (empty($recipients)) {
+                $fallback = env('POWERTEL_SMS_CT_RECIPIENTS');
+                $recipients = array_values(array_filter(array_map('trim', explode(',', (string)$fallback)), fn($x) => $x !== ''));
+            }
+            if (!empty($recipients)) {
+                $text = "Assessment: Fault {$fault->fault_ref_number} has been assessed. Please review and proceed with rectification.";
+                $ok = app(SmsService::class)->send($recipients, $text);
+                Log::info($ok ? 'Notify: Chief Technicians notified (SMS) for status 2' : 'Notify: Chief Technicians SMS failed for status 2', [
+                    'ok' => $ok,
+                    'fault' => $fault->fault_ref_number,
+                    'recipients' => $recipients,
+                    'region' => $region,
+                ]);
+            } else {
+                Log::warning('Notify: No Chief Technicians found for assessed fault', [
+                    'fault' => $fault->fault_ref_number,
+                    'region' => $region,
+                ]);
+            }
         }
 
         // Notify customer for key statuses (logged, assessed, resolved)
@@ -240,7 +267,7 @@ class FaultLifecycle
                     }
                 }
 
-                if (!empty($customerPhones)) {
+               /*  if (!empty($customerPhones)) {
                     $custText = self::customerMessage($fault, 3);
                     $okCust = app(SmsService::class)->send($customerPhones, $custText);
                     Log::info($okCust ? 'Notify: Customer notified (SMS) about assignment' : 'Notify: Customer SMS failed for assignment', [
@@ -248,7 +275,7 @@ class FaultLifecycle
                         'fault' => $fault->fault_ref_number,
                         'assigned_to' => $assigned->name ?? 'Unknown',
                     ]);
-                }
+                } */
             } else {
                 Log::warning("Notify: Assigned technician has no phone number for fault {$fault->fault_ref_number}", [
                     'technician_id' => $fault->assignedTo,
@@ -263,8 +290,11 @@ class FaultLifecycle
     protected static function notifyCustomerStatus(Fault $fault, int $toStatusId, string $text): void
     {
         // Only send for: 1 (logged/waiting assessment), 2 (assessed), 3 (under rectification), 4 (cleared by technician)
-        $shouldSend = in_array($toStatusId, [1, 2, 3, 4], true);
+        $shouldSend = in_array($toStatusId, [1, 6], true);
         if (!$shouldSend) {
+            return;
+        }
+        if (trim($text) === '') {
             return;
         }
 
@@ -319,10 +349,10 @@ class FaultLifecycle
         if ($toStatusId === 3) {
             return "Good news: Rectification is underway for fault {$fault->fault_ref_number}. We will keep you updated.";
         } */
-        if ($toStatusId === 4) {
+        if ($toStatusId === 6) {
             return "Good news: Fault {$fault->fault_ref_number} was resolved by our team. If you still experience issues, please contact us.";
         }
-        return "Fault {$fault->fault_ref_number} status updated.";
+        return "";
     }
 
     protected static function nocMessage(Fault $fault, int $toStatusId): string
@@ -331,7 +361,7 @@ class FaultLifecycle
         if ($toStatusId === 1) {
             return "New fault logged {$fault->fault_ref_number}. Awaiting assessment.\n{$summary}";
         }
-        return "Fault {$fault->fault_ref_number} updated.\n{$summary}";
+        return "";
     }
 
     protected static function techAssignmentMessage(Fault $fault, User $tech): string
@@ -346,6 +376,6 @@ class FaultLifecycle
         if ($toStatusId === 3) {
             return "Update: Fault {$fault->fault_ref_number} is under rectification.\n{$summary}";
         }
-        return "Fault {$fault->fault_ref_number} status updated.\n{$summary}";
+        /* return "Fault {$fault->fault_ref_number} status updated.\n{$summary}"; */
     }
 }

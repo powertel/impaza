@@ -24,7 +24,7 @@
               </a>
             </li>
 
-            @canany(['fault-list','my-fault-list','assigned-fault-list','assessment-fault-list','chief-tech-clear-faults-list','noc-clear-faults-list','department-faults-list','manage-faults','referred-faults'])
+            @canany(['fault-list','my-fault-list','assigned-fault-list','assessment-fault-list','chief-tech-clear-faults-list','noc-clear-faults-list','department-faults-list','manage-faults','referred-faults','resolved-faults-list'])
               <li class="nav-header">Faults</li>
             @endcanany
             @can('fault-list')
@@ -98,6 +98,14 @@
               <a class="nav-link {{ request()->routeIs('noc-clear.*') ? 'active' : '' }}" href="{{ route('noc-clear.index') }}">
                 <i class="nav-icon fas fa-broom"></i>
                 <p>Noc Clear</p>
+              </a>
+            </li>
+            @endcan
+            @can('resolved-faults-list')
+            <li class="nav-item">
+              <a class="nav-link {{ request()->routeIs('resolved.*') ? 'active' : '' }}" href="{{ route('resolved.index') }}">
+                <i class="nav-icon fas fa-check-circle"></i>
+                <p>Cleared</p>
               </a>
             </li>
             @endcan

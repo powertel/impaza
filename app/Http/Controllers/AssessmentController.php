@@ -291,6 +291,7 @@ class AssessmentController extends Controller
             $fault = Fault::find($id);
             $req = $request->only(['priorityLevel','faultType']);
             $req['status_id'] = 2;
+            $req['assessed_by'] = $request->user()->id;
             $fault->update($req);
             // Log transition to "Fault has been assessed" (status_id = 2)
             FaultLifecycle::recordStatusChange($fault, 2, $request->user()->id);

@@ -32,6 +32,7 @@ use App\Http\Controllers\StoreController;
 use App\Http\Controllers\RFOController;
 use App\Http\Controllers\TechnicianConfigController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ResolvedController;
 
 /*
 |--------------------------------------------------------------------------
@@ -96,6 +97,9 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('noc-clear', NocClearFaultsController::class);
     // NOC revoke technician-cleared fault back to rectification
     Route::put('noc-clear/{id}/revoke', [NocClearFaultsController::class, 'revoke'])->name('noc-clear.revoke');
+    // Cleared by NOC within 24 hours
+    Route::get('resolved', [ResolvedController::class, 'index'])->name('resolved.index');
+    Route::post('resolved/{fault}/revoke', [ResolvedController::class, 'revoke'])->name('resolved.revoke');
     Route::resource('permits', PermitController::class);
     Route::resource('finance', FinanceController::class);
     Route::resource('my_faults', MyFaultController::class);
