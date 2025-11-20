@@ -7,12 +7,56 @@ links
 @include('partials.css')
 @section('content')
 <section class="content">
+<div class="row row-cols-5 g-3 mb-3">
+  <div class="col">
+    <a href="#" class="text-decoration-none linksStatusStat" data-status-id="">
+      <div class="card shadow-sm border-0">
+        <div class="rounded-top" style="height:6px; background:#6c757d"></div>
+        <div class="card-body d-flex justify-content-between align-items-center py-3">
+          <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-secondary"><i class="fas fa-list"></i></span>
+            <div>
+              <div class="text-muted small">All</div>
+              <div class="fw-semibold">Links</div>
+            </div>
+          </div>
+          <div class="fs-5 fw-bold text-dark">{{ $totalLinks ?? 0 }}</div>
+        </div>
+      </div>
+    </a>
+  </div>
+  @foreach($linkStatuses as $st)
+    @php
+      $icon = $st->link_status === 'Pending' ? 'fa-hourglass-half' : ($st->link_status === 'Connected' ? 'fa-plug' : ($st->link_status === 'Disconnected' ? 'fa-unlink' : 'fa-ban'));
+      $bar = $st->link_status === 'Pending' ? '#ff8080' : ($st->link_status === 'Connected' ? '#90EE90' : ($st->link_status === 'Disconnected' ? '#FFFF00' : '#A9A9A9'));
+      $badge = $st->link_status === 'Pending' ? 'bg-danger' : ($st->link_status === 'Connected' ? 'bg-success' : ($st->link_status === 'Disconnected' ? 'bg-warning' : 'bg-secondary'));
+    @endphp
+    <div class="col">
+      <a href="#" class="text-decoration-none linksStatusStat" data-status-id="{{ $st->id }}">
+        <div class="card shadow-sm border-0">
+          <div class="rounded-top" style="height:6px; background: {{ $bar }}"></div>
+          <div class="card-body d-flex justify-content-between align-items-center py-3">
+            <div class="d-flex align-items-center gap-3">
+              <span class="badge {{ $badge }}"><i class="fas {{ $icon }}"></i></span>
+              <div>
+                <div class="text-muted small">{{ $st->link_status }}</div>
+                <div class="fw-semibold">Status</div>
+              </div>
+            </div>
+            <div class="fs-5 fw-bold text-dark">{{ (int)($statusCounts[$st->id] ?? 0) }}</div>
+          </div>
+        </div>
+      </a>
+    </div>
+  @endforeach
+</div>
 <div class="card">
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">Links</h3>
-        <div class="card-tools">
+        <div class="d-flex justify-content-between align-items-center">
+          <h3 class="card-title mb-0">Links</h3>
+          <div class="card-tools">
             @can('link-create')
                 <button type="button" class="btn btn-primary btn-sm" 
                         data-bs-toggle="modal" 
@@ -27,7 +71,18 @@ links
                 <i class="fas fa-search me-1"></i> Edit Existing Links
             </button>
             @endcan
+          </div>
         </div>
+        <style>
+          .status-cards{gap: 12px}
+          .status-card{display:flex; align-items:center; justify-content:space-between; min-width:220px; padding:12px 16px; border:1px solid #e5e7eb; border-radius:12px; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,0.04); text-decoration:none}
+          .status-card .left{display:flex; align-items:center; gap:10px}
+          .status-card .icon{width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#fff}
+          .status-card .title{font-size:12px; color:#6b7280}
+          .status-card .value{font-size:18px; font-weight:700; color:#111827}
+          .status-card:hover{box-shadow:0 4px 10px rgba(0,0,0,0.08)}
+        </style>
+        
     </div>
     <!-- /.card-header -->
     <div class="card-body">
@@ -43,11 +98,22 @@ links
                         <option value="100" {{ (int)$perPage===100 ? 'selected' : '' }}>100</option>
                     </select>
                 </div>
+                <div class="input-group input-group-sm" style="width: 220px;">
+                    <span class="input-group-text"><i class="fas fa-filter me-1"></i> Status</span>
+                    @php $statusSel = request('status'); @endphp
+                    <select id="linksStatusFilter" class="form-select form-select-sm" style="width:auto;">
+                        <option value="" {{ empty($statusSel) ? 'selected' : '' }}>All</option>
+                        @foreach($linkStatuses as $st)
+                          <option value="{{ $st->id }}" {{ (string)$statusSel === (string)$st->id ? 'selected' : '' }}>{{ $st->link_status }}</option>
+                        @endforeach
+                    </select>
+                </div>
                 <form id="linksSearchForm" method="GET" action="{{ route('links.index') }}" class="m-0">
                     <div class="input-group input-group-sm" style="width: 360px;">
                         <span class="input-group-text"><i class="fas fa-search"></i></span>
                         <input type="text" name="q" value="{{ request('q','') }}" class="form-control" placeholder="Search all records">
                         <input type="hidden" name="per_page" value="{{ $perPage }}">
+                        <input type="hidden" name="status" value="{{ $statusSel }}">
                         <button type="submit" class="btn btn-outline-primary"><i class="fas fa-search me-1"></i>Search</button>
                         <a href="{{ route('links.index', ['per_page' => $perPage]) }}" class="btn btn-outline-secondary"><i class="fas fa-rotate-left me-1"></i>Reset</a>
                     </div>
@@ -207,6 +273,23 @@ links
       params.set('per_page', this.value);
       params.delete('page');
       window.location.search = params.toString();
+    });
+    document.getElementById('linksStatusFilter')?.addEventListener('change', function(){
+      const params = new URLSearchParams(window.location.search);
+      const val = this.value;
+      if (!val) params.delete('status'); else params.set('status', val);
+      params.delete('page');
+      window.location.search = params.toString();
+    });
+    document.querySelectorAll('.linksStatusStat').forEach(function(el){
+      el.addEventListener('click', function(e){
+        e.preventDefault();
+        const id = this.getAttribute('data-status-id');
+        const params = new URLSearchParams(window.location.search);
+        if (!id) params.delete('status'); else params.set('status', id);
+        params.delete('page');
+        window.location.search = params.toString();
+      });
     });
     (function(){
       var success = @json(session('success'));

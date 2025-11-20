@@ -25,16 +25,45 @@ class FinanceController extends Controller
      */
     public function index()
     {
-        $finance_links = DB::table('links')
+        $perPage = (int) request('per_page', 20);
+        $perPage = in_array($perPage, [10,20,50,100]) ? $perPage : 20;
+        $q = trim((string) request('q',''));
+        $statusId = request('status');
+
+        $query = DB::table('links')
             ->leftjoin('customers','links.customer_id','=','customers.id')
             ->leftjoin('cities','links.city_id','=','cities.id')
             ->leftjoin('suburbs','links.suburb_id','=','suburbs.id')
             ->leftjoin('pops','links.pop_id','=','pops.id')
             ->leftjoin('link_statuses','links.link_status','=','link_statuses.id')
-            ->orderBy('cities.city', 'asc')
-            ->get(['links.id','links.link','links.contract_number','customers.customer','cities.city','pops.pop','suburbs.suburb','link_statuses.link_status']);
-        return view('finance.index',compact('finance_links'))
-        ->with('i');
+            ->orderBy('customers.customer', 'asc')
+            ->select(['links.id','links.link','links.contract_number','customers.customer','cities.city','pops.pop','suburbs.suburb','link_statuses.link_status']);
+
+        if ($q !== '') {
+            $like = "%".$q."%";
+            $query->where(function($qq) use ($like) {
+                $qq->where('customers.customer', 'like', $like)
+                   ->orWhere('cities.city', 'like', $like)
+                   ->orWhere('suburbs.suburb', 'like', $like)
+                   ->orWhere('pops.pop', 'like', $like)
+                   ->orWhere('links.link', 'like', $like)
+                   ->orWhere('links.contract_number', 'like', $like);
+            });
+        }
+
+        if (!empty($statusId) && $statusId !== 'all') {
+            $query->where('links.link_status', '=', (int) $statusId);
+        }
+
+        $finance_links = $query->paginate($perPage)->withQueryString();
+        $linkStatuses = DB::table('link_statuses')->orderBy('id')->get();
+        $statusCounts = DB::table('links')
+            ->select('link_status', DB::raw('count(*) as total'))
+            ->groupBy('link_status')
+            ->pluck('total', 'link_status');
+        $totalLinks = DB::table('links')->count();
+
+        return view('finance.index',compact('finance_links','linkStatuses','statusCounts','totalLinks'));
     }
 
     /**
@@ -97,7 +126,8 @@ class FinanceController extends Controller
         $cities = City::all();
         $suburbs = Suburb::all();
         $pops = Pop::all();
-return view('finance.edit',compact('link','customers','cities','suburbs','pops',));
+        
+        return view('finance.edit',compact('link','customers','cities','suburbs','pops',));
     }
 
     /**
