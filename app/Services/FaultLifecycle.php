@@ -232,12 +232,12 @@ class FaultLifecycle
         self::notifyCustomerStatus($fault, $toStatusId, $customerText);
 
         // 3+ progression updates -> notify currently assigned technician if present
-        if ($toStatusId === 3) {
+        /* if ($toStatusId === 3) {
             Log::info("Notify: Fault {$fault->fault_ref_number} status updated to {$toStatusId}, notifying assigned technician");
             $assigned = $fault->assignedTo ? User::find($fault->assignedTo) : null;
             $techText = $assigned ? self::techStatusMessage($fault, $assigned, $toStatusId) : "Fault {$fault->fault_ref_number}: {$desc}\n{$summary}";
             self::notifyAssignedTech($fault, $techText);
-        }
+        } */
     }
 
     protected static function notifyAssignedTech(Fault $fault, string $text): void
@@ -343,7 +343,7 @@ class FaultLifecycle
         if ($toStatusId === 1) {
             return "Good Day we have acknowledged the receipt of your fault {$fault->fault_ref_number}. We are on it.";
         }
-/*         if ($toStatusId === 2) {
+        /*         if ($toStatusId === 2) {
             return "Update: Fault {$fault->fault_ref_number} has been assessed. We are preparing rectification.";
         }
         if ($toStatusId === 3) {
