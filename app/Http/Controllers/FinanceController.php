@@ -126,7 +126,8 @@ class FinanceController extends Controller
         $cities = City::all();
         $suburbs = Suburb::all();
         $pops = Pop::all();
-return view('finance.edit',compact('link','customers','cities','suburbs','pops',));
+        
+        return view('finance.edit',compact('link','customers','cities','suburbs','pops',));
     }
 
     /**
