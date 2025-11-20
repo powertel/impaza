@@ -121,7 +121,13 @@ My Faults
                 @include('permits.requested-permits.edit_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
                 @include('stores.create_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
                 @include('my_faults.refer_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()), 'sections' => ($sections ?? collect()) ])
-                @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
+                @include('faults.show', [
+                    'fault' => $fault,
+                    'remarks' => ($remarksByFault[$fault->id] ?? collect()),
+                    'ageText' => ($faultAges[$fault->id] ?? ''),
+                    'ageStart' => ($faultAgeStart[$fault->id] ?? null),
+                    'ageEnd' => ($faultAgeEnd[$fault->id] ?? null),
+                ])
             @endforeach
             <div id="myFaultsPager" class="mt-2"></div>
         </div>       

@@ -48,6 +48,7 @@ class FaultController extends Controller
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
                 ->leftjoin('links','faults.link_id','=','links.id')
                 ->leftjoin('users as assigned_users','faults.assignedTo','=','assigned_users.id')
+                ->leftjoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
 				->leftjoin('users as reported_users','faults.user_id','=','reported_users.id')
                 ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
                 ->leftjoin('users as account_manager_users','account_managers.user_id','=','account_manager_users.id')
@@ -79,6 +80,7 @@ class FaultController extends Controller
                 'statuses.description',
                 'assigned_users.name as assignedTo',
                 'reported_users.name as reportedBy',
+                'assessed_users.name as assessedBy',
                 'faults.serviceType',
                 'faults.serviceAttribute',
                 'faults.faultType',
@@ -219,6 +221,7 @@ class FaultController extends Controller
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
                 ->leftjoin('links','faults.link_id','=','links.id')
                 ->leftjoin('users as assigned_users','faults.assignedTo','=','assigned_users.id')
+                ->leftjoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
 				->leftjoin('users as reported_users','faults.user_id','=','reported_users.id')
                 ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
                 ->leftjoin('users as account_manager_users','account_managers.user_id','=','account_manager_users.id')
@@ -249,6 +252,7 @@ class FaultController extends Controller
                 'statuses.description',
                 'assigned_users.name as assignedTo',
                 'reported_users.name as reportedBy',
+                'assessed_users.name as assessedBy',
                 'faults.serviceType',
                 'faults.serviceAttribute',
                 'faults.faultType',
@@ -376,6 +380,7 @@ class FaultController extends Controller
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
                 ->leftjoin('links','faults.link_id','=','links.id')
                 ->leftjoin('users as assigned_users','faults.assignedTo','=','assigned_users.id')
+                ->leftjoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
 				->leftjoin('users as reported_users','faults.user_id','=','reported_users.id')
                 ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
                 ->leftjoin('users as account_manager_users','account_managers.user_id','=','account_manager_users.id')
@@ -408,6 +413,7 @@ class FaultController extends Controller
                 'statuses.description',
                 'assigned_users.name as assignedTo',
                 'reported_users.name as reportedBy',
+                'assessed_users.name as assessedBy',
                 'faults.serviceType',
                 'faults.serviceAttribute',
                 'faults.faultType',

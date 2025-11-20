@@ -38,6 +38,7 @@ class AssignController extends Controller
         $faults = DB::table('faults')
             ->leftjoin('fault_section','faults.id','=','fault_section.fault_id')
             ->leftjoin('users','faults.assignedTo','=','users.id')
+            ->leftjoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
             ->leftjoin('sections','fault_section.section_id','=','sections.id')
             ->leftjoin('customers','faults.customer_id','=','customers.id')
             ->leftjoin('links','faults.link_id','=','links.id')
@@ -61,7 +62,7 @@ class AssignController extends Controller
             ->whereNotNull('faults.assignedTo')
             ->where('faults.status_id','=',3)
             ->get(['faults.id','faults.fault_ref_number','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
-                'account_manager_users.name as accountManager','faults.suspectedRfo_id','links.link','statuses.description','users.name','faults.status_id as status_id',
+                'account_manager_users.name as accountManager','faults.suspectedRfo_id','links.link','statuses.description','users.name','assessed_users.name as assessedBy','faults.status_id as status_id',
                 'cities.city as city','cities.region as region','faults.city_id as city_id','suburbs.suburb as suburb','pops.pop as pop','faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at',
                 'suspectedRFO.RFO as RFO','confirmedRFO.RFO as confirmedRFO', 'fsl.started_at as stage_started_at']);
 
@@ -93,7 +94,29 @@ class AssignController extends Controller
             ->orderBy('users.name','asc')
             ->get(['users.id','users.name']);
 
-        return view('assign.index',compact('faults','technicians','remarksByFault'))
+        $faultAges = [];$faultAgeStart = [];$faultAgeEnd = [];
+        $nocClearedId = (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
+        $faultIdsList = $faults->pluck('id')->all();
+        if (!empty($faultIdsList)) {
+            $clearedLogs = DB::table('fault_stage_logs')
+                ->whereIn('fault_id', $faultIdsList)
+                ->where('status_id', $nocClearedId)
+                ->select('fault_id','started_at')
+                ->get()
+                ->keyBy('fault_id');
+            foreach ($faults as $f) {
+                $start = \Carbon\Carbon::parse($f->created_at);
+                $end = (isset($clearedLogs[$f->id])) ? \Carbon\Carbon::parse($clearedLogs[$f->id]->started_at) : \Carbon\Carbon::now();
+                $days = $start->diffInDays($end);
+                $hours = $start->copy()->addDays($days)->diffInHours($end) % 24;
+                $minutes = $start->copy()->addDays($days)->addHours($hours)->diffInMinutes($end) % 60;
+                $faultAges[$f->id] = ($days > 0 ? ($days.'d ') : '').($hours.'h ').($minutes.'m');
+                $faultAgeStart[$f->id] = $start->format('c');
+                $faultAgeEnd[$f->id] = isset($clearedLogs[$f->id]) ? \Carbon\Carbon::parse($clearedLogs[$f->id]->started_at)->format('c') : null;
+            }
+        }
+
+        return view('assign.index',compact('faults','technicians','remarksByFault','faultAges','faultAgeStart','faultAgeEnd'))
         ->with('i');
     }
 
@@ -106,6 +129,7 @@ class AssignController extends Controller
     {
         // List faults waiting to be assigned (status = 2)
         $faults = DB::table('faults')
+            ->leftjoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
             ->leftjoin('fault_section','faults.id','=','fault_section.fault_id')
             ->leftjoin('users','faults.assignedTo','=','users.id')
             ->leftjoin('sections','fault_section.section_id','=','sections.id')
@@ -132,7 +156,7 @@ class AssignController extends Controller
             ->whereNull('faults.assignedTo')
             ->where('cities.region','=',auth()->user()->region)
             ->get(['faults.id','faults.fault_ref_number','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
-                'account_manager_users.name as accountManager','faults.suspectedRfo_id','links.link','statuses.description','users.name','faults.status_id as status_id',
+                'account_manager_users.name as accountManager','faults.suspectedRfo_id','links.link','statuses.description','users.name','faults.status_id as status_id','assessed_users.name as assessedBy',
                 'cities.city as city','cities.region as region','faults.city_id as city_id','suburbs.suburb as suburb','pops.pop as pop','faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at',
                 'suspectedRFO.RFO as RFO','confirmedRFO.RFO as confirmedRFO', 'fsl.started_at as stage_started_at']);
 
@@ -164,7 +188,29 @@ class AssignController extends Controller
             ->orderBy('users.name','asc')
             ->get(['users.id','users.name']);
 
-        return view('assign.waiting',compact('faults','technicians','remarksByFault'))
+                    $faultAges = [];$faultAgeStart = [];$faultAgeEnd = [];
+        $nocClearedId = (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
+        $faultIdsList = $faults->pluck('id')->all();
+        if (!empty($faultIdsList)) {
+            $clearedLogs = DB::table('fault_stage_logs')
+                ->whereIn('fault_id', $faultIdsList)
+                ->where('status_id', $nocClearedId)
+                ->select('fault_id','started_at')
+                ->get()
+                ->keyBy('fault_id');
+            foreach ($faults as $f) {
+                $start = \Carbon\Carbon::parse($f->created_at);
+                $end = (isset($clearedLogs[$f->id])) ? \Carbon\Carbon::parse($clearedLogs[$f->id]->started_at) : \Carbon\Carbon::now();
+                $days = $start->diffInDays($end);
+                $hours = $start->copy()->addDays($days)->diffInHours($end) % 24;
+                $minutes = $start->copy()->addDays($days)->addHours($hours)->diffInMinutes($end) % 60;
+                $faultAges[$f->id] = ($days > 0 ? ($days.'d ') : '').($hours.'h ').($minutes.'m');
+                $faultAgeStart[$f->id] = $start->format('c');
+                $faultAgeEnd[$f->id] = isset($clearedLogs[$f->id]) ? \Carbon\Carbon::parse($clearedLogs[$f->id]->started_at)->format('c') : null;
+            }
+        }
+
+        return view('assign.waiting',compact('faults','technicians','remarksByFault','faultAges','faultAgeStart','faultAgeEnd'))
             ->with('i');
     }
 

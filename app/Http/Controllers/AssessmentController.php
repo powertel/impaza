@@ -56,6 +56,7 @@ class AssessmentController extends Controller
         $faults = DB::table('faults')
             ->leftjoin('fault_section','faults.id','=','fault_section.fault_id')
             ->leftjoin('users','faults.assignedTo','=','users.id')
+            ->leftjoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
             ->leftjoin('sections','fault_section.section_id','=','sections.id')
             ->leftjoin('customers','faults.customer_id','=','customers.id')
             ->leftjoin('links','faults.link_id','=','links.id')
@@ -76,7 +77,7 @@ class AssessmentController extends Controller
             ->orderBy('faults.created_at', 'desc')
             ->where('faults.status_id','=',1)
             ->get(['faults.id','faults.fault_ref_number','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
-                'account_manager_users.name as accountManager','faults.suspectedRfo_id','links.link','statuses.description','users.name','faults.status_id as status_id',
+                'account_manager_users.name as accountManager','faults.suspectedRfo_id','links.link','statuses.description','users.name','assessed_users.name as assessedBy','faults.status_id as status_id',
                 'cities.city as city','cities.region as region','faults.city_id as city_id','suburbs.suburb as suburb','pops.pop as pop','faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at',
                 'suspectedRFO.RFO as RFO','confirmedRFO.RFO as confirmedRFO', 'fsl.started_at as stage_started_at']);
         // Datasets required for modal-based actions on the assessments page
@@ -110,7 +111,29 @@ class AssessmentController extends Controller
             ]);
         $remarksByFault = $remarksRecords->groupBy('fault_id');
 
-        return view('assessments.index',compact('faults','sections','confirmedRFO','remarksByFault'))
+        $faultAges = [];$faultAgeStart = [];$faultAgeEnd = [];
+        $nocClearedId = (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
+        $faultIdsList = $faults->pluck('id')->all();
+        if (!empty($faultIdsList)) {
+            $clearedLogs = DB::table('fault_stage_logs')
+                ->whereIn('fault_id', $faultIdsList)
+                ->where('status_id', $nocClearedId)
+                ->select('fault_id','started_at')
+                ->get()
+                ->keyBy('fault_id');
+            foreach ($faults as $f) {
+                $start = \Carbon\Carbon::parse($f->created_at);
+                $end = (isset($clearedLogs[$f->id])) ? \Carbon\Carbon::parse($clearedLogs[$f->id]->started_at) : \Carbon\Carbon::now();
+                $days = $start->diffInDays($end);
+                $hours = $start->copy()->addDays($days)->diffInHours($end) % 24;
+                $minutes = $start->copy()->addDays($days)->addHours($hours)->diffInMinutes($end) % 60;
+                $faultAges[$f->id] = ($days > 0 ? ($days.'d ') : '').($hours.'h ').($minutes.'m');
+                $faultAgeStart[$f->id] = $start->format('c');
+                $faultAgeEnd[$f->id] = isset($clearedLogs[$f->id]) ? \Carbon\Carbon::parse($clearedLogs[$f->id]->started_at)->format('c') : null;
+            }
+        }
+
+        return view('assessments.index',compact('faults','sections','confirmedRFO','remarksByFault','faultAges','faultAgeStart','faultAgeEnd'))
         ->with('i');
 
 

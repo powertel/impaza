@@ -35,6 +35,7 @@ class ChiefTechClearFaultsController extends Controller
         $user = auth()->user();
         $query = DB::table('faults')
             ->leftjoin('users','faults.assignedTo','=','users.id')
+            ->leftjoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
             ->leftjoin('customers','faults.customer_id','=','customers.id')
             ->leftjoin('links','faults.link_id','=','links.id')
             ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
@@ -73,6 +74,7 @@ class ChiefTechClearFaultsController extends Controller
                 'faults.suspectedRfo_id',
                 'links.link',
                 'statuses.description',
+                'assessed_users.name as assessedBy',
                 'faults.serviceType',
                 'faults.serviceAttribute',
                 'faults.faultType',
@@ -106,7 +108,29 @@ class ChiefTechClearFaultsController extends Controller
 
         $remarksByFault = $remarksRecords->groupBy('fault_id');
 
-        return view('clear_faults.chief_tech_clear',compact('faults','remarksByFault'))
+        $faultAges = [];$faultAgeStart = [];$faultAgeEnd = [];
+        $nocClearedId = (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
+        $faultIdsList = $faults->pluck('id')->all();
+        if (!empty($faultIdsList)) {
+            $clearedLogs = DB::table('fault_stage_logs')
+                ->whereIn('fault_id', $faultIdsList)
+                ->where('status_id', $nocClearedId)
+                ->select('fault_id','started_at')
+                ->get()
+                ->keyBy('fault_id');
+            foreach ($faults as $f) {
+                $start = \Carbon\Carbon::parse($f->created_at);
+                $end = (isset($clearedLogs[$f->id])) ? \Carbon\Carbon::parse($clearedLogs[$f->id]->started_at) : \Carbon\Carbon::now();
+                $days = $start->diffInDays($end);
+                $hours = $start->copy()->addDays($days)->diffInHours($end) % 24;
+                $minutes = $start->copy()->addDays($days)->addHours($hours)->diffInMinutes($end) % 60;
+                $faultAges[$f->id] = ($days > 0 ? ($days.'d ') : '').($hours.'h ').($minutes.'m');
+                $faultAgeStart[$f->id] = $start->format('c');
+                $faultAgeEnd[$f->id] = isset($clearedLogs[$f->id]) ? \Carbon\Carbon::parse($clearedLogs[$f->id]->started_at)->format('c') : null;
+            }
+        }
+
+        return view('clear_faults.chief_tech_clear',compact('faults','remarksByFault','faultAges','faultAgeStart','faultAgeEnd'))
             ->with('i');
     }
 

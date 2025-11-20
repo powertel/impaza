@@ -255,7 +255,10 @@ Faults
                 @endif
                 @include('faults.show', [
                     'fault' => $fault,
-                    'remarks' => ($remarksByFault[$fault->id] ?? collect())
+                    'remarks' => ($remarksByFault[$fault->id] ?? collect()),
+                    'ageText' => ($faultAges[$fault->id] ?? ''),
+                    'ageStart' => ($faultAgeStart[$fault->id] ?? null),
+                    'ageEnd' => ($faultAgeEnd[$fault->id] ?? null),
                 ])
             @endforeach
             <div class="d-flex justify-content-between align-items-center mt-3">

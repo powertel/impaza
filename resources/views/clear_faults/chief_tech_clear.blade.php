@@ -104,10 +104,13 @@ Clear Faults
 
  {{-- Per-row Fault show modals for "View" --}}
  @foreach ($faults as $fault)
-     @include('faults.show', [
-         'fault' => $fault,
-         'remarks' => $remarksByFault[$fault->id] ?? collect(),
-     ])
+    @include('faults.show', [
+        'fault' => $fault,
+        'remarks' => ($remarksByFault[$fault->id] ?? collect()),
+        'ageText' => ($faultAges[$fault->id] ?? ''),
+        'ageStart' => ($faultAgeStart[$fault->id] ?? null),
+        'ageEnd' => ($faultAgeEnd[$fault->id] ?? null),
+    ])
  @endforeach
  @endsection
 

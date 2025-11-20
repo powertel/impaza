@@ -65,6 +65,7 @@ class DepartmentFaultController extends Controller
                 $join->whereNull('fr.completed_at');
             })
             ->leftjoin('users','faults.assignedTo','=','users.id')
+            ->leftjoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
             ->leftjoin('sections','fault_section.section_id','=','sections.id')
             ->leftjoin('customers','faults.customer_id','=','customers.id')
             ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
@@ -95,6 +96,7 @@ class DepartmentFaultController extends Controller
                 'links.link',
                 'statuses.description',
                 'users.name',
+                'assessed_users.name as assessedBy',
                 'faults.serviceType',
                 'faults.serviceAttribute',
                 'faults.faultType',
@@ -150,7 +152,30 @@ class DepartmentFaultController extends Controller
 
         $remarksByFault = $remarksRecords->groupBy('fault_id');
 
-        return view('department_faults.index',compact('faults','remarksByFault','perPage'))
+        // Age calculation: from created_at to NOC-cleared stage start (status 6), else to now
+        $faultAges = [];$faultAgeStart = [];$faultAgeEnd = [];
+        $nocClearedId = (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
+        $faultIdsList = $faults->getCollection()->pluck('id')->all();
+        if (!empty($faultIdsList)) {
+            $clearedLogs = DB::table('fault_stage_logs')
+                ->whereIn('fault_id', $faultIdsList)
+                ->where('status_id', $nocClearedId)
+                ->select('fault_id','started_at')
+                ->get()
+                ->keyBy('fault_id');
+            foreach ($faults->getCollection() as $f) {
+                $start = \Carbon\Carbon::parse($f->created_at);
+                $end = (isset($clearedLogs[$f->id])) ? \Carbon\Carbon::parse($clearedLogs[$f->id]->started_at) : \Carbon\Carbon::now();
+                $days = $start->diffInDays($end);
+                $hours = $start->copy()->addDays($days)->diffInHours($end) % 24;
+                $minutes = $start->copy()->addDays($days)->addHours($hours)->diffInMinutes($end) % 60;
+                $faultAges[$f->id] = ($days > 0 ? ($days.'d ') : '') . ($hours.'h ') . ($minutes.'m');
+                $faultAgeStart[$f->id] = $start->format('c');
+                $faultAgeEnd[$f->id] = isset($clearedLogs[$f->id]) ? \Carbon\Carbon::parse($clearedLogs[$f->id]->started_at)->format('c') : null;
+            }
+        }
+
+        return view('department_faults.index',compact('faults','remarksByFault','perPage','faultAges','faultAgeStart','faultAgeEnd'))
             ->with('i');
         
     }
@@ -250,6 +275,7 @@ class DepartmentFaultController extends Controller
 
         $faultsQuery = DB::table('faults')
             ->leftjoin('users','faults.assignedTo','=','users.id')
+            ->leftjoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
             ->leftjoin('customers','faults.customer_id','=','customers.id')
             ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
             ->leftjoin('users as account_manager_users','account_managers.user_id','=','account_manager_users.id')
@@ -286,6 +312,7 @@ class DepartmentFaultController extends Controller
                 'links.link',
                 'statuses.description',
                 'users.name',
+                'assessed_users.name as assessedBy',
                 'faults.serviceType',
                 'faults.serviceAttribute',
                 'faults.faultType',
@@ -335,7 +362,30 @@ class DepartmentFaultController extends Controller
 
         $remarksByFault = $remarksRecords->groupBy('fault_id');
 
-        return view('department_faults.referred',compact('faults','remarksByFault','perPage'))
+        // Age calculation for referred faults
+        $faultAges = [];$faultAgeStart = [];$faultAgeEnd = [];
+        $nocClearedId = (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
+        $faultIdsList = $faults->getCollection()->pluck('id')->all();
+        if (!empty($faultIdsList)) {
+            $clearedLogs = DB::table('fault_stage_logs')
+                ->whereIn('fault_id', $faultIdsList)
+                ->where('status_id', $nocClearedId)
+                ->select('fault_id','started_at')
+                ->get()
+                ->keyBy('fault_id');
+            foreach ($faults->getCollection() as $f) {
+                $start = \Carbon\Carbon::parse($f->created_at);
+                $end = (isset($clearedLogs[$f->id])) ? \Carbon\Carbon::parse($clearedLogs[$f->id]->started_at) : \Carbon\Carbon::now();
+                $days = $start->diffInDays($end);
+                $hours = $start->copy()->addDays($days)->diffInHours($end) % 24;
+                $minutes = $start->copy()->addDays($days)->addHours($hours)->diffInMinutes($end) % 60;
+                $faultAges[$f->id] = ($days > 0 ? ($days.'d ') : '') . ($hours.'h ') . ($minutes.'m');
+                $faultAgeStart[$f->id] = $start->format('c');
+                $faultAgeEnd[$f->id] = isset($clearedLogs[$f->id]) ? \Carbon\Carbon::parse($clearedLogs[$f->id]->started_at)->format('c') : null;
+            }
+        }
+
+        return view('department_faults.referred',compact('faults','remarksByFault','perPage','faultAges','faultAgeStart','faultAgeEnd'))
             ->with('i');
     }
 
