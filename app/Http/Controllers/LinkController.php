@@ -32,6 +32,7 @@ class LinkController extends Controller
         $perPage = (int) request('per_page', 20);
         $perPage = in_array($perPage, [10,20,50,100]) ? $perPage : 20;
         $q = trim((string) request('q', ''));
+        $statusId = request('status');
 
         $linksQuery = DB::table('links')
             ->leftjoin('customers','links.customer_id','=','customers.id')
@@ -58,13 +59,23 @@ class LinkController extends Controller
             });
         }
 
+        if (!empty($statusId) && $statusId !== 'all') {
+            $linksQuery->where('links.link_status', '=', (int) $statusId);
+        }
+
         $links = $linksQuery->paginate($perPage)->withQueryString();
         $customers = DB::table('customers')->orderBy('customers.customer', 'asc')->get();
         $cities = City::all();
         $suburbs = Suburb::all();
         $pops = Pop::all();
         $linkTypes = LinkType::all();
-        return view('links.index',compact('links','customers','cities','suburbs','pops','linkTypes'))
+        $linkStatuses = DB::table('link_statuses')->orderBy('id')->get();
+        $statusCounts = DB::table('links')
+            ->select('link_status', DB::raw('count(*) as total'))
+            ->groupBy('link_status')
+            ->pluck('total', 'link_status');
+        $totalLinks = DB::table('links')->count();
+        return view('links.index',compact('links','customers','cities','suburbs','pops','linkTypes','linkStatuses','statusCounts','totalLinks'))
         ->with('i');
     }
 
