@@ -56,6 +56,9 @@ Cleared
               <td class="text-muted">{{ $fault->reportedBy }}</td>
               <td>{{ \Carbon\Carbon::parse($fault->updated_at)->format('j F Y h:i a') }}</td>
               <td>
+                <button  class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                    <i class="fas fa-eye me-1"></i> View
+                </button>
                 <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#resolvedRevoke-{{ $fault->id }}">
                   <i class="fas fa-undo me-1"></i> Revoke
                 </button>
@@ -88,13 +91,23 @@ Cleared
                   <div class="alert alert-warning mb-0">This will move the fault back to NOC</div>
                 </div>
                 <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                  <button type="submit" class="btn btn-danger">Revoke</button>
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i> Cancel</button>
+                  <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-undo me-1"></i> Revoke</button>
                 </div>
               </form>
             </div>
           </div>
         </div>
+
+                        @include('faults.show', [
+                    'fault' => $fault,
+                    'remarks' => ($remarksByFault[$fault->id] ?? collect()),
+                    'ageText' => ($faultAges[$fault->id] ?? ''),
+                    'ageStart' => ($faultAgeStart[$fault->id] ?? null),
+                    'ageEnd' => ($faultAgeEnd[$fault->id] ?? null),
+                ])
         @endforeach
 
         <div class="d-flex justify-content-between align-items-center mt-3">
