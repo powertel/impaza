@@ -72,7 +72,7 @@ Cleared
 
         @foreach ($faults as $fault)
         <div class="modal fade" id="resolvedRevoke-{{ $fault->id }}" tabindex="-1" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title">Revoke Fault</h5>
@@ -85,7 +85,7 @@ Cleared
                     <label class="form-label">Remark</label>
                     <textarea name="remark" class="form-control" rows="3" required></textarea>
                   </div>
-                  <div class="alert alert-warning mb-0">This moves the fault to status 5.</div>
+                  <div class="alert alert-warning mb-0">This will move the fault back to NOC</div>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

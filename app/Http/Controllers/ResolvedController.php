@@ -86,6 +86,8 @@ class ResolvedController extends Controller
 
         $fault->update(['status_id' => 5]);
         FaultLifecycle::recordStatusChange($fault, 5, $request->user()->id);
+        // Do NOT reassign. Instead, reopen the last assignment to the same owner to continue timing
+        FaultLifecycle::reopenAssignment($fault);
 
         Remark::create([
             'fault_id' => $fault->id,
@@ -93,6 +95,6 @@ class ResolvedController extends Controller
             'remark' => 'Resolved revoke: '.$validated['remark'],
         ]);
 
-        return back()->with('success', 'Fault revoked to status 5');
+        return back()->with('success', 'Fault has been Reopened');
     }
 }
