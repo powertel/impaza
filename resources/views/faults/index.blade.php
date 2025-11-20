@@ -182,6 +182,7 @@ Faults
                         <th>Date Reported</th>
                         <th>Logged By</th>
                         <th>Status</th>
+                        <th>Age</th>
                         <th>Action(s)</th>
                     </tr>
                 </thead>
@@ -203,6 +204,12 @@ Faults
                             <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
                                 {{$fault->description}}
                             </span>
+                        </td>
+                        <td>
+                          @php $ageText = $faultAges[$fault->id] ?? ''; @endphp
+                          @php $ageStart = $faultAgeStart[$fault->id] ?? null; @endphp
+                          @php $ageEnd = $faultAgeEnd[$fault->id] ?? null; @endphp
+                          <span class="badge bg-light text-dark border fault-age" data-age-start="{{ $ageStart }}" data-age-end="{{ $ageEnd }}">{{ $ageText }}</span>
                         </td>
                         <td class="text-nowrap">
                             <div class="btn-group btn-group gap-2" role="group" aria-label="Actions">
@@ -248,7 +255,10 @@ Faults
                 @endif
                 @include('faults.show', [
                     'fault' => $fault,
-                    'remarks' => ($remarksByFault[$fault->id] ?? collect())
+                    'remarks' => ($remarksByFault[$fault->id] ?? collect()),
+                    'ageText' => ($faultAges[$fault->id] ?? ''),
+                    'ageStart' => ($faultAgeStart[$fault->id] ?? null),
+                    'ageEnd' => ($faultAgeEnd[$fault->id] ?? null),
                 ])
             @endforeach
             <div class="d-flex justify-content-between align-items-center mt-3">
@@ -308,6 +318,32 @@ Faults
           window.location.search = params.toString();
         });
       });
+
+      function fmtAge(ms){
+        const totalMinutes = Math.floor(ms / 60000);
+        const days = Math.floor(totalMinutes / (60*24));
+        const hours = Math.floor((totalMinutes - days*60*24) / 60);
+        const minutes = totalMinutes - days*60*24 - hours*60;
+        let s = '';
+        if (days > 0) s += days + 'd ';
+        s += hours + 'h ' + minutes + 'm';
+        return s;
+      }
+      function updateAges(){
+        const now = Date.now();
+        document.querySelectorAll('.fault-age').forEach(function(el){
+          const start = el.getAttribute('data-age-start');
+          const end = el.getAttribute('data-age-end');
+          if (!start) return;
+          const startMs = Date.parse(start);
+          const endMs = end ? Date.parse(end) : null;
+          const diff = (endMs ? endMs : now) - startMs;
+          if (diff < 0) return;
+          el.textContent = fmtAge(diff);
+        });
+      }
+      updateAges();
+      setInterval(updateAges, 60000);
     </script>
 @endsection
 

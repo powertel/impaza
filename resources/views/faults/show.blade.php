@@ -67,6 +67,20 @@
                                         <div class="fw-semibold">{{ $fault->accountManager }}</div>
                                     </div>
                                 </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <small class="text-muted">Age</small>
+                                        <div class="fw-semibold">
+                                            <span class="badge bg-light text-dark border fault-age" data-age-start="{{ $ageStart ?? '' }}" data-age-end="{{ $ageEnd ?? '' }}">{{ $ageText ?? '' }}</span>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <small class="text-muted">Assessed By</small>
+                                        <div class="fw-semibold">{{ $fault->assessedBy ?? 'N/A' }}</div>
+                                    </div>
+                                </li>
                             </ul>
                         </div>
                     </div>

@@ -19,6 +19,7 @@ class FaultController extends Controller
         $userId = $request->user()->id;
         $faults = DB::table('faults')
             ->leftJoin('users','faults.assignedTo','=','users.id')
+            ->leftJoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
             ->leftJoin('customers','faults.customer_id','=','customers.id')
             ->leftJoin('links','faults.link_id','=','links.id')
             ->leftJoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
@@ -48,6 +49,7 @@ class FaultController extends Controller
                 'links.link',
                 'statuses.id as status_id',
                 'statuses.description as status',
+                'assessed_users.name as assessedBy',
                 'faults.serviceType',
                 'faults.serviceAttribute',
                 'faults.faultType',
@@ -78,9 +80,34 @@ class FaultController extends Controller
 
         $remarksByFault = $remarksRecords->groupBy('fault_id');
 
+        $faultAges = [];$faultAgeStart = [];$faultAgeEnd = [];
+        $nocClearedId = (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
+        $faultIdsList = $faults->pluck('id')->all();
+        if (!empty($faultIdsList)) {
+            $clearedLogs = DB::table('fault_stage_logs')
+                ->whereIn('fault_id', $faultIdsList)
+                ->where('status_id', $nocClearedId)
+                ->select('fault_id','started_at')
+                ->get()
+                ->keyBy('fault_id');
+            foreach ($faults as $f) {
+                $start = \Carbon\Carbon::parse($f->created_at);
+                $end = (isset($clearedLogs[$f->id])) ? \Carbon\Carbon::parse($clearedLogs[$f->id]->started_at) : \Carbon\Carbon::now();
+                $days = $start->diffInDays($end);
+                $hours = $start->copy()->addDays($days)->diffInHours($end) % 24;
+                $minutes = $start->copy()->addDays($days)->addHours($hours)->diffInMinutes($end) % 60;
+                $faultAges[$f->id] = ($days > 0 ? ($days.'d ') : '').($hours.'h ').($minutes.'m');
+                $faultAgeStart[$f->id] = $start->format('c');
+                $faultAgeEnd[$f->id] = isset($clearedLogs[$f->id]) ? \Carbon\Carbon::parse($clearedLogs[$f->id]->started_at)->format('c') : null;
+            }
+        }
+
         return response()->json([
             'faults' => $faults,
             'remarksByFault' => $remarksByFault,
+            'faultAges' => $faultAges,
+            'faultAgeStart' => $faultAgeStart,
+            'faultAgeEnd' => $faultAgeEnd,
         ]);
     }
 

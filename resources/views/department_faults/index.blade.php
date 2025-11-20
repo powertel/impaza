@@ -81,7 +81,13 @@ Department Faults
                 </tbody> 
             </table>
             @foreach ($faults as $fault)
-                @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
+                @include('faults.show', [
+                    'fault' => $fault,
+                    'remarks' => ($remarksByFault[$fault->id] ?? collect()),
+                    'ageText' => ($faultAges[$fault->id] ?? ''),
+                    'ageStart' => ($faultAgeStart[$fault->id] ?? null),
+                    'ageEnd' => ($faultAgeEnd[$fault->id] ?? null),
+                ])
             @endforeach
             @foreach ($faults as $fault)
               @if(!empty($fault->referral_id))

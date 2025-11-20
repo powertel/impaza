@@ -30,6 +30,7 @@ class Fault extends Model
         'serviceType',
         'serviceAttribute',
         'status_id',
+        'assessed_by',
         'confirmedRfo_id',
         'faultType',
         'priorityLevel',

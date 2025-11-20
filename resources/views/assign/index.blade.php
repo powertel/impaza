@@ -110,7 +110,13 @@ Assign Faults
             </div>   
                 @foreach ($faults as $fault)
                     @include('assign.reassign_modal', ['fault' => $fault, 'technicians' => ($techniciansByFault[$fault->id] ?? $technicians)])
-                    @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
+                    @include('faults.show', [
+                        'fault' => $fault,
+                        'remarks' => ($remarksByFault[$fault->id] ?? collect()),
+                        'ageText' => ($faultAges[$fault->id] ?? ''),
+                        'ageStart' => ($faultAgeStart[$fault->id] ?? null),
+                        'ageEnd' => ($faultAgeEnd[$fault->id] ?? null),
+                    ])
                 @endforeach
 
 
