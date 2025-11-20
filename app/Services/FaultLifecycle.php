@@ -311,16 +311,16 @@ class FaultLifecycle
     protected static function customerMessage(Fault $fault, int $toStatusId): string
     {
         if ($toStatusId === 1) {
-            return "Hello. Your fault {$fault->fault_ref_number} is logged and awaiting assessment. We are on it.";
+            return "Good Day we have acknowledged the receipt of your fault {$fault->fault_ref_number}. We are on it.";
         }
-        if ($toStatusId === 2) {
+/*         if ($toStatusId === 2) {
             return "Update: Fault {$fault->fault_ref_number} has been assessed. We are preparing rectification.";
         }
         if ($toStatusId === 3) {
             return "Good news: Rectification is underway for fault {$fault->fault_ref_number}. We will keep you updated.";
-        }
+        } */
         if ($toStatusId === 4) {
-            return "Resolved: Fault {$fault->fault_ref_number} was cleared by the technician. If you still experience issues, please contact us.";
+            return "Good news: Fault {$fault->fault_ref_number} was resolved by our team. If you still experience issues, please contact us.";
         }
         return "Fault {$fault->fault_ref_number} status updated.";
     }
