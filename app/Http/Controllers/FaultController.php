@@ -144,6 +144,39 @@ class FaultController extends Controller
             ]);
 
         $remarksByFault = $remarksRecords->groupBy('fault_id');
+
+        // Compute Age for each fault: from logged date to NOC-cleared date (status 6), otherwise to now
+        $faultAges = [];
+        $faultAgeStart = [];
+        $faultAgeEnd = [];
+        $nocClearedId = (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
+        $faultIdsList = $faults->getCollection()->pluck('id')->all();
+        if (!empty($faultIdsList)) {
+            $clearedLogs = DB::table('fault_stage_logs')
+                ->whereIn('fault_id', $faultIdsList)
+                ->where('status_id', $nocClearedId)
+                ->select('fault_id','started_at')
+                ->get()
+                ->keyBy('fault_id');
+
+            foreach ($faults->getCollection() as $f) {
+                $start = Carbon::parse($f->created_at);
+                $end = null;
+                if ((int)$f->status_id === $nocClearedId && isset($clearedLogs[$f->id])) {
+                    $end = Carbon::parse($clearedLogs[$f->id]->started_at);
+                } else {
+                    $end = Carbon::now();
+                }
+                $days = $start->diffInDays($end);
+                $hours = $start->copy()->addDays($days)->diffInHours($end);
+                $hours = $hours % 24;
+                $minutes = $start->copy()->addDays($days)->addHours($hours)->diffInMinutes($end);
+                $minutes = $minutes % 60;
+                $faultAges[$f->id] = ($days > 0 ? ($days.'d ') : '') . ($hours.'h ') . ($minutes.'m');
+                $faultAgeStart[$f->id] = $start->format('c');
+                $faultAgeEnd[$f->id] = ((int)$f->status_id === $nocClearedId && isset($clearedLogs[$f->id])) ? Carbon::parse($clearedLogs[$f->id]->started_at)->format('c') : null;
+            }
+        }
         
         $city = City::all();
         $customer = DB::table('customers')
@@ -168,7 +201,7 @@ class FaultController extends Controller
             'open_gt72'  => DB::table('faults')->where('status_id','<',4)->where('created_at', '<', Carbon::now()->subHours(72))->count(),
         ];
 
-        return view('faults.index',compact('faults','customer','city','accountManager','location','link','pop','suspectedRFO','remarksByFault','openStatuses','ageStats'))
+        return view('faults.index',compact('faults','customer','city','accountManager','location','link','pop','suspectedRFO','remarksByFault','openStatuses','ageStats','faultAges','faultAgeStart','faultAgeEnd'))
         ->with('i');
 
     }

@@ -290,7 +290,7 @@ class FaultLifecycle
     protected static function notifyCustomerStatus(Fault $fault, int $toStatusId, string $text): void
     {
         // Only send for: 1 (logged/waiting assessment), 2 (assessed), 3 (under rectification), 4 (cleared by technician)
-        $shouldSend = in_array($toStatusId, [1, 6], true);
+        $shouldSend = in_array($toStatusId, [1], true);
         if (!$shouldSend) {
             return;
         }
@@ -349,9 +349,9 @@ class FaultLifecycle
         if ($toStatusId === 3) {
             return "Good news: Rectification is underway for fault {$fault->fault_ref_number}. We will keep you updated.";
         } */
-        if ($toStatusId === 6) {
+       /*  if ($toStatusId === 6) {
             return "Good news: Fault {$fault->fault_ref_number} was resolved by our team. If you still experience issues, please contact us.";
-        }
+        } */
         return "";
     }
 
