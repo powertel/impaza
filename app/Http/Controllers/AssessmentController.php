@@ -367,30 +367,23 @@ class AssessmentController extends Controller
 	
     private function autoAssign($section_id)
     {
-        // Load configurable settings
-        $settings = AutoAssignSetting::query()->first();
-        // Gate auto-assignment behind chief tech toggle
-        if (!$settings || !($settings->auto_assign_enabled ?? false)) {
-            return; // Auto-assign disabled; do nothing
-        }
+        // Load scope-specific settings for the assessing user's section/region
+        $u = auth()->user();
+        $scopeSectionId = (int)$section_id;
+        $scopeRegion = in_array((int)$scopeSectionId, [2,3], true) ? ($u->region ?? null) : null;
+        $settings = AutoAssignSetting::query()
+            ->where('scope_section_id', $scopeSectionId)
+            ->where(function($q) use ($scopeRegion) {
+                if ($scopeRegion === null) { $q->whereNull('scope_region'); }
+                else { $q->where('scope_region', $scopeRegion); }
+            })
+            ->where('auto_assign_enabled', true)
+            ->first();
 
-        // Scope by explicit settings when provided; fallback to updater's section/region
-        $scopeSectionId = $settings->scope_section_id ?? null;
-        $scopeRegion = $settings->scope_region ?? null;
-        if (empty($scopeSectionId) || empty($scopeRegion)) {
-            $scopeUser = null;
-            if (!empty($settings->updated_by)) {
-                $scopeUser = \App\Models\User::find((int)$settings->updated_by);
-            }
-            $scopeSectionId = $scopeSectionId ?: ($scopeUser->section_id ?? null);
-            $scopeRegion = $scopeRegion ?: ($scopeUser->region ?? null);
-        }
-
-        // If the assessed fault's section does not match scope section, do nothing
-        if (!empty($scopeSectionId) && (int)$scopeSectionId !== (int)$section_id) {
-            Log::info('Auto-assign skipped: section mismatch with scope', [
+        // Gate auto-assignment behind per-scope toggle
+        if (!$settings) {
+            Log::info('Auto-assign skipped: scope disabled or missing', [
                 'assessed_section_id' => (int)$section_id,
-                'scope_section_id' => (int)$scopeSectionId,
                 'scope_region' => $scopeRegion,
             ]);
             return;
@@ -450,6 +443,9 @@ class AssessmentController extends Controller
                 ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
                 ->where('sections.id','=',$section_id)
                 ->where('user_statuses.status_name', '=', 'Assignable')
+                ->when(in_array((int)$section_id, [2,3], true) && !empty($scopeRegion), function($q) use ($scopeRegion) {
+                    $q->where('users.region', '=', $scopeRegion);
+                })
                 ->whereNotIn('user_statuses.status_name', $considerLeave ? ['Unassignable','On Leave'] : ['Unassignable'])
                 ->pluck('users.id')
                 ->toArray();
@@ -463,11 +459,10 @@ class AssessmentController extends Controller
 			
 			
 
-        // For round-robin we keep an index, but region filter may yield a subset per fault
-
-        $userslength=count($users);
-            // Retrieve the last assigned user index from persistent storage
-        $lastAssignedUserIndex = Cache::get('last_assigned_user_index', 0);
+        // For round-robin we keep an index per section/region
+        $userslength = count($users);
+        $rrKey = 'last_assigned_user_index_' . (int)$section_id . '_' . (in_array((int)$section_id, [2,3], true) ? ($scopeRegion ?: 'all') : 'all');
+        $lastAssignedUserIndex = Cache::get($rrKey, 0);
         $userfaults =[];
 
         for($i=0; $i < count($faults); $i++){
@@ -541,14 +536,13 @@ class AssessmentController extends Controller
             $faultCity = \DB::table('cities')->where('id', $assign->city_id)->value('region');
             FaultLifecycle::startAssignment($assign, $userfaults[$autoAssign], auth()->id(), FaultLifecycle::isOffHours(), $faultCity);
 
-            $lastAssignedUserIndex ++;
-        
-            if($lastAssignedUserIndex >= $userslength){
+            $lastAssignedUserIndex++;
+            if ($lastAssignedUserIndex >= $userslength) {
                 $lastAssignedUserIndex = 0;
             }
         }
         // Store the updated last assigned user index in persistent storage
-        Cache::put('last_assigned_user_index', $lastAssignedUserIndex);
+        Cache::put($rrKey, $lastAssignedUserIndex);
     }
 
 

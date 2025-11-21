@@ -58,7 +58,7 @@ Technician Configuration
                       <td>
                         <select class="form-select form-select-sm js-user-setting" data-field="user_status" data-role="status-select" {{ $t->status_name === 'On Leave' ? 'disabled' : '' }}>
                           <option value="Assignable" {{ $t->status_name === 'Assignable' ? 'selected' : '' }}>Assignable</option>
-                          <option value="Away" {{ $t->status_name === 'Away' ? 'selected' : '' }}>Away (Business Trip)</option>
+                          <option value="Away" {{ $t->status_name === 'Away' ? 'selected' : '' }}>Away</option>
                         </select>
                       </td>
                       <td>
@@ -154,7 +154,7 @@ Technician Configuration
               </div>
               <div class="col-md-4">
                 <div class="form-check">
-                  <input class="form-check-input js-setting" type="checkbox" name="consider_region" value="1" id="consider_region" data-field="consider_region" {{ old('consider_region', ($settings->consider_region ?? true)) ? 'checked' : '' }}>
+                  <input class="form-check-input js-setting" type="checkbox" name="consider_region" value="1" id="consider_region" data-field="consider_region" {{ old('consider_region', ($effectiveConsiderRegion ?? ($settings->consider_region ?? true))) ? 'checked' : '' }} {{ ($sectionLocked ?? false) ? '' : 'disabled' }}>
                   <label class="form-check-label" for="consider_region">Consider Region</label>
                 </div>
               </div>
@@ -163,7 +163,7 @@ Technician Configuration
             <div class="row g-2 mt-2">
               <div class="col-md-6">
                 <div class="form-check">
-                  <input class="form-check-input js-setting" type="checkbox" name="auto_assign_enabled" value="1" id="auto_assign_enabled" data-field="auto_assign_enabled" {{ old('auto_assign_enabled', ($settings->auto_assign_enabled ?? false)) ? 'checked' : '' }}>
+                  <input class="form-check-input js-setting" type="checkbox" name="auto_assign_enabled" value="1" id="auto_assign_enabled" data-field="auto_assign_enabled" {{ old('auto_assign_enabled', ($effectiveAutoAssignEnabled ?? ($settings->auto_assign_enabled ?? false))) ? 'checked' : '' }} {{ (($sectionLocked ?? false) && !($sectionMatches ?? true)) || (($regionLocked ?? false) && !($regionMatches ?? true)) ? 'disabled' : '' }}>
                   <label class="form-check-label" for="auto_assign_enabled">Enable Auto-Assign</label>
                 </div>
               </div>
@@ -231,6 +231,7 @@ Technician Configuration
     // Auto-save global settings on change (modal)
     document.querySelectorAll('.js-setting').forEach(el => {
       el.addEventListener('change', async () => {
+        if (el.disabled) { return; }
         const field = el.dataset.field;
         let value;
         if (el.type === 'checkbox') { value = el.checked ? 1 : 0; }
