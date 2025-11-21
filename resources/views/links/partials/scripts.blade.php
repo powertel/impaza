@@ -61,6 +61,35 @@
 
   // Modal-specific behavior: load links, edit and autosave
   document.addEventListener('DOMContentLoaded', function(){
+    // Create modal: auto-fill contract number from selected customer
+    (function(){
+      const createModal = document.getElementById('createLinkModal');
+      if (!createModal) return;
+      const custSel = createModal.querySelector('#customer_id');
+      function setContractNumber(val){
+        const fields = createModal.querySelectorAll('input[name^="items"][name$="[contract_number]"]');
+        fields.forEach(function(inp){ inp.value = val || ''; });
+      }
+      function currentContract(){
+        if (!custSel) return '';
+        const opt = custSel.options[custSel.selectedIndex];
+        return opt ? (opt.getAttribute('data-contract-number') || '') : '';
+      }
+      function apply(){ setContractNumber(currentContract()); }
+      if (custSel) {
+        custSel.addEventListener('change', apply);
+        if (window.$ && $(custSel).hasClass('select2')) {
+          $(custSel).on('select2:select', apply);
+        }
+        // Initial fill for preselected value
+        apply();
+      }
+      // When adding new repeater items, keep contract number populated
+      const addBtn = createModal.querySelector('#addLinkRepeaterItem');
+      addBtn && addBtn.addEventListener('click', function(){
+        setTimeout(apply, 0);
+      });
+    })();
     const modal = document.getElementById('editExistingLinksModal');
     if (!modal) return;
 
@@ -248,8 +277,8 @@
       });
     }
 
-    customerSel.addEventListener('change', function(){
-      const custId = this.value;
+    function loadLinksForCustomer(custId){
+      if (!custId) return;
       $(tbody).empty().append('<tr><td colspan="8" class="text-center text-muted">Loading…</td></tr>');
       $.get(`{{ url('links/customer') }}/${custId}`, function(items){
         $(tbody).empty();
@@ -258,9 +287,18 @@
           return;
         }
         items.forEach(function(item){ tbody.appendChild(renderRow(item)); });
-        // Ensure cascades bind for the newly rendered rows
         window.bindLinkCascades && window.bindLinkCascades(tbody);
       });
+    }
+
+    customerSel.addEventListener('change', function(){
+      loadLinksForCustomer(this.value);
     });
+    if (window.$ && $(customerSel).hasClass('select2')) {
+      $(customerSel).on('select2:select', function(e){
+        const val = e.params?.data?.id || customerSel.value;
+        loadLinksForCustomer(val);
+      });
+    }
   });
 </script>
