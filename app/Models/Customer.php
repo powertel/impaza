@@ -14,6 +14,7 @@ class Customer extends Model
         'account_number',
         'contract_number',
         'account_manager_id',
+        'customer_status',
         'address',
         'contact_number',
     ];

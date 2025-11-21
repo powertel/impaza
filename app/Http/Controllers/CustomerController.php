@@ -80,6 +80,7 @@ class CustomerController extends Controller
         $perPage = (int) request('per_page', 20);
         $perPage = in_array($perPage, [10,20,50,100]) ? $perPage : 20;
         $q = trim((string) request('q', ''));
+        $statusId = request('status');
 
         $customersQuery = DB::table('customers')
                 ->leftJoin('account_managers', 'customers.account_manager_id', '=', 'account_managers.id')
@@ -90,6 +91,7 @@ class CustomerController extends Controller
                     'customers.customer',
                     'customers.account_number',
                     'customers.account_manager_id',
+                    'customers.customer_status',
                     'customers.address',
                     'customers.contact_number',
                     'account_manager_users.name as accountManager',
@@ -106,7 +108,17 @@ class CustomerController extends Controller
             });
         }
 
+        if (!empty($statusId) && $statusId !== 'all') {
+            $customersQuery->where('customers.customer_status', '=', (int) $statusId);
+        }
+
         $customers = $customersQuery->paginate($perPage)->withQueryString();
+
+        $customerStatusCounts = DB::table('customers')
+            ->select('customer_status', DB::raw('count(*) as total'))
+            ->groupBy('customer_status')
+            ->pluck('total','customer_status');
+        $totalCustomers = DB::table('customers')->count();
 
         // Fetch account managers joined with users for display and selection
         $accountManagers = DB::table('account_managers')
@@ -115,7 +127,7 @@ class CustomerController extends Controller
             ->orderBy('users.name', 'asc')
             ->get(['account_managers.id as am_id', 'account_managers.user_id as user_id', 'users.name as name']);
 
-        return view('customers.index',compact('customers','accountManagers'));
+        return view('customers.index',compact('customers','accountManagers','customerStatusCounts','totalCustomers'));
     }
 
     /**
@@ -245,6 +257,7 @@ class CustomerController extends Controller
             'account_number' => ['required','string', Rule::unique('customers','account_number')->ignore($id)],
             'contract_number' => ['nullable','string','max:100'],
             'account_manager_id' => ['required','integer','exists:users,id'],
+            'customer_status' => ['nullable','integer','in:1,2,3,4'],
             'address' => ['nullable','string','max:255'],
             'contact_number' => ['nullable','string','max:50'],
         ]);
@@ -273,5 +286,154 @@ class CustomerController extends Controller
             return redirect()->route('customers.index')
                 ->withErrors(['error' => 'Delete failed due to existing references.']);
         }
+    }
+
+    public function disconnect(Request $request, $id)
+    {
+        $cust = Customer::findOrFail($id);
+        $cust->update(['customer_status' => 3]);
+        DB::table('audits')->insert([
+            'entity_type' => 'customer',
+            'entity_id' => $cust->id,
+            'action' => 'customer_disconnect',
+            'user_id' => optional($request->user())->id,
+            'notes' => 'Customer disconnected',
+            'created_at' => now(),
+        ]);
+        $affected = DB::table('links')
+            ->where('customer_id', $cust->id)
+            ->where('link_status', '<>', 4)
+            ->pluck('id');
+        DB::table('links')
+            ->whereIn('id', $affected)
+            ->update(['link_status' => 3]);
+        foreach ($affected as $lid) {
+            DB::table('audits')->insert([
+                'entity_type' => 'link',
+                'entity_id' => $lid,
+                'action' => 'link_disconnect',
+                'user_id' => optional($request->user())->id,
+                'notes' => 'Link disconnected due to customer disconnect',
+                'created_at' => now(),
+            ]);
+        }
+        return back()->with('success','Customer disconnected and related links updated');
+    }
+
+    public function reconnect(Request $request, $id)
+    {
+        $cust = Customer::findOrFail($id);
+        $cust->update(['customer_status' => 2]);
+        DB::table('audits')->insert([
+            'entity_type' => 'customer',
+            'entity_id' => $cust->id,
+            'action' => 'customer_reconnect',
+            'user_id' => optional($request->user())->id,
+            'notes' => 'Customer reconnected',
+            'created_at' => now(),
+        ]);
+        $affected = DB::table('links')
+            ->where('customer_id', $cust->id)
+            ->where('link_status', '=', 3)
+            ->pluck('id');
+        DB::table('links')
+            ->whereIn('id', $affected)
+            ->update(['link_status' => 2]);
+        foreach ($affected as $lid) {
+            DB::table('audits')->insert([
+                'entity_type' => 'link',
+                'entity_id' => $lid,
+                'action' => 'link_reconnect',
+                'user_id' => optional($request->user())->id,
+                'notes' => 'Link reconnected due to customer reconnect',
+                'created_at' => now(),
+            ]);
+        }
+        return back()->with('success','Customer reconnected; previously disconnected links restored');
+    }
+
+    public function reconnectDecommissioned(Request $request, $id)
+    {
+        $cust = Customer::findOrFail($id);
+        $cust->update(['customer_status' => 2]);
+        DB::table('audits')->insert([
+            'entity_type' => 'customer',
+            'entity_id' => $cust->id,
+            'action' => 'customer_reconnect_decommissioned',
+            'user_id' => optional($request->user())->id,
+            'notes' => 'Customer reconnected from decommissioned',
+            'created_at' => now(),
+        ]);
+        $lastCustDecom = DB::table('audits')
+            ->where('entity_type', 'customer')
+            ->where('entity_id', $cust->id)
+            ->where('action', 'customer_decommission')
+            ->orderByDesc('created_at')
+            ->first();
+
+        $customerLinkIds = DB::table('links')
+            ->where('customer_id', $cust->id)
+            ->pluck('id');
+
+        $affected = DB::table('audits')
+            ->where('entity_type', 'link')
+            ->whereIn('entity_id', $customerLinkIds)
+            ->where('action', 'link_decommission')
+            ->where('notes', 'Link decommissioned due to customer decommission')
+            ->when($lastCustDecom, function($q) use ($lastCustDecom){
+                $q->where('created_at', '>=', $lastCustDecom->created_at);
+            })
+            ->pluck('entity_id');
+
+        if ($affected->count() > 0) {
+            DB::table('links')
+                ->whereIn('id', $affected)
+                ->where('link_status', 4)
+                ->update(['link_status' => 2]);
+        }
+
+        foreach ($affected as $lid) {
+            DB::table('audits')->insert([
+                'entity_type' => 'link',
+                'entity_id' => $lid,
+                'action' => 'link_reconnect_from_decommission',
+                'user_id' => optional($request->user())->id,
+                'notes' => 'Link reconnected from customer decommissioned state',
+                'created_at' => now(),
+            ]);
+        }
+        return back()->with('success','Customer reconnected; decommissioned links restored');
+    }
+
+    public function decommission(Request $request, $id)
+    {
+        $cust = Customer::findOrFail($id);
+        $cust->update(['customer_status' => 4]);
+        DB::table('audits')->insert([
+            'entity_type' => 'customer',
+            'entity_id' => $cust->id,
+            'action' => 'customer_decommission',
+            'user_id' => optional($request->user())->id,
+            'notes' => 'Customer decommissioned',
+            'created_at' => now(),
+        ]);
+        $affected = DB::table('links')
+            ->where('customer_id', $cust->id)
+            ->where('link_status', '<>', 4)
+            ->pluck('id');
+        DB::table('links')
+            ->whereIn('id', $affected)
+            ->update(['link_status' => 4]);
+        foreach ($affected as $lid) {
+            DB::table('audits')->insert([
+                'entity_type' => 'link',
+                'entity_id' => $lid,
+                'action' => 'link_decommission',
+                'user_id' => optional($request->user())->id,
+                'notes' => 'Link decommissioned due to customer decommission',
+                'created_at' => now(),
+            ]);
+        }
+        return back()->with('success','Customer decommissioned and all links decommissioned');
     }
 }
