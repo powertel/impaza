@@ -11,8 +11,8 @@
         <div class="modal-body">
           <div class="mb-3">
             <label for="customer_id" class="form-label">Customer</label>
-            <select id="customer_id" name="customer_id" class="form-select @error('customer_id') is-invalid @enderror" required>
-              <option value="" disabled selected>Select Customer</option>
+            <select id="customer_id" name="customer_id" class="form-select select2 @error('customer_id') is-invalid @enderror" required>
+              <option  disabled selected>Select Customer</option>
               @foreach($customers as $cust)
                 <option value="{{ $cust->id }}" data-contract-number="{{ $cust->contract_number }}" {{ old('customer_id') == $cust->id ? 'selected' : '' }}>{{ $cust->customer }}</option>
               @endforeach

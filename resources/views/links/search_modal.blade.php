@@ -9,8 +9,8 @@
       <div class="modal-body">
         <div class="mb-3">
           <label class="form-label">Customer</label>
-          <select id="editLinksCustomer" class="form-select">
-            <option value="" selected disabled>Select Customer</option>
+          <select id="editLinksCustomer" class="form-select select2">
+            <option  selected disabled>Select Customer</option>
             @foreach($customers as $cust)
               <option value="{{ $cust->id }}">{{ $cust->customer }}</option>
             @endforeach
