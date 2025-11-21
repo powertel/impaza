@@ -423,8 +423,8 @@ class AssessmentController extends Controller
                     $q->where('users.weekly_standby', '=', true);
                 }
             })
-            // Enforce scope region for technician selection when available
-            ->when(!empty($scopeRegion), function($q) use ($scopeRegion) {
+            // Enforce scope region only for sections 2 and 3
+            ->when(in_array((int)$section_id, [2,3], true) && !empty($scopeRegion), function($q) use ($scopeRegion) {
                 $q->where('users.region', '=', $scopeRegion);
             });
 
@@ -434,8 +434,8 @@ class AssessmentController extends Controller
             ->leftJoin('cities', 'faults.city_id', '=', 'cities.id')
             ->whereNull('faults.assignedTo')
             ->where('fault_section.section_id','=',$section_id)
-            // Limit to scope region if available
-            ->when(!empty($scopeRegion), function($q) use ($scopeRegion) {
+            // Limit to scope region only for sections 2 and 3
+            ->when(in_array((int)$section_id, [2,3], true) && !empty($scopeRegion), function($q) use ($scopeRegion) {
                 $q->where('cities.region', '=', $scopeRegion);
             })
             ->pluck('faults.id')
@@ -484,7 +484,7 @@ class AssessmentController extends Controller
             }
 
             $eligibleUsers = $users;
-            if ($considerRegion && $faultRegion) {
+            if (in_array((int)$section_id, [2,3], true) && $considerRegion && $faultRegion) {
                 $eligibleUsers = User::join('departments','users.department_id','=','departments.id')
                     ->leftjoin('sections','users.section_id','=','sections.id')
                     ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')

@@ -61,7 +61,11 @@ class AutoAssignFaults extends Command
             $faultsQuery->where('fault_section.section_id', '=', $scopeSectionId);
         }
         if (!empty($scopeRegion)) {
-            $faultsQuery->where('cities.region', '=', $scopeRegion);
+            $faultsQuery->where(function($q) use ($scopeRegion) {
+                $q->whereIn('fault_section.section_id', [2, 3])
+                  ->where('cities.region', '=', $scopeRegion)
+                  ->orWhereNotIn('fault_section.section_id', [2, 3]);
+            });
         }
 
         $faults = $faultsQuery
@@ -107,11 +111,13 @@ class AutoAssignFaults extends Command
                     }
                 });
 
-            // Enforce scope region for technician selection when available
-            if (!empty($scopeRegion)) {
-                $query->where('users.region', '=', $scopeRegion);
-            } elseif ($considerRegion && $faultRegion) {
-                $query->where('users.region', '=', $faultRegion);
+            $enforceRegion = in_array((int)$row->section_id, [2, 3], true);
+            if ($enforceRegion) {
+                if (!empty($scopeRegion)) {
+                    $query->where('users.region', '=', $scopeRegion);
+                } elseif ($considerRegion && $faultRegion) {
+                    $query->where('users.region', '=', $faultRegion);
+                }
             }
 
             $userIds = $query->pluck('users.id')->toArray();

@@ -195,6 +195,7 @@
 
         @include('partials.scripts')
         @include('layouts.partials.pagination')
+        @include('partials.select2')
 
         @section('scripts')
         <script>

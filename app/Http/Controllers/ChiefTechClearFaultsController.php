@@ -57,7 +57,7 @@ class ChiefTechClearFaultsController extends Controller
 
         if ((int)($user->section_id ?? 0) !== 1) {
             $query->where('users.section_id', '=', $user->section_id);
-            if (!empty($user->region)) {
+            if (!empty($user->region) && in_array((int)$user->section_id, [2, 3], true)) {
                 $query->where('cities.region', '=', $user->region);
             }
         }

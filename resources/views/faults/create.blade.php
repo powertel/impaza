@@ -29,7 +29,7 @@
 
                         <div class="mb-3 col-md-6">
                             <label for="link" class="form-label">Link</label>
-                            <select id="link" class="form-select @error('link_id') is-invalid @enderror" name="link_id" >
+                            <select id="link" class="form-select select2  @error('link_id') is-invalid @enderror" name="link_id" >
                                 <option selected disabled>Select Link</option>
                                 @foreach($link as $link)
                                     @if (old('link_id')==$link->id)
@@ -67,7 +67,7 @@
 
                         <div class="mb-3 col-md-4">
                             <label for="suspectedRFO" class="form-label">Suspected Reason For Outage</label>
-                            <select  class="form-select @error('suspectedRfo_id') is-invalid @enderror" name="suspectedRfo_id" >
+                            <select  class="form-select select2 @error('suspectedRfo_id') is-invalid @enderror" name="suspectedRfo_id" >
                                 <option selected disabled >Select RFO</option>
                                 @foreach($suspectedRFO  as $suspected_rfo)
                                     @if (old('suspectedRfo_id')==$suspected_rfo->id)

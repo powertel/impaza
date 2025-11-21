@@ -58,7 +58,9 @@ class AssignController extends Controller
             })
             ->orderBy('faults.created_at', 'desc')
             ->where('fault_section.section_id','=',auth()->user()->section_id)
-            ->where('cities.region','=',auth()->user()->region)
+            ->when(in_array((int)auth()->user()->section_id, [2, 3], true), function($q) {
+                $q->where('cities.region','=',auth()->user()->region);
+            })
             ->whereNotNull('faults.assignedTo')
             ->where('faults.status_id','=',3)
             ->get(['faults.id','faults.fault_ref_number','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
@@ -89,7 +91,9 @@ class AssignController extends Controller
             ->leftJoin('sections','users.section_id','=','sections.id')
             ->leftJoin('user_statuses','users.user_status','=','user_statuses.id')
             ->where('users.section_id','=',auth()->user()->section_id)
-            ->where('users.region','=',auth()->user()->region)
+            ->when(in_array((int)auth()->user()->section_id, [2, 3], true), function($q) {
+                $q->where('users.region','=',auth()->user()->region);
+            })
             ->where('user_statuses.status_name','=','Assignable')
             ->orderBy('users.name','asc')
             ->get(['users.id','users.name']);
@@ -154,7 +158,9 @@ class AssignController extends Controller
             ->where('fault_section.section_id','=',auth()->user()->section_id)
             ->where('faults.status_id','=',2)
             ->whereNull('faults.assignedTo')
-            ->where('cities.region','=',auth()->user()->region)
+            ->when(in_array((int)auth()->user()->section_id, [2, 3], true), function($q) {
+                $q->where('cities.region','=',auth()->user()->region);
+            })
             ->get(['faults.id','faults.fault_ref_number','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
                 'account_manager_users.name as accountManager','faults.suspectedRfo_id','links.link','statuses.description','users.name','faults.status_id as status_id','assessed_users.name as assessedBy',
                 'cities.city as city','cities.region as region','faults.city_id as city_id','suburbs.suburb as suburb','pops.pop as pop','faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at',
@@ -183,7 +189,9 @@ class AssignController extends Controller
             ->leftJoin('sections','users.section_id','=','sections.id')
             ->leftJoin('user_statuses','users.user_status','=','user_statuses.id')
             ->where('users.section_id','=',auth()->user()->section_id)
-            ->where('users.region','=',auth()->user()->region)
+            ->when(in_array((int)auth()->user()->section_id, [2, 3], true), function($q) {
+                $q->where('users.region','=',auth()->user()->region);
+            })
             ->where('user_statuses.status_name','=','Assignable')
             ->orderBy('users.name','asc')
             ->get(['users.id','users.name']);
@@ -237,9 +245,10 @@ class AssignController extends Controller
             return back()->withErrors(['error' => 'Fault is not in an assignable state']).withInput();
         }
 
-        // Enforce region parity with logged-in user
+        // Enforce region parity only for sections 2 and 3
         $faultRegion = \DB::table('cities')->where('id', $fault->city_id)->value('region');
-        if ($faultRegion !== auth()->user()->region) {
+        $enforceRegion = in_array((int)auth()->user()->section_id, [2, 3], true);
+        if ($enforceRegion && $faultRegion !== auth()->user()->region) {
             return back()->withErrors(['error' => 'You can only assign faults in your region'])->withInput();
         }
 
@@ -247,7 +256,7 @@ class AssignController extends Controller
         $isTechEligible = \DB::table('users')
             ->leftJoin('user_statuses','users.user_status','=','user_statuses.id')
             ->where('users.id', '=', $request->input('assignedTo'))
-            ->where('users.section_id', '=', auth()->user()->section_id)
+            ->where('users.section_id', '=', auth()->user()->section_id,[2,3], true)
             ->where('users.region', '=', auth()->user()->region)
             ->where('user_statuses.status_name', '=', 'Assignable')
             ->exists();
