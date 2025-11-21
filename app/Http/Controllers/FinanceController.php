@@ -147,6 +147,14 @@ class FinanceController extends Controller
         $req= $request->all();
         $req['link_status'] = 2;
         $link ->update($req);
+        DB::table('audits')->insert([
+            'entity_type' => 'link',
+            'entity_id' => $link->id,
+            'action' => 'link_connect',
+            'user_id' => optional($request->user())->id,
+            'notes' => 'Link connected',
+            'created_at' => now(),
+        ]);
         return redirect(route('finance.index'))
         ->with('success','Link Connected');
     }
@@ -169,6 +177,14 @@ class FinanceController extends Controller
         $req= $request->all();
         $req['link_status'] = 3;
         $link ->update($req);
+        DB::table('audits')->insert([
+            'entity_type' => 'link',
+            'entity_id' => $link->id,
+            'action' => 'link_disconnect',
+            'user_id' => optional($request->user())->id,
+            'notes' => 'Link disconnected',
+            'created_at' => now(),
+        ]);
         return redirect()->back()
         ->with('success','Link Disconnected');
     }
@@ -180,6 +196,14 @@ class FinanceController extends Controller
         $req= $request->all();
         $req['link_status'] = 2;
         $link ->update($req);
+        DB::table('audits')->insert([
+            'entity_type' => 'link',
+            'entity_id' => $link->id,
+            'action' => 'link_reconnect',
+            'user_id' => optional($request->user())->id,
+            'notes' => 'Link reconnected',
+            'created_at' => now(),
+        ]);
         return redirect()->back()
         ->with('success','Link Reconnected');
     }
@@ -190,6 +214,14 @@ class FinanceController extends Controller
         $req= $request->all();
         $req['link_status'] = 4;
         $link ->update($req);
+        DB::table('audits')->insert([
+            'entity_type' => 'link',
+            'entity_id' => $link->id,
+            'action' => 'link_decommission',
+            'user_id' => optional($request->user())->id,
+            'notes' => 'Link decommissioned',
+            'created_at' => now(),
+        ]);
         return redirect()->back()
             ->with('success','Link Decommissioned');
     }

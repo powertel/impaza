@@ -30,58 +30,65 @@ class AutoAssignFaults extends Command
      */
     public function handle(): int
     {
-        // Chief tech toggle: exit early if disabled
-        $settings = AutoAssignSetting::query()->first();
-        if (!$settings || !($settings->auto_assign_enabled ?? false)) {
+        // Gather all enabled scopes (supports multiple section/region rows)
+        $settingsList = AutoAssignSetting::query()->where('auto_assign_enabled', true)->get();
+        if ($settingsList->isEmpty()) {
             $this->info('Auto-assign disabled by Chief Tech.');
             return Command::SUCCESS;
         }
 
-        // Explicit scope fields take precedence; fallback to updater
-        $scopeSectionId = $settings->scope_section_id ?? null;
-        $scopeRegion = $settings->scope_region ?? null;
-        if (empty($scopeSectionId) || empty($scopeRegion)) {
-            $scopeUser = null;
-            if (!empty($settings->updated_by)) {
-                $scopeUser = \App\Models\User::find((int)$settings->updated_by);
-            }
-            $scopeSectionId = $scopeSectionId ?: ($scopeUser->section_id ?? null);
-            $scopeRegion = $scopeRegion ?: ($scopeUser->region ?? null);
-        }
-
-        // Find assessed faults with no technician yet assigned
-        $faultsQuery = DB::table('faults')
-            ->leftJoin('fault_section', 'faults.id', '=', 'fault_section.fault_id')
-            ->leftJoin('cities', 'faults.city_id', '=', 'cities.id')
-            ->where('faults.status_id', '=', 2) // Fault has been assessed
-            ->whereNull('faults.assignedTo');
-
-        // Apply scoping if updater has section/region
-        if (!empty($scopeSectionId)) {
-            $faultsQuery->where('fault_section.section_id', '=', $scopeSectionId);
-        }
-        if (!empty($scopeRegion)) {
-            $faultsQuery->where('cities.region', '=', $scopeRegion);
-        }
-
-        $faults = $faultsQuery
-            ->select(['faults.id', 'faults.city_id', 'fault_section.section_id'])
-            ->get();
-
-        if ($faults->isEmpty()) {
-            $this->info('No assessed faults requiring auto-assign.');
-            return Command::SUCCESS;
-        }
-
         $assignedCount = 0;
+        foreach ($settingsList as $settings) {
+            // Explicit scope fields take precedence; fallback to updater
+            $scopeSectionId = $settings->scope_section_id ?? null;
+            $scopeRegion = $settings->scope_region ?? null;
+            if (empty($scopeSectionId) || (in_array((int)$scopeSectionId, [2,3], true) && empty($scopeRegion))) {
+                $scopeUser = null;
+                if (!empty($settings->updated_by)) {
+                    $scopeUser = \App\Models\User::find((int)$settings->updated_by);
+                }
+                $scopeSectionId = $scopeSectionId ?: ($scopeUser->section_id ?? null);
+                if (in_array((int)$scopeSectionId, [2,3], true)) {
+                    $scopeRegion = $scopeRegion ?: ($scopeUser->region ?? null);
+                } else {
+                    $scopeRegion = null;
+                }
+            }
 
-        // Fetch configurable settings once
-        $considerRegion = (bool)($settings->consider_region ?? true);
-        $considerLeave = (bool)($settings->consider_leave ?? true);
-        $isOffHours = FaultLifecycle::isOffHours();
-        $isWeekendOff = (bool)($settings->weekend_standby_enabled ?? true) && now()->isWeekend();
+            // Find assessed faults with no technician yet assigned (for this scope)
+            $faultsQuery = DB::table('faults')
+                ->leftJoin('fault_section', 'faults.id', '=', 'fault_section.fault_id')
+                ->leftJoin('cities', 'faults.city_id', '=', 'cities.id')
+                ->where('faults.status_id', '=', 2) // Fault has been assessed
+                ->whereNull('faults.assignedTo');
 
-        foreach ($faults as $row) {
+            // Apply scoping if updater has section/region
+            if (!empty($scopeSectionId)) {
+                $faultsQuery->where('fault_section.section_id', '=', $scopeSectionId);
+            }
+            if (!empty($scopeRegion)) {
+                $faultsQuery->where(function($q) use ($scopeRegion) {
+                    $q->whereIn('fault_section.section_id', [2, 3])
+                      ->where('cities.region', '=', $scopeRegion)
+                      ->orWhereNotIn('fault_section.section_id', [2, 3]);
+                });
+            }
+
+            $faults = $faultsQuery
+                ->select(['faults.id', 'faults.city_id', 'fault_section.section_id'])
+                ->get();
+
+            if ($faults->isEmpty()) {
+                continue;
+            }
+
+            // Fetch configurable settings once for this scope
+            $considerRegion = (bool)($settings->consider_region ?? true);
+            $considerLeave = (bool)($settings->consider_leave ?? true);
+            $isOffHours = FaultLifecycle::isOffHours();
+            $isWeekendOff = (bool)($settings->weekend_standby_enabled ?? true) && now()->isWeekend();
+
+            foreach ($faults as $row) {
             if (!$row->section_id) { continue; }
 
             // Build candidate technician list for this section, preferring Standby during off-hours, otherwise Assignable.
@@ -107,11 +114,13 @@ class AutoAssignFaults extends Command
                     }
                 });
 
-            // Enforce scope region for technician selection when available
-            if (!empty($scopeRegion)) {
-                $query->where('users.region', '=', $scopeRegion);
-            } elseif ($considerRegion && $faultRegion) {
-                $query->where('users.region', '=', $faultRegion);
+            $enforceRegion = in_array((int)$row->section_id, [2, 3], true);
+            if ($enforceRegion) {
+                if (!empty($scopeRegion)) {
+                    $query->where('users.region', '=', $scopeRegion);
+                } elseif ($considerRegion && $faultRegion) {
+                    $query->where('users.region', '=', $faultRegion);
+                }
             }
 
             $userIds = $query->pluck('users.id')->toArray();
@@ -136,12 +145,13 @@ class AutoAssignFaults extends Command
             $region = $faultRegion;
             FaultLifecycle::startAssignment($fault, $selectedUserId, null, $isOffHours, $region);
 
-            $assignedCount++;
+                $assignedCount++;
 
             // Advance pointer
             $idx++;
             if ($idx >= count($userIds)) { $idx = 0; }
             Cache::put($rrKey, $idx);
+            }
         }
 
         $this->info("Auto-assigned {$assignedCount} fault(s).");

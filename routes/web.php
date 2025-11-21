@@ -80,6 +80,10 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('links/check-link-name', [LinkController::class, 'checkLinkName'])->name('links.check-link-name');
     Route::get('links/check-jcc-number', [LinkController::class, 'checkJccNumber'])->name('links.check-jcc-number');
     Route::resource('customers', CustomerController::class);
+    Route::put('customers/{id}/disconnect', [CustomerController::class,'disconnect'])->name('customers.disconnect');
+    Route::put('customers/{id}/reconnect', [CustomerController::class,'reconnect'])->name('customers.reconnect');
+    Route::put('customers/{id}/reconnect-decommissioned', [CustomerController::class,'reconnectDecommissioned'])->name('customers.reconnect_decommissioned');
+    Route::put('customers/{id}/decommission', [CustomerController::class,'decommission'])->name('customers.decommission');
     Route::resource('cities', CityController::class);
     Route::resource('locations', LocationController::class);
     Route::resource('links', LinkController::class);

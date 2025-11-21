@@ -13,7 +13,21 @@ class TechnicianConfigController extends Controller
     // Auto-assign settings page only
     public function auto()
     {
-        $settings = AutoAssignSetting::query()->first();
+        $currentUser = auth()->user();
+        $settings = null;
+        if ($currentUser && in_array((int)($currentUser->section_id ?? 0), [2,3], true)) {
+            $settings = AutoAssignSetting::query()
+                ->where('scope_section_id', (int)$currentUser->section_id)
+                ->where('scope_region', $currentUser->region)
+                ->first();
+        } elseif ($currentUser && $currentUser->section_id) {
+            $settings = AutoAssignSetting::query()
+                ->where('scope_section_id', (int)$currentUser->section_id)
+                ->whereNull('scope_region')
+                ->first();
+        } else {
+            $settings = AutoAssignSetting::query()->first();
+        }
         if (!$settings) {
             $settings = new AutoAssignSetting([
                 'standby_start_time' => '16:30:00',
@@ -22,17 +36,42 @@ class TechnicianConfigController extends Controller
                 'consider_leave' => true,
                 'consider_region' => true,
                 'auto_assign_enabled' => false,
+                'scope_section_id' => optional($currentUser)->section_id,
+                'scope_region' => in_array((int)optional($currentUser)->section_id, [2,3], true) ? optional($currentUser)->region : null,
             ]);
         }
         $regions = DB::table('cities')->select('region')->whereNotNull('region')->distinct()->orderBy('region')->pluck('region');
         $sections = Section::query()->orderBy('section')->get(['id','section']);
-        return view('technicians.auto', compact('settings','regions','sections'));
+        $currentUser = $currentUser ?: auth()->user();
+        $scopeSectionId = (int)($settings->scope_section_id ?? 0);
+        $scopeRegion = $settings->scope_region ?? null;
+        $sectionLocked = in_array($scopeSectionId, [2,3], true) && $scopeSectionId > 0;
+        $sectionMatches = !$sectionLocked || (($currentUser->section_id ?? null) === $scopeSectionId);
+        $regionLocked = $sectionLocked && !empty($scopeRegion);
+        $regionMatches = !$regionLocked || (($currentUser->region ?? null) === $scopeRegion);
+        $effectiveAutoAssignEnabled = (bool)($settings->auto_assign_enabled ?? false) && $sectionMatches && $regionMatches;
+        $effectiveConsiderRegion = (bool)($settings->consider_region ?? false) && $sectionLocked && $regionMatches;
+        return view('technicians.auto', compact('settings','regions','sections','sectionLocked','sectionMatches','regionLocked','regionMatches','effectiveAutoAssignEnabled','effectiveConsiderRegion'));
     }
 
     // Technician configuration page only
     public function config()
     {
-        $settings = AutoAssignSetting::query()->first();
+        $currentUser = auth()->user();
+        $settings = null;
+        if ($currentUser && in_array((int)($currentUser->section_id ?? 0), [2,3], true)) {
+            $settings = AutoAssignSetting::query()
+                ->where('scope_section_id', (int)$currentUser->section_id)
+                ->where('scope_region', $currentUser->region)
+                ->first();
+        } elseif ($currentUser && $currentUser->section_id) {
+            $settings = AutoAssignSetting::query()
+                ->where('scope_section_id', (int)$currentUser->section_id)
+                ->whereNull('scope_region')
+                ->first();
+        } else {
+            $settings = AutoAssignSetting::query()->first();
+        }
         if (!$settings) {
             $settings = new AutoAssignSetting([
                 'standby_start_time' => '16:30:00',
@@ -41,6 +80,8 @@ class TechnicianConfigController extends Controller
                 'consider_leave' => true,
                 'consider_region' => true,
                 'auto_assign_enabled' => false,
+                'scope_section_id' => optional($currentUser)->section_id,
+                'scope_region' => in_array((int)optional($currentUser)->section_id, [2,3], true) ? optional($currentUser)->region : null,
             ]);
         }
         $regions = DB::table('cities')->select('region')->whereNotNull('region')->distinct()->orderBy('region')->pluck('region');
@@ -53,10 +94,21 @@ class TechnicianConfigController extends Controller
         $currentUser = auth()->user();
         if ($currentUser && $currentUser->section_id) {
             $techniciansQuery->where('users.section_id', $currentUser->section_id);
+            if (in_array((int)$currentUser->section_id, [2, 3], true) && !empty($currentUser->region)) {
+                $techniciansQuery->where('users.region', $currentUser->region);
+            }
         }
 
         $technicians = $techniciansQuery->get(['users.id','users.name','sections.section','users.region','users.weekly_standby','users.weekend_standby','user_statuses.status_name']);
-        return view('technicians.config', compact('settings','regions','sections','technicians'));
+        $scopeSectionId = (int)($settings->scope_section_id ?? 0);
+        $scopeRegion = $settings->scope_region ?? null;
+        $sectionLocked = in_array($scopeSectionId, [2,3], true) && $scopeSectionId > 0;
+        $sectionMatches = !$sectionLocked || (($currentUser->section_id ?? null) === $scopeSectionId);
+        $regionLocked = $sectionLocked && !empty($scopeRegion);
+        $regionMatches = !$regionLocked || (($currentUser->region ?? null) === $scopeRegion);
+        $effectiveAutoAssignEnabled = (bool)($settings->auto_assign_enabled ?? false) && $sectionMatches && $regionMatches;
+        $effectiveConsiderRegion = (bool)($settings->consider_region ?? false) && $sectionLocked && $regionMatches;
+        return view('technicians.config', compact('settings','regions','sections','technicians','sectionLocked','sectionMatches','regionLocked','regionMatches','effectiveAutoAssignEnabled','effectiveConsiderRegion'));
     }
 
     public function updateSettings(Request $request)
@@ -87,7 +139,23 @@ class TechnicianConfigController extends Controller
             $data['scope_region'] = optional($savingUser)->region;
         }
 
-        $settings = AutoAssignSetting::query()->first();
+        // Enforce region controls only for sections 2 and 3
+        $scopeSectionId = (int)($data['scope_section_id'] ?? 0);
+        if (!in_array($scopeSectionId, [2, 3], true)) {
+            $data['consider_region'] = false;
+            $data['scope_region'] = null;
+        }
+
+        // Upsert per (scope_section_id, scope_region)
+        $targetSectionId = (int)($data['scope_section_id'] ?? 0);
+        $targetRegion = $data['scope_region'] ?? null;
+        $settings = AutoAssignSetting::query()
+            ->where('scope_section_id', $targetSectionId)
+            ->where(function($q) use ($targetRegion) {
+                if ($targetRegion === null) { $q->whereNull('scope_region'); }
+                else { $q->where('scope_region', $targetRegion); }
+            })
+            ->first();
         if ($settings) {
             $settings->update($data + ['updated_by' => auth()->id()]);
         } else {
@@ -104,8 +172,17 @@ class TechnicianConfigController extends Controller
             'field' => 'required|string',
             'value' => 'nullable',
         ]);
-
-        $settings = AutoAssignSetting::query()->first();
+        // Target settings row for current user's scope
+        $u = $request->user();
+        $targetSectionId = (int)optional($u)->section_id;
+        $targetRegion = in_array($targetSectionId, [2,3], true) ? (optional($u)->region ?? null) : null;
+        $settings = AutoAssignSetting::query()
+            ->where('scope_section_id', $targetSectionId)
+            ->where(function($q) use ($targetRegion) {
+                if ($targetRegion === null) { $q->whereNull('scope_region'); }
+                else { $q->where('scope_region', $targetRegion); }
+            })
+            ->first();
         if (!$settings) {
             $settings = new AutoAssignSetting([
                 'standby_start_time' => '16:30:00',
@@ -114,6 +191,8 @@ class TechnicianConfigController extends Controller
                 'consider_leave' => true,
                 'consider_region' => true,
                 'auto_assign_enabled' => false,
+                'scope_section_id' => $targetSectionId,
+                'scope_region' => $targetRegion,
             ]);
             $settings->save();
         }
@@ -139,7 +218,14 @@ class TechnicianConfigController extends Controller
             $value = $value ?: null;
         }
 
-        $settings->update([$key => $value, 'updated_by' => optional($request->user())->id]);
+        // Gate region-related fields by scope section (only sections 2 and 3)
+        $update = [$key => $value, 'updated_by' => optional($request->user())->id];
+        if (!in_array($targetSectionId, [2,3], true)) {
+            if ($key === 'consider_region') { $update['consider_region'] = false; }
+            if ($key === 'scope_region') { $update['scope_region'] = null; }
+        }
+
+        $settings->update($update);
 
         return response()->json(['status' => 'ok']);
     }
