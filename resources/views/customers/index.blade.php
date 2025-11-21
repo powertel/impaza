@@ -109,8 +109,8 @@ Customers
                         <th>Account Manager</th>
                         <th>Account Number</th>
                         <th>Status</th>
-                        <th>Address</th>
-                        <th>Contact Number</th>
+                        <!-- <th>Address</th>
+                        <th>Contact Number</th> -->
                         <th>Action(s)</th>
                     </tr>
                 </thead>
@@ -132,8 +132,8 @@ Customers
                                 {{ $label }}
                             </span>
                         </td>
-                         <td>{{ $customer->address ?? '' }}</td>
-                        <td>{{ $customer->contact_number ?? '' }}</td>
+                         <!-- <td>{{ $customer->address ?? '' }}</td>
+                        <td>{{ $customer->contact_number ?? '' }}</td> -->
                         <td>
                             <div class="btn-group">
                               <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
