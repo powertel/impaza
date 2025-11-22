@@ -53,8 +53,14 @@ class CallCentreController extends Controller
         elseif ($filter === 'weekly') $periodLabelText = 'Week total';
 
         $newFaultsTotal = Fault::whereBetween('created_at', [$periodStart, $periodEnd])->count();
-        $resolvedQuery = FaultAssignment::whereNotNull('resolved_at');
-        $resolvedTotal = (clone $resolvedQuery)->whereBetween('resolved_at', [$periodStart, $periodEnd])->count();
+        $clearedStatusId = (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
+        $latestClearedInPeriod = DB::table('fault_stage_logs')
+            ->where('status_id', $clearedStatusId)
+            ->whereBetween('started_at', [$periodStart, $periodEnd])
+            ->select('fault_id', DB::raw('MAX(started_at) as resolved_at'))
+            ->groupBy('fault_id')
+            ->get();
+        $resolvedTotal = $latestClearedInPeriod->count();
 
         $weeklyLabels = ['Week 1','Week 2','Week 3','Week 4'];
         $weeklyRanges = [];
@@ -81,29 +87,43 @@ class CallCentreController extends Controller
         $weeklyResolved3DaysPerc = [];
         foreach ($weeklyRanges as [$ws,$we]) {
             $weeklyNewFaults[] = Fault::whereBetween('created_at', [$ws,$we])->count();
-            $weeklyResolved[] = FaultAssignment::whereNotNull('resolved_at')->whereBetween('resolved_at', [$ws,$we])->count();
-            $resolvedUpToDateIds = FaultAssignment::whereNotNull('resolved_at')->where('resolved_at','<=',$we)->pluck('fault_id')->unique()->values();
+            $latestInWeek = DB::table('fault_stage_logs')
+                ->where('status_id', $clearedStatusId)
+                ->whereBetween('started_at', [$ws,$we])
+                ->select('fault_id', DB::raw('MAX(started_at) as resolved_at'))
+                ->groupBy('fault_id')
+                ->get();
+            $weeklyResolved[] = $latestInWeek->count();
+            $resolvedUpToDateIds = DB::table('fault_stage_logs')
+                ->where('status_id', $clearedStatusId)
+                ->where('started_at','<=',$we)
+                ->select('fault_id', DB::raw('MAX(started_at) as ra'))
+                ->groupBy('fault_id')
+                ->pluck('fault_id')
+                ->unique()
+                ->values();
             $weeklyOutstanding[] = Fault::whereBetween('created_at', [$periodStart, $we])->whereNotIn('id', $resolvedUpToDateIds)->count();
 
-            $rows = FaultAssignment::join('faults','fault_assignments.fault_id','=','faults.id')
-                ->whereNotNull('fault_assignments.resolved_at')
-                ->whereBetween('fault_assignments.resolved_at', [$ws,$we])
-                ->select('faults.created_at as created_at', 'fault_assignments.resolved_at as resolved_at')
-                ->get();
-            $tot = $rows->count();
+            $ids = $latestInWeek->pluck('fault_id')->unique()->values();
+            $createdMap = Fault::whereIn('id', $ids)->pluck('created_at','id');
+            $tot = $latestInWeek->count();
             $w3 = 0;
-            foreach ($rows as $r) {
-                $days = Carbon::parse($r->created_at)->diffInDays(Carbon::parse($r->resolved_at));
+            foreach ($latestInWeek as $row) {
+                $created = $createdMap[$row->fault_id] ?? null;
+                if (!$created) continue;
+                $days = Carbon::parse($created)->diffInDays(Carbon::parse($row->resolved_at));
                 if ($days <= 3) $w3++;
             }
             $weeklyResolved3DaysPerc[] = $tot > 0 ? round(($w3 / $tot) * 100, 2) : 0;
         }
 
-        $resolvedRows = FaultAssignment::join('faults','fault_assignments.fault_id','=','faults.id')
-            ->whereNotNull('fault_assignments.resolved_at')
-            ->whereBetween('fault_assignments.resolved_at', [$periodStart, $periodEnd])
-            ->select('faults.created_at as created_at', 'fault_assignments.resolved_at as resolved_at')
-            ->get();
+        $latestMap = $latestClearedInPeriod->keyBy('fault_id');
+        $faultsForResolved = Fault::whereIn('id', $latestClearedInPeriod->pluck('fault_id')->unique()->values())->get(['id','created_at']);
+        $resolvedRows = collect();
+        foreach ($faultsForResolved as $f) {
+            $resolvedAt = $latestMap[$f->id]->resolved_at ?? null;
+            if ($resolvedAt) { $resolvedRows->push((object)['created_at' => $f->created_at, 'resolved_at' => $resolvedAt]); }
+        }
         $bins = [
             '0_3' => 0,
             '4_7' => 0,
@@ -125,8 +145,11 @@ class CallCentreController extends Controller
         }
         $within3DaysPercent = $resolvedTotal > 0 ? round(($bins['0_3'] / $resolvedTotal) * 100, 2) : 0;
 
-        $resolvedUpToEndIds = FaultAssignment::whereNotNull('resolved_at')
-            ->where('resolved_at','<=',$periodEnd)
+        $resolvedUpToEndIds = DB::table('fault_stage_logs')
+            ->where('status_id', $clearedStatusId)
+            ->where('started_at','<=',$periodEnd)
+            ->select('fault_id', DB::raw('MAX(started_at) as ra'))
+            ->groupBy('fault_id')
             ->pluck('fault_id')
             ->unique()
             ->values();
@@ -157,7 +180,7 @@ class CallCentreController extends Controller
         $over3DaysPercent = $outstandingTotal > 0 ? round(($over3DaysCount / $outstandingTotal) * 100, 2) : 0;
 
         $faultsInRange = Fault::whereBetween('created_at', [$periodStart, $periodEnd])->select('id','created_at')->get();
-        $assignmentsInRange = FaultAssignment::whereBetween('resolved_at', [$periodStart, $periodEnd])->select('fault_id','resolved_at')->get();
+        $assignmentsInRange = collect();
         $dailyLabels = [];
         $dailyNewFaults = [];
         $dailyResolved = [];
@@ -171,18 +194,18 @@ class CallCentreController extends Controller
                 $dayEnd = $cur->copy()->endOfDay();
                 $dailyLabels[] = $ds;
                 $dailyNewFaults[] = Fault::whereBetween('created_at', [$dayStart, $dayEnd])->count();
-                $dailyResolved[] = FaultAssignment::whereNotNull('resolved_at')->whereBetween('resolved_at', [$dayStart, $dayEnd])->count();
-                $resolvedIdsUpToDay = FaultAssignment::whereNotNull('resolved_at')->where('resolved_at','<=',$dayEnd)->pluck('fault_id')->unique()->values();
+                $latestInDay = DB::table('fault_stage_logs')->where('status_id',$clearedStatusId)->whereBetween('started_at', [$dayStart, $dayEnd])->select('fault_id', DB::raw('MAX(started_at) as resolved_at'))->groupBy('fault_id')->get();
+                $dailyResolved[] = $latestInDay->count();
+                $resolvedIdsUpToDay = DB::table('fault_stage_logs')->where('status_id',$clearedStatusId)->where('started_at','<=',$dayEnd)->select('fault_id', DB::raw('MAX(started_at) as ra'))->groupBy('fault_id')->pluck('fault_id')->unique()->values();
                 $dailyOutstanding[] = Fault::whereBetween('created_at', [$periodStart, $dayEnd])->whereNotIn('id', $resolvedIdsUpToDay)->count();
-                $rowsDay = FaultAssignment::join('faults','fault_assignments.fault_id','=','faults.id')
-                    ->whereNotNull('fault_assignments.resolved_at')
-                    ->whereBetween('fault_assignments.resolved_at', [$dayStart,$dayEnd])
-                    ->select('faults.created_at as created_at', 'fault_assignments.resolved_at as resolved_at')
-                    ->get();
-                $totDay = $rowsDay->count();
+                $idsDay = $latestInDay->pluck('fault_id')->unique()->values();
+                $createdMapDay = Fault::whereIn('id', $idsDay)->pluck('created_at','id');
+                $totDay = $latestInDay->count();
                 $w3Day = 0;
-                foreach ($rowsDay as $r) {
-                    $daysDiff = Carbon::parse($r->created_at)->diffInDays(Carbon::parse($r->resolved_at));
+                foreach ($latestInDay as $r) {
+                    $createdAt = $createdMapDay[$r->fault_id] ?? null;
+                    if (!$createdAt) continue;
+                    $daysDiff = Carbon::parse($createdAt)->diffInDays(Carbon::parse($r->resolved_at));
                     if ($daysDiff <= 3) $w3Day++;
                 }
                 $dailyResolved3DaysPerc[] = $totDay > 0 ? round(($w3Day / $totDay) * 100, 2) : 0;
