@@ -315,6 +315,16 @@
 canvas#chartShiftTraffic {
   height: 380px;
 }
+
+/* Header text fixes to prevent drop-cap or first-letter styling */
+.card-header p::first-letter {
+  float: none;
+  font-size: inherit;
+  line-height: inherit;
+}
+.card-header .card-title i {
+  vertical-align: middle;
+}
 .
 .cc-analysis-card {
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);

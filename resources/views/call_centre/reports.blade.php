@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-Call Centre Analytics Dashboard
+Faults Analytics Dashboard
 @endsection
 
 @section('content')
@@ -12,20 +12,20 @@ Call Centre Analytics Dashboard
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <h3 class="card-title mb-0 text-2xl font-bold text-gray-800">
-            <i class="fas fa-chart-line text-primary me-2"></i>
-            Call Centre Analytics Dashboard
+            <i class="fas fa-chart-line text-primary me-3"></i>
+            Faults Analytics Dashboard
           </h3>
-          <p class="text-sm text-gray-600 mb-0 mt-1">Real-time insights and performance metrics</p>
+          <p class="text-sm text-gray-600 mb-0 mt-1 me-3">Real-time insights and performance metrics</p>
         </div>
         <div class="d-flex align-items-center gap-3">
           <span class="badge bg-primary-subtle text-primary fs-7 px-3 py-2 rounded-pill">
-            <i class="fas fa-sync-alt me-1"></i>
-            Live Data
+            <!-- <i class="fas fa-sync-alt me-1"></i> -->
+            <!-- Live Data -->
           </span>
-          <button class="btn btn-outline-secondary btn-sm rounded-pill" data-bs-toggle="tooltip" title="Export Report">
+          <!-- <button class="btn btn-outline-secondary btn-sm rounded-pill" data-bs-toggle="tooltip" title="Export Report">
             <i class="fas fa-download me-1"></i>
             Export
-          </button>
+          </button> -->
         </div>
       </div>
       </div>
