@@ -188,7 +188,10 @@ class CallCentreController extends Controller
         $dailyResolved3DaysPerc = [];
         if ($filter === 'weekly') {
             $cur = $periodStart->copy();
-            while ($cur->lte($periodEnd)) {
+            $endBound = $periodEnd->copy();
+            $todayEnd = Carbon::now()->endOfDay();
+            if ($endBound->gt($todayEnd)) { $endBound = $todayEnd; }
+            while ($cur->lte($endBound)) {
                 $ds = $cur->format('Y-m-d');
                 $dayStart = $cur->copy()->startOfDay();
                 $dayEnd = $cur->copy()->endOfDay();

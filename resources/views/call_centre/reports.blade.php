@@ -9,7 +9,7 @@ Call Centre Reports
 <section class="content">
   <div class="card">
     <div class="card-header">
-      <h3 class="card-title">Call Centre Reports</h3>
+      <h3 class="card-title">Faults Reports</h3>
       <div class="card-tools">
         <form method="get" action="{{ route('call_centre.reports') }}" class="cc-filter-bar d-flex flex-wrap align-items-end gap-3">
           <div class="cc-field">
