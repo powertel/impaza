@@ -2,10 +2,11 @@
 
 @section('content')
 <link href="{{ asset('css/reports.css') }}" rel="stylesheet">
+<link href="{{ asset('css/call_centre.css') }}" rel="stylesheet">
 
 <div class="modern-dashboard">
     <!-- Dashboard Header -->
-    <div class="dashboard-header">
+    <div class="dashboard-header bg-gradient-to-r from-gray-50 to-white">
         <div class="dashboard-title-section">
             <h1 class="dashboard-title me-auto">Operations Analytics</h1>
             <p class="dashboard-subtitle">Comprehensive fault management and performance insights</p>
@@ -176,7 +177,7 @@
 
     <!-- Primary Charts Section -->
     <div class="charts-grid">
-        <div class="chart-card chart-large">
+        <div class="chart-card chart-large cc-chart-card">
             <div class="chart-header">
                 <h3>Performance Overview</h3>
                 <div class="chart-actions">
@@ -189,7 +190,7 @@
             </div>
         </div>
 
-        <div class="chart-card">
+        <div class="chart-card cc-chart-card">
             <div class="chart-header">
                 <h3>SLA Overview</h3>
             </div>
@@ -211,7 +212,7 @@
 
     <!-- Secondary Charts Grid -->
     <div class="charts-grid-secondary">
-        <div class="chart-card">
+        <div class="chart-card cc-chart-card">
             <div class="chart-header">
                 <h3>Fault Status Distribution</h3>
             </div>
@@ -220,7 +221,7 @@
             </div>
         </div>
 
-        <div class="chart-card">
+        <div class="chart-card cc-chart-card">
             <div class="chart-header">
                 <h3>RFO Analysis</h3>
             </div>
@@ -253,7 +254,7 @@
         <h2 class="section-title">Advanced Analytics</h2>
         
         <div class="charts-grid-advanced">
-            <div class="chart-card chart-wide">
+        <div class="chart-card chart-wide cc-chart-card">
                 <div class="chart-header">
                     <h3>Priority × Fault Type Matrix</h3>
                 </div>
@@ -262,7 +263,7 @@
                 </div>
             </div>
 
-            <div class="chart-card">
+            <div class="chart-card cc-chart-card">
                 <div class="chart-header">
                     <h3>Customer Impact (Count)</h3>
                 </div>
@@ -271,7 +272,7 @@
                 </div>
             </div>
 
-            <div class="chart-card">
+            <div class="chart-card cc-chart-card">
                 <div class="chart-header">
                     <h3>Customer Impact (Duration)</h3>
                 </div>
@@ -280,7 +281,7 @@
                 </div>
             </div>
 
-            <div class="chart-card">
+            <div class="chart-card cc-chart-card">
                 <div class="chart-header">
                     <h3>Service Impact by Type</h3>
                 </div>
@@ -289,7 +290,7 @@
                 </div>
             </div>
 
-            <div class="chart-card">
+            <div class="chart-card cc-chart-card">
                 <div class="chart-header">
                     <h3>Geographic Distribution</h3>
                 </div>

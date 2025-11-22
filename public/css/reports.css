@@ -1,7 +1,7 @@
 /* Reports Dashboard Styles */
 .modern-dashboard {
     min-height: 100vh;
-    background: #b9d2ff;
+    background: linear-gradient(90deg, #f8fafc 0%, #ffffff 100%);
     position: relative;
     padding: 2rem;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -22,16 +22,15 @@
 .dashboard-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     position: relative;
     z-index: 1;
-    /* Override default dashboard.css box styling for reports */
     margin-bottom: 1rem;
-    background: transparent;
-    backdrop-filter: none;
-    border: none;
-    padding: 0;
-    box-shadow: none;
+    background: linear-gradient(90deg, #f8fafc 0%, #ffffff 100%);
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 1rem 1rem;
+    box-shadow: 0 12px 32px rgba(16, 24, 40, 0.12);
 }
 
 .dashboard-title-section {
@@ -353,13 +352,23 @@
 }
 
 .chart-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
     border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 12px 32px rgba(16, 24, 40, 0.12);
     overflow: hidden;
     transition: all 0.3s ease;
+    position: relative;
+}
+.chart-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #4f46e5, #ec4899, #f59e0b);
+    opacity: 0.7;
 }
 
 .chart-card:hover {
@@ -376,12 +385,12 @@
 }
 
 .chart-header {
-    padding: 1.5rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 1.25rem 1.25rem 0.75rem;
+    border-bottom: 1px solid #eef2f7;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(255, 255, 255, 0.5);
+    background: transparent;
 }
 
 .chart-header h3 {
@@ -486,13 +495,23 @@
 }
 
 .performance-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
     border-radius: 16px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 12px 32px rgba(16, 24, 40, 0.12);
     overflow: hidden;
     transition: all 0.3s ease;
+    position: relative;
+}
+.performance-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #4f46e5, #ec4899, #f59e0b);
+    opacity: 0.7;
 }
 
 .performance-card:hover {
