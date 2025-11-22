@@ -1,6 +1,6 @@
 /* Modern Dashboard Styles */
 .modern-dashboard {
-  background: #b9d2ff;
+  background: linear-gradient(90deg, #f8fafc 0%, #ffffff 100%);
   min-height: 100vh;
   padding: 0;
   position: relative;
@@ -19,12 +19,12 @@
 
 /* Dashboard Header */
 .dashboard-header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  padding: 1.5rem 0;
+  background: linear-gradient(90deg, #f8fafc 0%, #ffffff 100%);
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 1rem 1rem;
   margin-bottom: 2rem;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 32px rgba(16, 24, 40, 0.12);
 }
 
 .dashboard-title h1 {
@@ -176,20 +176,31 @@
 
 /* Chart Cards */
 .chart-card {
-  background: white;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 16px;
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
-  border: none;
+  box-shadow: 0 12px 32px rgba(16, 24, 40, 0.12);
   overflow: hidden;
+  position: relative;
+}
+.chart-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #4f46e5, #ec4899, #f59e0b);
+  opacity: 0.7;
 }
 
 .chart-header {
-  padding: 1.5rem 1.5rem 0;
+  padding: 1.25rem 1.25rem 0.5rem;
   display: flex;
-  justify-content: between;
-  align-items: flex-start;
-  border-bottom: 1px solid #f7fafc;
-  margin-bottom: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eef2f7;
+  margin-bottom: 0.75rem;
 }
 
 .chart-title h5 {
@@ -215,11 +226,22 @@
 
 /* Performance Cards */
 .performance-card {
-  background: white;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 16px;
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
-  border: none;
+  box-shadow: 0 12px 32px rgba(16, 24, 40, 0.12);
   overflow: hidden;
+  position: relative;
+}
+.performance-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #4f46e5, #ec4899, #f59e0b);
+  opacity: 0.7;
 }
 
 .performance-header {
@@ -318,11 +340,22 @@
 
 /* Data Table Cards */
 .data-table-card {
-  background: white;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
   border-radius: 16px;
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
-  border: none;
+  box-shadow: 0 12px 32px rgba(16, 24, 40, 0.12);
   overflow: hidden;
+  position: relative;
+}
+.data-table-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #4f46e5, #ec4899, #f59e0b);
+  opacity: 0.7;
 }
 
 .table-header {

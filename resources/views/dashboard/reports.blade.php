@@ -2,56 +2,68 @@
 
 @section('content')
 <link href="{{ asset('css/reports.css') }}" rel="stylesheet">
+<link href="{{ asset('css/call_centre.css') }}" rel="stylesheet">
 
-<div class="modern-dashboard">
-    <!-- Dashboard Header -->
-    <div class="dashboard-header">
-        <div class="dashboard-title-section">
-            <h1 class="dashboard-title me-auto">Operations Analytics</h1>
-            <p class="dashboard-subtitle">Comprehensive fault management and performance insights</p>
-        </div>
-        
-        <div class="dashboard-controls">
-            <form method="get" action="{{ route('dashboard.reports') }}" class="filter-form" id="reportsFilterForm">
-                <div class="filter-group">
-                    <label for="month">Period</label>
-                    <select name="month" id="month" class="filter-select">
-                        <option value="all" {{ ($selectedMonth ?? null) === null ? 'selected' : '' }}>All Months</option>
-                        @for($m = 1; $m <= 12; $m++)
-                            <option value="{{ $m }}" {{ ($selectedMonth ?? null) == $m ? 'selected' : '' }}>{{ \Carbon\Carbon::create(null, $m)->format('F') }}</option>
-                        @endfor
-                    </select>
+<section class="content">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-white border-0 py-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="card-title mb-0 text-2xl font-bold text-gray-800">
+                            <i class="fas fa-chart-line text-primary me-3"></i>
+                            Operations Analytics
+                        </h3>
+                       <!--  <div>
+                            <p class="text-sm text-gray-600 mb-0 mt-1">Comprehensive fault management and performance insights</p>
+                        </div> -->
+                    </div>
+                    <!-- <div class="action-dropdown">
+                        <button class="btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ route('dashboard.reports') }}"><i class="fas fa-refresh"></i> Reset Filters</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="window.print()"><i class="fas fa-print"></i> Export Report</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-download"></i> Download PDF</a></li>
+                        </ul>
+                    </div> -->
                 </div>
-                
-                <div class="filter-group">
-                    <label for="year">Year</label>
-                    <select name="year" id="year" class="filter-select">
-                        <option value="all" {{ ($selectedYear ?? null) === null ? 'selected' : '' }}>All Years</option>
-                        @foreach(($availableYears ?? []) as $y)
-                            <option value="{{ $y }}" {{ ($selectedYear ?? null) == $y ? 'selected' : '' }}>{{ $y }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                
-                <button type="submit" class="btn-primary">
-                    <i class="fas fa-filter"></i> Apply Filters
-                </button>
-            </form>
-            
-            <div class="action-dropdown">
-                <button class="btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="fas fa-ellipsis-v"></i>
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="{{ route('dashboard.reports') }}"><i class="fas fa-refresh"></i> Reset Filters</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="window.print()"><i class="fas fa-print"></i> Export Report</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="fas fa-download"></i> Download PDF</a></li>
-                </ul>
             </div>
-        </div>
-    </div>
+            <div class="card-body p-0">
+                <div class="bg-gray-50 px-4 py-3 border-bottom">
+                    <form method="get" action="{{ route('dashboard.reports') }}" class="cc-filter-bar d-flex flex-nowrap align-items-end justify-content-between gap-3" id="reportsFilterForm">
+                        <div class="cc-field">
+                            <label class="form-label"><i class="far fa-calendar-alt me-1"></i>Month</label>
+                            <select name="month" class="form-select form-select-sm">
+                                <option value="all" {{ ($selectedMonth ?? null) === null ? 'selected' : '' }}>All Months</option>
+                                @for($m = 1; $m <= 12; $m++)
+                                    <option value="{{ $m }}" {{ ($selectedMonth ?? null) == $m ? 'selected' : '' }}>{{ \Carbon\Carbon::create(null, $m)->format('F') }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                        <div class="cc-field">
+                            <label class="form-label"><i class="far fa-calendar me-1"></i>Year</label>
+                            <select name="year" class="form-select form-select-sm">
+                                <option value="all" {{ ($selectedYear ?? null) === null ? 'selected' : '' }}>All Years</option>
+                                @foreach(($availableYears ?? []) as $y)
+                                    <option value="{{ $y }}" {{ ($selectedYear ?? null) == $y ? 'selected' : '' }}>{{ $y }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="cc-filter-actions ms-auto">
+                            <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4">
+                                <i class="fas fa-filter me-1"></i>
+                                Apply
+                            </button>
+                            <a href="{{ route('dashboard.reports') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                                <i class="fas fa-undo me-1"></i>
+                                Reset
+                            </a>
+                        </div>
+                    </form>
+                </div>
 
-    <!-- Primary KPI Cards -->
+                <div class="px-4 py-4 bg-gradient-to-r from-gray-50 to-white">
     <div class="kpi-grid">
         <div class="kpi-card kpi-primary">
             <div class="kpi-icon">
@@ -173,10 +185,11 @@
             </div>
         </div>
     </div>
+                </div>
 
-    <!-- Primary Charts Section -->
+                <div class="px-4 pb-4">
     <div class="charts-grid">
-        <div class="chart-card chart-large">
+        <div class="chart-card chart-large cc-chart-card">
             <div class="chart-header">
                 <h3>Performance Overview</h3>
                 <div class="chart-actions">
@@ -189,7 +202,7 @@
             </div>
         </div>
 
-        <div class="chart-card">
+        <div class="chart-card cc-chart-card">
             <div class="chart-header">
                 <h3>SLA Overview</h3>
             </div>
@@ -208,10 +221,11 @@
             </div>
         </div>
     </div>
+                </div>
 
-    <!-- Secondary Charts Grid -->
+                <div class="px-4 pb-4">
     <div class="charts-grid-secondary">
-        <div class="chart-card">
+        <div class="chart-card cc-chart-card">
             <div class="chart-header">
                 <h3>Fault Status Distribution</h3>
             </div>
@@ -220,7 +234,7 @@
             </div>
         </div>
 
-        <div class="chart-card">
+        <div class="chart-card cc-chart-card">
             <div class="chart-header">
                 <h3>RFO Analysis</h3>
             </div>
@@ -247,13 +261,14 @@
             </div>
         </div>
     </div>
+                </div>
 
-    <!-- Advanced Analytics Section -->
+                <div class="px-4 pb-4">
     <div class="analytics-section">
         <h2 class="section-title">Advanced Analytics</h2>
         
         <div class="charts-grid-advanced">
-            <div class="chart-card chart-wide">
+        <div class="chart-card chart-wide cc-chart-card">
                 <div class="chart-header">
                     <h3>Priority × Fault Type Matrix</h3>
                 </div>
@@ -262,7 +277,7 @@
                 </div>
             </div>
 
-            <div class="chart-card">
+            <div class="chart-card cc-chart-card">
                 <div class="chart-header">
                     <h3>Customer Impact (Count)</h3>
                 </div>
@@ -271,7 +286,7 @@
                 </div>
             </div>
 
-            <div class="chart-card">
+            <div class="chart-card cc-chart-card">
                 <div class="chart-header">
                     <h3>Customer Impact (Duration)</h3>
                 </div>
@@ -280,7 +295,7 @@
                 </div>
             </div>
 
-            <div class="chart-card">
+            <div class="chart-card cc-chart-card">
                 <div class="chart-header">
                     <h3>Service Impact by Type</h3>
                 </div>
@@ -289,7 +304,7 @@
                 </div>
             </div>
 
-            <div class="chart-card">
+            <div class="chart-card cc-chart-card">
                 <div class="chart-header">
                     <h3>Geographic Distribution</h3>
                 </div>
@@ -308,8 +323,9 @@
             </div>
         </div>
     </div>
+                </div>
 
-    <!-- Performance Metrics Section -->
+                <div class="px-4 pb-4">
     <div class="performance-section">
         <h2 class="section-title">Performance Metrics</h2>
         
@@ -364,8 +380,9 @@
             </div>
         </div>
     </div>
+                </div>
 
-    <!-- Data Tables Section -->
+                <div class="px-4 pb-4">
     <div class="tables-section">
         <h2 class="section-title">Detailed Analysis</h2>
         
@@ -507,7 +524,10 @@
             </div>
         </div>
     </div>
-</div>
+                </div>
+            </div>
+        </div>
+    </section>
 
 <!-- Hidden data payload for charts -->
 <div id="reportsData" style="display:none"

@@ -315,6 +315,12 @@
 canvas#chartShiftTraffic {
   height: 380px;
 }
+.cc-kpi--compact { padding: 12px; }
+.cc-kpi--compact .cc-kpi-head { margin-bottom: 4px; gap: 8px; }
+.cc-kpi--compact .cc-kpi-icon { width: 22px; height: 22px; font-size: 0.8rem; }
+.cc-kpi--compact .cc-kpi-title { font-size: 0.8rem; }
+.cc-kpi--compact .cc-kpi-value { font-size: 1.25rem; }
+.cc-kpi--compact .cc-kpi-sub { font-size: 0.7rem; }
 
 /* Header text fixes to prevent drop-cap or first-letter styling */
 .card-header p::first-letter {
