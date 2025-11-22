@@ -163,6 +163,32 @@
   if (has('chartOutstandingAge')) {
     new Chart(el('chartOutstandingAge'), { type: 'line', data: { labels: binLabels, datasets: [{ label: 'Outstanding', data: binsToVals(data.outstandingBins), borderColor: colors.blue, backgroundColor: 'rgba(0,69,120,0.12)', tension: 0.35, pointBackgroundColor: colors.blue }] }, options: lineOptions() });
   }
+
+  if (has('chartShiftTraffic')) {
+    var labelsShift = isWeekly ? (data.dailyLabels || []) : (data.weeklyLabels || []);
+    function bgGrad(base){ return function(ctx){ return gradientColor(ctx, base); }; }
+    function fmtDate(s){ try { var d = new Date(s + 'T00:00:00'); return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short' }); } catch(_){ return s; } }
+    var valueLabelPlugin = { id: 'valueLabels', afterDatasetsDraw: function(chart){ var ctx = chart.ctx; ctx.save(); chart.data.datasets.forEach(function(ds, di){ var meta = chart.getDatasetMeta(di); meta.data.forEach(function(el, i){ var v = ds.data[i]; if (!v) return; ctx.fillStyle = '#374151'; ctx.font = '12px system-ui, -apple-system, Segoe UI, Roboto'; ctx.textAlign = 'center'; var y = el.y - 4; if (v <= 1) { ctx.textBaseline = 'top'; y = el.y + 4; } else { ctx.textBaseline = 'bottom'; } ctx.fillText(v, el.x, y); }); }); ctx.restore(); } };
+    new Chart(el('chartShiftTraffic'), {
+      type: 'bar',
+      data: {
+        labels: labelsShift,
+        datasets: [
+          { label: 'Morning', data: isWeekly ? (data.dailyShiftMorning || []) : (data.weeklyShiftMorning || []), backgroundColor: bgGrad(colors.sky), borderColor: hexToRGBA(colors.sky, 1), borderWidth: 2, borderRadius: 10 },
+          { label: 'Afternoon', data: isWeekly ? (data.dailyShiftAfternoon || []) : (data.weeklyShiftAfternoon || []), backgroundColor: bgGrad(colors.orange), borderColor: hexToRGBA(colors.orange, 1), borderWidth: 2, borderRadius: 10 },
+          { label: 'Night', data: isWeekly ? (data.dailyShiftNight || []) : (data.weeklyShiftNight || []), backgroundColor: bgGrad(colors.light), borderColor: hexToRGBA(colors.light, 1), borderWidth: 2, borderRadius: 10 }
+        ]
+      },
+      plugins: [valueLabelPlugin],
+      options: Object.assign(barOptions(), {
+        plugins: { legend: { display: true, position: 'top', labels: { usePointStyle: true, boxWidth: 10 } }, tooltip: { callbacks: { title: function(items){ var i = items && items[0] ? items[0].dataIndex : 0; if (isWeekly) { var ds = labelsShift[i]; return ds || 'Day'; } var s = (data.weeklyRangeStarts||[])[i]; var e = (data.weeklyRangeEnds||[])[i]; var left = 'Week ' + (i+1); if (s && e) left += ' (' + fmtDate(s) + ' – ' + fmtDate(e) + ')'; return left; }, label: function(ctx){ var v = ctx.parsed && ctx.parsed.y != null ? ctx.parsed.y : ctx.raw; return ctx.dataset.label + ': ' + v; } } } },
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { x: { stacked: false, grid: { display: false }, ticks: { color: '#6b7280' } }, y: { stacked: false, grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#6b7280', precision: 0 } } },
+        datasets: { bar: { categoryPercentage: 0.7, barPercentage: 0.25 } }
+      })
+    });
+  }
   var form = document.querySelector('form[action$="call-centre/reports"]');
   if (form) {
     var resetBtn = form.querySelector('[data-cc-reset]');

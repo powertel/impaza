@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-Call Centre Analytics Dashboard
+Faults Analytics Dashboard
 @endsection
 
 @section('content')
@@ -12,23 +12,23 @@ Call Centre Analytics Dashboard
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <h3 class="card-title mb-0 text-2xl font-bold text-gray-800">
-            <i class="fas fa-chart-line text-primary me-2"></i>
-            Call Centre Analytics Dashboard
+            <i class="fas fa-chart-line text-primary me-3"></i>
+            Faults Analytics Dashboard
           </h3>
-          <p class="text-sm text-gray-600 mb-0 mt-1">Real-time insights and performance metrics</p>
+          <p class="text-sm text-gray-600 mb-0 mt-1 me-3">Real-time insights and performance metrics</p>
         </div>
         <div class="d-flex align-items-center gap-3">
           <span class="badge bg-primary-subtle text-primary fs-7 px-3 py-2 rounded-pill">
-            <i class="fas fa-sync-alt me-1"></i>
-            Live Data
+            <!-- <i class="fas fa-sync-alt me-1"></i> -->
+            <!-- Live Data -->
           </span>
-          <button class="btn btn-outline-secondary btn-sm rounded-pill" data-bs-toggle="tooltip" title="Export Report">
+          <!-- <button class="btn btn-outline-secondary btn-sm rounded-pill" data-bs-toggle="tooltip" title="Export Report">
             <i class="fas fa-download me-1"></i>
             Export
-          </button>
+          </button> -->
         </div>
       </div>
-    </div>
+      </div>
     
     <div class="card-body p-0">
       <!-- Filter Section -->
@@ -207,6 +207,77 @@ Call Centre Analytics Dashboard
           </div>
         </div>
       </div>
+      <!-- Traffic By Shift -->
+      <div class="px-4 pb-4">
+        <div class="row g-4">
+          <div class="col-12">
+            <div class="cc-chart-card">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="fw-semibold">Traffic By Shift (Logged Faults)</div>
+                <button class="btn btn-sm btn-outline-secondary rounded-pill" data-bs-toggle="tooltip" title="View details">
+                  <i class="fas fa-expand"></i>
+                </button>
+              </div>
+              <canvas id="chartShiftTraffic"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="px-4 pb-4">
+        <div class="row g-4">
+          <div class="col-12">
+            <div class="card border-0 shadow-sm cc-analysis-card">
+              <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                <div class="fw-semibold">Weekly Analysis</div>
+                <div class="text-muted small">Balances and performance by week</div>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table align-middle mb-0 cc-analysis-table">
+                    <thead>
+                      <tr>
+                        <th>Week</th>
+                        <th>Opening Balance</th>
+                        <th>New Faults Received</th>
+                        <th>Total Faults</th>
+                        <th>Resolved Faults</th>
+                        <th>Closing Balance – Pending Faults</th>
+                        <th>Resolved Within 72hrs</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @foreach(($weeklyLabels ?? []) as $i => $wk)
+                        @php($perc = (int) round(($weeklyResolved3DaysPerc[$i] ?? 0)))
+                        <tr>
+                          <td><div class="fw-semibold text-gray-800">{{ $wk }}</div></td>
+                          <td>
+                            <span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($weeklyOpening[$i] ?? 0)) }}</span>
+                          </td>
+                          <td>
+                            <span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($weeklyNewFaults[$i] ?? 0)) }}</span>
+                          </td>
+                          <td>
+                            <span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($weeklyTotals[$i] ?? (($weeklyOpening[$i] ?? 0) + ($weeklyNewFaults[$i] ?? 0)))) }}</span>
+                          </td>
+                          <td>
+                            <span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($weeklyResolved[$i] ?? 0)) }}</span>
+                          </td>
+                          <td>
+                            <span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($weeklyOutstanding[$i] ?? 0)) }}</span>
+                          </td>
+                          <td>
+                            <span class="badge rounded-pill bg-warning-subtle text-dark">{{ $perc }}%</span>
+                          </td>
+                        </tr>
+                      @endforeach
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -226,6 +297,14 @@ Call Centre Analytics Dashboard
     dailyResolved: @json($dailyResolved ?? []),
     dailyOutstanding: @json($dailyOutstanding ?? []),
     dailyResolved3DaysPerc: @json($dailyResolved3DaysPerc ?? []),
+    dailyShiftMorning: @json($dailyShiftMorning ?? []),
+    dailyShiftAfternoon: @json($dailyShiftAfternoon ?? []),
+    dailyShiftNight: @json($dailyShiftNight ?? []),
+    weeklyShiftMorning: @json($weeklyShiftMorning ?? []),
+    weeklyShiftAfternoon: @json($weeklyShiftAfternoon ?? []),
+    weeklyShiftNight: @json($weeklyShiftNight ?? []),
+    weeklyRangeStarts: @json($weeklyRangeStarts ?? []),
+    weeklyRangeEnds: @json($weeklyRangeEnds ?? []),
   };
 </script>
 <script src="{{ asset('js/call_centre.js') }}"></script>
