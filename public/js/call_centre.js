@@ -168,7 +168,7 @@
     var labelsShift = isWeekly ? (data.dailyLabels || []) : (data.weeklyLabels || []);
     function bgGrad(base){ return function(ctx){ return gradientColor(ctx, base); }; }
     function fmtDate(s){ try { var d = new Date(s + 'T00:00:00'); return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short' }); } catch(_){ return s; } }
-    var valueLabelPlugin = { id: 'valueLabels', afterDatasetsDraw: function(chart){ var ctx = chart.ctx; ctx.save(); chart.data.datasets.forEach(function(ds, di){ var meta = chart.getDatasetMeta(di); meta.data.forEach(function(el, i){ var v = ds.data[i]; if (!v) return; ctx.fillStyle = '#374151'; ctx.font = '12px system-ui, -apple-system, Segoe UI, Roboto'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText(v, el.x, el.y - 4); }); }); ctx.restore(); } };
+    var valueLabelPlugin = { id: 'valueLabels', afterDatasetsDraw: function(chart){ var ctx = chart.ctx; ctx.save(); chart.data.datasets.forEach(function(ds, di){ var meta = chart.getDatasetMeta(di); meta.data.forEach(function(el, i){ var v = ds.data[i]; if (!v) return; ctx.fillStyle = '#374151'; ctx.font = '12px system-ui, -apple-system, Segoe UI, Roboto'; ctx.textAlign = 'center'; var y = el.y - 4; if (v <= 1) { ctx.textBaseline = 'top'; y = el.y + 4; } else { ctx.textBaseline = 'bottom'; } ctx.fillText(v, el.x, y); }); }); ctx.restore(); } };
     new Chart(el('chartShiftTraffic'), {
       type: 'bar',
       data: {
