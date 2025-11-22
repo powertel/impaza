@@ -32,6 +32,7 @@ Call Centre Reports
           <div class="cc-field">
             <label class="form-label"><i class="far fa-calendar me-1"></i>Year</label>
             <select name="year" class="form-select form-select-sm" title="Choose year">
+              <option value="all" {{ (($filter ?? '') === 'year' && strtolower((string)request('year')) === 'all') ? 'selected' : '' }}>All</option>
               @foreach(($availableYears ?? []) as $y)
                 <option value="{{ $y }}" {{ ($selectedYear ?? 0) == $y ? 'selected' : '' }}>{{ $y }}</option>
               @endforeach
@@ -55,8 +56,8 @@ Call Centre Reports
             <input type="date" name="end_date" value="{{ request('end_date') }}" class="form-control form-control-sm" title="End date for weekly range" />
           </div>
           <div class="cc-filter-actions">
-            <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-filter me-1"></i>Apply</button>
-            <button type="button" class="btn btn-light btn-sm ms-2" data-cc-reset><i class="fas fa-undo me-1"></i>Reset</button>
+            <button type="submit" class="btn btn-outline-primary btn-sm rounded-pill"><i class="fas fa-filter me-1"></i>Apply</button>
+            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill ms-2" data-cc-reset><i class="fas fa-undo me-1"></i>Reset</button>
           </div>
         </form>
       </div>
@@ -96,7 +97,7 @@ Call Centre Reports
           <div class="cc-kpi cc-kpi--indigo h-100">
             <div class="cc-kpi-head">
               <div class="cc-kpi-icon"><i class="fas fa-stopwatch"></i></div>
-              <div class="cc-kpi-title"></div>
+              <div class="cc-kpi-title">Resolved within 3 Days</div>
             </div>
             <div class="cc-kpi-value">{{ number_format($within3DaysPercent ?? 0, 2) }}%</div>
             <div class="cc-kpi-sub">{{ $periodLabelText ?? 'Period total' }}</div>

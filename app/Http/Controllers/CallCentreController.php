@@ -21,7 +21,9 @@ class CallCentreController extends Controller
             ->toArray();
 
         $now = Carbon::now();
-        $selectedYear = (int) ($request->input('year', $now->year));
+        $yearInput = $request->input('year', $now->year);
+        $isAllYears = strtolower((string)$yearInput) === 'all';
+        $selectedYear = $isAllYears ? null : (int) $yearInput;
         $selectedMonth = (int) ($request->input('month', $now->month));
         $quarter = (int) ($request->input('quarter', 1));
 
@@ -32,8 +34,15 @@ class CallCentreController extends Controller
             $periodStart = Carbon::create($selectedYear, $selectedMonth, 1)->startOfMonth();
             $periodEnd = Carbon::create($selectedYear, $selectedMonth, 1)->endOfMonth();
         } elseif ($filter === 'year') {
-            $periodStart = Carbon::create($selectedYear, 1, 1)->startOfYear();
-            $periodEnd = Carbon::create($selectedYear, 12, 31)->endOfYear();
+            if ($isAllYears && !empty($availableYears)) {
+                $minYear = min($availableYears);
+                $maxYear = max($availableYears);
+                $periodStart = Carbon::create($minYear, 1, 1)->startOfYear();
+                $periodEnd = Carbon::create($maxYear, 12, 31)->endOfYear();
+            } else {
+                $periodStart = Carbon::create($selectedYear ?? $now->year, 1, 1)->startOfYear();
+                $periodEnd = Carbon::create($selectedYear ?? $now->year, 12, 31)->endOfYear();
+            }
         } elseif ($filter === 'weekly') {
             $start = $request->input('start_date');
             $end = $request->input('end_date');
@@ -48,7 +57,7 @@ class CallCentreController extends Controller
 
         $periodLabelText = 'Period total';
         if ($filter === 'month') $periodLabelText = 'Month total';
-        elseif ($filter === 'year') $periodLabelText = 'Year total';
+        elseif ($filter === 'year') $periodLabelText = $isAllYears ? 'All years total' : 'Year total';
         elseif ($filter === 'quarter') $periodLabelText = 'Quarter total';
         elseif ($filter === 'weekly') $periodLabelText = 'Week total';
 
