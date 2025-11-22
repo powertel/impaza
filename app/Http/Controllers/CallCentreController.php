@@ -46,8 +46,19 @@ class CallCentreController extends Controller
         } elseif ($filter === 'weekly') {
             $start = $request->input('start_date');
             $end = $request->input('end_date');
-            $periodStart = $start ? Carbon::parse($start)->startOfDay() : $now->copy()->startOfWeek();
-            $periodEnd = $end ? Carbon::parse($end)->endOfDay() : $now->copy()->endOfWeek();
+            if ($start && !$end) {
+                $periodStart = Carbon::parse($start)->startOfDay();
+                $periodEnd = Carbon::parse($start)->copy()->addDays(6)->endOfDay();
+            } elseif (!$start && $end) {
+                $periodEnd = Carbon::parse($end)->endOfDay();
+                $periodStart = Carbon::parse($end)->copy()->subDays(6)->startOfDay();
+            } elseif ($start && $end) {
+                $periodStart = Carbon::parse($start)->startOfDay();
+                $periodEnd = Carbon::parse($end)->endOfDay();
+            } else {
+                $periodStart = $now->copy()->startOfWeek(Carbon::SUNDAY);
+                $periodEnd = $now->copy()->endOfWeek(Carbon::SATURDAY);
+            }
         } elseif ($filter === 'quarter') {
             $q = max(1, min(4, $quarter));
             $qStartMonth = [1 => 1, 2 => 4, 3 => 7, 4 => 10][$q];
@@ -71,23 +82,48 @@ class CallCentreController extends Controller
             ->get();
         $resolvedTotal = $latestClearedInPeriod->count();
 
-        $weeklyLabels = ['Week 1','Week 2','Week 3','Week 4'];
+        $weeklyLabels = [];
+        $weeks = [];
         $weeklyRanges = [];
+        $s = $periodStart->copy()->startOfDay();
+        $e = $s->copy()->addDays((6 - $s->dayOfWeek + 7) % 7)->endOfDay();
+        if ($e->gt($periodEnd)) { $e = $periodEnd->copy()->endOfDay(); }
+        $weeks[] = [$s->copy(), $e->copy()];
+        $s = $e->copy()->addDay()->startOfDay();
+        while ($s->lte($periodEnd)) {
+            $e = $s->copy()->addDays(6)->endOfDay();
+            if ($e->gt($periodEnd)) { $e = $periodEnd->copy()->endOfDay(); }
+            $weeks[] = [$s->copy(), $e->copy()];
+            $s = $e->copy()->addDay()->startOfDay();
+        }
         if ($filter === 'month') {
-            $w1s = $periodStart->copy()->startOfDay();
-            $w1e = $periodStart->copy()->day(7)->endOfDay();
-            $w2s = $periodStart->copy()->day(8)->startOfDay();
-            $w2e = $periodStart->copy()->day(14)->endOfDay();
-            $w3s = $periodStart->copy()->day(15)->startOfDay();
-            $w3e = $periodStart->copy()->day(21)->endOfDay();
-            $w4s = $periodStart->copy()->day(22)->startOfDay();
-            $w4e = $periodEnd->copy()->endOfDay();
-            $weeklyRanges = [[$w1s,$w1e],[$w2s,$w2e],[$w3s,$w3e],[$w4s,$w4e]];
+            $weeklyLabels = ['Week 1','Week 2','Week 3','Week 4'];
+            $weeklyRanges = [];
+            $monthStart = Carbon::create($selectedYear, $selectedMonth, 1)->startOfDay();
+            $offset = (Carbon::SUNDAY - $monthStart->dayOfWeek + 7) % 7;
+            $firstSunday = $monthStart->copy()->addDays($offset)->startOfDay();
+            for ($i = 0; $i < 4; $i++) {
+                $ws = $firstSunday->copy()->addDays($i * 7)->startOfDay();
+                $we = $ws->copy()->addDays(6)->endOfDay();
+                $weeklyRanges[] = [$ws, $we];
+            }
         } else {
-            $len = $periodStart->diffInDays($periodEnd) + 1;
-            $chunk = (int) ceil($len / 4);
-            $s = $periodStart->copy()->startOfDay();
-            for ($i=0; $i<4; $i++) { $e = $s->copy()->addDays($chunk - 1)->endOfDay(); if ($e->gt($periodEnd)) $e = $periodEnd->copy()->endOfDay(); $weeklyRanges[] = [$s->copy(), $e]; $s = $e->copy()->addDay()->startOfDay(); }
+            $weeklyLabels = ['Week 1','Week 2','Week 3','Week 4'];
+            $totalWeeks = count($weeks);
+            $base = intdiv($totalWeeks, 4);
+            $rem = $totalWeeks % 4;
+            $idx = 0;
+            for ($i = 0; $i < 4; $i++) {
+                $take = $base + ($i < $rem ? 1 : 0);
+                if ($take > 0) {
+                    $ws = $weeks[$idx][0];
+                    $we = $weeks[$idx + $take - 1][1];
+                    $weeklyRanges[] = [$ws, $we];
+                    $idx += $take;
+                } else {
+                    $weeklyRanges[] = [$periodEnd->copy()->endOfDay(), $periodEnd->copy()->endOfDay()];
+                }
+            }
         }
 
         $weeklyNewFaults = [];
