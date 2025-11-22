@@ -85,15 +85,15 @@ class WeeklyMetrics extends Command
         $binsResolved = ['0_3'=>0,'4_7'=>0,'8_14'=>0,'15_30'=>0,'31_60'=>0,'61_90'=>0,'90_plus'=>0];
         foreach ($latestInWeek as $r) {
             $c = $createdMapWeek[$r->fault_id] ?? null; if (!$c) continue;
-            $d = Carbon::parse($c)->diffInDays(Carbon::parse($r->resolved_at));
-            if ($d <= 3) $binsResolved['0_3']++; elseif ($d <= 7) $binsResolved['4_7']++; elseif ($d <= 14) $binsResolved['8_14']++; elseif ($d <= 30) $binsResolved['15_30']++; elseif ($d <= 60) $binsResolved['31_60']++; elseif ($d <= 90) $binsResolved['61_90']++; else $binsResolved['90_plus']++;
+            $m = Carbon::parse($c)->diffInMinutes(Carbon::parse($r->resolved_at));
+            if ($m <= 4320) $binsResolved['0_3']++; elseif ($m <= 10080) $binsResolved['4_7']++; elseif ($m <= 20160) $binsResolved['8_14']++; elseif ($m <= 43200) $binsResolved['15_30']++; elseif ($m <= 86400) $binsResolved['31_60']++; elseif ($m <= 129600) $binsResolved['61_90']++; else $binsResolved['90_plus']++;
         }
         $resolvedUpToEndIdsWeek = DB::table('fault_stage_logs')->where('status_id',$clearedStatusId)->where('started_at','<=',$periodEnd)->select('fault_id', DB::raw('MAX(started_at) as ra'))->groupBy('fault_id')->pluck('fault_id')->unique()->values();
         $outstandingWeek = Fault::whereBetween('created_at', [$periodStart, $periodEnd])->whereNotIn('id', $resolvedUpToEndIdsWeek)->get(['id','created_at']);
         $binsOutstanding = ['0_3'=>0,'4_7'=>0,'8_14'=>0,'15_30'=>0,'31_60'=>0,'61_90'=>0,'90_plus'=>0];
         foreach ($outstandingWeek as $f) {
-            $d = Carbon::parse($f->created_at)->diffInDays($periodEnd);
-            if ($d <= 3) $binsOutstanding['0_3']++; elseif ($d <= 7) $binsOutstanding['4_7']++; elseif ($d <= 14) $binsOutstanding['8_14']++; elseif ($d <= 30) $binsOutstanding['15_30']++; elseif ($d <= 60) $binsOutstanding['31_60']++; elseif ($d <= 90) $binsOutstanding['61_90']++; else $binsOutstanding['90_plus']++;
+            $mOpen = Carbon::parse($f->created_at)->diffInMinutes($periodEnd);
+            if ($mOpen <= 4320) $binsOutstanding['0_3']++; elseif ($mOpen <= 10080) $binsOutstanding['4_7']++; elseif ($mOpen <= 20160) $binsOutstanding['8_14']++; elseif ($mOpen <= 43200) $binsOutstanding['15_30']++; elseif ($mOpen <= 86400) $binsOutstanding['31_60']++; elseif ($mOpen <= 129600) $binsOutstanding['61_90']++; else $binsOutstanding['90_plus']++;
         }
 
         $summary = [
