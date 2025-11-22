@@ -111,8 +111,8 @@ class CallCentreController extends Controller
             foreach ($latestInWeek as $row) {
                 $created = $createdMap[$row->fault_id] ?? null;
                 if (!$created) continue;
-                $days = Carbon::parse($created)->diffInDays(Carbon::parse($row->resolved_at));
-                if ($days <= 3) $w3++;
+                $mins = Carbon::parse($created)->diffInMinutes(Carbon::parse($row->resolved_at));
+                if ($mins <= 4320) $w3++;
             }
             $weeklyResolved3DaysPerc[] = $tot > 0 ? round(($w3 / $tot) * 100, 2) : 0;
         }
@@ -134,16 +134,21 @@ class CallCentreController extends Controller
             '90_plus' => 0,
         ];
         foreach ($resolvedRows as $r) {
-            $days = Carbon::parse($r->created_at)->diffInDays(Carbon::parse($r->resolved_at));
-            if ($days <= 3) $bins['0_3']++;
-            elseif ($days <= 7) $bins['4_7']++;
-            elseif ($days <= 14) $bins['8_14']++;
-            elseif ($days <= 30) $bins['15_30']++;
-            elseif ($days <= 60) $bins['31_60']++;
-            elseif ($days <= 90) $bins['61_90']++;
+            $m = Carbon::parse($r->created_at)->diffInMinutes(Carbon::parse($r->resolved_at));
+            if ($m <= 4320) $bins['0_3']++;
+            elseif ($m <= 10080) $bins['4_7']++;
+            elseif ($m <= 20160) $bins['8_14']++;
+            elseif ($m <= 43200) $bins['15_30']++;
+            elseif ($m <= 86400) $bins['31_60']++;
+            elseif ($m <= 129600) $bins['61_90']++;
             else $bins['90_plus']++;
         }
-        $within3DaysPercent = $resolvedTotal > 0 ? round(($bins['0_3'] / $resolvedTotal) * 100, 2) : 0;
+        $w3Strict = 0;
+        foreach ($resolvedRows as $r) {
+            $mins = Carbon::parse($r->created_at)->diffInMinutes(Carbon::parse($r->resolved_at));
+            if ($mins <= 4320) $w3Strict++;
+        }
+        $within3DaysPercent = $resolvedTotal > 0 ? round(($w3Strict / $resolvedTotal) * 100, 2) : 0;
 
         $resolvedUpToEndIds = DB::table('fault_stage_logs')
             ->where('status_id', $clearedStatusId)
@@ -168,13 +173,13 @@ class CallCentreController extends Controller
         ];
         $over3DaysCount = 0;
         foreach ($outstandingFaults as $f) {
-            $days = Carbon::parse($f->created_at)->diffInDays($periodEnd);
-            if ($days <= 3) $outBins['0_3']++;
-            elseif ($days <= 7) { $outBins['4_7']++; $over3DaysCount++; }
-            elseif ($days <= 14) { $outBins['8_14']++; $over3DaysCount++; }
-            elseif ($days <= 30) { $outBins['15_30']++; $over3DaysCount++; }
-            elseif ($days <= 60) { $outBins['31_60']++; $over3DaysCount++; }
-            elseif ($days <= 90) { $outBins['61_90']++; $over3DaysCount++; }
+            $mOpen = Carbon::parse($f->created_at)->diffInMinutes($periodEnd);
+            if ($mOpen <= 4320) $outBins['0_3']++;
+            elseif ($mOpen <= 10080) { $outBins['4_7']++; $over3DaysCount++; }
+            elseif ($mOpen <= 20160) { $outBins['8_14']++; $over3DaysCount++; }
+            elseif ($mOpen <= 43200) { $outBins['15_30']++; $over3DaysCount++; }
+            elseif ($mOpen <= 86400) { $outBins['31_60']++; $over3DaysCount++; }
+            elseif ($mOpen <= 129600) { $outBins['61_90']++; $over3DaysCount++; }
             else { $outBins['90_plus']++; $over3DaysCount++; }
         }
         $over3DaysPercent = $outstandingTotal > 0 ? round(($over3DaysCount / $outstandingTotal) * 100, 2) : 0;
@@ -208,8 +213,8 @@ class CallCentreController extends Controller
                 foreach ($latestInDay as $r) {
                     $createdAt = $createdMapDay[$r->fault_id] ?? null;
                     if (!$createdAt) continue;
-                    $daysDiff = Carbon::parse($createdAt)->diffInDays(Carbon::parse($r->resolved_at));
-                    if ($daysDiff <= 3) $w3Day++;
+                    $minsDiff = Carbon::parse($createdAt)->diffInMinutes(Carbon::parse($r->resolved_at));
+                    if ($minsDiff <= 4320) $w3Day++;
                 }
                 $dailyResolved3DaysPerc[] = $totDay > 0 ? round(($w3Day / $totDay) * 100, 2) : 0;
                 $cur->addDay();
