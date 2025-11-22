@@ -25,7 +25,7 @@ Dashboard
               <i class="fas fa-chart-line text-primary me-2"></i>
               Dashboard
             </h3>
-            <p class="text-sm text-gray-600 mb-0 mt-1">Welcome back! Here's what's happening with your operations today.</p>
+            <!-- <p class="text-sm text-gray-600 mb-0 mt-1">Welcome back! Here's what's happening with your operations today.</p> -->
           </div>
         </div>
       </div>
