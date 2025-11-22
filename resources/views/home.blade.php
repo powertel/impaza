@@ -9,7 +9,7 @@ Dashboard
 @section('content')
 <link href="{{ asset('css/dashboard.css') }}" rel="stylesheet">
 <link href="{{ asset('css/call_centre.css') }}" rel="stylesheet">
-<div class="modern-dashboard">
+ 
   @php
     $periodLabel = ($selectedYear ?? null)
       ? (($selectedMonth ?? null) ? \Carbon\Carbon::create(null, $selectedMonth, 1)->format('F') . ' ' . $selectedYear : (string)$selectedYear)
@@ -388,7 +388,6 @@ Dashboard
   </div>
   </div>
   </section>
-  </div>
 
 <!-- Data payload for charts -->
 @php
