@@ -100,24 +100,33 @@ class CallCentreController extends Controller
         $weeklyResolved = [];
         $weeklyOutstanding = [];
         $weeklyResolved3DaysPerc = [];
+        $todayEnd = Carbon::now()->endOfDay();
         foreach ($weeklyRanges as [$ws,$we]) {
-            $weeklyNewFaults[] = Fault::whereBetween('created_at', [$ws,$we])->count();
+            if ($ws->gt($todayEnd)) {
+                $weeklyNewFaults[] = 0;
+                $weeklyResolved[] = 0;
+                $weeklyOutstanding[] = 0;
+                $weeklyResolved3DaysPerc[] = 0;
+                continue;
+            }
+            $weEff = $we->gt($todayEnd) ? $todayEnd->copy() : $we->copy();
+            $weeklyNewFaults[] = Fault::whereBetween('created_at', [$ws,$weEff])->count();
             $latestInWeek = DB::table('fault_stage_logs')
                 ->where('status_id', $clearedStatusId)
-                ->whereBetween('started_at', [$ws,$we])
+                ->whereBetween('started_at', [$ws,$weEff])
                 ->select('fault_id', DB::raw('MAX(started_at) as resolved_at'))
                 ->groupBy('fault_id')
                 ->get();
             $weeklyResolved[] = $latestInWeek->count();
             $resolvedUpToDateIds = DB::table('fault_stage_logs')
                 ->where('status_id', $clearedStatusId)
-                ->where('started_at','<=',$we)
+                ->where('started_at','<=',$weEff)
                 ->select('fault_id', DB::raw('MAX(started_at) as ra'))
                 ->groupBy('fault_id')
                 ->pluck('fault_id')
                 ->unique()
                 ->values();
-            $weeklyOutstanding[] = Fault::whereBetween('created_at', [$periodStart, $we])->whereNotIn('id', $resolvedUpToDateIds)->count();
+            $weeklyOutstanding[] = Fault::whereBetween('created_at', [$periodStart, $weEff])->whereNotIn('id', $resolvedUpToDateIds)->count();
 
             $ids = $latestInWeek->pluck('fault_id')->unique()->values();
             $createdMap = Fault::whereIn('id', $ids)->pluck('created_at','id');
