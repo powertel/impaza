@@ -1,24 +1,46 @@
 @extends('layouts.admin')
 
 @section('title')
-Call Centre Reports
+Call Centre Analytics Dashboard
 @endsection
 
 @section('content')
 <link href="{{ asset('css/call_centre.css') }}" rel="stylesheet">
 <section class="content">
-  <div class="card">
-    <div class="card-header">
-      <h3 class="card-title">Faults Reports</h3>
-      <div class="card-tools">
-        <form method="get" action="{{ route('call_centre.reports') }}" class="cc-filter-bar d-flex flex-wrap align-items-end gap-3">
+  <div class="card border-0 shadow-lg">
+    <div class="card-header bg-white border-0 py-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h3 class="card-title mb-0 text-2xl font-bold text-gray-800">
+            <i class="fas fa-chart-line text-primary me-2"></i>
+            Call Centre Analytics Dashboard
+          </h3>
+          <p class="text-sm text-gray-600 mb-0 mt-1">Real-time insights and performance metrics</p>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <span class="badge bg-primary-subtle text-primary fs-7 px-3 py-2 rounded-pill">
+            <i class="fas fa-sync-alt me-1"></i>
+            Live Data
+          </span>
+          <button class="btn btn-outline-secondary btn-sm rounded-pill" data-bs-toggle="tooltip" title="Export Report">
+            <i class="fas fa-download me-1"></i>
+            Export
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card-body p-0">
+      <!-- Filter Section -->
+      <div class="bg-gray-50 px-4 py-3 border-bottom">
+        <form method="get" action="{{ route('call_centre.reports') }}" class="cc-filter-bar d-flex flex-wrap align-items-end gap-4">
           <div class="cc-field">
-            <label class="form-label"><i class="fas fa-sliders-h me-1"></i>Filter</label>
+            <label class="form-label"><i class="fas fa-sliders-h me-1"></i>Time Period</label>
             <select name="filter" class="form-select form-select-sm" title="Select filter type">
-              <option value="month" {{ ($filter ?? 'month') === 'month' ? 'selected' : '' }}>Month</option>
-              <option value="year" {{ ($filter ?? '') === 'year' ? 'selected' : '' }}>Year</option>
-              <option value="weekly" {{ ($filter ?? '') === 'weekly' ? 'selected' : '' }}>Weekly Range</option>
-              <option value="quarter" {{ ($filter ?? '') === 'quarter' ? 'selected' : '' }}>Quarter</option>
+              <option value="month" {{ ($filter ?? 'month') === 'month' ? 'selected' : '' }}>Monthly</option>
+              <option value="year" {{ ($filter ?? '') === 'year' ? 'selected' : '' }}>Yearly</option>
+              <option value="weekly" {{ ($filter ?? '') === 'weekly' ? 'selected' : '' }}>Custom Range</option>
+              <option value="quarter" {{ ($filter ?? '') === 'quarter' ? 'selected' : '' }}>Quarterly</option>
             </select>
           </div>
           <div class="cc-field">
@@ -32,7 +54,7 @@ Call Centre Reports
           <div class="cc-field">
             <label class="form-label"><i class="far fa-calendar me-1"></i>Year</label>
             <select name="year" class="form-select form-select-sm" title="Choose year">
-              <option value="all" {{ (($filter ?? '') === 'year' && strtolower((string)request('year')) === 'all') ? 'selected' : '' }}>All</option>
+              <option value="all" {{ (($filter ?? '') === 'year' && strtolower((string)request('year')) === 'all') ? 'selected' : '' }}>All Years</option>
               @foreach(($availableYears ?? []) as $y)
                 <option value="{{ $y }}" {{ ($selectedYear ?? 0) == $y ? 'selected' : '' }}>{{ $y }}</option>
               @endforeach
@@ -48,98 +70,140 @@ Call Centre Reports
             </select>
           </div>
           <div class="cc-field">
-            <label class="form-label"><i class="far fa-play-circle me-1"></i>Start</label>
+            <label class="form-label"><i class="far fa-play-circle me-1"></i>Start Date</label>
             <input type="date" name="start_date" value="{{ request('start_date') }}" class="form-control form-control-sm" title="Start date for weekly range" />
           </div>
           <div class="cc-field">
-            <label class="form-label"><i class="far fa-stop-circle me-1"></i>End</label>
+            <label class="form-label"><i class="far fa-stop-circle me-1"></i>End Date</label>
             <input type="date" name="end_date" value="{{ request('end_date') }}" class="form-control form-control-sm" title="End date for weekly range" />
           </div>
           <div class="cc-filter-actions">
-            <button type="submit" class="btn btn-outline-primary btn-sm rounded-pill"><i class="fas fa-filter me-1"></i>Apply</button>
-            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill ms-2" data-cc-reset><i class="fas fa-undo me-1"></i>Reset</button>
+            <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4">
+              <i class="fas fa-filter me-1"></i>
+              Apply Filters
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-cc-reset>
+              <i class="fas fa-undo me-1"></i>
+              Reset
+            </button>
           </div>
         </form>
       </div>
-    </div>
-    <div class="card-body">
-      <div class="row g-3 mb-3">
-        <div class="col-md-3">
-          <div class="cc-kpi cc-kpi--slate h-100">
-            <div class="cc-kpi-head">
-              <div class="cc-kpi-icon"><i class="far fa-calendar-alt"></i></div>
-              <div class="cc-kpi-title">Period</div>
+
+      <!-- KPI Cards -->
+      <div class="px-4 py-4 bg-gradient-to-r from-gray-50 to-white">
+        <div class="row g-4 mb-4">
+          <div class="col-md-3">
+            <div class="cc-kpi cc-kpi--slate h-100">
+              <div class="cc-kpi-head">
+                <div class="cc-kpi-icon"><i class="far fa-calendar-alt"></i></div>
+                <div class="cc-kpi-title">Reporting Period</div>
+              </div>
+              <div class="cc-kpi-value">{{ ($periodStart ?? now())->format('d M Y') }} — {{ ($periodEnd ?? now())->format('d M Y') }}</div>
+              <div class="cc-kpi-sub">{{ $periodLabelText ?? 'Selected period' }}</div>
             </div>
-            <div class="cc-kpi-value">{{ ($periodStart ?? now())->format('d M Y') }} — {{ ($periodEnd ?? now())->format('d M Y') }}</div>
           </div>
-        </div>
-        <div class="col-md-3">
-          <div class="cc-kpi cc-kpi--blue h-100">
-            <div class="cc-kpi-head">
-              <div class="cc-kpi-icon"><i class="fas fa-bolt"></i></div>
-              <div class="cc-kpi-title">New Faults</div>
+          <div class="col-md-3">
+            <div class="cc-kpi cc-kpi--blue h-100">
+              <div class="cc-kpi-head">
+                <div class="cc-kpi-icon"><i class="fas fa-bolt"></i></div>
+                <div class="cc-kpi-title">New Faults</div>
+              </div>
+              <div class="cc-kpi-value">{{ number_format($newFaultsTotal ?? 0) }}</div>
+              <div class="cc-kpi-sub">{{ $periodLabelText ?? 'Period total' }}</div>
             </div>
-            <div class="cc-kpi-value">{{ number_format($newFaultsTotal ?? 0) }}</div>
-            <div class="cc-kpi-sub">{{ $periodLabelText ?? 'Period total' }}</div>
           </div>
-        </div>
-        <div class="col-md-3">
-          <div class="cc-kpi cc-kpi--green h-100">
-            <div class="cc-kpi-head">
-              <div class="cc-kpi-icon"><i class="fas fa-check-circle"></i></div>
-              <div class="cc-kpi-title">Resolved</div>
+          <div class="col-md-3">
+            <div class="cc-kpi cc-kpi--green h-100">
+              <div class="cc-kpi-head">
+                <div class="cc-kpi-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="cc-kpi-title">Resolved Faults</div>
+              </div>
+              <div class="cc-kpi-value">{{ number_format($resolvedTotal ?? 0) }}</div>
+              <div class="cc-kpi-sub">{{ $periodLabelText ?? 'Period total' }}</div>
             </div>
-            <div class="cc-kpi-value">{{ number_format($resolvedTotal ?? 0) }}</div>
-            <div class="cc-kpi-sub">{{ $periodLabelText ?? 'Period total' }}</div>
           </div>
-        </div>
-        <div class="col-md-3">
-          <div class="cc-kpi cc-kpi--indigo h-100">
-            <div class="cc-kpi-head">
-              <div class="cc-kpi-icon"><i class="fas fa-stopwatch"></i></div>
-              <div class="cc-kpi-title">Resolved within 3 Days</div>
+          <div class="col-md-3">
+            <div class="cc-kpi cc-kpi--indigo h-100">
+              <div class="cc-kpi-head">
+                <div class="cc-kpi-icon"><i class="fas fa-stopwatch"></i></div>
+                <div class="cc-kpi-title">Resolved in ≤72h</div>
+              </div>
+              <div class="cc-kpi-value">{{ number_format($within3DaysPercent ?? 0, 2) }}%</div>
+              <div class="cc-kpi-sub">{{ $periodLabelText ?? 'Period total' }}</div>
             </div>
-            <div class="cc-kpi-value">{{ number_format($within3DaysPercent ?? 0, 2) }}%</div>
-            <div class="cc-kpi-sub">{{ $periodLabelText ?? 'Period total' }}</div>
           </div>
         </div>
       </div>
 
-      <div class="row g-3">
-        <div class="col-lg-6">
-          <div class="p-3 border rounded h-100 cc-chart-card">
-            <div class="fw-semibold mb-2">New Faults Received</div>
-            <canvas id="chartWeeklyNewSingle"></canvas>
+      <!-- Charts Grid -->
+      <div class="px-4 pb-4">
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="cc-chart-card">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="fw-semibold">New Faults Received</div>
+                <button class="btn btn-sm btn-outline-secondary rounded-pill" data-bs-toggle="tooltip" title="View details">
+                  <i class="fas fa-expand"></i>
+                </button>
+              </div>
+              <canvas id="chartWeeklyNewSingle"></canvas>
+            </div>
           </div>
-        </div>
-        <div class="col-lg-6">
-          <div class="p-3 border rounded h-100 cc-chart-card">
-            <div class="fw-semibold mb-2">Faults Resolved</div>
-            <canvas id="chartWeeklyResolvedSingle"></canvas>
+          <div class="col-lg-6">
+            <div class="cc-chart-card">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="fw-semibold">Faults Resolved</div>
+                <button class="btn btn-sm btn-outline-secondary rounded-pill" data-bs-toggle="tooltip" title="View details">
+                  <i class="fas fa-expand"></i>
+                </button>
+              </div>
+              <canvas id="chartWeeklyResolvedSingle"></canvas>
+            </div>
           </div>
-        </div>
-        <div class="col-lg-6">
-          <div class="p-3 border rounded h-100 cc-chart-card">
-            <div class="fw-semibold mb-2">Faults Resolved Within 3 Days</div>
-            <canvas id="chartWeeklyResolved3Days"></canvas>
+          <div class="col-lg-6">
+            <div class="cc-chart-card">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="fw-semibold">Faults Resolved Within 72 Hours</div>
+                <button class="btn btn-sm btn-outline-secondary rounded-pill" data-bs-toggle="tooltip" title="View details">
+                  <i class="fas fa-expand"></i>
+                </button>
+              </div>
+              <canvas id="chartWeeklyResolved3Days"></canvas>
+            </div>
           </div>
-        </div>
-        <div class="col-lg-6">
-          <div class="p-3 border rounded h-100 cc-chart-card">
-            <div class="fw-semibold mb-2">Total Outstanding Faults</div>
-            <canvas id="chartWeeklyOutstandingSingle"></canvas>
+          <div class="col-lg-6">
+            <div class="cc-chart-card">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="fw-semibold">Total Outstanding Faults</div>
+                <button class="btn btn-sm btn-outline-secondary rounded-pill" data-bs-toggle="tooltip" title="View details">
+                  <i class="fas fa-expand"></i>
+                </button>
+              </div>
+              <canvas id="chartWeeklyOutstandingSingle"></canvas>
+            </div>
           </div>
-        </div>
-        <div class="col-lg-6">
-          <div class="p-3 border rounded h-100 cc-chart-card">
-            <div class="fw-semibold mb-2">Resolved Faults – Age Analysis</div>
-            <canvas id="chartResolvedAge"></canvas>
+          <div class="col-lg-6">
+            <div class="cc-chart-card">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="fw-semibold">Resolved Faults – Age Analysis</div>
+                <button class="btn btn-sm btn-outline-secondary rounded-pill" data-bs-toggle="tooltip" title="View details">
+                  <i class="fas fa-expand"></i>
+                </button>
+              </div>
+              <canvas id="chartResolvedAge"></canvas>
+            </div>
           </div>
-        </div>
-        <div class="col-lg-6">
-          <div class="p-3 border rounded h-100 cc-chart-card">
-            <div class="fw-semibold mb-2">Outstanding Faults – Age Analysis</div>
-            <canvas id="chartOutstandingAge"></canvas>
+          <div class="col-lg-6">
+            <div class="cc-chart-card">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="fw-semibold">Outstanding Faults – Age Analysis</div>
+                <button class="btn btn-sm btn-outline-secondary rounded-pill" data-bs-toggle="tooltip" title="View details">
+                  <i class="fas fa-expand"></i>
+                </button>
+              </div>
+              <canvas id="chartOutstandingAge"></canvas>
+            </div>
           </div>
         </div>
       </div>

@@ -137,4 +137,96 @@
       resetBtn.addEventListener('click', function(){ window.location.href = form.getAttribute('action'); });
     }
   }
+
+  // Modern interactive features
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add loading animations to KPI cards
+    const kpiCards = document.querySelectorAll('.cc-kpi');
+    kpiCards.forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-5px)';
+        this.style.boxShadow = '0 20px 40px rgba(16, 24, 40, 0.2)';
+      });
+      card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 8px 24px rgba(16, 24, 40, 0.1)';
+      });
+    });
+
+    // Add chart card interactions
+    const chartCards = document.querySelectorAll('.cc-chart-card');
+    chartCards.forEach(card => {
+      const expandBtn = card.querySelector('button');
+      if (expandBtn) {
+        expandBtn.addEventListener('click', function() {
+          card.classList.toggle('cc-chart-card--expanded');
+          const icon = this.querySelector('i');
+          if (card.classList.contains('cc-chart-card--expanded')) {
+            icon.className = 'fas fa-compress';
+            this.setAttribute('title', 'Collapse view');
+          } else {
+            icon.className = 'fas fa-expand';
+            this.setAttribute('title', 'Expand view');
+          }
+        });
+      }
+    });
+
+    // Add real-time data refresh simulation
+    const liveBadge = document.querySelector('.badge.bg-primary-subtle');
+    if (liveBadge) {
+      setInterval(() => {
+        liveBadge.classList.toggle('pulse');
+      }, 2000);
+    }
+
+    // Add tooltip initialization
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Add smooth scrolling for better UX
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+  });
+
+  // Performance metrics animation
+  function animateValue(element, start, end, duration, suffix, decimals) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const val = progress * (end - start) + start;
+      const text = decimals ? val.toFixed(decimals) : formatNumber(Math.round(val));
+      element.textContent = suffix ? (text + suffix) : text;
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+    window.requestAnimationFrame(step);
+  }
+
+  // Initialize animations when page loads
+  window.addEventListener('load', function() {
+    const kpiValues = document.querySelectorAll('.cc-kpi-value');
+    kpiValues.forEach(function(valueEl){
+      const raw = (valueEl.textContent || '').trim();
+      const isNumeric = /^[\d,]+(\.[\d]+)?%?$/.test(raw);
+      if (!isNumeric) return;
+      const suffix = raw.endsWith('%') ? '%' : '';
+      const decimals = (raw.indexOf('.') >= 0) ? (raw.split('.')[1].replace(/[^\d]/g,'').length) : 0;
+      const endNum = parseFloat(raw.replace(/[,%]/g,''));
+      valueEl.textContent = suffix ? ('0' + suffix) : '0';
+      setTimeout(function(){
+        animateValue(valueEl, 0, endNum, 2000, suffix, decimals);
+      }, 500);
+    });
+  });
 })();
