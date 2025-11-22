@@ -104,6 +104,8 @@ class CallCentreController extends Controller
         $weeklyResolved = [];
         $weeklyOutstanding = [];
         $weeklyResolved3DaysPerc = [];
+        $weeklyOpening = [];
+        $weeklyTotals = [];
         $weeklyShiftMorning = [];
         $weeklyShiftAfternoon = [];
         $weeklyShiftNight = [];
@@ -114,12 +116,26 @@ class CallCentreController extends Controller
                 $weeklyResolved[] = 0;
                 $weeklyOutstanding[] = 0;
                 $weeklyResolved3DaysPerc[] = 0;
+                $weeklyOpening[] = 0;
+                $weeklyTotals[] = 0;
                 $weeklyShiftMorning[] = 0;
                 $weeklyShiftAfternoon[] = 0;
                 $weeklyShiftNight[] = 0;
                 continue;
             }
             $weEff = $we->gt($todayEnd) ? $todayEnd->copy() : $we->copy();
+            $resolvedUpToStartIds = DB::table('fault_stage_logs')
+                ->where('status_id', $clearedStatusId)
+                ->where('started_at','<=',$ws)
+                ->select('fault_id', DB::raw('MAX(started_at) as ra'))
+                ->groupBy('fault_id')
+                ->pluck('fault_id')
+                ->unique()
+                ->values();
+            $openingCount = Fault::where('created_at','>=',$periodStart)
+                ->where('created_at','<',$ws)
+                ->whereNotIn('id', $resolvedUpToStartIds)
+                ->count();
             $weeklyNewFaults[] = Fault::whereBetween('created_at', [$ws,$weEff])->count();
             $latestInWeek = DB::table('fault_stage_logs')
                 ->where('status_id', $clearedStatusId)
@@ -137,6 +153,8 @@ class CallCentreController extends Controller
                 ->unique()
                 ->values();
             $weeklyOutstanding[] = Fault::whereBetween('created_at', [$periodStart, $weEff])->whereNotIn('id', $resolvedUpToDateIds)->count();
+            $weeklyOpening[] = $openingCount;
+            $weeklyTotals[] = $openingCount + end($weeklyNewFaults);
 
             $ids = $latestInWeek->pluck('fault_id')->unique()->values();
             $createdMap = Fault::whereIn('id', $ids)->pluck('created_at','id');
@@ -326,6 +344,8 @@ class CallCentreController extends Controller
                 'weeklyShiftMorning' => $weeklyShiftMorning,
                 'weeklyShiftAfternoon' => $weeklyShiftAfternoon,
                 'weeklyShiftNight' => $weeklyShiftNight,
+                'weeklyOpening' => $weeklyOpening,
+                'weeklyTotals' => $weeklyTotals,
                 'weeklyRangeStarts' => $weeklyRangeStarts,
                 'weeklyRangeEnds' => $weeklyRangeEnds,
         ]);

@@ -223,6 +223,48 @@ Call Centre Analytics Dashboard
           </div>
         </div>
       </div>
+      <div class="px-4 pb-4">
+        <div class="row g-4">
+          <div class="col-12">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                <div class="fw-semibold">Weekly Analysis</div>
+                <div class="text-muted small">Detailed weekly balances and performance</div>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Week</th>
+                        <th>Opening Balance</th>
+                        <th>New Faults Received</th>
+                        <th>Total Faults</th>
+                        <th>Resolved Faults</th>
+                        <th>Closing Balance – Pending Faults</th>
+                        <th>Resolved Within 3 Days (72hrs)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @foreach(($weeklyLabels ?? []) as $i => $wk)
+                        <tr>
+                          <td>{{ $wk }}</td>
+                          <td>{{ number_format(($weeklyOpening[$i] ?? 0)) }}</td>
+                          <td>{{ number_format(($weeklyNewFaults[$i] ?? 0)) }}</td>
+                          <td>{{ number_format(($weeklyTotals[$i] ?? (($weeklyOpening[$i] ?? 0) + ($weeklyNewFaults[$i] ?? 0)))) }}</td>
+                          <td>{{ number_format(($weeklyResolved[$i] ?? 0)) }}</td>
+                          <td>{{ number_format(($weeklyOutstanding[$i] ?? 0)) }}</td>
+                          <td>{{ number_format(($weeklyResolved3DaysPerc[$i] ?? 0), 0) }}%</td>
+                        </tr>
+                      @endforeach
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
