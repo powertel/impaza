@@ -359,6 +359,8 @@
     overflow: hidden;
     transition: all 0.3s ease;
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 .chart-card::before {
     content: '';
@@ -429,18 +431,17 @@
 
 /* General chart body constraints */
 .chart-body {
-    padding: 1.5rem;
+    padding: 1rem;
     position: relative;
-    height: 300px; /* Fixed height to prevent expansion */
-    overflow: hidden; /* Prevent any overflow */
     display: flex;
     flex-direction: column;
+    flex: 1;
 }
 
 .chart-body canvas {
     flex: 1;
-    max-height: 250px !important; /* Ensure canvas doesn't exceed container */
     width: 100% !important;
+    height: 100% !important;
 }
 
 .chart-stats {
