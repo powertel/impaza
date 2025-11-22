@@ -28,7 +28,7 @@ Call Centre Analytics Dashboard
           </button>
         </div>
       </div>
-    </div>
+      </div>
     
     <div class="card-body p-0">
       <!-- Filter Section -->
@@ -207,6 +207,22 @@ Call Centre Analytics Dashboard
           </div>
         </div>
       </div>
+      <!-- Traffic By Shift -->
+      <div class="px-4 pb-4">
+        <div class="row g-4">
+          <div class="col-12">
+            <div class="cc-chart-card">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="fw-semibold">Traffic By Shift (Logged Faults)</div>
+                <button class="btn btn-sm btn-outline-secondary rounded-pill" data-bs-toggle="tooltip" title="View details">
+                  <i class="fas fa-expand"></i>
+                </button>
+              </div>
+              <canvas id="chartShiftTraffic"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -226,6 +242,14 @@ Call Centre Analytics Dashboard
     dailyResolved: @json($dailyResolved ?? []),
     dailyOutstanding: @json($dailyOutstanding ?? []),
     dailyResolved3DaysPerc: @json($dailyResolved3DaysPerc ?? []),
+    dailyShiftMorning: @json($dailyShiftMorning ?? []),
+    dailyShiftAfternoon: @json($dailyShiftAfternoon ?? []),
+    dailyShiftNight: @json($dailyShiftNight ?? []),
+    weeklyShiftMorning: @json($weeklyShiftMorning ?? []),
+    weeklyShiftAfternoon: @json($weeklyShiftAfternoon ?? []),
+    weeklyShiftNight: @json($weeklyShiftNight ?? []),
+    weeklyRangeStarts: @json($weeklyRangeStarts ?? []),
+    weeklyRangeEnds: @json($weeklyRangeEnds ?? []),
   };
 </script>
 <script src="{{ asset('js/call_centre.js') }}"></script>

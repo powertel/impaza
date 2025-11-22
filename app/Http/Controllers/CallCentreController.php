@@ -84,6 +84,8 @@ class CallCentreController extends Controller
 
         $weeklyLabels = [];
         $weeklyRanges = [];
+        $weeklyRangeStarts = [];
+        $weeklyRangeEnds = [];
         $cursor = $periodStart->copy()->startOfWeek(Carbon::MONDAY);
         $endBound = $periodEnd->copy()->endOfWeek(Carbon::SUNDAY);
         $weekIndex = 1;
@@ -91,6 +93,8 @@ class CallCentreController extends Controller
             $ws = $cursor->copy()->startOfWeek(Carbon::MONDAY);
             $we = $cursor->copy()->endOfWeek(Carbon::SUNDAY);
             $weeklyRanges[] = [$ws, $we];
+            $weeklyRangeStarts[] = $ws->copy()->format('Y-m-d');
+            $weeklyRangeEnds[] = $we->copy()->format('Y-m-d');
             $weeklyLabels[] = 'Week ' . $weekIndex;
             $cursor->addWeek();
             $weekIndex++;
@@ -100,6 +104,9 @@ class CallCentreController extends Controller
         $weeklyResolved = [];
         $weeklyOutstanding = [];
         $weeklyResolved3DaysPerc = [];
+        $weeklyShiftMorning = [];
+        $weeklyShiftAfternoon = [];
+        $weeklyShiftNight = [];
         $todayEnd = Carbon::now()->endOfDay();
         foreach ($weeklyRanges as [$ws,$we]) {
             if ($ws->gt($todayEnd)) {
@@ -107,6 +114,9 @@ class CallCentreController extends Controller
                 $weeklyResolved[] = 0;
                 $weeklyOutstanding[] = 0;
                 $weeklyResolved3DaysPerc[] = 0;
+                $weeklyShiftMorning[] = 0;
+                $weeklyShiftAfternoon[] = 0;
+                $weeklyShiftNight[] = 0;
                 continue;
             }
             $weEff = $we->gt($todayEnd) ? $todayEnd->copy() : $we->copy();
@@ -139,6 +149,24 @@ class CallCentreController extends Controller
                 if ($mins <= 4320) $w3++;
             }
             $weeklyResolved3DaysPerc[] = $tot > 0 ? round(($w3 / $tot) * 100, 2) : 0;
+
+            $morningCount = Fault::whereBetween('created_at', [$ws,$weEff])
+                ->whereTime('created_at', '>=', '06:00')
+                ->whereTime('created_at', '<=', '13:59')
+                ->count();
+            $afternoonCount = Fault::whereBetween('created_at', [$ws,$weEff])
+                ->whereTime('created_at', '>=', '14:00')
+                ->whereTime('created_at', '<=', '21:59')
+                ->count();
+            $nightCount = Fault::whereBetween('created_at', [$ws,$weEff])
+                ->where(function($q){
+                    $q->whereTime('created_at', '>=', '22:00')
+                      ->orWhereTime('created_at', '<=', '05:59');
+                })
+                ->count();
+            $weeklyShiftMorning[] = $morningCount;
+            $weeklyShiftAfternoon[] = $afternoonCount;
+            $weeklyShiftNight[] = $nightCount;
         }
 
         $latestMap = $latestClearedInPeriod->keyBy('fault_id');
@@ -215,6 +243,9 @@ class CallCentreController extends Controller
         $dailyResolved = [];
         $dailyOutstanding = [];
         $dailyResolved3DaysPerc = [];
+        $dailyShiftMorning = [];
+        $dailyShiftAfternoon = [];
+        $dailyShiftNight = [];
         if ($filter === 'weekly') {
             $cur = $periodStart->copy();
             $endBound = $periodEnd->copy();
@@ -241,6 +272,23 @@ class CallCentreController extends Controller
                     if ($minsDiff <= 4320) $w3Day++;
                 }
                 $dailyResolved3DaysPerc[] = $totDay > 0 ? round(($w3Day / $totDay) * 100, 2) : 0;
+                $morningDay = Fault::whereBetween('created_at', [$dayStart,$dayEnd])
+                    ->whereTime('created_at','>=','06:00')
+                    ->whereTime('created_at','<=','13:59')
+                    ->count();
+                $afternoonDay = Fault::whereBetween('created_at', [$dayStart,$dayEnd])
+                    ->whereTime('created_at','>=','14:00')
+                    ->whereTime('created_at','<=','21:59')
+                    ->count();
+                $nightDay = Fault::whereBetween('created_at', [$dayStart,$dayEnd])
+                    ->where(function($q){
+                        $q->whereTime('created_at','>=','22:00')
+                          ->orWhereTime('created_at','<=','05:59');
+                    })
+                    ->count();
+                $dailyShiftMorning[] = $morningDay;
+                $dailyShiftAfternoon[] = $afternoonDay;
+                $dailyShiftNight[] = $nightDay;
                 $cur->addDay();
             }
         }
@@ -265,13 +313,21 @@ class CallCentreController extends Controller
             'outstandingTotal' => $outstandingTotal,
             'outstandingBins' => $outBins,
             'over3DaysCount' => $over3DaysCount,
-            'over3DaysPercent' => $over3DaysPercent,
-            'periodLabelText' => $periodLabelText,
-            'dailyLabels' => $dailyLabels,
-            'dailyNewFaults' => $dailyNewFaults,
-            'dailyResolved' => $dailyResolved,
-            'dailyOutstanding' => $dailyOutstanding,
-            'dailyResolved3DaysPerc' => $dailyResolved3DaysPerc,
+                'over3DaysPercent' => $over3DaysPercent,
+                'periodLabelText' => $periodLabelText,
+                'dailyLabels' => $dailyLabels,
+                'dailyNewFaults' => $dailyNewFaults,
+                'dailyResolved' => $dailyResolved,
+                'dailyOutstanding' => $dailyOutstanding,
+                'dailyResolved3DaysPerc' => $dailyResolved3DaysPerc,
+                'dailyShiftMorning' => $dailyShiftMorning,
+                'dailyShiftAfternoon' => $dailyShiftAfternoon,
+                'dailyShiftNight' => $dailyShiftNight,
+                'weeklyShiftMorning' => $weeklyShiftMorning,
+                'weeklyShiftAfternoon' => $weeklyShiftAfternoon,
+                'weeklyShiftNight' => $weeklyShiftNight,
+                'weeklyRangeStarts' => $weeklyRangeStarts,
+                'weeklyRangeEnds' => $weeklyRangeEnds,
         ]);
     }
 }
