@@ -263,6 +263,12 @@
                 <p>Reports</p>
               </a>
             </li>
+            <li class="nav-item">
+              <a href="{{ route('call_centre.reports') }}" class="nav-link {{ request()->routeIs('call_centre.reports') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-headset"></i>
+                <p>Call Centre</p>
+              </a>
+            </li>
             @endcan
 
             @canany(['user-list','role-list','permissions'])

@@ -126,6 +126,8 @@ Route::group(['middleware' => ['auth']], function() {
     Route::put('auto/{id}/auto', [AssessmentController::class,'assign'])->name('auto');
     Route::get('stores/{id}', [StoreController::class,'findstores'])->name('stores');
 
+    Route::get('call-centre/reports', [\App\Http\Controllers\CallCentreController::class, 'index'])->name('call_centre.reports');
+
     // Add change password routes
     Route::get('/password/change', [UserController::class,'getPassword'])->name('user.password.change');
     Route::post('/password/change', [UserController::class,'postPassword'])->name('user.password.update');
