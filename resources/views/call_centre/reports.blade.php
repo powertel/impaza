@@ -251,22 +251,22 @@ Call Centre Analytics Dashboard
                         <tr>
                           <td><div class="fw-semibold text-gray-800">{{ $wk }}</div></td>
                           <td>
-                            <span class="badge rounded-pill bg-primary-subtle text-primary">{{ number_format(($weeklyOpening[$i] ?? 0)) }}</span>
+                            <span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($weeklyOpening[$i] ?? 0)) }}</span>
                           </td>
                           <td>
-                            <span class="badge rounded-pill bg-primary-subtle text-primary">{{ number_format(($weeklyNewFaults[$i] ?? 0)) }}</span>
+                            <span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($weeklyNewFaults[$i] ?? 0)) }}</span>
                           </td>
                           <td>
-                            <span class="badge rounded-pill bg-primary-subtle text-primary">{{ number_format(($weeklyTotals[$i] ?? (($weeklyOpening[$i] ?? 0) + ($weeklyNewFaults[$i] ?? 0)))) }}</span>
+                            <span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($weeklyTotals[$i] ?? (($weeklyOpening[$i] ?? 0) + ($weeklyNewFaults[$i] ?? 0)))) }}</span>
                           </td>
                           <td>
-                            <span class="badge rounded-pill bg-primary-subtle text-primary">{{ number_format(($weeklyResolved[$i] ?? 0)) }}</span>
+                            <span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($weeklyResolved[$i] ?? 0)) }}</span>
                           </td>
                           <td>
-                            <span class="badge rounded-pill bg-primary-subtle text-primary">{{ number_format(($weeklyOutstanding[$i] ?? 0)) }}</span>
+                            <span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($weeklyOutstanding[$i] ?? 0)) }}</span>
                           </td>
                           <td>
-                            <span class="badge rounded-pill bg-primary-subtle text-primary">{{ $perc }}%</span>
+                            <span class="badge rounded-pill bg-warning-subtle text-dark">{{ $perc }}%</span>
                           </td>
                         </tr>
                       @endforeach
