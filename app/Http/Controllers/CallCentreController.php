@@ -47,17 +47,17 @@ class CallCentreController extends Controller
             $start = $request->input('start_date');
             $end = $request->input('end_date');
             if ($start && !$end) {
-                $periodStart = Carbon::parse($start)->startOfDay();
-                $periodEnd = Carbon::parse($start)->copy()->addDays(6)->endOfDay();
+                $periodStart = Carbon::parse($start)->startOfWeek(Carbon::MONDAY);
+                $periodEnd = Carbon::parse($start)->endOfWeek(Carbon::SUNDAY);
             } elseif (!$start && $end) {
-                $periodEnd = Carbon::parse($end)->endOfDay();
-                $periodStart = Carbon::parse($end)->copy()->subDays(6)->startOfDay();
+                $periodStart = Carbon::parse($end)->startOfWeek(Carbon::MONDAY);
+                $periodEnd = Carbon::parse($end)->endOfWeek(Carbon::SUNDAY);
             } elseif ($start && $end) {
                 $periodStart = Carbon::parse($start)->startOfDay();
                 $periodEnd = Carbon::parse($end)->endOfDay();
             } else {
-                $periodStart = $now->copy()->startOfWeek(Carbon::SUNDAY);
-                $periodEnd = $now->copy()->endOfWeek(Carbon::SATURDAY);
+                $periodStart = $now->copy()->startOfWeek(Carbon::MONDAY);
+                $periodEnd = $now->copy()->endOfWeek(Carbon::SUNDAY);
             }
         } elseif ($filter === 'quarter') {
             $q = max(1, min(4, $quarter));
@@ -83,47 +83,17 @@ class CallCentreController extends Controller
         $resolvedTotal = $latestClearedInPeriod->count();
 
         $weeklyLabels = [];
-        $weeks = [];
         $weeklyRanges = [];
-        $s = $periodStart->copy()->startOfDay();
-        $e = $s->copy()->addDays((6 - $s->dayOfWeek + 7) % 7)->endOfDay();
-        if ($e->gt($periodEnd)) { $e = $periodEnd->copy()->endOfDay(); }
-        $weeks[] = [$s->copy(), $e->copy()];
-        $s = $e->copy()->addDay()->startOfDay();
-        while ($s->lte($periodEnd)) {
-            $e = $s->copy()->addDays(6)->endOfDay();
-            if ($e->gt($periodEnd)) { $e = $periodEnd->copy()->endOfDay(); }
-            $weeks[] = [$s->copy(), $e->copy()];
-            $s = $e->copy()->addDay()->startOfDay();
-        }
-        if ($filter === 'month') {
-            $weeklyLabels = ['Week 1','Week 2','Week 3','Week 4'];
-            $weeklyRanges = [];
-            $monthStart = Carbon::create($selectedYear, $selectedMonth, 1)->startOfDay();
-            $offset = (Carbon::SUNDAY - $monthStart->dayOfWeek + 7) % 7;
-            $firstSunday = $monthStart->copy()->addDays($offset)->startOfDay();
-            for ($i = 0; $i < 4; $i++) {
-                $ws = $firstSunday->copy()->addDays($i * 7)->startOfDay();
-                $we = $ws->copy()->addDays(6)->endOfDay();
-                $weeklyRanges[] = [$ws, $we];
-            }
-        } else {
-            $weeklyLabels = ['Week 1','Week 2','Week 3','Week 4'];
-            $totalWeeks = count($weeks);
-            $base = intdiv($totalWeeks, 4);
-            $rem = $totalWeeks % 4;
-            $idx = 0;
-            for ($i = 0; $i < 4; $i++) {
-                $take = $base + ($i < $rem ? 1 : 0);
-                if ($take > 0) {
-                    $ws = $weeks[$idx][0];
-                    $we = $weeks[$idx + $take - 1][1];
-                    $weeklyRanges[] = [$ws, $we];
-                    $idx += $take;
-                } else {
-                    $weeklyRanges[] = [$periodEnd->copy()->endOfDay(), $periodEnd->copy()->endOfDay()];
-                }
-            }
+        $cursor = $periodStart->copy()->startOfWeek(Carbon::MONDAY);
+        $endBound = $periodEnd->copy()->endOfWeek(Carbon::SUNDAY);
+        $weekIndex = 1;
+        while ($cursor->lte($endBound)) {
+            $ws = $cursor->copy()->startOfWeek(Carbon::MONDAY);
+            $we = $cursor->copy()->endOfWeek(Carbon::SUNDAY);
+            $weeklyRanges[] = [$ws, $we];
+            $weeklyLabels[] = 'Week ' . $weekIndex;
+            $cursor->addWeek();
+            $weekIndex++;
         }
 
         $weeklyNewFaults = [];
