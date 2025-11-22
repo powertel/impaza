@@ -21,7 +21,9 @@ class CallCentreController extends Controller
             ->toArray();
 
         $now = Carbon::now();
-        $selectedYear = (int) ($request->input('year', $now->year));
+        $yearInput = $request->input('year', $now->year);
+        $isAllYears = strtolower((string)$yearInput) === 'all';
+        $selectedYear = $isAllYears ? null : (int) $yearInput;
         $selectedMonth = (int) ($request->input('month', $now->month));
         $quarter = (int) ($request->input('quarter', 1));
 
@@ -32,13 +34,31 @@ class CallCentreController extends Controller
             $periodStart = Carbon::create($selectedYear, $selectedMonth, 1)->startOfMonth();
             $periodEnd = Carbon::create($selectedYear, $selectedMonth, 1)->endOfMonth();
         } elseif ($filter === 'year') {
-            $periodStart = Carbon::create($selectedYear, 1, 1)->startOfYear();
-            $periodEnd = Carbon::create($selectedYear, 12, 31)->endOfYear();
+            if ($isAllYears && !empty($availableYears)) {
+                $minYear = min($availableYears);
+                $maxYear = max($availableYears);
+                $periodStart = Carbon::create($minYear, 1, 1)->startOfYear();
+                $periodEnd = Carbon::create($maxYear, 12, 31)->endOfYear();
+            } else {
+                $periodStart = Carbon::create($selectedYear ?? $now->year, 1, 1)->startOfYear();
+                $periodEnd = Carbon::create($selectedYear ?? $now->year, 12, 31)->endOfYear();
+            }
         } elseif ($filter === 'weekly') {
             $start = $request->input('start_date');
             $end = $request->input('end_date');
-            $periodStart = $start ? Carbon::parse($start)->startOfDay() : $now->copy()->startOfWeek();
-            $periodEnd = $end ? Carbon::parse($end)->endOfDay() : $now->copy()->endOfWeek();
+            if ($start && !$end) {
+                $periodStart = Carbon::parse($start)->startOfWeek(Carbon::MONDAY);
+                $periodEnd = Carbon::parse($start)->endOfWeek(Carbon::SUNDAY);
+            } elseif (!$start && $end) {
+                $periodStart = Carbon::parse($end)->startOfWeek(Carbon::MONDAY);
+                $periodEnd = Carbon::parse($end)->endOfWeek(Carbon::SUNDAY);
+            } elseif ($start && $end) {
+                $periodStart = Carbon::parse($start)->startOfDay();
+                $periodEnd = Carbon::parse($end)->endOfDay();
+            } else {
+                $periodStart = $now->copy()->startOfWeek(Carbon::MONDAY);
+                $periodEnd = $now->copy()->endOfWeek(Carbon::SUNDAY);
+            }
         } elseif ($filter === 'quarter') {
             $q = max(1, min(4, $quarter));
             $qStartMonth = [1 => 1, 2 => 4, 3 => 7, 4 => 10][$q];
@@ -48,7 +68,7 @@ class CallCentreController extends Controller
 
         $periodLabelText = 'Period total';
         if ($filter === 'month') $periodLabelText = 'Month total';
-        elseif ($filter === 'year') $periodLabelText = 'Year total';
+        elseif ($filter === 'year') $periodLabelText = $isAllYears ? 'All years total' : 'Year total';
         elseif ($filter === 'quarter') $periodLabelText = 'Quarter total';
         elseif ($filter === 'weekly') $periodLabelText = 'Week total';
 
@@ -62,47 +82,51 @@ class CallCentreController extends Controller
             ->get();
         $resolvedTotal = $latestClearedInPeriod->count();
 
-        $weeklyLabels = ['Week 1','Week 2','Week 3','Week 4'];
+        $weeklyLabels = [];
         $weeklyRanges = [];
-        if ($filter === 'month') {
-            $w1s = $periodStart->copy()->startOfDay();
-            $w1e = $periodStart->copy()->day(7)->endOfDay();
-            $w2s = $periodStart->copy()->day(8)->startOfDay();
-            $w2e = $periodStart->copy()->day(14)->endOfDay();
-            $w3s = $periodStart->copy()->day(15)->startOfDay();
-            $w3e = $periodStart->copy()->day(21)->endOfDay();
-            $w4s = $periodStart->copy()->day(22)->startOfDay();
-            $w4e = $periodEnd->copy()->endOfDay();
-            $weeklyRanges = [[$w1s,$w1e],[$w2s,$w2e],[$w3s,$w3e],[$w4s,$w4e]];
-        } else {
-            $len = $periodStart->diffInDays($periodEnd) + 1;
-            $chunk = (int) ceil($len / 4);
-            $s = $periodStart->copy()->startOfDay();
-            for ($i=0; $i<4; $i++) { $e = $s->copy()->addDays($chunk - 1)->endOfDay(); if ($e->gt($periodEnd)) $e = $periodEnd->copy()->endOfDay(); $weeklyRanges[] = [$s->copy(), $e]; $s = $e->copy()->addDay()->startOfDay(); }
+        $cursor = $periodStart->copy()->startOfWeek(Carbon::MONDAY);
+        $endBound = $periodEnd->copy()->endOfWeek(Carbon::SUNDAY);
+        $weekIndex = 1;
+        while ($cursor->lte($endBound)) {
+            $ws = $cursor->copy()->startOfWeek(Carbon::MONDAY);
+            $we = $cursor->copy()->endOfWeek(Carbon::SUNDAY);
+            $weeklyRanges[] = [$ws, $we];
+            $weeklyLabels[] = 'Week ' . $weekIndex;
+            $cursor->addWeek();
+            $weekIndex++;
         }
 
         $weeklyNewFaults = [];
         $weeklyResolved = [];
         $weeklyOutstanding = [];
         $weeklyResolved3DaysPerc = [];
+        $todayEnd = Carbon::now()->endOfDay();
         foreach ($weeklyRanges as [$ws,$we]) {
-            $weeklyNewFaults[] = Fault::whereBetween('created_at', [$ws,$we])->count();
+            if ($ws->gt($todayEnd)) {
+                $weeklyNewFaults[] = 0;
+                $weeklyResolved[] = 0;
+                $weeklyOutstanding[] = 0;
+                $weeklyResolved3DaysPerc[] = 0;
+                continue;
+            }
+            $weEff = $we->gt($todayEnd) ? $todayEnd->copy() : $we->copy();
+            $weeklyNewFaults[] = Fault::whereBetween('created_at', [$ws,$weEff])->count();
             $latestInWeek = DB::table('fault_stage_logs')
                 ->where('status_id', $clearedStatusId)
-                ->whereBetween('started_at', [$ws,$we])
+                ->whereBetween('started_at', [$ws,$weEff])
                 ->select('fault_id', DB::raw('MAX(started_at) as resolved_at'))
                 ->groupBy('fault_id')
                 ->get();
             $weeklyResolved[] = $latestInWeek->count();
             $resolvedUpToDateIds = DB::table('fault_stage_logs')
                 ->where('status_id', $clearedStatusId)
-                ->where('started_at','<=',$we)
+                ->where('started_at','<=',$weEff)
                 ->select('fault_id', DB::raw('MAX(started_at) as ra'))
                 ->groupBy('fault_id')
                 ->pluck('fault_id')
                 ->unique()
                 ->values();
-            $weeklyOutstanding[] = Fault::whereBetween('created_at', [$periodStart, $we])->whereNotIn('id', $resolvedUpToDateIds)->count();
+            $weeklyOutstanding[] = Fault::whereBetween('created_at', [$periodStart, $weEff])->whereNotIn('id', $resolvedUpToDateIds)->count();
 
             $ids = $latestInWeek->pluck('fault_id')->unique()->values();
             $createdMap = Fault::whereIn('id', $ids)->pluck('created_at','id');
@@ -111,8 +135,8 @@ class CallCentreController extends Controller
             foreach ($latestInWeek as $row) {
                 $created = $createdMap[$row->fault_id] ?? null;
                 if (!$created) continue;
-                $days = Carbon::parse($created)->diffInDays(Carbon::parse($row->resolved_at));
-                if ($days <= 3) $w3++;
+                $mins = Carbon::parse($created)->diffInMinutes(Carbon::parse($row->resolved_at));
+                if ($mins <= 4320) $w3++;
             }
             $weeklyResolved3DaysPerc[] = $tot > 0 ? round(($w3 / $tot) * 100, 2) : 0;
         }
@@ -134,16 +158,21 @@ class CallCentreController extends Controller
             '90_plus' => 0,
         ];
         foreach ($resolvedRows as $r) {
-            $days = Carbon::parse($r->created_at)->diffInDays(Carbon::parse($r->resolved_at));
-            if ($days <= 3) $bins['0_3']++;
-            elseif ($days <= 7) $bins['4_7']++;
-            elseif ($days <= 14) $bins['8_14']++;
-            elseif ($days <= 30) $bins['15_30']++;
-            elseif ($days <= 60) $bins['31_60']++;
-            elseif ($days <= 90) $bins['61_90']++;
+            $m = Carbon::parse($r->created_at)->diffInMinutes(Carbon::parse($r->resolved_at));
+            if ($m <= 4320) $bins['0_3']++;
+            elseif ($m <= 10080) $bins['4_7']++;
+            elseif ($m <= 20160) $bins['8_14']++;
+            elseif ($m <= 43200) $bins['15_30']++;
+            elseif ($m <= 86400) $bins['31_60']++;
+            elseif ($m <= 129600) $bins['61_90']++;
             else $bins['90_plus']++;
         }
-        $within3DaysPercent = $resolvedTotal > 0 ? round(($bins['0_3'] / $resolvedTotal) * 100, 2) : 0;
+        $w3Strict = 0;
+        foreach ($resolvedRows as $r) {
+            $mins = Carbon::parse($r->created_at)->diffInMinutes(Carbon::parse($r->resolved_at));
+            if ($mins <= 4320) $w3Strict++;
+        }
+        $within3DaysPercent = $resolvedTotal > 0 ? round(($w3Strict / $resolvedTotal) * 100, 2) : 0;
 
         $resolvedUpToEndIds = DB::table('fault_stage_logs')
             ->where('status_id', $clearedStatusId)
@@ -168,13 +197,13 @@ class CallCentreController extends Controller
         ];
         $over3DaysCount = 0;
         foreach ($outstandingFaults as $f) {
-            $days = Carbon::parse($f->created_at)->diffInDays($periodEnd);
-            if ($days <= 3) $outBins['0_3']++;
-            elseif ($days <= 7) { $outBins['4_7']++; $over3DaysCount++; }
-            elseif ($days <= 14) { $outBins['8_14']++; $over3DaysCount++; }
-            elseif ($days <= 30) { $outBins['15_30']++; $over3DaysCount++; }
-            elseif ($days <= 60) { $outBins['31_60']++; $over3DaysCount++; }
-            elseif ($days <= 90) { $outBins['61_90']++; $over3DaysCount++; }
+            $mOpen = Carbon::parse($f->created_at)->diffInMinutes($periodEnd);
+            if ($mOpen <= 4320) $outBins['0_3']++;
+            elseif ($mOpen <= 10080) { $outBins['4_7']++; $over3DaysCount++; }
+            elseif ($mOpen <= 20160) { $outBins['8_14']++; $over3DaysCount++; }
+            elseif ($mOpen <= 43200) { $outBins['15_30']++; $over3DaysCount++; }
+            elseif ($mOpen <= 86400) { $outBins['31_60']++; $over3DaysCount++; }
+            elseif ($mOpen <= 129600) { $outBins['61_90']++; $over3DaysCount++; }
             else { $outBins['90_plus']++; $over3DaysCount++; }
         }
         $over3DaysPercent = $outstandingTotal > 0 ? round(($over3DaysCount / $outstandingTotal) * 100, 2) : 0;
@@ -208,8 +237,8 @@ class CallCentreController extends Controller
                 foreach ($latestInDay as $r) {
                     $createdAt = $createdMapDay[$r->fault_id] ?? null;
                     if (!$createdAt) continue;
-                    $daysDiff = Carbon::parse($createdAt)->diffInDays(Carbon::parse($r->resolved_at));
-                    if ($daysDiff <= 3) $w3Day++;
+                    $minsDiff = Carbon::parse($createdAt)->diffInMinutes(Carbon::parse($r->resolved_at));
+                    if ($minsDiff <= 4320) $w3Day++;
                 }
                 $dailyResolved3DaysPerc[] = $totDay > 0 ? round(($w3Day / $totDay) * 100, 2) : 0;
                 $cur->addDay();

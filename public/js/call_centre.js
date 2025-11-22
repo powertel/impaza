@@ -3,7 +3,10 @@
   function has(id){ return !!el(id); }
   var data = window.callCentreData || {};
   var isWeekly = (data.filter === 'weekly');
-  var weekColors = ['#4e73df','#f6a13e','#9aa0a6','#36b9cc'];
+  var colors = { blue: '#004578', teal: '#00A9A5', sky: '#1A73E8', orange: '#F97316', red: '#EA4335', green: '#34A853', purple: '#8B5CF6', amber: '#FBBF24', light: '#D1D5DB' };
+  var weekPalette = [colors.blue, colors.teal, colors.sky, colors.orange, colors.purple, colors.green, colors.amber];
+  function makeColors(len, palette){ var arr=[]; for (var i=0;i<len;i++){ arr.push(palette[i % palette.length]); } return arr; }
+  function makeDayColors(labels){ return (labels||[]).map(function(l){ try { var d = new Date(String(l).trim() + 'T00:00:00'); var dow = d.getDay(); switch(dow){ case 1: return colors.blue; case 2: return colors.sky; case 3: return colors.teal; case 4: return colors.green; case 5: return colors.orange; case 6: return colors.red; case 0: default: return colors.purple; } } catch(_){ return colors.light; } }); }
   var ticksColor = '#6b7280';
   var gridColor = 'rgba(0,0,0,0.06)';
   function shade(hex, pct){
@@ -14,14 +17,42 @@
     b = Math.min(255, Math.max(0, b + Math.round(255*pct/100)));
     return '#' + r.toString(16).padStart(2,'0') + g.toString(16).padStart(2,'0') + b.toString(16).padStart(2,'0');
   }
+  function hexToRGBA(hex, alpha){
+    var c = hex.replace('#','');
+    var r = parseInt(c.substring(0,2),16), g = parseInt(c.substring(2,4),16), b = parseInt(c.substring(4,6),16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + (alpha || 1) + ')';
+  }
   function gradientColor(ctx, base){
     var ca = ctx.chart.chartArea; if (!ca) return base;
     var g = ctx.chart.ctx.createLinearGradient(0, ca.top, 0, ca.bottom);
-    g.addColorStop(0, shade(base, 0));
-    g.addColorStop(1, shade(base, -25));
+    g.addColorStop(0, hexToRGBA(base, 0.75));
+    g.addColorStop(1, hexToRGBA(base, 0.45));
     return g;
   }
-  function weekGradient(ctx){ var base = weekColors[ctx.dataIndex % weekColors.length]; return gradientColor(ctx, base); }
+  function weekGradient(ctx){ var baseList = weekPalette; var base = baseList[ctx.dataIndex % baseList.length]; return gradientColor(ctx, base); }
+  function weekSolid(ctx){ var baseList = weekPalette; var base = baseList[ctx.dataIndex % baseList.length]; return hexToRGBA(base, 1); }
+  function dayGradient(ctx){
+    var labels = (ctx.chart && ctx.chart.data && ctx.chart.data.labels) ? ctx.chart.data.labels : [];
+    var l = labels[ctx.dataIndex];
+    try {
+      var d = new Date(String(l).trim() + 'T00:00:00');
+      var dow = d.getDay();
+      var base;
+      switch(dow){ case 1: base = colors.blue; break; case 2: base = colors.sky; break; case 3: base = colors.teal; break; case 4: base = colors.green; break; case 5: base = colors.orange; break; case 6: base = colors.red; break; case 0: default: base = colors.purple; }
+      return gradientColor(ctx, base);
+    } catch(_){ return gradientColor(ctx, colors.light); }
+  }
+  function daySolid(ctx){
+    var labels = (ctx.chart && ctx.chart.data && ctx.chart.data.labels) ? ctx.chart.data.labels : [];
+    var l = labels[ctx.dataIndex];
+    try {
+      var d = new Date(String(l).trim() + 'T00:00:00');
+      var dow = d.getDay();
+      var base;
+      switch(dow){ case 1: base = colors.blue; break; case 2: base = colors.sky; break; case 3: base = colors.teal; break; case 4: base = colors.green; break; case 5: base = colors.orange; break; case 6: base = colors.red; break; case 0: default: base = colors.purple; }
+      return hexToRGBA(base, 1);
+    } catch(_){ return hexToRGBA(colors.light, 0.85); }
+  }
   var modernPlugin = {
     id: 'modernStyle',
     beforeDatasetsDraw: function(chart){ var ctx = chart.ctx; ctx.save(); ctx.shadowColor = 'rgba(16,24,40,.18)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 6; },
@@ -86,10 +117,10 @@
   function barPointColors(values){ return (values || []).map(function(_,i){ return weekColors[i % weekColors.length]; }); }
 
   if (has('chartWeeklyNewSingle')) {
-    new Chart(el('chartWeeklyNewSingle'), { type: 'bar', data: { labels: (isWeekly ? (data.dailyLabels || []) : (data.weeklyLabels || [])), datasets: [{ label: 'New Faults', data: (isWeekly ? (data.dailyNewFaults || []) : (data.weeklyNewFaults || [])), backgroundColor: weekGradient, borderRadius: 8 }] }, options: barOptions() });
+    new Chart(el('chartWeeklyNewSingle'), { type: 'bar', data: { labels: (isWeekly ? (data.dailyLabels || []) : (data.weeklyLabels || [])), datasets: [{ label: 'New Faults', data: (isWeekly ? (data.dailyNewFaults || []) : (data.weeklyNewFaults || [])), backgroundColor: (isWeekly ? dayGradient : weekGradient), borderColor: (isWeekly ? daySolid : weekSolid), borderWidth: 2, borderRadius: 8 }] }, options: barOptions() });
   }
   if (has('chartWeeklyResolvedSingle')) {
-    new Chart(el('chartWeeklyResolvedSingle'), { type: 'bar', data: { labels: (isWeekly ? (data.dailyLabels || []) : (data.weeklyLabels || [])), datasets: [{ label: 'Resolved Faults', data: (isWeekly ? (data.dailyResolved || []) : (data.weeklyResolved || [])), backgroundColor: weekGradient, borderRadius: 8 }] }, options: barOptions() });
+    new Chart(el('chartWeeklyResolvedSingle'), { type: 'bar', data: { labels: (isWeekly ? (data.dailyLabels || []) : (data.weeklyLabels || [])), datasets: [{ label: 'Resolved Faults', data: (isWeekly ? (data.dailyResolved || []) : (data.weeklyResolved || [])), backgroundColor: (isWeekly ? dayGradient : weekGradient), borderColor: (isWeekly ? daySolid : weekSolid), borderWidth: 2, borderRadius: 8 }] }, options: barOptions() });
   }
   if (has('chartWeeklyResolved3Days')) {
     new Chart(el('chartWeeklyResolved3Days'), {
@@ -99,7 +130,9 @@
         datasets: [{
           label: 'Resolved <= 3 days (%)',
           data: (isWeekly ? (data.dailyResolved3DaysPerc || []) : (data.weeklyResolved3DaysPerc || [])),
-          backgroundColor: weekGradient,
+          backgroundColor: (isWeekly ? dayGradient : weekGradient),
+          borderColor: (isWeekly ? daySolid : weekSolid),
+          borderWidth: 2,
           borderRadius: 8
         }]
       },
@@ -107,7 +140,7 @@
     });
   }
   if (has('chartWeeklyOutstandingSingle')) {
-    new Chart(el('chartWeeklyOutstandingSingle'), { type: 'bar', data: { labels: (isWeekly ? (data.dailyLabels || []) : (data.weeklyLabels || [])), datasets: [{ label: 'Outstanding Faults', data: (isWeekly ? (data.dailyOutstanding || []) : (data.weeklyOutstanding || [])), backgroundColor: weekGradient, borderRadius: 8 }] }, options: barOptions() });
+    new Chart(el('chartWeeklyOutstandingSingle'), { type: 'bar', data: { labels: (isWeekly ? (data.dailyLabels || []) : (data.weeklyLabels || [])), datasets: [{ label: 'Outstanding Faults', data: (isWeekly ? (data.dailyOutstanding || []) : (data.weeklyOutstanding || [])), backgroundColor: (isWeekly ? dayGradient : weekGradient), borderColor: (isWeekly ? daySolid : weekSolid), borderWidth: 2, borderRadius: 8 }] }, options: barOptions() });
   }
   function binsToVals(bins){
     var order = ['0_3','4_7','8_14','15_30','31_60','61_90','90_plus'];
@@ -125,10 +158,10 @@
     };
   }
   if (has('chartResolvedAge')) {
-    new Chart(el('chartResolvedAge'), { type: 'line', data: { labels: binLabels, datasets: [{ label: 'Resolved', data: binsToVals(data.resolvedBins), borderColor: '#4e73df', backgroundColor: 'rgba(78,115,223,0.12)', tension: 0.35, pointBackgroundColor: '#4e73df' }] }, options: lineOptions() });
+    new Chart(el('chartResolvedAge'), { type: 'line', data: { labels: binLabels, datasets: [{ label: 'Resolved', data: binsToVals(data.resolvedBins), borderColor: colors.sky, backgroundColor: 'rgba(26,115,232,0.12)', tension: 0.35, pointBackgroundColor: colors.sky }] }, options: lineOptions() });
   }
   if (has('chartOutstandingAge')) {
-    new Chart(el('chartOutstandingAge'), { type: 'line', data: { labels: binLabels, datasets: [{ label: 'Outstanding', data: binsToVals(data.outstandingBins), borderColor: '#1f88e5', backgroundColor: 'rgba(31,136,229,0.12)', tension: 0.35, pointBackgroundColor: '#1f88e5' }] }, options: lineOptions() });
+    new Chart(el('chartOutstandingAge'), { type: 'line', data: { labels: binLabels, datasets: [{ label: 'Outstanding', data: binsToVals(data.outstandingBins), borderColor: colors.blue, backgroundColor: 'rgba(0,69,120,0.12)', tension: 0.35, pointBackgroundColor: colors.blue }] }, options: lineOptions() });
   }
   var form = document.querySelector('form[action$="call-centre/reports"]');
   if (form) {
@@ -137,4 +170,96 @@
       resetBtn.addEventListener('click', function(){ window.location.href = form.getAttribute('action'); });
     }
   }
+
+  // Modern interactive features
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add loading animations to KPI cards
+    const kpiCards = document.querySelectorAll('.cc-kpi');
+    kpiCards.forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-5px)';
+        this.style.boxShadow = '0 20px 40px rgba(16, 24, 40, 0.2)';
+      });
+      card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 8px 24px rgba(16, 24, 40, 0.1)';
+      });
+    });
+
+    // Add chart card interactions
+    const chartCards = document.querySelectorAll('.cc-chart-card');
+    chartCards.forEach(card => {
+      const expandBtn = card.querySelector('button');
+      if (expandBtn) {
+        expandBtn.addEventListener('click', function() {
+          card.classList.toggle('cc-chart-card--expanded');
+          const icon = this.querySelector('i');
+          if (card.classList.contains('cc-chart-card--expanded')) {
+            icon.className = 'fas fa-compress';
+            this.setAttribute('title', 'Collapse view');
+          } else {
+            icon.className = 'fas fa-expand';
+            this.setAttribute('title', 'Expand view');
+          }
+        });
+      }
+    });
+
+    // Add real-time data refresh simulation
+    const liveBadge = document.querySelector('.badge.bg-primary-subtle');
+    if (liveBadge) {
+      setInterval(() => {
+        liveBadge.classList.toggle('pulse');
+      }, 2000);
+    }
+
+    // Add tooltip initialization
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Add smooth scrolling for better UX
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+  });
+
+  // Performance metrics animation
+  function animateValue(element, start, end, duration, suffix, decimals) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const val = progress * (end - start) + start;
+      const text = decimals ? val.toFixed(decimals) : formatNumber(Math.round(val));
+      element.textContent = suffix ? (text + suffix) : text;
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+    window.requestAnimationFrame(step);
+  }
+
+  // Initialize animations when page loads
+  window.addEventListener('load', function() {
+    const kpiValues = document.querySelectorAll('.cc-kpi-value');
+    kpiValues.forEach(function(valueEl){
+      const raw = (valueEl.textContent || '').trim();
+      const isNumeric = /^[\d,]+(\.[\d]+)?%?$/.test(raw);
+      if (!isNumeric) return;
+      const suffix = raw.endsWith('%') ? '%' : '';
+      const decimals = (raw.indexOf('.') >= 0) ? (raw.split('.')[1].replace(/[^\d]/g,'').length) : 0;
+      const endNum = parseFloat(raw.replace(/[,%]/g,''));
+      valueEl.textContent = suffix ? ('0' + suffix) : '0';
+      setTimeout(function(){
+        animateValue(valueEl, 0, endNum, 2000, suffix, decimals);
+      }, 500);
+    });
+  });
 })();
