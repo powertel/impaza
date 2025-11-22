@@ -33,13 +33,13 @@ Call Centre Analytics Dashboard
     <div class="card-body p-0">
       <!-- Filter Section -->
       <div class="bg-gray-50 px-4 py-3 border-bottom">
-        <form method="get" action="{{ route('call_centre.reports') }}" class="cc-filter-bar d-flex flex-wrap align-items-end gap-4">
+        <form method="get" action="{{ route('call_centre.reports') }}" class="cc-filter-bar d-flex flex-nowrap align-items-end justify-content-between gap-3">
           <div class="cc-field">
             <label class="form-label"><i class="fas fa-sliders-h me-1"></i>Time Period</label>
             <select name="filter" class="form-select form-select-sm" title="Select filter type">
               <option value="month" {{ ($filter ?? 'month') === 'month' ? 'selected' : '' }}>Monthly</option>
               <option value="year" {{ ($filter ?? '') === 'year' ? 'selected' : '' }}>Yearly</option>
-              <option value="weekly" {{ ($filter ?? '') === 'weekly' ? 'selected' : '' }}>Custom Range</option>
+              <option value="weekly" {{ ($filter ?? '') === 'weekly' ? 'selected' : '' }}>Weekly Range</option>
               <option value="quarter" {{ ($filter ?? '') === 'quarter' ? 'selected' : '' }}>Quarterly</option>
             </select>
           </div>
@@ -77,7 +77,7 @@ Call Centre Analytics Dashboard
             <label class="form-label"><i class="far fa-stop-circle me-1"></i>End Date</label>
             <input type="date" name="end_date" value="{{ request('end_date') }}" class="form-control form-control-sm" title="End date for weekly range" />
           </div>
-          <div class="cc-filter-actions">
+          <div class="cc-filter-actions ms-auto">
             <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4">
               <i class="fas fa-filter me-1"></i>
               Apply Filters

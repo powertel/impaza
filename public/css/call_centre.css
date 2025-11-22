@@ -41,28 +41,29 @@
 .cc-filter-bar {
   background: #fff;
   border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 20px;
-  margin-top: 12px;
-  margin-bottom: 16px;
-  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.08);
-  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-top: 8px;
+  margin-bottom: 12px;
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.07);
+  backdrop-filter: blur(8px);
+  overflow-x: auto;
 }
 .cc-field {
-  min-width: 200px;
+  min-width: 150px;
 }
 .cc-field .form-label {
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   color: #374151;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 .cc-field .form-select,
 .cc-field .form-control {
-  border-radius: 12px;
+  border-radius: 8px;
   border-color: #e5e7eb;
-  padding: 10px 14px;
-  font-size: 0.95rem;
+  padding: 6px 10px;
+  font-size: 0.85rem;
   transition: all 0.2s ease;
 }
 .cc-field .form-select:focus,
@@ -74,7 +75,16 @@
 .cc-filter-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+}
+
+.cc-filter-actions .btn {
+  white-space: nowrap;
+}
+
+.cc-filter-actions .btn.rounded-pill {
+  border-radius: 8px;
+  padding: 6px 10px;
 }
 
 .cc-stat {
