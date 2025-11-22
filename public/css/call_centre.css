@@ -312,3 +312,6 @@
     width: 100%;
   }
 }
+canvas#chartShiftTraffic {
+  height: 380px;
+}
