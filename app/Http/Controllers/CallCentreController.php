@@ -46,6 +46,12 @@ class CallCentreController extends Controller
             $periodEnd = Carbon::create($selectedYear, $qStartMonth + 2, 1)->endOfMonth();
         }
 
+        $periodLabelText = 'Period total';
+        if ($filter === 'month') $periodLabelText = 'Month total';
+        elseif ($filter === 'year') $periodLabelText = 'Year total';
+        elseif ($filter === 'quarter') $periodLabelText = 'Quarter total';
+        elseif ($filter === 'weekly') $periodLabelText = 'Week total';
+
         $newFaultsTotal = Fault::whereBetween('created_at', [$periodStart, $periodEnd])->count();
         $resolvedQuery = FaultAssignment::whereNotNull('resolved_at');
         $resolvedTotal = (clone $resolvedQuery)->whereBetween('resolved_at', [$periodStart, $periodEnd])->count();
@@ -152,7 +158,37 @@ class CallCentreController extends Controller
 
         $faultsInRange = Fault::whereBetween('created_at', [$periodStart, $periodEnd])->select('id','created_at')->get();
         $assignmentsInRange = FaultAssignment::whereBetween('resolved_at', [$periodStart, $periodEnd])->select('fault_id','resolved_at')->get();
-        // Daily series removed to focus on 4-week reporting
+        $dailyLabels = [];
+        $dailyNewFaults = [];
+        $dailyResolved = [];
+        $dailyOutstanding = [];
+        $dailyResolved3DaysPerc = [];
+        if ($filter === 'weekly') {
+            $cur = $periodStart->copy();
+            while ($cur->lte($periodEnd)) {
+                $ds = $cur->format('Y-m-d');
+                $dayStart = $cur->copy()->startOfDay();
+                $dayEnd = $cur->copy()->endOfDay();
+                $dailyLabels[] = $ds;
+                $dailyNewFaults[] = Fault::whereBetween('created_at', [$dayStart, $dayEnd])->count();
+                $dailyResolved[] = FaultAssignment::whereNotNull('resolved_at')->whereBetween('resolved_at', [$dayStart, $dayEnd])->count();
+                $resolvedIdsUpToDay = FaultAssignment::whereNotNull('resolved_at')->where('resolved_at','<=',$dayEnd)->pluck('fault_id')->unique()->values();
+                $dailyOutstanding[] = Fault::whereBetween('created_at', [$periodStart, $dayEnd])->whereNotIn('id', $resolvedIdsUpToDay)->count();
+                $rowsDay = FaultAssignment::join('faults','fault_assignments.fault_id','=','faults.id')
+                    ->whereNotNull('fault_assignments.resolved_at')
+                    ->whereBetween('fault_assignments.resolved_at', [$dayStart,$dayEnd])
+                    ->select('faults.created_at as created_at', 'fault_assignments.resolved_at as resolved_at')
+                    ->get();
+                $totDay = $rowsDay->count();
+                $w3Day = 0;
+                foreach ($rowsDay as $r) {
+                    $daysDiff = Carbon::parse($r->created_at)->diffInDays(Carbon::parse($r->resolved_at));
+                    if ($daysDiff <= 3) $w3Day++;
+                }
+                $dailyResolved3DaysPerc[] = $totDay > 0 ? round(($w3Day / $totDay) * 100, 2) : 0;
+                $cur->addDay();
+            }
+        }
 
         return view('call_centre.reports', [
             'filter' => $filter,
@@ -175,6 +211,12 @@ class CallCentreController extends Controller
             'outstandingBins' => $outBins,
             'over3DaysCount' => $over3DaysCount,
             'over3DaysPercent' => $over3DaysPercent,
+            'periodLabelText' => $periodLabelText,
+            'dailyLabels' => $dailyLabels,
+            'dailyNewFaults' => $dailyNewFaults,
+            'dailyResolved' => $dailyResolved,
+            'dailyOutstanding' => $dailyOutstanding,
+            'dailyResolved3DaysPerc' => $dailyResolved3DaysPerc,
         ]);
     }
 }
