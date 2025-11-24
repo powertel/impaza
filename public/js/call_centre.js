@@ -3,6 +3,7 @@
   function has(id){ return !!el(id); }
   var data = window.callCentreData || {};
   var isWeekly = (data.filter === 'weekly');
+  var isMonthly = (data.filter === 'year');
   var colors = { blue: '#004578', teal: '#00A9A5', sky: '#1A73E8', orange: '#F97316', red: '#EA4335', green: '#34A853', purple: '#8B5CF6', amber: '#FBBF24', light: '#D1D5DB' };
   var weekPalette = [colors.blue, colors.teal, colors.sky, colors.orange, colors.purple, colors.green, colors.amber];
   function makeColors(len, palette){ var arr=[]; for (var i=0;i<len;i++){ arr.push(palette[i % palette.length]); } return arr; }
@@ -98,6 +99,35 @@
   };
   if (typeof Chart !== 'undefined') { Chart.register(modernPlugin); }
   function formatNumber(n){ try { return new Intl.NumberFormat().format(n); } catch(e) { return String(n); } }
+  function monthName(idx){ return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][idx] || String(idx+1); }
+  function buildMonthlyLabels(rangeStarts){
+    var months = [];
+    (rangeStarts || []).forEach(function(s){
+      try { var d = new Date(String(s) + 'T00:00:00'); var m = d.getMonth(); var nm = monthName(m); if (months.indexOf(nm) < 0) months.push(nm); } catch(_){}
+    });
+    return months.length ? months : ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  }
+  function aggregateMonthly(rangeStarts, weeklyValues){
+    var months = buildMonthlyLabels(rangeStarts);
+    var map = {};
+    months.forEach(function(m){ map[m] = 0; });
+    (weeklyValues || []).forEach(function(v, i){
+      var s = (rangeStarts || [])[i];
+      try { var d = new Date(String(s) + 'T00:00:00'); var nm = monthName(d.getMonth()); map[nm] = (map[nm] || 0) + (v || 0); } catch(_){ }
+    });
+    return months.map(function(m){ return map[m] || 0; });
+  }
+  function aggregateMonthlyPercent(rangeStarts, weeklyResolved, weeklyPerc){
+    var months = buildMonthlyLabels(rangeStarts);
+    var sumResolved = {}; var sumWithin = {};
+    months.forEach(function(m){ sumResolved[m]=0; sumWithin[m]=0; });
+    (weeklyResolved || []).forEach(function(res, i){
+      var s = (rangeStarts || [])[i];
+      var p = (weeklyPerc || [])[i] || 0;
+      try { var d = new Date(String(s) + 'T00:00:00'); var nm = monthName(d.getMonth()); sumResolved[nm] = (sumResolved[nm] || 0) + (res || 0); sumWithin[nm] = (sumWithin[nm] || 0) + ((res || 0) * (p || 0) / 100); } catch(_){ }
+    });
+    return months.map(function(m){ var sr = sumResolved[m] || 0; var sw = sumWithin[m] || 0; return sr > 0 ? Math.round((sw * 100) / sr) : 0; });
+  }
   function barOptions(){
     return {
       responsive: true,
@@ -117,19 +147,23 @@
   function barPointColors(values){ return (values || []).map(function(_,i){ return weekColors[i % weekColors.length]; }); }
 
   if (has('chartWeeklyNewSingle')) {
-    new Chart(el('chartWeeklyNewSingle'), { type: 'bar', data: { labels: (isWeekly ? (data.dailyLabels || []) : (data.weeklyLabels || [])), datasets: [{ label: 'New Faults', data: (isWeekly ? (data.dailyNewFaults || []) : (data.weeklyNewFaults || [])), backgroundColor: (isWeekly ? dayGradient : weekGradient), borderColor: (isWeekly ? daySolid : weekSolid), borderWidth: 2, borderRadius: 8 }] }, options: barOptions() });
+    var lblsNew = isWeekly ? (data.dailyLabels || []) : (isMonthly ? buildMonthlyLabels(data.weeklyRangeStarts || []) : (data.weeklyLabels || []));
+    var valsNew = isWeekly ? (data.dailyNewFaults || []) : (isMonthly ? aggregateMonthly(data.weeklyRangeStarts || [], data.weeklyNewFaults || []) : (data.weeklyNewFaults || []));
+    new Chart(el('chartWeeklyNewSingle'), { type: 'bar', data: { labels: lblsNew, datasets: [{ label: 'New Faults', data: valsNew, backgroundColor: (isWeekly ? dayGradient : weekGradient), borderColor: (isWeekly ? daySolid : weekSolid), borderWidth: 2, borderRadius: 8 }] }, options: barOptions() });
   }
   if (has('chartWeeklyResolvedSingle')) {
-    new Chart(el('chartWeeklyResolvedSingle'), { type: 'bar', data: { labels: (isWeekly ? (data.dailyLabels || []) : (data.weeklyLabels || [])), datasets: [{ label: 'Resolved Faults', data: (isWeekly ? (data.dailyResolved || []) : (data.weeklyResolved || [])), backgroundColor: (isWeekly ? dayGradient : weekGradient), borderColor: (isWeekly ? daySolid : weekSolid), borderWidth: 2, borderRadius: 8 }] }, options: barOptions() });
+    var lblsRes = isWeekly ? (data.dailyLabels || []) : (isMonthly ? buildMonthlyLabels(data.weeklyRangeStarts || []) : (data.weeklyLabels || []));
+    var valsRes = isWeekly ? (data.dailyResolved || []) : (isMonthly ? aggregateMonthly(data.weeklyRangeStarts || [], data.weeklyResolved || []) : (data.weeklyResolved || []));
+    new Chart(el('chartWeeklyResolvedSingle'), { type: 'bar', data: { labels: lblsRes, datasets: [{ label: 'Resolved Faults', data: valsRes, backgroundColor: (isWeekly ? dayGradient : weekGradient), borderColor: (isWeekly ? daySolid : weekSolid), borderWidth: 2, borderRadius: 8 }] }, options: barOptions() });
   }
   if (has('chartWeeklyResolved3Days')) {
     new Chart(el('chartWeeklyResolved3Days'), {
       type: 'bar',
       data: {
-        labels: (isWeekly ? (data.dailyLabels || []) : (data.weeklyLabels || [])),
+        labels: (isWeekly ? (data.dailyLabels || []) : (isMonthly ? buildMonthlyLabels(data.weeklyRangeStarts || []) : (data.weeklyLabels || []))),
         datasets: [{
           label: 'Resolved <= 3 days (%)',
-          data: (isWeekly ? (data.dailyResolved3DaysPerc || []) : (data.weeklyResolved3DaysPerc || [])),
+          data: (isWeekly ? (data.dailyResolved3DaysPerc || []) : (isMonthly ? aggregateMonthlyPercent(data.weeklyRangeStarts || [], data.weeklyResolved || [], data.weeklyResolved3DaysPerc || []) : (data.weeklyResolved3DaysPerc || []))),
           backgroundColor: (isWeekly ? dayGradient : weekGradient),
           borderColor: (isWeekly ? daySolid : weekSolid),
           borderWidth: 2,
@@ -140,7 +174,9 @@
     });
   }
   if (has('chartWeeklyOutstandingSingle')) {
-    new Chart(el('chartWeeklyOutstandingSingle'), { type: 'bar', data: { labels: (isWeekly ? (data.dailyLabels || []) : (data.weeklyLabels || [])), datasets: [{ label: 'Outstanding Faults', data: (isWeekly ? (data.dailyOutstanding || []) : (data.weeklyOutstanding || [])), backgroundColor: (isWeekly ? dayGradient : weekGradient), borderColor: (isWeekly ? daySolid : weekSolid), borderWidth: 2, borderRadius: 8 }] }, options: barOptions() });
+    var lblsOut = isWeekly ? (data.dailyLabels || []) : (isMonthly ? buildMonthlyLabels(data.weeklyRangeStarts || []) : (data.weeklyLabels || []));
+    var valsOut = isWeekly ? (data.dailyOutstanding || []) : (isMonthly ? aggregateMonthly(data.weeklyRangeStarts || [], data.weeklyOutstanding || []) : (data.weeklyOutstanding || []));
+    new Chart(el('chartWeeklyOutstandingSingle'), { type: 'bar', data: { labels: lblsOut, datasets: [{ label: 'Outstanding Faults', data: valsOut, backgroundColor: (isWeekly ? dayGradient : weekGradient), borderColor: (isWeekly ? daySolid : weekSolid), borderWidth: 2, borderRadius: 8 }] }, options: barOptions() });
   }
   function binsToVals(bins){
     var order = ['0_3','4_7','8_14','15_30','31_60','61_90','90_plus'];
@@ -165,7 +201,7 @@
   }
 
   if (has('chartShiftTraffic')) {
-    var labelsShift = isWeekly ? (data.dailyLabels || []) : (data.weeklyLabels || []);
+    var labelsShift = isWeekly ? (data.dailyLabels || []) : (isMonthly ? buildMonthlyLabels(data.weeklyRangeStarts || []) : (data.weeklyLabels || []));
     function bgGrad(base){ return function(ctx){ return gradientColor(ctx, base); }; }
     function fmtDate(s){ try { var d = new Date(s + 'T00:00:00'); return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short' }); } catch(_){ return s; } }
     var valueLabelPlugin = { id: 'valueLabels', afterDatasetsDraw: function(chart){ var ctx = chart.ctx; ctx.save(); chart.data.datasets.forEach(function(ds, di){ var meta = chart.getDatasetMeta(di); meta.data.forEach(function(el, i){ var v = ds.data[i]; if (!v) return; ctx.fillStyle = '#374151'; ctx.font = '12px system-ui, -apple-system, Segoe UI, Roboto'; ctx.textAlign = 'center'; var y = el.y - 4; if (v <= 1) { ctx.textBaseline = 'top'; y = el.y + 4; } else { ctx.textBaseline = 'bottom'; } ctx.fillText(v, el.x, y); }); }); ctx.restore(); } };
@@ -174,9 +210,9 @@
       data: {
         labels: labelsShift,
         datasets: [
-          { label: 'Morning', data: isWeekly ? (data.dailyShiftMorning || []) : (data.weeklyShiftMorning || []), backgroundColor: bgGrad(colors.sky), borderColor: hexToRGBA(colors.sky, 1), borderWidth: 2, borderRadius: 10 },
-          { label: 'Afternoon', data: isWeekly ? (data.dailyShiftAfternoon || []) : (data.weeklyShiftAfternoon || []), backgroundColor: bgGrad(colors.orange), borderColor: hexToRGBA(colors.orange, 1), borderWidth: 2, borderRadius: 10 },
-          { label: 'Night', data: isWeekly ? (data.dailyShiftNight || []) : (data.weeklyShiftNight || []), backgroundColor: bgGrad(colors.light), borderColor: hexToRGBA(colors.light, 1), borderWidth: 2, borderRadius: 10 }
+          { label: 'Morning', data: isWeekly ? (data.dailyShiftMorning || []) : (isMonthly ? aggregateMonthly(data.weeklyRangeStarts || [], data.weeklyShiftMorning || []) : (data.weeklyShiftMorning || [])), backgroundColor: bgGrad(colors.sky), borderColor: hexToRGBA(colors.sky, 1), borderWidth: 2, borderRadius: 10 },
+          { label: 'Afternoon', data: isWeekly ? (data.dailyShiftAfternoon || []) : (isMonthly ? aggregateMonthly(data.weeklyRangeStarts || [], data.weeklyShiftAfternoon || []) : (data.weeklyShiftAfternoon || [])), backgroundColor: bgGrad(colors.orange), borderColor: hexToRGBA(colors.orange, 1), borderWidth: 2, borderRadius: 10 },
+          { label: 'Night', data: isWeekly ? (data.dailyShiftNight || []) : (isMonthly ? aggregateMonthly(data.weeklyRangeStarts || [], data.weeklyShiftNight || []) : (data.weeklyShiftNight || [])), backgroundColor: bgGrad(colors.light), borderColor: hexToRGBA(colors.light, 1), borderWidth: 2, borderRadius: 10 }
         ]
       },
       plugins: [valueLabelPlugin],
