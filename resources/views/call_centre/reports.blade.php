@@ -228,15 +228,44 @@ Faults Analytics Dashboard
           <div class="col-12">
             <div class="card border-0 shadow-sm cc-analysis-card">
               <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
-                <div class="fw-semibold">Weekly Analysis</div>
-                <div class="text-muted small">Balances and performance by week</div>
+                @php $ff = $filter ?? 'month'; @endphp
+                <div class="fw-semibold">{{ $ff === 'year' ? 'Monthly Analysis' : ($ff === 'weekly' ? 'Daily Analysis' : 'Weekly Analysis') }}</div>
+                <div class="text-muted small">{{ $ff === 'year' ? 'Balances and performance by month' : ($ff === 'weekly' ? 'Balances and performance by day' : 'Balances and performance by week') }}</div>
               </div>
               <div class="card-body p-0">
                 <div class="table-responsive">
+                  @php $ff = $filter ?? 'month'; @endphp
+                  @if($ff === 'year')
+                    @php
+                      $monthlyMap = [];
+                      $rangeStarts = ($weeklyRangeStarts ?? []);
+                      foreach ($rangeStarts as $i => $s) {
+                        try { $m = \Carbon\Carbon::parse($s)->format('M'); } catch (\Exception $e) { $m = null; }
+                        if (!$m) { continue; }
+                        if (!isset($monthlyMap[$m])) {
+                          $monthlyMap[$m] = ['opening'=>0,'new'=>0,'total'=>0,'resolved'=>0,'outstanding'=>0,'resolvedWithin'=>0,'resolvedSum'=>0];
+                        }
+                        $op = (int)($weeklyOpening[$i] ?? 0);
+                        $nw = (int)($weeklyNewFaults[$i] ?? 0);
+                        $tot = (int)($weeklyTotals[$i] ?? ($op + $nw));
+                        $res = (int)($weeklyResolved[$i] ?? 0);
+                        $out = (int)($weeklyOutstanding[$i] ?? 0);
+                        $perc = (float)($weeklyResolved3DaysPerc[$i] ?? 0);
+                        $monthlyMap[$m]['opening'] += $op;
+                        $monthlyMap[$m]['new'] += $nw;
+                        $monthlyMap[$m]['total'] += $tot;
+                        $monthlyMap[$m]['resolved'] += $res;
+                        $monthlyMap[$m]['outstanding'] += $out;
+                        $monthlyMap[$m]['resolvedWithin'] += ($res * $perc / 100.0);
+                        $monthlyMap[$m]['resolvedSum'] += $res;
+                      }
+                      $monthlyLabelsCalc = array_keys($monthlyMap);
+                    @endphp
+                  @endif
                   <table class="table align-middle mb-0 cc-analysis-table">
                     <thead>
                       <tr>
-                        <th>Week</th>
+                        <th>{{ $ff === 'year' ? 'Month' : ($ff === 'weekly' ? 'Day' : 'Week') }}</th>
                         <th>Opening Balance</th>
                         <th>New Faults Received</th>
                         <th>Total Faults</th>
@@ -246,30 +275,49 @@ Faults Analytics Dashboard
                       </tr>
                     </thead>
                     <tbody>
-                      @foreach(($weeklyLabels ?? []) as $i => $wk)
-                        @php($perc = (int) round(($weeklyResolved3DaysPerc[$i] ?? 0)))
-                        <tr>
-                          <td><div class="fw-semibold text-gray-800">{{ $wk }}</div></td>
-                          <td>
-                            <span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($weeklyOpening[$i] ?? 0)) }}</span>
-                          </td>
-                          <td>
-                            <span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($weeklyNewFaults[$i] ?? 0)) }}</span>
-                          </td>
-                          <td>
-                            <span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($weeklyTotals[$i] ?? (($weeklyOpening[$i] ?? 0) + ($weeklyNewFaults[$i] ?? 0)))) }}</span>
-                          </td>
-                          <td>
-                            <span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($weeklyResolved[$i] ?? 0)) }}</span>
-                          </td>
-                          <td>
-                            <span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($weeklyOutstanding[$i] ?? 0)) }}</span>
-                          </td>
-                          <td>
-                            <span class="badge rounded-pill bg-warning-subtle text-dark">{{ $perc }}%</span>
-                          </td>
-                        </tr>
-                      @endforeach
+                      @if($ff === 'year')
+                        @foreach(($monthlyLabelsCalc ?? []) as $mi => $ml)
+                          @php
+                            $mRow = $monthlyMap[$ml] ?? ['opening'=>0,'new'=>0,'total'=>0,'resolved'=>0,'outstanding'=>0,'resolvedWithin'=>0,'resolvedSum'=>0];
+                            $perc = (int) (($mRow['resolvedSum'] > 0) ? round(($mRow['resolvedWithin'] * 100) / $mRow['resolvedSum']) : 0);
+                          @endphp
+                          <tr>
+                            <td><div class="fw-semibold text-gray-800">{{ $ml }}</div></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($mRow['opening'] ?? 0)) }}</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($mRow['new'] ?? 0)) }}</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($mRow['total'] ?? 0)) }}</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($mRow['resolved'] ?? 0)) }}</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($mRow['outstanding'] ?? 0)) }}</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ $perc }}%</span></td>
+                          </tr>
+                        @endforeach
+                      @elseif($ff === 'weekly')
+                        @foreach(($dailyLabels ?? []) as $i => $day)
+                          @php($perc = (int) round(($dailyResolved3DaysPerc[$i] ?? 0)))
+                          <tr>
+                            <td><div class="fw-semibold text-gray-800">{{ $day }}</div></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">N/A</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($dailyNewFaults[$i] ?? 0)) }}</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">N/A</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($dailyResolved[$i] ?? 0)) }}</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($dailyOutstanding[$i] ?? 0)) }}</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ $perc }}%</span></td>
+                          </tr>
+                        @endforeach
+                      @else
+                        @foreach(($weeklyLabels ?? []) as $i => $wk)
+                          @php($perc = (int) round(($weeklyResolved3DaysPerc[$i] ?? 0)))
+                          <tr>
+                            <td><div class="fw-semibold text-gray-800">{{ $wk }}</div></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($weeklyOpening[$i] ?? 0)) }}</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($weeklyNewFaults[$i] ?? 0)) }}</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($weeklyTotals[$i] ?? (($weeklyOpening[$i] ?? 0) + ($weeklyNewFaults[$i] ?? 0)))) }}</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($weeklyResolved[$i] ?? 0)) }}</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($weeklyOutstanding[$i] ?? 0)) }}</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ $perc }}%</span></td>
+                          </tr>
+                        @endforeach
+                      @endif
                     </tbody>
                   </table>
                 </div>
