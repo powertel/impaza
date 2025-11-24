@@ -253,7 +253,7 @@
             </li>
             @endcan
 
-            @canany(['reports'])
+            @canany(['reports','call-centre-reports'])
             <li class="nav-header">Reports</li>
             @endcanany
             @can('reports')
@@ -263,6 +263,8 @@
                 <p>Reports</p>
               </a>
             </li>
+            @endcan
+            @can('call-centre-reports')
             <li class="nav-item">
               <a href="{{ route('call_centre.reports') }}" class="nav-link {{ request()->routeIs('call_centre.reports') ? 'active' : '' }}">
                 <i class="nav-icon fas fa-headset"></i>
