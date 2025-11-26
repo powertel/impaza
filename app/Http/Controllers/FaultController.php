@@ -496,6 +496,7 @@ class FaultController extends Controller
                 'customer_id'=> 'required|exists:customers,id',
                 'contactName'=> 'required|string',
                 'phoneNumber'=> ['required','string','size:12','regex:/^2637\d{8}$/'],
+                'contactEmail'=> 'nullable|email|max:255',
                 'address'=> 'nullable|string',
                 'link_id'=> 'required|exists:links,id',
                 'suspectedRfo_id'=> 'required|exists:reasons_for_outages,id',
@@ -516,7 +517,7 @@ class FaultController extends Controller
                 $req['pop_id'] = $lnk->pop_id ?? null;
                 $req['serviceType'] = $lnk->service_type ?? null; // map to faults.serviceType
             }
-            // Remove email if it is not provided anymore
+            // Normalize email to null when not provided
             if(!$request->filled('contactEmail')){
                 $req['contactEmail'] = null;
             }

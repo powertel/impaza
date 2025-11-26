@@ -41,11 +41,11 @@
                     </div>
 
                     <div class="row g-3">
-                        <div class="mb-3 col-md-4">
+                        <div class="mb-3 col-md-6">
                             <label for="contactName" class="form-label">Contact Name</label>
                             <input type="text" class="form-control @error('contactName') is-invalid @enderror"  placeholder="Contact Name" name="contactName" value="{{ old('contactName') }}">
                         </div>
-                        <div class="mb-3 col-md-4">
+                        <div class="mb-3 col-md-6">
                             <label for="phone" class="form-label">Phone Number</label>
                             <input type="tel"
                                    class="form-control @error('phoneNumber') is-invalid @enderror"
@@ -64,8 +64,22 @@
                                 <div class="invalid-feedback">Phone number must be 12 digits starting with 2637</div>
                             @enderror
                         </div>
+                    </div>
 
-                        <div class="mb-3 col-md-4">
+                    <div class="row g-3">
+
+                        <div class="mb-3 col-md-6">
+                            <label for="contactEmail" class="form-label">Contact Email (optional)</label>
+                            <input type="email"
+                                   class="form-control @error('contactEmail') is-invalid @enderror"
+                                   placeholder="e.g. name@example.com"
+                                   name="contactEmail"
+                                   value="{{ old('contactEmail') }}">
+                            @error('contactEmail')
+                                <div class="invalid-feedback"><strong>{{ $message }}</strong></div>
+                            @enderror
+                        </div>
+                        <div class="mb-3 col-md-6">
                             <label for="suspectedRFO" class="form-label">Suspected Reason For Outage</label>
                             <select  class="form-select select2 @error('suspectedRfo_id') is-invalid @enderror" name="suspectedRfo_id" >
                                 <option selected disabled >Select RFO</option>
