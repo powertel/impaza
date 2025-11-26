@@ -142,7 +142,12 @@ $(document).off('change', '.customer-select').on('change', '.customer-select', f
       dataType: 'json',
       success: function(res){
         $link.empty().append('<option selected disabled>Select Link</option>');
-        $.each(res, function(key, value){ $link.append('<option value="'+key+'">'+value+'</option>'); });
+        $.each(res, function(key, value){
+          var text = (value && typeof value === 'object')
+            ? ((value.link || '') + ' - ' + (value.city || '') + ' - ' + (value.suburb || ''))
+            : String(value || '');
+          $link.append('<option value="'+key+'">'+text+'</option>');
+        });
         var lsel = $link.data('selected');
         if (lsel) { $link.val(String(lsel)); }
       }
@@ -219,12 +224,15 @@ $(document).off('shown.bs.modal', '.modal[id^="editFaultModal-"]').on('shown.bs.
     $customerSel.select2({
       placeholder: 'Select Customer',
       width: '100%',
-      dropdownParent: $modal
+      dropdownParent: $modal,
+      minimumResultsForSearch: Infinity
     });
+    var currentVal = $customerSel.data('selected') || $customerSel.find('option:selected').val();
+    if (currentVal) { $customerSel.val(String(currentVal)).trigger('change.select2'); }
   }
   var cityID = $modal.find('.city-select').val();
   var suburbSelected = $modal.find('.suburb-select').data('selected');
-  var customerID = $modal.find('.customer-select').val();
+  var customerID = $modal.find('.customer-select').val() || $modal.find('input[name="customer_id"]').val();
   var linkSelected = $modal.find('.link-select').data('selected');
   var popSelected = $modal.find('.pop-select').data('selected');
 
@@ -250,7 +258,12 @@ $(document).off('shown.bs.modal', '.modal[id^="editFaultModal-"]').on('shown.bs.
       success: function(res){
         var $link = $modal.find('.link-select');
         $link.empty().append('<option selected disabled>Select Link</option>');
-        $.each(res, function(key, value){ $link.append('<option value="'+key+'">'+value+'</option>'); });
+        $.each(res, function(key, value){
+          var text = (value && typeof value === 'object')
+            ? ((value.link || '') + ' - ' + (value.city || '') + ' - ' + (value.suburb || ''))
+            : String(value || '');
+          $link.append('<option value="'+key+'">'+text+'</option>');
+        });
         if (linkSelected) { $link.val(String(linkSelected)); }
       }
     });
