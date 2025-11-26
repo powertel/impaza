@@ -220,15 +220,19 @@ class CallCentreController extends Controller
         }
         $within3DaysPercent = $resolvedTotal > 0 ? round(($w3Strict / $resolvedTotal) * 100, 2) : 0;
 
+        $effectiveEnd = $periodEnd->copy();
+        $todayEnd = Carbon::now()->endOfDay();
+        if ($effectiveEnd->gt($todayEnd)) { $effectiveEnd = $todayEnd; }
+
         $resolvedUpToEndIds = DB::table('fault_stage_logs')
             ->where('status_id', $clearedStatusId)
-            ->where('started_at','<=',$periodEnd)
+            ->where('started_at','<=',$effectiveEnd)
             ->select('fault_id', DB::raw('MAX(started_at) as ra'))
             ->groupBy('fault_id')
             ->pluck('fault_id')
             ->unique()
             ->values();
-        $outstandingFaults = Fault::whereBetween('created_at', [$periodStart, $periodEnd])
+        $outstandingFaults = Fault::whereBetween('created_at', [$periodStart, $effectiveEnd])
             ->whereNotIn('id', $resolvedUpToEndIds)
             ->get(['id','created_at']);
         $outstandingTotal = $outstandingFaults->count();
@@ -243,7 +247,7 @@ class CallCentreController extends Controller
         ];
         $over3DaysCount = 0;
         foreach ($outstandingFaults as $f) {
-            $mOpen = Carbon::parse($f->created_at)->diffInMinutes($periodEnd);
+            $mOpen = Carbon::parse($f->created_at)->diffInMinutes($effectiveEnd);
             if ($mOpen <= 4320) $outBins['0_3']++;
             elseif ($mOpen <= 10080) { $outBins['4_7']++; $over3DaysCount++; }
             elseif ($mOpen <= 20160) { $outBins['8_14']++; $over3DaysCount++; }
@@ -264,6 +268,8 @@ class CallCentreController extends Controller
         $dailyShiftMorning = [];
         $dailyShiftAfternoon = [];
         $dailyShiftNight = [];
+        $dailyOpening = [];
+        $dailyTotals = [];
         if ($filter === 'weekly') {
             $cur = $periodStart->copy();
             $endBound = $periodEnd->copy();
@@ -275,10 +281,24 @@ class CallCentreController extends Controller
                 $dayEnd = $cur->copy()->endOfDay();
                 $dailyLabels[] = $ds;
                 $dailyNewFaults[] = Fault::whereBetween('created_at', [$dayStart, $dayEnd])->count();
+                $resolvedIdsUpToStart = DB::table('fault_stage_logs')
+                    ->where('status_id',$clearedStatusId)
+                    ->where('started_at','<=',$dayStart)
+                    ->select('fault_id', DB::raw('MAX(started_at) as ra'))
+                    ->groupBy('fault_id')
+                    ->pluck('fault_id')
+                    ->unique()
+                    ->values();
+                $openingCountDay = Fault::where('created_at','>=',$periodStart)
+                    ->where('created_at','<',$dayStart)
+                    ->whereNotIn('id', $resolvedIdsUpToStart)
+                    ->count();
+                $dailyOpening[] = $openingCountDay;
                 $latestInDay = DB::table('fault_stage_logs')->where('status_id',$clearedStatusId)->whereBetween('started_at', [$dayStart, $dayEnd])->select('fault_id', DB::raw('MAX(started_at) as resolved_at'))->groupBy('fault_id')->get();
                 $dailyResolved[] = $latestInDay->count();
                 $resolvedIdsUpToDay = DB::table('fault_stage_logs')->where('status_id',$clearedStatusId)->where('started_at','<=',$dayEnd)->select('fault_id', DB::raw('MAX(started_at) as ra'))->groupBy('fault_id')->pluck('fault_id')->unique()->values();
                 $dailyOutstanding[] = Fault::whereBetween('created_at', [$periodStart, $dayEnd])->whereNotIn('id', $resolvedIdsUpToDay)->count();
+                $dailyTotals[] = $openingCountDay + end($dailyNewFaults);
                 $idsDay = $latestInDay->pluck('fault_id')->unique()->values();
                 $createdMapDay = Fault::whereIn('id', $idsDay)->pluck('created_at','id');
                 $totDay = $latestInDay->count();
@@ -341,6 +361,8 @@ class CallCentreController extends Controller
                 'dailyShiftMorning' => $dailyShiftMorning,
                 'dailyShiftAfternoon' => $dailyShiftAfternoon,
                 'dailyShiftNight' => $dailyShiftNight,
+                'dailyOpening' => $dailyOpening,
+                'dailyTotals' => $dailyTotals,
                 'weeklyShiftMorning' => $weeklyShiftMorning,
                 'weeklyShiftAfternoon' => $weeklyShiftAfternoon,
                 'weeklyShiftNight' => $weeklyShiftNight,

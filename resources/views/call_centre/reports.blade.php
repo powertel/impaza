@@ -296,9 +296,9 @@ Faults Analytics Dashboard
                           @php($perc = (int) round(($dailyResolved3DaysPerc[$i] ?? 0)))
                           <tr>
                             <td><div class="fw-semibold text-gray-800">{{ $day }}</div></td>
-                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">N/A</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($dailyOpening[$i] ?? 0)) }}</span></td>
                             <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($dailyNewFaults[$i] ?? 0)) }}</span></td>
-                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">N/A</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($dailyTotals[$i] ?? (($dailyOpening[$i] ?? 0) + ($dailyNewFaults[$i] ?? 0)))) }}</span></td>
                             <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($dailyResolved[$i] ?? 0)) }}</span></td>
                             <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($dailyOutstanding[$i] ?? 0)) }}</span></td>
                             <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ $perc }}%</span></td>
