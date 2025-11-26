@@ -97,7 +97,7 @@
             <li class="nav-item">
               <a class="nav-link {{ request()->routeIs('noc-clear.*') ? 'active' : '' }}" href="{{ route('noc-clear.index') }}">
                 <i class="nav-icon fas fa-broom"></i>
-                <p>Noc Clear</p>
+                <p>Resolved</p>
               </a>
             </li>
             @endcan
@@ -268,7 +268,7 @@
             <li class="nav-item">
               <a href="{{ route('call_centre.reports') }}" class="nav-link {{ request()->routeIs('call_centre.reports') ? 'active' : '' }}">
                 <i class="nav-icon fas fa-headset"></i>
-                <p>Call Centre</p>
+                <p>Contact Centre</p>
               </a>
             </li>
             @endcan
