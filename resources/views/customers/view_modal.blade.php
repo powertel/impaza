@@ -5,7 +5,7 @@
     <div class="modal-content">
       <div class="modal-header  text-dark">
         <h5 class="modal-title" id="customerViewModalLabel{{ $customer->id }}">Customer Details</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div class="card border-0 shadow-sm mb-3">

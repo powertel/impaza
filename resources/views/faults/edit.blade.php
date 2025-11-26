@@ -6,7 +6,7 @@
                 <h5 class="modal-title" id="editFaultModalLabel-{{ $fault->id }}">
                     <i class="fas fa-edit me-2"></i>Edit Fault
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="UF-edit-{{ $fault->id }}" action="{{ route('faults.update', $fault->id ) }}" method="POST">
