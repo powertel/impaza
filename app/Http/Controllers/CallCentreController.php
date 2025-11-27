@@ -13,6 +13,9 @@ class CallCentreController extends Controller
     public function index(Request $request)
     {
         $filter = strtolower((string) $request->input('filter', 'month'));
+        $selectedRegionRaw = trim((string) $request->input('region', ''));
+        $selectedRegion = $selectedRegionRaw === '' ? null : $selectedRegionRaw;
+        $availableRegions = DB::table('cities')->select('region')->whereNotNull('region')->distinct()->orderBy('region')->pluck('region')->toArray();
         $availableYears = DB::table('faults')
             ->selectRaw('YEAR(created_at) as y')
             ->distinct()
@@ -72,11 +75,25 @@ class CallCentreController extends Controller
         elseif ($filter === 'quarter') $periodLabelText = 'Quarter total';
         elseif ($filter === 'weekly') $periodLabelText = 'Week total';
 
-        $newFaultsTotal = Fault::whereBetween('created_at', [$periodStart, $periodEnd])->count();
+        $faultIdsRegion = null;
+        if ($selectedRegion) {
+            $faultIdsRegion = DB::table('faults')
+                ->join('cities', 'faults.city_id', '=', 'cities.id')
+                ->where('cities.region', '=', $selectedRegion)
+                ->pluck('faults.id')
+                ->unique()
+                ->values()
+                ->toArray();
+        }
+
+        $newFaultsTotal = Fault::whereBetween('created_at', [$periodStart, $periodEnd])
+            ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+            ->count();
         $clearedStatusId = (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
         $latestClearedInPeriod = DB::table('fault_stage_logs')
             ->where('status_id', $clearedStatusId)
             ->whereBetween('started_at', [$periodStart, $periodEnd])
+            ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
             ->select('fault_id', DB::raw('MAX(started_at) as resolved_at'))
             ->groupBy('fault_id')
             ->get();
@@ -127,6 +144,7 @@ class CallCentreController extends Controller
             $resolvedUpToStartIds = DB::table('fault_stage_logs')
                 ->where('status_id', $clearedStatusId)
                 ->where('started_at','<=',$ws)
+                ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
                 ->select('fault_id', DB::raw('MAX(started_at) as ra'))
                 ->groupBy('fault_id')
                 ->pluck('fault_id')
@@ -134,12 +152,16 @@ class CallCentreController extends Controller
                 ->values();
             $openingCount = Fault::where('created_at','>=',$periodStart)
                 ->where('created_at','<',$ws)
+                ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
                 ->whereNotIn('id', $resolvedUpToStartIds)
                 ->count();
-            $weeklyNewFaults[] = Fault::whereBetween('created_at', [$ws,$weEff])->count();
+            $weeklyNewFaults[] = Fault::whereBetween('created_at', [$ws,$weEff])
+                ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                ->count();
             $latestInWeek = DB::table('fault_stage_logs')
                 ->where('status_id', $clearedStatusId)
                 ->whereBetween('started_at', [$ws,$weEff])
+                ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
                 ->select('fault_id', DB::raw('MAX(started_at) as resolved_at'))
                 ->groupBy('fault_id')
                 ->get();
@@ -147,12 +169,16 @@ class CallCentreController extends Controller
             $resolvedUpToDateIds = DB::table('fault_stage_logs')
                 ->where('status_id', $clearedStatusId)
                 ->where('started_at','<=',$weEff)
+                ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
                 ->select('fault_id', DB::raw('MAX(started_at) as ra'))
                 ->groupBy('fault_id')
                 ->pluck('fault_id')
                 ->unique()
                 ->values();
-            $weeklyOutstanding[] = Fault::whereBetween('created_at', [$periodStart, $weEff])->whereNotIn('id', $resolvedUpToDateIds)->count();
+            $weeklyOutstanding[] = Fault::whereBetween('created_at', [$periodStart, $weEff])
+                ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                ->whereNotIn('id', $resolvedUpToDateIds)
+                ->count();
             $weeklyOpening[] = $openingCount;
             $weeklyTotals[] = $openingCount + end($weeklyNewFaults);
 
@@ -169,14 +195,17 @@ class CallCentreController extends Controller
             $weeklyResolved3DaysPerc[] = $tot > 0 ? round(($w3 / $tot) * 100, 2) : 0;
 
             $morningCount = Fault::whereBetween('created_at', [$ws,$weEff])
+                ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
                 ->whereTime('created_at', '>=', '06:00')
                 ->whereTime('created_at', '<=', '13:59')
                 ->count();
             $afternoonCount = Fault::whereBetween('created_at', [$ws,$weEff])
+                ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
                 ->whereTime('created_at', '>=', '14:00')
                 ->whereTime('created_at', '<=', '21:59')
                 ->count();
             $nightCount = Fault::whereBetween('created_at', [$ws,$weEff])
+                ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
                 ->where(function($q){
                     $q->whereTime('created_at', '>=', '22:00')
                       ->orWhereTime('created_at', '<=', '05:59');
@@ -227,12 +256,14 @@ class CallCentreController extends Controller
         $resolvedUpToEndIds = DB::table('fault_stage_logs')
             ->where('status_id', $clearedStatusId)
             ->where('started_at','<=',$effectiveEnd)
+            ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
             ->select('fault_id', DB::raw('MAX(started_at) as ra'))
             ->groupBy('fault_id')
             ->pluck('fault_id')
             ->unique()
             ->values();
         $outstandingFaults = Fault::whereBetween('created_at', [$periodStart, $effectiveEnd])
+            ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
             ->whereNotIn('id', $resolvedUpToEndIds)
             ->get(['id','created_at']);
         $outstandingTotal = $outstandingFaults->count();
@@ -258,7 +289,10 @@ class CallCentreController extends Controller
         }
         $over3DaysPercent = $outstandingTotal > 0 ? round(($over3DaysCount / $outstandingTotal) * 100, 2) : 0;
 
-        $faultsInRange = Fault::whereBetween('created_at', [$periodStart, $periodEnd])->select('id','created_at')->get();
+        $faultsInRange = Fault::whereBetween('created_at', [$periodStart, $periodEnd])
+            ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+            ->select('id','created_at')
+            ->get();
         $assignmentsInRange = collect();
         $dailyLabels = [];
         $dailyNewFaults = [];
@@ -280,10 +314,13 @@ class CallCentreController extends Controller
                 $dayStart = $cur->copy()->startOfDay();
                 $dayEnd = $cur->copy()->endOfDay();
                 $dailyLabels[] = $ds;
-                $dailyNewFaults[] = Fault::whereBetween('created_at', [$dayStart, $dayEnd])->count();
+                $dailyNewFaults[] = Fault::whereBetween('created_at', [$dayStart, $dayEnd])
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->count();
                 $resolvedIdsUpToStart = DB::table('fault_stage_logs')
                     ->where('status_id',$clearedStatusId)
                     ->where('started_at','<=',$dayStart)
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
                     ->select('fault_id', DB::raw('MAX(started_at) as ra'))
                     ->groupBy('fault_id')
                     ->pluck('fault_id')
@@ -291,13 +328,30 @@ class CallCentreController extends Controller
                     ->values();
                 $openingCountDay = Fault::where('created_at','>=',$periodStart)
                     ->where('created_at','<',$dayStart)
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
                     ->whereNotIn('id', $resolvedIdsUpToStart)
                     ->count();
-                $dailyOpening[] = $openingCountDay;
-                $latestInDay = DB::table('fault_stage_logs')->where('status_id',$clearedStatusId)->whereBetween('started_at', [$dayStart, $dayEnd])->select('fault_id', DB::raw('MAX(started_at) as resolved_at'))->groupBy('fault_id')->get();
+                $latestInDay = DB::table('fault_stage_logs')
+                    ->where('status_id',$clearedStatusId)
+                    ->whereBetween('started_at', [$dayStart, $dayEnd])
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
+                    ->select('fault_id', DB::raw('MAX(started_at) as resolved_at'))
+                    ->groupBy('fault_id')
+                    ->get();
                 $dailyResolved[] = $latestInDay->count();
-                $resolvedIdsUpToDay = DB::table('fault_stage_logs')->where('status_id',$clearedStatusId)->where('started_at','<=',$dayEnd)->select('fault_id', DB::raw('MAX(started_at) as ra'))->groupBy('fault_id')->pluck('fault_id')->unique()->values();
-                $dailyOutstanding[] = Fault::whereBetween('created_at', [$periodStart, $dayEnd])->whereNotIn('id', $resolvedIdsUpToDay)->count();
+                $resolvedIdsUpToDay = DB::table('fault_stage_logs')
+                    ->where('status_id',$clearedStatusId)
+                    ->where('started_at','<=',$dayEnd)
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
+                    ->select('fault_id', DB::raw('MAX(started_at) as ra'))
+                    ->groupBy('fault_id')
+                    ->pluck('fault_id')
+                    ->unique()
+                    ->values();
+                $dailyOutstanding[] = Fault::whereBetween('created_at', [$periodStart, $dayEnd])
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->whereNotIn('id', $resolvedIdsUpToDay)
+                    ->count();
                 $dailyTotals[] = $openingCountDay + end($dailyNewFaults);
                 $idsDay = $latestInDay->pluck('fault_id')->unique()->values();
                 $createdMapDay = Fault::whereIn('id', $idsDay)->pluck('created_at','id');
@@ -311,14 +365,17 @@ class CallCentreController extends Controller
                 }
                 $dailyResolved3DaysPerc[] = $totDay > 0 ? round(($w3Day / $totDay) * 100, 2) : 0;
                 $morningDay = Fault::whereBetween('created_at', [$dayStart,$dayEnd])
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
                     ->whereTime('created_at','>=','06:00')
                     ->whereTime('created_at','<=','13:59')
                     ->count();
                 $afternoonDay = Fault::whereBetween('created_at', [$dayStart,$dayEnd])
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
                     ->whereTime('created_at','>=','14:00')
                     ->whereTime('created_at','<=','21:59')
                     ->count();
                 $nightDay = Fault::whereBetween('created_at', [$dayStart,$dayEnd])
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
                     ->where(function($q){
                         $q->whereTime('created_at','>=','22:00')
                           ->orWhereTime('created_at','<=','05:59');
@@ -333,6 +390,8 @@ class CallCentreController extends Controller
 
         return view('call_centre.reports', [
             'filter' => $filter,
+            'availableRegions' => $availableRegions,
+            'selectedRegion' => $selectedRegion,
             'availableYears' => $availableYears,
             'selectedYear' => $selectedYear,
             'selectedMonth' => $selectedMonth,
