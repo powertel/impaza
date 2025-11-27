@@ -70,6 +70,15 @@ Faults Analytics Dashboard
             </select>
           </div>
           <div class="cc-field">
+            <label class="form-label"><i class="fas fa-map-marker-alt me-1"></i>Region</label>
+            <select name="region" class="form-select form-select-sm" title="Choose region">
+              <option value="" {{ empty($selectedRegion ?? '') ? 'selected' : '' }}>All Regions</option>
+              @foreach(($availableRegions ?? []) as $r)
+                <option value="{{ $r }}" {{ (($selectedRegion ?? '') === $r) ? 'selected' : '' }}>{{ $r }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div class="cc-field">
             <label class="form-label"><i class="far fa-play-circle me-1"></i>Start Date</label>
             <input type="date" name="start_date" value="{{ request('start_date') }}" class="form-control form-control-sm" title="Start date for weekly range" />
           </div>
