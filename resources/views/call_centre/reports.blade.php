@@ -244,33 +244,6 @@ Faults Analytics Dashboard
               <div class="card-body p-0">
                 <div class="table-responsive">
                   @php $ff = $filter ?? 'month'; @endphp
-                  @if($ff === 'year')
-                    @php
-                      $monthlyMap = [];
-                      $rangeStarts = ($weeklyRangeStarts ?? []);
-                      foreach ($rangeStarts as $i => $s) {
-                        try { $m = \Carbon\Carbon::parse($s)->format('M'); } catch (\Exception $e) { $m = null; }
-                        if (!$m) { continue; }
-                        if (!isset($monthlyMap[$m])) {
-                          $monthlyMap[$m] = ['opening'=>0,'new'=>0,'total'=>0,'resolved'=>0,'outstanding'=>0,'resolvedWithin'=>0,'resolvedSum'=>0];
-                        }
-                        $op = (int)($weeklyOpening[$i] ?? 0);
-                        $nw = (int)($weeklyNewFaults[$i] ?? 0);
-                        $tot = (int)($weeklyTotals[$i] ?? ($op + $nw));
-                        $res = (int)($weeklyResolved[$i] ?? 0);
-                        $out = (int)($weeklyOutstanding[$i] ?? 0);
-                        $perc = (float)($weeklyResolved3DaysPerc[$i] ?? 0);
-                        $monthlyMap[$m]['opening'] += $op;
-                        $monthlyMap[$m]['new'] += $nw;
-                        $monthlyMap[$m]['total'] += $tot;
-                        $monthlyMap[$m]['resolved'] += $res;
-                        $monthlyMap[$m]['outstanding'] += $out;
-                        $monthlyMap[$m]['resolvedWithin'] += ($res * $perc / 100.0);
-                        $monthlyMap[$m]['resolvedSum'] += $res;
-                      }
-                      $monthlyLabelsCalc = array_keys($monthlyMap);
-                    @endphp
-                  @endif
                   <table class="table align-middle mb-0 cc-analysis-table">
                     <thead>
                       <tr>
@@ -285,18 +258,23 @@ Faults Analytics Dashboard
                     </thead>
                     <tbody>
                       @if($ff === 'year')
-                        @foreach(($monthlyLabelsCalc ?? []) as $mi => $ml)
+                        @php $labels = ($monthlyActiveLabels ?? $monthlyLabels ?? []); @endphp
+                        @foreach(($labels) as $i => $ml)
                           @php
-                            $mRow = $monthlyMap[$ml] ?? ['opening'=>0,'new'=>0,'total'=>0,'resolved'=>0,'outstanding'=>0,'resolvedWithin'=>0,'resolvedSum'=>0];
-                            $perc = (int) (($mRow['resolvedSum'] > 0) ? round(($mRow['resolvedWithin'] * 100) / $mRow['resolvedSum']) : 0);
+                            $opening = (int)(($monthlyOpeningActive[$i] ?? null) ?? ($monthlyOpening[$i] ?? 0));
+                            $new = (int)(($monthlyNewFaultsActive[$i] ?? null) ?? ($monthlyNewFaults[$i] ?? 0));
+                            $resolved = (int)(($monthlyResolvedActive[$i] ?? null) ?? ($monthlyResolved[$i] ?? 0));
+                            $closing = (int)(($monthlyOutstandingActive[$i] ?? null) ?? ($monthlyOutstanding[$i] ?? 0));
+                            $totalMonth = (int)(($monthlyTotalsActive[$i] ?? null) ?? ($monthlyTotals[$i] ?? ($opening + $new)));
+                            $perc = (int) round((($monthlyResolved3DaysPercActive[$i] ?? null) ?? ($monthlyResolved3DaysPerc[$i] ?? 0)));
                           @endphp
                           <tr>
                             <td><div class="fw-semibold text-gray-800">{{ $ml }}</div></td>
-                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($mRow['opening'] ?? 0)) }}</span></td>
-                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($mRow['new'] ?? 0)) }}</span></td>
-                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($mRow['total'] ?? 0)) }}</span></td>
-                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($mRow['resolved'] ?? 0)) }}</span></td>
-                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format(($mRow['outstanding'] ?? 0)) }}</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format($opening) }}</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format($new) }}</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format($totalMonth) }}</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format($resolved) }}</span></td>
+                            <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ number_format($closing) }}</span></td>
                             <td><span class="badge rounded-pill bg-warning-subtle text-dark">{{ $perc }}%</span></td>
                           </tr>
                         @endforeach
@@ -362,8 +340,18 @@ Faults Analytics Dashboard
     weeklyShiftNight: @json($weeklyShiftNight ?? []),
     weeklyRangeStarts: @json($weeklyRangeStarts ?? []),
     weeklyRangeEnds: @json($weeklyRangeEnds ?? []),
+    monthlyLabels: @json(($monthlyActiveLabels ?? $monthlyLabels) ?? []),
+    monthlyOpening: @json(($monthlyOpeningActive ?? $monthlyOpening) ?? []),
+    monthlyNewFaults: @json(($monthlyNewFaultsActive ?? $monthlyNewFaults) ?? []),
+    monthlyResolved: @json(($monthlyResolvedActive ?? $monthlyResolved) ?? []),
+    monthlyOutstanding: @json(($monthlyOutstandingActive ?? $monthlyOutstanding) ?? []),
+    monthlyTotals: @json(($monthlyTotalsActive ?? $monthlyTotals) ?? []),
+    monthlyResolved3DaysPerc: @json(($monthlyResolved3DaysPercActive ?? $monthlyResolved3DaysPerc) ?? []),
+    monthlyShiftMorning: @json(($monthlyShiftMorningActive ?? $monthlyShiftMorning) ?? []),
+    monthlyShiftAfternoon: @json(($monthlyShiftAfternoonActive ?? $monthlyShiftAfternoon) ?? []),
+    monthlyShiftNight: @json(($monthlyShiftNightActive ?? $monthlyShiftNight) ?? []),
   };
 </script>
-<script src="{{ asset('js/call_centre.js') }}"></script>
+<script src="{{ asset('js/call_centre.js') }}?v={{ file_exists(public_path('js/call_centre.js')) ? filemtime(public_path('js/call_centre.js')) : time() }}"></script>
 @endsection
 @endsection
