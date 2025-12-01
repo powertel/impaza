@@ -150,8 +150,7 @@ class CallCentreController extends Controller
                 ->pluck('fault_id')
                 ->unique()
                 ->values();
-            $openingCount = Fault::where('created_at','>=',$periodStart)
-                ->where('created_at','<',$ws)
+            $openingCount = Fault::where('created_at','<',$ws)
                 ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
                 ->whereNotIn('id', $resolvedUpToStartIds)
                 ->count();
@@ -175,7 +174,7 @@ class CallCentreController extends Controller
                 ->pluck('fault_id')
                 ->unique()
                 ->values();
-            $weeklyOutstanding[] = Fault::whereBetween('created_at', [$periodStart, $weEff])
+            $weeklyOutstanding[] = Fault::where('created_at','<=',$weEff)
                 ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
                 ->whereNotIn('id', $resolvedUpToDateIds)
                 ->count();
@@ -262,7 +261,7 @@ class CallCentreController extends Controller
             ->pluck('fault_id')
             ->unique()
             ->values();
-        $outstandingFaults = Fault::whereBetween('created_at', [$periodStart, $effectiveEnd])
+        $outstandingFaults = Fault::where('created_at','<=',$effectiveEnd)
             ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
             ->whereNotIn('id', $resolvedUpToEndIds)
             ->get(['id','created_at']);
@@ -326,11 +325,11 @@ class CallCentreController extends Controller
                     ->pluck('fault_id')
                     ->unique()
                     ->values();
-                $openingCountDay = Fault::where('created_at','>=',$periodStart)
-                    ->where('created_at','<',$dayStart)
+                $openingCountDay = Fault::where('created_at','<',$dayStart)
                     ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
                     ->whereNotIn('id', $resolvedIdsUpToStart)
                     ->count();
+                $dailyOpening[] = $openingCountDay;
                 $latestInDay = DB::table('fault_stage_logs')
                     ->where('status_id',$clearedStatusId)
                     ->whereBetween('started_at', [$dayStart, $dayEnd])
@@ -348,7 +347,7 @@ class CallCentreController extends Controller
                     ->pluck('fault_id')
                     ->unique()
                     ->values();
-                $dailyOutstanding[] = Fault::whereBetween('created_at', [$periodStart, $dayEnd])
+                $dailyOutstanding[] = Fault::where('created_at','<=',$dayEnd)
                     ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
                     ->whereNotIn('id', $resolvedIdsUpToDay)
                     ->count();
@@ -385,6 +384,75 @@ class CallCentreController extends Controller
                 $dailyShiftAfternoon[] = $afternoonDay;
                 $dailyShiftNight[] = $nightDay;
                 $cur->addDay();
+            }
+        }
+
+        $monthlyLabels = [];
+        $monthlyOpening = [];
+        $monthlyNewFaults = [];
+        $monthlyResolved = [];
+        $monthlyOutstanding = [];
+        $monthlyTotals = [];
+        $monthlyResolved3DaysPerc = [];
+        if ($filter === 'year') {
+            $baseYear = $isAllYears ? ($selectedYear ?? $now->year) : ($selectedYear ?? $now->year);
+            for ($m = 1; $m <= 12; $m++) {
+                $ms = \Carbon\Carbon::create($baseYear, $m, 1)->startOfMonth();
+                $me = \Carbon\Carbon::create($baseYear, $m, 1)->endOfMonth();
+                $monthlyLabels[] = $ms->format('M');
+                $resolvedIdsUpToStart = \DB::table('fault_stage_logs')
+                    ->where('status_id', $clearedStatusId)
+                    ->where('started_at', '<=', $ms)
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
+                    ->select('fault_id', \DB::raw('MAX(started_at) as ra'))
+                    ->groupBy('fault_id')
+                    ->pluck('fault_id')
+                    ->unique()
+                    ->values();
+                $openMonth = Fault::where('created_at','<',$ms)
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->whereNotIn('id', $resolvedIdsUpToStart)
+                    ->count();
+                $newMonth = Fault::whereBetween('created_at', [$ms,$me])
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->count();
+                $latestClearedInMonth = \DB::table('fault_stage_logs')
+                    ->where('status_id', $clearedStatusId)
+                    ->whereBetween('started_at', [$ms,$me])
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
+                    ->select('fault_id', \DB::raw('MAX(started_at) as resolved_at'))
+                    ->groupBy('fault_id')
+                    ->get();
+                $resolvedMonth = $latestClearedInMonth->count();
+                $resolvedIdsUpToEnd = \DB::table('fault_stage_logs')
+                    ->where('status_id', $clearedStatusId)
+                    ->where('started_at', '<=', $me)
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
+                    ->select('fault_id', \DB::raw('MAX(started_at) as ra'))
+                    ->groupBy('fault_id')
+                    ->pluck('fault_id')
+                    ->unique()
+                    ->values();
+                $outMonth = Fault::where('created_at','<=',$me)
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->whereNotIn('id', $resolvedIdsUpToEnd)
+                    ->count();
+                $idsMonth = $latestClearedInMonth->pluck('fault_id')->unique()->values();
+                $createdMapMonth = Fault::whereIn('id', $idsMonth)->pluck('created_at','id');
+                $totMonth = $latestClearedInMonth->count();
+                $w3Month = 0;
+                foreach ($latestClearedInMonth as $r) {
+                    $createdAt = $createdMapMonth[$r->fault_id] ?? null;
+                    if (!$createdAt) continue;
+                    $minsDiff = \Carbon\Carbon::parse($createdAt)->diffInMinutes(\Carbon\Carbon::parse($r->resolved_at));
+                    if ($minsDiff <= 4320) $w3Month++;
+                }
+                $monthlyOpening[] = $openMonth;
+                $monthlyNewFaults[] = $newMonth;
+                $monthlyResolved[] = $resolvedMonth;
+                $monthlyOutstanding[] = $outMonth;
+                $monthlyTotals[] = $openMonth + $newMonth;
+                $monthlyResolved3DaysPerc[] = $totMonth > 0 ? round(($w3Month / $totMonth) * 100, 2) : 0;
             }
         }
 
@@ -429,6 +497,13 @@ class CallCentreController extends Controller
                 'weeklyTotals' => $weeklyTotals,
                 'weeklyRangeStarts' => $weeklyRangeStarts,
                 'weeklyRangeEnds' => $weeklyRangeEnds,
+                'monthlyLabels' => $monthlyLabels,
+                'monthlyOpening' => $monthlyOpening,
+                'monthlyNewFaults' => $monthlyNewFaults,
+                'monthlyResolved' => $monthlyResolved,
+                'monthlyOutstanding' => $monthlyOutstanding,
+                'monthlyTotals' => $monthlyTotals,
+                'monthlyResolved3DaysPerc' => $monthlyResolved3DaysPerc,
         ]);
     }
 }
