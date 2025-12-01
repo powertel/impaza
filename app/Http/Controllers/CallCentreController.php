@@ -394,6 +394,9 @@ class CallCentreController extends Controller
         $monthlyOutstanding = [];
         $monthlyTotals = [];
         $monthlyResolved3DaysPerc = [];
+        $monthlyShiftMorning = [];
+        $monthlyShiftAfternoon = [];
+        $monthlyShiftNight = [];
         if ($filter === 'year') {
             $baseYear = $isAllYears ? ($selectedYear ?? $now->year) : ($selectedYear ?? $now->year);
             for ($m = 1; $m <= 12; $m++) {
@@ -453,6 +456,59 @@ class CallCentreController extends Controller
                 $monthlyOutstanding[] = $outMonth;
                 $monthlyTotals[] = $openMonth + $newMonth;
                 $monthlyResolved3DaysPerc[] = $totMonth > 0 ? round(($w3Month / $totMonth) * 100, 2) : 0;
+
+                $morningMonth = Fault::whereBetween('created_at', [$ms,$me])
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->whereTime('created_at', '>=', '06:00')
+                    ->whereTime('created_at', '<=', '13:59')
+                    ->count();
+                $afternoonMonth = Fault::whereBetween('created_at', [$ms,$me])
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->whereTime('created_at', '>=', '14:00')
+                    ->whereTime('created_at', '<=', '21:59')
+                    ->count();
+                $nightMonth = Fault::whereBetween('created_at', [$ms,$me])
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->where(function($q){
+                        $q->whereTime('created_at','>=','22:00')
+                          ->orWhereTime('created_at','<=','05:59');
+                    })
+                    ->count();
+                $monthlyShiftMorning[] = $morningMonth;
+                $monthlyShiftAfternoon[] = $afternoonMonth;
+                $monthlyShiftNight[] = $nightMonth;
+            }
+        }
+
+        $monthlyActiveLabels = [];
+        $monthlyOpeningActive = [];
+        $monthlyNewFaultsActive = [];
+        $monthlyResolvedActive = [];
+        $monthlyOutstandingActive = [];
+        $monthlyTotalsActive = [];
+        $monthlyResolved3DaysPercActive = [];
+        $monthlyShiftMorningActive = [];
+        $monthlyShiftAfternoonActive = [];
+        $monthlyShiftNightActive = [];
+        if ($filter === 'year') {
+            foreach ($monthlyLabels as $i => $ml) {
+                $open = (int)($monthlyOpening[$i] ?? 0);
+                $new = (int)($monthlyNewFaults[$i] ?? 0);
+                $res = (int)($monthlyResolved[$i] ?? 0);
+                $out = (int)($monthlyOutstanding[$i] ?? 0);
+                $hasActivity = ($open + $new + $res + $out) > 0;
+                if ($hasActivity) {
+                    $monthlyActiveLabels[] = $ml;
+                    $monthlyOpeningActive[] = $open;
+                    $monthlyNewFaultsActive[] = $new;
+                    $monthlyResolvedActive[] = $res;
+                    $monthlyOutstandingActive[] = $out;
+                    $monthlyTotalsActive[] = (int)($monthlyTotals[$i] ?? ($open + $new));
+                    $monthlyResolved3DaysPercActive[] = (int) round(($monthlyResolved3DaysPerc[$i] ?? 0));
+                    $monthlyShiftMorningActive[] = (int)($monthlyShiftMorning[$i] ?? 0);
+                    $monthlyShiftAfternoonActive[] = (int)($monthlyShiftAfternoon[$i] ?? 0);
+                    $monthlyShiftNightActive[] = (int)($monthlyShiftNight[$i] ?? 0);
+                }
             }
         }
 
@@ -504,6 +560,19 @@ class CallCentreController extends Controller
                 'monthlyOutstanding' => $monthlyOutstanding,
                 'monthlyTotals' => $monthlyTotals,
                 'monthlyResolved3DaysPerc' => $monthlyResolved3DaysPerc,
+                'monthlyShiftMorning' => $monthlyShiftMorning,
+                'monthlyShiftAfternoon' => $monthlyShiftAfternoon,
+                'monthlyShiftNight' => $monthlyShiftNight,
+                'monthlyActiveLabels' => $monthlyActiveLabels,
+                'monthlyOpeningActive' => $monthlyOpeningActive,
+                'monthlyNewFaultsActive' => $monthlyNewFaultsActive,
+                'monthlyResolvedActive' => $monthlyResolvedActive,
+                'monthlyOutstandingActive' => $monthlyOutstandingActive,
+                'monthlyTotalsActive' => $monthlyTotalsActive,
+                'monthlyResolved3DaysPercActive' => $monthlyResolved3DaysPercActive,
+                'monthlyShiftMorningActive' => $monthlyShiftMorningActive,
+                'monthlyShiftAfternoonActive' => $monthlyShiftAfternoonActive,
+                'monthlyShiftNightActive' => $monthlyShiftNightActive,
         ]);
     }
 }

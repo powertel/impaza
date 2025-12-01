@@ -258,14 +258,15 @@ Faults Analytics Dashboard
                     </thead>
                     <tbody>
                       @if($ff === 'year')
-                        @foreach(($monthlyLabels ?? []) as $i => $ml)
+                        @php $labels = ($monthlyActiveLabels ?? $monthlyLabels ?? []); @endphp
+                        @foreach(($labels) as $i => $ml)
                           @php
-                            $opening = (int)($monthlyOpening[$i] ?? 0);
-                            $new = (int)($monthlyNewFaults[$i] ?? 0);
-                            $resolved = (int)($monthlyResolved[$i] ?? 0);
-                            $closing = (int)($monthlyOutstanding[$i] ?? 0);
-                            $totalMonth = (int)($monthlyTotals[$i] ?? ($opening + $new));
-                            $perc = (int) round(($monthlyResolved3DaysPerc[$i] ?? 0));
+                            $opening = (int)(($monthlyOpeningActive[$i] ?? null) ?? ($monthlyOpening[$i] ?? 0));
+                            $new = (int)(($monthlyNewFaultsActive[$i] ?? null) ?? ($monthlyNewFaults[$i] ?? 0));
+                            $resolved = (int)(($monthlyResolvedActive[$i] ?? null) ?? ($monthlyResolved[$i] ?? 0));
+                            $closing = (int)(($monthlyOutstandingActive[$i] ?? null) ?? ($monthlyOutstanding[$i] ?? 0));
+                            $totalMonth = (int)(($monthlyTotalsActive[$i] ?? null) ?? ($monthlyTotals[$i] ?? ($opening + $new)));
+                            $perc = (int) round((($monthlyResolved3DaysPercActive[$i] ?? null) ?? ($monthlyResolved3DaysPerc[$i] ?? 0)));
                           @endphp
                           <tr>
                             <td><div class="fw-semibold text-gray-800">{{ $ml }}</div></td>
@@ -339,15 +340,18 @@ Faults Analytics Dashboard
     weeklyShiftNight: @json($weeklyShiftNight ?? []),
     weeklyRangeStarts: @json($weeklyRangeStarts ?? []),
     weeklyRangeEnds: @json($weeklyRangeEnds ?? []),
-    monthlyLabels: @json($monthlyLabels ?? []),
-    monthlyOpening: @json($monthlyOpening ?? []),
-    monthlyNewFaults: @json($monthlyNewFaults ?? []),
-    monthlyResolved: @json($monthlyResolved ?? []),
-    monthlyOutstanding: @json($monthlyOutstanding ?? []),
-    monthlyTotals: @json($monthlyTotals ?? []),
-    monthlyResolved3DaysPerc: @json($monthlyResolved3DaysPerc ?? []),
+    monthlyLabels: @json(($monthlyActiveLabels ?? $monthlyLabels) ?? []),
+    monthlyOpening: @json(($monthlyOpeningActive ?? $monthlyOpening) ?? []),
+    monthlyNewFaults: @json(($monthlyNewFaultsActive ?? $monthlyNewFaults) ?? []),
+    monthlyResolved: @json(($monthlyResolvedActive ?? $monthlyResolved) ?? []),
+    monthlyOutstanding: @json(($monthlyOutstandingActive ?? $monthlyOutstanding) ?? []),
+    monthlyTotals: @json(($monthlyTotalsActive ?? $monthlyTotals) ?? []),
+    monthlyResolved3DaysPerc: @json(($monthlyResolved3DaysPercActive ?? $monthlyResolved3DaysPerc) ?? []),
+    monthlyShiftMorning: @json(($monthlyShiftMorningActive ?? $monthlyShiftMorning) ?? []),
+    monthlyShiftAfternoon: @json(($monthlyShiftAfternoonActive ?? $monthlyShiftAfternoon) ?? []),
+    monthlyShiftNight: @json(($monthlyShiftNightActive ?? $monthlyShiftNight) ?? []),
   };
 </script>
-<script src="{{ asset('js/call_centre.js') }}"></script>
+<script src="{{ asset('js/call_centre.js') }}?v={{ file_exists(public_path('js/call_centre.js')) ? filemtime(public_path('js/call_centre.js')) : time() }}"></script>
 @endsection
 @endsection
