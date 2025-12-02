@@ -390,7 +390,13 @@ class FaultController extends Controller
                 ->leftjoin('cities','faults.city_id','=','cities.id')
                 ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
                 ->leftjoin('pops','faults.pop_id','=','pops.id')
-                ->where('account_manager_users.id', '=', $userId)
+                ->where(function($q) use ($userId, $request) {
+                    $q->where('account_manager_users.id', '=', $userId);
+                    $scopeRegion = trim((string) ($request->user()->region ?? ''));
+                    if ($scopeRegion !== '') {
+                        $q->orWhere('cities.region', '=', $scopeRegion);
+                    }
+                })
                 ->orderBy('faults.created_at', 'desc')
                 ->select([
                 'faults.id',
