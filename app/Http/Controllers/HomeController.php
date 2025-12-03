@@ -25,6 +25,16 @@ class HomeController extends Controller
      */
     public function index(Request $request)
     {
+        $availableRegions = DB::table('cities')
+            ->whereNotNull('region')
+            ->select('region')
+            ->distinct()
+            ->orderBy('region')
+            ->pluck('region')
+            ->toArray();
+
+        $selectedRegionInput = $request->input('region');
+        $selectedRegion = ($selectedRegionInput !== null && $selectedRegionInput !== '' && strtolower((string)$selectedRegionInput) !== 'all') ? (string)$selectedRegionInput : null;
         // Available years from faults.created_at
         $availableYears = DB::table('faults')
             ->selectRaw('YEAR(created_at) as y')
@@ -81,26 +91,50 @@ class HomeController extends Controller
 
         // Base counts respecting selected period
         $faultsQuery = DB::table('faults');
+        if ($selectedRegion !== null) {
+            $faultsQuery->leftJoin('cities','faults.city_id','=','cities.id')
+                        ->where('cities.region','=',$selectedRegion);
+        }
         if ($fromDate && $toDate) {
-            $faultsQuery->whereBetween('created_at', [$fromDate, $toDate]);
+            $faultsQuery->whereBetween('faults.created_at', [$fromDate, $toDate]);
         }
         $faultCount = $faultsQuery->count();
 
-        $customersQuery = DB::table('customers');
-        if ($fromDate && $toDate) {
-            $customersQuery->whereBetween('created_at', [$fromDate, $toDate]);
+        if ($selectedRegion !== null) {
+            $customersQuery = DB::table('customers')
+                ->leftJoin('links','links.customer_id','=','customers.id')
+                ->leftJoin('cities','links.city_id','=','cities.id')
+                ->where('cities.region','=',$selectedRegion)
+                ->distinct();
+            if ($fromDate && $toDate) {
+                $customersQuery->whereBetween('links.created_at', [$fromDate, $toDate]);
+            }
+            $customerCount = $customersQuery->count('customers.id');
+        } else {
+            $customersQuery = DB::table('customers');
+            if ($fromDate && $toDate) {
+                $customersQuery->whereBetween('created_at', [$fromDate, $toDate]);
+            }
+            $customerCount = $customersQuery->count();
         }
-        $customerCount = $customersQuery->count();
 
         $linksQuery = DB::table('links');
+        if ($selectedRegion !== null) {
+            $linksQuery->leftJoin('cities','links.city_id','=','cities.id')
+                      ->where('cities.region','=',$selectedRegion);
+        }
         if ($fromDate && $toDate) {
-            $linksQuery->whereBetween('created_at', [$fromDate, $toDate]);
+            $linksQuery->whereBetween('links.created_at', [$fromDate, $toDate]);
         }
         $linkCount = $linksQuery->count();
 
         $recentQuery = DB::table('faults')
             ->leftJoin('customers','faults.customer_id','=','customers.id')
             ->leftJoin('links','faults.link_id','=','links.id');
+        if ($selectedRegion !== null) {
+            $recentQuery->leftJoin('cities','faults.city_id','=','cities.id')
+                        ->where('cities.region','=',$selectedRegion);
+        }
         if ($fromDate && $toDate) {
             $recentQuery->whereBetween('faults.created_at', [$fromDate, $toDate]);
         }
@@ -115,10 +149,14 @@ class HomeController extends Controller
         if ($selectedYear !== null) {
             foreach (range(1,12) as $m) {
                 $monthlyLabels[] = Carbon::create(null, $m, 1)->format('M');
-                $count = DB::table('faults')
-                    ->whereYear('created_at', $selectedYear)
-                    ->whereMonth('created_at', $m)
-                    ->count();
+                $countQuery = DB::table('faults')
+                    ->whereYear('faults.created_at', $selectedYear)
+                    ->whereMonth('faults.created_at', $m);
+                if ($selectedRegion !== null) {
+                    $countQuery->leftJoin('cities','faults.city_id','=','cities.id')
+                               ->where('cities.region','=',$selectedRegion);
+                }
+                $count = $countQuery->count();
                 $monthlyCounts[] = (int)$count;
             }
         } else {
@@ -127,9 +165,13 @@ class HomeController extends Controller
             for ($i = 0; $i < 12; $i++) {
                 $label = $cursor->format('M');
                 $next = (clone $cursor)->endOfMonth();
-                $count = DB::table('faults')
-                    ->whereBetween('created_at', [$cursor, $next])
-                    ->count();
+                $countQuery = DB::table('faults')
+                    ->whereBetween('faults.created_at', [$cursor, $next]);
+                if ($selectedRegion !== null) {
+                    $countQuery->leftJoin('cities','faults.city_id','=','cities.id')
+                               ->where('cities.region','=',$selectedRegion);
+                }
+                $count = $countQuery->count();
                 $monthlyLabels[] = $label;
                 $monthlyCounts[] = (int)$count;
                 $cursor->addMonth();
@@ -141,6 +183,10 @@ class HomeController extends Controller
             ->leftJoin('statuses','faults.status_id','=','statuses.id')
             ->select('statuses.description as name', DB::raw('COUNT(*) as c'))
             ->groupBy('faults.status_id','statuses.description');
+        if ($selectedRegion !== null) {
+            $statusQuery->leftJoin('cities','faults.city_id','=','cities.id')
+                        ->where('cities.region','=',$selectedRegion);
+        }
         if ($fromDate && $toDate) {
             $statusQuery->whereBetween('faults.created_at', [$fromDate, $toDate]);
         }
@@ -155,6 +201,10 @@ class HomeController extends Controller
             ->groupBy('faults.customer_id','customers.customer')
             ->orderBy('c','desc')
             ->limit(5);
+        if ($selectedRegion !== null) {
+            $topCustQuery->leftJoin('cities','faults.city_id','=','cities.id')
+                         ->where('cities.region','=',$selectedRegion);
+        }
         if ($fromDate && $toDate) {
             $topCustQuery->whereBetween('faults.created_at', [$fromDate, $toDate]);
         }
@@ -167,12 +217,16 @@ class HomeController extends Controller
 
         $openFaultsQuery = DB::table('faults')
             ->where('status_id','!=',$nocClearedId);
+        if ($selectedRegion !== null) {
+            $openFaultsQuery->leftJoin('cities','faults.city_id','=','cities.id')
+                            ->where('cities.region','=',$selectedRegion);
+        }
         if ($fromDate && $toDate) {
-            $openFaultsQuery->whereBetween('created_at', [$fromDate, $toDate]);
+            $openFaultsQuery->whereBetween('faults.created_at', [$fromDate, $toDate]);
         }
         $openFaultsCount = $openFaultsQuery->count();
 
-        $openFaultCreatedAts = (clone $openFaultsQuery)->pluck('created_at');
+        $openFaultCreatedAts = (clone $openFaultsQuery)->pluck('faults.created_at');
 
         $now = Carbon::now();
         $ageSeconds = collect($openFaultCreatedAts)->map(function($dt) use ($now){
@@ -185,6 +239,11 @@ class HomeController extends Controller
         // Resolution metrics in selected period
         $avgResQuery = DB::table('fault_assignments')
             ->whereNotNull('resolved_at');
+        if ($selectedRegion !== null) {
+            $avgResQuery->leftJoin('faults','fault_assignments.fault_id','=','faults.id')
+                        ->leftJoin('cities','faults.city_id','=','cities.id')
+                        ->where('cities.region','=',$selectedRegion);
+        }
         if ($fromDate && $toDate) {
             $avgResQuery->whereBetween('resolved_at', [$fromDate, $toDate]);
         }
@@ -193,6 +252,11 @@ class HomeController extends Controller
         $techAvgQuery = DB::table('fault_assignments')
             ->leftJoin('users','fault_assignments.user_id','=','users.id')
             ->whereNotNull('fault_assignments.resolved_at');
+        if ($selectedRegion !== null) {
+            $techAvgQuery->leftJoin('faults','fault_assignments.fault_id','=','faults.id')
+                        ->leftJoin('cities','faults.city_id','=','cities.id')
+                        ->where('cities.region','=',$selectedRegion);
+        }
         if ($fromDate && $toDate) {
             $techAvgQuery->whereBetween('fault_assignments.resolved_at', [$fromDate, $toDate]);
         }
@@ -227,7 +291,8 @@ class HomeController extends Controller
             'availableYears','availableMonths','selectedYear','selectedMonth',
             'myAssignedCount','myResolvedCount','myAvgResolutionSec','myCompletionRate',
             'monthlyLabels','monthlyCounts','statusLabels','statusValues',
-            'topCustomerLabels','topCustomerCounts'
+            'topCustomerLabels','topCustomerCounts',
+            'availableRegions','selectedRegion'
         ));
     }
 }
