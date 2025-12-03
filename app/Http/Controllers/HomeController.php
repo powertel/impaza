@@ -136,12 +136,12 @@ class HomeController extends Controller
                         ->where('cities.region','=',$selectedRegion);
         }
         if ($fromDate && $toDate) {
-            $recentQuery->whereBetween('faults.created_at', [$fromDate, $toDate]);
+            $recentQuery->whereBetween('faults.updated_at', [$fromDate, $toDate]);
         }
         $recentFaults = $recentQuery
-            ->orderBy('faults.created_at','desc')
-            ->limit(20)
-            ->get(['faults.id','customers.customer','links.link','faults.created_at']);
+            ->orderBy('faults.updated_at','desc')
+            ->limit(10)
+            ->get(['faults.fault_ref_number','faults.status_id','customers.customer','links.link','faults.updated_at']);
 
         // Monthly counts for charts
         $monthlyLabels = [];
@@ -264,7 +264,7 @@ class HomeController extends Controller
             ->groupBy('fault_assignments.user_id','users.name')
             ->select('fault_assignments.user_id','users.name', DB::raw('AVG(fault_assignments.duration_seconds) as avg_sec'), DB::raw('COUNT(*) as tickets'))
             ->orderBy('avg_sec','asc')
-            ->limit(5)
+            ->limit(10)
             ->get();
 
         // My technician stats (for logged-in user)

@@ -14,6 +14,7 @@ Dashboard
   .zoom-card:hover { transform: scale(1.02); box-shadow: 0 12px 24px rgba(16,24,40,.12); }
   .cc-kpi.zoom-card:hover { transform: scale(1.03); }
   .avatar.avatar-sm .avatar-text { display:inline-block; width:28px; height:28px; border-radius:50%; background:#eef2ff; color:#4f46e5; font-weight:700; line-height:28px; text-align:center; }
+  .personal-performance-card { background:#ffffff; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 12px 32px rgba(16,24,40,.12); overflow:hidden; }
 </style>
  
   @php
@@ -280,9 +281,9 @@ Dashboard
               <p class="text-muted mb-0">Latest fault reports and updates</p>
             </div>
             <div class="table-controls">
-              <button class="btn btn-sm btn-outline-primary">
+              <!-- <button class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-refresh me-1"></i>Refresh
-              </button>
+              </button> -->
             </div>
           </div>
           <div class="table-body">
@@ -290,26 +291,29 @@ Dashboard
               <table class="table table-hover">
                 <thead>
                   <tr>
-                    <th>Fault ID</th>
+                    <th>Ref. No.</th>
                     <th>Customer</th>
                     <th>Status</th>
-                    <th>Created</th>
+                    <th>Updated</th>
                   </tr>
                 </thead>
                 <tbody>
                   @forelse(($recentFaults ?? []) as $fault)
                   <tr>
                     <td>
-                      <span class="fw-bold text-primary">#{{ $fault->id }}</span>
+                      <span class="fw-bold text-primary">{{ $fault->fault_ref_number }}</span>
                     </td>
                     <td>{{ Str::limit($fault->customer ?? 'N/A', 20) }}</td>
                     <td>
-                      <span class="badge bg-{{ ['success', 'warning', 'danger', 'info'][array_rand(['success', 'warning', 'danger', 'info'])] }}">
-                        {{ ['Open', 'In Progress', 'Resolved', 'Closed'][array_rand(['Open', 'In Progress', 'Resolved', 'Closed'])] }}
-                      </span>
+                      @php
+                        $sid = (int)($fault->status_id ?? 0);
+                        $statusLabel = in_array($sid,[1,2]) ? 'Open' : (in_array($sid,[3,4,5]) ? 'In Progress' : ($sid===6 ? 'Resolved' : 'Other'));
+                        $badge = in_array($sid,[1,2]) ? 'bg-danger' : (in_array($sid,[3,4,5]) ? 'bg-warning' : ($sid===6 ? 'bg-success' : 'bg-secondary'));
+                      @endphp
+                      <span class="badge {{ $badge }}">{{ $statusLabel }}</span>
                     </td>
                     <td>
-                      <small class="text-muted">{{ \Carbon\Carbon::parse($fault->created_at)->diffForHumans() }}</small>
+                      <small class="text-muted">{{ \Carbon\Carbon::parse($fault->updated_at)->diffForHumans() }}</small>
                     </td>
                   </tr>
                   @empty
@@ -334,7 +338,7 @@ Dashboard
   <div class="px-4 pb-4">
     <div class="row g-4 mt-2">
       <div class="col-12">
-        <div class="personal-performance-card">
+        <div class="personal-performance-card zoom-card">
           <div class="performance-header">
             <h5 class="mb-0">My Performance Dashboard</h5>
             <p class="mb-0">Your personal metrics for {{ $periodLabel }}</p>
