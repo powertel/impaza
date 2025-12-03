@@ -9,6 +9,12 @@ Dashboard
 @section('content')
 <link href="{{ asset('css/dashboard.css') }}" rel="stylesheet">
 <link href="{{ asset('css/call_centre.css') }}" rel="stylesheet">
+<style>
+  .zoom-card { transition: transform .12s ease, box-shadow .12s ease; }
+  .zoom-card:hover { transform: scale(1.02); box-shadow: 0 12px 24px rgba(16,24,40,.12); }
+  .cc-kpi.zoom-card:hover { transform: scale(1.03); }
+  .avatar.avatar-sm .avatar-text { display:inline-block; width:28px; height:28px; border-radius:50%; background:#eef2ff; color:#4f46e5; font-weight:700; line-height:28px; text-align:center; }
+</style>
  
   @php
     $periodLabel = ($selectedYear ?? null)
@@ -50,6 +56,15 @@ Dashboard
                 @endforeach
               </select>
             </div>
+            <div class="cc-field">
+              <label class="form-label"><i class="fas fa-globe-africa me-1"></i>Region</label>
+              <select name="region" class="form-select form-select-sm">
+                <option value="all" {{ ($selectedRegion ?? null) === null ? 'selected' : '' }}>All Regions</option>
+                @foreach(($availableRegions ?? []) as $r)
+                  <option value="{{ $r }}" {{ ($selectedRegion ?? null) === $r ? 'selected' : '' }}>{{ $r }}</option>
+                @endforeach
+              </select>
+            </div>
             <div class="cc-filter-actions ms-auto">
               <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4">
                 <i class="fas fa-filter me-1"></i>
@@ -67,7 +82,7 @@ Dashboard
   <div class="px-4 py-4 bg-gradient-to-r from-gray-50 to-white">
     <div class="row g-4 mb-4">
       <div class="col-xxl-3 col-lg-3 col-md-3 col-sm-6 col-6">
-        <div class="cc-kpi cc-kpi--blue cc-kpi--compact h-100">
+        <div class="cc-kpi cc-kpi--blue cc-kpi--compact h-100 zoom-card">
           <div class="cc-kpi-head">
             <div class="cc-kpi-icon"><i class="fas fa-exclamation-triangle"></i></div>
             <div class="cc-kpi-title">Total Faults</div>
@@ -77,7 +92,7 @@ Dashboard
         </div>
       </div>
       <div class="col-xxl-3 col-lg-3 col-md-3 col-sm-6 col-6">
-        <div class="cc-kpi cc-kpi--green cc-kpi--compact h-100">
+        <div class="cc-kpi cc-kpi--green cc-kpi--compact h-100 zoom-card">
           <div class="cc-kpi-head">
             <div class="cc-kpi-icon"><i class="fas fa-users"></i></div>
             <div class="cc-kpi-title">Active Customers</div>
@@ -87,7 +102,7 @@ Dashboard
         </div>
       </div>
       <div class="col-xxl-3 col-lg-3 col-md-3 col-sm-6 col-6">
-        <div class="cc-kpi cc-kpi--indigo cc-kpi--compact h-100">
+        <div class="cc-kpi cc-kpi--indigo cc-kpi--compact h-100 zoom-card">
           <div class="cc-kpi-head">
             <div class="cc-kpi-icon"><i class="fas fa-link"></i></div>
             <div class="cc-kpi-title">Network Links</div>
@@ -98,7 +113,7 @@ Dashboard
       </div>
       @can('dashboard-open-faults')
       <div class="col-xxl-3 col-lg-3 col-md-3 col-sm-6 col-6">
-        <div class="cc-kpi cc-kpi--slate cc-kpi--compact h-100">
+        <div class="cc-kpi cc-kpi--slate cc-kpi--compact h-100 zoom-card">
           <div class="cc-kpi-head">
             <div class="cc-kpi-icon"><i class="fas fa-exclamation-circle"></i></div>
             <div class="cc-kpi-title">Open Faults</div>
@@ -115,7 +130,7 @@ Dashboard
   <div class="px-4 pb-4">
     <div class="row g-4 mb-4">
       <div class="col-xl-8 col-lg-7">
-        <div class="chart-card cc-chart-card">
+        <div class="chart-card cc-chart-card zoom-card">
           <div class="chart-header">
             <div class="chart-title">
               <h5 class="mb-0">Monthly Fault Trends</h5>
@@ -128,7 +143,7 @@ Dashboard
         </div>
       </div>
       <div class="col-xl-4 col-lg-5">
-        <div class="chart-card cc-chart-card">
+        <div class="chart-card cc-chart-card zoom-card">
           <div class="chart-header">
             <div class="chart-title">
               <h5 class="mb-0">Fault Status Distribution</h5>
@@ -148,7 +163,7 @@ Dashboard
   <div class="px-4 pb-4">
     <div class="row g-4 mb-4">
       <div class="col-xl-6">
-        <div class="performance-card cc-chart-card">
+        <div class="performance-card cc-chart-card zoom-card">
           <div class="performance-header">
             <h5 class="mb-0">Resolution Performance</h5>
             <p class="text-muted mb-0">Average resolution times by period</p>
@@ -174,7 +189,7 @@ Dashboard
       </div>
       @can('dashboard-fault-age')
       <div class="col-xl-6">
-        <div class="performance-card cc-chart-card">
+        <div class="performance-card cc-chart-card zoom-card">
           <div class="performance-header">
             <h5 class="mb-0">Aging Analysis</h5>
             <p class="text-muted mb-0">Open fault aging metrics</p>
