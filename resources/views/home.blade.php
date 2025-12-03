@@ -281,9 +281,9 @@ Dashboard
               <p class="text-muted mb-0">Latest fault reports and updates</p>
             </div>
             <div class="table-controls">
-              <button class="btn btn-sm btn-outline-primary">
+              <!-- <button class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-refresh me-1"></i>Refresh
-              </button>
+              </button> -->
             </div>
           </div>
           <div class="table-body">

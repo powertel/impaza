@@ -264,7 +264,7 @@ class HomeController extends Controller
             ->groupBy('fault_assignments.user_id','users.name')
             ->select('fault_assignments.user_id','users.name', DB::raw('AVG(fault_assignments.duration_seconds) as avg_sec'), DB::raw('COUNT(*) as tickets'))
             ->orderBy('avg_sec','asc')
-            ->limit(5)
+            ->limit(10)
             ->get();
 
         // My technician stats (for logged-in user)
