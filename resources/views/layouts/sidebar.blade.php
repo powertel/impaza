@@ -92,6 +92,12 @@
                 <p>Rectified</p>
               </a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link {{ request()->routeIs('chief-tech-escalations.*') ? 'active' : '' }}" href="{{ route('chief-tech-escalations.index') }}">
+                <i class="nav-icon fas fa-level-up-alt"></i>
+                <p>Escalations</p>
+              </a>
+            </li>
             @endcan
             @can('noc-clear-faults-list')
             <li class="nav-item">

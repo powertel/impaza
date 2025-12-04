@@ -95,8 +95,8 @@ My Faults
                                     <i class="fas fa-pencil me-1"></i>Request Material
                                 </button>
                             @endcan
-                            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#referModal-{{ $fault->id }}">
-                                <i class="fas fa-share me-1"></i>Refer
+                            <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#escalateModal-{{ $fault->id }}">
+                                <i class="fas fa-level-up-alt me-1"></i>Escalate
                             </button>
                             
                         @endif
@@ -120,7 +120,7 @@ My Faults
                 @include('rectification.edit_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()), 'confirmedRFO' => ($confirmedRFO ?? collect()) ])
                 @include('permits.requested-permits.edit_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
                 @include('stores.create_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
-                @include('my_faults.refer_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()), 'sections' => ($sections ?? collect()) ])
+                @include('my_faults.escalate_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
                 @include('faults.show', [
                     'fault' => $fault,
                     'remarks' => ($remarksByFault[$fault->id] ?? collect()),

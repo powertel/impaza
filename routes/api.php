@@ -37,6 +37,7 @@ Route::prefix('mobile')->group(function () {
         Route::get('faults', [FaultController::class, 'index']);
         Route::get('faults/{fault}', [FaultController::class, 'show']);
         Route::post('faults/{fault}/rectify', [FaultController::class, 'rectify']);
+        Route::post('faults/{fault}/escalate', [FaultController::class, 'escalate']);
         Route::post('faults/{fault}/remarks', [FaultController::class, 'addRemark']);
         Route::get('rfos', [FaultController::class, 'rfos']);
         Route::get('sections', [FaultController::class, 'sections']);

@@ -26,6 +26,7 @@ use App\Http\Controllers\DepartmentFaultController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\ChiefTechClearFaultsController;
+use App\Http\Controllers\ChiefTechEscalationsController;
 use App\Http\Controllers\NocClearFaultsController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\StoreController;
@@ -108,6 +109,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('finance', FinanceController::class);
     Route::resource('my_faults', MyFaultController::class);
     Route::post('my_faults/{id}/refer', [MyFaultController::class, 'refer'])->name('my_faults.refer');
+    Route::post('my_faults/{fault}/escalate', [MyFaultController::class, 'escalate'])->name('my_faults.escalate');
     Route::resource('department_faults', DepartmentFaultController::class);
     Route::get('referred-faults', [DepartmentFaultController::class, 'referred'])->name('referred_faults.index');
     Route::post('referrals/{referral}/complete', [DepartmentFaultController::class, 'completeReferral'])->name('referrals.complete');
@@ -139,6 +141,11 @@ Route::group(['middleware' => ['auth']], function() {
     // Auto-save endpoints
     Route::post('technicians/settings/ajax', [TechnicianConfigController::class, 'updateSettingsAjax'])->name('technicians.settings.ajax');
     Route::post('technicians/users/{user}/setting', [TechnicianConfigController::class, 'updateUserSetting'])->name('technicians.user.setting');
+
+    Route::get('chief-tech/escalations', [ChiefTechEscalationsController::class, 'index'])->name('chief-tech-escalations.index');
+    Route::post('chief-tech/escalations/{fault}/refer', [ChiefTechEscalationsController::class, 'refer'])->name('chief-tech-escalations.refer');
+    Route::post('chief-tech/escalations/{fault}/return', [ChiefTechEscalationsController::class, 'returnToRectification'])->name('chief-tech-escalations.return');
+    Route::post('chief-tech/escalations/{fault}/escalate-manager', [ChiefTechEscalationsController::class, 'escalateToManager'])->name('chief-tech-escalations.escalate-manager');
 });
 
 

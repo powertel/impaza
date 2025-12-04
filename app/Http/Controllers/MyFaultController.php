@@ -24,6 +24,8 @@ class MyFaultController extends Controller
          $this->middleware('permission:my-fault-create', ['only' => ['create','store']]);
          $this->middleware('permission:my-fault-edit', ['only' => ['edit','update']]);
          $this->middleware('permission:my-fault-delete', ['only' => ['destroy']]);
+         $this->middleware('permission:refer-fault', ['only' => ['refer']]);
+         $this->middleware('permission:rectify-fault', ['only' => ['escalate']]);
     }
     /**
      * Display a listing of the resource.
@@ -171,6 +173,32 @@ class MyFaultController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             return redirect()->back()->with('fail', 'Failed to refer fault');
+        }
+    }
+
+    public function escalate(Request $request, Fault $fault)
+    {
+        $request->validate([
+            'remark' => ['required','string']
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $fault->update(['status_id' => \App\Services\FaultLifecycle::escalatedId()]);
+            FaultLifecycle::recordStatusChange($fault, \App\Services\FaultLifecycle::escalatedId(), $request->user()->id);
+            FaultLifecycle::resolveAssignment($fault);
+
+            Remark::create([
+                'fault_id' => $fault->id,
+                'user_id' => $request->user()->id,
+                'remark' => 'Escalated: '.$request->input('remark'),
+            ]);
+
+            DB::commit();
+            return redirect()->route('my_faults.index')->with('success', 'Fault escalated to Chief Technician');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->with('fail', 'Failed to escalate fault');
         }
     }
 
