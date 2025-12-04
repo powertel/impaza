@@ -33,6 +33,8 @@ class ChiefTechEscalationsController extends Controller
             ->leftjoin('cities','faults.city_id','=','cities.id')
             ->leftjoin('suburbs','faults.suburb_id','=','suburbs.id')
             ->leftjoin('pops','faults.pop_id','=','pops.id')
+            ->leftjoin('reasons_for_outages as suspectedRFO','faults.suspectedRfo_id','=','suspectedRFO.id')
+            ->leftjoin('reasons_for_outages as confirmedRFO','faults.confirmedRfo_id','=','confirmedRFO.id')
             ->leftjoin('fault_stage_logs as fsl', function($join) {
                 $join->on('fsl.fault_id','=','faults.id');
                 $join->on('fsl.status_id','=','faults.status_id');
@@ -69,6 +71,8 @@ class ChiefTechEscalationsController extends Controller
             'cities.region',
             'suburbs.suburb',
             'pops.pop',
+            'suspectedRFO.RFO as RFO',
+            'confirmedRFO.RFO as confirmedRFO',
             'fsl.started_at as stage_started_at'
         ]);
 

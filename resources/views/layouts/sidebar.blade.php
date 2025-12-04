@@ -52,20 +52,21 @@
               </a>
             </li>
             @endcan
+
+            @can('assign-fault')
+            <li class="nav-item">
+              <a href="{{ route('assign.create') }}" class="nav-link {{ request()->routeIs('assign.create') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-user-check"></i>
+                <p>Assign</p>
+              </a>
+            </li>
+            @endcan
             
             @can('assigned-fault-list')
             <li class="nav-item">
               <a href="{{ route('assign.index') }}" class="nav-link {{ request()->routeIs('assign.index') ? 'active' : '' }}">
                 <i class="nav-icon fas fa-tasks"></i>
                 <p>Assigned</p>
-              </a>
-            </li>
-            @endcan
-            @can('assign-fault')
-            <li class="nav-item">
-              <a href="{{ route('assign.create') }}" class="nav-link {{ request()->routeIs('assign.create') ? 'active' : '' }}">
-                <i class="nav-icon fas fa-user-check"></i>
-                <p>Assign</p>
               </a>
             </li>
             @endcan

@@ -44,11 +44,14 @@ Escalations
                         </td>
                         <td class="text-nowrap">
                             @can('chief-tech-clear-faults-clear')
-                            <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal" data-bs-target="#returnRectModal-{{ $fault->id }}">
+                            <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                                <i class="fas fa-eye me-1"></i> View
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#returnRectModal-{{ $fault->id }}">
                                 <i class="fas fa-undo me-1"></i> Return to Rectification
                             </button>
                             <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#referModal-{{ $fault->id }}">
-                                <i class="fas fa-share-square me-1"></i> Refer to Section
+                                <i class="fas fa-share-square me-1"></i> Refer to section
                             </button>
                             <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#escalateMgrModal-{{ $fault->id }}">
                                 <i class="fas fa-level-up-alt me-1"></i> Escalate to Manager
@@ -59,6 +62,7 @@ Escalations
                     @include('escalations.refer_modal', ['fault' => $fault])
                     @include('escalations.return_rect_modal', ['fault' => $fault])
                     @include('escalations.escalate_manager_modal', ['fault' => $fault])
+                    @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
                     @endforeach
                     @if ($faults->count() === 0)
                         <tr>
