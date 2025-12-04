@@ -225,6 +225,44 @@ class FaultLifecycle
             }
         }
 
+        if ($toStatusId === 4) {
+            $sectionId = (int) (FaultSection::where('fault_id', $fault->id)->value('section_id') ?? 0);
+            $sectionName = $sectionId ? (Section::find($sectionId)->section ?? 'Section') : 'Section';
+            $region = $fault->city_id ? (City::find($fault->city_id)->region ?? null) : null;
+            $query = User::query()
+                ->join('positions','users.position_id','=','positions.id')
+                ->where('positions.position', '=', 'Chief Technician')
+                ->whereNotNull('users.phonenumber');
+            if ($sectionId > 0) {
+                $query->where('users.section_id', '=', $sectionId);
+            }
+            if (in_array($sectionId, [2,3], true) && !empty($region)) {
+                $query->where('users.region', '=', $region);
+            }
+            $recipients = $query->pluck('users.phonenumber')->all();
+            if (empty($recipients)) {
+                $fallback = env('POWERTEL_SMS_CT_RECIPIENTS');
+                $recipients = array_values(array_filter(array_map('trim', explode(',', (string)$fallback)), fn($x) => $x !== ''));
+            }
+            if (!empty($recipients)) {
+                $text = "Rectification: Fault {$fault->fault_ref_number} was rectified for {$sectionName}.";
+                $ok = app(SmsService::class)->send($recipients, $text);
+                Log::info($ok ? 'Notify: Chief Technicians notified (SMS) for status 4' : 'Notify: Chief Technicians SMS failed for status 4', [
+                    'ok' => $ok,
+                    'fault' => $fault->fault_ref_number,
+                    'recipients' => $recipients,
+                    'section_id' => $sectionId,
+                    'region' => $region,
+                ]);
+            } else {
+                Log::warning('Notify: No Chief Technicians found for rectified fault', [
+                    'fault' => $fault->fault_ref_number,
+                    'section_id' => $sectionId,
+                    'region' => $region,
+                ]);
+            }
+        }
+
         // Notify customer for key statuses (logged, assessed, resolved)
         self::notifyCustomerStatus($fault, $toStatusId, $customerText);
 
