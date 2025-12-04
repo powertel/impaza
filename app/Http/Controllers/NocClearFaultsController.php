@@ -52,8 +52,7 @@ class NocClearFaultsController extends Controller
                 $join->whereNull('fsl.ended_at');
             })
             ->orderBy('faults.created_at', 'desc')
-            // Show faults cleared by Technician (CLT: status_id = 5) for NOC review
-            ->where('faults.status_id','=',5)
+            ->where('faults.status_id','=',4)
             ->get([
                 'faults.id',
                 'faults.fault_ref_number',

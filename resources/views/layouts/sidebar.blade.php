@@ -89,7 +89,7 @@
             <li class="nav-item">
               <a class="nav-link {{ request()->routeIs('chief-tech-clear.*') ? 'active' : '' }}" href="{{ route('chief-tech-clear.index') }}">
                 <i class="nav-icon fas fa-wrench"></i>
-                <p>Clear</p>
+                <p>Rectified</p>
               </a>
             </li>
             @endcan

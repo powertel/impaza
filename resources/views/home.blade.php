@@ -14,7 +14,14 @@ Dashboard
   .zoom-card:hover { transform: scale(1.02); box-shadow: 0 12px 24px rgba(16,24,40,.12); }
   .cc-kpi.zoom-card:hover { transform: scale(1.03); }
   .avatar.avatar-sm .avatar-text { display:inline-block; width:28px; height:28px; border-radius:50%; background:#eef2ff; color:#4f46e5; font-weight:700; line-height:28px; text-align:center; }
-  .personal-performance-card { background:#ffffff; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 12px 32px rgba(16,24,40,.12); overflow:hidden; }
+  .personal-performance-card { background:#ffffff; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 12px 32px rgba(16,24,40,.12); overflow:hidden; color:#111827; }
+  .personal-performance-card .performance-header { border-bottom: 1px solid #f1f5f9; }
+  .personal-performance-card .performance-header h5 { color:#111827; }
+  .personal-performance-card .performance-header p { color:#6b7280; }
+  .personal-performance-card .metric-value { color:#111827; }
+  .personal-performance-card .metric-label { color:#6b7280; }
+  .personal-performance-card .personal-metric { background: transparent; backdrop-filter: none; }
+  .personal-performance-card .metric-icon { color:#111827; }
 </style>
  
   @php
