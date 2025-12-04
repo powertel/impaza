@@ -163,6 +163,16 @@ class FaultLifecycle
         return $cachedId;
     }
 
+    public static function escalatedId(): int
+    {
+        return 10;
+    }
+
+    public static function managerEscalatedId(): int
+    {
+        return 11;
+    }
+
     protected static function notifyStatusChange(Fault $fault, int $toStatusId): void
     {
         $desc = Status::find($toStatusId)->description ?? 'Status changed';
@@ -265,6 +275,59 @@ class FaultLifecycle
 
         // Notify customer for key statuses (logged, assessed, resolved)
         self::notifyCustomerStatus($fault, $toStatusId, $customerText);
+
+        // Escalations -> notify appropriate recipients
+        if ($toStatusId === self::escalatedId()) {
+            $sectionId = (int) (FaultSection::where('fault_id', $fault->id)->value('section_id') ?? 0);
+            $region = $fault->city_id ? (City::find($fault->city_id)->region ?? null) : null;
+            $query = User::query()
+                ->join('positions','users.position_id','=','positions.id')
+                ->where('positions.position', '=', 'Chief Technician')
+                ->whereNotNull('users.phonenumber');
+            if ($sectionId > 0) {
+                $query->where('users.section_id', '=', $sectionId);
+            }
+            if (in_array($sectionId, [2,3], true) && !empty($region)) {
+                $query->where('users.region', '=', $region);
+            }
+            $recipients = $query->pluck('users.phonenumber')->all();
+            if (!empty($recipients)) {
+                $text = "Escalation: Fault {$fault->fault_ref_number} has been escalated by technician for review.";
+                $ok = app(SmsService::class)->send($recipients, $text);
+                Log::info($ok ? 'Notify: Chief Technicians notified (SMS) for escalation' : 'Notify: Chief Technicians SMS failed for escalation', [
+                    'ok' => $ok,
+                    'fault' => $fault->fault_ref_number,
+                    'recipients' => $recipients,
+                    'section_id' => $sectionId,
+                    'region' => $region,
+                ]);
+            }
+        } elseif ($toStatusId === self::managerEscalatedId()) {
+            $sectionId = (int) (FaultSection::where('fault_id', $fault->id)->value('section_id') ?? 0);
+            $region = $fault->city_id ? (City::find($fault->city_id)->region ?? null) : null;
+            $query = User::query()
+                ->join('positions','users.position_id','=','positions.id')
+                ->whereIn('positions.position', ['Manager','Technical Manager'])
+                ->whereNotNull('users.phonenumber');
+            if ($sectionId > 0) {
+                $query->where('users.section_id', '=', $sectionId);
+            }
+            if (in_array($sectionId, [2,3], true) && !empty($region)) {
+                $query->where('users.region', '=', $region);
+            }
+            $recipients = $query->pluck('users.phonenumber')->all();
+            if (!empty($recipients)) {
+                $text = "Escalation: Fault {$fault->fault_ref_number} has been escalated to Manager for intervention.";
+                $ok = app(SmsService::class)->send($recipients, $text);
+                Log::info($ok ? 'Notify: Managers notified (SMS) for escalation' : 'Notify: Managers SMS failed for escalation', [
+                    'ok' => $ok,
+                    'fault' => $fault->fault_ref_number,
+                    'recipients' => $recipients,
+                    'section_id' => $sectionId,
+                    'region' => $region,
+                ]);
+            }
+        }
 
         // 3+ progression updates -> notify currently assigned technician if present
         /* if ($toStatusId === 3) {

@@ -52,20 +52,21 @@
               </a>
             </li>
             @endcan
+
+            @can('assign-fault')
+            <li class="nav-item">
+              <a href="{{ route('assign.create') }}" class="nav-link {{ request()->routeIs('assign.create') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-user-check"></i>
+                <p>Assign</p>
+              </a>
+            </li>
+            @endcan
             
             @can('assigned-fault-list')
             <li class="nav-item">
               <a href="{{ route('assign.index') }}" class="nav-link {{ request()->routeIs('assign.index') ? 'active' : '' }}">
                 <i class="nav-icon fas fa-tasks"></i>
                 <p>Assigned</p>
-              </a>
-            </li>
-            @endcan
-            @can('assign-fault')
-            <li class="nav-item">
-              <a href="{{ route('assign.create') }}" class="nav-link {{ request()->routeIs('assign.create') ? 'active' : '' }}">
-                <i class="nav-icon fas fa-user-check"></i>
-                <p>Assign</p>
               </a>
             </li>
             @endcan
@@ -90,6 +91,12 @@
               <a class="nav-link {{ request()->routeIs('chief-tech-clear.*') ? 'active' : '' }}" href="{{ route('chief-tech-clear.index') }}">
                 <i class="nav-icon fas fa-wrench"></i>
                 <p>Rectified</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link {{ request()->routeIs('chief-tech-escalations.*') ? 'active' : '' }}" href="{{ route('chief-tech-escalations.index') }}">
+                <i class="nav-icon fas fa-level-up-alt"></i>
+                <p>Escalations</p>
               </a>
             </li>
             @endcan

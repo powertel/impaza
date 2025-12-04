@@ -312,4 +312,35 @@ class FaultController extends Controller
             return response()->json(['success' => false, 'error' => 'Failed to refer'], 500);
         }
     }
+
+    public function escalate(Request $request, Fault $fault)
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+        }
+
+        $validated = $request->validate([
+            'remark' => ['required','string']
+        ]);
+
+        \DB::beginTransaction();
+        try {
+            $fault->update(['status_id' => \App\Services\FaultLifecycle::escalatedId()]);
+            FaultLifecycle::recordStatusChange($fault, \App\Services\FaultLifecycle::escalatedId(), $user->id);
+            FaultLifecycle::resolveAssignment($fault);
+
+            Remark::create([
+                'fault_id' => $fault->id,
+                'user_id' => $user->id,
+                'remark' => 'Escalated: ' . $validated['remark'],
+            ]);
+
+            \DB::commit();
+            return response()->json(['success' => true]);
+        } catch (\Throwable $e) {
+            \DB::rollBack();
+            return response()->json(['success' => false, 'error' => 'Failed to escalate'], 500);
+        }
+    }
 }
