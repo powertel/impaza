@@ -70,11 +70,6 @@ Escalations
                             
                         </td>
                     </tr>
-                    @include('escalations.refer_modal', ['fault' => $fault])
-                    @include('escalations.return_rect_modal', ['fault' => $fault])
-                    @include('escalations.escalate_manager_modal', ['fault' => $fault])
-                    @include('escalations.return_manager_modal', ['fault' => $fault])
-                    @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
                     @endforeach
                     @if ($faults->count() === 0)
                         <tr>
@@ -87,6 +82,13 @@ Escalations
     </div>
 </div>
 
+ @foreach ($faults as $fault)
+    @include('escalations.refer_modal', ['fault' => $fault])
+    @include('escalations.return_rect_modal', ['fault' => $fault])
+    @include('escalations.escalate_manager_modal', ['fault' => $fault])
+    @include('escalations.return_manager_modal', ['fault' => $fault])
+    @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
+@endforeach
 </section>
 
 @endsection
