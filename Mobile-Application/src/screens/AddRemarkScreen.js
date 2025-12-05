@@ -16,15 +16,31 @@ export default function AddRemarkScreen() {
   const [images, setImages] = useState([]);
 
   const pickImages = async () => {
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    try {
+      console.log('pickImages: start', { platform: Platform.OS });
+      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      console.log('pickImages: permission', perm);
     if (!perm.granted) {
-      Alert.alert('Permission required', 'Allow media library access to attach images.');
+      Alert.alert('Permission required', 'Allow media library access to attach images.', [
+        { text: 'Open Settings', onPress: () => { try { require('expo-linking').openSettings(); } catch (_) {} } },
+        { text: 'Cancel', style: 'cancel' }
+      ]);
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync({ allowsMultipleSelection: true, mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8 });
-    if (result.canceled) return;
+    const opts = Platform.OS === 'android'
+      ? { mediaTypes: ['images'], quality: 0.8 }
+      : { mediaTypes: ['images'], quality: 0.8 };
+      console.log('pickImages: launch options', opts);
+      const result = await ImagePicker.launchImageLibraryAsync(opts);
+      console.log('pickImages: result', result);
+    if (result.canceled) { Alert.alert('No image selected'); return; }
     const selected = (result.assets || []).map(a => ({ uri: a.uri, name: a.fileName || `attachment-${Date.now()}.jpg`, type: a.mimeType || 'image/jpeg' }));
     setImages(prev => [...prev, ...selected]);
+    Alert.alert('Attached', `${selected.length} image(s) added`);
+    } catch (e) {
+      console.error('pickImages: error', e);
+      Alert.alert('Error', 'Failed to open gallery.');
+    }
   };
 
   const submit = async () => {
@@ -34,6 +50,7 @@ export default function AddRemarkScreen() {
     }
     setLoading(true);
     try {
+      console.log('submitRemark: start', { imagesCount: images.length });
       if (images.length > 0) {
         const fd = new FormData();
         fd.append('remark', remark.trim());
@@ -45,14 +62,17 @@ export default function AddRemarkScreen() {
             fd.append('attachments[]', { uri: img.uri, name: img.name, type: img.type });
           }
         }
-        await addFaultRemark(id, fd);
+        const resp = await addFaultRemark(id, fd);
+        console.log('submitRemark: response (form)', resp);
       } else {
-        await addFaultRemark(id, { remark: remark.trim() });
+        const resp = await addFaultRemark(id, { remark: remark.trim() });
+        console.log('submitRemark: response (json)', resp);
       }
       Alert.alert('Success', 'Remark added successfully.', [
         { text: 'OK', onPress: () => navigation.replace('FaultDetail', { id, refetchAt: Date.now() }) }
       ]);
     } catch (e) {
+      console.error('submitRemark: error', e);
       Alert.alert('Error', 'Failed to add remark. Please try again.');
     } finally {
       setLoading(false);
@@ -91,16 +111,25 @@ export default function AddRemarkScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.secondaryBtn} onPress={async () => {
+          console.log('capturePhoto: start', { platform: Platform.OS });
           const perm = await ImagePicker.requestCameraPermissionsAsync();
+          console.log('capturePhoto: permission', perm);
           if (!perm.granted) {
-            Alert.alert('Permission required', 'Allow camera access to capture images.');
+            Alert.alert('Permission required', 'Allow camera access to capture images.', [
+              { text: 'Open Settings', onPress: () => { try { require('expo-linking').openSettings(); } catch (_) {} } },
+              { text: 'Cancel', style: 'cancel' }
+            ]);
             return;
           }
-          const result = await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8 });
-          if (result.canceled) return;
+          const opts = { mediaTypes: ['images'], quality: 0.8, cameraType: 'back' };
+          console.log('capturePhoto: launch options', opts);
+          const result = await ImagePicker.launchCameraAsync(opts);
+          console.log('capturePhoto: result', result);
+          if (result.canceled) { Alert.alert('Capture canceled'); return; }
           const a = result.assets?.[0];
           if (a) {
             setImages(prev => [...prev, { uri: a.uri, name: a.fileName || `capture-${Date.now()}.jpg`, type: a.mimeType || 'image/jpeg' }]);
+            Alert.alert('Attached', 'Photo added');
           }
         }} disabled={loading}>
           <Text style={styles.secondaryBtnText}>Capture Photo</Text>

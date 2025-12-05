@@ -89,20 +89,34 @@ export default function RectifyFaultScreen() {
           onChangeText={setNotes}
           placeholderTextColor={theme.colors.gray}
         />
-        <TouchableOpacity style={[styles.primaryBtn, { marginTop: theme.spacing.md }]} onPress={pickImages}>
+        <TouchableOpacity style={[styles.primaryBtn, { marginTop: theme.spacing.md }]} onPress={() => { pickImages(); }}>
           <Text style={styles.primaryBtnText}>Attach Images</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.primaryBtn, { marginTop: theme.spacing.sm }]} onPress={async () => {
-          const perm = await ImagePicker.requestCameraPermissionsAsync();
+          try {
+            console.log('capturePhoto: start', { platform: Platform.OS });
+            const perm = await ImagePicker.requestCameraPermissionsAsync();
+            console.log('capturePhoto: permission', perm);
           if (!perm.granted) {
-            Alert.alert('Permission required', 'Allow camera access to capture images.');
+            Alert.alert('Permission required', 'Allow camera access to capture images.', [
+              { text: 'Open Settings', onPress: () => { try { require('expo-linking').openSettings(); } catch (_) {} } },
+              { text: 'Cancel', style: 'cancel' }
+            ]);
             return;
           }
-          const result = await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8 });
-          if (result.canceled) return;
-          const a = result.assets?.[0];
-          if (a) {
-            setImages(prev => [...prev, { uri: a.uri, name: a.fileName || `capture-${Date.now()}.jpg`, type: a.mimeType || 'image/jpeg' }]);
+            const opts = { mediaTypes: ['images'], quality: 0.8, cameraType: 'back' };
+            console.log('capturePhoto: launch options', opts);
+            const result = await ImagePicker.launchCameraAsync(opts);
+            console.log('capturePhoto: result', result);
+            if (result.canceled) { Alert.alert('Capture canceled'); return; }
+            const a = result.assets?.[0];
+            if (a) {
+              setImages(prev => [...prev, { uri: a.uri, name: a.fileName || `capture-${Date.now()}.jpg`, type: a.mimeType || 'image/jpeg' }]);
+              Alert.alert('Attached', 'Photo added');
+            }
+          } catch (e) {
+            console.error('capturePhoto: error', e);
+            Alert.alert('Error', 'Failed to open camera.');
           }
         }}>
           <Text style={styles.primaryBtnText}>Capture Photo</Text>
@@ -140,11 +154,18 @@ const styles = StyleSheet.create({
   const pickImages = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert('Permission required', 'Allow media library access to attach images.');
+      Alert.alert('Permission required', 'Allow media library access to attach images.', [
+        { text: 'Open Settings', onPress: () => { try { require('expo-linking').openSettings(); } catch (_) {} } },
+        { text: 'Cancel', style: 'cancel' }
+      ]);
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync({ allowsMultipleSelection: true, mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8 });
-    if (result.canceled) return;
+    const opts = Platform.OS === 'android'
+      ? { mediaTypes: ['images'], quality: 0.8 }
+      : { mediaTypes: ['images'], quality: 0.8 };
+    const result = await ImagePicker.launchImageLibraryAsync(opts);
+    if (result.canceled) { Alert.alert('No image selected'); return; }
     const selected = (result.assets || []).map(a => ({ uri: a.uri, name: a.fileName || `attachment-${Date.now()}.jpg`, type: a.mimeType || 'image/jpeg' }));
     setImages(prev => [...prev, ...selected]);
+    Alert.alert('Attached', `${selected.length} image(s) added`);
   };
