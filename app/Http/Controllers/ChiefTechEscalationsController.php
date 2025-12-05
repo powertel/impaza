@@ -198,16 +198,23 @@ class ChiefTechEscalationsController extends Controller
             'remark' => ['required','string']
         ]);
 
-        $fault->update(['status_id' => 3]);
-        FaultLifecycle::reopenStageForStatus($fault, 3, $request->user()->id);
-        FaultLifecycle::reopenAssignment($fault);
+        DB::beginTransaction();
+        try {
+            $fault->update(['status_id' => 3]);
+            FaultLifecycle::reopenStageForStatus($fault, 3, $request->user()->id);
+            FaultLifecycle::reopenAssignment($fault);
 
-        Remark::create([
-            'fault_id' => $fault->id,
-            'user_id' => $request->user()->id,
-            'remark' => 'Escalation returned: '.$request->input('remark'),
-        ]);
+            Remark::create([
+                'fault_id' => $fault->id,
+                'user_id' => $request->user()->id,
+                'remark' => 'Escalation returned: '.$request->input('remark'),
+            ]);
 
-        return redirect()->back()->with('success', 'Fault returned to rectification');
+            DB::commit();
+            return redirect()->back()->with('success', 'Fault returned to rectification');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->with('fail', 'Failed to return fault to rectification');
+        }
     }
 }
