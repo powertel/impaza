@@ -16,7 +16,7 @@ export default function FaultDetailScreen() {
   const isFocused = useIsFocused();
   const [refreshing, setRefreshing] = useState(false);
   const CONFIG_API_URL = Constants?.expoConfig?.extra?.apiUrl || Constants?.manifest?.extra?.apiUrl;
-  const API_URL = CONFIG_API_URL || 'https://impazamon.powertel.co.zw/';
+  const ASSET_ORIGIN = ((CONFIG_API_URL || 'https://impazamon.powertel.co.zw').replace(/\/$/, '')).replace(/\/api$/, '');
 
   const loadFault = async () => {
     setRefreshing(true);
@@ -59,10 +59,7 @@ export default function FaultDetailScreen() {
       <Text style={styles.remarkText}>{remark.remark}</Text>
       {remark.file_path ? (
         <View style={{ marginTop: 8 }}>
-          <Image source={{ uri: `${API_URL}storage/${remark.file_path}` }} style={styles.remarkImage} />
-          <TouchableOpacity onPress={() => Linking.openURL(`${API_URL}storage/${remark.file_path}`)} style={styles.viewLink}>
-            <Text style={styles.viewLinkText}>View</Text>
-          </TouchableOpacity>
+          <Image source={{ uri: `${ASSET_ORIGIN}/storage/${remark.file_path}` }} style={styles.remarkImage} resizeMode="contain" />
         </View>
       ) : null}
       <Text style={styles.remarkMeta}>By {remark.name || 'Unknown'} on {new Date(remark.created_at).toLocaleDateString()}</Text>
@@ -144,8 +141,6 @@ const styles = StyleSheet.create({
   remarkText: { fontSize: theme.fontSizes.md, color: theme.colors.dark, marginBottom: theme.spacing.xs },
   remarkMeta: { fontSize: theme.fontSizes.sm, color: theme.colors.gray },
   remarkImage: { width: '100%', height: 200, borderRadius: theme.spacing.sm, backgroundColor: theme.colors.lightGray },
-  viewLink: { marginTop: 8 },
-  viewLinkText: { color: theme.colors.primary, fontWeight: '600' },
   primaryBtn: { backgroundColor: theme.colors.primary, borderRadius: theme.spacing.sm, paddingVertical: theme.spacing.md, alignItems: 'center', marginTop: theme.spacing.lg },
   primaryBtnText: { color: theme.colors.white, fontSize: theme.fontSizes.md, fontWeight: '600' },
   secondaryBtn: { backgroundColor: theme.colors.white, borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, paddingVertical: theme.spacing.md, alignItems: 'center', marginTop: theme.spacing.md },

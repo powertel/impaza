@@ -90,7 +90,7 @@ export default function RectifyFaultScreen() {
           placeholderTextColor={theme.colors.gray}
         />
         <TouchableOpacity style={[styles.primaryBtn, { marginTop: theme.spacing.md }]} onPress={() => { pickImages(); }}>
-          <Text style={styles.primaryBtnText}>Attach Images</Text>
+          <Text style={styles.secondaryBtnText}>Attach Images</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.primaryBtn, { marginTop: theme.spacing.sm }]} onPress={async () => {
           try {
@@ -119,7 +119,7 @@ export default function RectifyFaultScreen() {
             Alert.alert('Error', 'Failed to open camera.');
           }
         }}>
-          <Text style={styles.primaryBtnText}>Capture Photo</Text>
+          <Text style={styles.secondaryBtnText}>Capture Photo</Text>
         </TouchableOpacity>
         {images.length > 0 && (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: theme.spacing.md }}>
