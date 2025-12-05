@@ -105,8 +105,8 @@ export default function FaultDetailScreen() {
         )}
 
         {String(fault.status_id) === '3' && (
-          <TouchableOpacity style={styles.secondaryBtn} onPress={() => navigation.navigate('ReferFault', { id })}>
-            <Text style={styles.secondaryBtnText}>Refer Fault</Text>
+          <TouchableOpacity style={styles.secondaryBtn} onPress={() => navigation.navigate('EscalateFault', { id })}>
+            <Text style={styles.secondaryBtnText}>Escalate</Text>
           </TouchableOpacity>
         )}
 

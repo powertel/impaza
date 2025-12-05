@@ -73,6 +73,6 @@ export async function getSections() {
   return request('/mobile/sections');
 }
 
-export async function referFault(id, payload) {
-  return request(`/mobile/faults/${id}/refer`, { method: 'POST', body: JSON.stringify(payload) });
+export async function escalateFault(id, payload) {
+  return request(`/mobile/faults/${id}/escalate`, { method: 'POST', body: JSON.stringify(payload) });
 }
