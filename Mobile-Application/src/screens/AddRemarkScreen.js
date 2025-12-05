@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Alert, Image, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { addFaultRemark } from '../services/api';
 import { theme } from '../styles/theme';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function AddRemarkScreen() {
   const navigation = useNavigation();
@@ -12,6 +13,19 @@ export default function AddRemarkScreen() {
 
   const [remark, setRemark] = useState('');
   const [loading, setLoading] = useState(false);
+  const [images, setImages] = useState([]);
+
+  const pickImages = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('Permission required', 'Allow media library access to attach images.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({ allowsMultipleSelection: true, mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8 });
+    if (result.canceled) return;
+    const selected = (result.assets || []).map(a => ({ uri: a.uri, name: a.fileName || `attachment-${Date.now()}.jpg`, type: a.mimeType || 'image/jpeg' }));
+    setImages(prev => [...prev, ...selected]);
+  };
 
   const submit = async () => {
     if (!remark.trim()) {
@@ -20,9 +34,16 @@ export default function AddRemarkScreen() {
     }
     setLoading(true);
     try {
-      await addFaultRemark(id, { remark: remark.trim() });
+      if (images.length > 0) {
+        const fd = new FormData();
+        fd.append('remark', remark.trim());
+        images.forEach(img => { fd.append('attachments[]', { uri: img.uri, name: img.name, type: img.type }); });
+        await addFaultRemark(id, fd);
+      } else {
+        await addFaultRemark(id, { remark: remark.trim() });
+      }
       Alert.alert('Success', 'Remark added successfully.', [
-        { text: 'OK', onPress: () => navigation.goBack() }
+        { text: 'OK', onPress: () => navigation.replace('FaultDetail', { id, refetchAt: Date.now() }) }
       ]);
     } catch (e) {
       Alert.alert('Error', 'Failed to add remark. Please try again.');
@@ -57,6 +78,34 @@ export default function AddRemarkScreen() {
             <Text style={styles.primaryBtnText}>Submit Remark</Text>
           )}
         </TouchableOpacity>
+
+        <TouchableOpacity style={styles.secondaryBtn} onPress={pickImages} disabled={loading}>
+          <Text style={styles.secondaryBtnText}>Attach Images</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.secondaryBtn} onPress={async () => {
+          const perm = await ImagePicker.requestCameraPermissionsAsync();
+          if (!perm.granted) {
+            Alert.alert('Permission required', 'Allow camera access to capture images.');
+            return;
+          }
+          const result = await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8 });
+          if (result.canceled) return;
+          const a = result.assets?.[0];
+          if (a) {
+            setImages(prev => [...prev, { uri: a.uri, name: a.fileName || `capture-${Date.now()}.jpg`, type: a.mimeType || 'image/jpeg' }]);
+          }
+        }} disabled={loading}>
+          <Text style={styles.secondaryBtnText}>Capture Photo</Text>
+        </TouchableOpacity>
+
+        {images.length > 0 && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: theme.spacing.md }}>
+            {images.map((img, i) => (
+              <Image key={`${img.uri}-${i}`} source={{ uri: img.uri }} style={{ width: 100, height: 100, borderRadius: 8, marginRight: 8, backgroundColor: theme.colors.lightGray }} />
+            ))}
+          </ScrollView>
+        )}
 
         <TouchableOpacity style={styles.secondaryBtn} onPress={() => navigation.goBack()} disabled={loading}>
           <Text style={styles.secondaryBtnText}>Cancel</Text>

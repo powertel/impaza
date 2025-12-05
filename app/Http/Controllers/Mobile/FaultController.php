@@ -184,6 +184,8 @@ class FaultController extends Controller
             'remark' => 'required|string|min:2',
             'activity' => 'nullable|string',
             'attachment' => 'nullable|file',
+            'attachments' => 'nullable|array',
+            'attachments.*' => 'nullable|file',
         ]);
 
         $path = '';
@@ -200,15 +202,32 @@ class FaultController extends Controller
                 ->value('id') ?? 0);
         }
 
-        Remark::create([
-            'remark' => $data['remark'],
-            'user_id' => $user->id,
-            'fault_id' => $fault->id,
-            'remarkActivity_id' => $remarkActivityId,
-            'file_path' => $path,
-        ]);
+        $created = [];
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                if (!$file) { continue; }
+                $stored = $file->storePublicly('attachments', 'public');
+                $r = Remark::create([
+                    'remark' => $data['remark'],
+                    'user_id' => $user->id,
+                    'fault_id' => $fault->id,
+                    'remarkActivity_id' => $remarkActivityId,
+                    'file_path' => $stored,
+                ]);
+                $created[] = $r->id;
+            }
+        } else {
+            $r = Remark::create([
+                'remark' => $data['remark'],
+                'user_id' => $user->id,
+                'fault_id' => $fault->id,
+                'remarkActivity_id' => $remarkActivityId,
+                'file_path' => $path,
+            ]);
+            $created[] = $r->id;
+        }
 
-        return response()->json(['success' => true, 'message' => 'Remark added']);
+        return response()->json(['success' => true, 'message' => 'Remark added', 'ids' => $created]);
     }
 
     public function rectify(Request $request, Fault $fault)
@@ -228,6 +247,8 @@ class FaultController extends Controller
             'confirmedRfo_id' => 'required|exists:reasons_for_outages,id',
             'activity' => 'nullable|string',
             'attachment' => 'nullable|file',
+            'attachments' => 'nullable|array',
+            'attachments.*' => 'nullable|file',
         ]);
 
         $path = '';
@@ -244,13 +265,27 @@ class FaultController extends Controller
                 ->value('id') ?? 0);
         }
 
-        Remark::create([
-            'remark' => $data['notes'],
-            'user_id' => $user->id,
-            'fault_id' => $fault->id,
-            'remarkActivity_id' => $remarkActivityId,
-            'file_path' => $path,
-        ]);
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                if (!$file) { continue; }
+                $stored = $file->storePublicly('attachments', 'public');
+                Remark::create([
+                    'remark' => $data['notes'],
+                    'user_id' => $user->id,
+                    'fault_id' => $fault->id,
+                    'remarkActivity_id' => $remarkActivityId,
+                    'file_path' => $stored,
+                ]);
+            }
+        } else {
+            Remark::create([
+                'remark' => $data['notes'],
+                'user_id' => $user->id,
+                'fault_id' => $fault->id,
+                'remarkActivity_id' => $remarkActivityId,
+                'file_path' => $path,
+            ]);
+        }
 
         // Technician resolved: set status to 4, save confirmed RFO and log lifecycle
         $fault->update(['status_id' => 4, 'confirmedRfo_id' => $data['confirmedRfo_id']]);

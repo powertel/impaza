@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { rectifyFault, getRFOs } from '../services/api';
 import { theme } from '../styles/theme';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function RectifyFaultScreen() {
   const route = useRoute();
@@ -16,6 +17,7 @@ export default function RectifyFaultScreen() {
   const [showRfoList, setShowRfoList] = useState(false);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [images, setImages] = useState([]);
 
   useEffect(() => {
     const load = async () => {
@@ -32,7 +34,17 @@ export default function RectifyFaultScreen() {
   const submit = async () => {
     setLoading(true);
     try {
-      const res = await rectifyFault(id, { notes, confirmedRfo_id: selectedRfo?.id, activity: 'ON RECTIFICATION' });
+      let res;
+      if (images.length > 0) {
+        const fd = new FormData();
+        fd.append('notes', notes);
+        fd.append('confirmedRfo_id', String(selectedRfo?.id || ''));
+        fd.append('activity', 'ON RECTIFICATION');
+        images.forEach(img => { fd.append('attachments[]', { uri: img.uri, name: img.name, type: img.type }); });
+        res = await rectifyFault(id, fd);
+      } else {
+        res = await rectifyFault(id, { notes, confirmedRfo_id: selectedRfo?.id, activity: 'ON RECTIFICATION' });
+      }
       setResult(res);
       Alert.alert('Success', 'Fault rectified successfully.', [
         { text: 'OK', onPress: () => navigation.navigate('FaultDetail', { id, refetchAt: Date.now() }) }
@@ -70,6 +82,31 @@ export default function RectifyFaultScreen() {
           onChangeText={setNotes}
           placeholderTextColor={theme.colors.gray}
         />
+        <TouchableOpacity style={[styles.primaryBtn, { marginTop: theme.spacing.md }]} onPress={pickImages}>
+          <Text style={styles.primaryBtnText}>Attach Images</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.primaryBtn, { marginTop: theme.spacing.sm }]} onPress={async () => {
+          const perm = await ImagePicker.requestCameraPermissionsAsync();
+          if (!perm.granted) {
+            Alert.alert('Permission required', 'Allow camera access to capture images.');
+            return;
+          }
+          const result = await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8 });
+          if (result.canceled) return;
+          const a = result.assets?.[0];
+          if (a) {
+            setImages(prev => [...prev, { uri: a.uri, name: a.fileName || `capture-${Date.now()}.jpg`, type: a.mimeType || 'image/jpeg' }]);
+          }
+        }}>
+          <Text style={styles.primaryBtnText}>Capture Photo</Text>
+        </TouchableOpacity>
+        {images.length > 0 && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: theme.spacing.md }}>
+            {images.map((img, i) => (
+              <Image key={`${img.uri}-${i}`} source={{ uri: img.uri }} style={{ width: 100, height: 100, borderRadius: 8, marginRight: 8, backgroundColor: theme.colors.lightGray }} />
+            ))}
+          </ScrollView>
+        )}
         {result?.error ? <Text style={styles.error}>{result.error}</Text> : null}
         <TouchableOpacity style={[styles.primaryBtn, (!selectedRfo || !notes.trim()) && { opacity: 0.6 }]} onPress={submit} disabled={loading || !selectedRfo || !notes.trim()}>
           <Text style={styles.primaryBtnText}>{loading ? 'Submitting…' : 'Submit'}</Text>
@@ -93,3 +130,14 @@ const styles = StyleSheet.create({
   primaryBtn: { backgroundColor: theme.colors.primary, borderRadius: theme.spacing.sm, paddingVertical: theme.spacing.md, alignItems: 'center', marginTop: theme.spacing.lg },
   primaryBtnText: { color: theme.colors.white, fontSize: theme.fontSizes.md, fontWeight: '600' }
 });
+  const pickImages = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('Permission required', 'Allow media library access to attach images.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({ allowsMultipleSelection: true, mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8 });
+    if (result.canceled) return;
+    const selected = (result.assets || []).map(a => ({ uri: a.uri, name: a.fileName || `attachment-${Date.now()}.jpg`, type: a.mimeType || 'image/jpeg' }));
+    setImages(prev => [...prev, ...selected]);
+  };
