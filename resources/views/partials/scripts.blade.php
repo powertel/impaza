@@ -1,18 +1,21 @@
 
 
 <script>
-      $(document).ready(function () {
-            
-            $("img").click(function () {
-                var img=$(this).attr('src'); 
-            $("#show_it").attr('src',img);
-                $('#PicModal').modal('show');
-            });
-        });
-       
-      
-   
-       </script>
+(function(){
+  var baseModal = 1055;
+  var baseBackdrop = 1040;
+  function updateStack(){
+    var modals = Array.prototype.slice.call(document.querySelectorAll('.modal.show'));
+    var backs = Array.prototype.slice.call(document.querySelectorAll('.modal-backdrop'));
+    modals.forEach(function(m, i){ m.style.zIndex = String(baseModal + i*10); });
+    backs.forEach(function(b, i){ b.style.zIndex = String(baseBackdrop + i*10); });
+    if (modals.length > 0) { document.body.classList.add('modal-open'); }
+    else { document.body.classList.remove('modal-open'); }
+  }
+  document.addEventListener('shown.bs.modal', updateStack);
+  document.addEventListener('hidden.bs.modal', updateStack);
+})();
+</script>
 
 <script type="text/javascript">
 
