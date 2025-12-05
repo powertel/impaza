@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Alert, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Alert, Image, ScrollView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { addFaultRemark } from '../services/api';
@@ -37,7 +37,14 @@ export default function AddRemarkScreen() {
       if (images.length > 0) {
         const fd = new FormData();
         fd.append('remark', remark.trim());
-        images.forEach(img => { fd.append('attachments[]', { uri: img.uri, name: img.name, type: img.type }); });
+        for (const img of images) {
+          if (Platform.OS === 'web') {
+            const blob = await (await fetch(img.uri)).blob();
+            fd.append('attachments[]', blob, img.name);
+          } else {
+            fd.append('attachments[]', { uri: img.uri, name: img.name, type: img.type });
+          }
+        }
         await addFaultRemark(id, fd);
       } else {
         await addFaultRemark(id, { remark: remark.trim() });

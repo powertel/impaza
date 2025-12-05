@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Image, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { rectifyFault, getRFOs } from '../services/api';
@@ -40,7 +40,14 @@ export default function RectifyFaultScreen() {
         fd.append('notes', notes);
         fd.append('confirmedRfo_id', String(selectedRfo?.id || ''));
         fd.append('activity', 'ON RECTIFICATION');
-        images.forEach(img => { fd.append('attachments[]', { uri: img.uri, name: img.name, type: img.type }); });
+        for (const img of images) {
+          if (Platform.OS === 'web') {
+            const blob = await (await fetch(img.uri)).blob();
+            fd.append('attachments[]', blob, img.name);
+          } else {
+            fd.append('attachments[]', { uri: img.uri, name: img.name, type: img.type });
+          }
+        }
         res = await rectifyFault(id, fd);
       } else {
         res = await rectifyFault(id, { notes, confirmedRfo_id: selectedRfo?.id, activity: 'ON RECTIFICATION' });
