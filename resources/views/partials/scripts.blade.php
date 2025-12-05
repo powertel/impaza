@@ -278,17 +278,22 @@ $('#city').on('change',function () {
         if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending...'; }
         const url = form.getAttribute('action');
         const json = await postForm(url, form);
-        if (json && json.status === 'ok' && json.remark) {
-          const bubble = renderRemarkBubble(json.remark);
-          if (list) {
-            list.appendChild(bubble);
-            list.scrollTop = list.scrollHeight;
-          }
+        if (json && json.status === 'ok') {
+          const items = Array.isArray(json.remarks) ? json.remarks : (json.remark ? [json.remark] : []);
+          items.forEach(function(rem){
+            const bubble = renderRemarkBubble(rem);
+            if (list) {
+              list.appendChild(bubble);
+              list.scrollTop = list.scrollHeight;
+            }
+          });
           // Reset inputs
           const ta = form.querySelector('textarea[name="remark"]');
           if (ta) ta.value = '';
-          const file = form.querySelector('input[type="file"][name="attachment"]');
-          if (file) file.value = '';
+          const fileSingle = form.querySelector('input[type="file"][name="attachment"]');
+          const fileMulti = form.querySelector('input[type="file"][name="attachments[]"]');
+          if (fileSingle) fileSingle.value = '';
+          if (fileMulti) fileMulti.value = '';
         }
         if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Send'; }
       });

@@ -89,8 +89,8 @@
               <input type="hidden" name="url" value="{{ url()->current() }}">
             </div>
             <div class="col-md-4">
-              <label class="form-label">Attachment (optional)</label>
-              <input type="file" name="attachment" class="form-control @error('attachment') is-invalid @enderror" accept="image/png,image/jpg,image/jpeg">
+              <label class="form-label">Attachments (optional)</label>
+              <input type="file" name="attachments[]" multiple class="form-control @error('attachments') is-invalid @enderror" accept="image/png,image/jpg,image/jpeg">
             </div>
           </div>
           <div class="mt-2">
