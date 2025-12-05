@@ -7,6 +7,77 @@ Department Faults
 @section('content')
 <section class="content">
 
+<div class="row row-cols-4 g-3 mb-3">
+  <div class="col">
+    <a href="#" class="text-decoration-none deptFaultsAgeStat" data-age="" data-status="lt4">
+      <div class="card shadow-sm border-0">
+        <div class="rounded-top" style="height:6px; background:#6c757d"></div>
+        <div class="card-body d-flex justify-content-between align-items-center py-3">
+          <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-secondary"><i class="fas fa-clipboard-list"></i></span>
+            <div>
+              <div class="text-muted small">All Open</div>
+              <div class="fw-semibold">Faults</div>
+            </div>
+          </div>
+          <div class="fs-5 fw-bold text-dark">{{ (int)($ageStats['open_total'] ?? 0) }}</div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col">
+    <a href="#" class="text-decoration-none deptFaultsAgeStat" data-age="today" data-status="lt4">
+      <div class="card shadow-sm border-0">
+        <div class="rounded-top" style="height:6px; background:#0d6efd"></div>
+        <div class="card-body d-flex justify-content-between align-items-center py-3">
+          <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-primary"><i class="fas fa-calendar-day"></i></span>
+            <div>
+              <div class="text-muted small">Logged</div>
+              <div class="fw-semibold">Today</div>
+            </div>
+          </div>
+          <div class="fs-5 fw-bold text-dark">{{ (int)($ageStats['open_today'] ?? 0) }}</div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col">
+    <a href="#" class="text-decoration-none deptFaultsAgeStat" data-age="lt72" data-status="lt4">
+      <div class="card shadow-sm border-0">
+        <div class="rounded-top" style="height:6px; background:#20c997"></div>
+        <div class="card-body d-flex justify-content-between align-items-center py-3">
+          <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-success"><i class="fas fa-hourglass-half"></i></span>
+            <div>
+              <div class="text-muted small">Within</div>
+              <div class="fw-semibold">72 Hours</div>
+            </div>
+          </div>
+          <div class="fs-5 fw-bold text-dark">{{ (int)($ageStats['open_lt72'] ?? 0) }}</div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col">
+    <a href="#" class="text-decoration-none deptFaultsAgeStat" data-age="gt72" data-status="lt4">
+      <div class="card shadow-sm border-0">
+        <div class="rounded-top" style="height:6px; background:#ffc107"></div>
+        <div class="card-body d-flex justify-content-between align-items-center py-3">
+          <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-warning text-dark"><i class="fas fa-hourglass-end"></i></span>
+            <div>
+              <div class="text-muted small">Over</div>
+              <div class="fw-semibold">72 Hours</div>
+            </div>
+          </div>
+          <div class="fs-5 fw-bold text-dark">{{ (int)($ageStats['open_gt72'] ?? 0) }}</div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+
 <div class="card">
 
     <!--Card Header-->
@@ -19,7 +90,7 @@ Department Faults
     <div class="card-body">
         <div class="table-responsive">
             <div class="filter-toolbar d-flex justify-content-end align-items-center gap-2 mb-2">
-                <div class="input-group input-group-sm" style="width: 170px;">
+                <div class="input-group input-group-sm" style="width: 200px;">
                     <div class="input-group-prepend"><span class="input-group-text"><i class="fas fa-list me-1"></i> Show</span></div>
                     <select id="departmentFaultsPageSize" class="form-select form-select-sm" style="width:auto;">
                         <option value="10"  {{ (int)$perPage===10 ? 'selected' : '' }}>10</option>
@@ -29,7 +100,30 @@ Department Faults
                     </select>
                 </div>
                 <form method="GET" action="{{ route('department_faults.index') }}" class="m-0">
-                    <div class="input-group input-group-sm" style="width: 360px;">
+                    <div class="input-group input-group-sm" style="width: 760px; max-width: 100%;">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-filter me-1"></i> Status</span>
+                        </div>
+                        @php $statusFilter = request('status', 'all'); @endphp
+                        <select name="status" id="deptFaultsStatusFilter" class="form-select form-select-sm" style="width:auto;">
+                            <option value="all"   {{ $statusFilter === 'all' ? 'selected' : '' }}>All</option>
+                            <option value="lt4"   {{ $statusFilter === 'lt4' ? 'selected' : '' }}>Open Faults</option>
+                            @foreach(($openStatuses ?? collect()) as $st)
+                                <option value="{{ $st->id }}" {{ $statusFilter == (string)$st->id ? 'selected' : '' }}>{{ $st->description }}</option>
+                            @endforeach
+                        </select>
+
+                        <div class="input-group-prepend ms-2">
+                            <span class="input-group-text"><i class="fas fa-clock me-1"></i> Age</span>
+                        </div>
+                        @php $ageFilter = request('age', 'all'); @endphp
+                        <select name="age" id="deptFaultsAgeFilter" class="form-select form-select-sm me-1" style="width:50px;">
+                            <option value="all"    {{ $ageFilter === 'all' ? 'selected' : '' }}>All</option>
+                            <option value="today"  {{ $ageFilter === 'today' ? 'selected' : '' }}>Today</option>
+                            <option value="lt72"   {{ $ageFilter === 'lt72' ? 'selected' : '' }}>Within 72 hours</option>
+                            <option value="gt72"   {{ $ageFilter === 'gt72' ? 'selected' : '' }}>Over 72 hours</option>
+                        </select>
+
                         <span class="input-group-text"><i class="fas fa-search"></i></span>
                         <input type="text" name="q" value="{{ request('q','') }}" class="form-control" placeholder="Search faults (all records)">
                         <input type="hidden" name="per_page" value="{{ $perPage }}">
@@ -135,6 +229,23 @@ Department Faults
           });
         }
       })();
+      document.querySelectorAll('.deptFaultsAgeStat').forEach(function(el){
+        el.addEventListener('click', function(e){
+          e.preventDefault();
+          var params = new URLSearchParams(window.location.search);
+          params.set('status', this.getAttribute('data-status'));
+          var age = this.getAttribute('data-age');
+          if (!age) params.delete('age'); else params.set('age', age);
+          params.delete('page');
+          window.location.search = params.toString();
+        });
+      });
+      document.getElementById('deptFaultsStatusFilter')?.addEventListener('change', function(){
+        this.form?.submit();
+      });
+      document.getElementById('deptFaultsAgeFilter')?.addEventListener('change', function(){
+        this.form?.submit();
+      });
     </script>
 @endsection
 
