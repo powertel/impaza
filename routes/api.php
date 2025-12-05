@@ -41,7 +41,6 @@ Route::prefix('mobile')->group(function () {
         Route::post('faults/{fault}/remarks', [FaultController::class, 'addRemark']);
         Route::get('rfos', [FaultController::class, 'rfos']);
         Route::get('sections', [FaultController::class, 'sections']);
-        Route::post('faults/{fault}/refer', [FaultController::class, 'refer']);
         Route::get('technician-stats', [StatsController::class, 'myStats']);
     });
 });
