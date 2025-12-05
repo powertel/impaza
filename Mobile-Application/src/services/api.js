@@ -10,10 +10,10 @@ let authToken = null;
 export function setAuthToken(token) { authToken = token; }
 
 async function request(path, options = {}) {
-  const res = await fetch(`${API_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}), ...(options.headers || {}) },
-    ...options,
-  });
+  const isForm = options && options.body && typeof options.body === 'object' && options.body instanceof FormData;
+  const headers = { ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}), ...(options.headers || {}) };
+  if (!isForm) headers['Content-Type'] = 'application/json';
+  const res = await fetch(`${API_URL}${path}`, { headers, ...options });
   return res.json();
 }
 
@@ -53,10 +53,16 @@ export async function getFault(id) {
 }
 
 export async function rectifyFault(id, payload) {
+  if (payload instanceof FormData) {
+    return request(`/mobile/faults/${id}/rectify`, { method: 'POST', body: payload });
+  }
   return request(`/mobile/faults/${id}/rectify`, { method: 'POST', body: JSON.stringify(payload) });
 }
 
 export async function addFaultRemark(id, payload) {
+  if (payload instanceof FormData) {
+    return request(`/mobile/faults/${id}/remarks`, { method: 'POST', body: payload });
+  }
   return request(`/mobile/faults/${id}/remarks`, { method: 'POST', body: JSON.stringify(payload) });
 }
 

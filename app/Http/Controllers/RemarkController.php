@@ -41,10 +41,11 @@ class RemarkController extends Controller
      */
     public function store(Request $request,Fault $fault)
     {
-        // Validate: attachment optional and limited to image types
         $validated = $request->validate([
             'remark' => 'required|string',
             'attachment' => 'nullable|mimes:png,jpg,jpeg|max:2048',
+            'attachments' => 'nullable|array',
+            'attachments.*' => 'nullable|mimes:png,jpg,jpeg|max:2048',
             'activity' => 'nullable|string',
             'url' => 'nullable|string'
         ]);
@@ -63,12 +64,6 @@ class RemarkController extends Controller
             elseif ($REASSIGN)    { $activity = 'ON CHIEF-TECH REASSIGN'; }
         }
 
-        // Store attachment if present
-        $path = null;
-        if ($request->hasFile('attachment')) {
-            $path = $request->file('attachment')->storePublicly('attachments', 'public');
-        }
-
         // Map activity to remark_activities.id
         $remarkActivityId = null;
         if ($activity) {
@@ -77,32 +72,60 @@ class RemarkController extends Controller
                 ->value('id');
         }
 
-        // Create remark
-        $remark = Remark::create([
-            'fault_id' => $fault->id,
-            'user_id' => $request->user()->id,
-            'remark' => $validated['remark'],
-            'remarkActivity_id' => $remarkActivityId,
-            'file_path' => $path,
-        ]);
+        $createdIds = [];
+        $path = null;
+        $hasMany = $request->hasFile('attachments');
+        if ($hasMany) {
+            foreach ($request->file('attachments') as $file) {
+                if (!$file) { continue; }
+                $p = $file->storePublicly('attachments', 'public');
+                $remark = Remark::create([
+                    'fault_id' => $fault->id,
+                    'user_id' => $request->user()->id,
+                    'remark' => $validated['remark'],
+                    'remarkActivity_id' => $remarkActivityId,
+                    'file_path' => $p,
+                ]);
+                $createdIds[] = $remark->id;
+            }
+        } else {
+            if ($request->hasFile('attachment')) {
+                $path = $request->file('attachment')->storePublicly('attachments', 'public');
+            }
+            $remark = Remark::create([
+                'fault_id' => $fault->id,
+                'user_id' => $request->user()->id,
+                'remark' => $validated['remark'],
+                'remarkActivity_id' => $remarkActivityId,
+                'file_path' => $path,
+            ]);
+            $createdIds[] = $remark->id;
+        }
+
 
         // If this is an AJAX/JSON request, respond with the remark payload
         if ($request->expectsJson()) {
-            $fullRemark = DB::table('remarks')
-                ->leftJoin('remark_activities', 'remarks.remarkActivity_id', '=', 'remark_activities.id')
-                ->leftJoin('users', 'remarks.user_id', '=', 'users.id')
-                ->where('remarks.id', '=', $remark->id)
-                ->select([
-                    'remarks.id',
-                    'remarks.fault_id',
-                    'remarks.created_at',
-                    'remarks.remark',
-                    'remarks.file_path',
-                    'users.name',
-                    'remark_activities.activity'
-                ])->first();
-
-            return response()->json(['status' => 'ok', 'remark' => $fullRemark]);
+            $rows = [];
+            if (!empty($createdIds)) {
+                $rows = DB::table('remarks')
+                    ->leftJoin('remark_activities', 'remarks.remarkActivity_id', '=', 'remark_activities.id')
+                    ->leftJoin('users', 'remarks.user_id', '=', 'users.id')
+                    ->whereIn('remarks.id', $createdIds)
+                    ->orderBy('remarks.created_at', 'asc')
+                    ->select([
+                        'remarks.id',
+                        'remarks.fault_id',
+                        'remarks.created_at',
+                        'remarks.remark',
+                        'remarks.file_path',
+                        'users.name',
+                        'remark_activities.activity'
+                    ])->get()->all();
+            }
+            if (count($rows) === 1) {
+                return response()->json(['status' => 'ok', 'remark' => $rows[0]]);
+            }
+            return response()->json(['status' => 'ok', 'remarks' => $rows]);
         }
 
         // Legacy redirects (non-AJAX)

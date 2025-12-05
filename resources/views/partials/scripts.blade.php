@@ -1,18 +1,21 @@
 
 
 <script>
-      $(document).ready(function () {
-            
-            $("img").click(function () {
-                var img=$(this).attr('src'); 
-            $("#show_it").attr('src',img);
-                $('#PicModal').modal('show');
-            });
-        });
-       
-      
-   
-       </script>
+(function(){
+  var baseModal = 1055;
+  var baseBackdrop = 1040;
+  function updateStack(){
+    var modals = Array.prototype.slice.call(document.querySelectorAll('.modal.show'));
+    var backs = Array.prototype.slice.call(document.querySelectorAll('.modal-backdrop'));
+    modals.forEach(function(m, i){ m.style.zIndex = String(baseModal + i*10); });
+    backs.forEach(function(b, i){ b.style.zIndex = String(baseBackdrop + i*10); });
+    if (modals.length > 0) { document.body.classList.add('modal-open'); }
+    else { document.body.classList.remove('modal-open'); }
+  }
+  document.addEventListener('shown.bs.modal', updateStack);
+  document.addEventListener('hidden.bs.modal', updateStack);
+})();
+</script>
 
 <script type="text/javascript">
 
@@ -275,17 +278,22 @@ $('#city').on('change',function () {
         if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending...'; }
         const url = form.getAttribute('action');
         const json = await postForm(url, form);
-        if (json && json.status === 'ok' && json.remark) {
-          const bubble = renderRemarkBubble(json.remark);
-          if (list) {
-            list.appendChild(bubble);
-            list.scrollTop = list.scrollHeight;
-          }
+        if (json && json.status === 'ok') {
+          const items = Array.isArray(json.remarks) ? json.remarks : (json.remark ? [json.remark] : []);
+          items.forEach(function(rem){
+            const bubble = renderRemarkBubble(rem);
+            if (list) {
+              list.appendChild(bubble);
+              list.scrollTop = list.scrollHeight;
+            }
+          });
           // Reset inputs
           const ta = form.querySelector('textarea[name="remark"]');
           if (ta) ta.value = '';
-          const file = form.querySelector('input[type="file"][name="attachment"]');
-          if (file) file.value = '';
+          const fileSingle = form.querySelector('input[type="file"][name="attachment"]');
+          const fileMulti = form.querySelector('input[type="file"][name="attachments[]"]');
+          if (fileSingle) fileSingle.value = '';
+          if (fileMulti) fileMulti.value = '';
         }
         if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Send'; }
       });

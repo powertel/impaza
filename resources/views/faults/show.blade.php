@@ -157,11 +157,13 @@
                                             <a href="#" class="d-inline-block text-decoration-none" data-bs-toggle="modal" data-bs-target="#PicModal-{{ $remark->id }}" aria-controls="PicModal-{{ $remark->id }}" title="View attachment">
                                                 <img src="{{ asset('storage/'.$remark->file_path) }}" alt="Attachment" class="img-fluid rounded" style="max-height: 160px; object-fit: cover; cursor: pointer;">
                                             </a>
-                                            <button type="button" class="btn btn-link btn-sm text-decoration-none" data-bs-toggle="modal" data-bs-target="#PicModal-{{ $remark->id }}">View</button>
+                                            <a href="{{ asset('storage/'.$remark->file_path) }}" class="btn btn-link btn-sm text-decoration-none" download>
+                                                <i class="fas fa-download me-1"></i>
+                                            </a>
                                         </div>
 
                                         <!-- Remark Attachment Modal -->
-                                        <div class="modal custom-modal fade" id="PicModal-{{ $remark->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="PicModalLabel-{{ $remark->id }}" aria-hidden="true">
+                                        <div class="modal custom-modal fade" id="PicModal-{{ $remark->id }}" data-bs-backdrop="false" data-bs-keyboard="true" tabindex="-1" aria-labelledby="PicModalLabel-{{ $remark->id }}" aria-hidden="true">
                                             <div class="modal-dialog modal-xl modal-dialog-centered">
                                                 <div class="modal-content rounded-4 border-0 shadow-lg">
                                                     <div class="modal-header border-0">
@@ -172,6 +174,7 @@
                                                         <img src="{{ asset('storage/'.$remark->file_path) }}" alt="Attachment" class="img-fluid rounded">
                                                     </div>
                                                     <div class="modal-footer border-0">
+                                                        <a href="{{ asset('storage/'.$remark->file_path) }}" class="btn btn-outline-primary" download><i class="fas fa-download me-1"></i>Download</a>
                                                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
                                                     </div>
                                                 </div>
