@@ -52,10 +52,12 @@ class DepartmentFaultController extends Controller
         return view('department_faults.index',compact('faults','autoAssign'))
         ->with('i'); */
 
-        // Pagination and search parameters
+        // Pagination and filters
         $perPage = (int) request('per_page', 20);
         $perPage = in_array($perPage, [10,20,50,100]) ? $perPage : 20;
         $q = trim((string) request('q', ''));
+        $statusFilter = request('status', 'all');
+        $ageFilter = request('age', 'all');
 
         // Base query scoped to the user's section
         $faultsQuery = DB::table('faults')
@@ -131,6 +133,22 @@ class DepartmentFaultController extends Controller
             });
         }
 
+        // Status filter: 'lt4' or specific 1/2/3
+        if ($statusFilter === 'lt4') {
+            $faultsQuery->where('faults.status_id', '<', 4);
+        } elseif (in_array($statusFilter, ['1','2','3'], true)) {
+            $faultsQuery->where('faults.status_id', '=', (int)$statusFilter);
+        }
+
+        // Age filter: today / within 72 hours / over 72 hours
+        if ($ageFilter === 'today') {
+            $faultsQuery->whereDate('faults.created_at', \Carbon\Carbon::today());
+        } elseif ($ageFilter === 'lt72') {
+            $faultsQuery->where('faults.created_at', '>=', \Carbon\Carbon::now()->subHours(72));
+        } elseif ($ageFilter === 'gt72') {
+            $faultsQuery->where('faults.created_at', '<', \Carbon\Carbon::now()->subHours(72));
+        }
+
         $faults = $faultsQuery->paginate($perPage)->withQueryString();
 
         // Collect remarks for all listed faults and group by fault_id for faults.show
@@ -175,7 +193,35 @@ class DepartmentFaultController extends Controller
             }
         }
 
-        return view('department_faults.index',compact('faults','remarksByFault','perPage','faultAges','faultAgeStart','faultAgeEnd'))
+        // Load open statuses (< 4) for dynamic filter options
+        $openStatuses = DB::table('statuses')
+            ->where('id','<',4)
+            ->orderBy('id','asc')
+            ->get(['id','description']);
+
+        // Age stats scoped to current section or referrals to it
+        $sectionId = (int) (auth()->user()->section_id ?? 0);
+        $base = function() use ($sectionId) {
+            return DB::table('faults')
+                ->leftjoin('fault_section','faults.id','=','fault_section.fault_id')
+                ->leftJoin('fault_referrals as fr', function($join) {
+                    $join->on('fr.fault_id','=','faults.id');
+                    $join->whereNull('fr.completed_at');
+                })
+                ->leftJoin('cities','faults.city_id','=','cities.id')
+                ->where(function($q) use ($sectionId) {
+                    $q->where('fault_section.section_id','=',$sectionId)
+                      ->orWhere('fr.to_section_id','=',$sectionId);
+                });
+        };
+        $ageStats = [
+            'open_total' => $base()->where('faults.status_id','<',4)->count(),
+            'open_today' => $base()->where('faults.status_id','<',4)->whereDate('faults.created_at', \Carbon\Carbon::today())->count(),
+            'open_lt72'  => $base()->where('faults.status_id','<',4)->where('faults.created_at', '>=', \Carbon\Carbon::now()->subHours(72))->count(),
+            'open_gt72'  => $base()->where('faults.status_id','<',4)->where('faults.created_at', '<', \Carbon\Carbon::now()->subHours(72))->count(),
+        ];
+
+        return view('department_faults.index',compact('faults','remarksByFault','perPage','faultAges','faultAgeStart','faultAgeEnd','openStatuses','ageStats'))
             ->with('i');
         
     }

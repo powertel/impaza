@@ -3,10 +3,18 @@
     "extra": {
       "eas": {
         "projectId": "4f92c051-10ba-43f3-b546-1b7b9961038c"
-      }
+      },
+      "apiUrl": "https://impazamon.powertel.co.zw"
     },
     "android": {
       "package": "com.powerteldev.impaza"
+    },
+    "ios": {
+      "infoPlist": {
+        "NSCameraUsageDescription": "Allow camera access to capture attachments for remarks and rectification.",
+        "NSPhotoLibraryUsageDescription": "Allow photo library access to select attachments for remarks and rectification.",
+        "NSPhotoLibraryAddUsageDescription": "Allow saving captured photos to your photo library."
+      }
     }
   }
 }

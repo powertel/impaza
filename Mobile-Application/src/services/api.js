@@ -3,7 +3,8 @@ import Constants from 'expo-constants';
 // Prefer Expo config (app.json/eas.json) for API URL. Avoid using process.env
 // to prevent accidental overrides with local IPs during web dev.
 const CONFIG_API_URL = Constants?.expoConfig?.extra?.apiUrl || Constants?.manifest?.extra?.apiUrl;
-const API_URL = CONFIG_API_URL || 'https://impazamon.powertel.co.zw/';
+const API_ORIGIN = (CONFIG_API_URL || 'https://impazamon.powertel.co.zw').replace(/\/$/, '');
+const API_URL = `${API_ORIGIN}`;
 if (__DEV__) console.log('API_URL', API_URL);
 
 let authToken = null;
@@ -11,7 +12,7 @@ export function setAuthToken(token) { authToken = token; }
 
 async function request(path, options = {}) {
   const isForm = options && options.body && typeof options.body === 'object' && options.body instanceof FormData;
-  const headers = { ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}), ...(options.headers || {}) };
+  const headers = { Accept: 'application/json', ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}), ...(options.headers || {}) };
   if (!isForm) headers['Content-Type'] = 'application/json';
   const res = await fetch(`${API_URL}${path}`, { headers, ...options });
   return res.json();

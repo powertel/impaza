@@ -146,6 +146,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::post('chief-tech/escalations/{fault}/refer', [ChiefTechEscalationsController::class, 'refer'])->name('chief-tech-escalations.refer');
     Route::post('chief-tech/escalations/{fault}/return', [ChiefTechEscalationsController::class, 'returnToRectification'])->name('chief-tech-escalations.return');
     Route::post('chief-tech/escalations/{fault}/escalate-manager', [ChiefTechEscalationsController::class, 'escalateToManager'])->name('chief-tech-escalations.escalate-manager');
+    Route::post('chief-tech/escalations/{fault}/return-from-manager', [ChiefTechEscalationsController::class, 'downgradeFromManager'])->name('chief-tech-escalations.return-from-manager');
 });
 
 

@@ -14,7 +14,10 @@ class ChiefTechEscalationsController extends Controller
 {
     function __construct()
     {
-        $this->middleware('permission:chief-tech-clear-faults-list|chief-tech-clear-faults-clear', ['only' => ['index','refer','returnToRectification']]);
+        $this->middleware('permission:chief-tech-clear-faults-list|chief-tech-clear-faults-clear', ['only' => ['index','refer']]);
+        $this->middleware('permission:chief-tech-return-to-technician', ['only' => ['returnToRectification']]);
+        $this->middleware('permission:chief-tech-escalate', ['only' => ['escalateToManager']]);
+        $this->middleware('permission:manager-return-to-chief-tech', ['only' => ['downgradeFromManager']]);
     }
 
     public function index()
@@ -61,6 +64,7 @@ class ChiefTechEscalationsController extends Controller
             'account_manager_users.name as accountManager',
             'links.link',
             'statuses.description',
+            'faults.status_id as status_id',
             'assessed_users.name as assessedBy',
             'faults.serviceType',
             'faults.serviceAttribute',
@@ -163,22 +167,54 @@ class ChiefTechEscalationsController extends Controller
         }
     }
 
+    public function downgradeFromManager(Request $request, Fault $fault)
+    {
+        $request->validate([
+            'remark' => ['required','string']
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $fault->update(['status_id' => FaultLifecycle::escalatedId()]);
+            FaultLifecycle::recordStatusChange($fault, FaultLifecycle::escalatedId(), $request->user()->id);
+
+            Remark::create([
+                'fault_id' => $fault->id,
+                'user_id' => $request->user()->id,
+                'remark' => 'Manager returned: ' . $request->input('remark'),
+            ]);
+
+            DB::commit();
+            return redirect()->back()->with('success', 'Returned from Manager to Chief Tech');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->with('fail', 'Failed to return from Manager');
+        }
+    }
+
     public function returnToRectification(Request $request, Fault $fault)
     {
         $request->validate([
             'remark' => ['required','string']
         ]);
 
-        $fault->update(['status_id' => 3]);
-        FaultLifecycle::reopenStageForStatus($fault, 3, $request->user()->id);
-        FaultLifecycle::reopenAssignment($fault);
+        DB::beginTransaction();
+        try {
+            $fault->update(['status_id' => 3]);
+            FaultLifecycle::reopenStageForStatus($fault, 3, $request->user()->id);
+            FaultLifecycle::reopenAssignment($fault);
 
-        Remark::create([
-            'fault_id' => $fault->id,
-            'user_id' => $request->user()->id,
-            'remark' => 'Escalation returned: '.$request->input('remark'),
-        ]);
+            Remark::create([
+                'fault_id' => $fault->id,
+                'user_id' => $request->user()->id,
+                'remark' => 'Escalation returned: '.$request->input('remark'),
+            ]);
 
-        return redirect()->back()->with('success', 'Fault returned to rectification');
+            DB::commit();
+            return redirect()->back()->with('success', 'Fault returned to rectification');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->with('fail', 'Failed to return fault to rectification');
+        }
     }
 }
