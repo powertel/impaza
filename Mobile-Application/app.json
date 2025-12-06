@@ -28,7 +28,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#F5F7FF"
       },
-      "usesCleartextTraffic": true,
+      // removed usesCleartextTraffic (unsupported in Expo config)
       "edgeToEdgeEnabled": false,
       "package": "com.powerteldev.MobileApplication"
     },
