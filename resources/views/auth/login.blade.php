@@ -101,6 +101,29 @@ Login
   }
   .invalid-feedback { color: var(--error); }
 
+  /* show/hide password toggle */
+  .password-wrapper { position: relative; }
+  .form-control.custom.password { padding-right: 40px; }
+  .toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .toggle-password:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(76,111,255,0.18);
+    border-radius: 8px;
+  }
+  .toggle-password svg { width: 18px; height: 18px; }
   .row-actions { display: flex; align-items: center; justify-content: space-between; margin: 8px 0 16px; }
   .remember { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
   /* Align and style checkbox to match other inputs */
@@ -189,7 +212,17 @@ Login
 
       <div class="form-group">
         <label for="password" class="form-label">Password</label>
-        <input id="password" type="password" placeholder="Enter Password" class="form-control custom @error('password') is-invalid @enderror" name="password" required autocomplete="current-password">
+        <div class="password-wrapper">
+          <input id="password" type="password" placeholder="Enter Password" class="form-control custom password @error('password') is-invalid @enderror" name="password" required autocomplete="current-password">
+          <button type="button" class="toggle-password" aria-label="Show password" data-toggle-target="password">
+            <svg class="eye-on" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 5c-5 0-9 7-9 7s4 7 9 7 9-7 9-7-4-7-9-7zm0 12a5 5 0 110-10 5 5 0 010 10z"/>
+            </svg>
+            <svg class="eye-off" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+              <path d="M3 3l18 18-1.5 1.5L16.7 20C14.9 20.6 13.5 21 12 21c-5 0-9-7-9-7a20.8 20.8 0 014.8-5.8L1.5 4.5 3 3zm7.9 7.9a3 3 0 004.1 4.1l-4.1-4.1zM12 3c5 0 9 7 9 7a20.8 20.8 0 01-3.5 4.5l-1.5-1.5A18.8 18.8 0 0019 10s-4-7-7-7c-1.2 0-2.4.3-3.5.8L6.7 2.5A10.8 10.8 0 0112 3z"/>
+            </svg>
+          </button>
+        </div>
         @error('password')
           <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
         @enderror
@@ -206,6 +239,27 @@ Login
     </form>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const toggle = document.querySelector('.toggle-password');
+  if (!toggle) return;
+  const inputId = toggle.getAttribute('data-toggle-target') || 'password';
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const eyeOn = toggle.querySelector('.eye-on');
+  const eyeOff = toggle.querySelector('.eye-off');
+  toggle.addEventListener('click', function() {
+    const showing = input.type === 'text';
+    input.type = showing ? 'password' : 'text';
+    toggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+    if (eyeOn && eyeOff) {
+      eyeOn.style.display = showing ? '' : 'none';
+      eyeOff.style.display = showing ? 'none' : '';
+    }
+  });
+});
+</script>
 
 @endsection
 
