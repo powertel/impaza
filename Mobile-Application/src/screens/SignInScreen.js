@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { AntDesign, FontAwesome } from '@expo/vector-icons';
@@ -47,7 +47,8 @@ export default function SignInScreen() {
             <FontAwesome name="wrench" size={48} style={[styles.bgIcon, styles.icon5]} />
           </View>
 
-          <Text style={styles.brand}>iMPAZAMON</Text>
+          {/* Replace text brand with logo image */}
+          <Image source={require('../../assets/impazamon-v2.png')} style={styles.logo} resizeMode="contain" />
           <View style={styles.card}>
             <Text style={styles.title}>Login to your Account</Text>
   
@@ -95,7 +96,7 @@ export default function SignInScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#E9F3FF' },
   wrapper: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: theme.spacing.lg, position: 'relative' },
-  brand: { fontSize: 28, color: theme.colors.primary, fontWeight: '800', marginBottom: theme.spacing.lg },
+  logo: { width: 240, height: 64, marginBottom: theme.spacing.lg },
   card: { width: '100%', maxWidth: 380, backgroundColor: theme.colors.white, borderRadius: 24, padding: 24, shadowColor: theme.colors.black, shadowOpacity: 0.1, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 4 },
   title: { fontSize: theme.fontSizes.xl, fontWeight: '700', color: theme.colors.black, textAlign: 'center', marginBottom: theme.spacing.lg },
   field: { marginBottom: theme.spacing.md },
