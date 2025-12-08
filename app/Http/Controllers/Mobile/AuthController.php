@@ -29,15 +29,24 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        // Accept either username or email; resolve username by local-part lookup
         $credentials = $request->validate([
-            'email' => 'required|email',
+            'email' => 'required|string',
             'password' => 'required|string',
         ]);
 
-        // Enforce access flag in attempt: only allow is_access = 0 (enabled)
-        if (!Auth::attempt(array_merge($credentials, ['is_access' => 0]))) {
+        $identity = trim($credentials['email']);
+        if ($identity && strpos($identity, '@') === false) {
+            $userMatch = User::where('email', 'like', $identity . '@%')->first();
+            if ($userMatch) {
+                $identity = $userMatch->email;
+            }
+        }
+
+        // Attempt with resolved email and enforce is_access = 0 (enabled)
+        if (!Auth::attempt(['email' => $identity, 'password' => $credentials['password'], 'is_access' => 0])) {
             // Provide clearer error if credentials are correct but account disabled
-            $userProbe = User::where('email', $credentials['email'])->first();
+            $userProbe = User::where('email', $identity)->first();
             if ($userProbe && Hash::check($credentials['password'], $userProbe->password) && (int)($userProbe->is_access ?? 0) !== 0) {
                 return response()->json(['message' => 'Account disabled'], 403);
             }
@@ -45,7 +54,7 @@ class AuthController extends Controller
         }
 
         /** @var User $user */
-        $user = User::where('email', $credentials['email'])->first();
+        $user = User::where('email', $identity)->first();
         $token = $user->createToken('powertel-mobile')->plainTextToken;
 
         // Include role names and key profile fields for parity with web expectations

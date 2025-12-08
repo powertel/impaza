@@ -203,8 +203,8 @@ Login
       @csrf
 
       <div class="form-group">
-        <label for="email" class="form-label">Email</label>
-        <input id="email" type="email" placeholder="Enter your Email" class="form-control custom @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
+        <label for="email" class="form-label">Username or Email</label>
+        <input id="email" type="text" placeholder="Enter Username or Email" class="form-control custom @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="username" autofocus>
         @error('email')
           <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
         @enderror

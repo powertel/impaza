@@ -108,4 +108,7 @@ return [
 
     'password_timeout' => 10800,
 
+    // Custom: default domain appended to usernames without '@'
+    'login_domain' => env('LOGIN_DOMAIN', 'powertel.co.zw'),
+
 ];

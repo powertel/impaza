@@ -46,8 +46,21 @@ class LoginController extends Controller
      */
     protected function credentials(Request $request)
     {
-        return array_merge($request->only($this->username(), 'password'), [
+        $login = trim($request->input($this->username()));
+
+        // If user typed a local-part (no '@'), resolve to actual email from DB
+        if ($login && strpos($login, '@') === false) {
+            $user = \App\Models\User::where('email', 'like', $login . '@%')->first();
+            if ($user) {
+                $login = $user->email;
+            }
+            // Do NOT modify the request; keep user input as-is
+        }
+
+        return [
+            $this->username() => $login,
+            'password' => $request->input('password'),
             'is_access' => 0,
-        ]);
+        ];
     }
 }
