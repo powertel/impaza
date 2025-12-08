@@ -54,7 +54,7 @@ export default function SignInScreen() {
   
             <View style={styles.field}> 
               <TextInput
-                placeholder="Email"
+                placeholder="Username or Email"
                 style={styles.input}
                 placeholderTextColor={theme.colors.gray}
                 autoCapitalize="none"
