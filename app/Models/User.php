@@ -70,4 +70,9 @@ class User extends Authenticatable implements MustVerifyEmail
         {
             return $this->hasMany(Fault::class);
         }
+
+        public function assignedFaults()
+        {
+            return $this->hasMany(Fault::class, 'assignedTo');
+        }
 }

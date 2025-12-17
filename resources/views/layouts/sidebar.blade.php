@@ -24,6 +24,13 @@
               </a>
             </li>
 
+            <li class="nav-item">
+              <a href="{{ route('performance.index') }}" class="nav-link {{ request()->routeIs('performance.index') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-chart-line"></i>
+                <p>Performance</p>
+              </a>
+            </li>
+
             @canany(['fault-list','my-fault-list','assigned-fault-list','assessment-fault-list','chief-tech-clear-faults-list','noc-clear-faults-list','department-faults-list','manage-faults','referred-faults','resolved-faults-list'])
               <li class="nav-header">Faults</li>
             @endcanany
@@ -328,3 +335,4 @@
     </div>
     <!-- /.sidebar -->
 </aside>
+

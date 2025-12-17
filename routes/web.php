@@ -33,6 +33,7 @@ use App\Http\Controllers\StoreController;
 use App\Http\Controllers\RFOController;
 use App\Http\Controllers\TechnicianConfigController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\ResolvedController;
 
 /*
@@ -58,6 +59,8 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     // Reports dashboard
     Route::get('/dashboard/reports', [DashboardController::class, 'reports'])->name('dashboard.reports');
+    // Performance Dashboard
+    Route::get('/performance', [PerformanceController::class, 'index'])->name('performance.index');
     Route::resource('users', UserController::class);
     // Toggle user access (enable/disable)
     Route::patch('users/{user}/access', [UserController::class, 'updateAccess'])->name('users.access');
@@ -293,6 +296,7 @@ Route::get('/test-infobip-status', function (\Illuminate\Http\Request $request) 
         ], 500);
     }
 })->name('test.infobip.status');
+
 
 
 
