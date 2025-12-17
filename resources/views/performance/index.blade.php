@@ -68,6 +68,16 @@ Performance Dashboard
                         </select>
                     </div>
 
+                    <div class="cc-field">
+                        <label class="form-label"><i class="fas fa-map-marker-alt me-1"></i>Region</label>
+                        <select name="region" class="form-control form-control-sm" style="min-width: 140px;">
+                            <option value="">All Regions</option>
+                            @foreach($availableRegions as $region)
+                                <option value="{{ $region }}" {{ $selectedRegion == $region ? 'selected' : '' }}>{{ $region }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <div class="cc-field filter-group" id="dateRangeFilter" style="display:none;">
                         <label class="form-label"><i class="far fa-play-circle me-1"></i>Start Date</label>
                         <input type="date" name="start_date" class="form-control form-control-sm" value="{{ $startDate }}">
