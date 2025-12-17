@@ -270,6 +270,13 @@
                 <p>Reports</p>
               </a>
             </li>
+            
+            <li class="nav-item">
+              <a href="{{ route('performance.index') }}" class="nav-link {{ request()->routeIs('performance.index') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-chart-line"></i>
+                <p>Performance</p>
+              </a>
+            </li>
             @endcan
             @can('call-centre-reports')
             <li class="nav-item">
@@ -328,3 +335,4 @@
     </div>
     <!-- /.sidebar -->
 </aside>
+
