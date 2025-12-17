@@ -58,7 +58,14 @@ class ProfileController extends Controller
     public function changePassword(Request $request)
     {
         $request->validate([
-            'newpassword' => 'required|min:6|max:30|confirmed',
+            'newpassword' => [
+                'required',
+                'string',
+                'min:8',
+                'max:30',
+                'confirmed',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/',
+            ],
         ]);
 
         $u = $request->user();

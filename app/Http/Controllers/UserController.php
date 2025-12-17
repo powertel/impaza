@@ -133,7 +133,14 @@ class UserController extends Controller
             request()->validate([
                 'name' => 'required',
                 'email' => 'required|email|unique:users,email',
-                'password' => 'required|same:confirm-password',
+                // Enforce strong password: min 8, upper, lower, number, special char
+                'password' => [
+                    'required',
+                    'same:confirm-password',
+                    'string',
+                    'min:8',
+                    'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/',
+                ],
                 'department_id' => 'required',
                 'section_id' => 'required',
                 'position_id' => 'required',
@@ -349,7 +356,14 @@ class UserController extends Controller
     public function postPassword(Request $request){
 
         $this->validate($request, [
-            'newpassword' => 'required|min:6|max:30|confirmed'
+            'newpassword' => [
+                'required',
+                'string',
+                'min:8',
+                'max:30',
+                'confirmed',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/',
+            ],
         ]);
 
         $user = auth()->user();
@@ -365,7 +379,14 @@ class UserController extends Controller
     public function changePassword(Request $request, $id)
     {
         $this->validate($request, [
-            'newpassword' => 'required|min:6|max:30|confirmed',
+            'newpassword' => [
+                'required',
+                'string',
+                'min:8',
+                'max:30',
+                'confirmed',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/',
+            ],
         ]);
 
         $user = User::findOrFail($id);
