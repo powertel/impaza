@@ -26,3 +26,6 @@ Common next commands:
 
 docker exec impaza_mysql mysql -uroot -proot -e "CREATE USER 'impazamon'@'%' IDENTIFIED BY 'Power@Dev25'; GRANT ALL PRIVILEGES ON impaza.* TO 'impaza'@'%'; FLUSH PRIVILEGES;"
 docker exec impaza_mysql mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON impaza.* TO 'impazamon'@'%'; FLUSH PRIVILEGES;" 
+
+-Building the adroid app
+eas build -p android --profile preview
