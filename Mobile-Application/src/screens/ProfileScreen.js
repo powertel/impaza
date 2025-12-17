@@ -6,6 +6,8 @@ import { setAuthToken, getProfile, updateProfile, changePassword } from '../serv
 import { theme } from '../styles/theme';
 import { UserContext } from '../context/UserContext';
 import { FontAwesome } from '@expo/vector-icons';
+import { isStrongPassword, passwordsMatch, POLICY_HINT } from '../utils/password';
+import PasswordStrengthMeter from '../components/PasswordStrengthMeter';
 
 export default function ProfileScreen() {
   const navigation = useNavigation();
@@ -73,11 +75,12 @@ export default function ProfileScreen() {
   };
 
   const handleChangePassword = async () => {
-    if (!newPassword || newPassword.length < 6) {
-      setError('Password must be at least 6 characters');
+    // Client-side enforcement
+    if (!isStrongPassword(newPassword)) {
+      setError('Password does not meet the required format');
       return;
     }
-    if (newPassword !== confirmPassword) {
+    if (!passwordsMatch(newPassword, confirmPassword)) {
       setError('Passwords do not match');
       return;
     }
@@ -158,6 +161,8 @@ export default function ProfileScreen() {
                 <FontAwesome name={newPasswordVisible ? 'eye-slash' : 'eye'} size={theme.fontSizes.lg} color={theme.colors.dark} />
               </TouchableOpacity>
             </View>
+            <PasswordStrengthMeter password={newPassword} />
+            <Text style={styles.hint}>{POLICY_HINT}</Text>
           </View>
           <View style={styles.field}> 
             <Text style={styles.label}>Confirm Password</Text>
@@ -174,8 +179,11 @@ export default function ProfileScreen() {
                 <FontAwesome name={confirmPasswordVisible ? 'eye-slash' : 'eye'} size={theme.fontSizes.lg} color={theme.colors.dark} />
               </TouchableOpacity>
             </View>
+            {!passwordsMatch(newPassword, confirmPassword) && !!confirmPassword ? (
+              <Text style={styles.mismatch}>Passwords do not match</Text>
+            ) : null}
           </View>
-          <TouchableOpacity style={styles.secondaryBtn} onPress={handleChangePassword} disabled={pwLoading}>
+          <TouchableOpacity style={[styles.secondaryBtn, (!isStrongPassword(newPassword) || !passwordsMatch(newPassword, confirmPassword)) ? styles.btnDisabled : null]} onPress={handleChangePassword} disabled={pwLoading || !isStrongPassword(newPassword) || !passwordsMatch(newPassword, confirmPassword)}>
             <Text style={styles.secondaryBtnText}>{pwLoading ? 'Changing…' : 'Update Password'}</Text>
           </TouchableOpacity>
         </View>
@@ -200,6 +208,8 @@ const styles = StyleSheet.create({
   inputContainer: { position: 'relative' },
   passwordInput: { paddingRight: theme.spacing.xl },
   eyeToggleInside: { position: 'absolute', right: theme.spacing.md, top: 0, bottom: 0, justifyContent: 'center' },
+  hint: { color: theme.colors.gray, marginTop: theme.spacing.xs },
+  mismatch: { color: theme.colors.danger, marginTop: theme.spacing.xs },
   success: { color: theme.colors.success, marginTop: theme.spacing.sm },
   error: { color: theme.colors.danger, marginTop: theme.spacing.sm },
   sectionTitle: { fontSize: theme.fontSizes.lg, fontWeight: '700', color: theme.colors.black, marginBottom: theme.spacing.sm },
@@ -208,5 +218,7 @@ const styles = StyleSheet.create({
   primaryBtn: { backgroundColor: theme.colors.primary, borderRadius: theme.spacing.md, paddingVertical: theme.spacing.md, alignItems: 'center' },
   primaryBtnText: { color: theme.colors.white, fontWeight: '700' },
   secondaryBtn: { backgroundColor: theme.colors.dark, borderRadius: theme.spacing.md, paddingVertical: theme.spacing.md, alignItems: 'center' },
+  btnDisabled: { opacity: 0.6 },
   secondaryBtnText: { color: theme.colors.white, fontWeight: '700' }
 });
+
