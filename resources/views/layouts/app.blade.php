@@ -23,11 +23,13 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    @include('partials.css')
 </head>
 <body class="login-page" style="min-height: 512.8px;">
     <div class="login-box">
         @yield('content')
     </div>
+    @include('partials.scripts')
 </body>
 
 </html>

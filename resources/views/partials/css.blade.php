@@ -73,3 +73,61 @@
   /* Age ticker style */
   .age-ticker { color: #dc2626; font-weight: 700; }
 </style>
+
+<style>
+  /* Shared show/hide password toggle styles */
+  .password-wrapper { position: relative; }
+  .password-wrapper .form-control { padding-right: 40px; }
+  .toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 0;
+    color: #7c8da1; /* muted */
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .toggle-password:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(76,111,255,0.18);
+    border-radius: 8px;
+  }
+  .toggle-password svg { width: 18px; height: 18px; }
+
+  /* Password Strength Meter */
+  .password-strength-meter {
+    height: 4px;
+    background-color: #e2e8f0;
+    margin-top: 8px;
+    border-radius: 2px;
+    overflow: hidden;
+    display: none; /* Hidden until typing */
+  }
+  .password-strength-meter .strength-bar {
+    height: 100%;
+    width: 0;
+    transition: width 0.3s ease, background-color 0.3s ease;
+  }
+  .password-strength-text {
+    font-size: 0.75rem;
+    margin-top: 4px;
+    display: none;
+    font-weight: 500;
+  }
+  
+  /* Strength Colors */
+  .strength-weak { background-color: #ef4444 !important; }   /* Red */
+  .strength-fair { background-color: #f59e0b !important; }   /* Orange */
+  .strength-good { background-color: #3b82f6 !important; }   /* Blue */
+  .strength-strong { background-color: #10b981 !important; } /* Green */
+  
+  .text-weak { color: #ef4444; }
+  .text-fair { color: #f59e0b; }
+  .text-good { color: #3b82f6; }
+  .text-strong { color: #10b981; }
+</style>

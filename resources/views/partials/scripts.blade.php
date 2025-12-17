@@ -1343,3 +1343,247 @@ $('#city').on('change',function () {
 </script>
 
 
+
+<script>
+// Enable show/hide password toggles globally where elements exist
+(function(){
+  var init = function() {
+    var toggles = document.querySelectorAll('.toggle-password[data-toggle-target]');
+    if (!toggles || toggles.length === 0) return;
+    toggles.forEach(function(toggle){
+      var inputId = toggle.getAttribute('data-toggle-target');
+      var input = document.getElementById(inputId);
+      if (!input) return;
+      // Remove existing listener to prevent duplicates if init called twice
+      var newToggle = toggle.cloneNode(true);
+      toggle.parentNode.replaceChild(newToggle, toggle);
+      toggle = newToggle;
+      
+      var eyeOn = toggle.querySelector('.eye-on');
+      var eyeOff = toggle.querySelector('.eye-off');
+      
+      toggle.addEventListener('click', function(e){
+        e.preventDefault(); // Prevent form submit if button type not explicitly set (though it is button type=button)
+        var input = document.getElementById(inputId); // Re-fetch input
+        if(!input) return;
+        var showing = input.type === 'text';
+        input.type = showing ? 'password' : 'text';
+        toggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+        if (eyeOn && eyeOff) {
+          eyeOn.style.display = showing ? '' : 'none';
+          eyeOff.style.display = showing ? 'none' : '';
+        }
+      });
+    });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+<script>
+// Client-side password strength and match validation (non-intrusive)
+// Applies only to inputs that declare a strong pattern attribute
+// so login page is unaffected.
+(function(){
+  var STRONG_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+
+  function isStrongPatternAttr(el){
+    var pat = el.getAttribute('pattern') || '';
+    // Heuristic: if pattern includes the lookaheads we use, treat as strong
+            return /\(\?\=\.\*\[a\-z\]\)/.test(pat) &&
+                   /\(\?\=\.\*\[A\-Z\]\)/.test(pat) &&
+                   ( /\(\?\=\.\*\\d\)/.test(pat) || /\(\?\=\.\*\\\\d\)/.test(pat) ) &&
+                   /\(\?\=\.\*\[\^A\-Za\-z0\-9\]\)/.test(pat);
+  }
+
+  function findOrCreateFeedback(container){
+    // Prefer an existing invalid-feedback element, otherwise create one
+    var fb = container.querySelector('.invalid-feedback');
+    if (!fb){
+      fb = document.createElement('div');
+      fb.className = 'invalid-feedback';
+      container.appendChild(fb);
+    }
+    return fb;
+  }
+
+  function validateGroup(form){
+    var pwInputs = Array.prototype.slice.call(form.querySelectorAll('input[type="password"]'));
+    // Identify primary (non-confirm) and confirm(s)
+    var primary = pwInputs.find(function(inp){
+      var nm = (inp.name || '') + ' ' + (inp.id || '');
+      return !/confirm|confirmation/i.test(nm) && isStrongPatternAttr(inp);
+    });
+    if (!primary) return; // No strong password field in this form
+
+    function calculateStrength(val) {
+      var score = 0;
+      if (!val) return 0;
+      if (val.length >= 8) score++;
+      if (/[a-z]/.test(val)) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/\d/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+      return score;
+    }
+
+    function updateMeter(input, score) {
+      var wrapper = input.closest('.password-wrapper') || input.parentElement;
+      // Look for meter siblings
+      var meter = wrapper.nextElementSibling;
+      while (meter && !meter.classList.contains('password-strength-meter')) {
+        meter = meter.nextElementSibling;
+      }
+      var text = wrapper.nextElementSibling;
+      while (text && !text.classList.contains('password-strength-text')) {
+        text = text.nextElementSibling;
+      }
+
+      if (meter) {
+        meter.style.display = input.value.length > 0 ? 'block' : 'none';
+        var bar = meter.querySelector('.strength-bar');
+        var width = (score / 5) * 100;
+        bar.style.width = width + '%';
+        
+        // Remove old classes
+        bar.classList.remove('strength-weak', 'strength-fair', 'strength-good', 'strength-strong');
+        
+        if (score < 3) bar.classList.add('strength-weak');
+        else if (score < 4) bar.classList.add('strength-fair');
+        else if (score < 5) bar.classList.add('strength-good');
+        else bar.classList.add('strength-strong');
+      }
+
+      if (text) {
+        text.style.display = input.value.length > 0 ? 'block' : 'none';
+        text.classList.remove('text-weak', 'text-fair', 'text-good', 'text-strong');
+        
+        var label = '';
+        if (score < 3) { label = 'Weak'; text.classList.add('text-weak'); }
+        else if (score < 4) { label = 'Fair'; text.classList.add('text-fair'); }
+        else if (score < 5) { label = 'Good'; text.classList.add('text-good'); }
+        else { label = 'Strong'; text.classList.add('text-strong'); }
+        
+        text.textContent = 'Strength: ' + label;
+      }
+    }
+
+    function updatePrimary(){
+      var value = primary.value || '';
+      var ok = STRONG_RE.test(value);
+      var score = calculateStrength(value);
+      
+      updateMeter(primary, score);
+
+      primary.classList.toggle('is-invalid', !ok && value.length > 0);
+      primary.classList.toggle('is-valid', ok);
+      var container = primary.closest('.password-wrapper') || primary.parentElement;
+      var fb = findOrCreateFeedback(container);
+      fb.textContent = ok ? '' : 'Password must be at least 8 chars and include uppercase, lowercase, number, and special character.';
+      fb.style.display = ok ? 'none' : '';
+    }
+
+    function updateConfirm(inp){
+      var match = inp.value === primary.value;
+      inp.classList.toggle('is-invalid', !match && inp.value.length > 0);
+      inp.classList.toggle('is-valid', match && STRONG_RE.test(primary.value));
+      var container = inp.closest('.password-wrapper') || inp.parentElement;
+      var fb = findOrCreateFeedback(container);
+      fb.textContent = match ? '' : 'Passwords do not match.';
+      fb.style.display = match ? 'none' : '';
+    }
+
+    function allConfirmsMatch(){
+      var ok = true;
+      pwInputs.forEach(function(inp){
+        var nm = (inp.name || '') + ' ' + (inp.id || '');
+        if (/confirm|confirmation/i.test(nm)){
+          if (inp.value !== primary.value) ok = false;
+        }
+      });
+      return ok;
+    }
+
+    function updateSubmitControls(){
+      var strongOk = STRONG_RE.test(primary.value);
+      var confirmOk = allConfirmsMatch();
+      var show = strongOk && confirmOk;
+      var submitters = Array.prototype.slice.call(form.querySelectorAll('button[type="submit"], input[type="submit"]'));
+      submitters.forEach(function(sub){
+        sub.disabled = !show;
+        sub.classList.toggle('d-none', !show);
+      });
+    }
+
+    // Attach listeners
+    primary.addEventListener('input', function(){
+      updatePrimary();
+      pwInputs.forEach(function(inp){
+        var nm = (inp.name || '') + ' ' + (inp.id || '');
+        if (/confirm|confirmation/i.test(nm)) updateConfirm(inp);
+      });
+      updateSubmitControls();
+    });
+
+    pwInputs.forEach(function(inp){
+      var nm = (inp.name || '') + ' ' + (inp.id || '');
+      if (/confirm|confirmation/i.test(nm)){
+        inp.addEventListener('input', function(){ updateConfirm(inp); updateSubmitControls(); });
+      }
+    });
+
+    // Initial state
+    updatePrimary();
+    pwInputs.forEach(function(inp){
+      var nm = (inp.name || '') + ' ' + (inp.id || '');
+      if (/confirm|confirmation/i.test(nm)) updateConfirm(inp);
+    });
+    updateSubmitControls();
+
+    // Guard submit to prevent weak/mismatch
+    form.addEventListener('submit', function(e){
+      var strongOk = STRONG_RE.test(primary.value);
+      var confirmOk = true;
+      pwInputs.forEach(function(inp){
+        var nm = (inp.name || '') + ' ' + (inp.id || '');
+        if (/confirm|confirmation/i.test(nm)){
+          var match = inp.value === primary.value;
+          if (!match) confirmOk = false;
+        }
+      });
+      if (!strongOk || !confirmOk){
+        e.preventDefault();
+        e.stopPropagation();
+        updatePrimary();
+        pwInputs.forEach(function(inp){
+          var nm = (inp.name || '') + ' ' + (inp.id || '');
+          if (/confirm|confirmation/i.test(nm)) updateConfirm(inp);
+        });
+      }
+    });
+  }
+
+  var init = function() {
+    // Initialize for all forms present
+    Array.prototype.slice.call(document.querySelectorAll('form')).forEach(validateGroup);
+
+    // Reinitialize inside modals when shown
+    document.querySelectorAll('.modal').forEach(function(modal){
+      modal.addEventListener('shown.bs.modal', function(){
+        Array.prototype.slice.call(modal.querySelectorAll('form')).forEach(validateGroup);
+      });
+    });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
