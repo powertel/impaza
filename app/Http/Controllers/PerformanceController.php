@@ -14,9 +14,39 @@ class PerformanceController extends Controller
 {
     public function index(Request $request)
     {
-        // Date Filter
-        $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->format('Y-m-d'));
-        $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->format('Y-m-d'));
+        // Date Filter Logic matching Call Centre Reports
+        $filter = $request->input('filter', 'month');
+        $selectedYear = $request->input('year', Carbon::now()->year);
+        $selectedMonth = $request->input('month', Carbon::now()->month);
+        $selectedQuarter = $request->input('quarter', isset($request->quarter) ? $request->quarter : Carbon::now()->quarter);
+        $startDateInput = $request->input('start_date');
+        $endDateInput = $request->input('end_date');
+
+        if ($filter == 'year') {
+            if ($selectedYear == 'all') {
+                $startDate = Carbon::create(2000, 1, 1)->startOfDay()->format('Y-m-d');
+                $endDate = Carbon::now()->endOfDay()->format('Y-m-d');
+            } else {
+                $startDate = Carbon::create($selectedYear, 1, 1)->startOfYear()->format('Y-m-d');
+                $endDate = Carbon::create($selectedYear, 1, 1)->endOfYear()->format('Y-m-d');
+            }
+        } elseif ($filter == 'quarter') {
+             $startMonth = ($selectedQuarter - 1) * 3 + 1;
+             $startDate = Carbon::create($selectedYear, $startMonth, 1)->startOfQuarter()->format('Y-m-d');
+             $endDate = Carbon::create($selectedYear, $startMonth, 1)->endOfQuarter()->format('Y-m-d');
+        } elseif ($filter == 'weekly') {
+             $startDate = $startDateInput ? Carbon::parse($startDateInput)->format('Y-m-d') : Carbon::now()->startOfWeek()->format('Y-m-d');
+             $endDate = $endDateInput ? Carbon::parse($endDateInput)->format('Y-m-d') : Carbon::now()->endOfWeek()->format('Y-m-d');
+        } else { // month or default
+             $startDate = Carbon::create($selectedYear, $selectedMonth, 1)->startOfMonth()->format('Y-m-d');
+             $endDate = Carbon::create($selectedYear, $selectedMonth, 1)->endOfMonth()->format('Y-m-d');
+        }
+
+        // Available Years for Filter
+        $availableYears = Fault::selectRaw('YEAR(created_at) as year')->distinct()->orderBy('year', 'desc')->pluck('year')->toArray();
+        if (empty($availableYears)) {
+            $availableYears = [Carbon::now()->year];
+        }
 
         // Technician/User Performance
         // Only users who have at least one fault assigned within the date range
@@ -133,9 +163,28 @@ class PerformanceController extends Controller
             'deptRates' => $departments->pluck('resolution_rate')->toArray(),
         ];
 
-        return view('performance.index', compact('users', 'sections', 'departments', 'topUser', 'topSection', 'avgUserRate', 'avgSectionRate', 'avgUserTime', 'totalUsersAssigned', 'chartData', 'startDate', 'endDate'));
+        return view('performance.index', compact(
+            'users', 
+            'sections', 
+            'departments',
+            'topUser', 
+            'avgUserRate', 
+            'topSection', 
+            'avgSectionRate',
+            'chartData',
+            'totalUsersAssigned',
+            'avgUserTime',
+            'startDate',
+            'endDate',
+            'filter',
+            'selectedYear',
+            'selectedMonth',
+            'selectedQuarter',
+            'availableYears'
+        ));
     }
 }
+
 
 
 
