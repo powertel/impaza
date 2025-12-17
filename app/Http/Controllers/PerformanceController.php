@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Section;
 use App\Models\Fault;
 use App\Models\Department;
+use App\Models\City;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -21,6 +22,11 @@ class PerformanceController extends Controller
         $selectedQuarter = $request->input('quarter', isset($request->quarter) ? $request->quarter : Carbon::now()->quarter);
         $startDateInput = $request->input('start_date');
         $endDateInput = $request->input('end_date');
+        
+        // Region Filter Logic
+        $selectedRegionRaw = trim((string) $request->input('region', ''));
+        $selectedRegion = $selectedRegionRaw === '' ? null : $selectedRegionRaw;
+        $availableRegions = DB::table('cities')->select('region')->whereNotNull('region')->distinct()->orderBy('region')->pluck('region')->toArray();
 
         if ($filter == 'year') {
             if ($selectedYear == 'all') {
@@ -50,23 +56,43 @@ class PerformanceController extends Controller
 
         // Technician/User Performance
         // Only users who have at least one fault assigned within the date range
-        $usersQuery = User::whereHas('assignedFaults', function ($query) use ($startDate, $endDate) {
+        $usersQuery = User::whereHas('assignedFaults', function ($query) use ($startDate, $endDate, $selectedRegion) {
                 $query->whereBetween('faults.created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+                if ($selectedRegion) {
+                    $query->whereHas('city', function($q) use ($selectedRegion) {
+                        $q->where('region', $selectedRegion);
+                    });
+                }
             });
 
         $totalUsersAssigned = $usersQuery->count();
 
-        $users = $usersQuery->withCount(['assignedFaults as total_faults' => function ($query) use ($startDate, $endDate) {
+        $users = $usersQuery->withCount(['assignedFaults as total_faults' => function ($query) use ($startDate, $endDate, $selectedRegion) {
                 $query->whereBetween('faults.created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+                if ($selectedRegion) {
+                    $query->whereHas('city', function($q) use ($selectedRegion) {
+                        $q->where('region', $selectedRegion);
+                    });
+                }
             }])
-            ->withCount(['assignedFaults as resolved_faults' => function ($query) use ($startDate, $endDate) {
+            ->withCount(['assignedFaults as resolved_faults' => function ($query) use ($startDate, $endDate, $selectedRegion) {
                 $query->whereIn('faults.status_id', [4, 5, 6]) // CLT, CLC, CLN
                       ->whereBetween('faults.created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+                if ($selectedRegion) {
+                    $query->whereHas('city', function($q) use ($selectedRegion) {
+                        $q->where('region', $selectedRegion);
+                    });
+                }
             }])
-            ->with(['assignedFaults' => function ($query) use ($startDate, $endDate) {
+            ->with(['assignedFaults' => function ($query) use ($startDate, $endDate, $selectedRegion) {
                 $query->whereIn('faults.status_id', [4, 5, 6])
-                      ->whereBetween('faults.created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
-                      ->select('faults.id', 'faults.created_at', 'faults.updated_at', 'faults.assignedTo');
+                      ->whereBetween('faults.created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+                if ($selectedRegion) {
+                    $query->whereHas('city', function($q) use ($selectedRegion) {
+                        $q->where('region', $selectedRegion);
+                    });
+                }
+                $query->select('faults.id', 'faults.created_at', 'faults.updated_at', 'faults.assignedTo');
             }])
             ->get()
             ->map(function ($user) {
@@ -84,20 +110,40 @@ class PerformanceController extends Controller
             });
 
         // Section Performance
-        $sections = Section::whereHas('faults', function ($query) use ($startDate, $endDate) {
+        $sections = Section::whereHas('faults', function ($query) use ($startDate, $endDate, $selectedRegion) {
                 $query->whereBetween('faults.created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+                if ($selectedRegion) {
+                    $query->whereHas('city', function($q) use ($selectedRegion) {
+                        $q->where('region', $selectedRegion);
+                    });
+                }
             })
-            ->withCount(['faults as total_faults' => function ($query) use ($startDate, $endDate) {
+            ->withCount(['faults as total_faults' => function ($query) use ($startDate, $endDate, $selectedRegion) {
                 $query->whereBetween('faults.created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+                if ($selectedRegion) {
+                    $query->whereHas('city', function($q) use ($selectedRegion) {
+                        $q->where('region', $selectedRegion);
+                    });
+                }
             }])
-            ->withCount(['faults as resolved_faults' => function ($query) use ($startDate, $endDate) {
+            ->withCount(['faults as resolved_faults' => function ($query) use ($startDate, $endDate, $selectedRegion) {
                 $query->whereIn('faults.status_id', [4, 5, 6])
                       ->whereBetween('faults.created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+                if ($selectedRegion) {
+                    $query->whereHas('city', function($q) use ($selectedRegion) {
+                        $q->where('region', $selectedRegion);
+                    });
+                }
             }])
-            ->with(['faults' => function ($query) use ($startDate, $endDate) {
+            ->with(['faults' => function ($query) use ($startDate, $endDate, $selectedRegion) {
                 $query->whereIn('faults.status_id', [4, 5, 6])
-                      ->whereBetween('faults.created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
-                      ->select('faults.id', 'faults.created_at', 'faults.updated_at');
+                      ->whereBetween('faults.created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+                if ($selectedRegion) {
+                    $query->whereHas('city', function($q) use ($selectedRegion) {
+                        $q->where('region', $selectedRegion);
+                    });
+                }
+                $query->select('faults.id', 'faults.created_at', 'faults.updated_at');
             }])
             ->get()
             ->map(function ($section) {
@@ -114,9 +160,14 @@ class PerformanceController extends Controller
             });
 
         // Department Performance
-        $departments = Department::with(['sections.faults' => function($query) use ($startDate, $endDate) {
-                $query->whereBetween('faults.created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
-                      ->select('faults.id', 'faults.created_at', 'faults.updated_at', 'faults.status_id');
+        $departments = Department::with(['sections.faults' => function($query) use ($startDate, $endDate, $selectedRegion) {
+                $query->whereBetween('faults.created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+                if ($selectedRegion) {
+                    $query->whereHas('city', function($q) use ($selectedRegion) {
+                        $q->where('region', $selectedRegion);
+                    });
+                }
+                $query->select('faults.id', 'faults.created_at', 'faults.updated_at', 'faults.status_id');
             }])
             ->get()
             ->map(function ($department) {
@@ -180,10 +231,13 @@ class PerformanceController extends Controller
             'selectedYear',
             'selectedMonth',
             'selectedQuarter',
-            'availableYears'
+            'availableYears',
+            'availableRegions',
+            'selectedRegion'
         ));
     }
 }
+
 
 
 
