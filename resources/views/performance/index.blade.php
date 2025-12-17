@@ -227,10 +227,10 @@ Performance Dashboard
                                 <thead class="bg-light">
                                     <tr>
                                         <th>User</th>
-                                        <th>Total Assigned</th>
-                                        <th>Resolved</th>
-                                        <th>Pending</th>
-                                        <th>Avg Resolution Time</th>
+                                        <th class="text-center">Total Assigned</th>
+                                        <th class="text-center">Resolved</th>
+                                        <th class="text-center">Pending</th>
+                                        <th class="text-center">Avg Resolution Time</th>
                                         <th>Resolution Rate</th>
                                         <th>Performance</th>
                                     </tr>
@@ -239,10 +239,10 @@ Performance Dashboard
                                     @foreach($users as $user)
                                     <tr>
                                         <td class="font-weight-bold">{{ $user->name }}</td>
-                                        <td>{{ $user->total_faults }}</td>
-                                        <td>{{ $user->resolved_faults }}</td>
-                                        <td>{{ $user->pending_faults }}</td>
-                                        <td>{{ $user->avg_resolution_time }} Hours</td>
+                                        <td class="text-center"><span class="text-primary font-weight-bold" style="font-size: 1.1em;">{{ $user->total_faults }}</span></td>
+                                        <td class="text-center"><span class="text-success font-weight-bold" style="font-size: 1.1em;">{{ $user->resolved_faults }}</span></td>
+                                        <td class="text-center"><span class="text-danger font-weight-bold" style="font-size: 1.1em;">{{ $user->pending_faults }}</span></td>
+                                        <td class="text-center">{{ $user->avg_resolution_time }} Hours</td>
                                         <td style="width: 25%">
                                             <div class="d-flex align-items-center">
                                                 <span class="mr-2 font-weight-bold">{{ $user->resolution_rate }}%</span>
@@ -279,10 +279,10 @@ Performance Dashboard
                                 <thead class="bg-light">
                                     <tr>
                                         <th>Section</th>
-                                        <th>Total Faults</th>
-                                        <th>Resolved</th>
-                                        <th>Pending</th>
-                                        <th>Avg Resolution Time</th>
+                                        <th class="text-center">Total Faults</th>
+                                        <th class="text-center">Resolved</th>
+                                        <th class="text-center">Pending</th>
+                                        <th class="text-center">Avg Resolution Time</th>
                                         <th>Resolution Rate</th>
                                         <th>Performance</th>
                                     </tr>
@@ -291,10 +291,10 @@ Performance Dashboard
                                     @foreach($sections as $section)
                                     <tr>
                                         <td class="font-weight-bold">{{ $section->section }}</td>
-                                        <td>{{ $section->total_faults }}</td>
-                                        <td>{{ $section->resolved_faults }}</td>
-                                        <td>{{ $section->pending_faults }}</td>
-                                        <td>{{ $section->avg_resolution_time }} Hours</td>
+                                        <td class="text-center"><span class="text-primary font-weight-bold" style="font-size: 1.1em;">{{ $section->total_faults }}</span></td>
+                                        <td class="text-center"><span class="text-success font-weight-bold" style="font-size: 1.1em;">{{ $section->resolved_faults }}</span></td>
+                                        <td class="text-center"><span class="text-danger font-weight-bold" style="font-size: 1.1em;">{{ $section->pending_faults }}</span></td>
+                                        <td class="text-center">{{ $section->avg_resolution_time }} Hours</td>
                                         <td style="width: 25%">
                                             <div class="d-flex align-items-center">
                                                 <span class="mr-2 font-weight-bold">{{ $section->resolution_rate }}%</span>
@@ -331,10 +331,10 @@ Performance Dashboard
                                 <thead class="bg-light">
                                     <tr>
                                         <th>Department</th>
-                                        <th>Total Faults</th>
-                                        <th>Resolved</th>
-                                        <th>Pending</th>
-                                        <th>Avg Resolution Time</th>
+                                        <th class="text-center">Total Faults</th>
+                                        <th class="text-center">Resolved</th>
+                                        <th class="text-center">Pending</th>
+                                        <th class="text-center">Avg Resolution Time</th>
                                         <th>Resolution Rate</th>
                                         <th>Performance</th>
                                     </tr>
@@ -343,10 +343,10 @@ Performance Dashboard
                                     @foreach($departments as $dept)
                                     <tr>
                                         <td class="font-weight-bold">{{ $dept->department }}</td>
-                                        <td>{{ $dept->total_faults }}</td>
-                                        <td>{{ $dept->resolved_faults }}</td>
-                                        <td>{{ $dept->pending_faults }}</td>
-                                        <td>{{ $dept->avg_resolution_time }} Hours</td>
+                                        <td class="text-center"><span class="text-primary font-weight-bold" style="font-size: 1.1em;">{{ $dept->total_faults }}</span></td>
+                                        <td class="text-center"><span class="text-success font-weight-bold" style="font-size: 1.1em;">{{ $dept->resolved_faults }}</span></td>
+                                        <td class="text-center"><span class="text-danger font-weight-bold" style="font-size: 1.1em;">{{ $dept->pending_faults }}</span></td>
+                                        <td class="text-center">{{ $dept->avg_resolution_time }} Hours</td>
                                         <td style="width: 25%">
                                             <div class="d-flex align-items-center">
                                                 <span class="mr-2 font-weight-bold">{{ $dept->resolution_rate }}%</span>
