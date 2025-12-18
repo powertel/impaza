@@ -10,6 +10,8 @@
     return {
       monthlyLabels: parse('monthlyLabels'),
       monthlyCounts: parse('monthlyCounts'),
+      monthlySLA: parse('monthlySLA'),
+      monthlyMTTR: parse('monthlyMTTR'),
       statusLabels: parse('statusLabels'),
       statusValues: parse('statusValues'),
       rfoLabels: parse('rfoLabels'),
@@ -165,6 +167,61 @@
       });
     }
 
+    // SLA Trend
+    if (has('chartSLATrend')) {
+      new Chart(el('chartSLATrend'), {
+        type: 'line',
+        data: {
+          labels: data.monthlyLabels,
+          datasets: [{
+            label: 'SLA Compliance %',
+            data: data.monthlySLA,
+            borderColor: '#1cc88a',
+            backgroundColor: 'rgba(28, 200, 138, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100
+            }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    // MTTR Trend
+    if (has('chartMTTRTrend')) {
+      new Chart(el('chartMTTRTrend'), {
+        type: 'line',
+        data: {
+          labels: data.monthlyLabels,
+          datasets: [{
+            label: 'Avg MTTR (Hours)',
+            data: data.monthlyMTTR,
+            borderColor: '#f6c23e',
+            backgroundColor: 'rgba(246, 194, 62, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          },
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
     // SLA gauge
     if (has('chartSLA')) new Chart(el('chartSLA'), {
       type: 'doughnut',
@@ -290,10 +347,23 @@
     if (has('chartCoverageGap')) new Chart(el('chartCoverageGap'), { type: 'bar', data: { labels: data.linksPerCityLabels, datasets: [{ label: 'Faults per Link', data: data.coverageGapValues, backgroundColor: '#f6c23e' }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
   }
 
+  function initEvents() {
+    const filterForm = document.getElementById('reportsFilterForm');
+    if (filterForm) {
+      const selects = filterForm.querySelectorAll('select');
+      selects.forEach(select => {
+        select.addEventListener('change', function() {
+          filterForm.submit();
+        });
+      });
+    }
+  }
+
   function start() {
     const data = getData();
     if (!data) return;
     initCharts(data);
+    initEvents();
   }
 
   if (document.readyState === 'loading') {

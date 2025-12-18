@@ -140,13 +140,35 @@ class DashboardController extends Controller
         // Faults per past 12 months (labels and counts)
         $monthlyLabels = [];
         $monthlyCounts = [];
+        $monthlySLA = [];
+        $monthlyMTTR = [];
+        $slaThreshold = 24 * 3600; // 24 hours
+
         for ($i = 11; $i >= 0; $i--) {
             $from = $now->copy()->subMonths($i)->startOfMonth();
             $to = $now->copy()->subMonths($i)->endOfMonth();
             $label = $from->format('M Y');
+            
+            // Fault Count
             $count = Fault::whereBetween('created_at', [$from, $to])->count();
             $monthlyLabels[] = $label;
             $monthlyCounts[] = $count;
+
+            // SLA Calculation for this month
+            $totalSla = FaultStageLog::whereBetween('started_at', [$from, $to])
+                ->whereNotNull('duration_seconds')
+                ->count();
+            $metSla = FaultStageLog::whereBetween('started_at', [$from, $to])
+                ->whereNotNull('duration_seconds')
+                ->where('duration_seconds', '<=', $slaThreshold)
+                ->count();
+            $monthlySLA[] = $totalSla > 0 ? round(($metSla / $totalSla) * 100, 1) : 0;
+
+            // MTTR Calculation for this month
+            $avgMttr = FaultStageLog::whereBetween('started_at', [$from, $to])
+                ->whereNotNull('duration_seconds')
+                ->avg('duration_seconds');
+            $monthlyMTTR[] = $avgMttr ? round($avgMttr / 3600, 1) : 0; // In Hours
         }
 
         // Status distribution (join statuses for labels if available)
@@ -591,6 +613,8 @@ class DashboardController extends Controller
             'mttaLastMonth' => (int) $mttaLastMonth,
             'monthlyLabels' => $monthlyLabels,
             'monthlyCounts' => $monthlyCounts,
+            'monthlySLA' => $monthlySLA,
+            'monthlyMTTR' => $monthlyMTTR,
             'statusLabels' => $statusLabels,
             'statusValues' => $statusValues,
             'rfoLabels' => $rfoLabels,
