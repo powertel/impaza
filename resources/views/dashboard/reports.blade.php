@@ -108,7 +108,7 @@
                                 <i class="fas fa-clock"></i>
                             </div>
                             <div class="kpi-content">
-                                <div class="kpi-value">{{ gmdate('H\h i\m', $mttrThisMonth) }}</div>
+                                <div class="kpi-value">{{ number_format($mttrThisMonth / 3600, 1) }}h</div>
                                 <div class="kpi-label">Avg MTTR</div>
                                 <div class="kpi-trend">
                                     @php
@@ -143,24 +143,15 @@
                     </div>
                 </div>
 
-                <div class="px-4 pb-4">
+                <div class="px-6 pb-6">
                     <h2 class="section-title text-lg font-bold text-gray-700 mb-3 px-1">Service Reliability Trends</h2>
-                    <div class="charts-grid">
+                    <div class="w-full mb-8">
                         <div class="chart-card chart-large cc-chart-card">
                             <div class="chart-header">
                                 <h3>Fault Volume Trend (12 Months)</h3>
                             </div>
                             <div class="chart-body">
                                 <canvas id="chartMonthlyFaults"></canvas>
-                            </div>
-                        </div>
-
-                        <div class="chart-card chart-large cc-chart-card">
-                            <div class="chart-header">
-                                <h3>SLA Compliance Trend</h3>
-                            </div>
-                            <div class="chart-body">
-                                <canvas id="chartSLATrend"></canvas>
                             </div>
                         </div>
                     </div>
@@ -180,19 +171,10 @@
 
                         <div class="chart-card cc-chart-card">
                             <div class="chart-header">
-                                <h3>Geographic Distribution</h3>
+                                <h3>Geographic Distribution (By Region)</h3>
                             </div>
                             <div class="chart-body">
                                 <canvas id="chartCityFaults"></canvas>
-                            </div>
-                        </div>
-                        
-                        <div class="chart-card cc-chart-card">
-                            <div class="chart-header">
-                                <h3>MTTR Trend (Hours)</h3>
-                            </div>
-                            <div class="chart-body">
-                                <canvas id="chartMTTRTrend"></canvas>
                             </div>
                         </div>
                     </div>
@@ -288,8 +270,6 @@
 <div id="reportsData" style="display:none"
      data-monthly-labels='@json($monthlyLabels)'
      data-monthly-counts='@json($monthlyCounts)'
-     data-monthly-sla='@json($monthlySLA)'
-     data-monthly-mttr='@json($monthlyMTTR)'
      data-rfo-labels='@json($rfoLabels)'
      data-rfo-values='@json($rfoValues)'
      data-city-faults-labels='@json($cityFaultsLabels)'
@@ -299,3 +279,7 @@
 <script src="{{ asset('js/reports.js') }}"></script>
 @endpush
 @endsection
+
+
+
+

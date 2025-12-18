@@ -10,8 +10,6 @@
     return {
       monthlyLabels: parse('monthlyLabels'),
       monthlyCounts: parse('monthlyCounts'),
-      monthlySLA: parse('monthlySLA'),
-      monthlyMTTR: parse('monthlyMTTR'),
       statusLabels: parse('statusLabels'),
       statusValues: parse('statusValues'),
       rfoLabels: parse('rfoLabels'),
@@ -163,61 +161,6 @@
               hoverRadius: 8
             }
           }
-        }
-      });
-    }
-
-    // SLA Trend
-    if (has('chartSLATrend')) {
-      new Chart(el('chartSLATrend'), {
-        type: 'line',
-        data: {
-          labels: data.monthlyLabels,
-          datasets: [{
-            label: 'SLA Compliance %',
-            data: data.monthlySLA,
-            borderColor: '#1cc88a',
-            backgroundColor: 'rgba(28, 200, 138, 0.1)',
-            borderWidth: 3,
-            fill: true,
-            tension: 0.4
-          }]
-        },
-        options: {
-          scales: {
-            y: {
-              beginAtZero: true,
-              max: 100
-            }
-          },
-          plugins: { legend: { display: false } }
-        }
-      });
-    }
-
-    // MTTR Trend
-    if (has('chartMTTRTrend')) {
-      new Chart(el('chartMTTRTrend'), {
-        type: 'line',
-        data: {
-          labels: data.monthlyLabels,
-          datasets: [{
-            label: 'Avg MTTR (Hours)',
-            data: data.monthlyMTTR,
-            borderColor: '#f6c23e',
-            backgroundColor: 'rgba(246, 194, 62, 0.1)',
-            borderWidth: 3,
-            fill: true,
-            tension: 0.4
-          }]
-        },
-        options: {
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          },
-          plugins: { legend: { display: false } }
         }
       });
     }

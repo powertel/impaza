@@ -82,7 +82,7 @@
                                     </select>
                                 </div>
                                 <div class="col-md-12">
-                                    <label for="address" class="form-label">Address</label>
+                                    <label for="address" class="form-label">Fault Address</label>
                                     <input type="text" class="form-control @error('address') is-invalid @enderror" placeholder="Address" name="address" value="{{ old('address') }}">
                                 </div>
                             </div>
@@ -103,7 +103,7 @@
                         <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-md-12">
-                                    <label for="remark" class="form-label">Remarks</label>
+                                    <label for="remark" class="form-label">Remarks (Issue, port and Switch)</label>
                                     <textarea name="remark" required class="form-control @error('remark') is-invalid @enderror" placeholder="Enter any additional comments" rows="3">{{ old('remark') }}</textarea>
                                     <input type="hidden" name="activity" value="ON LOGGING">
                                 </div>
