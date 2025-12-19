@@ -242,7 +242,7 @@ Performance Dashboard
                                         <th class="text-center">Pending</th>
                                         <th class="text-center">Avg Resolution Time</th>
                                         <th>Resolution Rate</th>
-                                        <th>Performance</th>
+                                        <!-- <th>Performance</th> -->
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -261,7 +261,7 @@ Performance Dashboard
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>
+                                        <!-- <td>
                                             @if($user->resolution_rate >= 80)
                                                 <span class="badge badge-success px-2 py-1"><i class="fas fa-star"></i> Excellent</span>
                                             @elseif($user->resolution_rate >= 50)
@@ -269,7 +269,7 @@ Performance Dashboard
                                             @else
                                                 <span class="badge badge-danger px-2 py-1"><i class="fas fa-exclamation-triangle"></i> Poor</span>
                                             @endif
-                                        </td>
+                                        </td> -->
                                     </tr>
                                     @endforeach
                                 </tbody>
@@ -294,7 +294,7 @@ Performance Dashboard
                                         <th class="text-center">Pending</th>
                                         <th class="text-center">Avg Resolution Time</th>
                                         <th>Resolution Rate</th>
-                                        <th>Performance</th>
+                                        <!-- <th>Performance</th> -->
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -313,7 +313,7 @@ Performance Dashboard
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>
+                                      <!--   <td>
                                             @if($section->resolution_rate >= 80)
                                                 <span class="badge badge-success px-2 py-1"><i class="fas fa-star"></i> Excellent</span>
                                             @elseif($section->resolution_rate >= 50)
@@ -321,7 +321,7 @@ Performance Dashboard
                                             @else
                                                 <span class="badge badge-danger px-2 py-1"><i class="fas fa-exclamation-triangle"></i> Poor</span>
                                             @endif
-                                        </td>
+                                        </td> -->
                                     </tr>
                                     @endforeach
                                 </tbody>
@@ -346,7 +346,7 @@ Performance Dashboard
                                         <th class="text-center">Pending</th>
                                         <th class="text-center">Avg Resolution Time</th>
                                         <th>Resolution Rate</th>
-                                        <th>Performance</th>
+                                        <!-- <th>Performance</th> -->
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -365,7 +365,7 @@ Performance Dashboard
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>
+                                   <!--      <td>
                                             @if($dept->resolution_rate >= 80)
                                                 <span class="badge badge-success px-2 py-1"><i class="fas fa-star"></i> Excellent</span>
                                             @elseif($dept->resolution_rate >= 50)
@@ -373,7 +373,7 @@ Performance Dashboard
                                             @else
                                                 <span class="badge badge-danger px-2 py-1"><i class="fas fa-exclamation-triangle"></i> Poor</span>
                                             @endif
-                                        </td>
+                                        </td> -->
                                     </tr>
                                     @endforeach
                                 </tbody>
