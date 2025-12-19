@@ -70,11 +70,11 @@ Assess Faults
                         </td>
                         <td class="text-nowrap">
                             <div class="btn-group btn-group gap-2" role="group" aria-label="Actions">
-                                @can('noc-clear-faults-clear')
+                                <!-- @can('noc-clear-faults-clear')
                                 <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#nocClearModal-{{ $fault->id }}">
                                     <i class="fas fa-save me-1"></i> Clear
                                 </button>
-                                @endcan
+                                @endcan -->
                                 @can('fault-assessment')
                                 <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#assessFaultModal-{{ $fault->id }}">
                                   <i class="fas fa-clipboard-check me-1"></i> Assess
@@ -105,7 +105,11 @@ Assess Faults
                 @include('assessments.assess_modal', [
                     'fault' => $fault,
                     'sections' => $sections,
-                    'confirmedRFO' => $confirmedRFO
+                    'confirmedRFO' => $confirmedRFO,
+                    'remarks' => ($remarksByFault[$fault->id] ?? collect()),
+                    'ageText' => ($faultAges[$fault->id] ?? ''),
+                    'ageStart' => ($faultAgeStart[$fault->id] ?? null),
+                    'ageEnd' => ($faultAgeEnd[$fault->id] ?? null),
                 ])
                 @include('clear_faults.noc_clear_modal', [ 'fault' => $fault ])
                 @include('faults.show', [

@@ -109,7 +109,14 @@ Assign Faults
                 <div id="assignedfaultsPager" class="mt-2"></div>
             </div>   
             @foreach($faults as $fault)
-                @include('assign.assign_modal', ['fault' => $fault, 'technicians' => ($techniciansByFault[$fault->id] ?? $technicians)])
+                @include('assign.assign_modal', [
+                    'fault' => $fault,
+                    'technicians' => ($techniciansByFault[$fault->id] ?? $technicians),
+                    'remarks' => ($remarksByFault[$fault->id] ?? collect()),
+                    'ageText' => ($faultAges[$fault->id] ?? ''),
+                    'ageStart' => ($faultAgeStart[$fault->id] ?? null),
+                    'ageEnd' => ($faultAgeEnd[$fault->id] ?? null),
+                ])
             @endforeach
         </div>
         <!-- /.card-body -->

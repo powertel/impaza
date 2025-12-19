@@ -382,31 +382,53 @@ class AssignController extends Controller
      */
     public function update(Request $request, $id)
     {
-        
-        request()->validate([
-            'assignedTo'=> 'required',
+        $validated = $request->validate([
+            'assignedTo' => ['required'],
+            'remark' => ['required','string'],
         ]);
-        $fault = Fault::find($id);
-        $req = $request->only(['assignedTo']);
 
-        // Determine if this is an initial assignment (status transitions to rectification)
-        $isInitialAssign = ($fault && (int)$fault->status_id !== 3);
+        DB::beginTransaction();
+        try {
+            $fault = Fault::find($id);
+            if (!$fault) {
+                DB::rollBack();
+                return redirect()->back()->with('fail', 'Fault not found');
+            }
 
-        if ($isInitialAssign) {
-            // Move fault to Rectification and start a new rectification stage log entry
-            $fault->status_id = 3;
-            $fault->update($req + ['status_id' => 3]);
-            FaultLifecycle::recordStatusChange($fault, 3, $request->user()->id);
-        } else {
-            // Re-assign within the same rectification stage — keep stage timing continuous
-            $fault->update($req);
+            $req = $request->only(['assignedTo']);
+
+            // Determine if this is an initial assignment (status transitions to rectification)
+            $isInitialAssign = ((int)$fault->status_id !== 3);
+
+            if ($isInitialAssign) {
+                $fault->status_id = 3;
+                $fault->update($req + ['status_id' => 3]);
+                FaultLifecycle::recordStatusChange($fault, 3, $request->user()->id);
+            } else {
+                $fault->update($req);
+            }
+
+            // Close any open assignment and start a new one for the selected technician
+            $region = \DB::table('cities')->where('id', $fault->city_id)->value('region');
+            FaultLifecycle::startAssignment($fault, (int)$req['assignedTo'], $request->user()->id, FaultLifecycle::isOffHours(), $region);
+
+            $remarkActivityId = (int) (DB::table('remark_activities')
+                ->where('activity', '=', 'ON CHIEF-TECH REASSIGN')
+                ->value('id') ?? 0);
+            Remark::create([
+                'fault_id' => $fault->id,
+                'user_id' => $request->user()->id,
+                'remark' => $validated['remark'],
+                'remarkActivity_id' => $remarkActivityId,
+                'file_path' => null,
+            ]);
+
+            DB::commit();
+            return redirect()->back()->with('success','Fault Re-Assigned');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->with('fail','Failed to re-assign fault');
         }
-
-        // Close any open assignment and start a new one for the selected technician
-        $region = \DB::table('cities')->where('id', $fault->city_id)->value('region');
-        FaultLifecycle::startAssignment($fault, (int)$req['assignedTo'], $request->user()->id, FaultLifecycle::isOffHours(), $region);
-        return redirect()->back()
-        ->with('success','Fault Re-Assigned');
     }
 
     /**
@@ -426,15 +448,18 @@ class AssignController extends Controller
 
 public function assignFault(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'fault_id' => 'required|integer|exists:faults,id',
             'assignedTo' => 'required|integer|exists:users,id',
+            'remark' => 'required|string',
         ]);
 
-        $faultId = (int)$request->input('fault_id');
-        $techId = (int)$request->input('assignedTo');
+        $faultId = (int)$validated['fault_id'];
+        $techId = (int)$validated['assignedTo'];
         $userId = optional($request->user())->id;
 
+        DB::beginTransaction();
+        try {
         $fault = Fault::find($faultId);
         if (!$fault) {
             Log::warning('Assign failed: fault not found', [
@@ -444,6 +469,7 @@ public function assignFault(Request $request)
                 'origin' => $request->getSchemeAndHttpHost(),
                 'path' => $request->path(),
             ]);
+            DB::rollBack();
             return back()->withErrors(['error' => 'Fault not found'])->withInput();
         }
 
@@ -456,6 +482,7 @@ public function assignFault(Request $request)
                 'tech_id' => $techId,
                 'user_id' => $userId,
             ]);
+            DB::rollBack();
             return back()->withErrors(['error' => 'Fault is not in an assignable state'])->withInput();
         }
 
@@ -468,6 +495,7 @@ public function assignFault(Request $request)
                 'user_region' => auth()->user()->region,
                 'user_id' => $userId,
             ]);
+            DB::rollBack();
             return back()->withErrors(['error' => 'You can only assign faults in your region'])->withInput();
         }
 
@@ -488,6 +516,7 @@ public function assignFault(Request $request)
                 'user_region' => auth()->user()->region,
                 'user_id' => $userId,
             ]);
+            DB::rollBack();
             return back()->withErrors(['assignedTo' => 'Selected technician is not eligible']).withInput();
         }
 
@@ -506,6 +535,17 @@ public function assignFault(Request $request)
             $faultRegion
         );
 
+        $remarkActivityId = (int) (DB::table('remark_activities')
+            ->where('activity', '=', 'ON CHIEF-TECH ASSIGN')
+            ->value('id') ?? 0);
+        Remark::create([
+            'fault_id' => $fault->id,
+            'user_id' => $userId,
+            'remark' => $validated['remark'],
+            'remarkActivity_id' => $remarkActivityId,
+            'file_path' => null,
+        ]);
+
         Log::info('Assign success', [
             'fault_id' => $fault->id,
             'tech_id' => $techId,
@@ -513,7 +553,12 @@ public function assignFault(Request $request)
             'status_id' => 3,
         ]);
 
+        DB::commit();
         return redirect()->back()->with('success', 'Fault Assigned');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return redirect()->back()->with('fail', 'Failed to assign fault');
+        }
     }
 
 /* 

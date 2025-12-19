@@ -306,17 +306,23 @@ class AssessmentController extends Controller
       
         DB::beginTransaction();
         try{
-            request()->validate([
-                'priorityLevel'=>'required',
-                'faultType'=>'required',
+            $validated = $request->validate([
+                'priorityLevel' => ['required'],
+                'faultType' => ['required'],
+                'remark' => ['required','string'],
             ]);
 
             $fault = Fault::find($id);
+            if (!$fault) {
+                DB::rollBack();
+                return redirect(route('assessments.index'))
+                    ->with('fail', 'Fault not found');
+            }
+
             $req = $request->only(['priorityLevel','faultType']);
             $req['status_id'] = 2;
             $req['assessed_by'] = $request->user()->id;
             $fault->update($req);
-            // Log transition to "Fault has been assessed" (status_id = 2)
             FaultLifecycle::recordStatusChange($fault, 2, $request->user()->id);
 
             $sectionId = null;
@@ -336,20 +342,27 @@ class AssessmentController extends Controller
                 $this->autoAssign($sectionId);
             }
 
-          if($fault  && $fault_section)
-            {
-                DB::commit();
-            }
-            else
-            {
-                DB::rollback();
-            }
+            $remarkActivityId = (int) (DB::table('remark_activities')
+                ->where('activity', '=', 'ON ASSESSMENT')
+                ->value('id') ?? 0);
+
+            Remark::create([
+                'fault_id' => $fault->id,
+                'user_id' => $request->user()->id,
+                'remark' => $validated['remark'],
+                'remarkActivity_id' => $remarkActivityId,
+                'file_path' => null,
+            ]);
+
+            DB::commit();
             return redirect(route('assessments.index'))
             ->with('success','Fault Assessed');
         }
         catch(\Exception $ex)
         {
             DB::rollback();
+            return redirect(route('assessments.index'))
+                ->with('fail', 'Failed to assess fault');
         }
 
     }
