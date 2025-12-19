@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use App\Services\FaultLifecycle;
 use Illuminate\Support\Facades\Log;
 use App\Models\AutoAssignSetting;
+use Illuminate\Validation\ValidationException;
 
 class AssignController extends Controller
 {
@@ -382,16 +383,32 @@ class AssignController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'assignedTo' => ['required'],
-            'remark' => ['required','string'],
-        ]);
+        try {
+            $validated = $request->validate([
+                'assignedTo' => ['required'],
+                'remark' => ['required','string'],
+            ]);
+        } catch (ValidationException $e) {
+            Log::warning('Re-assign validation failed', [
+                'fault_id' => (int)$id,
+                'user_id' => optional($request->user())->id,
+                'path' => $request->path(),
+                'errors' => $e->errors(),
+            ]);
+            throw $e;
+        }
 
         DB::beginTransaction();
         try {
             $fault = Fault::find($id);
             if (!$fault) {
                 DB::rollBack();
+                Log::warning('Re-assign failed: fault not found', [
+                    'fault_id' => (int)$id,
+                    'assignedTo' => (int)($validated['assignedTo'] ?? 0),
+                    'user_id' => optional($request->user())->id,
+                    'path' => $request->path(),
+                ]);
                 return redirect()->back()->with('fail', 'Fault not found');
             }
 
@@ -427,6 +444,13 @@ class AssignController extends Controller
             return redirect()->back()->with('success','Fault Re-Assigned');
         } catch (\Throwable $e) {
             DB::rollBack();
+            Log::error('Re-assign failed with exception', [
+                'fault_id' => (int)$id,
+                'assignedTo' => (int)($request->input('assignedTo') ?? 0),
+                'user_id' => optional($request->user())->id,
+                'path' => $request->path(),
+                'message' => $e->getMessage(),
+            ]);
             return redirect()->back()->with('fail','Failed to re-assign fault');
         }
     }
@@ -448,11 +472,20 @@ class AssignController extends Controller
 
 public function assignFault(Request $request)
     {
-        $validated = $request->validate([
-            'fault_id' => 'required|integer|exists:faults,id',
-            'assignedTo' => 'required|integer|exists:users,id',
-            'remark' => 'required|string',
-        ]);
+        try {
+            $validated = $request->validate([
+                'fault_id' => 'required|integer|exists:faults,id',
+                'assignedTo' => 'required|integer|exists:users,id',
+                'remark' => 'required|string',
+            ]);
+        } catch (ValidationException $e) {
+            Log::warning('Assign validation failed', [
+                'user_id' => optional($request->user())->id,
+                'path' => $request->path(),
+                'errors' => $e->errors(),
+            ]);
+            throw $e;
+        }
 
         $faultId = (int)$validated['fault_id'];
         $techId = (int)$validated['assignedTo'];
@@ -473,6 +506,9 @@ public function assignFault(Request $request)
             return back()->withErrors(['error' => 'Fault not found'])->withInput();
         }
 
+        $faultSectionId = (int) (FaultSection::where('fault_id', '=', $fault->id)->value('section_id') ?? 0);
+        $shouldEnforceRegion = in_array($faultSectionId, [2, 3], true);
+
         // Only allow assigning if the fault is unassigned and in Assessments (status 2)
         if ((int)$fault->status_id !== 2 || !is_null($fault->assignedTo)) {
             Log::warning('Assign failed: fault not in assignable state', [
@@ -481,19 +517,21 @@ public function assignFault(Request $request)
                 'assignedTo_current' => $fault->assignedTo,
                 'tech_id' => $techId,
                 'user_id' => $userId,
+                'fault_section_id' => $faultSectionId,
             ]);
             DB::rollBack();
             return back()->withErrors(['error' => 'Fault is not in an assignable state'])->withInput();
         }
 
-        // Enforce region parity with logged-in user
+        // Enforce region parity with logged-in user only for section-scoped regions (e.g. sections 2/3)
         $faultRegion = \DB::table('cities')->where('id', $fault->city_id)->value('region');
-        if ($faultRegion !== auth()->user()->region) {
+        if ($shouldEnforceRegion && $faultRegion !== auth()->user()->region) {
             Log::warning('Assign failed: region mismatch', [
                 'fault_id' => $fault->id,
                 'fault_region' => $faultRegion,
                 'user_region' => auth()->user()->region,
                 'user_id' => $userId,
+                'fault_section_id' => $faultSectionId,
             ]);
             DB::rollBack();
             return back()->withErrors(['error' => 'You can only assign faults in your region'])->withInput();
@@ -504,7 +542,9 @@ public function assignFault(Request $request)
             ->leftJoin('user_statuses','users.user_status','=','user_statuses.id')
             ->where('users.id', '=', $techId)
             ->where('users.section_id', '=', auth()->user()->section_id)
-            ->where('users.region', '=', auth()->user()->region)
+            ->when($shouldEnforceRegion, function($q) {
+                $q->where('users.region', '=', auth()->user()->region);
+            })
             ->where('user_statuses.status_name', '=', 'Assignable')
             ->exists();
 
@@ -557,6 +597,13 @@ public function assignFault(Request $request)
         return redirect()->back()->with('success', 'Fault Assigned');
         } catch (\Throwable $e) {
             DB::rollBack();
+            Log::error('Assign failed with exception', [
+                'fault_id' => (int)($request->input('fault_id') ?? 0),
+                'tech_id' => (int)($request->input('assignedTo') ?? 0),
+                'user_id' => optional($request->user())->id,
+                'path' => $request->path(),
+                'message' => $e->getMessage(),
+            ]);
             return redirect()->back()->with('fail', 'Failed to assign fault');
         }
     }
