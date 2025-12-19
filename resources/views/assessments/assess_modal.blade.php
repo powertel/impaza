@@ -11,35 +11,127 @@
 
       <div class="modal-body">
         <div class="row g-4">
-          <!-- Fault Summary -->
-          <div class="col-lg-5">
-            <div class="card border-0 shadow-sm h-100 rounded-3">
-              <div class="card-header bg-transparent border-0">
-                <h6 class="mb-0 text-secondary"><i class="fas fa-info-circle me-2 text-primary"></i>Fault Summary</h6>
+          <!-- Fault Details -->
+          <div class="col-lg-6">
+            <div class="row g-4">
+              <div class="col-12">
+                <div class="card border-0 shadow-sm h-100 rounded-3">
+                  <div class="card-header bg-transparent border-0">
+                    <h6 class="mb-0 text-secondary"><i class="fas fa-info-circle me-2 text-primary"></i>Fault Details</h6>
+                  </div>
+                  <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                      <div>
+                        <small class="text-muted">Ref. No.</small>
+                        <div class="fw-semibold">{{ $fault->fault_ref_number ?? 'N/A' }}</div>
+                      </div>
+
+                      <div>
+                        <small class="text-muted">Customer Name</small>
+                        <div class="fw-semibold">{{ $fault->customer }}</div>
+                      </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                      <div>
+                        <small class="text-muted">City/Town</small>
+                        <div class="fw-semibold">{{ $fault->city ?? 'N/A' }}</div>
+                      </div>
+                      <div class="ms-4">
+                        <small class="text-muted">Location</small>
+                        <div class="fw-semibold">{{ $fault->suburb ?? 'N/A' }}</div>
+                      </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                      <div>
+                        <small class="text-muted">Link</small>
+                        <div class="fw-semibold">{{ $fault->link }}</div>
+                      </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                      <div>
+                        <small class="text-muted">POP</small>
+                        <div class="fw-semibold">{{ $fault->pop ?? 'N/A' }}</div>
+                      </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                      <div>
+                        <small class="text-muted">Service Type</small>
+                        <div class="fw-semibold"><span class="badge bg-secondary">{{ $fault->serviceType ?? 'N/A' }}</span></div>
+                      </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                      <div>
+                        <small class="text-muted">Address</small>
+                        <div class="fw-semibold">{{ $fault->address ?? 'N/A' }}</div>
+                      </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                      <div>
+                        <small class="text-muted">Account Manager</small>
+                        <div class="fw-semibold">{{ $fault->accountManager ?? 'N/A' }}</div>
+                      </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                      <div>
+                        <small class="text-muted">Age</small>
+                        <div class="fw-semibold">
+                          <span class="badge bg-light text-dark border fault-age" data-age-start="{{ $ageStart ?? '' }}" data-age-end="{{ $ageEnd ?? '' }}">{{ $ageText ?? '' }}</span>
+                        </div>
+                      </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                      <div>
+                        <small class="text-muted">Assessed By</small>
+                        <div class="fw-semibold">{{ $fault->assessedBy ?? 'N/A' }}</div>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <ul class="list-group list-group-flush">
-                <li class="list-group-item">
-                  <small class="text-muted">Customer</small>
-                  <div class="fw-semibold">{{ $fault->customer }}</div>
-                </li>
-                <li class="list-group-item">
-                  <small class="text-muted">Link</small>
-                  <div class="fw-semibold">{{ $fault->link }}</div>
-                </li>
-                <li class="list-group-item">
-                  <small class="text-muted">Account Manager</small>
-                  <div class="fw-semibold">{{ $fault->accountManager }}</div>
-                </li>
-                <li class="list-group-item">
-                  <small class="text-muted">Contact Name</small>
-                  <div class="fw-semibold">{{ $fault->contactName }}</div>
-                </li>
-              </ul>
+
+              <div class="col-12">
+                <div class="card border-0 shadow-sm h-100 rounded-3">
+                  <div class="card-header bg-transparent border-0">
+                    <h6 class="mb-0 text-secondary"><i class="fas fa-user-circle me-2 text-primary"></i>Contact & RFO</h6>
+                  </div>
+                  <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                      <div>
+                        <small class="text-muted">Contact Name</small>
+                        <div class="fw-semibold">{{ $fault->contactName ?? 'N/A' }}</div>
+                      </div>
+
+                      <div>
+                        <small class="text-muted">Phone Number</small>
+                        <div class="fw-semibold">{{ $fault->phoneNumber ?? 'N/A' }}</div>
+                      </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                      <div>
+                        <small class="text-muted">Email Address</small>
+                        <div class="fw-semibold">{{ $fault->contactEmail ?? 'N/A' }}</div>
+                      </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                      <div>
+                        <small class="text-muted">Suspected RFO</small>
+                        <div class="fw-semibold">{{ $fault->RFO ?? 'N/A' }}</div>
+                      </div>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                      <div>
+                        <small class="text-muted">Confirmed RFO</small>
+                        <div class="fw-semibold">{{ $fault->confirmedRFO ?? 'N/A' }}</div>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
 
           <!-- Assessment -->
-          <div class="col-lg-7">
+          <div class="col-lg-6">
             <div class="card border-0 shadow-sm h-100 rounded-3">
               <div class="card-header bg-transparent border-0">
                 <h6 class="mb-0 text-secondary"><i class="fas fa-clipboard-check me-2 text-primary"></i>Assessment</h6>
@@ -64,7 +156,12 @@
                         <option value="Low" {{ old('priorityLevel', $fault->priorityLevel ?? '') === 'Low' ? 'selected' : '' }}>Low</option>
                         <option value="Medium" {{ old('priorityLevel', $fault->priorityLevel ?? '') === 'Medium' ? 'selected' : '' }}>Medium</option>
                         <option value="High" {{ old('priorityLevel', $fault->priorityLevel ?? '') === 'High' ? 'selected' : '' }}>High</option>
+                        <option value="Critical" {{ old('priorityLevel', $fault->priorityLevel ?? '') === 'Critical' ? 'selected' : '' }}>Critical</option>
                       </select>
+                    </div>
+                    <div class="mb-3 col-md-12">
+                      <label class="form-label">Remarks</label>
+                      <textarea class="form-control @error('remark') is-invalid @enderror" name="remark" rows="6" required>{{ old('remark') }}</textarea>
                     </div>
                   </div>
                 </form>
@@ -72,6 +169,43 @@
             </div>
           </div>
         </div>
+
+        @if(isset($remarks) && count($remarks))
+        <div class="mt-4">
+          <div class="d-flex align-items-center mb-2">
+            <span class="badge bg-info me-2"><i class="fas fa-comments"></i></span>
+            <h6 class="mb-0 text-secondary">Conversation</h6>
+          </div>
+
+          <div id="remarksScroller-{{ $fault->id }}" style="max-height: 360px; overflow-y: auto; padding-right: 6px;">
+            @foreach($remarks->sortBy('created_at') as $r)
+              @php
+                $currentName = optional(auth()->user())->name;
+                $isOwn = $currentName && (strtolower(trim($r->name)) === strtolower(trim($currentName)));
+              @endphp
+              <div class="d-flex {{ $isOwn ? 'justify-content-end' : 'justify-content-start' }} mb-3">
+                <div class="rounded-3 shadow-sm px-3 py-2" style="max-width: 75%; background-color: {{ $isOwn ? '#e8f5e9' : '#eef5ff' }};">
+                  <div class="d-flex align-items-center gap-2 mb-1">
+                    <span class="badge {{ $isOwn ? 'bg-success' : 'bg-secondary' }}">{{ $r->name ?? 'User' }}</span>
+                    <small class="text-muted">{{ Carbon\Carbon::parse($r->created_at)->diffForHumans() }}</small>
+                    @if(!empty($r->activity))
+                      <small class="text-muted">• {{ $r->activity }}</small>
+                    @endif
+                  </div>
+                  <div class="fw-normal">{{ $r->remark }}</div>
+                  @if($r->file_path)
+                    <div class="mt-2">
+                      <a href="{{ asset('storage/'.$r->file_path) }}" class="btn btn-link btn-sm text-decoration-none" download>
+                        <i class="fas fa-download me-1"></i>
+                      </a>
+                    </div>
+                  @endif
+                </div>
+              </div>
+            @endforeach
+          </div>
+        </div>
+        @endif
       </div>
 
       <div class="modal-footer">
