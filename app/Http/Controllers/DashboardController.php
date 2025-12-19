@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Models\Fault;
-use App\Models\FaultStageLog;
 use App\Models\FaultAssignment;
 use App\Models\ReasonsForOutage;
 use App\Models\Customer;
@@ -90,60 +89,63 @@ class DashboardController extends Controller
         }
 
         // KPI: Avg MTTR from stage logs (respects filters; all-time when both are "All")
+        $resolvedStatusIds = Status::where('status_code', 'like', 'CL%')->pluck('id');
+        $slaThreshold = 24 * 3600; // 24 hours
+
         if ($selectedMonth !== null && $selectedYear === null) {
-            $mttrThisMonth = FaultStageLog::query()
-                ->whereMonth('started_at', $selectedMonth)
-                ->whereNotNull('duration_seconds')
-                ->avg('duration_seconds') ?? 0;
-            $mttrLastMonth = FaultStageLog::query()
-                ->whereMonth('started_at', $prevMonthNum)
-                ->whereNotNull('duration_seconds')
-                ->avg('duration_seconds') ?? 0;
+            $mttrThisMonth = Fault::whereIn('status_id', $resolvedStatusIds)
+                ->whereMonth('updated_at', $selectedMonth)
+                ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as val')
+                ->value('val') ?? 0;
+            $mttrLastMonth = Fault::whereIn('status_id', $resolvedStatusIds)
+                ->whereMonth('updated_at', $prevMonthNum)
+                ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as val')
+                ->value('val') ?? 0;
         } elseif (!$allTime) {
-            $mttrThisMonth = FaultStageLog::whereBetween('started_at', [$currentStart, $currentEnd])
-                ->whereNotNull('duration_seconds')
-                ->avg('duration_seconds') ?? 0;
-            $mttrLastMonth = FaultStageLog::whereBetween('started_at', [$prevStart, $prevEnd])
-                ->whereNotNull('duration_seconds')
-                ->avg('duration_seconds') ?? 0;
+            $mttrThisMonth = Fault::whereIn('status_id', $resolvedStatusIds)
+                ->whereBetween('updated_at', [$currentStart, $currentEnd])
+                ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as val')
+                ->value('val') ?? 0;
+            $mttrLastMonth = Fault::whereIn('status_id', $resolvedStatusIds)
+                ->whereBetween('updated_at', [$prevStart, $prevEnd])
+                ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as val')
+                ->value('val') ?? 0;
         } else {
-            $mttrThisMonth = FaultStageLog::whereNotNull('duration_seconds')
-                ->avg('duration_seconds') ?? 0;
-            $mttrLastMonth = FaultStageLog::whereBetween('started_at', [$lastMonthStart, $lastMonthEnd])
-                ->whereNotNull('duration_seconds')
-                ->avg('duration_seconds') ?? 0;
+            $mttrThisMonth = Fault::whereIn('status_id', $resolvedStatusIds)
+                ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as val')
+                ->value('val') ?? 0;
+            $mttrLastMonth = Fault::whereIn('status_id', $resolvedStatusIds)
+                ->whereBetween('updated_at', [$lastMonthStart, $lastMonthEnd])
+                ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as val')
+                ->value('val') ?? 0;
         }
 
         // SLA compliance (duration < 24h in stage logs; respects filters; all-time when both are "All")
-        $slaThreshold = 24 * 3600; // 24 hours
         if ($selectedMonth !== null && $selectedYear === null) {
-            $slaCount = FaultStageLog::query()
-                ->whereMonth('started_at', $selectedMonth)
-                ->whereNotNull('duration_seconds')
-                ->count();
-            $slaMetCount = FaultStageLog::query()
-                ->whereMonth('started_at', $selectedMonth)
-                ->whereNotNull('duration_seconds')
-                ->where('duration_seconds', '<=', $slaThreshold)
-                ->count();
+            $slaQuery = Fault::whereIn('status_id', $resolvedStatusIds)->whereMonth('updated_at', $selectedMonth);
+            $slaCount = $slaQuery->count();
+            $slaMetCount = (clone $slaQuery)->whereRaw('TIMESTAMPDIFF(SECOND, created_at, updated_at) <= ?', [$slaThreshold])->count();
         } elseif (!$allTime) {
-            $slaCount = FaultStageLog::whereBetween('started_at', [$currentStart, $currentEnd])
-                ->whereNotNull('duration_seconds')->count();
-            $slaMetCount = FaultStageLog::whereBetween('started_at', [$currentStart, $currentEnd])
-                ->whereNotNull('duration_seconds')->where('duration_seconds', '<=', $slaThreshold)->count();
+            $slaQuery = Fault::whereIn('status_id', $resolvedStatusIds)->whereBetween('updated_at', [$currentStart, $currentEnd]);
+            $slaCount = $slaQuery->count();
+            $slaMetCount = (clone $slaQuery)->whereRaw('TIMESTAMPDIFF(SECOND, created_at, updated_at) <= ?', [$slaThreshold])->count();
         } else {
-            $slaCount = FaultStageLog::whereNotNull('duration_seconds')->count();
-            $slaMetCount = FaultStageLog::whereNotNull('duration_seconds')->where('duration_seconds', '<=', $slaThreshold)->count();
+            $slaQuery = Fault::whereIn('status_id', $resolvedStatusIds);
+            $slaCount = $slaQuery->count();
+            $slaMetCount = (clone $slaQuery)->whereRaw('TIMESTAMPDIFF(SECOND, created_at, updated_at) <= ?', [$slaThreshold])->count();
         }
         $slaCompliance = $slaCount > 0 ? round(($slaMetCount / $slaCount) * 100, 1) : 0;
 
         // Faults per past 12 months (labels and counts)
         $monthlyLabels = [];
         $monthlyCounts = [];
+        
         for ($i = 11; $i >= 0; $i--) {
             $from = $now->copy()->subMonths($i)->startOfMonth();
             $to = $now->copy()->subMonths($i)->endOfMonth();
             $label = $from->format('M Y');
+            
+            // Fault Count
             $count = Fault::whereBetween('created_at', [$from, $to])->count();
             $monthlyLabels[] = $label;
             $monthlyCounts[] = $count;
@@ -269,15 +271,17 @@ class DashboardController extends Controller
             $customerImpactCountLabels[] = $cust->customer ?? ('Customer ' . ($row->customer_id ?? 'N/A'));
             $customerImpactCountValues[] = (int) $row->c;
         }
-        $customerImpactDurationQuery = FaultStageLog::join('faults','fault_stage_logs.fault_id','=','faults.id')
-            ->select('faults.customer_id', DB::raw('SUM(fault_stage_logs.duration_seconds) as sec'));
+
+        $customerImpactDurationQuery = Fault::whereIn('status_id', $resolvedStatusIds)
+            ->select('customer_id', DB::raw('SUM(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as sec'));
+
         if ($selectedMonth !== null && $selectedYear === null) {
-            $customerImpactDurationQuery->whereMonth('fault_stage_logs.started_at', $selectedMonth);
+            $customerImpactDurationQuery->whereMonth('updated_at', $selectedMonth);
         } elseif ($selectedYear !== null || $selectedMonth !== null) {
-            if ($selectedYear !== null) $customerImpactDurationQuery->whereYear('fault_stage_logs.started_at', $selectedYear);
-            if ($selectedMonth !== null) $customerImpactDurationQuery->whereMonth('fault_stage_logs.started_at', $selectedMonth);
+            if ($selectedYear !== null) $customerImpactDurationQuery->whereYear('updated_at', $selectedYear);
+            if ($selectedMonth !== null) $customerImpactDurationQuery->whereMonth('updated_at', $selectedMonth);
         }
-        $customerImpactDurationRaw = $customerImpactDurationQuery->groupBy('faults.customer_id')->orderByDesc('sec')->limit(10)->get();
+        $customerImpactDurationRaw = $customerImpactDurationQuery->groupBy('customer_id')->orderByDesc('sec')->limit(10)->get();
         $customerImpactDurationLabels = [];$customerImpactDurationValues = [];
         foreach ($customerImpactDurationRaw as $row) {
             $cust = $row->customer_id ? Customer::find($row->customer_id) : null;
@@ -297,19 +301,29 @@ class DashboardController extends Controller
         $serviceTypeLabels = $serviceTypeBreakdown->pluck('serviceType')->map(fn($x) => $x ?? 'N/A')->toArray();
         $serviceTypeValues = $serviceTypeBreakdown->pluck('c')->map(fn($x) => (int) $x)->toArray();
 
-        // Geography: faults by city
-        $cityFaultsQuery = Fault::select('city_id', DB::raw('COUNT(*) as c'));
+        // Geography: faults by REGION (instead of city)
+        $regionFaultsQuery = Fault::join('cities', 'faults.city_id', '=', 'cities.id')
+            ->select('cities.region', DB::raw('COUNT(*) as c'));
+
         if ($selectedMonth !== null && $selectedYear === null) {
-            $cityFaultsQuery->whereMonth('created_at', $selectedMonth);
+            $regionFaultsQuery->whereMonth('faults.created_at', $selectedMonth);
         } elseif ($selectedYear !== null || $selectedMonth !== null) {
-            if ($selectedYear !== null) $cityFaultsQuery->whereYear('created_at', $selectedYear);
-            if ($selectedMonth !== null) $cityFaultsQuery->whereMonth('created_at', $selectedMonth);
+            if ($selectedYear !== null) $regionFaultsQuery->whereYear('faults.created_at', $selectedYear);
+            if ($selectedMonth !== null) $regionFaultsQuery->whereMonth('faults.created_at', $selectedMonth);
         }
-        $cityFaultsRaw = $cityFaultsQuery->groupBy('city_id')->orderByDesc('c')->limit(10)->get();
-        $cityFaultsLabels = [];$cityFaultsValues = [];
-        foreach ($cityFaultsRaw as $row) {
-            $city = $row->city_id ? City::find($row->city_id) : null;
-            $cityFaultsLabels[] = $city->city ?? ('City ' . ($row->city_id ?? 'N/A'));
+        
+        $regionFaultsRaw = $regionFaultsQuery->groupBy('cities.region')
+            ->orderByDesc('c')
+            ->limit(10)
+            ->get();
+
+        $cityFaultsLabels = []; // Keeping variable name same to avoid breaking frontend immediately, or rename it?
+                                // Frontend expects 'cityFaultsLabels' and 'cityFaultsValues' in reports.js
+                                // I will map regions to these variables.
+        $cityFaultsValues = [];
+        
+        foreach ($regionFaultsRaw as $row) {
+            $cityFaultsLabels[] = $row->region ?? 'Unknown Region';
             $cityFaultsValues[] = (int) $row->c;
         }
 
@@ -328,15 +342,17 @@ class DashboardController extends Controller
             $amLabels[] = $name ?? ('AM ' . ($row->accountManager_id ?? 'N/A'));
             $amFaultsValues[] = (int) $row->c;
         }
-        $amMttrQuery = FaultStageLog::join('faults','fault_stage_logs.fault_id','=','faults.id')
-            ->select('faults.accountManager_id', DB::raw('AVG(fault_stage_logs.duration_seconds) as mttr'));
+        $amMttrQuery = Fault::whereIn('status_id', $resolvedStatusIds)
+            ->select('accountManager_id', DB::raw('AVG(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as mttr'));
+        
         if ($selectedMonth !== null && $selectedYear === null) {
-            $amMttrQuery->whereMonth('fault_stage_logs.started_at', $selectedMonth);
+            $amMttrQuery->whereMonth('updated_at', $selectedMonth);
         } elseif ($selectedYear !== null || $selectedMonth !== null) {
-            if ($selectedYear !== null) $amMttrQuery->whereYear('fault_stage_logs.started_at', $selectedYear);
-            if ($selectedMonth !== null) $amMttrQuery->whereMonth('fault_stage_logs.started_at', $selectedMonth);
+            if ($selectedYear !== null) $amMttrQuery->whereYear('updated_at', $selectedYear);
+            if ($selectedMonth !== null) $amMttrQuery->whereMonth('updated_at', $selectedMonth);
         }
-        $amMttrRaw = $amMttrQuery->groupBy('faults.accountManager_id')->get();
+        
+        $amMttrRaw = $amMttrQuery->groupBy('accountManager_id')->get();
         $amMttrMap = [];
         foreach ($amMttrRaw as $r) { $amMttrMap[$r->accountManager_id ?? 0] = (int) ($r->mttr ?? 0); }
         $amMttrValues = [];
@@ -373,25 +389,27 @@ class DashboardController extends Controller
 
         // SLA by priority
         $priorityTargets = [ 'P1' => 4*3600, 'P2' => 8*3600, 'P3' => 24*3600, 'P4' => 48*3600 ];
-        $sumsQuery = FaultStageLog::query()
-            ->whereNotNull('duration_seconds')
-            ->select('fault_id', DB::raw('SUM(duration_seconds) as total'));
+        
+        $sumsQuery = Fault::whereIn('status_id', $resolvedStatusIds)
+            ->select('priorityLevel', DB::raw('TIMESTAMPDIFF(SECOND, created_at, updated_at) as duration'));
+
         if ($selectedMonth !== null && $selectedYear === null) {
-            $sumsQuery->whereMonth('started_at', $selectedMonth);
+            $sumsQuery->whereMonth('updated_at', $selectedMonth);
         } elseif ($selectedYear !== null || $selectedMonth !== null) {
-            if ($selectedYear !== null) $sumsQuery->whereYear('started_at', $selectedYear);
-            if ($selectedMonth !== null) $sumsQuery->whereMonth('started_at', $selectedMonth);
+            if ($selectedYear !== null) $sumsQuery->whereYear('updated_at', $selectedYear);
+            if ($selectedMonth !== null) $sumsQuery->whereMonth('updated_at', $selectedMonth);
         }
-        $sums = $sumsQuery->groupBy('fault_id')->get();
+        
+        $sums = $sumsQuery->get();
         $slaPriorityTotals = [];$slaPriorityMet = [];
+        
         foreach ($sums as $s) {
-            $fault = Fault::find($s->fault_id);
-            if (!$fault) continue;
-            $p = $fault->priorityLevel ?? 'N/A';
+            $p = $s->priorityLevel ?? 'N/A';
             $slaPriorityTotals[$p] = ($slaPriorityTotals[$p] ?? 0) + 1;
             $target = $priorityTargets[$p] ?? (24*3600);
-            if (($s->total ?? 0) <= $target) { $slaPriorityMet[$p] = ($slaPriorityMet[$p] ?? 0) + 1; }
+            if (($s->duration ?? 0) <= $target) { $slaPriorityMet[$p] = ($slaPriorityMet[$p] ?? 0) + 1; }
         }
+        
         $slaPriorityLabels = array_keys($slaPriorityTotals);
         $slaPriorityValues = [];
         foreach ($slaPriorityLabels as $p) {
@@ -399,35 +417,13 @@ class DashboardController extends Controller
             $slaPriorityValues[] = $tot > 0 ? round(($met / $tot) * 100, 1) : 0;
         }
 
-        // Stage bottlenecks
-        $stageBottlenecksQuery = FaultStageLog::select('status_id', DB::raw('AVG(duration_seconds) as avg_dur'))
-            ->whereNotNull('duration_seconds');
-        if ($selectedMonth !== null && $selectedYear === null) {
-            $stageBottlenecksQuery->whereMonth('started_at', $selectedMonth);
-        } elseif ($selectedYear !== null || $selectedMonth !== null) {
-            if ($selectedYear !== null) $stageBottlenecksQuery->whereYear('started_at', $selectedYear);
-            if ($selectedMonth !== null) $stageBottlenecksQuery->whereMonth('started_at', $selectedMonth);
-        }
-        $stageBottlenecksRaw = $stageBottlenecksQuery->groupBy('status_id')->get();
-        $stageBottlenecksLabels = [];$stageBottlenecksValues = [];
-        foreach ($stageBottlenecksRaw as $row) {
-            $label = 'Status ' . ($row->status_id ?? 'N/A');
-            if ($row->status_id) { $s = Status::find($row->status_id); if ($s) $label = $s->description ?? $s->status_code ?? $label; }
-            $stageBottlenecksLabels[] = $label;
-            $stageBottlenecksValues[] = (int) ($row->avg_dur ?? 0);
-        }
+        // Stage bottlenecks - DATA UNAVAILABLE WITHOUT FAULT STAGE LOGS
+        // Returning empty data to prevent errors
+        $stageBottlenecksLabels = [];
+        $stageBottlenecksValues = [];
 
-        // Reopen rate
-        $reopenQuery = FaultStageLog::query()
-            ->select('fault_id','status_id', DB::raw('COUNT(*) as c'));
-        if ($selectedMonth !== null && $selectedYear === null) {
-            $reopenQuery->whereMonth('started_at', $selectedMonth);
-        } elseif ($selectedYear !== null || $selectedMonth !== null) {
-            if ($selectedYear !== null) $reopenQuery->whereYear('started_at', $selectedYear);
-            if ($selectedMonth !== null) $reopenQuery->whereMonth('started_at', $selectedMonth);
-        }
-        $reopenedFaultIds = $reopenQuery->groupBy('fault_id','status_id')->havingRaw('COUNT(*) > 1')->pluck('fault_id')->unique();
-        $reopenRate = $faultsThisMonth > 0 ? round(($reopenedFaultIds->count() / $faultsThisMonth) * 100, 1) : 0;
+        // Reopen rate - DATA UNAVAILABLE WITHOUT HISTORY LOGS
+        $reopenRate = 0;
 
         // Workload by section
         $sectionWorkloadRaw = FaultSection::select('section_id', DB::raw('COUNT(*) as c'))

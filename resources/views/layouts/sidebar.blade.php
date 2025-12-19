@@ -260,7 +260,7 @@
             </li>
             @endcan
 
-            @canany(['reports','call-centre-reports'])
+            @canany(['reports','call-centre-reports','performance-reports'])
             <li class="nav-header">Reports</li>
             @endcanany
             @can('reports')
@@ -270,19 +270,21 @@
                 <p>Reports</p>
               </a>
             </li>
-            
-            <li class="nav-item">
-              <a href="{{ route('performance.index') }}" class="nav-link {{ request()->routeIs('performance.index') ? 'active' : '' }}">
-                <i class="nav-icon fas fa-chart-line"></i>
-                <p>Performance</p>
-              </a>
-            </li>
             @endcan
             @can('call-centre-reports')
             <li class="nav-item">
               <a href="{{ route('call_centre.reports') }}" class="nav-link {{ request()->routeIs('call_centre.reports') ? 'active' : '' }}">
                 <i class="nav-icon fas fa-headset"></i>
                 <p>Contact Centre</p>
+              </a>
+            </li>
+            @endcan
+
+            @can('performance-reports')
+            <li class="nav-item">
+              <a href="{{ route('performance.index') }}" class="nav-link {{ request()->routeIs('performance.index') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-chart-line"></i>
+                <p>Performance</p>
               </a>
             </li>
             @endcan

@@ -94,8 +94,8 @@
     if (has('chartMonthlyFaults')) {
       const ctx = el('chartMonthlyFaults').getContext('2d');
       const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-      gradient.addColorStop(0, 'rgba(78, 115, 223, 0.8)');
-      gradient.addColorStop(1, 'rgba(78, 115, 223, 0.1)');
+      gradient.addColorStop(0, 'rgba(78, 115, 223, 0.4)');
+      gradient.addColorStop(1, 'rgba(78, 115, 223, 0.01)');
       
       new Chart(el('chartMonthlyFaults'), {
         type: 'line',
@@ -104,19 +104,19 @@
           datasets: [{ 
             label: 'Monthly Fault Trends',
             data: data.monthlyCounts, 
-            borderColor: '#4e73df',
+            borderColor: '#6366f1',
             backgroundColor: gradient,
-            borderWidth: 3,
+            borderWidth: 4,
             fill: true,
             tension: 0.4,
-            pointBackgroundColor: '#4e73df',
+            pointBackgroundColor: '#6366f1',
             pointBorderColor: '#ffffff',
-            pointBorderWidth: 2,
+            pointBorderWidth: 3,
             pointRadius: 6,
-            pointHoverRadius: 8,
-            pointHoverBackgroundColor: '#4e73df',
+            pointHoverRadius: 9,
+            pointHoverBackgroundColor: '#6366f1',
             pointHoverBorderColor: '#ffffff',
-            pointHoverBorderWidth: 3
+            pointHoverBorderWidth: 4
           }] 
         },
         options: { 
@@ -125,15 +125,20 @@
           plugins: { 
             legend: { display: false },
             tooltip: {
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              titleColor: '#374151',
-              bodyColor: '#6b7280',
+              backgroundColor: '#ffffff',
+              titleColor: '#111827',
+              bodyColor: '#4b5563',
               borderColor: '#e5e7eb',
               borderWidth: 1,
-              cornerRadius: 8,
+              padding: 12,
               displayColors: false,
-              titleFont: { size: 14, weight: 'bold' },
-              bodyFont: { size: 13 }
+              titleFont: { size: 13, weight: '600', family: 'Inter' },
+              bodyFont: { size: 12, family: 'Inter' },
+              callbacks: {
+                label: function(context) {
+                  return context.parsed.y + ' Faults';
+                }
+              }
             }
           }, 
           scales: { 
@@ -141,25 +146,34 @@
               grid: { display: false },
               ticks: { 
                 color: '#9ca3af',
-                font: { size: 11 }
-              }
+                font: { size: 12, family: 'Inter' },
+                padding: 10
+              },
+              border: { display: false }
             },
             y: { 
               beginAtZero: true,
               grid: { 
-                color: 'rgba(156, 163, 175, 0.2)',
-                drawBorder: false
+                color: '#f3f4f6',
+                drawBorder: false,
+                tickLength: 0
               },
               ticks: { 
                 color: '#9ca3af',
-                font: { size: 11 }
-              }
+                font: { size: 12, family: 'Inter' },
+                padding: 10,
+                stepSize: 2
+              },
+              border: { display: false }
             } 
           },
-          elements: {
-            point: {
-              hoverRadius: 8
-            }
+          interaction: {
+            intersect: false,
+            mode: 'index',
+          },
+          animation: {
+            duration: 2000,
+            easing: 'easeOutQuart'
           }
         }
       });
@@ -290,10 +304,23 @@
     if (has('chartCoverageGap')) new Chart(el('chartCoverageGap'), { type: 'bar', data: { labels: data.linksPerCityLabels, datasets: [{ label: 'Faults per Link', data: data.coverageGapValues, backgroundColor: '#f6c23e' }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
   }
 
+  function initEvents() {
+    const filterForm = document.getElementById('reportsFilterForm');
+    if (filterForm) {
+      const selects = filterForm.querySelectorAll('select');
+      selects.forEach(select => {
+        select.addEventListener('change', function() {
+          filterForm.submit();
+        });
+      });
+    }
+  }
+
   function start() {
     const data = getData();
     if (!data) return;
     initCharts(data);
+    initEvents();
   }
 
   if (document.readyState === 'loading') {
