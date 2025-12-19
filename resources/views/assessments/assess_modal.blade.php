@@ -1,15 +1,19 @@
 <!-- Assess Fault Modal -->
 <div class="modal custom-modal fade" id="assessFaultModal-{{ $fault->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="assessFaultModalLabel-{{ $fault->id }}" aria-hidden="true">
   <div class="modal-dialog modal-xl">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="assessFaultModalLabel-{{ $fault->id }}">
-          <i class="fas fa-clipboard-check me-2"></i>Assess Fault
-        </h5>
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <div class="modal-header border-0">
+        <div class="d-flex align-items-center">
+          <span class="badge bg-primary me-2"><i class="fas fa-clipboard-check"></i></span>
+          <div>
+            <h5 class="modal-title mb-0" id="assessFaultModalLabel-{{ $fault->id }}">Assess Fault</h5>
+            <small class="text-muted">Ref. {{ $fault->fault_ref_number ?? 'N/A' }} • {{ $fault->customer ?? 'N/A' }}</small>
+          </div>
+        </div>
         <button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
-      <div class="modal-body">
+      <div class="modal-body pt-0">
         <div class="row g-4">
           <!-- Fault Details -->
           <div class="col-lg-6">
@@ -141,17 +145,17 @@
                   @csrf
                   @method('PUT')
                   <div class="row g-3">
-                    <div class="mb-3 col-md-12">
-                      <label class="form-label">Fault Type</label>
-                      <select class="form-select @error('faultType') is-invalid @enderror" name="faultType" required>
+                    <div class="col-md-6">
+                      <label class="form-label required" for="faultType-{{ $fault->id }}">Fault Type</label>
+                      <select id="faultType-{{ $fault->id }}" class="form-select @error('faultType') is-invalid @enderror" name="faultType" required>
                         <option disabled {{ old('faultType', $fault->faultType ?? null) ? '' : 'selected' }}>Select Fault Type</option>
                         <option value="Logical" {{ old('faultType', $fault->faultType ?? '') === 'Logical' ? 'selected' : '' }}>Logical</option>
                         <option value="Physical" {{ old('faultType', $fault->faultType ?? '') === 'Physical' ? 'selected' : '' }}>Physical</option>
                       </select>
                     </div>
-                    <div class="mb-3 col-md-12">
-                      <label class="form-label">Priority Level</label>
-                      <select class="form-select @error('priorityLevel') is-invalid @enderror" name="priorityLevel" required>
+                    <div class="col-md-6">
+                      <label class="form-label required" for="priorityLevel-{{ $fault->id }}">Priority Level</label>
+                      <select id="priorityLevel-{{ $fault->id }}" class="form-select @error('priorityLevel') is-invalid @enderror" name="priorityLevel" required>
                         <option disabled {{ old('priorityLevel', $fault->priorityLevel ?? null) ? '' : 'selected' }}>Select</option>
                         <option value="Low" {{ old('priorityLevel', $fault->priorityLevel ?? '') === 'Low' ? 'selected' : '' }}>Low</option>
                         <option value="Medium" {{ old('priorityLevel', $fault->priorityLevel ?? '') === 'Medium' ? 'selected' : '' }}>Medium</option>
@@ -159,9 +163,10 @@
                         <option value="Critical" {{ old('priorityLevel', $fault->priorityLevel ?? '') === 'Critical' ? 'selected' : '' }}>Critical</option>
                       </select>
                     </div>
-                    <div class="mb-3 col-md-12">
-                      <label class="form-label">Remarks</label>
-                      <textarea class="form-control @error('remark') is-invalid @enderror" name="remark" rows="6" required>{{ old('remark') }}</textarea>
+                    <div class="col-12">
+                      <label class="form-label required" for="remark-{{ $fault->id }}">Remarks</label>
+                      <textarea id="remark-{{ $fault->id }}" class="form-control @error('remark') is-invalid @enderror" name="remark" rows="7" placeholder="Describe symptoms, checks performed, and next action." required>{{ old('remark', '') }}</textarea>
+                      
                     </div>
                   </div>
                 </form>
@@ -177,32 +182,32 @@
             <h6 class="mb-0 text-secondary">Conversation</h6>
           </div>
 
-          <div id="remarksScroller-{{ $fault->id }}" style="max-height: 360px; overflow-y: auto; padding-right: 6px;">
-            @foreach($remarks->sortBy('created_at') as $r)
-              @php
-                $currentName = optional(auth()->user())->name;
-                $isOwn = $currentName && (strtolower(trim($r->name)) === strtolower(trim($currentName)));
-              @endphp
-              <div class="d-flex {{ $isOwn ? 'justify-content-end' : 'justify-content-start' }} mb-3">
-                <div class="rounded-3 shadow-sm px-3 py-2" style="max-width: 75%; background-color: {{ $isOwn ? '#e8f5e9' : '#eef5ff' }};">
-                  <div class="d-flex align-items-center gap-2 mb-1">
-                    <span class="badge {{ $isOwn ? 'bg-success' : 'bg-secondary' }}">{{ $r->name ?? 'User' }}</span>
-                    <small class="text-muted">{{ Carbon\Carbon::parse($r->created_at)->diffForHumans() }}</small>
+          <div id="remarksScroller-{{ $fault->id }}" class="border rounded-3 bg-white p-3" style="max-height: 360px; overflow-y: auto;">
+            <div class="chat-messages">
+              @foreach($remarks->sortBy('created_at') as $r)
+                @php
+                  $currentName = optional(auth()->user())->name;
+                  $isOwn = $currentName && (strtolower(trim($r->name)) === strtolower(trim($currentName)));
+                @endphp
+                <div class="chat-msg {{ $isOwn ? 'chat-msg-self' : 'chat-msg-other' }}">
+                  <div class="chat-msg-meta d-flex align-items-center gap-2">
+                    <span class="badge {{ $isOwn ? 'bg-primary' : 'bg-secondary' }}">{{ $r->name ?? 'User' }}</span>
+                    <span>{{ Carbon\Carbon::parse($r->created_at)->diffForHumans() }}</span>
                     @if(!empty($r->activity))
-                      <small class="text-muted">• {{ $r->activity }}</small>
+                      <span>• {{ $r->activity }}</span>
+                    @endif
+                    @if($r->file_path)
+                      <span class="ms-auto">
+                        <a href="{{ asset('storage/'.$r->file_path) }}" class="btn btn-link btn-sm p-0 text-decoration-none" download>
+                          <i class="fas fa-download me-1"></i>Download
+                        </a>
+                      </span>
                     @endif
                   </div>
-                  <div class="fw-normal">{{ $r->remark }}</div>
-                  @if($r->file_path)
-                    <div class="mt-2">
-                      <a href="{{ asset('storage/'.$r->file_path) }}" class="btn btn-link btn-sm text-decoration-none" download>
-                        <i class="fas fa-download me-1"></i>
-                      </a>
-                    </div>
-                  @endif
+                  <div class="chat-msg-body">{{ $r->remark }}</div>
                 </div>
-              </div>
-            @endforeach
+              @endforeach
+            </div>
           </div>
         </div>
         @endif
@@ -212,7 +217,7 @@
         <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
           <i class="fas fa-times me-1"></i> Cancel
         </button>
-        <button type="submit" form="assess-form-{{ $fault->id }}" class="btn btn-outline-primary btn-sm">
+        <button type="submit" form="assess-form-{{ $fault->id }}" class="btn btn-primary btn-sm">
           <i class="fas fa-save me-1"></i> Save Assessment
         </button>
       </div>
