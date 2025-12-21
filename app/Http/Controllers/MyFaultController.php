@@ -36,7 +36,9 @@ class MyFaultController extends Controller
     {
         $faults = DB::table('faults')
                  ->leftjoin('users','faults.assignedTo','=','users.id')
+                ->leftjoin('users as assigned_users','faults.assignedTo','=','assigned_users.id')
                 ->leftjoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
+				->leftjoin('users as reported_users','faults.user_id','=','reported_users.id')
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
                 ->leftjoin('links','faults.link_id','=','links.id')
                 ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
@@ -65,6 +67,8 @@ class MyFaultController extends Controller
                     'account_manager_users.name as accountManager',
                     'links.link',
                     'statuses.description',
+                    'assigned_users.name as assignedTo',
+                    'reported_users.name as reportedBy',
                     'assessed_users.name as assessedBy',
                     'faults.serviceType',
                     'faults.serviceAttribute',

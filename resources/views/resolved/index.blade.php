@@ -67,7 +67,7 @@ Cleared
             @endforeach
             @if ($faults->isEmpty())
               <tr>
-                <td colspan="8" class="text-center text-muted">No NOC-cleared faults in the last 24 hours</td>
+                <td colspan="8" class="text-center text-muted">No cleared faults in the last 24 hours</td>
               </tr>
             @endif
           </tbody>
@@ -101,13 +101,13 @@ Cleared
           </div>
         </div>
 
-                        @include('faults.show', [
-                    'fault' => $fault,
-                    'remarks' => ($remarksByFault[$fault->id] ?? collect()),
-                    'ageText' => ($faultAges[$fault->id] ?? ''),
-                    'ageStart' => ($faultAgeStart[$fault->id] ?? null),
-                    'ageEnd' => ($faultAgeEnd[$fault->id] ?? null),
-                ])
+        @include('faults.show', [
+            'fault' => $fault,
+            'remarks' => ($remarksByFault[$fault->id] ?? collect()),
+            'ageText' => ($faultAges[$fault->id] ?? ''),
+            'ageStart' => ($faultAgeStart[$fault->id] ?? null),
+            'ageEnd' => ($faultAgeEnd[$fault->id] ?? null),
+        ])
         @endforeach
 
         <div class="d-flex justify-content-between align-items-center mt-3">

@@ -67,7 +67,9 @@ class DepartmentFaultController extends Controller
                 $join->whereNull('fr.completed_at');
             })
             ->leftjoin('users','faults.assignedTo','=','users.id')
+            ->leftjoin('users as assigned_users','faults.assignedTo','=','assigned_users.id')
             ->leftjoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
+			->leftjoin('users as reported_users','faults.user_id','=','reported_users.id')
             ->leftjoin('sections','fault_section.section_id','=','sections.id')
             ->leftjoin('customers','faults.customer_id','=','customers.id')
             ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
@@ -98,6 +100,8 @@ class DepartmentFaultController extends Controller
                 'links.link',
                 'statuses.description',
                 'users.name',
+                'assigned_users.name as assignedTo',
+                'reported_users.name as reportedBy',
                 'assessed_users.name as assessedBy',
                 'faults.serviceType',
                 'faults.serviceAttribute',

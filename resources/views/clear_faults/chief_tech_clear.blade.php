@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title')
-Clear Faults
+Rectified Faults
 @endsection
 
 @include('partials.css')
@@ -14,7 +14,7 @@ Clear Faults
 
     <!--Card Header-->
     <div class="card-header">
-        <h3 class="card-title">Clear Faults</h3>
+        <h3 class="card-title">Rectified Faults</h3>
         <div class="card-tools">
 
         </div>
@@ -81,7 +81,7 @@ Clear Faults
                     @endforeach
                     @if ($faults->isEmpty())
                         <tr>
-                            <td colspan="7" class="text-center text-muted">No faults to Clear</td>
+                            <td colspan="7" class="text-center text-muted">No Rectified Faults</td>
                         </tr>
                     @endif
                 </tbody> 

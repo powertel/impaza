@@ -141,9 +141,9 @@ class ResolvedController extends Controller
             'remark' => ['required','string']
         ]);
 
-        $fault->update(['status_id' => 5]);
-        FaultLifecycle::recordStatusChange($fault, 5, $request->user()->id);
-        FaultLifecycle::reopenStageForStatus($fault, 5, $request->user()->id);
+        $fault->update(['status_id' => 4]);
+        FaultLifecycle::recordStatusChange($fault, 4, $request->user()->id);
+        FaultLifecycle::reopenStageForStatus($fault, 4, $request->user()->id);
         // Do NOT reassign during NOC review; assignment remains closed until rectification
 
         Remark::create([
