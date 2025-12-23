@@ -80,7 +80,13 @@
                                         <small class="text-muted">Assessed By</small>
                                         <div class="fw-semibold">{{ $fault->assessedBy ?? 'N/A' }}</div>
                                     </div>
+
+                                     <div>
+                                        <small class="text-muted">Assigned To</small>
+                                        <div class="fw-semibold">{{ $fault->assignedTo ?? 'Not yet assigned' }}</div>
+                                    </div>
                                 </li>
+
                             </ul>
                         </div>
                     </div>

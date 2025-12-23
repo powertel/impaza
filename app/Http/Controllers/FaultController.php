@@ -188,7 +188,8 @@ class FaultController extends Controller
         $link = Link::all();
         $pop = Pop::all();
         $accountManager = AccountManager::all();
-        $suspectedRFO = ReasonsForOutage::whereBetween('id', [1, 5])->get();
+        /* $suspectedRFO = ReasonsForOutage::whereBetween('id', [1, 5])->get(); */
+        $suspectedRFO = ReasonsForOutage::all();
         // Load open statuses (< 4) for dynamic filter options
         $openStatuses = DB::table('statuses')
             ->where('id','<',4)

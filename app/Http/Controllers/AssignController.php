@@ -39,7 +39,9 @@ class AssignController extends Controller
         $faults = DB::table('faults')
             ->leftjoin('fault_section','faults.id','=','fault_section.fault_id')
             ->leftjoin('users','faults.assignedTo','=','users.id')
+            ->leftjoin('users as assigned_users','faults.assignedTo','=','assigned_users.id')
             ->leftjoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
+			->leftjoin('users as reported_users','faults.user_id','=','reported_users.id')
             ->leftjoin('sections','fault_section.section_id','=','sections.id')
             ->leftjoin('customers','faults.customer_id','=','customers.id')
             ->leftjoin('links','faults.link_id','=','links.id')
@@ -65,7 +67,8 @@ class AssignController extends Controller
             ->whereNotNull('faults.assignedTo')
             ->where('faults.status_id','=',3)
             ->get(['faults.id','faults.fault_ref_number','customers.customer','faults.contactName','faults.phoneNumber','faults.contactEmail','faults.address','faults.assignedTo',
-                'account_manager_users.name as accountManager','faults.suspectedRfo_id','links.link','statuses.description','users.name','assessed_users.name as assessedBy','faults.status_id as status_id',
+                'account_manager_users.name as accountManager','faults.suspectedRfo_id','links.link','statuses.description','users.name',
+                'assigned_users.name as assignedTo','reported_users.name as reportedBy','assessed_users.name as assessedBy','faults.status_id as status_id',
                 'cities.city as city','cities.region as region','faults.city_id as city_id','suburbs.suburb as suburb','pops.pop as pop','faults.serviceType','faults.serviceAttribute','faults.faultType','faults.priorityLevel','faults.created_at',
                 'suspectedRFO.RFO as RFO','confirmedRFO.RFO as confirmedRFO', 'fsl.started_at as stage_started_at']);
 

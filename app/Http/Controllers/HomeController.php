@@ -139,9 +139,14 @@ class HomeController extends Controller
             $recentQuery->whereBetween('faults.updated_at', [$fromDate, $toDate]);
         }
         $recentFaults = $recentQuery
+            ->leftjoin('users as assigned_users','faults.assignedTo','=','assigned_users.id')
+            ->leftjoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
+			->leftjoin('users as reported_users','faults.user_id','=','reported_users.id')
             ->orderBy('faults.updated_at','desc')
             ->limit(10)
-            ->get(['faults.fault_ref_number','faults.status_id','customers.customer','links.link','faults.updated_at']);
+            ->get(['faults.fault_ref_number','faults.status_id','customers.customer','links.link','faults.updated_at',                'assigned_users.name as assignedTo',
+                'reported_users.name as reportedBy',
+                'assessed_users.name as assessedBy']);
 
         // Monthly counts for charts
         $monthlyLabels = [];

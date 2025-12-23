@@ -27,7 +27,9 @@ class ChiefTechEscalationsController extends Controller
         $mgrEscId = FaultLifecycle::managerEscalatedId();
         $query = DB::table('faults')
             ->leftjoin('users','faults.assignedTo','=','users.id')
+            ->leftjoin('users as assigned_users','faults.assignedTo','=','assigned_users.id')
             ->leftjoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
+			->leftjoin('users as reported_users','faults.user_id','=','reported_users.id')
             ->leftjoin('customers','faults.customer_id','=','customers.id')
             ->leftjoin('links','faults.link_id','=','links.id')
             ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
@@ -65,6 +67,8 @@ class ChiefTechEscalationsController extends Controller
             'links.link',
             'statuses.description',
             'faults.status_id as status_id',
+            'assigned_users.name as assignedTo',
+            'reported_users.name as reportedBy',
             'assessed_users.name as assessedBy',
             'faults.serviceType',
             'faults.serviceAttribute',

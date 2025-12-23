@@ -228,8 +228,8 @@ Dashboard
   <!-- Data Tables Section -->
   <div class="px-4 pb-4">
     <div class="row g-4">
-      @can('dashboard-resolution-metrics')
-      <div class="col-xl-6">
+      
+<!--       <div class="col-xl-6">
         <div class="data-table-card cc-chart-card">
           <div class="table-header">
             <div class="table-title">
@@ -277,10 +277,9 @@ Dashboard
           </div>
         </div>
       </div>
-      @endcan
-
-      @can('dashboard-recent-faults')
-      <div class="col-xl-6">
+       -->
+     
+      <div class="col-xl-12">
         <div class="data-table-card cc-chart-card">
           <div class="table-header">
             <div class="table-title">
@@ -300,6 +299,7 @@ Dashboard
                   <tr>
                     <th>Ref. No.</th>
                     <th>Customer</th>
+                    <th>Assigned To</th>
                     <th>Status</th>
                     <th>Updated</th>
                   </tr>
@@ -311,6 +311,7 @@ Dashboard
                       <span class="fw-bold text-primary">{{ $fault->fault_ref_number }}</span>
                     </td>
                     <td>{{ Str::limit($fault->customer ?? 'N/A', 20) }}</td>
+                    <td class="{{ $fault->assignedTo ? 'fw-bold' : 'text-muted' }}">{{ $fault->assignedTo ?: 'Not yet assigned' }}</td>
                     <td>
                       @php
                         $sid = (int)($fault->status_id ?? 0);
@@ -337,7 +338,7 @@ Dashboard
           </div>
         </div>
       </div>
-      @endcan
+     
     </div>
   </div>
 

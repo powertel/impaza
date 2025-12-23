@@ -558,7 +558,18 @@ class DashboardController extends Controller
             ->leftJoin('links', 'faults.link_id', '=', 'links.id')
             ->leftJoin('customers', 'faults.customer_id', '=', 'customers.id')
             ->leftJoin('statuses','faults.status_id','=','statuses.id')
-            ->select('faults.*', 'links.service_type', 'links.capacity', 'customers.customer','statuses.status_code as status')
+            ->leftjoin('users as assigned_users','faults.assignedTo','=','assigned_users.id')
+            ->leftjoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
+			->leftjoin('users as reported_users','faults.user_id','=','reported_users.id')
+            ->select('faults.*',
+             'links.service_type',
+            'links.capacity', 
+            'customers.customer',
+            'statuses.status_code as status',
+            'assigned_users.name as assignedTo',
+            'reported_users.name as reportedBy',
+            'assessed_users.name as assessedBy'
+            )
 
             ->orderByDesc('created_at')
             ->limit(10)
@@ -570,6 +581,7 @@ class DashboardController extends Controller
             if ($selectedMonth !== null) $recentFaultsQuery->whereMonth('faults.created_at', $selectedMonth);
         }
         $recentFaults = $recentFaultsQuery->get();
+
 
         return view('dashboard.reports', [
             'period' => $period,
