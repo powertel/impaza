@@ -178,10 +178,15 @@ class NocClearFaultsController extends Controller
     {
         $validated = $request->validate([
             'remark' => ['required', 'string'],
+            'confirmedRfo_id' => ['nullable', 'integer', 'exists:reasons_for_outages,id'],
         ]);
 
         $fault = Fault::findOrFail($id);
-        $fault->update(['status_id' => 6]);
+        $updateData = ['status_id' => 6];
+        if ($request->filled('confirmedRfo_id')) {
+            $updateData['confirmedRfo_id'] = (int) $validated['confirmedRfo_id'];
+        }
+        $fault->update($updateData);
         FaultLifecycle::recordStatusChange($fault, 6, $request->user()->id);
         // Ensure assignment window is closed when NOC clears
         FaultLifecycle::resolveAssignment($fault);
