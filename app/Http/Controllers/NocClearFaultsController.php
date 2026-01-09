@@ -176,13 +176,27 @@ class NocClearFaultsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $fault = Fault::find($id);
-        $req= $request->all();
-        $req['status_id'] = 6;
-        $fault ->update($req);
+        $validated = $request->validate([
+            'remark' => ['required', 'string'],
+        ]);
+
+        $fault = Fault::findOrFail($id);
+        $fault->update(['status_id' => 6]);
         FaultLifecycle::recordStatusChange($fault, 6, $request->user()->id);
         // Ensure assignment window is closed when NOC clears
         FaultLifecycle::resolveAssignment($fault);
+
+        $remarkActivityId = (int) (DB::table('remark_activities')
+            ->where('activity', '=', 'ON NOC CLEAR')
+            ->value('id') ?? 0);
+
+        Remark::create([
+            'fault_id' => $fault->id,
+            'user_id' => $request->user()->id,
+            'remark' => $validated['remark'],
+            'remarkActivity_id' => $remarkActivityId,
+            'file_path' => null,
+        ]);
         
         return redirect()->back()
             ->with('success','Fault Has Been Cleared By Noc');
