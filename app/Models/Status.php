@@ -27,7 +27,7 @@ class Status extends Model
         'Fault has been refered' => '#a855f7',          // purple-500 (referral)
         'Fault has been parked' => '#94a3b8',           // slate-400 (paused)
         'Fault has been revoked' => '#ef4444',          // red-500 (reversed)
-        'Fault has been under escalated' => '#dc2626',  // red-600 (escalated)
+        'Fault  escalated to Chief Technician' => '#548ff3ff',  // red-600 (escalated)
     ];
 
 }
