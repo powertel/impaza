@@ -21,6 +21,16 @@
             </div>
           </div>
 
+          <div class="mb-3">
+            <label class="form-label">Confirmed Reason For Outage</label>
+            <select class="form-select select2 @error('confirmedRfo_id') is-invalid @enderror" name="confirmedRfo_id" id="nocConfirmedRfoSelect-{{ $fault->id }}" required>
+              <option selected disabled>Select RFO</option>
+              @foreach(($confirmedRFO ?? []) as $confirmed_rfo)
+                <option value="{{ $confirmed_rfo->id }}" {{ (isset($fault->confirmedRfo_id) && (int) $fault->confirmedRfo_id === (int) $confirmed_rfo->id) ? 'selected' : '' }}>{{ $confirmed_rfo->RFO }}</option>
+              @endforeach
+            </select>
+          </div>
+
           @if(isset($remarks) && count($remarks))
           <div class="mt-4">
             <div class="d-flex align-items-center mb-2">

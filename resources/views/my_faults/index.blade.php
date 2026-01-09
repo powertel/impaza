@@ -115,7 +115,7 @@ My Faults
                 </tbody>
             </table>
             @foreach ($faults as $fault)
-                @include('clear_faults.noc_clear_modal', [ 'fault' => $fault ])
+                @include('rectification.noc_clear_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
                 @include('clear_faults.chief_tech_clear_modal', [ 'fault' => $fault ])
                 @include('rectification.edit_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()), 'confirmedRFO' => ($confirmedRFO ?? collect()) ])
                 @include('permits.requested-permits.edit_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])

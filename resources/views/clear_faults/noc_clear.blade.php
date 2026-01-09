@@ -109,7 +109,7 @@ Clear Faults
 
     <!-- Include per-row View Fault modal with conversation -->
     @foreach ($faults as $fault)
-        @include('clear_faults.noc_clear_modal', [ 'fault' => $fault ])
+        @include('clear_faults.noc_clear_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
         @include('clear_faults.noc_revoke_modal', [ 'fault' => $fault ])
         @include('faults.show', [
             'fault' => $fault,
