@@ -25,7 +25,6 @@ class MyFaultController extends Controller
          $this->middleware('permission:my-fault-edit', ['only' => ['edit','update']]);
          $this->middleware('permission:my-fault-delete', ['only' => ['destroy']]);
          $this->middleware('permission:refer-fault', ['only' => ['refer']]);
-         $this->middleware('permission:rectify-fault', ['only' => ['escalate']]);
     }
     /**
      * Display a listing of the resource.

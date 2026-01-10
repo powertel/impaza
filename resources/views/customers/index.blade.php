@@ -62,7 +62,7 @@ Customers
         <h3 class="card-title">Customers</h3>
         <div class="card-tools">
             @can('customer-create')
-            <button class="btn btn-primary " data-bs-toggle="modal" data-bs-target="#customerCreateModal"><i class="fas fa-plus-circle"></i> Create Customer(s) </button>
+            <button class="btn btn-primary " data-bs-toggle="modal" data-bs-target="#customerCreateModal"><i class="fas fa-plus-circle"></i> Create Existing Customer(s) </button>
             @endcan            
         </div>
     </div>
