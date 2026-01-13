@@ -110,7 +110,7 @@
                                 <div class="col-md-12 d-flex justify-content-end">
                                     <div class="form-check mt-2">
                                         <input class="form-check-input me-1" type="checkbox" id="resolvedOnCall" name="resolved_on_call" value="1" {{ old('resolved_on_call') ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="resolvedOnCall">Resolved on call</label>
+                                        <label class="form-check-label fs-5 fw-semibold" for="resolvedOnCall">Resolved on call</label>
                                     </div>
                                 </div>
                             </div>
