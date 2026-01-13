@@ -102,10 +102,16 @@
                         <div class="card-header bg-secondary text-dark">Remarks</div>
                         <div class="card-body">
                             <div class="row g-3">
-                                <div class="col-md-12">
+                                <div class="col-md-12 mb-2">
                                     <label for="remark" class="form-label">Remarks (Issue, port and Switch)</label>
                                     <textarea name="remark" required class="form-control @error('remark') is-invalid @enderror" placeholder="Enter any additional comments" rows="3">{{ old('remark') }}</textarea>
                                     <input type="hidden" name="activity" value="ON LOGGING">
+                                </div>
+                                <div class="col-md-12 d-flex justify-content-end">
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input me-1" type="checkbox" id="resolvedOnCall" name="resolved_on_call" value="1" {{ old('resolved_on_call') ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="resolvedOnCall">Resolved on call</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
