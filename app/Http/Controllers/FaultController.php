@@ -557,9 +557,13 @@ class FaultController extends Controller
             }
             $req['accountManager_id'] = $accountManagerId;
         
-            //This is where i am creating the fault
-            $req['status_id'] = 1;
-			$req['user_id'] =$request->user()->id;
+            $resolvedOnCall = (bool)$request->input('resolved_on_call', false);
+            $nocClearedId = (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
+            $req['status_id'] = $resolvedOnCall ? $nocClearedId : 1;
+            if ($resolvedOnCall) {
+                $req['confirmedRfo_id'] = $req['suspectedRfo_id'];
+            }
+            $req['user_id'] = $request->user()->id;
             // Build daily-running sequence: PWT2510171, P2510172, …
             $today = date('ymd');                          // 251017
             $prefix = 'PWT' . $today;                      // PWT251017
@@ -579,8 +583,7 @@ class FaultController extends Controller
             $req['fault_ref_number'] = $prefix . sprintf('%03d', $next);
 
             $fault = Fault::create($req);
-            // Start lifecycle at "Waiting for assessment" (status_id = 1)
-            FaultLifecycle::recordStatusChange($fault, 1, $request->user()->id);
+            FaultLifecycle::recordStatusChange($fault, (int)$req['status_id'], $request->user()->id);
             if ($request->hasFile('attachment')) {
                 $path = $request->file('attachment')->storePublicly('attachments', 'public');
             } else {
@@ -793,5 +796,138 @@ class FaultController extends Controller
                      });
 
         return response()->json($links);
+    }
+
+
+    public function callCentreRestore(Request $request)
+    {
+      
+        //Fault::create($request->all());
+
+        DB::beginTransaction();
+        try{
+            request()->validate([
+                'customer_id'=> 'required|exists:customers,id',
+                'contactName'=> 'required|string',
+                'phoneNumber'=> ['required','string','size:12','regex:/^2637\d{8}$/'],
+                'contactEmail'=> 'nullable|email|max:255',
+                'address'=> 'nullable|string',
+                'link_id'=> 'required|exists:links,id',
+                'suspectedRfo_id'=> 'required|exists:reasons_for_outages,id',
+                'remark'=> 'required|string',
+                'attachment' => 'nullable|mimes:png,jpg,jpeg|max:2048'
+            ], [
+                'phoneNumber.regex' => 'Phone number must be 12 digits starting with 2637',
+                'phoneNumber.size' => 'Phone number must be exactly 12 digits',
+            ]);
+           
+            $req = $request->all();
+
+            // Derive location and service details from selected link
+            $lnk = Link::find($request->input('link_id'));
+            if($lnk){
+                $req['city_id'] = $lnk->city_id ?? null; 
+                $req['suburb_id'] = $lnk->suburb_id ?? null; 
+                $req['pop_id'] = $lnk->pop_id ?? null;
+                $req['serviceType'] = $lnk->service_type ?? null; // map to faults.serviceType
+            }
+            // Normalize email to null when not provided
+            if(!$request->filled('contactEmail')){
+                $req['contactEmail'] = null;
+            }
+
+            // Derive Account Manager from selected customer (snapshot at creation)
+            $customer = Customer::find($request->input('customer_id'));
+            $accountManagerId = null;
+            if ($customer) {
+                $amUserId = $customer->account_manager_id; // references users.id
+                if ($amUserId) {
+                    $user = User::find($amUserId);
+                    $accountManager = AccountManager::firstOrCreate(
+                        ['user_id' => $amUserId],
+                        ['accountManager' => $user ? $user->name : 'Account Manager']
+                    );
+                    $accountManagerId = $accountManager->id;
+                } else {
+                    // Fallback to an "Unassigned" Account Manager record to satisfy NOT NULL constraint
+                    $accountManager = AccountManager::whereNull('user_id')
+                        ->where('accountManager', 'Unassigned')
+                        ->first();
+                    if (!$accountManager) {
+                        $accountManager = AccountManager::create([
+                            'accountManager' => 'Unassigned',
+                            'user_id' => null,
+                        ]);
+                    }
+                    $accountManagerId = $accountManager->id;
+                }
+            }
+            $req['accountManager_id'] = $accountManagerId;
+        
+            //This is where i am creating the fault
+            $req['status_id'] = 1;
+			$req['user_id'] =$request->user()->id;
+            // Build daily-running sequence: PWT2510171, P2510172, …
+            $today = date('ymd');                          // 251017
+            $prefix = 'PWT' . $today;                      // PWT251017
+
+            // Get the highest sequence used today
+            $lastToday = Fault::where('fault_ref_number', 'LIKE', $prefix . '%')
+                               ->orderByDesc('fault_ref_number')
+                               ->value('fault_ref_number');
+
+            if ($lastToday) {
+                // Extract the numeric suffix and increment
+                $next = (int)substr($lastToday, strlen($prefix)) + 1;
+            } else {
+                $next = 1;                                 // First of the day
+            }
+
+            $req['fault_ref_number'] = $prefix . sprintf('%03d', $next);
+
+            $fault = Fault::create($req);
+            // Start lifecycle at "Waiting for assessment" (status_id = 1)
+            FaultLifecycle::recordStatusChange($fault, 1, $request->user()->id);
+            if ($request->hasFile('attachment')) {
+                $path = $request->file('attachment')->storePublicly('attachments', 'public');
+            } else {
+                $path = null;
+            }
+            $remarkActivity_id = DB::table('remark_activities')->where('activity','=',$request['activity'])->get('remark_activities.id')->first();
+            $remark = Remark::create(
+                [
+                    'fault_id'=> $fault->id,
+                    'user_id' => $request->user()->id,
+                    'remark' => $request['remark'],
+                    'remarkActivity_id'=>$remarkActivity_id->id,
+                    'file_path'=>$path
+                ]
+            );
+           
+        
+
+            $fault_section = FaultSection::create(
+                [
+                    'fault_id'=> $fault->id,
+                ]
+            );
+          //  $request->user()->posts()->create($request->only('body'));
+            if($fault && $remark && $fault_section)
+            {
+                DB::commit();
+            }
+            else
+            {
+                DB::rollback();
+            }
+            return redirect()->route('faults.index')
+            ->with('success', 'Fault Created');
+        }
+
+        catch(Exception $ex)
+        {
+            DB::rollback();
+        }
+
     }
 }

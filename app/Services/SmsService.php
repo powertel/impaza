@@ -45,7 +45,15 @@ class SmsService
             $headers['Authorization'] = 'Bearer ' . $apiKey;
         }
 
-        $response = Http::withHeaders($headers)->timeout(30)->post($url, $payload);
+        try {
+            $response = Http::withHeaders($headers)->timeout(15)->post($url, $payload);
+        } catch (\Throwable $e) {
+            Log::error('SMS connection error', [
+                'url' => $url,
+                'error' => $e->getMessage(),
+            ]);
+            return false;
+        }
 
         $success = $response->successful();
         if ($success) {
