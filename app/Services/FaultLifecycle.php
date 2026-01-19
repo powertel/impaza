@@ -441,20 +441,16 @@ class FaultLifecycle
         $suburb = optional($fault->suburb)->suburb ?? '';
         $link = $fault->link_id ? Link::find($fault->link_id) : null;
         $linkName = $link ? ($link->link ?? '') : '';
-        return trim("Customer: {$customer}\nCity/Suburb: {$city} / {$suburb}\nLink: {$linkName}");
+        // Abbreviated labels to save space (SMS limit 160 chars)
+        return trim("Cust: {$customer}\nLoc: {$city}/{$suburb}\nLnk: {$linkName}");
     }
 
     protected static function customerMessage(Fault $fault, int $toStatusId): string
     {
         if ($toStatusId === 1) {
-            return "Good Day we have acknowledged the receipt of your fault {$fault->fault_ref_number}. We are on it.";
+            return "Good Day we have acknowledged the receipt of your fault {$fault->fault_ref_number}. We are working on it.";
         }
-        /*         if ($toStatusId === 2) {
-            return "Update: Fault {$fault->fault_ref_number} has been assessed. We are preparing rectification.";
-        }
-        if ($toStatusId === 3) {
-            return "Good news: Rectification is underway for fault {$fault->fault_ref_number}. We will keep you updated.";
-        } */
+
        /*  if ($toStatusId === 6) {
             return "Good news: Fault {$fault->fault_ref_number} was resolved by our team. If you still experience issues, please contact us.";
         } */
@@ -465,7 +461,7 @@ class FaultLifecycle
     {
         $summary = self::faultSummary($fault);
         if ($toStatusId === 1) {
-            return "New fault logged {$fault->fault_ref_number}. Awaiting assessment.\n{$summary}";
+            return "New fault {$fault->fault_ref_number} logged. Pending assessment.\n{$summary}";
         }
         return "";
     }
@@ -473,14 +469,14 @@ class FaultLifecycle
     protected static function techAssignmentMessage(Fault $fault, User $tech): string
     {
         $summary = self::faultSummary($fault);
-        return "Assignment: You are assigned to fault {$fault->fault_ref_number}.\n{$summary}";
+        return "Assign: Fault {$fault->fault_ref_number} assigned to you.\n{$summary}";
     }
 
     protected static function techStatusMessage(Fault $fault, User $tech, int $toStatusId): string
     {
         $summary = self::faultSummary($fault);
         if ($toStatusId === 3) {
-            return "Update: Fault {$fault->fault_ref_number} is under rectification.\n{$summary}";
+            return "Update: Fault {$fault->fault_ref_number} under rectification.\n{$summary}";
         }
         /* return "Fault {$fault->fault_ref_number} status updated.\n{$summary}"; */
     }
