@@ -205,14 +205,20 @@ class FaultLifecycle
 
         // 2: Assessed -> notify Chief Technicians in the fault's region
         if ($toStatusId === 2) {
+            $sectionId = (int) (FaultSection::where('fault_id', $fault->id)->value('section_id') ?? 0);
             $region = $fault->city_id ? (City::find($fault->city_id)->region ?? null) : null;
             $query = User::query()
                 ->join('positions','users.position_id','=','positions.id')
                 ->where('positions.position', '=', 'Chief Technician')
                 ->whereNotNull('users.phonenumber');
-            if (!empty($region)) {
+
+            if ($sectionId > 0) {
+                $query->where('users.section_id', '=', $sectionId);
+            }
+            if (in_array($sectionId, [2,3], true) && !empty($region)) {
                 $query->where('users.region', '=', $region);
             }
+
             $recipients = $query->pluck('users.phonenumber')->all();
             if (empty($recipients)) {
                 $fallback = env('POWERTEL_SMS_CT_RECIPIENTS');
@@ -226,11 +232,13 @@ class FaultLifecycle
                     'fault' => $fault->fault_ref_number,
                     'recipients' => $recipients,
                     'region' => $region,
+                    'section_id' => $sectionId,
                 ]);
             } else {
                 Log::warning('Notify: No Chief Technicians found for assessed fault', [
                     'fault' => $fault->fault_ref_number,
                     'region' => $region,
+                    'section_id' => $sectionId,
                 ]);
             }
         }
