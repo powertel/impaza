@@ -734,6 +734,27 @@ class FaultController extends Controller
             }
         }
 
+        // Handle Resolved on Call
+        if ($request->has('resolved_on_call') && $request->input('resolved_on_call')) {
+             $nocClearedId = (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
+             $data['status_id'] = $nocClearedId;
+             $data['confirmedRfo_id'] = $data['suspectedRfo_id'] ?? $fault->suspectedRfo_id;
+             
+             FaultLifecycle::recordStatusChange($fault, $nocClearedId, $request->user()->id);
+        }
+
+        // Handle Remark Update
+        if ($request->filled('remark')) {
+             $remarkActivity = DB::table('remark_activities')->where('activity','=',$request->input('activity', 'ON EDIT'))->first();
+             $actId = $remarkActivity ? $remarkActivity->id : 1;
+             Remark::create([
+                'fault_id'=> $fault->id,
+                'user_id' => $request->user()->id,
+                'remark' => $request->input('remark'),
+                'remarkActivity_id' => $actId,
+             ]);
+        }
+
         $fault->update($data);
         return redirect(route('faults.index'))
         ->with('success','Fault Updated');
