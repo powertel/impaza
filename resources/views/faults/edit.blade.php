@@ -131,6 +131,61 @@
                         </div>
                     </div>
 
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-header bg-light text-dark">Conversation History</div>
+                        <div class="card-body">
+                            <div id="remarksScroller-edit-{{ $fault->id }}" style="max-height: 300px; overflow-y: auto; padding-right: 6px;">
+                                @if(isset($remarks) && count($remarks) > 0)
+                                    @foreach($remarks->sortBy('created_at') as $remark)
+                                        @php
+                                            $currentName = optional(auth()->user())->name;
+                                            $isOwn = $currentName && (strtolower(trim($remark->name)) === strtolower(trim($currentName)));
+                                        @endphp
+                                        <div class="d-flex {{ $isOwn ? 'justify-content-end' : 'justify-content-start' }} mb-3">
+                                            <div class="rounded-3 shadow-sm px-3 py-2" style="max-width: 85%; background-color: {{ $isOwn ? '#e8f5e9' : '#eef5ff' }};">
+                                                <div class="d-flex align-items-center gap-2 mb-1">
+                                                    <span class="badge {{ $isOwn ? 'bg-success' : 'bg-secondary' }}">{{ $remark->name ?? 'User' }}</span>
+                                                    <small class="text-muted">{{ Carbon\Carbon::parse($remark->created_at)->diffForHumans() }}</small>
+                                                    @if(!empty($remark->activity))
+                                                        <small class="text-muted">• {{ $remark->activity }}</small>
+                                                    @endif
+                                                </div>
+                                                <div class="fw-normal">{{ $remark->remark }}</div>
+                                                @if($remark->file_path)
+                                                    <div class="mt-2">
+                                                         <a href="{{ asset('storage/'.$remark->file_path) }}" target="_blank" class="d-inline-block text-decoration-none" title="View attachment">
+                                                            <img src="{{ asset('storage/'.$remark->file_path) }}" alt="Attachment" class="img-fluid rounded" style="max-height: 100px; object-fit: cover;">
+                                                        </a>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                @else
+                                    <div class="text-center text-muted py-3">No remarks found.</div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm mb-3">
+                        <div class="card-header bg-secondary text-dark">Remarks</div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-12 mb-2">
+                                    <label for="remark-edit-{{ $fault->id }}" class="form-label">Remarks (Issue, port and Switch)</label>
+                                    <textarea name="remark" required class="form-control @error('remark') is-invalid @enderror" placeholder="Enter any additional comments" rows="3">{{ $fault->remark ?? old('remark') }}</textarea>
+                                    <input type="hidden" name="activity" value="ON EDIT">
+                                </div>
+                                <div class="col-md-12 d-flex justify-content-end">
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input me-1" type="checkbox" id="resolvedOnCall-edit-{{ $fault->id }}" name="resolved_on_call" value="1" {{ old('resolved_on_call') ? 'checked' : '' }}>
+                                        <label class="form-check-label fs-5 fw-semibold ms-1" for="resolvedOnCall-edit-{{ $fault->id }}">Resolved on call</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     
                 </form>
             </div>

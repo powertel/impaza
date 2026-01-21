@@ -250,7 +250,8 @@ Faults
                         'pops' => $pop,
                         'links' => $link,
                         'accountManagers' => $accountManager,
-                        'suspectedRFO' => $suspectedRFO
+                        'suspectedRFO' => $suspectedRFO,
+                        'remarks' => ($remarksByFault[$fault->id] ?? collect())
                     ])
                 @endif
                 @include('faults.show', [
