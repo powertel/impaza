@@ -6,6 +6,7 @@ use App\Http\Controllers\Mobile\AuthController;
 use App\Http\Controllers\Mobile\FaultController;
 use App\Http\Controllers\Mobile\StatsController;
 use App\Http\Controllers\Mobile\ProfileController;
+use App\Http\Controllers\Api\CustomerFaultsController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -44,3 +45,6 @@ Route::prefix('mobile')->group(function () {
         Route::get('technician-stats', [StatsController::class, 'myStats']);
     });
 });
+
+// Customer faults lookup by account and contract
+Route::middleware('api_key')->get('customer-faults', [CustomerFaultsController::class, 'index']);

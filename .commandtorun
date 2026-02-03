@@ -29,3 +29,10 @@ docker exec impaza_mysql mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON impaza.
 
 -Building the adroid app
 eas build -p android --profile preview
+
+
+
+
+### Api To BILLING ####
+curl "https://impazamon.powertel.co.zw/api/customer-faults?account_number=700000371&contract_number=40108570" \
+  -H "X-API-Key: 7f1c9a2b0e645d2f9a76c3b1e8d4f0ab3c5d7e9f2a1b0c3d4e5f6a7b8c9d0e1f"
