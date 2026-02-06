@@ -637,9 +637,9 @@ class FaultController extends Controller
     {
         // Prevent loading the edit view for locked faults
         $faultModel = Fault::find($id);
-        if ($faultModel && (int)$faultModel->status_id !== 1) {
+        if ($faultModel && (int)$faultModel->status_id == 6) {
             return redirect()->route('faults.index')
-                ->with('error', 'This fault cannot be edited after it passes the initial stage.');
+                ->with('error', 'This fault cannot be edited after it is cleared by NOC.');
         }
 
         $fault = DB::table('faults')
@@ -688,9 +688,9 @@ class FaultController extends Controller
         $fault = Fault::find($id);
 
         // Block edits once fault has passed status_id = 1
-        if ($fault && (int)$fault->status_id !== 1) {
+        if ($fault && (int)$fault->status_id == 6) {
             return redirect()->route('faults.index')
-                ->with('error', 'Editing is locked after the initial stage.');
+                ->with('error', 'Editing is locked after the fault is cleared by NOC.');
         }
 
         $data = $request->all();

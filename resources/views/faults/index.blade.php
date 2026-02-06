@@ -214,7 +214,7 @@ Faults
                         <td class="text-nowrap">
                             <div class="btn-group btn-group gap-2" role="group" aria-label="Actions">
                                 @can('fault-edit')
-                                  @if ($fault->status_id == 1)
+                                  @if ($fault->status_id != 6)
                                     <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editFaultModal-{{ $fault->id }}">
                                       <i class="fas fa-edit me-1"></i> Edit
                                     </button>
@@ -224,6 +224,7 @@ Faults
                                     </button>
                                   @endif
                                 @endcan
+
                                 <button  class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                     <i class="fas fa-eye me-1"></i> View
                                 </button>
@@ -241,7 +242,7 @@ Faults
             @include('faults.create')
 
             @foreach ($faults as $fault)
-                @if ($fault->status_id == 1)
+                @if ($fault->status_id != 6)
                     @include('faults.edit', [
                         'fault' => $fault,
                         'customers' => $customer,
