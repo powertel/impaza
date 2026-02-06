@@ -13,10 +13,16 @@ class Pop extends Model
         'city_id',
         'suburb_id',
         'pop',
+        'zone_id',
     ];
     public function suburb()
     {
         return $this->belongsTo(Suburb::class);
+    }
+
+    public function zone()
+    {
+        return $this->belongsTo(Zone::class);
     }
 
     public function fault()

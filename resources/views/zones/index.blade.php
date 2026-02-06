@@ -46,7 +46,7 @@ Zones
                         <th>No.</th>
                         <th>Name</th>
                         <th>Region</th>
-                        <th>Suburbs Count</th>
+                        <th>POPs Count</th>
                         <th>Action(s)</th>
                     </tr>
                 </thead>
@@ -56,7 +56,7 @@ Zones
                         <td>{{++$i}}</td>
                         <td>{{ $zone->name}}</td>
                         <td>{{ $zone->region ?? '-' }}</td>
-                        <td>{{ $zone->suburbs_count }}</td>
+                        <td>{{ $zone->pops_count }}</td>
                         <td>
                             <form action="{{ route('zones.destroy',$zone->id) }}" method="POST">
                                 @csrf

@@ -59,7 +59,7 @@ class AutoAssignFaults extends Command
             $faultsQuery = DB::table('faults')
                 ->leftJoin('fault_section', 'faults.id', '=', 'fault_section.fault_id')
                 ->leftJoin('cities', 'faults.city_id', '=', 'cities.id')
-                ->leftJoin('suburbs', 'faults.suburb_id', '=', 'suburbs.id')
+                ->leftJoin('pops', 'faults.pop_id', '=', 'pops.id')
                 ->where('faults.status_id', '=', 2) // Fault has been assessed
                 ->whereNull('faults.assignedTo');
 
@@ -76,7 +76,7 @@ class AutoAssignFaults extends Command
             }
 
             $faults = $faultsQuery
-                ->select(['faults.id', 'faults.city_id', 'fault_section.section_id', 'suburbs.zone_id'])
+                ->select(['faults.id', 'faults.city_id', 'fault_section.section_id', 'pops.zone_id'])
                 ->get();
 
             if ($faults->isEmpty()) {
