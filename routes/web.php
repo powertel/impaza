@@ -35,6 +35,7 @@ use App\Http\Controllers\TechnicianConfigController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\ResolvedController;
+use App\Http\Controllers\ZoneController;
 
 /*
 |--------------------------------------------------------------------------
@@ -89,6 +90,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::put('customers/{id}/reconnect-decommissioned', [CustomerController::class,'reconnectDecommissioned'])->name('customers.reconnect_decommissioned');
     Route::put('customers/{id}/decommission', [CustomerController::class,'decommission'])->name('customers.decommission');
     Route::resource('cities', CityController::class);
+    Route::resource('zones', ZoneController::class);
     Route::resource('locations', LocationController::class);
     Route::resource('links', LinkController::class);
     // AJAX: fetch links for a given customer

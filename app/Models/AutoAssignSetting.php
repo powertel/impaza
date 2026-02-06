@@ -17,6 +17,7 @@ class AutoAssignSetting extends Model
         'weekend_standby_enabled',
         'consider_leave',
         'consider_region',
+        'consider_zones',
         'scope_section_id',
         'scope_region',
         'auto_assign_enabled',

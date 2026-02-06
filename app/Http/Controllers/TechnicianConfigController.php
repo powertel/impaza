@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AutoAssignSetting;
 use App\Models\Section;
 use App\Models\User;
+use App\Models\Zone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -86,8 +87,10 @@ class TechnicianConfigController extends Controller
         }
         $regions = DB::table('cities')->select('region')->whereNotNull('region')->distinct()->orderBy('region')->pluck('region');
         $sections = Section::query()->orderBy('section')->get(['id','section']);
+        $zones = Zone::all();
         $techniciansQuery = User::leftJoin('sections','users.section_id','=','sections.id')
             ->leftJoin('user_statuses','users.user_status','=','user_statuses.id')
+            ->with('zones')
             ->orderBy('users.name','asc');
 
         // Limit technicians list to the logged-in user's section when available
@@ -108,7 +111,8 @@ class TechnicianConfigController extends Controller
         $regionMatches = !$regionLocked || (($currentUser->region ?? null) === $scopeRegion);
         $effectiveAutoAssignEnabled = (bool)($settings->auto_assign_enabled ?? false) && $sectionMatches && $regionMatches;
         $effectiveConsiderRegion = (bool)($settings->consider_region ?? false) && $sectionLocked && $regionMatches;
-        return view('technicians.config', compact('settings','regions','sections','technicians','sectionLocked','sectionMatches','regionLocked','regionMatches','effectiveAutoAssignEnabled','effectiveConsiderRegion'));
+        $effectiveConsiderZones = (bool)($settings->consider_zones ?? false);
+        return view('technicians.config', compact('settings','regions','sections','zones','technicians','sectionLocked','sectionMatches','regionLocked','regionMatches','effectiveAutoAssignEnabled','effectiveConsiderRegion','effectiveConsiderZones'));
     }
 
     public function updateSettings(Request $request)
@@ -119,6 +123,7 @@ class TechnicianConfigController extends Controller
             'weekend_standby_enabled' => 'nullable|boolean',
             'consider_leave' => 'nullable|boolean',
             'consider_region' => 'nullable|boolean',
+            'consider_zones' => 'nullable|boolean',
             'auto_assign_enabled' => 'nullable|boolean',
             'scope_section_id' => 'nullable|integer',
             'scope_region' => 'nullable|string',
@@ -128,6 +133,7 @@ class TechnicianConfigController extends Controller
         $data['weekend_standby_enabled'] = (bool)($data['weekend_standby_enabled'] ?? false);
         $data['consider_leave'] = (bool)($data['consider_leave'] ?? false);
         $data['consider_region'] = (bool)($data['consider_region'] ?? false);
+        $data['consider_zones'] = (bool)($data['consider_zones'] ?? false);
         $data['auto_assign_enabled'] = (bool)($data['auto_assign_enabled'] ?? false);
 
         // Default scope to the saving user's section/region if not explicitly provided
@@ -201,7 +207,7 @@ class TechnicianConfigController extends Controller
         $value = $field['value'];
 
         // Coerce types for known boolean fields
-        $booleanKeys = ['weekend_standby_enabled','consider_leave','consider_region','auto_assign_enabled'];
+        $booleanKeys = ['weekend_standby_enabled','consider_leave','consider_region','consider_zones','auto_assign_enabled'];
         if (in_array($key, $booleanKeys, true)) {
             $value = (bool)$value;
         }
@@ -272,6 +278,15 @@ class TechnicianConfigController extends Controller
                     $statusId = DB::table('user_statuses')->insertGetId(['status_name' => $statusName]);
                 }
                 $user->update(['user_status' => $statusId]);
+                break;
+            case 'zones':
+                // Expects array of zone IDs or single ID
+                if (is_array($value)) {
+                    $zoneIds = $value;
+                } else {
+                    $zoneIds = $value ? [$value] : [];
+                }
+                $user->zones()->sync($zoneIds);
                 break;
         }
 

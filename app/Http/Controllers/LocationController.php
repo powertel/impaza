@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\City;
 use App\Models\Suburb;
+use App\Models\Zone;
 use DB;
 
 class LocationController extends Controller
@@ -93,7 +94,7 @@ class LocationController extends Controller
         } else {
             request()->validate([
                 'city_id' => 'required',
-                'suburb' => 'required|string|unique:suburbs'
+                'suburb' => 'required|string|unique:suburbs',
             ]);
             $location = Suburb::create($request->all());
             
@@ -152,9 +153,9 @@ class LocationController extends Controller
      */
     public function update(Request $request, $id)
     {
-        request()->validate([
+        $validated = request()->validate([
             'city_id' => 'required',
-            'suburb' => 'required|string|unique:suburbs'
+            'suburb' => 'required|string|unique:suburbs,suburb,'.$id,
         ]);
 
         $location = Suburb::find($id);
