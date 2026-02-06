@@ -33,6 +33,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'weekend_standby'
     ];
 
+    public function zones()
+    {
+        return $this->belongsToMany(Zone::class, 'technician_zone', 'user_id', 'zone_id');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

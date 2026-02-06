@@ -45,6 +45,7 @@ Technician Configuration
                     <th>Section</th>
                     <th>Status</th>
                     <th>Region</th>
+                    <th>Zones</th>
                     <th>Weekly Standby</th>
                     <th>Weekend Standby</th>
                     <th>On Leave</th>
@@ -65,12 +66,14 @@ Technician Configuration
                         <input type="hidden" name="user_id[]" value="{{ $t->id }}">
                         <input type="hidden" name="region[]" value="{{ $t->region }}">
                         <span class="form-control-plaintext form-control-sm">{{ $t->region ?: 'Not set' }}</span>
-                        <!-- <select name="region[]" class="form-select form-select-sm js-user-setting" data-field="region">
-                          <option value="">Not set</option>
-                          @foreach($regions as $region)
-                            <option value="{{ $region }}" {{ $t->region === $region ? 'selected' : '' }} readonly>{{ $region }}</option>
-                          @endforeach
-                        </select> -->
+                      </td>
+                      <td>
+                        <select class="form-select form-select-sm js-user-setting" data-field="zones">
+                            <option value="">Select Zone</option>
+                            @foreach($zones as $z)
+                                <option value="{{ $z->id }}" {{ $t->zones->contains($z->id) ? 'selected' : '' }}>{{ $z->name }}</option>
+                            @endforeach
+                        </select>
                       </td>
                       <td>
                         <input type="checkbox" class="form-check-input js-user-setting" data-field="weekly_standby" {{ $t->weekly_standby ? 'checked' : '' }}>
@@ -156,6 +159,12 @@ Technician Configuration
                 <div class="form-check">
                   <input class="form-check-input js-setting" type="checkbox" name="consider_region" value="1" id="consider_region" data-field="consider_region" {{ old('consider_region', ($effectiveConsiderRegion ?? ($settings->consider_region ?? true))) ? 'checked' : '' }} {{ ($sectionLocked ?? false) ? '' : 'disabled' }}>
                   <label class="form-check-label" for="consider_region">Consider Region</label>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-check">
+                  <input class="form-check-input js-setting" type="checkbox" name="consider_zones" value="1" id="consider_zones" data-field="consider_zones" {{ old('consider_zones', ($effectiveConsiderZones ?? ($settings->consider_zones ?? false))) ? 'checked' : '' }}>
+                  <label class="form-check-label" for="consider_zones">Consider Zones</label>
                 </div>
               </div>
             </div>

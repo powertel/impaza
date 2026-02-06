@@ -174,6 +174,12 @@
                 <p>Technician Settings</p>
               </a>
             </li>
+            <li class="nav-item">
+              <a href="{{ route('zones.index') }}" class="nav-link {{ request()->routeIs('zones.*') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-map-marked-alt"></i>
+                <p>Zones</p>
+              </a>
+            </li>
             @endcan
 
             @canany(['department-list'])

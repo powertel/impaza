@@ -59,6 +59,7 @@ class AutoAssignFaults extends Command
             $faultsQuery = DB::table('faults')
                 ->leftJoin('fault_section', 'faults.id', '=', 'fault_section.fault_id')
                 ->leftJoin('cities', 'faults.city_id', '=', 'cities.id')
+                ->leftJoin('suburbs', 'faults.suburb_id', '=', 'suburbs.id')
                 ->where('faults.status_id', '=', 2) // Fault has been assessed
                 ->whereNull('faults.assignedTo');
 
@@ -75,7 +76,7 @@ class AutoAssignFaults extends Command
             }
 
             $faults = $faultsQuery
-                ->select(['faults.id', 'faults.city_id', 'fault_section.section_id'])
+                ->select(['faults.id', 'faults.city_id', 'fault_section.section_id', 'suburbs.zone_id'])
                 ->get();
 
             if ($faults->isEmpty()) {
@@ -84,6 +85,7 @@ class AutoAssignFaults extends Command
 
             // Fetch configurable settings once for this scope
             $considerRegion = (bool)($settings->consider_region ?? true);
+            $considerZones = (bool)($settings->consider_zones ?? false);
             $considerLeave = (bool)($settings->consider_leave ?? true);
             $isOffHours = FaultLifecycle::isOffHours();
             $isWeekendOff = (bool)($settings->weekend_standby_enabled ?? true) && now()->isWeekend();
@@ -123,7 +125,21 @@ class AutoAssignFaults extends Command
                 }
             }
 
-            $userIds = $query->pluck('users.id')->toArray();
+            $candidates = $query->select('users.id')->get();
+            $userIds = $candidates->pluck('id')->toArray();
+
+            // Priority: Filter by Zone if enabled and available
+            if ($considerZones && $row->zone_id && !empty($userIds)) {
+                $zoneUserIds = DB::table('technician_zone')
+                    ->where('zone_id', $row->zone_id)
+                    ->whereIn('user_id', $userIds)
+                    ->pluck('user_id')
+                    ->toArray();
+                
+                if (!empty($zoneUserIds)) {
+                    $userIds = $zoneUserIds;
+                }
+            }
 
             if (empty($userIds)) { continue; }
 
