@@ -14,9 +14,9 @@ class Zone extends Model
         'region',
     ];
 
-    public function suburbs()
+    public function pops()
     {
-        return $this->hasMany(Suburb::class);
+        return $this->hasMany(Pop::class);
     }
 
     public function technicians()

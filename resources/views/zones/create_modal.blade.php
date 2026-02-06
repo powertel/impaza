@@ -15,27 +15,27 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">Region</label>
-                <select name="region" class="form-select" id="createZoneRegionSelect" onchange="filterCreateSuburbs()">
+                <select name="region" class="form-select" id="createZoneRegionSelect" onchange="filterCreatePops()">
                     <option value="">Select Region</option>
                     @foreach($regions as $r)
                         <option value="{{ $r }}">{{ $r }}</option>
                     @endforeach
                 </select>
-                <small class="text-muted">Select a region to filter the suburbs list below.</small>
+                <small class="text-muted">Select a region to filter the POPs list below.</small>
             </div>
             <div class="mb-3">
-                <label class="form-label">Suburbs</label>
-                <input type="text" class="form-control mb-2" id="createZoneSearch" placeholder="Search suburbs..." onkeyup="filterCreateSuburbs()">
-                <div class="border rounded p-2" style="height: 300px; overflow-y: auto;" id="createSuburbsList">
+                <label class="form-label">POPs</label>
+                <input type="text" class="form-control mb-2" id="createZoneSearch" placeholder="Search POPs..." onkeyup="filterCreatePops()">
+                <div class="border rounded p-2" style="height: 300px; overflow-y: auto;" id="createPopsList">
                     <div class="row">
-                    @foreach($suburbs as $suburb)
-                        <div class="col-6 suburb-item" data-region="{{ $suburb->region }}">
+                    @foreach($pops as $pop)
+                        <div class="col-6 pop-item" data-region="{{ $pop->region }}">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="suburbs[]" value="{{ $suburb->id }}" id="create_suburb_{{ $suburb->id }}">
-                                <label class="form-check-label {{ $suburb->zone_id ? 'text-danger' : '' }}" for="create_suburb_{{ $suburb->id }}">
-                                    {{ $suburb->suburb }}
-                                    @if($suburb->zone_id) 
-                                        <span class="small">({{ $suburb->zone_name }})</span>
+                                <input class="form-check-input" type="checkbox" name="pops[]" value="{{ $pop->id }}" id="create_pop_{{ $pop->id }}">
+                                <label class="form-check-label {{ $pop->zone_id ? 'text-danger' : '' }}" for="create_pop_{{ $pop->id }}">
+                                    {{ $pop->pop }}
+                                    @if($pop->zone_id) 
+                                        <span class="small">({{ $pop->zone_name }})</span>
                                     @endif
                                 </label>
                             </div>
@@ -43,14 +43,14 @@
                     @endforeach
                     </div>
                 </div>
-                <small class="text-muted">Select suburbs to add to this zone. Suburbs already in another zone will be moved.</small>
+                <small class="text-muted">Select POPs to add to this zone. POPs already in another zone will be moved.</small>
             </div>
             
             <script>
-            function filterCreateSuburbs() {
+            function filterCreatePops() {
                 var region = document.getElementById('createZoneRegionSelect').value;
                 var searchText = document.getElementById('createZoneSearch').value.toLowerCase();
-                var items = document.querySelectorAll('#createSuburbsList .suburb-item');
+                var items = document.querySelectorAll('#createPopsList .pop-item');
                 
                 items.forEach(function(item) {
                     var itemRegion = item.getAttribute('data-region');

@@ -12,13 +12,7 @@ class Suburb extends Model
     protected $fillable = [
         'city_id',
         'suburb',
-        'zone_id',
     ];
-
-    public function zone()
-    {
-        return $this->belongsTo(Zone::class);
-    }
 
     public function city()
     {
