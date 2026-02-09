@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Fault;
 use App\Models\AutoAssignSetting;
 use App\Services\FaultLifecycle;
+use Illuminate\Support\Facades\Log;
 
 class AutoAssignFaults extends Command
 {
@@ -129,6 +130,7 @@ class AutoAssignFaults extends Command
             $userIds = $candidates->pluck('id')->toArray();
 
             // Priority: Filter by Zone if enabled and available
+            $appliedZoneFilter = false;
             if ($considerZones && $row->zone_id && !empty($userIds)) {
                 $zoneUserIds = DB::table('technician_zone')
                     ->where('zone_id', $row->zone_id)
@@ -138,16 +140,25 @@ class AutoAssignFaults extends Command
                 
                 if (!empty($zoneUserIds)) {
                     $userIds = $zoneUserIds;
+                    $appliedZoneFilter = true;
                 }
             }
 
             if (empty($userIds)) { continue; }
 
-            // Round-robin pointer per section
+            // Round-robin pointer per section (and zone if applied)
             $rrKey = 'auto_assign_rr_' . $row->section_id;
+            if ($appliedZoneFilter) {
+                $rrKey .= '_zone_' . $row->zone_id;
+            }
             $idx = Cache::get($rrKey, 0);
             if ($idx >= count($userIds)) { $idx = 0; }
             $selectedUserId = (int)$userIds[$idx];
+
+            Log::info("AutoAssign Fault {$row->id}: ZoneID=" . ($row->zone_id ?? 'NULL') . 
+                      " Filtered=" . ($appliedZoneFilter ? 'YES' : 'NO') . 
+                      " Candidates=" . count($userIds) . 
+                      " SelectedUser=$selectedUserId");
 
             // Perform assignment and lifecycle updates
             $fault = Fault::find((int)$row->id);
