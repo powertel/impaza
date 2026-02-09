@@ -403,15 +403,16 @@ class AssessmentController extends Controller
         }
 
         $considerRegion = (bool)($settings->consider_region ?? true);
+        $considerZones = (bool)($settings->consider_zones ?? false);
         $considerLeave = (bool)($settings->consider_leave ?? true);
         $isOffHours = \App\Services\FaultLifecycle::isOffHours();
         $isWeekendOff = (bool)($settings->weekend_standby_enabled ?? true) && now()->isWeekend();
 
-        $usersQuery = User::join('departments','users.department_id','=','departments.id')
+        // Base query for available technicians in this section
+        $baseUsersQuery = User::join('departments','users.department_id','=','departments.id')
             ->leftjoin('sections','users.section_id','=','sections.id')
             ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
             ->where('sections.id','=',$section_id)
-            // Off-hours -> accept Standby or Assignable if present; otherwise Assignable.
             ->where(function($q) use ($isOffHours) {
                 if ($isOffHours) {
                     $q->whereIn('user_statuses.status_name', ['Standby','Assignable']);
@@ -419,9 +420,7 @@ class AssessmentController extends Controller
                     $q->where('user_statuses.status_name', '=', 'Assignable');
                 }
             })
-            // Exclude known non-working statuses where applicable
             ->whereNotIn('user_statuses.status_name', $considerLeave ? ['Unassignable','On Leave'] : ['Unassignable'])
-            // Apply per-user standby flags during off-hours
             ->when($isOffHours, function($q) use ($isWeekendOff) {
                 if ($isWeekendOff) {
                     $q->where('users.weekend_standby', '=', true);
@@ -429,133 +428,110 @@ class AssessmentController extends Controller
                     $q->where('users.weekly_standby', '=', true);
                 }
             })
-            // Enforce scope region only for sections 2 and 3
             ->when(in_array((int)$section_id, [2,3], true) && !empty($scopeRegion), function($q) use ($scopeRegion) {
                 $q->where('users.region', '=', $scopeRegion);
             });
 
-        // Fault list by section
+        $baseUsers = $baseUsersQuery->pluck('users.id')->toArray();
+
+        // Fault list by section with necessary metadata (Zone, Region)
         $faults = DB::table('fault_section')
             ->leftjoin('faults','fault_section.fault_id','=','faults.id')
             ->leftJoin('cities', 'faults.city_id', '=', 'cities.id')
+            ->leftJoin('pops', 'faults.pop_id', '=', 'pops.id')
             ->whereNull('faults.assignedTo')
             ->where('fault_section.section_id','=',$section_id)
-            // Limit to scope region only for sections 2 and 3
             ->when(in_array((int)$section_id, [2,3], true) && !empty($scopeRegion), function($q) use ($scopeRegion) {
                 $q->where('cities.region', '=', $scopeRegion);
             })
-            ->pluck('faults.id')
-            ->toArray();
+            ->select(['faults.id', 'pops.zone_id', 'cities.region'])
+            ->get();
 
-        // If region consideration is enabled, we'll assign per fault using region-aware filtering
-        $users = $usersQuery->pluck('users.id')->toArray();
-        if (empty($users)) {
-            // Relax criteria: drop region and standby gating, allow Assignable in section
-            $users = User::join('departments','users.department_id','=','departments.id')
-                ->leftjoin('sections','users.section_id','=','sections.id')
-                ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
-                ->where('sections.id','=',$section_id)
-                ->where('user_statuses.status_name', '=', 'Assignable')
-                ->when(in_array((int)$section_id, [2,3], true) && !empty($scopeRegion), function($q) use ($scopeRegion) {
-                    $q->where('users.region', '=', $scopeRegion);
-                })
-                ->whereNotIn('user_statuses.status_name', $considerLeave ? ['Unassignable','On Leave'] : ['Unassignable'])
-                ->pluck('users.id')
-                ->toArray();
-            Log::warning('Auto-assign fallback: relaxed technician pool used', [
-                'section_id' => (int)$section_id,
-                'scope_region' => $scopeRegion,
-                'off_hours' => $isOffHours,
-                'weekend_off' => $isWeekendOff,
-            ]);
-        }
-			
-			
+        foreach ($faults as $row) {
+            $faultId = $row->id;
+            $faultRegion = $row->region;
+            $zoneId = $row->zone_id;
 
-        // For round-robin we keep an index per section/region
-        $userslength = count($users);
-        $rrKey = 'last_assigned_user_index_' . (int)$section_id . '_' . (in_array((int)$section_id, [2,3], true) ? ($scopeRegion ?: 'all') : 'all');
-        $lastAssignedUserIndex = Cache::get($rrKey, 0);
-        $userfaults =[];
-
-        for($i=0; $i < count($faults); $i++){
-
-            $autoAssign  = $faults[$i];
-
-            // Region-aware candidate filtering if enabled
-            $faultRegion = null;
-            if ($considerRegion) {
-                $faultRegion = \DB::table('faults')
-                    ->leftJoin('cities', 'faults.city_id', '=', 'cities.id')
-                    ->where('faults.id', '=', $autoAssign)
-                    ->value('cities.region');
+            // 1. Determine Eligible Users for this specific fault
+            $eligibleUsers = $baseUsers;
+            
+            // Filter by Region if required and not already scoped
+            if (empty($scopeRegion) && $considerRegion && $faultRegion && in_array((int)$section_id, [2,3], true)) {
+                // We need to filter baseUsers by this region
+                $regionUsers = User::whereIn('id', $baseUsers)
+                    ->where('region', $faultRegion)
+                    ->pluck('id')
+                    ->toArray();
+                
+                // Only apply if we found matches, otherwise fallback (or empty if strict?)
+                // Current logic seems to fallback if empty, but strict region adherence is usually preferred.
+                // However, matching existing fallback logic:
+                if (!empty($regionUsers)) {
+                    $eligibleUsers = $regionUsers;
+                }
             }
 
-            $eligibleUsers = $users;
-            if (in_array((int)$section_id, [2,3], true) && $considerRegion && $faultRegion) {
-                $eligibleUsers = User::join('departments','users.department_id','=','departments.id')
-                    ->leftjoin('sections','users.section_id','=','sections.id')
-                    ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
-                    ->where('sections.id','=',$section_id)
-                    // Enforce scope region when available; otherwise use fault region
-                    ->where('users.region', '=', !empty($scopeRegion) ? $scopeRegion : $faultRegion)
-                    ->where(function($q) use ($isOffHours) {
-                        if ($isOffHours) {
-                            $q->whereIn('user_statuses.status_name', ['Standby','Assignable']);
-                        } else {
-                            $q->where('user_statuses.status_name', '=', 'Assignable');
-                        }
-                    })
-                    ->whereNotIn('user_statuses.status_name', $considerLeave ? ['Unassignable','On Leave'] : ['Unassignable'])
-                    ->when($isOffHours, function($q) use ($isWeekendOff) {
-                        if ($isWeekendOff) {
-                            $q->where('users.weekend_standby', '=', true);
-                        } else {
-                            $q->where('users.weekly_standby', '=', true);
-                        }
-                    })
-                    ->pluck('users.id')
+            // 2. Filter by Zone if enabled
+            $appliedZoneFilter = false;
+            if ($considerZones && $zoneId && !empty($eligibleUsers)) {
+                $zoneUserIds = DB::table('technician_zone')
+                    ->where('zone_id', $zoneId)
+                    ->whereIn('user_id', $eligibleUsers)
+                    ->pluck('user_id')
                     ->toArray();
 
-                if (empty($eligibleUsers)) {
-                    $eligibleUsers = $users;
+                if (!empty($zoneUserIds)) {
+                    $eligibleUsers = $zoneUserIds;
+                    $appliedZoneFilter = true;
                 }
             }
 
             if (empty($eligibleUsers)) {
                 Log::info('Auto-assign skipped for fault: no eligible technicians', [
-                    'fault_id' => $autoAssign,
-                    'section_id' => (int)$section_id,
-                    'scope_region' => $scopeRegion,
-                    'consider_region' => $considerRegion,
-                    'off_hours' => $isOffHours,
-                    'weekend_off' => $isWeekendOff,
+                    'fault_id' => $faultId,
+                    'section_id' => $section_id,
+                    'zone_id' => $zoneId
                 ]);
                 continue;
             }
 
-            $idx = $lastAssignedUserIndex % count($eligibleUsers);
-            $userfaults[$autoAssign] = $eligibleUsers[$idx];
-
-            $user = $eligibleUsers[$idx];
-
-            $assign = Fault::find($autoAssign);
-            $req['assignedTo'] = $userfaults[$autoAssign];
-            $req['status_id'] = 3;
-            $assign ->update($req);
-            // Log transition to "Fault is under rectification" (status_id = 3)
-            FaultLifecycle::recordStatusChange($assign, 3, auth()->id());
-            // Record assignment window (standby determination and region from city if available)
-            $faultCity = \DB::table('cities')->where('id', $assign->city_id)->value('region');
-            FaultLifecycle::startAssignment($assign, $userfaults[$autoAssign], auth()->id(), FaultLifecycle::isOffHours(), $faultCity);
-
-            $lastAssignedUserIndex++;
-            if ($lastAssignedUserIndex >= $userslength) {
-                $lastAssignedUserIndex = 0;
+            // 3. Round Robin Selection
+            $rrKey = 'auto_assign_rr_' . $section_id;
+            if ($appliedZoneFilter) {
+                $rrKey .= '_zone_' . $zoneId;
+            } elseif ($faultRegion) {
+                // If we filtered by region but not zone, we should probably rotate per region to be fair
+                // But to stay consistent with Console Command, we can keep it simple or match the key structure.
+                // The Console Command uses global section RR unless zone is applied. 
+                // However, the previous controller code tried to use region in key.
+                // Let's stick to the improved logic: Section + (Optional Zone)
             }
+
+            $idx = Cache::get($rrKey, 0);
+            if ($idx >= count($eligibleUsers)) { $idx = 0; }
+            $selectedUserId = (int)$eligibleUsers[$idx];
+
+            // 4. Perform Assignment
+            $assign = Fault::find($faultId);
+            if ($assign) {
+                $assign->update([
+                    'assignedTo' => $selectedUserId,
+                    'status_id' => 3
+                ]);
+
+                FaultLifecycle::recordStatusChange($assign, 3, auth()->id());
+                FaultLifecycle::startAssignment($assign, $selectedUserId, auth()->id(), $isOffHours, $faultRegion);
+
+                Log::info("Controller AutoAssign Fault {$faultId}: ZoneID=" . ($zoneId ?? 'NULL') . 
+                          " Filtered=" . ($appliedZoneFilter ? 'YES' : 'NO') . 
+                          " Candidates=" . count($eligibleUsers) . 
+                          " SelectedUser=$selectedUserId");
+            }
+
+            // 5. Update RR Pointer
+            $idx++;
+            Cache::put($rrKey, $idx);
         }
-        // Store the updated last assigned user index in persistent storage
-        Cache::put($rrKey, $lastAssignedUserIndex);
     }
 
 
