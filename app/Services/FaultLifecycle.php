@@ -18,6 +18,7 @@ use App\Models\Link;
 use App\Models\Customer;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\SendInfobipTemplateMessage;
+use App\Models\FaultReferral;
 use Illuminate\Support\Facades\Mail;
 
 class FaultLifecycle
@@ -174,6 +175,11 @@ class FaultLifecycle
         return 11;
     }
 
+    public static function referredId(): int
+    {
+        return 7;
+    }
+
     protected static function notifyStatusChange(Fault $fault, int $toStatusId): void
     {
         $desc = Status::find($toStatusId)->description ?? 'Status changed';
@@ -216,7 +222,7 @@ class FaultLifecycle
             if ($sectionId > 0) {
                 $query->where('users.section_id', '=', $sectionId);
             }
-            if (in_array($sectionId, [2,3], true) && !empty($region)) {
+            if (in_array($sectionId, [2, 3], true) && !empty($region)) {
                 $query->where('users.region', '=', $region);
             }
 
@@ -255,7 +261,7 @@ class FaultLifecycle
             if ($sectionId > 0) {
                 $query->where('users.section_id', '=', $sectionId);
             }
-            if (in_array($sectionId, [2,3], true) && !empty($region)) {
+            if (in_array($sectionId, [2, 3], true) && !empty($region)) {
                 $query->where('users.region', '=', $region);
             }
             $recipients = $query->pluck('users.phonenumber')->all();
@@ -290,8 +296,13 @@ class FaultLifecycle
             self::sendClearedEmail($fault);
         }
 
+        if ($toStatusId === self::referredId()) {
+            self::sendReferralEmail($fault);
+        }
+
         // Escalations -> notify appropriate recipients
         if ($toStatusId === self::escalatedId()) {
+            self::sendEscalationEmail($fault, 'Chief Technician');
             $sectionId = (int) (FaultSection::where('fault_id', $fault->id)->value('section_id') ?? 0);
             $region = $fault->city_id ? (City::find($fault->city_id)->region ?? null) : null;
             $query = User::query()
@@ -301,7 +312,7 @@ class FaultLifecycle
             if ($sectionId > 0) {
                 $query->where('users.section_id', '=', $sectionId);
             }
-            if (in_array($sectionId, [2,3], true) && !empty($region)) {
+            if (in_array($sectionId, [2, 3], true) && !empty($region)) {
                 $query->where('users.region', '=', $region);
             }
             $recipients = $query->pluck('users.phonenumber')->all();
@@ -317,17 +328,14 @@ class FaultLifecycle
                 ]);
             }
         } elseif ($toStatusId === self::managerEscalatedId()) {
+            self::sendEscalationEmail($fault, 'Manager');
             $sectionId = (int) (FaultSection::where('fault_id', $fault->id)->value('section_id') ?? 0);
-            $region = $fault->city_id ? (City::find($fault->city_id)->region ?? null) : null;
             $query = User::query()
                 ->join('positions','users.position_id','=','positions.id')
                 ->whereIn('positions.position', ['Manager','Technical Manager'])
                 ->whereNotNull('users.phonenumber');
             if ($sectionId > 0) {
                 $query->where('users.section_id', '=', $sectionId);
-            }
-            if (in_array($sectionId, [2,3], true) && !empty($region)) {
-                $query->where('users.region', '=', $region);
             }
             $recipients = $query->pluck('users.phonenumber')->all();
             if (!empty($recipients)) {
@@ -512,6 +520,120 @@ class FaultLifecycle
             Log::info("Notify: Clearance email sent to Power Call Centre for fault {$fault->fault_ref_number}");
         } catch (\Exception $e) {
             Log::error("Notify: Error sending clearance email via SMTP: " . $e->getMessage());
+        }
+    }
+
+    protected static function sendReferralEmail(Fault $fault): void
+    {
+        $referral = FaultReferral::where('fault_id', $fault->id)
+            ->whereNull('completed_at')
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if (!$referral) {
+            Log::warning("Notify: No active referral found for fault {$fault->fault_ref_number}");
+            return;
+        }
+
+        $toSection = Section::find($referral->to_section_id);
+        $fromSection = Section::find($referral->from_section_id);
+        $referredBy = User::find($referral->referred_by);
+        $region = $fault->city_id ? (City::find($fault->city_id)->region ?? null) : null;
+
+        $query = User::query()
+            ->join('positions','users.position_id','=','positions.id')
+            ->where('users.section_id', $referral->to_section_id)
+            ->whereIn('positions.position', ['Chief Technician', 'Manager', 'Technical Manager'])
+            ->whereNotNull('users.email');
+
+        if (in_array((int)$referral->to_section_id, [2, 3], true) && !empty($region)) {
+            $query->where('users.region', '=', $region);
+        }
+
+        $recipients = $query->pluck('users.email')->all();
+
+        if (empty($recipients)) {
+            Log::warning("Notify: No email recipients found for referral to section {$referral->to_section_id}");
+            return;
+        }
+
+        $customerModel = $fault->customer_id ? Customer::find($fault->customer_id) : null;
+        $customerName = $customerModel ? ($customerModel->customer ?? 'N/A') : 'N/A';
+
+        $data = [
+            'fault_ref' => $fault->fault_ref_number,
+            'customer' => $customerName,
+            'service_type' => $fault->serviceType,
+            'from_section' => $fromSection->section ?? 'Unknown',
+            'to_section' => $toSection->section ?? 'Unknown',
+            'referred_by' => $referredBy->name ?? 'Unknown',
+            'referred_at' => $referral->started_at ?? now()->toDateTimeString(),
+            'remark' => $referral->work_note,
+        ];
+
+        $subject = "Fault Referred to Your Section: {$fault->fault_ref_number}";
+
+        try {
+            Mail::send('emails.fault_referred', $data, function ($message) use ($recipients, $subject) {
+                $message->to($recipients)
+                        ->subject($subject);
+            });
+            Log::info("Notify: Referral email sent to section {$referral->to_section_id} for fault {$fault->fault_ref_number}");
+        } catch (\Exception $e) {
+            Log::error("Notify: Error sending referral email: " . $e->getMessage());
+        }
+    }
+
+    protected static function sendEscalationEmail(Fault $fault, string $type): void
+    {
+        $sectionId = (int) (FaultSection::where('fault_id', $fault->id)->value('section_id') ?? 0);
+        $region = $fault->city_id ? (City::find($fault->city_id)->region ?? null) : null;
+
+        $query = User::query()
+            ->join('positions','users.position_id','=','positions.id')
+            ->whereNotNull('users.email');
+
+        if ($type === 'Chief Technician') {
+            $query->where('positions.position', '=', 'Chief Technician');
+            if (in_array($sectionId, [2, 3], true) && !empty($region)) {
+                $query->where('users.region', '=', $region);
+            }
+        } else {
+            $query->whereIn('positions.position', ['Manager', 'Technical Manager']);
+        }
+
+        if ($sectionId > 0) {
+            $query->where('users.section_id', '=', $sectionId);
+        }
+
+        $recipients = $query->pluck('users.email')->all();
+
+        if (empty($recipients)) {
+            Log::warning("Notify: No email recipients found for {$type} escalation of fault {$fault->fault_ref_number}");
+            return;
+        }
+
+        $customerModel = $fault->customer_id ? Customer::find($fault->customer_id) : null;
+        $customerName = $customerModel ? ($customerModel->customer ?? 'N/A') : 'N/A';
+
+        $data = [
+            'fault_ref' => $fault->fault_ref_number,
+            'customer' => $customerName,
+            'service_type' => $fault->serviceType,
+            'escalation_type' => $type,
+            'escalated_at' => now()->toDateTimeString(),
+        ];
+
+        $subject = "Fault Escalated: {$fault->fault_ref_number} ({$type})";
+
+        try {
+            Mail::send('emails.fault_escalated', $data, function ($message) use ($recipients, $subject) {
+                $message->to($recipients)
+                        ->subject($subject);
+            });
+            Log::info("Notify: Escalation email sent to {$type}s for fault {$fault->fault_ref_number}");
+        } catch (\Exception $e) {
+            Log::error("Notify: Error sending escalation email: " . $e->getMessage());
         }
     }
 }
