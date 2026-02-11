@@ -18,6 +18,7 @@ use App\Models\Link;
 use App\Models\Customer;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\SendInfobipTemplateMessage;
+use Illuminate\Support\Facades\Mail;
 
 class FaultLifecycle
 {
@@ -495,28 +496,22 @@ class FaultLifecycle
         $customerName = $customerModel ? ($customerModel->customer ?? 'N/A') : 'N/A';
         $rfo = $fault->confirmedrfo ? $fault->confirmedrfo->RFO : ($fault->suspectedrfo ? $fault->suspectedrfo->RFO : 'N/A');
         
-        $body = "
-            <h2>Fault Clearance Notification</h2>
-            <p>The following fault has been cleared by NOC:</p>
-            <ul>
-                <li><strong>Fault Reference:</strong> {$fault->fault_ref_number}</li>
-                <li><strong>Customer:</strong> {$customerName}</li>
-                <li><strong>Service Type:</strong> {$fault->serviceType}</li>
-                <li><strong>RFO (Reason For Outage):</strong> {$rfo}</li>
-                <li><strong>Cleared At:</strong> " . now()->toDateTimeString() . "</li>
-            </ul>
-            <p>This is an automated notification from Impazamon.</p>
-        ";
+        $data = [
+            'fault_ref' => $fault->fault_ref_number,
+            'customer' => $customerName,
+            'service_type' => $fault->serviceType,
+            'rfo' => $rfo,
+            'cleared_at' => now()->toDateTimeString(),
+        ];
 
         try {
-            $ok = app(EwsService::class)->sendEmail($to, $subject, $body);
-            if ($ok) {
-                Log::info("Notify: Clearance email sent to Power Call Centre for fault {$fault->fault_ref_number}");
-            } else {
-                Log::error("Notify: Failed to send clearance email for fault {$fault->fault_ref_number}");
-            }
+            Mail::send('emails.fault_cleared', $data, function ($message) use ($to, $subject) {
+                $message->to($to)
+                        ->subject($subject);
+            });
+            Log::info("Notify: Clearance email sent to Power Call Centre for fault {$fault->fault_ref_number}");
         } catch (\Exception $e) {
-            Log::error("Notify: Error sending clearance email: " . $e->getMessage());
+            Log::error("Notify: Error sending clearance email via SMTP: " . $e->getMessage());
         }
     }
 }
