@@ -489,7 +489,7 @@ class FaultLifecycle
 
     protected static function sendClearedEmail(Fault $fault): void
     {
-        $to = 'fjatakalula@powertel.co.zw';
+        $to = 'powercallcentre@powertel.co.zw';
         $subject = "Fault Cleared: {$fault->fault_ref_number}";
         
         $customerModel = $fault->customer_id ? Customer::find($fault->customer_id) : null;
