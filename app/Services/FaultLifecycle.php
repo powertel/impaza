@@ -284,6 +284,11 @@ class FaultLifecycle
         // Notify customer for key statuses (logged, assessed, resolved)
         self::notifyCustomerStatus($fault, $toStatusId, $customerText);
 
+        // Cleared -> notify Power Call Centre
+        if ($toStatusId === self::nocClearedId()) {
+            self::sendClearedEmail($fault);
+        }
+
         // Escalations -> notify appropriate recipients
         if ($toStatusId === self::escalatedId()) {
             $sectionId = (int) (FaultSection::where('fault_id', $fault->id)->value('section_id') ?? 0);
@@ -479,5 +484,39 @@ class FaultLifecycle
             return "Update: Fault {$fault->fault_ref_number} under rectification.\n{$summary}";
         }
         /* return "Fault {$fault->fault_ref_number} status updated.\n{$summary}"; */
+    }
+
+    protected static function sendClearedEmail(Fault $fault): void
+    {
+        $to = 'fjatakalula@powertel.co.zw';
+        $subject = "Fault Cleared: {$fault->fault_ref_number}";
+        
+        $customerModel = $fault->customer_id ? Customer::find($fault->customer_id) : null;
+        $customerName = $customerModel ? ($customerModel->customer ?? 'N/A') : 'N/A';
+        $rfo = $fault->confirmedrfo ? $fault->confirmedrfo->RFO : ($fault->suspectedrfo ? $fault->suspectedrfo->RFO : 'N/A');
+        
+        $body = "
+            <h2>Fault Clearance Notification</h2>
+            <p>The following fault has been cleared by NOC:</p>
+            <ul>
+                <li><strong>Fault Reference:</strong> {$fault->fault_ref_number}</li>
+                <li><strong>Customer:</strong> {$customerName}</li>
+                <li><strong>Service Type:</strong> {$fault->serviceType}</li>
+                <li><strong>RFO (Reason For Outage):</strong> {$rfo}</li>
+                <li><strong>Cleared At:</strong> " . now()->toDateTimeString() . "</li>
+            </ul>
+            <p>This is an automated notification from Impazamon.</p>
+        ";
+
+        try {
+            $ok = app(EwsService::class)->sendEmail($to, $subject, $body);
+            if ($ok) {
+                Log::info("Notify: Clearance email sent to Power Call Centre for fault {$fault->fault_ref_number}");
+            } else {
+                Log::error("Notify: Failed to send clearance email for fault {$fault->fault_ref_number}");
+            }
+        } catch (\Exception $e) {
+            Log::error("Notify: Error sending clearance email: " . $e->getMessage());
+        }
     }
 }
