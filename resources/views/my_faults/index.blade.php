@@ -65,20 +65,23 @@ My Faults
                             <span class="badge rounded-pill bg-light text-danger age-ticker fs-6" data-started-at="{{ $fault->stage_started_at ?? '' }}"></span>
                         </td>
                         <td>
-
-                        @can('noc-clear-faults-clear')
-                            <button class="btn btn-sm btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#nocClearModal-{{ $fault->id }}">
-                                <i class="fas fa-save me-1"></i>Clear
-                            </button>
-                        @endcan
-                        @can('chief-tech-clear-faults-clear')
-                            <button class="btn btn-sm btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#chiefTechClearModal-{{ $fault->id }}">
-                                <i class="fas fa-save me-1"></i>Clear
-                            </button>
-                        @endcan
-
-                        <!--<a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>-->
                         @if ($fault->description==='Fault is under rectification')
+                            @can('noc-clear-faults-clear')
+                                <button class="btn btn-sm btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#nocClearModal-{{ $fault->id }}">
+                                    <i class="fas fa-save me-1"></i>Clear
+                                </button>
+                                <button class="btn btn-sm btn-outline-success"  data-bs-toggle="modal" data-bs-target="#inProgressModal-{{ $fault->id }}">
+                                    <i class="fas fa-save me-1"></i>In Progress
+                                </button>
+                            @endcan
+                            <!-- @can('chief-tech-clear-faults-clear')
+                                <button class="btn btn-sm btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#chiefTechClearModal-{{ $fault->id }}">
+                                    <i class="fas fa-save me-1"></i>Clear
+                                </button>
+                            @endcan -->
+
+                            <!--<a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>-->
+                            
 
                             @can('rectify-fault')
                                 <button class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#rectifyEditModal-{{ $fault->id }}">
@@ -115,6 +118,7 @@ My Faults
                 </tbody>
             </table>
             @foreach ($faults as $fault)
+                @include('my_faults.in_progress_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
                 @include('rectification.noc_clear_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
                 @include('clear_faults.chief_tech_clear_modal', [ 'fault' => $fault ])
                 @include('rectification.edit_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()), 'confirmedRFO' => ($confirmedRFO ?? collect()) ])
