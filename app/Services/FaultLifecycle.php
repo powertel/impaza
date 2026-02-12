@@ -214,6 +214,8 @@ class FaultLifecycle
         if ($toStatusId === 2) {
             $sectionId = (int) (FaultSection::where('fault_id', $fault->id)->value('section_id') ?? 0);
             $region = $fault->city_id ? (City::find($fault->city_id)->region ?? null) : null;
+            
+            // Query for recipients: Chief Technicians in the section/region
             $query = User::query()
                 ->join('positions','users.position_id','=','positions.id')
                 ->where('positions.position', '=', 'Chief Technician')
@@ -227,6 +229,19 @@ class FaultLifecycle
             }
 
             $recipients = $query->pluck('users.phonenumber')->all();
+
+            // Fallback: if no regional Chief Technician found, try all in that section
+            if (empty($recipients) && !empty($region)) {
+                Log::info("Notify: No regional Chief Technician found for SMS assessed alert to {$region}, searching all in section {$sectionId}");
+                $recipients = User::query()
+                    ->join('positions','users.position_id','=','positions.id')
+                    ->where('positions.position', '=', 'Chief Technician')
+                    ->where('users.section_id', '=', $sectionId)
+                    ->whereNotNull('users.phonenumber')
+                    ->pluck('users.phonenumber')
+                    ->all();
+            }
+
             if (empty($recipients)) {
                 $fallback = env('POWERTEL_SMS_CT_RECIPIENTS');
                 $recipients = array_values(array_filter(array_map('trim', explode(',', (string)$fallback)), fn($x) => $x !== ''));
@@ -256,8 +271,14 @@ class FaultLifecycle
             $region = $fault->city_id ? (City::find($fault->city_id)->region ?? null) : null;
             $query = User::query()
                 ->join('positions','users.position_id','=','positions.id')
-                ->where('positions.position', '=', 'Chief Technician')
                 ->whereNotNull('users.phonenumber');
+
+            if ($sectionId === 1) {
+                $query->where('positions.position', '=', 'Network Controller');
+            } else {
+                $query->where('positions.position', '=', 'Chief Technician');
+            }
+
             if ($sectionId > 0) {
                 $query->where('users.section_id', '=', $sectionId);
             }
@@ -265,6 +286,23 @@ class FaultLifecycle
                 $query->where('users.region', '=', $region);
             }
             $recipients = $query->pluck('users.phonenumber')->all();
+
+            // If no regional recipient found, try all in that section before .env fallback
+            if (empty($recipients) && !empty($region)) {
+                Log::info("Notify: No regional recipient found for SMS rectified alert to {$region}, searching all in section {$sectionId}");
+                $query = User::query()
+                    ->join('positions','users.position_id','=','positions.id')
+                    ->where('users.section_id', '=', $sectionId)
+                    ->whereNotNull('users.phonenumber');
+                
+                if ($sectionId === 1) {
+                    $query->where('positions.position', '=', 'Network Controller');
+                } else {
+                    $query->where('positions.position', '=', 'Chief Technician');
+                }
+                $recipients = $query->pluck('users.phonenumber')->all();
+            }
+
             if (empty($recipients)) {
                 $fallback = env('POWERTEL_SMS_CT_RECIPIENTS');
                 $recipients = array_values(array_filter(array_map('trim', explode(',', (string)$fallback)), fn($x) => $x !== ''));
@@ -307,8 +345,14 @@ class FaultLifecycle
             $region = $fault->city_id ? (City::find($fault->city_id)->region ?? null) : null;
             $query = User::query()
                 ->join('positions','users.position_id','=','positions.id')
-                ->where('positions.position', '=', 'Chief Technician')
                 ->whereNotNull('users.phonenumber');
+
+            if ($sectionId === 1) {
+                $query->where('positions.position', '=', 'Network Controller');
+            } else {
+                $query->where('positions.position', '=', 'Chief Technician');
+            }
+
             if ($sectionId > 0) {
                 $query->where('users.section_id', '=', $sectionId);
             }
@@ -316,6 +360,50 @@ class FaultLifecycle
                 $query->where('users.region', '=', $region);
             }
             $recipients = $query->pluck('users.phonenumber')->all();
+
+            // Fallback: if no regional recipient found, try all in section
+            if (empty($recipients) && !empty($region)) {
+                Log::info("Notify: No regional recipient found for SMS escalation to {$region}, searching all in section {$sectionId}");
+                $query = User::query()
+                    ->join('positions','users.position_id','=','positions.id')
+                    ->where('users.section_id', '=', $sectionId)
+                    ->whereNotNull('users.phonenumber');
+                
+                if ($sectionId === 1) {
+                    $query->where('positions.position', '=', 'Network Controller');
+                } else {
+                    $query->where('positions.position', '=', 'Chief Technician');
+                }
+                $recipients = $query->pluck('users.phonenumber')->all();
+            }
+
+            // Final fallback for Chief Technician SMS: search across all technical sections (2, 3)
+            if (empty($recipients)) {
+                Log::info("Notify: No Chief Technician found for SMS escalation in section {$sectionId}, searching across technical sections (NOC/Projects)");
+                $query = User::query()
+                    ->join('positions','users.position_id','=','positions.id')
+                    ->where('positions.position', '=', 'Chief Technician')
+                    ->whereIn('users.section_id', [2, 3])
+                    ->whereNotNull('users.phonenumber');
+                
+                if (!empty($region)) {
+                    $query->where('users.region', '=', $region);
+                }
+                
+                $recipients = $query->pluck('users.phonenumber')->all();
+
+                // If still empty and we used region, try without region
+                if (empty($recipients) && !empty($region)) {
+                    $recipients = User::query()
+                        ->join('positions','users.position_id','=','positions.id')
+                        ->where('positions.position', '=', 'Chief Technician')
+                        ->whereIn('users.section_id', [2, 3])
+                        ->whereNotNull('users.phonenumber')
+                        ->pluck('users.phonenumber')
+                        ->all();
+                }
+            }
+
             if (!empty($recipients)) {
                 $text = "Escalation: Fault {$fault->fault_ref_number} has been escalated by technician for review.";
                 $ok = app(SmsService::class)->send($recipients, $text);
@@ -543,8 +631,13 @@ class FaultLifecycle
         $query = User::query()
             ->join('positions','users.position_id','=','positions.id')
             ->where('users.section_id', $referral->to_section_id)
-            ->whereIn('positions.position', ['Chief Technician', 'Manager', 'Technical Manager'])
             ->whereNotNull('users.email');
+
+        if ((int)$referral->to_section_id === 1) {
+            $query->where('positions.position', '=', 'Network Controller');
+        } else {
+            $query->whereIn('positions.position', ['Chief Technician', 'Manager', 'Technical Manager']);
+        }
 
         if (in_array((int)$referral->to_section_id, [2, 3], true) && !empty($region)) {
             $query->where('users.region', '=', $region);
@@ -552,8 +645,24 @@ class FaultLifecycle
 
         $recipients = $query->pluck('users.email')->all();
 
+        // Fallback: if no regional supervisors found, try all supervisors in that section
+        if (empty($recipients) && !empty($region)) {
+            Log::info("Notify: No regional supervisors found for referral to {$region}, searching all in section {$referral->to_section_id}");
+            $query = User::query()
+                ->join('positions','users.position_id','=','positions.id')
+                ->where('users.section_id', $referral->to_section_id)
+                ->whereNotNull('users.email');
+
+            if ((int)$referral->to_section_id === 1) {
+                $query->where('positions.position', '=', 'Network Controller');
+            } else {
+                $query->whereIn('positions.position', ['Chief Technician', 'Manager', 'Technical Manager']);
+            }
+            $recipients = $query->pluck('users.email')->all();
+        }
+
         if (empty($recipients)) {
-            Log::warning("Notify: No email recipients found for referral to section {$referral->to_section_id}");
+            Log::warning("Notify: No email recipients found for referral to section {$referral->to_section_id}. Region: " . ($region ?? 'N/A'));
             return;
         }
 
@@ -594,7 +703,12 @@ class FaultLifecycle
             ->whereNotNull('users.email');
 
         if ($type === 'Chief Technician') {
-            $query->where('positions.position', '=', 'Chief Technician');
+            if ($sectionId === 1) {
+                $query->where('positions.position', '=', 'Network Controller');
+            } else {
+                $query->where('positions.position', '=', 'Chief Technician');
+            }
+            
             if (in_array($sectionId, [2, 3], true) && !empty($region)) {
                 $query->where('users.region', '=', $region);
             }
@@ -608,8 +722,46 @@ class FaultLifecycle
 
         $recipients = $query->pluck('users.email')->all();
 
+        // If no recipients found for Chief Technician with region, try without region
+        if (empty($recipients) && $type === 'Chief Technician' && in_array($sectionId, [2, 3], true) && !empty($region)) {
+            Log::info("Notify: No regional Chief Technician found for {$region}, searching all Chief Technicians in section {$sectionId}");
+            $query = User::query()
+                ->join('positions','users.position_id','=','positions.id')
+                ->where('positions.position', '=', 'Chief Technician')
+                ->where('users.section_id', '=', $sectionId)
+                ->whereNotNull('users.email');
+            $recipients = $query->pluck('users.email')->all();
+        }
+
+        // Final fallback for Chief Technician: search across all technical sections (2, 3) if still empty
+        if (empty($recipients) && $type === 'Chief Technician') {
+            Log::info("Notify: No Chief Technician found for section {$sectionId}, searching across technical sections (NOC/Projects)");
+            $query = User::query()
+                ->join('positions','users.position_id','=','positions.id')
+                ->where('positions.position', '=', 'Chief Technician')
+                ->whereIn('users.section_id', [2, 3])
+                ->whereNotNull('users.email');
+            
+            if (!empty($region)) {
+                $query->where('users.region', '=', $region);
+            }
+            
+            $recipients = $query->pluck('users.email')->all();
+            
+            // If still empty and we used region, try without region
+            if (empty($recipients) && !empty($region)) {
+                $recipients = User::query()
+                    ->join('positions','users.position_id','=','positions.id')
+                    ->where('positions.position', '=', 'Chief Technician')
+                    ->whereIn('users.section_id', [2, 3])
+                    ->whereNotNull('users.email')
+                    ->pluck('users.email')
+                    ->all();
+            }
+        }
+
         if (empty($recipients)) {
-            Log::warning("Notify: No email recipients found for {$type} escalation of fault {$fault->fault_ref_number}");
+            Log::warning("Notify: No email recipients found for {$type} escalation of fault {$fault->fault_ref_number}. Section: {$sectionId}, Region: " . ($region ?? 'N/A'));
             return;
         }
 
