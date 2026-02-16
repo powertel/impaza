@@ -107,6 +107,17 @@
                                     <textarea name="remark" required class="form-control @error('remark') is-invalid @enderror" placeholder="Enter any additional comments" rows="3">{{ old('remark') }}</textarea>
                                     <input type="hidden" name="activity" value="ON LOGGING">
                                 </div>
+                                <div class="col-md-12 mb-2">
+                                    <label for="attachment" class="form-label">Image attachment (optional)</label>
+                                    <input type="file" class="form-control @error('attachment') is-invalid @enderror" id="attachment" name="attachment" accept="image/*">
+                                    @error('attachment')
+                                        <div class="invalid-feedback d-block"><strong>{{ $message }}</strong></div>
+                                    @enderror
+                                    <div class="form-text">You can also paste an image into the remarks field.</div>
+                                    <div class="mt-2" id="attachmentPreviewContainer" style="display:none;">
+                                        <img id="attachmentPreview" src="" class="img-thumbnail" style="max-height:200px;">
+                                    </div>
+                                </div>
                                 <div class="col-md-12 d-flex justify-content-end">
                                     <div class="form-check mt-2">
                                         <input class="form-check-input me-1" type="checkbox" id="resolvedOnCall" name="resolved_on_call" value="1" {{ old('resolved_on_call') ? 'checked' : '' }}>
