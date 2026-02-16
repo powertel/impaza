@@ -278,56 +278,123 @@ document.addEventListener('DOMContentLoaded', function(){
   var attachmentInput = document.getElementById('attachment');
   var previewImg = document.getElementById('attachmentPreview');
   var previewContainer = document.getElementById('attachmentPreviewContainer');
-  if (!remark || !attachmentInput) return;
-  function setFile(file){
-    if (!file) return;
-    if (window.DataTransfer) {
-      var dt = new DataTransfer();
-      dt.items.add(file);
-      attachmentInput.files = dt.files;
-    }
-    if (file.type && file.type.indexOf('image') === 0 && previewImg && previewContainer) {
-      var reader = new FileReader();
-      reader.onload = function(e){
-        previewImg.src = e.target.result;
-        previewContainer.style.display = 'block';
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-  remark.addEventListener('paste', function(e){
-    if (!e.clipboardData || !e.clipboardData.items) return;
-    var items = e.clipboardData.items;
-    for (var i = 0; i < items.length; i++) {
-      var item = items[i];
-      if (item.kind === 'file') {
-        var file = item.getAsFile();
-        if (file) {
-          setFile(file);
-          break;
-        }
-      }
-    }
-  });
-  attachmentInput.addEventListener('change', function(){
-    var file = this.files && this.files[0] ? this.files[0] : null;
-    if (!file) {
-      if (previewContainer) previewContainer.style.display = 'none';
-      if (previewImg) previewImg.src = '';
-      return;
-    }
-    setFile(file);
-  });
-  $('#createFaultModal').on('hidden.bs.modal', function(){
-    if (attachmentInput) {
-      attachmentInput.value = '';
+  if (remark && attachmentInput) {
+    function setFile(file){
+      if (!file) return;
       if (window.DataTransfer) {
         var dt = new DataTransfer();
+        dt.items.add(file);
         attachmentInput.files = dt.files;
       }
+      if (file.type && file.type.indexOf('image') === 0 && previewImg && previewContainer) {
+        var reader = new FileReader();
+        reader.onload = function(e){
+          previewImg.src = e.target.result;
+          previewContainer.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
     }
-    if (previewContainer) previewContainer.style.display = 'none';
-    if (previewImg) previewImg.src = '';
+    remark.addEventListener('paste', function(e){
+      if (!e.clipboardData || !e.clipboardData.items) return;
+      var items = e.clipboardData.items;
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        if (item.kind === 'file') {
+          var file = item.getAsFile();
+          if (file) {
+            setFile(file);
+            break;
+          }
+        }
+      }
+    });
+    attachmentInput.addEventListener('change', function(){
+      var file = this.files && this.files[0] ? this.files[0] : null;
+      if (!file) {
+        if (previewContainer) previewContainer.style.display = 'none';
+        if (previewImg) previewImg.src = '';
+        return;
+      }
+      setFile(file);
+    });
+    $('#createFaultModal').on('hidden.bs.modal', function(){
+      if (attachmentInput) {
+        attachmentInput.value = '';
+        if (window.DataTransfer) {
+          var dt = new DataTransfer();
+          attachmentInput.files = dt.files;
+        }
+      }
+      if (previewContainer) previewContainer.style.display = 'none';
+      if (previewImg) previewImg.src = '';
+    });
+  }
+  function setEditFile(faultId, file){
+    if (!file) return;
+    var input = document.querySelector('.edit-attachment[data-fault-id="'+faultId+'"]');
+    var preview = document.querySelector('.edit-attachment-preview[data-fault-id="'+faultId+'"]');
+    var container = document.querySelector('.edit-attachment-preview-container[data-fault-id="'+faultId+'"]');
+    if (input && window.DataTransfer) {
+      var dt2 = new DataTransfer();
+      dt2.items.add(file);
+      input.files = dt2.files;
+    }
+    if (file.type && file.type.indexOf('image') === 0 && preview && container) {
+      var reader2 = new FileReader();
+      reader2.onload = function(e){
+        preview.src = e.target.result;
+        container.style.display = 'block';
+      };
+      reader2.readAsDataURL(file);
+    }
+  }
+  document.querySelectorAll('.edit-remark').forEach(function(el){
+    el.addEventListener('paste', function(e){
+      if (!e.clipboardData || !e.clipboardData.items) return;
+      var items = e.clipboardData.items;
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        if (item.kind === 'file') {
+          var file = item.getAsFile();
+          if (file) {
+            var fid = el.getAttribute('data-fault-id');
+            setEditFile(fid, file);
+            break;
+          }
+        }
+      }
+    });
+  });
+  document.querySelectorAll('.edit-attachment').forEach(function(el){
+    el.addEventListener('change', function(){
+      var fid = el.getAttribute('data-fault-id');
+      var file = this.files && this.files[0] ? this.files[0] : null;
+      if (!file) {
+        var container = document.querySelector('.edit-attachment-preview-container[data-fault-id="'+fid+'"]');
+        var preview = document.querySelector('.edit-attachment-preview[data-fault-id="'+fid+'"]');
+        if (container) container.style.display = 'none';
+        if (preview) preview.src = '';
+        return;
+      }
+      setEditFile(fid, file);
+    });
+  });
+  $(document).on('hidden.bs.modal', '.modal[id^="editFaultModal-"]', function(){
+    var $modal = $(this);
+    $modal.find('.edit-attachment').each(function(){
+      this.value = '';
+      if (window.DataTransfer) {
+        var dt3 = new DataTransfer();
+        this.files = dt3.files;
+      }
+    });
+    $modal.find('.edit-attachment-preview-container').each(function(){
+      this.style.display = 'none';
+    });
+    $modal.find('.edit-attachment-preview').each(function(){
+      this.src = '';
+    });
   });
 });
 </script>

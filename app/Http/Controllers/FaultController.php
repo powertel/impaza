@@ -695,6 +695,10 @@ class FaultController extends Controller
 
         $data = $request->all();
 
+        $request->validate([
+            'attachment' => 'nullable|mimes:png,jpg,jpeg|max:2048'
+        ]);
+
         // If customer changed, derive Account Manager from the selected customer
         if ($request->filled('customer_id')) {
             $customer = Customer::find($request->input('customer_id'));
@@ -743,15 +747,19 @@ class FaultController extends Controller
              FaultLifecycle::recordStatusChange($fault, $nocClearedId, $request->user()->id);
         }
 
-        // Handle Remark Update
-        if ($request->filled('remark')) {
+        if ($request->filled('remark') || $request->hasFile('attachment')) {
              $remarkActivity = DB::table('remark_activities')->where('activity','=',$request->input('activity', 'ON EDIT'))->first();
              $actId = $remarkActivity ? $remarkActivity->id : 1;
+             $path = null;
+             if ($request->hasFile('attachment')) {
+                 $path = $request->file('attachment')->storePublicly('attachments', 'public');
+             }
              Remark::create([
                 'fault_id'=> $fault->id,
                 'user_id' => $request->user()->id,
                 'remark' => $request->input('remark'),
                 'remarkActivity_id' => $actId,
+                'file_path' => $path,
              ]);
         }
 

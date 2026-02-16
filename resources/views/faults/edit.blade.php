@@ -9,7 +9,7 @@
                 <button type="button" class="btn-close btn-close-dark" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="UF-edit-{{ $fault->id }}" action="{{ route('faults.update', $fault->id ) }}" method="POST">
+                <form id="UF-edit-{{ $fault->id }}" action="{{ route('faults.update', $fault->id ) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     <div class="card border-0 shadow-sm mb-3">
@@ -174,8 +174,19 @@
                             <div class="row g-3">
                                 <div class="col-md-12 mb-2">
                                     <label for="remark-edit-{{ $fault->id }}" class="form-label">Remarks (Issue, port and Switch)</label>
-                                    <textarea name="remark" required class="form-control @error('remark') is-invalid @enderror" placeholder="Enter any additional comments" rows="3">{{ $fault->remark ?? old('remark') }}</textarea>
+                                    <textarea name="remark" required class="form-control @error('remark') is-invalid @enderror edit-remark" data-fault-id="{{ $fault->id }}" placeholder="Enter any additional comments" rows="3">{{ $fault->remark ?? old('remark') }}</textarea>
                                     <input type="hidden" name="activity" value="ON EDIT">
+                                </div>
+                                <div class="col-md-12 mb-2">
+                                    <label for="attachment-edit-{{ $fault->id }}" class="form-label">Image attachment (optional)</label>
+                                    <input type="file" class="form-control @error('attachment') is-invalid @enderror edit-attachment" id="attachment-edit-{{ $fault->id }}" name="attachment" accept="image/*" data-fault-id="{{ $fault->id }}">
+                                    @error('attachment')
+                                        <div class="invalid-feedback d-block"><strong>{{ $message }}</strong></div>
+                                    @enderror
+                                    <div class="form-text">You can also paste an image into the remarks field.</div>
+                                    <div class="mt-2 edit-attachment-preview-container" data-fault-id="{{ $fault->id }}" style="display:none;">
+                                        <img class="img-thumbnail edit-attachment-preview" data-fault-id="{{ $fault->id }}" style="max-height:200px;">
+                                    </div>
                                 </div>
                                 <div class="col-md-12 d-flex justify-content-end">
                                     <div class="form-check mt-2">
