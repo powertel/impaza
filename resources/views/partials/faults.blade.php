@@ -269,6 +269,65 @@ $(document).off('shown.bs.modal', '.modal[id^="editFaultModal-"]').on('shown.bs.
     });
   }
 
-  // POP options will be populated by the suburb change handler triggered above
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  var remark = document.querySelector('#createFaultModal textarea[name="remark"]');
+  var attachmentInput = document.getElementById('attachment');
+  var previewImg = document.getElementById('attachmentPreview');
+  var previewContainer = document.getElementById('attachmentPreviewContainer');
+  if (!remark || !attachmentInput) return;
+  function setFile(file){
+    if (!file) return;
+    if (window.DataTransfer) {
+      var dt = new DataTransfer();
+      dt.items.add(file);
+      attachmentInput.files = dt.files;
+    }
+    if (file.type && file.type.indexOf('image') === 0 && previewImg && previewContainer) {
+      var reader = new FileReader();
+      reader.onload = function(e){
+        previewImg.src = e.target.result;
+        previewContainer.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+  remark.addEventListener('paste', function(e){
+    if (!e.clipboardData || !e.clipboardData.items) return;
+    var items = e.clipboardData.items;
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      if (item.kind === 'file') {
+        var file = item.getAsFile();
+        if (file) {
+          setFile(file);
+          break;
+        }
+      }
+    }
+  });
+  attachmentInput.addEventListener('change', function(){
+    var file = this.files && this.files[0] ? this.files[0] : null;
+    if (!file) {
+      if (previewContainer) previewContainer.style.display = 'none';
+      if (previewImg) previewImg.src = '';
+      return;
+    }
+    setFile(file);
+  });
+  $('#createFaultModal').on('hidden.bs.modal', function(){
+    if (attachmentInput) {
+      attachmentInput.value = '';
+      if (window.DataTransfer) {
+        var dt = new DataTransfer();
+        attachmentInput.files = dt.files;
+      }
+    }
+    if (previewContainer) previewContainer.style.display = 'none';
+    if (previewImg) previewImg.src = '';
+  });
 });
 </script>
