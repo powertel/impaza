@@ -119,7 +119,7 @@ Dashboard
           <div class="cc-kpi-sub">Current overview</div>
         </div>
       </div>
-      @can('dashboard-open-faults')
+      
       <div class="col-xxl-3 col-lg-3 col-md-3 col-sm-6 col-6">
         <div class="cc-kpi cc-kpi--slate cc-kpi--compact h-100 zoom-card">
           <div class="cc-kpi-head">
@@ -130,7 +130,7 @@ Dashboard
           <div class="cc-kpi-sub">Current overview</div>
         </div>
       </div>
-      @endcan
+     
     </div>
   </div>
 
