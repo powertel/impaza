@@ -50,6 +50,33 @@
                                 @endforeach
                             </select>
                         </div>
+                        <div class="cc-field">
+                            <label class="form-label"><i class="far fa-clock me-1"></i>Quarter</label>
+                            <select name="quarter" class="form-select form-select-sm">
+                                <option value="" {{ empty($selectedQuarter ?? '') ? 'selected' : '' }}>All Quarters</option>
+                                <option value="1" {{ ($selectedQuarter ?? null) == 1 ? 'selected' : '' }}>Q1</option>
+                                <option value="2" {{ ($selectedQuarter ?? null) == 2 ? 'selected' : '' }}>Q2</option>
+                                <option value="3" {{ ($selectedQuarter ?? null) == 3 ? 'selected' : '' }}>Q3</option>
+                                <option value="4" {{ ($selectedQuarter ?? null) == 4 ? 'selected' : '' }}>Q4</option>
+                            </select>
+                        </div>
+                        <div class="cc-field">
+                            <label class="form-label"><i class="fas fa-map-marker-alt me-1"></i>Region</label>
+                            <select name="region" class="form-select form-select-sm">
+                                <option value="" {{ empty($selectedRegion ?? '') ? 'selected' : '' }}>All Regions</option>
+                                @foreach(($availableRegions ?? []) as $r)
+                                    <option value="{{ $r }}" {{ (($selectedRegion ?? '') === $r) ? 'selected' : '' }}>{{ $r }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="cc-field">
+                            <label class="form-label"><i class="far fa-play-circle me-1"></i>Start Date</label>
+                            <input type="date" name="start_date" class="form-control form-control-sm" value="{{ $startDate ?? request('start_date') }}">
+                        </div>
+                        <div class="cc-field">
+                            <label class="form-label"><i class="far fa-stop-circle me-1"></i>End Date</label>
+                            <input type="date" name="end_date" class="form-control form-control-sm" value="{{ $endDate ?? request('end_date') }}">
+                        </div>
                         <div class="cc-filter-actions ms-auto">
                             <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4">
                                 <i class="fas fa-filter me-1"></i>
