@@ -102,20 +102,20 @@ Dashboard
       <div class="col-xxl-3 col-lg-3 col-md-3 col-sm-6 col-6">
         <div class="cc-kpi cc-kpi--green cc-kpi--compact h-100 zoom-card">
           <div class="cc-kpi-head">
-            <div class="cc-kpi-icon"><i class="fas fa-users"></i></div>
-            <div class="cc-kpi-title">Active Customers</div>
+            <div class="cc-kpi-icon"><i class="fas fa-tasks"></i></div>
+            <div class="cc-kpi-title">Under Rectification</div>
           </div>
-          <div class="cc-kpi-value">{{ number_format($customerCount ?? 0) }}</div>
+          <div class="cc-kpi-value">{{ number_format($inProgressFaultsCount ?? 0) }}</div>
           <div class="cc-kpi-sub">Current overview</div>
         </div>
       </div>
       <div class="col-xxl-3 col-lg-3 col-md-3 col-sm-6 col-6">
         <div class="cc-kpi cc-kpi--indigo cc-kpi--compact h-100 zoom-card">
           <div class="cc-kpi-head">
-            <div class="cc-kpi-icon"><i class="fas fa-link"></i></div>
-            <div class="cc-kpi-title">Network Links</div>
+            <div class="cc-kpi-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="cc-kpi-title">Resolved Faults</div>
           </div>
-          <div class="cc-kpi-value">{{ number_format($linkCount ?? 0) }}</div>
+          <div class="cc-kpi-value">{{ number_format($resolvedFaultsCount ?? 0) }}</div>
           <div class="cc-kpi-sub">Current overview</div>
         </div>
       </div>
@@ -123,10 +123,10 @@ Dashboard
       <div class="col-xxl-3 col-lg-3 col-md-3 col-sm-6 col-6">
         <div class="cc-kpi cc-kpi--slate cc-kpi--compact h-100 zoom-card">
           <div class="cc-kpi-head">
-            <div class="cc-kpi-icon"><i class="fas fa-exclamation-circle"></i></div>
-            <div class="cc-kpi-title">Open Faults</div>
+            <div class="cc-kpi-icon"><i class="fas fa-calendar-day"></i></div>
+            <div class="cc-kpi-title">Faults Today</div>
           </div>
-          <div class="cc-kpi-value">{{ number_format($openFaultsCount ?? 0) }}</div>
+          <div class="cc-kpi-value">{{ number_format($todayFaultsCount ?? 0) }}</div>
           <div class="cc-kpi-sub">Current overview</div>
         </div>
       </div>
@@ -315,8 +315,8 @@ Dashboard
                     <td>
                       @php
                         $sid = (int)($fault->status_id ?? 0);
-                        $statusLabel = in_array($sid,[1,2]) ? 'Open' : (in_array($sid,[3,4,5]) ? 'In Progress' : ($sid===6 ? 'Resolved' : 'Other'));
-                        $badge = in_array($sid,[1,2]) ? 'bg-danger' : (in_array($sid,[3,4,5]) ? 'bg-warning' : ($sid===6 ? 'bg-success' : 'bg-secondary'));
+                        $statusLabel = $sid < 4 ? 'In Progress' : ($sid === 6 ? 'Resolved' : 'Other');
+                        $badge = $sid < 4 ? 'bg-warning' : ($sid === 6 ? 'bg-success' : 'bg-secondary');
                       @endphp
                       <span class="badge {{ $badge }}">{{ $statusLabel }}</span>
                     </td>

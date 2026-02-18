@@ -231,6 +231,36 @@ class HomeController extends Controller
         }
         $openFaultsCount = $openFaultsQuery->count();
 
+        $inProgressFaultsQuery = DB::table('faults')
+            ->where('status_id','<',4);
+        if ($selectedRegion !== null) {
+            $inProgressFaultsQuery->leftJoin('cities','faults.city_id','=','cities.id')
+                                  ->where('cities.region','=',$selectedRegion);
+        }
+        if ($fromDate && $toDate) {
+            $inProgressFaultsQuery->whereBetween('faults.created_at', [$fromDate, $toDate]);
+        }
+        $inProgressFaultsCount = $inProgressFaultsQuery->count();
+
+        $resolvedFaultsQuery = DB::table('faults')
+            ->where('status_id','=',6);
+        if ($selectedRegion !== null) {
+            $resolvedFaultsQuery->leftJoin('cities','faults.city_id','=','cities.id')
+                                ->where('cities.region','=',$selectedRegion);
+        }
+        if ($fromDate && $toDate) {
+            $resolvedFaultsQuery->whereBetween('faults.created_at', [$fromDate, $toDate]);
+        }
+        $resolvedFaultsCount = $resolvedFaultsQuery->count();
+
+        $todayFaultsQuery = DB::table('faults');
+        if ($selectedRegion !== null) {
+            $todayFaultsQuery->leftJoin('cities','faults.city_id','=','cities.id')
+                             ->where('cities.region','=',$selectedRegion);
+        }
+        $todayFaultsQuery->whereDate('faults.created_at', Carbon::today());
+        $todayFaultsCount = $todayFaultsQuery->count();
+
         $openFaultCreatedAts = (clone $openFaultsQuery)->pluck('faults.created_at');
 
         $now = Carbon::now();
@@ -292,7 +322,7 @@ class HomeController extends Controller
     
         return view('home', compact(
             'faultCount','customerCount','linkCount','recentFaults',
-            'openFaultsCount','avgOpenAgeSec','maxOpenAgeSec','avgResolutionSec','techResolutionAverages',
+            'openFaultsCount','inProgressFaultsCount','resolvedFaultsCount','todayFaultsCount','avgOpenAgeSec','maxOpenAgeSec','avgResolutionSec','techResolutionAverages',
             'availableYears','availableMonths','selectedYear','selectedMonth',
             'myAssignedCount','myResolvedCount','myAvgResolutionSec','myCompletionRate',
             'monthlyLabels','monthlyCounts','statusLabels','statusValues',

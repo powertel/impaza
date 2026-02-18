@@ -50,6 +50,33 @@
                                 @endforeach
                             </select>
                         </div>
+                        <div class="cc-field">
+                            <label class="form-label"><i class="far fa-clock me-1"></i>Quarter</label>
+                            <select name="quarter" class="form-select form-select-sm">
+                                <option value="" {{ empty($selectedQuarter ?? '') ? 'selected' : '' }}>All Quarters</option>
+                                <option value="1" {{ ($selectedQuarter ?? null) == 1 ? 'selected' : '' }}>Q1</option>
+                                <option value="2" {{ ($selectedQuarter ?? null) == 2 ? 'selected' : '' }}>Q2</option>
+                                <option value="3" {{ ($selectedQuarter ?? null) == 3 ? 'selected' : '' }}>Q3</option>
+                                <option value="4" {{ ($selectedQuarter ?? null) == 4 ? 'selected' : '' }}>Q4</option>
+                            </select>
+                        </div>
+                        <div class="cc-field">
+                            <label class="form-label"><i class="fas fa-map-marker-alt me-1"></i>Region</label>
+                            <select name="region" class="form-select form-select-sm">
+                                <option value="" {{ empty($selectedRegion ?? '') ? 'selected' : '' }}>All Regions</option>
+                                @foreach(($availableRegions ?? []) as $r)
+                                    <option value="{{ $r }}" {{ (($selectedRegion ?? '') === $r) ? 'selected' : '' }}>{{ $r }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="cc-field">
+                            <label class="form-label"><i class="far fa-play-circle me-1"></i>Start Date</label>
+                            <input type="date" name="start_date" class="form-control form-control-sm" value="{{ $startDate ?? request('start_date') }}">
+                        </div>
+                        <div class="cc-field">
+                            <label class="form-label"><i class="far fa-stop-circle me-1"></i>End Date</label>
+                            <input type="date" name="end_date" class="form-control form-control-sm" value="{{ $endDate ?? request('end_date') }}">
+                        </div>
                         <div class="cc-filter-actions ms-auto">
                             <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4">
                                 <i class="fas fa-filter me-1"></i>
@@ -65,24 +92,31 @@
 
                 <div class="px-4 py-4 bg-gradient-to-r from-gray-50 to-white">
                     <div class="kpi-grid">
+                        <div class="kpi-card kpi-secondary">
+                            <div class="kpi-icon">
+                                <i class="far fa-calendar-alt"></i>
+                            </div>
+                            <div class="kpi-content">
+                                <div class="kpi-label">Reporting Period</div>
+                                <div class="kpi-value">
+                                    {{ ($periodStart ?? now())->format('d M Y') }} — {{ ($periodEnd ?? now())->format('d M Y') }}
+                                </div>
+                                <div class="kpi-trend">
+                                    <span class="trend-period">
+                                        {{ $periodLabelText ?? 'Current period' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                         <div class="kpi-card kpi-primary">
                             <div class="kpi-icon">
                                 <i class="fas fa-exclamation-triangle"></i>
                             </div>
                             <div class="kpi-content">
                                 <div class="kpi-value">{{ number_format($faultsThisMonth) }}</div>
-                                <div class="kpi-label">Total Faults</div>
+                                <div class="kpi-label">New Faults</div>
                                 <div class="kpi-trend">
-                                    @php
-                                        $faultsDeltaRaw = ($faultsLastMonth > 0) ? (($faultsThisMonth - $faultsLastMonth) / $faultsLastMonth) * 100 : 0;
-                                        $faultsDelta = round($faultsDeltaRaw, 1);
-                                        $faultsDirection = $faultsDelta >= 0 ? 'up' : 'down';
-                                    @endphp
-                                    <span class="trend-{{ $faultsDirection }}">
-                                        <i class="fas fa-arrow-{{ $faultsDirection }}"></i>
-                                        {{ abs($faultsDelta) }}%
-                                    </span>
-                                    <span class="trend-period">vs last month</span>
+                                    <span class="trend-period">Current period</span>
                                 </div>
                             </div>
                         </div>
@@ -95,10 +129,7 @@
                                 <div class="kpi-value">{{ $slaCompliance }}%</div>
                                 <div class="kpi-label">SLA Compliance</div>
                                 <div class="kpi-trend">
-                                    <span class="trend-neutral">
-                                        <i class="fas fa-target"></i>
-                                        Target: &lt; 24h
-                                    </span>
+                                    <span class="trend-period">Current period</span>
                                 </div>
                             </div>
                         </div>
@@ -111,21 +142,12 @@
                                 <div class="kpi-value">{{ number_format($mttrThisMonth / 3600, 1) }}h</div>
                                 <div class="kpi-label">Avg MTTR</div>
                                 <div class="kpi-trend">
-                                    @php
-                                        $mttrDeltaRaw = ($mttrLastMonth > 0) ? (($mttrThisMonth - $mttrLastMonth) / $mttrLastMonth) * 100 : 0;
-                                        $mttrDelta = round($mttrDeltaRaw, 1);
-                                        $mttrDirection = $mttrDeltaRaw <= 0 ? 'up' : 'down';
-                                    @endphp
-                                    <span class="trend-{{ $mttrDirection }}">
-                                        <i class="fas fa-arrow-{{ $mttrDirection == 'up' ? 'down' : 'up' }}"></i>
-                                        {{ abs($mttrDelta) }}%
-                                    </span>
-                                    <span class="trend-period">vs last month</span>
+                                    <span class="trend-period">Current period</span>
                                 </div>
                             </div>
                         </div>
                 
-                        <div class="kpi-card kpi-danger">
+                        <!-- <div class="kpi-card kpi-danger">
                             <div class="kpi-icon">
                                 <i class="fas fa-redo"></i>
                             </div>
@@ -139,7 +161,7 @@
                                     </span>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
 

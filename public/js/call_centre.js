@@ -210,10 +210,10 @@
     new Chart(el('chartWeeklyOutstandingSingle'), { type: 'bar', data: { labels: lblsOut, datasets: [{ label: 'Outstanding Faults', data: valsOut, backgroundColor: (isWeekRange ? dayGradient : weekGradient), borderColor: (isWeekRange ? daySolid : weekSolid), borderWidth: 2, borderRadius: 8 }] }, options: barOptions() });
   }
   function binsToVals(bins){
-    var order = ['0_3','4_7','8_14','15_30','31_60','61_90','90_plus'];
+    var order = ['0_24h','24_48h','48_72h','4_7','8_14','15_30','31_60','61_90','90_plus'];
     return order.map(function(k){ return (bins && typeof bins[k] !== 'undefined') ? bins[k] : 0; });
   }
-  var binLabels = ['0-3 DAYS', '4-7 DAYS', '8-14 DAYS', '15-30 DAYS', '31-60 DAYS', '61-90 DAYS', 'ABOVE 90 DAYS'];
+  var binLabels = ['0-24 HRS', '24-48 HRS', '48-72 HRS', '4-7 DAYS', '8-14 DAYS', '15-30 DAYS', '31-60 DAYS', '61-90 DAYS', 'ABOVE 90 DAYS'];
   function lineOptions(){
     return {
       responsive: true,
@@ -235,25 +235,43 @@
     var labelsShift = isYear ? monthsOrdered() : (isWeekRange ? (data.dailyLabels || []) : (data.weeklyLabels || []));
     function bgGrad(base){ return function(ctx){ return gradientColor(ctx, base); }; }
     function fmtDate(s){ try { var d = new Date(s + 'T00:00:00'); return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short' }); } catch(_){ return s; } }
-    var valueLabelPlugin = { id: 'valueLabels', afterDatasetsDraw: function(chart){ var ctx = chart.ctx; ctx.save(); chart.data.datasets.forEach(function(ds, di){ var meta = chart.getDatasetMeta(di); meta.data.forEach(function(el, i){ var v = ds.data[i]; if (!v) return; ctx.fillStyle = '#374151'; ctx.font = '12px system-ui, -apple-system, Segoe UI, Roboto'; ctx.textAlign = 'center'; var y = el.y - 4; if (v <= 1) { ctx.textBaseline = 'top'; y = el.y + 4; } else { ctx.textBaseline = 'bottom'; } ctx.fillText(v, el.x, y); }); }); ctx.restore(); } };
+    var baseOptions = barOptions();
+    baseOptions.plugins.legend = { display: true, position: 'top', labels: { usePointStyle: true, boxWidth: 10 } };
+    baseOptions.plugins.tooltip = baseOptions.plugins.tooltip || {};
+    baseOptions.plugins.tooltip.callbacks = {
+      title: function(items){
+        var i = items && items[0] ? items[0].dataIndex : 0;
+        if (isWeekRange) {
+          var ds = labelsShift[i];
+          return ds || 'Day';
+        }
+        if (isYear) {
+          return labelsShift[i] || 'Month';
+        }
+        var s = (data.weeklyRangeStarts||[])[i];
+        var e = (data.weeklyRangeEnds||[])[i];
+        var left = 'Week ' + (i+1);
+        if (s && e) left += ' (' + fmtDate(s) + ' – ' + fmtDate(e) + ')';
+        return left;
+      },
+      label: function(ctx){
+        var v = ctx.parsed && ctx.parsed.y != null ? ctx.parsed.y : ctx.raw;
+        return ctx.dataset.label + ': ' + v;
+      }
+    };
+    baseOptions.scales = { x: { stacked: false, grid: { display: false }, ticks: { color: '#6b7280' } }, y: { stacked: false, grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#6b7280', precision: 0 } } };
+    baseOptions.datasets = { bar: { categoryPercentage: 0.9, barPercentage: 0.5 } };
     new Chart(el('chartShiftTraffic'), {
       type: 'bar',
       data: {
         labels: labelsShift,
         datasets: [
-          { label: 'Morning', data: isYear ? reorderMonthlyValues((data.monthlyLabels || []), (data.monthlyShiftMorning || [])) : (isWeekRange ? (data.dailyShiftMorning || []) : (data.weeklyShiftMorning || [])), backgroundColor: bgGrad(colors.sky), borderColor: hexToRGBA(colors.sky, 1), borderWidth: 2, borderRadius: 10 },
-          { label: 'Afternoon', data: isYear ? reorderMonthlyValues((data.monthlyLabels || []), (data.monthlyShiftAfternoon || [])) : (isWeekRange ? (data.dailyShiftAfternoon || []) : (data.weeklyShiftAfternoon || [])), backgroundColor: bgGrad(colors.orange), borderColor: hexToRGBA(colors.orange, 1), borderWidth: 2, borderRadius: 10 },
-          { label: 'Night', data: isYear ? reorderMonthlyValues((data.monthlyLabels || []), (data.monthlyShiftNight || [])) : (isWeekRange ? (data.dailyShiftNight || []) : (data.weeklyShiftNight || [])), backgroundColor: bgGrad(colors.light), borderColor: hexToRGBA(colors.light, 1), borderWidth: 2, borderRadius: 10 }
+          { label: 'Morning', data: isYear ? reorderMonthlyValues((data.monthlyLabels || []), (data.monthlyShiftMorning || [])) : (isWeekRange ? (data.dailyShiftMorning || []) : (data.weeklyShiftMorning || [])), backgroundColor: bgGrad(colors.sky), borderColor: hexToRGBA(colors.sky, 1), borderWidth: 3, borderRadius: 14 },
+          { label: 'Afternoon', data: isYear ? reorderMonthlyValues((data.monthlyLabels || []), (data.monthlyShiftAfternoon || [])) : (isWeekRange ? (data.dailyShiftAfternoon || []) : (data.weeklyShiftAfternoon || [])), backgroundColor: bgGrad(colors.orange), borderColor: hexToRGBA(colors.orange, 1), borderWidth: 3, borderRadius: 14 },
+          { label: 'Night', data: isYear ? reorderMonthlyValues((data.monthlyLabels || []), (data.monthlyShiftNight || [])) : (isWeekRange ? (data.dailyShiftNight || []) : (data.weeklyShiftNight || [])), backgroundColor: bgGrad(colors.light), borderColor: hexToRGBA(colors.light, 1), borderWidth: 3, borderRadius: 14 }
         ]
       },
-      plugins: [valueLabelPlugin],
-      options: Object.assign(barOptions(), {
-        plugins: { legend: { display: true, position: 'top', labels: { usePointStyle: true, boxWidth: 10 } }, tooltip: { callbacks: { title: function(items){ var i = items && items[0] ? items[0].dataIndex : 0; if (isWeekRange) { var ds = labelsShift[i]; return ds || 'Day'; } if (isYear) { return labelsShift[i] || 'Month'; } var s = (data.weeklyRangeStarts||[])[i]; var e = (data.weeklyRangeEnds||[])[i]; var left = 'Week ' + (i+1); if (s && e) left += ' (' + fmtDate(s) + ' – ' + fmtDate(e) + ')'; return left; }, label: function(ctx){ var v = ctx.parsed && ctx.parsed.y != null ? ctx.parsed.y : ctx.raw; return ctx.dataset.label + ': ' + v; } } } },
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: { x: { stacked: false, grid: { display: false }, ticks: { color: '#6b7280' } }, y: { stacked: false, grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { color: '#6b7280', precision: 0 } } },
-        datasets: { bar: { categoryPercentage: 0.7, barPercentage: 0.25 } }
-      })
+      options: baseOptions
     });
   }
   var form = document.querySelector('form[action$="call-centre/reports"]');

@@ -223,7 +223,9 @@ class CallCentreController extends Controller
             if ($resolvedAt) { $resolvedRows->push((object)['created_at' => $f->created_at, 'resolved_at' => $resolvedAt]); }
         }
         $bins = [
-            '0_3' => 0,
+            '0_24h' => 0,
+            '24_48h' => 0,
+            '48_72h' => 0,
             '4_7' => 0,
             '8_14' => 0,
             '15_30' => 0,
@@ -233,7 +235,9 @@ class CallCentreController extends Controller
         ];
         foreach ($resolvedRows as $r) {
             $m = Carbon::parse($r->created_at)->diffInMinutes(Carbon::parse($r->resolved_at));
-            if ($m <= 4320) $bins['0_3']++;
+            if ($m <= 1440) $bins['0_24h']++;
+            elseif ($m <= 2880) $bins['24_48h']++;
+            elseif ($m <= 4320) $bins['48_72h']++;
             elseif ($m <= 10080) $bins['4_7']++;
             elseif ($m <= 20160) $bins['8_14']++;
             elseif ($m <= 43200) $bins['15_30']++;
@@ -267,7 +271,9 @@ class CallCentreController extends Controller
             ->get(['id','created_at']);
         $outstandingTotal = $outstandingFaults->count();
         $outBins = [
-            '0_3' => 0,
+            '0_24h' => 0,
+            '24_48h' => 0,
+            '48_72h' => 0,
             '4_7' => 0,
             '8_14' => 0,
             '15_30' => 0,
@@ -278,13 +284,31 @@ class CallCentreController extends Controller
         $over3DaysCount = 0;
         foreach ($outstandingFaults as $f) {
             $mOpen = Carbon::parse($f->created_at)->diffInMinutes($effectiveEnd);
-            if ($mOpen <= 4320) $outBins['0_3']++;
-            elseif ($mOpen <= 10080) { $outBins['4_7']++; $over3DaysCount++; }
-            elseif ($mOpen <= 20160) { $outBins['8_14']++; $over3DaysCount++; }
-            elseif ($mOpen <= 43200) { $outBins['15_30']++; $over3DaysCount++; }
-            elseif ($mOpen <= 86400) { $outBins['31_60']++; $over3DaysCount++; }
-            elseif ($mOpen <= 129600) { $outBins['61_90']++; $over3DaysCount++; }
-            else { $outBins['90_plus']++; $over3DaysCount++; }
+            if ($mOpen <= 1440) {
+                $outBins['0_24h']++;
+            } elseif ($mOpen <= 2880) {
+                $outBins['24_48h']++;
+            } elseif ($mOpen <= 4320) {
+                $outBins['48_72h']++;
+            } elseif ($mOpen <= 10080) {
+                $outBins['4_7']++;
+                $over3DaysCount++;
+            } elseif ($mOpen <= 20160) {
+                $outBins['8_14']++;
+                $over3DaysCount++;
+            } elseif ($mOpen <= 43200) {
+                $outBins['15_30']++;
+                $over3DaysCount++;
+            } elseif ($mOpen <= 86400) {
+                $outBins['31_60']++;
+                $over3DaysCount++;
+            } elseif ($mOpen <= 129600) {
+                $outBins['61_90']++;
+                $over3DaysCount++;
+            } else {
+                $outBins['90_plus']++;
+                $over3DaysCount++;
+            }
         }
         $over3DaysPercent = $outstandingTotal > 0 ? round(($over3DaysCount / $outstandingTotal) * 100, 2) : 0;
 

@@ -22,7 +22,6 @@ class DashboardController extends Controller
     {
         $period = $request->string('period')->toString() ?: 'this_month';
 
-        // Month/Year filters (support "All Months" and "All Years")
         $availableYears = DB::table('faults')
             ->selectRaw('YEAR(created_at) as y')
             ->distinct()
@@ -32,10 +31,20 @@ class DashboardController extends Controller
 
         $yearInput = $request->input('year');
         $monthInput = $request->input('month');
-        // Treat empty string or explicit 'all' as null (all-time)
         $selectedYear = ($request->has('year') && $yearInput !== '' && strtolower((string)$yearInput) !== 'all') ? (int)$yearInput : null;
         $selectedMonth = ($request->has('month') && $monthInput !== '' && strtolower((string)$monthInput) !== 'all') ? (int)$monthInput : null;
-        $allTime = ($selectedYear === null && $selectedMonth === null);
+        $selectedQuarterInput = $request->input('quarter');
+        $selectedQuarter = $selectedQuarterInput !== null && $selectedQuarterInput !== '' ? (int) $selectedQuarterInput : null;
+        $startDateInput = $request->input('start_date');
+        $endDateInput = $request->input('end_date');
+
+        $hasQuarter = $selectedQuarter !== null;
+        $hasDateRange = ($startDateInput !== null && $startDateInput !== '') || ($endDateInput !== null && $endDateInput !== '');
+        $allTime = ($selectedYear === null && $selectedMonth === null && !$hasQuarter && !$hasDateRange);
+
+        $selectedRegionRaw = trim((string) $request->input('region', ''));
+        $selectedRegion = $selectedRegionRaw === '' ? null : $selectedRegionRaw;
+        $availableRegions = DB::table('cities')->select('region')->whereNotNull('region')->distinct()->orderBy('region')->pluck('region')->toArray();
 
         $now = Carbon::now();
         $startOfMonth = $now->copy()->startOfMonth();
@@ -43,9 +52,8 @@ class DashboardController extends Controller
         $lastMonthStart = $now->copy()->subMonthNoOverflow()->startOfMonth();
         $lastMonthEnd = $now->copy()->subMonthNoOverflow()->endOfMonth();
 
-        // Resolve current/previous period based on filters
         $currentStart = $startOfMonth; $currentEnd = $endOfMonth; $prevStart = $lastMonthStart; $prevEnd = $lastMonthEnd; $prevMonthNum = (int)$now->copy()->subMonthNoOverflow()->format('n');
-        if ($selectedYear !== null || $selectedMonth !== null) {
+        if (!$hasQuarter && !$hasDateRange && ($selectedYear !== null || $selectedMonth !== null)) {
             if ($selectedYear !== null && $selectedMonth !== null) {
                 $currentStart = Carbon::create($selectedYear, $selectedMonth, 1)->startOfMonth();
                 $currentEnd = Carbon::create($selectedYear, $selectedMonth, 1)->endOfMonth();
@@ -64,16 +72,96 @@ class DashboardController extends Controller
             }
         }
 
-        // KPI: Faults (respects month/year filters; all-time when both are "All")
-        if ($selectedMonth !== null && $selectedYear === null) {
-            $faultsThisMonth = Fault::query()->whereMonth('created_at', $selectedMonth)->count();
-            $faultsLastMonth = Fault::query()->whereMonth('created_at', $prevMonthNum)->count();
-        } elseif (!$allTime) {
-            $faultsThisMonth = Fault::whereBetween('created_at', [$currentStart, $currentEnd])->count();
-            $faultsLastMonth = Fault::whereBetween('created_at', [$prevStart, $prevEnd])->count();
+        if ($hasQuarter) {
+            $quarterYear = $selectedYear !== null ? $selectedYear : (int) $now->year;
+            $startMonth = ($selectedQuarter - 1) * 3 + 1;
+            $currentStart = Carbon::create($quarterYear, $startMonth, 1)->startOfQuarter();
+            $currentEnd = Carbon::create($quarterYear, $startMonth, 1)->endOfQuarter();
+
+            $prevBase = Carbon::create($quarterYear, $startMonth, 1)->subMonths(3);
+            $prevStart = $prevBase->copy()->startOfQuarter();
+            $prevEnd = $prevBase->copy()->endOfQuarter();
+        } elseif ($hasDateRange) {
+            $rangeStart = $startDateInput ? Carbon::parse($startDateInput)->startOfDay() : Carbon::create(2000, 1, 1)->startOfDay();
+            $rangeEnd = $endDateInput ? Carbon::parse($endDateInput)->endOfDay() : $now->copy()->endOfDay();
+            if ($rangeEnd->lessThan($rangeStart)) {
+                $tmp = $rangeStart;
+                $rangeStart = $rangeEnd;
+                $rangeEnd = $tmp;
+            }
+            $currentStart = $rangeStart;
+            $currentEnd = $rangeEnd;
+
+            $rangeSeconds = $currentEnd->diffInSeconds($currentStart) ?: 1;
+            $prevEnd = $currentStart->copy()->subSecond();
+            $prevStart = $prevEnd->copy()->subSeconds($rangeSeconds);
+        }
+
+        $periodStart = $currentStart;
+        $periodEnd = $currentEnd;
+        $periodLabelText = null;
+        if ($hasDateRange) {
+            $periodLabelText = 'Custom date range';
+        } elseif ($hasQuarter && $selectedQuarter !== null) {
+            $periodLabelText = 'Quarter ' . $selectedQuarter;
+        } elseif ($selectedYear !== null && $selectedMonth !== null) {
+            $periodLabelText = $currentStart->format('F Y');
+        } elseif ($selectedYear !== null && $selectedMonth === null) {
+            $periodLabelText = (string) $selectedYear;
+        } elseif ($selectedMonth !== null && $selectedYear === null) {
+            $periodLabelText = $currentStart->format('F');
         } else {
-            $faultsThisMonth = Fault::count();
-            $faultsLastMonth = Fault::whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])->count();
+            $periodLabelText = 'Current month';
+        }
+
+        if ($selectedMonth !== null && $selectedYear === null && !$hasQuarter && !$hasDateRange) {
+            $faultsThisMonthQuery = Fault::query()->whereMonth('created_at', $selectedMonth);
+            if ($selectedRegion) {
+                $faultsThisMonthQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                    $q->where('region', $selectedRegion);
+                });
+            }
+            $faultsThisMonth = $faultsThisMonthQuery->count();
+
+            $faultsLastMonthQuery = Fault::query()->whereMonth('created_at', $prevMonthNum);
+            if ($selectedRegion) {
+                $faultsLastMonthQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                    $q->where('region', $selectedRegion);
+                });
+            }
+            $faultsLastMonth = $faultsLastMonthQuery->count();
+        } elseif (!$allTime) {
+            $faultsThisMonthQuery = Fault::whereBetween('created_at', [$currentStart, $currentEnd]);
+            if ($selectedRegion) {
+                $faultsThisMonthQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                    $q->where('region', $selectedRegion);
+                });
+            }
+            $faultsThisMonth = $faultsThisMonthQuery->count();
+
+            $faultsLastMonthQuery = Fault::whereBetween('created_at', [$prevStart, $prevEnd]);
+            if ($selectedRegion) {
+                $faultsLastMonthQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                    $q->where('region', $selectedRegion);
+                });
+            }
+            $faultsLastMonth = $faultsLastMonthQuery->count();
+        } else {
+            $faultsThisMonthQuery = Fault::query();
+            if ($selectedRegion) {
+                $faultsThisMonthQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                    $q->where('region', $selectedRegion);
+                });
+            }
+            $faultsThisMonth = $faultsThisMonthQuery->count();
+
+            $faultsLastMonthQuery = Fault::whereBetween('created_at', [$lastMonthStart, $lastMonthEnd]);
+            if ($selectedRegion) {
+                $faultsLastMonthQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                    $q->where('region', $selectedRegion);
+                });
+            }
+            $faultsLastMonth = $faultsLastMonthQuery->count();
         }
 
         // KPI: New Customers (respects month/year filters; all-time when both are "All")
@@ -92,48 +180,88 @@ class DashboardController extends Controller
         $resolvedStatusIds = Status::where('status_code', 'like', 'CL%')->pluck('id');
         $slaThreshold = 24 * 3600; // 24 hours
 
-        if ($selectedMonth !== null && $selectedYear === null) {
-            $mttrThisMonth = Fault::whereIn('status_id', $resolvedStatusIds)
-                ->whereMonth('updated_at', $selectedMonth)
+        if ($selectedMonth !== null && $selectedYear === null && !$hasQuarter && !$hasDateRange) {
+            $mttrThisMonthQuery = Fault::whereIn('status_id', $resolvedStatusIds)
+                ->whereMonth('updated_at', $selectedMonth);
+            if ($selectedRegion) {
+                $mttrThisMonthQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                    $q->where('region', $selectedRegion);
+                });
+            }
+            $mttrThisMonth = $mttrThisMonthQuery
                 ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as val')
                 ->value('val') ?? 0;
-            $mttrLastMonth = Fault::whereIn('status_id', $resolvedStatusIds)
-                ->whereMonth('updated_at', $prevMonthNum)
+
+            $mttrLastMonthQuery = Fault::whereIn('status_id', $resolvedStatusIds)
+                ->whereMonth('updated_at', $prevMonthNum);
+            if ($selectedRegion) {
+                $mttrLastMonthQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                    $q->where('region', $selectedRegion);
+                });
+            }
+            $mttrLastMonth = $mttrLastMonthQuery
                 ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as val')
                 ->value('val') ?? 0;
         } elseif (!$allTime) {
-            $mttrThisMonth = Fault::whereIn('status_id', $resolvedStatusIds)
-                ->whereBetween('updated_at', [$currentStart, $currentEnd])
+            $mttrThisMonthQuery = Fault::whereIn('status_id', $resolvedStatusIds)
+                ->whereBetween('updated_at', [$currentStart, $currentEnd]);
+            if ($selectedRegion) {
+                $mttrThisMonthQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                    $q->where('region', $selectedRegion);
+                });
+            }
+            $mttrThisMonth = $mttrThisMonthQuery
                 ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as val')
                 ->value('val') ?? 0;
-            $mttrLastMonth = Fault::whereIn('status_id', $resolvedStatusIds)
-                ->whereBetween('updated_at', [$prevStart, $prevEnd])
+
+            $mttrLastMonthQuery = Fault::whereIn('status_id', $resolvedStatusIds)
+                ->whereBetween('updated_at', [$prevStart, $prevEnd]);
+            if ($selectedRegion) {
+                $mttrLastMonthQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                    $q->where('region', $selectedRegion);
+                });
+            }
+            $mttrLastMonth = $mttrLastMonthQuery
                 ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as val')
                 ->value('val') ?? 0;
         } else {
-            $mttrThisMonth = Fault::whereIn('status_id', $resolvedStatusIds)
+            $mttrThisMonthQuery = Fault::whereIn('status_id', $resolvedStatusIds);
+            if ($selectedRegion) {
+                $mttrThisMonthQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                    $q->where('region', $selectedRegion);
+                });
+            }
+            $mttrThisMonth = $mttrThisMonthQuery
                 ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as val')
                 ->value('val') ?? 0;
-            $mttrLastMonth = Fault::whereIn('status_id', $resolvedStatusIds)
-                ->whereBetween('updated_at', [$lastMonthStart, $lastMonthEnd])
+
+            $mttrLastMonthQuery = Fault::whereIn('status_id', $resolvedStatusIds)
+                ->whereBetween('updated_at', [$lastMonthStart, $lastMonthEnd]);
+            if ($selectedRegion) {
+                $mttrLastMonthQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                    $q->where('region', $selectedRegion);
+                });
+            }
+            $mttrLastMonth = $mttrLastMonthQuery
                 ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as val')
                 ->value('val') ?? 0;
         }
 
         // SLA compliance (duration < 24h in stage logs; respects filters; all-time when both are "All")
-        if ($selectedMonth !== null && $selectedYear === null) {
+        if ($selectedMonth !== null && $selectedYear === null && !$hasQuarter && !$hasDateRange) {
             $slaQuery = Fault::whereIn('status_id', $resolvedStatusIds)->whereMonth('updated_at', $selectedMonth);
-            $slaCount = $slaQuery->count();
-            $slaMetCount = (clone $slaQuery)->whereRaw('TIMESTAMPDIFF(SECOND, created_at, updated_at) <= ?', [$slaThreshold])->count();
         } elseif (!$allTime) {
             $slaQuery = Fault::whereIn('status_id', $resolvedStatusIds)->whereBetween('updated_at', [$currentStart, $currentEnd]);
-            $slaCount = $slaQuery->count();
-            $slaMetCount = (clone $slaQuery)->whereRaw('TIMESTAMPDIFF(SECOND, created_at, updated_at) <= ?', [$slaThreshold])->count();
         } else {
             $slaQuery = Fault::whereIn('status_id', $resolvedStatusIds);
-            $slaCount = $slaQuery->count();
-            $slaMetCount = (clone $slaQuery)->whereRaw('TIMESTAMPDIFF(SECOND, created_at, updated_at) <= ?', [$slaThreshold])->count();
         }
+        if ($selectedRegion) {
+            $slaQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                $q->where('region', $selectedRegion);
+            });
+        }
+        $slaCount = $slaQuery->count();
+        $slaMetCount = (clone $slaQuery)->whereRaw('TIMESTAMPDIFF(SECOND, created_at, updated_at) <= ?', [$slaThreshold])->count();
         $slaCompliance = $slaCount > 0 ? round(($slaMetCount / $slaCount) * 100, 1) : 0;
 
         // Faults per past 12 months (labels and counts)
@@ -145,19 +273,31 @@ class DashboardController extends Controller
             $to = $now->copy()->subMonths($i)->endOfMonth();
             $label = $from->format('M Y');
             
-            // Fault Count
-            $count = Fault::whereBetween('created_at', [$from, $to])->count();
+            $monthlyQuery = Fault::whereBetween('created_at', [$from, $to]);
+            if ($selectedRegion) {
+                $monthlyQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                    $q->where('region', $selectedRegion);
+                });
+            }
+            $count = $monthlyQuery->count();
             $monthlyLabels[] = $label;
             $monthlyCounts[] = $count;
         }
 
         // Status distribution (join statuses for labels if available)
         $statusBreakdownQuery = Fault::select('status_id', DB::raw('COUNT(*) as c'));
-        if ($selectedMonth !== null && $selectedYear === null) {
+        if ($hasDateRange || $hasQuarter) {
+            $statusBreakdownQuery->whereBetween('created_at', [$currentStart, $currentEnd]);
+        } elseif ($selectedMonth !== null && $selectedYear === null) {
             $statusBreakdownQuery->whereMonth('created_at', $selectedMonth);
         } elseif ($selectedYear !== null || $selectedMonth !== null) {
             if ($selectedYear !== null) $statusBreakdownQuery->whereYear('created_at', $selectedYear);
             if ($selectedMonth !== null) $statusBreakdownQuery->whereMonth('created_at', $selectedMonth);
+        }
+        if ($selectedRegion) {
+            $statusBreakdownQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                $q->where('region', $selectedRegion);
+            });
         }
         $statusBreakdown = $statusBreakdownQuery->groupBy('status_id')->get();
         $statusLabels = [];
@@ -174,11 +314,18 @@ class DashboardController extends Controller
 
         // RFO distribution (confirmed)
         $rfoBreakdownQuery = Fault::select('confirmedRfo_id', DB::raw('COUNT(*) as c'));
-        if ($selectedMonth !== null && $selectedYear === null) {
+        if ($hasDateRange || $hasQuarter) {
+            $rfoBreakdownQuery->whereBetween('created_at', [$currentStart, $currentEnd]);
+        } elseif ($selectedMonth !== null && $selectedYear === null) {
             $rfoBreakdownQuery->whereMonth('created_at', $selectedMonth);
         } elseif ($selectedYear !== null || $selectedMonth !== null) {
             if ($selectedYear !== null) $rfoBreakdownQuery->whereYear('created_at', $selectedYear);
             if ($selectedMonth !== null) $rfoBreakdownQuery->whereMonth('created_at', $selectedMonth);
+        }
+        if ($selectedRegion) {
+            $rfoBreakdownQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                $q->where('region', $selectedRegion);
+            });
         }
         $rfoBreakdown = $rfoBreakdownQuery->groupBy('confirmedRfo_id')->get();
         $rfoLabels = [];
@@ -195,11 +342,18 @@ class DashboardController extends Controller
 
         // RFO distribution (suspected)
         $suspectedRfoBreakdownQuery = Fault::select('suspectedRfo_id', DB::raw('COUNT(*) as c'));
-        if ($selectedMonth !== null && $selectedYear === null) {
+        if ($hasDateRange || $hasQuarter) {
+            $suspectedRfoBreakdownQuery->whereBetween('created_at', [$currentStart, $currentEnd]);
+        } elseif ($selectedMonth !== null && $selectedYear === null) {
             $suspectedRfoBreakdownQuery->whereMonth('created_at', $selectedMonth);
         } elseif ($selectedYear !== null || $selectedMonth !== null) {
             if ($selectedYear !== null) $suspectedRfoBreakdownQuery->whereYear('created_at', $selectedYear);
             if ($selectedMonth !== null) $suspectedRfoBreakdownQuery->whereMonth('created_at', $selectedMonth);
+        }
+        if ($selectedRegion) {
+            $suspectedRfoBreakdownQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                $q->where('region', $selectedRegion);
+            });
         }
         $suspectedRfoBreakdown = $suspectedRfoBreakdownQuery->groupBy('suspectedRfo_id')->get();
         $suspectedRfoLabels = [];
@@ -221,8 +375,14 @@ class DashboardController extends Controller
             $from = $now->copy()->subMonths($i)->startOfMonth();
             $to = $now->copy()->subMonths($i)->endOfMonth();
             $rfoMonthlyLabels[] = $from->format('M Y');
-            $rfoMonthlyCounts[] = Fault::whereBetween('created_at', [$from,$to])
-                ->whereNotNull('confirmedRfo_id')->count();
+            $rfoMonthlyQuery = Fault::whereBetween('created_at', [$from, $to])
+                ->whereNotNull('confirmedRfo_id');
+            if ($selectedRegion) {
+                $rfoMonthlyQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                    $q->where('region', $selectedRegion);
+                });
+            }
+            $rfoMonthlyCounts[] = $rfoMonthlyQuery->count();
         }
 
         // Technician workload (open assignments)
@@ -258,11 +418,18 @@ class DashboardController extends Controller
 
         // Customer impact (count & duration)
         $customerImpactCountQuery = Fault::select('customer_id', DB::raw('COUNT(*) as c'));
-        if ($selectedMonth !== null && $selectedYear === null) {
+        if ($hasDateRange || $hasQuarter) {
+            $customerImpactCountQuery->whereBetween('created_at', [$currentStart, $currentEnd]);
+        } elseif ($selectedMonth !== null && $selectedYear === null) {
             $customerImpactCountQuery->whereMonth('created_at', $selectedMonth);
         } elseif ($selectedYear !== null || $selectedMonth !== null) {
             if ($selectedYear !== null) $customerImpactCountQuery->whereYear('created_at', $selectedYear);
             if ($selectedMonth !== null) $customerImpactCountQuery->whereMonth('created_at', $selectedMonth);
+        }
+        if ($selectedRegion) {
+            $customerImpactCountQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                $q->where('region', $selectedRegion);
+            });
         }
         $customerImpactCountRaw = $customerImpactCountQuery->groupBy('customer_id')->orderByDesc('c')->limit(10)->get();
         $customerImpactCountLabels = [];$customerImpactCountValues = [];
@@ -275,11 +442,18 @@ class DashboardController extends Controller
         $customerImpactDurationQuery = Fault::whereIn('status_id', $resolvedStatusIds)
             ->select('customer_id', DB::raw('SUM(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as sec'));
 
-        if ($selectedMonth !== null && $selectedYear === null) {
+        if ($hasDateRange || $hasQuarter) {
+            $customerImpactDurationQuery->whereBetween('updated_at', [$currentStart, $currentEnd]);
+        } elseif ($selectedMonth !== null && $selectedYear === null) {
             $customerImpactDurationQuery->whereMonth('updated_at', $selectedMonth);
         } elseif ($selectedYear !== null || $selectedMonth !== null) {
             if ($selectedYear !== null) $customerImpactDurationQuery->whereYear('updated_at', $selectedYear);
             if ($selectedMonth !== null) $customerImpactDurationQuery->whereMonth('updated_at', $selectedMonth);
+        }
+        if ($selectedRegion) {
+            $customerImpactDurationQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                $q->where('region', $selectedRegion);
+            });
         }
         $customerImpactDurationRaw = $customerImpactDurationQuery->groupBy('customer_id')->orderByDesc('sec')->limit(10)->get();
         $customerImpactDurationLabels = [];$customerImpactDurationValues = [];
@@ -291,11 +465,18 @@ class DashboardController extends Controller
 
         // Service impact by type
         $serviceTypeBreakdownQuery = Fault::select('serviceType', DB::raw('COUNT(*) as c'));
-        if ($selectedMonth !== null && $selectedYear === null) {
+        if ($hasDateRange || $hasQuarter) {
+            $serviceTypeBreakdownQuery->whereBetween('created_at', [$currentStart, $currentEnd]);
+        } elseif ($selectedMonth !== null && $selectedYear === null) {
             $serviceTypeBreakdownQuery->whereMonth('created_at', $selectedMonth);
         } elseif ($selectedYear !== null || $selectedMonth !== null) {
             if ($selectedYear !== null) $serviceTypeBreakdownQuery->whereYear('created_at', $selectedYear);
             if ($selectedMonth !== null) $serviceTypeBreakdownQuery->whereMonth('created_at', $selectedMonth);
+        }
+        if ($selectedRegion) {
+            $serviceTypeBreakdownQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                $q->where('region', $selectedRegion);
+            });
         }
         $serviceTypeBreakdown = $serviceTypeBreakdownQuery->groupBy('serviceType')->orderByDesc('c')->get();
         $serviceTypeLabels = $serviceTypeBreakdown->pluck('serviceType')->map(fn($x) => $x ?? 'N/A')->toArray();
@@ -305,11 +486,16 @@ class DashboardController extends Controller
         $regionFaultsQuery = Fault::join('cities', 'faults.city_id', '=', 'cities.id')
             ->select('cities.region', DB::raw('COUNT(*) as c'));
 
-        if ($selectedMonth !== null && $selectedYear === null) {
+        if ($hasDateRange || $hasQuarter) {
+            $regionFaultsQuery->whereBetween('faults.created_at', [$currentStart, $currentEnd]);
+        } elseif ($selectedMonth !== null && $selectedYear === null) {
             $regionFaultsQuery->whereMonth('faults.created_at', $selectedMonth);
         } elseif ($selectedYear !== null || $selectedMonth !== null) {
             if ($selectedYear !== null) $regionFaultsQuery->whereYear('faults.created_at', $selectedYear);
             if ($selectedMonth !== null) $regionFaultsQuery->whereMonth('faults.created_at', $selectedMonth);
+        }
+        if ($selectedRegion) {
+            $regionFaultsQuery->where('cities.region', $selectedRegion);
         }
         
         $regionFaultsRaw = $regionFaultsQuery->groupBy('cities.region')
@@ -329,11 +515,18 @@ class DashboardController extends Controller
 
         // Account manager performance
         $amFaultsQuery = Fault::select('accountManager_id', DB::raw('COUNT(*) as c'));
-        if ($selectedMonth !== null && $selectedYear === null) {
+        if ($hasDateRange || $hasQuarter) {
+            $amFaultsQuery->whereBetween('created_at', [$currentStart, $currentEnd]);
+        } elseif ($selectedMonth !== null && $selectedYear === null) {
             $amFaultsQuery->whereMonth('created_at', $selectedMonth);
         } elseif ($selectedYear !== null || $selectedMonth !== null) {
             if ($selectedYear !== null) $amFaultsQuery->whereYear('created_at', $selectedYear);
             if ($selectedMonth !== null) $amFaultsQuery->whereMonth('created_at', $selectedMonth);
+        }
+        if ($selectedRegion) {
+            $amFaultsQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                $q->where('region', $selectedRegion);
+            });
         }
         $amFaultsRaw = $amFaultsQuery->groupBy('accountManager_id')->orderByDesc('c')->limit(10)->get();
         $amLabels = [];$amFaultsValues = [];
@@ -345,11 +538,18 @@ class DashboardController extends Controller
         $amMttrQuery = Fault::whereIn('status_id', $resolvedStatusIds)
             ->select('accountManager_id', DB::raw('AVG(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as mttr'));
         
-        if ($selectedMonth !== null && $selectedYear === null) {
+        if ($hasDateRange || $hasQuarter) {
+            $amMttrQuery->whereBetween('updated_at', [$currentStart, $currentEnd]);
+        } elseif ($selectedMonth !== null && $selectedYear === null) {
             $amMttrQuery->whereMonth('updated_at', $selectedMonth);
         } elseif ($selectedYear !== null || $selectedMonth !== null) {
             if ($selectedYear !== null) $amMttrQuery->whereYear('updated_at', $selectedYear);
             if ($selectedMonth !== null) $amMttrQuery->whereMonth('updated_at', $selectedMonth);
+        }
+        if ($selectedRegion) {
+            $amMttrQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                $q->where('region', $selectedRegion);
+            });
         }
         
         $amMttrRaw = $amMttrQuery->groupBy('accountManager_id')->get();
@@ -358,31 +558,31 @@ class DashboardController extends Controller
         $amMttrValues = [];
         foreach ($amFaultsRaw as $row) { $amMttrValues[] = $amMttrMap[$row->accountManager_id ?? 0] ?? 0; }
 
-        // MTTA (respects filters)
-        if ($selectedMonth !== null && $selectedYear === null) {
-            $mttaThisMonth = DB::table('fault_assignments')
-                ->join('faults','fault_assignments.fault_id','=','faults.id')
+        $mttaBaseQuery = DB::table('fault_assignments')
+            ->join('faults','fault_assignments.fault_id','=','faults.id');
+        if ($selectedRegion) {
+            $mttaBaseQuery->join('cities','faults.city_id','=','cities.id')
+                ->where('cities.region', $selectedRegion);
+        }
+
+        if ($selectedMonth !== null && $selectedYear === null && !$hasQuarter && !$hasDateRange) {
+            $mttaThisMonth = (clone $mttaBaseQuery)
                 ->whereMonth('fault_assignments.assigned_at', $selectedMonth)
                 ->avg(DB::raw('TIMESTAMPDIFF(SECOND, faults.created_at, fault_assignments.assigned_at)')) ?? 0;
-            $mttaLastMonth = DB::table('fault_assignments')
-                ->join('faults','fault_assignments.fault_id','=','faults.id')
+            $mttaLastMonth = (clone $mttaBaseQuery)
                 ->whereMonth('fault_assignments.assigned_at', $prevMonthNum)
                 ->avg(DB::raw('TIMESTAMPDIFF(SECOND, faults.created_at, fault_assignments.assigned_at)')) ?? 0;
         } elseif (!$allTime) {
-            $mttaThisMonth = DB::table('fault_assignments')
-                ->join('faults','fault_assignments.fault_id','=','faults.id')
+            $mttaThisMonth = (clone $mttaBaseQuery)
                 ->whereBetween('fault_assignments.assigned_at', [$currentStart, $currentEnd])
                 ->avg(DB::raw('TIMESTAMPDIFF(SECOND, faults.created_at, fault_assignments.assigned_at)')) ?? 0;
-            $mttaLastMonth = DB::table('fault_assignments')
-                ->join('faults','fault_assignments.fault_id','=','faults.id')
+            $mttaLastMonth = (clone $mttaBaseQuery)
                 ->whereBetween('fault_assignments.assigned_at', [$prevStart, $prevEnd])
                 ->avg(DB::raw('TIMESTAMPDIFF(SECOND, faults.created_at, fault_assignments.assigned_at)')) ?? 0;
         } else {
-            $mttaThisMonth = DB::table('fault_assignments')
-                ->join('faults','fault_assignments.fault_id','=','faults.id')
+            $mttaThisMonth = (clone $mttaBaseQuery)
                 ->avg(DB::raw('TIMESTAMPDIFF(SECOND, faults.created_at, fault_assignments.assigned_at)')) ?? 0;
-            $mttaLastMonth = DB::table('fault_assignments')
-                ->join('faults','fault_assignments.fault_id','=','faults.id')
+            $mttaLastMonth = (clone $mttaBaseQuery)
                 ->whereBetween('fault_assignments.assigned_at', [$lastMonthStart, $lastMonthEnd])
                 ->avg(DB::raw('TIMESTAMPDIFF(SECOND, faults.created_at, fault_assignments.assigned_at)')) ?? 0;
         }
@@ -393,11 +593,18 @@ class DashboardController extends Controller
         $sumsQuery = Fault::whereIn('status_id', $resolvedStatusIds)
             ->select('priorityLevel', DB::raw('TIMESTAMPDIFF(SECOND, created_at, updated_at) as duration'));
 
-        if ($selectedMonth !== null && $selectedYear === null) {
+        if ($hasDateRange || $hasQuarter) {
+            $sumsQuery->whereBetween('updated_at', [$currentStart, $currentEnd]);
+        } elseif ($selectedMonth !== null && $selectedYear === null) {
             $sumsQuery->whereMonth('updated_at', $selectedMonth);
         } elseif ($selectedYear !== null || $selectedMonth !== null) {
             if ($selectedYear !== null) $sumsQuery->whereYear('updated_at', $selectedYear);
             if ($selectedMonth !== null) $sumsQuery->whereMonth('updated_at', $selectedMonth);
+        }
+        if ($selectedRegion) {
+            $sumsQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                $q->where('region', $selectedRegion);
+            });
         }
         
         $sums = $sumsQuery->get();
@@ -553,7 +760,6 @@ class DashboardController extends Controller
             $coverageGapValues[] = $row->links > 0 ? round($faults / $row->links, 2) : 0;
         }
 
-        // Recent faults (respects filters)
         $recentFaultsQuery = Fault::with(['city','suburb'])
             ->leftJoin('links', 'faults.link_id', '=', 'links.id')
             ->leftJoin('customers', 'faults.customer_id', '=', 'customers.id')
@@ -574,11 +780,18 @@ class DashboardController extends Controller
             ->orderByDesc('created_at')
             ->limit(10)
             ;
-        if ($selectedMonth !== null && $selectedYear === null) {
+        if ($hasDateRange || $hasQuarter) {
+            $recentFaultsQuery->whereBetween('faults.created_at', [$currentStart, $currentEnd]);
+        } elseif ($selectedMonth !== null && $selectedYear === null) {
             $recentFaultsQuery->whereMonth('faults.created_at', $selectedMonth);
         } elseif ($selectedYear !== null || $selectedMonth !== null) {
             if ($selectedYear !== null) $recentFaultsQuery->whereYear('faults.created_at', $selectedYear);
             if ($selectedMonth !== null) $recentFaultsQuery->whereMonth('faults.created_at', $selectedMonth);
+        }
+        if ($selectedRegion) {
+            $recentFaultsQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                $q->where('region', $selectedRegion);
+            });
         }
         $recentFaults = $recentFaultsQuery->get();
 
@@ -586,8 +799,16 @@ class DashboardController extends Controller
         return view('dashboard.reports', [
             'period' => $period,
             'availableYears' => $availableYears,
+            'availableRegions' => $availableRegions,
             'selectedYear' => $selectedYear,
             'selectedMonth' => $selectedMonth,
+            'selectedRegion' => $selectedRegion,
+            'selectedQuarter' => $selectedQuarter,
+            'startDate' => $startDateInput,
+            'endDate' => $endDateInput,
+            'periodStart' => $periodStart,
+            'periodEnd' => $periodEnd,
+            'periodLabelText' => $periodLabelText,
             'faultsThisMonth' => $faultsThisMonth,
             'faultsLastMonth' => $faultsLastMonth,
             'customersThisMonth' => $customersThisMonth,
