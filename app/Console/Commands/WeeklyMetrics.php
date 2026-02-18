@@ -82,18 +82,54 @@ class WeeklyMetrics extends Command
             ->get();
         $faultIdsWeek = $latestInWeek->pluck('fault_id')->unique()->values();
         $createdMapWeek = Fault::whereIn('id', $faultIdsWeek)->pluck('created_at','id');
-        $binsResolved = ['0_3'=>0,'4_7'=>0,'8_14'=>0,'15_30'=>0,'31_60'=>0,'61_90'=>0,'90_plus'=>0];
+        $binsResolved = [
+            '0_24h' => 0,
+            '24_48h' => 0,
+            '48_72h' => 0,
+            '4_7' => 0,
+            '8_14' => 0,
+            '15_30' => 0,
+            '31_60' => 0,
+            '61_90' => 0,
+            '90_plus' => 0,
+        ];
         foreach ($latestInWeek as $r) {
             $c = $createdMapWeek[$r->fault_id] ?? null; if (!$c) continue;
             $m = Carbon::parse($c)->diffInMinutes(Carbon::parse($r->resolved_at));
-            if ($m <= 4320) $binsResolved['0_3']++; elseif ($m <= 10080) $binsResolved['4_7']++; elseif ($m <= 20160) $binsResolved['8_14']++; elseif ($m <= 43200) $binsResolved['15_30']++; elseif ($m <= 86400) $binsResolved['31_60']++; elseif ($m <= 129600) $binsResolved['61_90']++; else $binsResolved['90_plus']++;
+            if ($m <= 1440) $binsResolved['0_24h']++;
+            elseif ($m <= 2880) $binsResolved['24_48h']++;
+            elseif ($m <= 4320) $binsResolved['48_72h']++;
+            elseif ($m <= 10080) $binsResolved['4_7']++;
+            elseif ($m <= 20160) $binsResolved['8_14']++;
+            elseif ($m <= 43200) $binsResolved['15_30']++;
+            elseif ($m <= 86400) $binsResolved['31_60']++;
+            elseif ($m <= 129600) $binsResolved['61_90']++;
+            else $binsResolved['90_plus']++;
         }
         $resolvedUpToEndIdsWeek = DB::table('fault_stage_logs')->where('status_id',$clearedStatusId)->where('started_at','<=',$periodEnd)->select('fault_id', DB::raw('MAX(started_at) as ra'))->groupBy('fault_id')->pluck('fault_id')->unique()->values();
         $outstandingWeek = Fault::whereBetween('created_at', [$periodStart, $periodEnd])->whereNotIn('id', $resolvedUpToEndIdsWeek)->get(['id','created_at']);
-        $binsOutstanding = ['0_3'=>0,'4_7'=>0,'8_14'=>0,'15_30'=>0,'31_60'=>0,'61_90'=>0,'90_plus'=>0];
+        $binsOutstanding = [
+            '0_24h' => 0,
+            '24_48h' => 0,
+            '48_72h' => 0,
+            '4_7' => 0,
+            '8_14' => 0,
+            '15_30' => 0,
+            '31_60' => 0,
+            '61_90' => 0,
+            '90_plus' => 0,
+        ];
         foreach ($outstandingWeek as $f) {
             $mOpen = Carbon::parse($f->created_at)->diffInMinutes($periodEnd);
-            if ($mOpen <= 4320) $binsOutstanding['0_3']++; elseif ($mOpen <= 10080) $binsOutstanding['4_7']++; elseif ($mOpen <= 20160) $binsOutstanding['8_14']++; elseif ($mOpen <= 43200) $binsOutstanding['15_30']++; elseif ($mOpen <= 86400) $binsOutstanding['31_60']++; elseif ($mOpen <= 129600) $binsOutstanding['61_90']++; else $binsOutstanding['90_plus']++;
+            if ($mOpen <= 1440) $binsOutstanding['0_24h']++;
+            elseif ($mOpen <= 2880) $binsOutstanding['24_48h']++;
+            elseif ($mOpen <= 4320) $binsOutstanding['48_72h']++;
+            elseif ($mOpen <= 10080) $binsOutstanding['4_7']++;
+            elseif ($mOpen <= 20160) $binsOutstanding['8_14']++;
+            elseif ($mOpen <= 43200) $binsOutstanding['15_30']++;
+            elseif ($mOpen <= 86400) $binsOutstanding['31_60']++;
+            elseif ($mOpen <= 129600) $binsOutstanding['61_90']++;
+            else $binsOutstanding['90_plus']++;
         }
 
         $summary = [

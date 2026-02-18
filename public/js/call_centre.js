@@ -210,10 +210,10 @@
     new Chart(el('chartWeeklyOutstandingSingle'), { type: 'bar', data: { labels: lblsOut, datasets: [{ label: 'Outstanding Faults', data: valsOut, backgroundColor: (isWeekRange ? dayGradient : weekGradient), borderColor: (isWeekRange ? daySolid : weekSolid), borderWidth: 2, borderRadius: 8 }] }, options: barOptions() });
   }
   function binsToVals(bins){
-    var order = ['0_3','4_7','8_14','15_30','31_60','61_90','90_plus'];
+    var order = ['0_24h','24_48h','48_72h','4_7','8_14','15_30','31_60','61_90','90_plus'];
     return order.map(function(k){ return (bins && typeof bins[k] !== 'undefined') ? bins[k] : 0; });
   }
-  var binLabels = ['0-3 DAYS', '4-7 DAYS', '8-14 DAYS', '15-30 DAYS', '31-60 DAYS', '61-90 DAYS', 'ABOVE 90 DAYS'];
+  var binLabels = ['0-24 HRS', '24-48 HRS', '48-72 HRS', '4-7 DAYS', '8-14 DAYS', '15-30 DAYS', '31-60 DAYS', '61-90 DAYS', 'ABOVE 90 DAYS'];
   function lineOptions(){
     return {
       responsive: true,
