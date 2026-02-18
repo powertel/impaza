@@ -92,24 +92,31 @@
 
                 <div class="px-4 py-4 bg-gradient-to-r from-gray-50 to-white">
                     <div class="kpi-grid">
+                        <div class="kpi-card kpi-secondary">
+                            <div class="kpi-icon">
+                                <i class="far fa-calendar-alt"></i>
+                            </div>
+                            <div class="kpi-content">
+                                <div class="kpi-label">Reporting Period</div>
+                                <div class="kpi-value">
+                                    {{ ($periodStart ?? now())->format('d M Y') }} — {{ ($periodEnd ?? now())->format('d M Y') }}
+                                </div>
+                                <div class="kpi-trend">
+                                    <span class="trend-period">
+                                        {{ $periodLabelText ?? 'Current period' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                         <div class="kpi-card kpi-primary">
                             <div class="kpi-icon">
                                 <i class="fas fa-exclamation-triangle"></i>
                             </div>
                             <div class="kpi-content">
                                 <div class="kpi-value">{{ number_format($faultsThisMonth) }}</div>
-                                <div class="kpi-label">Total Faults</div>
+                                <div class="kpi-label">New Faults</div>
                                 <div class="kpi-trend">
-                                    @php
-                                        $faultsDeltaRaw = ($faultsLastMonth > 0) ? (($faultsThisMonth - $faultsLastMonth) / $faultsLastMonth) * 100 : 0;
-                                        $faultsDelta = round($faultsDeltaRaw, 1);
-                                        $faultsDirection = $faultsDelta >= 0 ? 'up' : 'down';
-                                    @endphp
-                                    <span class="trend-{{ $faultsDirection }}">
-                                        <i class="fas fa-arrow-{{ $faultsDirection }}"></i>
-                                        {{ abs($faultsDelta) }}%
-                                    </span>
-                                    <span class="trend-period">vs last month</span>
+                                    <span class="trend-period">Current period</span>
                                 </div>
                             </div>
                         </div>
@@ -122,10 +129,7 @@
                                 <div class="kpi-value">{{ $slaCompliance }}%</div>
                                 <div class="kpi-label">SLA Compliance</div>
                                 <div class="kpi-trend">
-                                    <span class="trend-neutral">
-                                        <i class="fas fa-target"></i>
-                                        Target: &lt; 24h
-                                    </span>
+                                    <span class="trend-period">Current period</span>
                                 </div>
                             </div>
                         </div>
@@ -138,21 +142,12 @@
                                 <div class="kpi-value">{{ number_format($mttrThisMonth / 3600, 1) }}h</div>
                                 <div class="kpi-label">Avg MTTR</div>
                                 <div class="kpi-trend">
-                                    @php
-                                        $mttrDeltaRaw = ($mttrLastMonth > 0) ? (($mttrThisMonth - $mttrLastMonth) / $mttrLastMonth) * 100 : 0;
-                                        $mttrDelta = round($mttrDeltaRaw, 1);
-                                        $mttrDirection = $mttrDeltaRaw <= 0 ? 'up' : 'down';
-                                    @endphp
-                                    <span class="trend-{{ $mttrDirection }}">
-                                        <i class="fas fa-arrow-{{ $mttrDirection == 'up' ? 'down' : 'up' }}"></i>
-                                        {{ abs($mttrDelta) }}%
-                                    </span>
-                                    <span class="trend-period">vs last month</span>
+                                    <span class="trend-period">Current period</span>
                                 </div>
                             </div>
                         </div>
                 
-                        <div class="kpi-card kpi-danger">
+                        <!-- <div class="kpi-card kpi-danger">
                             <div class="kpi-icon">
                                 <i class="fas fa-redo"></i>
                             </div>
@@ -166,7 +161,7 @@
                                     </span>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
 

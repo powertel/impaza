@@ -97,6 +97,23 @@ class DashboardController extends Controller
             $prevStart = $prevEnd->copy()->subSeconds($rangeSeconds);
         }
 
+        $periodStart = $currentStart;
+        $periodEnd = $currentEnd;
+        $periodLabelText = null;
+        if ($hasDateRange) {
+            $periodLabelText = 'Custom date range';
+        } elseif ($hasQuarter && $selectedQuarter !== null) {
+            $periodLabelText = 'Quarter ' . $selectedQuarter;
+        } elseif ($selectedYear !== null && $selectedMonth !== null) {
+            $periodLabelText = $currentStart->format('F Y');
+        } elseif ($selectedYear !== null && $selectedMonth === null) {
+            $periodLabelText = (string) $selectedYear;
+        } elseif ($selectedMonth !== null && $selectedYear === null) {
+            $periodLabelText = $currentStart->format('F');
+        } else {
+            $periodLabelText = 'Current month';
+        }
+
         if ($selectedMonth !== null && $selectedYear === null && !$hasQuarter && !$hasDateRange) {
             $faultsThisMonthQuery = Fault::query()->whereMonth('created_at', $selectedMonth);
             if ($selectedRegion) {
@@ -789,6 +806,9 @@ class DashboardController extends Controller
             'selectedQuarter' => $selectedQuarter,
             'startDate' => $startDateInput,
             'endDate' => $endDateInput,
+            'periodStart' => $periodStart,
+            'periodEnd' => $periodEnd,
+            'periodLabelText' => $periodLabelText,
             'faultsThisMonth' => $faultsThisMonth,
             'faultsLastMonth' => $faultsLastMonth,
             'customersThisMonth' => $customersThisMonth,
