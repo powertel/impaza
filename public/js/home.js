@@ -120,11 +120,11 @@
       });
     }
 
-    // Status Distribution Chart (Doughnut)
+    // Status Distribution Chart (Pie)
     const statusDistributionCtx = document.getElementById('statusDistributionChart');
     if (statusDistributionCtx) {
-      new Chart(statusDistributionCtx, {
-        type: 'doughnut',
+      const statusChart = new Chart(statusDistributionCtx, {
+        type: 'pie',
         data: {
           labels: statusLabels,
           datasets: [{
@@ -150,21 +150,10 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          cutout: '65%',
+          cutout: 0,
           plugins: {
             legend: {
-              display: true,
-              position: 'bottom',
-              labels: {
-                padding: 20,
-                usePointStyle: true,
-                pointStyle: 'circle',
-                font: {
-                  size: 12,
-                  weight: '500'
-                },
-                color: '#4a5568'
-              }
+              display: false
             },
             tooltip: {
               backgroundColor: 'rgba(45, 55, 72, 0.95)',
@@ -184,6 +173,34 @@
           }
         }
       });
+
+      const legendContainer = document.getElementById('statusDistributionLegend');
+      if (legendContainer && statusChart.data && statusChart.data.labels && statusChart.data.labels.length) {
+        const labels = statusChart.data.labels;
+        const colorsArr = Array.isArray(statusChart.data.datasets[0].backgroundColor)
+          ? statusChart.data.datasets[0].backgroundColor
+          : labels.map(() => statusChart.data.datasets[0].backgroundColor);
+        const items = labels.map((label, index) => ({
+          label,
+          color: colorsArr[index] || colors.primary
+        }));
+        const midpoint = Math.ceil(items.length / 2);
+        const leftItems = items.slice(0, midpoint);
+        const rightItems = items.slice(midpoint);
+
+        const renderColumn = list => list.map(item => (
+          '<div class="d-flex align-items-center mb-1">' +
+            '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + item.color + ';margin-right:8px;"></span>' +
+            '<span style="font-size:13px;color:#4a5568;">' + item.label + '</span>' +
+          '</div>'
+        )).join('');
+
+        legendContainer.innerHTML =
+          '<div class="d-flex justify-content-between">' +
+            '<div class="me-3 flex-grow-1">' + renderColumn(leftItems) + '</div>' +
+            '<div class="flex-grow-1 text-end">' + renderColumn(rightItems) + '</div>' +
+          '</div>';
+      }
     }
 
     // Create additional charts if we have old chart containers (for backward compatibility)
