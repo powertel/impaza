@@ -110,10 +110,10 @@ class FaultController extends Controller
             });
         }
 
-        // Status filter: 'lt4' or specific 1/2/3
+        // Status filter: 'lt4' or specific status id
         if ($statusFilter === 'lt4') {
             $faultsQuery->where('faults.status_id', '<', 4);
-        } elseif (in_array($statusFilter, ['1','2','3'], true)) {
+        } elseif (ctype_digit((string) $statusFilter)) {
             $faultsQuery->where('faults.status_id', '=', (int)$statusFilter);
         }
 
@@ -190,9 +190,8 @@ class FaultController extends Controller
         $accountManager = AccountManager::all();
         /* $suspectedRFO = ReasonsForOutage::whereBetween('id', [1, 5])->get(); */
         $suspectedRFO = ReasonsForOutage::all();
-        // Load open statuses (< 4) for dynamic filter options
+        // Load all statuses for dynamic filter options
         $openStatuses = DB::table('statuses')
-            ->where('id','<',4)
             ->orderBy('id','asc')
             ->get(['id','description']);
 
@@ -281,10 +280,10 @@ class FaultController extends Controller
             });
         }
 
-        // Status filter: 'lt4' or specific 1/2/3
+        // Status filter: 'lt4' or specific status id
         if ($statusFilter === 'lt4') {
             $faultsQuery->where('faults.status_id', '<', 4);
-        } elseif (in_array($statusFilter, ['1','2','3'], true)) {
+        } elseif (ctype_digit((string) $statusFilter)) {
             $faultsQuery->where('faults.status_id', '=', (int)$statusFilter);
         }
 
