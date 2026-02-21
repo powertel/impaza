@@ -138,7 +138,7 @@ Dashboard
   <div class="px-4 pb-4">
     <div class="row g-4 mb-4">
       <div class="col-xl-8 col-lg-7">
-        <div class="chart-card cc-chart-card zoom-card">
+        <div class="chart-card cc-chart-card zoom-card h-100">
           <div class="chart-header">
             <div class="chart-title">
               <h5 class="mb-0">Monthly Fault Trends</h5>
@@ -151,7 +151,7 @@ Dashboard
         </div>
       </div>
       <div class="col-xl-4 col-lg-5">
-        <div class="chart-card cc-chart-card zoom-card">
+        <div class="chart-card cc-chart-card zoom-card h-100">
           <div class="chart-header">
             <div class="chart-title">
               <h5 class="mb-0">Fault Status Distribution</h5>
@@ -160,6 +160,7 @@ Dashboard
           </div>
           <div class="chart-body">
             <canvas id="statusDistributionChart" height="300"></canvas>
+            <div id="statusDistributionLegend" class="mt-3"></div>
           </div>
         </div>
       </div>
@@ -435,7 +436,7 @@ Dashboard
 
 @section('scripts')
 @include('partials.scripts')
-<script src="/js/home.js"></script>
+<script src="{{ asset('js/home.js') }}?v={{ file_exists(public_path('js/home.js')) ? filemtime(public_path('js/home.js')) : time() }}"></script>
 <script>
 // Enhanced dashboard interactions
 document.addEventListener('DOMContentLoaded', function() {
