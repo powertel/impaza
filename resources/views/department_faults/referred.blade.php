@@ -77,6 +77,9 @@ Department Faults
                               <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#completeReferralModal-{{ $fault->id }}">
                                 <i class="fas fa-check me-1"></i>Complete Referral
                               </button>
+                              <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#reassignReferralModal-{{ $fault->id }}">
+                                <i class="fas fa-user-plus me-1"></i>Reassign
+                              </button>
                             @endif
                         </td>
                     </tr>
@@ -92,6 +95,7 @@ Department Faults
                 @include('faults.show', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
                 @if(!empty($fault->referral_id))
                     @include('department_faults.complete_referral_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
+                    @include('department_faults.reassign_referral_modal', [ 'fault' => $fault, 'technicians' => $technicians ])
                 @endif
             @endforeach
             <div class="d-flex justify-content-between align-items-center mt-2">

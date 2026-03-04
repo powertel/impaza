@@ -117,6 +117,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::post('my_faults/{fault}/escalate', [MyFaultController::class, 'escalate'])->name('my_faults.escalate');
     Route::resource('department_faults', DepartmentFaultController::class);
     Route::get('referred-faults', [DepartmentFaultController::class, 'referred'])->name('referred_faults.index');
+    Route::post('referred-faults/{id}/reassign', [DepartmentFaultController::class, 'reassignReferral'])->name('referred_faults.reassign');
     Route::post('referrals/{referral}/complete', [DepartmentFaultController::class, 'completeReferral'])->name('referrals.complete');
     Route::resource('rfos', RFOController::class);
     Route::resource('request-permit', RequestPermitController::class);
