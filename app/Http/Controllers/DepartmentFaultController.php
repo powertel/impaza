@@ -325,7 +325,9 @@ class DepartmentFaultController extends Controller
 
         $faultsQuery = DB::table('faults')
             ->leftjoin('users','faults.assignedTo','=','users.id')
+            ->leftjoin('users as assigned_users','faults.assignedTo','=','assigned_users.id')
             ->leftjoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
+			->leftjoin('users as reported_users','faults.user_id','=','reported_users.id')
             ->leftjoin('customers','faults.customer_id','=','customers.id')
             ->leftjoin('account_managers', 'customers.account_manager_id','=','account_managers.id')
             ->leftjoin('users as account_manager_users','account_managers.user_id','=','account_manager_users.id')
@@ -356,12 +358,14 @@ class DepartmentFaultController extends Controller
                 'faults.phoneNumber',
                 'faults.contactEmail',
                 'faults.address',
-                'faults.assignedTo',
+                
                 'account_manager_users.name as accountManager',
                 'faults.suspectedRfo_id',
                 'links.link',
                 'statuses.description',
                 'users.name',
+                'assigned_users.name as assignedTo',
+                'reported_users.name as reportedBy',
                 'assessed_users.name as assessedBy',
                 'faults.serviceType',
                 'faults.serviceAttribute',
@@ -435,8 +439,91 @@ class DepartmentFaultController extends Controller
             }
         }
 
-        return view('department_faults.referred',compact('faults','remarksByFault','perPage','faultAges','faultAgeStart','faultAgeEnd'))
+        $technicians = DB::table('users')
+            ->leftJoin('sections','users.section_id','=','sections.id')
+            ->leftJoin('user_statuses','users.user_status','=','user_statuses.id')
+            ->where('users.section_id','=',auth()->user()->section_id)
+            ->when(in_array((int)auth()->user()->section_id, [2, 3], true), function($q) {
+                $q->where('users.region','=',auth()->user()->region);
+            })
+            ->where('user_statuses.status_name','=','Assignable')
+            ->orderBy('users.name','asc')
+            ->get(['users.id','users.name']);
+
+        return view('department_faults.referred',compact('faults','remarksByFault','perPage','faultAges','faultAgeStart','faultAgeEnd', 'technicians'))
             ->with('i');
+    }
+
+    public function reassignReferral(Request $request, $id)
+    {
+        \Illuminate\Support\Facades\Log::info("Reassign Referral Attempt", [
+            'fault_id' => $id,
+            'user_id' => auth()->id(),
+            'input' => $request->all()
+        ]);
+
+        $request->validate([
+            'assignedTo' => ['required', 'exists:users,id'],
+            'remark' => ['required', 'string']
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $fault = Fault::find($id);
+            if (!$fault) {
+                 \Illuminate\Support\Facades\Log::error("Reassign Referral: Fault not found", ['fault_id' => $id]);
+                 return back()->with('fail', 'Fault not found');
+            }
+
+            // Find active referral
+            $referral = DB::table('fault_referrals')
+                ->where('fault_id', $id)
+                ->whereNull('completed_at')
+                ->orderBy('started_at', 'desc')
+                ->first();
+
+            if ($referral) {
+                // Mark referral as completed
+                DB::table('fault_referrals')
+                    ->where('id', $referral->id)
+                    ->update(['completed_at' => now()]);
+            } else {
+                \Illuminate\Support\Facades\Log::warning("Reassign Referral: No active referral found", ['fault_id' => $id]);
+            }
+            
+            // Change section ownership
+            DB::table('fault_section')
+                ->updateOrInsert(
+                    ['fault_id' => $id],
+                    ['section_id' => auth()->user()->section_id]
+                );
+
+            // Assign to technician and update status
+            $fault->assignedTo = $request->input('assignedTo');
+            $fault->status_id = 3; // Assigned
+            $fault->save();
+
+            // Add remark
+            Remark::create([
+                'fault_id' => $id,
+                'user_id' => auth()->user()->id,
+                'remark' => 'Referral accepted and reassigned: ' . $request->input('remark')
+            ]);
+            
+            FaultLifecycle::recordStatusChange($fault, 3, auth()->user()->id);
+
+            DB::commit();
+            \Illuminate\Support\Facades\Log::info("Reassign Referral Success", ['fault_id' => $id]);
+            return back()->with('success', 'Fault reassigned successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Illuminate\Support\Facades\Log::error("Reassign Referral Error", [
+                'fault_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->with('fail', 'Failed to reassign fault: ' . $e->getMessage());
+        }
     }
 
     /**
