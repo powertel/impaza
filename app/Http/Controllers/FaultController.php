@@ -933,15 +933,15 @@ class FaultController extends Controller
         }
 
         if ($request->filled('remark') || $request->hasFile('attachment')) {
-             $activityName = $data['activity'] ?? $request->input('activity', 'ON EDIT');
-             $remarkActivity = DB::table('remark_activities')->where('activity', $activityName)->first();
-             // If not found, fallback to 'ON EDIT' or ID 1
-             if (!$remarkActivity) {
-                 $remarkActivity = DB::table('remark_activities')->where('activity', 'ON EDIT')->first();
-             }
-             $actId = $remarkActivity ? $remarkActivity->id : 1;
-             
-             $path = null;
+               $activityName = $data['activity'] ?? $request->input('activity', 'ON CALL CENTRE ASSESSMENT');
+               $remarkActivity = DB::table('remark_activities')->where('activity', $activityName)->first();
+               // If not found, fallback to 'ON CALL CENTRE ASSESSMENT' or ID 1
+               if (!$remarkActivity) {
+                   $remarkActivity = DB::table('remark_activities')->where('activity', 'ON CALL CENTRE ASSESSMENT')->first();
+               }
+               $actId = $remarkActivity ? $remarkActivity->id : 10;
+               
+               $path = null;
              if ($request->hasFile('attachment')) {
                  $path = $request->file('attachment')->storePublicly('attachments', 'public');
              }
