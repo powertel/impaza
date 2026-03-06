@@ -191,7 +191,7 @@
                                 <div class="col-md-12 d-flex justify-content-end">
                                     <div class="form-check mt-2">
                                         <input class="form-check-input me-1" type="checkbox" id="resolvedOnCall-edit-{{ $fault->id }}" name="resolved_on_call" value="1" {{ old('resolved_on_call') ? 'checked' : '' }}>
-                                        <label class="form-check-label fs-5 fw-semibold ms-1" for="resolvedOnCall-edit-{{ $fault->id }}">Resolved on call</label>
+                                        <label class="form-check-label fs-5 fw-semibold ms-1" for="resolvedOnCall-edit-{{ $fault->id }}">Resolved</label>
                                     </div>
                                 </div>
                             </div>

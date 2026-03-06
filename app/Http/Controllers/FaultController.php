@@ -924,11 +924,23 @@ class FaultController extends Controller
              $data['confirmedRfo_id'] = $data['suspectedRfo_id'] ?? $fault->suspectedRfo_id;
              
              FaultLifecycle::recordStatusChange($fault, $nocClearedId, $request->user()->id);
+             
+             // Override activity if resolved
+             $remarkActivity = DB::table('remark_activities')->where('activity', 'On Call Centre Clear')->first();
+             if ($remarkActivity) {
+                 $data['activity'] = 'On Call Centre Clear';
+             }
         }
 
         if ($request->filled('remark') || $request->hasFile('attachment')) {
-             $remarkActivity = DB::table('remark_activities')->where('activity','=',$request->input('activity', 'ON EDIT'))->first();
+             $activityName = $data['activity'] ?? $request->input('activity', 'ON EDIT');
+             $remarkActivity = DB::table('remark_activities')->where('activity', $activityName)->first();
+             // If not found, fallback to 'ON EDIT' or ID 1
+             if (!$remarkActivity) {
+                 $remarkActivity = DB::table('remark_activities')->where('activity', 'ON EDIT')->first();
+             }
              $actId = $remarkActivity ? $remarkActivity->id : 1;
+             
              $path = null;
              if ($request->hasFile('attachment')) {
                  $path = $request->file('attachment')->storePublicly('attachments', 'public');
