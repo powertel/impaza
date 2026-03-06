@@ -139,7 +139,7 @@ class DepartmentFaultController extends Controller
 
         // Status filter: 'lt4' or specific 1/2/3
         if ($statusFilter === 'lt4') {
-            $faultsQuery->where('faults.status_id', '<', 4);
+            $faultsQuery->where('faults.status_id', '!=',6);
         } elseif (in_array($statusFilter, ['1','2','3'], true)) {
             $faultsQuery->where('faults.status_id', '=', (int)$statusFilter);
         }
@@ -199,7 +199,7 @@ class DepartmentFaultController extends Controller
 
         // Load open statuses (< 4) for dynamic filter options
         $openStatuses = DB::table('statuses')
-            ->where('id','<',4)
+            ->where('id','!=',$nocClearedId)
             ->orderBy('id','asc')
             ->get(['id','description']);
 
@@ -219,10 +219,10 @@ class DepartmentFaultController extends Controller
                 });
         };
         $ageStats = [
-            'open_total' => $base()->where('faults.status_id','<',4)->count(),
-            'open_today' => $base()->where('faults.status_id','<',4)->whereDate('faults.created_at', \Carbon\Carbon::today())->count(),
-            'open_lt72'  => $base()->where('faults.status_id','<',4)->where('faults.created_at', '>=', \Carbon\Carbon::now()->subHours(72))->count(),
-            'open_gt72'  => $base()->where('faults.status_id','<',4)->where('faults.created_at', '<', \Carbon\Carbon::now()->subHours(72))->count(),
+            'open_total' => $base()->where('faults.status_id','!=',$nocClearedId)->count(),
+            'open_today' => $base()->where('faults.status_id','!=',$nocClearedId)->whereDate('faults.created_at', \Carbon\Carbon::today())->count(),
+            'open_lt72'  => $base()->where('faults.status_id','!=',$nocClearedId)->where('faults.created_at', '>=', \Carbon\Carbon::now()->subHours(72))->count(),
+            'open_gt72'  => $base()->where('faults.status_id','!=',$nocClearedId)->where('faults.created_at', '<', \Carbon\Carbon::now()->subHours(72))->count(),
         ];
 
         return view('department_faults.index',compact('faults','remarksByFault','perPage','faultAges','faultAgeStart','faultAgeEnd','openStatuses','ageStats'))
