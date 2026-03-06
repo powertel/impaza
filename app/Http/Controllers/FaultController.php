@@ -112,7 +112,7 @@ class FaultController extends Controller
 
         // Status filter: 'lt4' or specific status id
         if ($statusFilter === 'lt4') {
-            $faultsQuery->where('faults.status_id', '<', 4);
+            $faultsQuery->where('faults.status_id', '!=',6);
         } elseif (ctype_digit((string) $statusFilter)) {
             $faultsQuery->where('faults.status_id', '=', (int)$statusFilter);
         }
@@ -197,10 +197,10 @@ class FaultController extends Controller
 
         // Age stats for open faults (status_id < 4)
         $ageStats = [
-            'open_total' => DB::table('faults')->where('status_id','<',4)->count(),
-            'open_today' => DB::table('faults')->where('status_id','<',4)->whereDate('created_at', Carbon::today())->count(),
-            'open_lt72'  => DB::table('faults')->where('status_id','<',4)->where('created_at', '>=', Carbon::now()->subHours(72))->count(),
-            'open_gt72'  => DB::table('faults')->where('status_id','<',4)->where('created_at', '<', Carbon::now()->subHours(72))->count(),
+            'open_total' => DB::table('faults')->where('status_id','!=',$nocClearedId)->count(),
+            'open_today' => DB::table('faults')->where('status_id','!=',$nocClearedId)->whereDate('created_at', Carbon::today())->count(),
+            'open_lt72'  => DB::table('faults')->where('status_id','!=',$nocClearedId)->where('created_at', '>=', Carbon::now()->subHours(72))->count(),
+            'open_gt72'  => DB::table('faults')->where('status_id','!=',$nocClearedId)->where('created_at', '<', Carbon::now()->subHours(72))->count(),
         ];
 
         return view('faults.index',compact('faults','customer','city','accountManager','location','link','pop','suspectedRFO','remarksByFault','openStatuses','ageStats','faultAges','faultAgeStart','faultAgeEnd'))

@@ -232,7 +232,7 @@ class HomeController extends Controller
         $openFaultsCount = $openFaultsQuery->count();
 
         $inProgressFaultsQuery = DB::table('faults')
-            ->where('status_id','<',4);
+            ->where('status_id','!=',$nocClearedId);
         if ($selectedRegion !== null) {
             $inProgressFaultsQuery->leftJoin('cities','faults.city_id','=','cities.id')
                                   ->where('cities.region','=',$selectedRegion);
