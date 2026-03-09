@@ -90,9 +90,9 @@ export default function DashboardScreen() {
             </View>
           </View>
 
-          {hasAnyPermission(['technician-configuration', 'assigned-fault-list']) && (
+          {hasAnyPermission(['technician-configuration', 'assigned-fault-list', 'noc-clear-faults-list', 'department-faults-list']) && (
             <>
-              <Text style={styles.sectionTitle}>{stats.periodLabel ? `Technician Stats (${stats.periodLabel})` : 'Technician Stats'}</Text>
+              <Text style={styles.sectionTitle}>{stats.periodLabel ? `Stats Overview (${stats.periodLabel})` : 'Stats Overview'}</Text>
               
               <View style={styles.statsGrid}>
                 <StatCard icon="clipboard" label="Assigned" value={stats.assigned} color={theme.colors.warning} />
