@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation, useIsFocused } from '@react-navigation/native';
 import { getFault } from '../services/api';
 import { theme } from '../styles/theme';
+import { usePermissions } from '../hooks/usePermissions';
 
 export default function FaultDetailScreen() {
   const route = useRoute();
@@ -15,6 +16,7 @@ export default function FaultDetailScreen() {
   const [loading, setLoading] = useState(false);
   const isFocused = useIsFocused();
   const [refreshing, setRefreshing] = useState(false);
+  const { hasPermission, hasAnyPermission } = usePermissions();
   const CONFIG_API_URL = Constants?.expoConfig?.extra?.apiUrl || Constants?.manifest?.extra?.apiUrl;
   const ASSET_ORIGIN = ((CONFIG_API_URL || 'https://impazamon.powertel.co.zw').replace(/\/$/, '')).replace(/\/api$/, '');
 
@@ -106,19 +108,19 @@ export default function FaultDetailScreen() {
           </View>
         )}
 
-        {String(fault.status_id) == '3' && (
+        {String(fault.status_id) == '3' && hasPermission('remark-create') && (
           <TouchableOpacity style={styles.secondaryBtn} onPress={() => navigation.navigate('AddRemark', { id })}>
             <Text style={styles.secondaryBtnText}>Add Remark</Text>
           </TouchableOpacity>
         )}
 
-        {String(fault.status_id) === '3' && (
+        {String(fault.status_id) === '3' && hasAnyPermission(['re-assign-fault', 'assign-fault']) && (
           <TouchableOpacity style={styles.secondaryBtn} onPress={() => navigation.navigate('EscalateFault', { id })}>
             <Text style={styles.secondaryBtnText}>Escalate</Text>
           </TouchableOpacity>
         )}
 
-        {String(fault.status_id) === '3' && (
+        {String(fault.status_id) === '3' && hasAnyPermission(['rectify-fault', 'clear-fault', 'noc-clear-faults-clear', 'chief-tech-clear-faults-clear']) && (
           <TouchableOpacity style={styles.primaryBtn} onPress={() => navigation.navigate('RectifyFault', { id })}>
             <Text style={styles.primaryBtnText}>Rectify Fault</Text>
           </TouchableOpacity>

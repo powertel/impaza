@@ -22,7 +22,7 @@ export default function EscalateFaultScreen() {
       setResult(res);
       if (res?.success) {
         Alert.alert('Success', 'Fault escalated successfully.', [
-          { text: 'OK', onPress: () => navigation.navigate('FaultDetail', { id, refetchAt: Date.now() }) }
+          { text: 'OK', onPress: () => navigation.navigate('Escalations') }
         ]);
       } else {
         Alert.alert('Error', res?.error || 'Failed to escalate fault');

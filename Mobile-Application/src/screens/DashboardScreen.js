@@ -6,11 +6,13 @@ import { useNavigation } from '@react-navigation/native';
 import { getTechnicianStats, setAuthToken } from '../services/api';
 import { theme } from '../styles/theme';
 import { UserContext } from '../context/UserContext';
+import { usePermissions } from '../hooks/usePermissions';
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { user } = useContext(UserContext);
+  const { hasPermission, hasAnyPermission } = usePermissions();
 
   const [stats, setStats] = useState({ assigned: 0, completed: 0, remaining: 0, completionRate: 0, avgResolutionSec: 0, periodLabel: '' });
   const [refreshing, setRefreshing] = useState(false);
@@ -88,36 +90,86 @@ export default function DashboardScreen() {
             </View>
           </View>
 
-          <Text style={styles.sectionTitle}>{stats.periodLabel ? `Technician Stats (${stats.periodLabel})` : 'Technician Stats'}</Text>
-          
-          <View style={styles.statsGrid}>
-            <StatCard icon="clipboard" label="Assigned" value={stats.assigned} color={theme.colors.warning} />
-            <StatCard icon="check-circle" label="Resolved" value={stats.completed} color={theme.colors.success} />
-            <StatCard icon="alert-circle" label="Remaining" value={stats.remaining} color={theme.colors.danger} />
-            <StatCard icon="pie-chart" label="Completion Rate" value={rateText} color={theme.colors.info} />
-          </View>
+          {hasAnyPermission(['technician-configuration', 'assigned-fault-list']) && (
+            <>
+              <Text style={styles.sectionTitle}>{stats.periodLabel ? `Technician Stats (${stats.periodLabel})` : 'Technician Stats'}</Text>
+              
+              <View style={styles.statsGrid}>
+                <StatCard icon="clipboard" label="Assigned" value={stats.assigned} color={theme.colors.warning} />
+                <StatCard icon="check-circle" label="Resolved" value={stats.completed} color={theme.colors.success} />
+                <StatCard icon="alert-circle" label="Remaining" value={stats.remaining} color={theme.colors.danger} />
+                <StatCard icon="pie-chart" label="Completion Rate" value={rateText} color={theme.colors.info} />
+              </View>
 
-          <View style={styles.avgResolutionCard}>
-            <Feather name="clock" size={theme.fontSizes.xl} color={theme.colors.dark} />
-            <Text style={styles.avgResolutionLabel}>Avg Resolution Time</Text>
-            <Text style={styles.avgResolutionValue}>{formatDuration(stats.avgResolutionSec)}</Text>
-          </View>
+              <View style={styles.avgResolutionCard}>
+                <Feather name="clock" size={theme.fontSizes.xl} color={theme.colors.dark} />
+                <Text style={styles.avgResolutionLabel}>Avg Resolution Time</Text>
+                <Text style={styles.avgResolutionValue}>{formatDuration(stats.avgResolutionSec)}</Text>
+              </View>
+            </>
+          )}
 
-          <TouchableOpacity style={styles.mainAction} onPress={() => navigation.navigate('My Faults')}>
-            <Text style={styles.mainActionText}>View My Faults</Text>
-            <AntDesign name="arrowright" size={theme.fontSizes.lg} color={theme.colors.white} />
-          </TouchableOpacity>
+          {hasAnyPermission(['fault-list', 'my-fault-list', 'assigned-fault-list']) && (
+            <TouchableOpacity style={styles.mainAction} onPress={() => navigation.navigate('My Faults')}>
+              <Text style={styles.mainActionText}>View My Faults</Text>
+              <AntDesign name="arrowright" size={theme.fontSizes.lg} color={theme.colors.white} />
+            </TouchableOpacity>
+          )}
   
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.quickRow}>
-            <TouchableOpacity style={styles.quickItem}>
-              <Feather name="list" size={theme.fontSizes.xl} color={theme.colors.dark} />
-              <Text style={styles.quickTitle}>All Faults</Text>
+            {hasPermission('assigned-fault-list') && (
+              <TouchableOpacity style={styles.quickItem} onPress={() => navigation.navigate('UnassignedFaults')}>
+                <Feather name="inbox" size={theme.fontSizes.xl} color={theme.colors.dark} />
+                <Text style={styles.quickTitle}>Unassigned</Text>
+              </TouchableOpacity>
+            )}
+            {hasAnyPermission(['department-faults-list', 'assigned-fault-list']) && (
+              <TouchableOpacity style={styles.quickItem} onPress={() => navigation.navigate('SectionFaults')}>
+                <Feather name="users" size={theme.fontSizes.xl} color={theme.colors.dark} />
+                <Text style={styles.quickTitle}>Section Faults</Text>
+              </TouchableOpacity>
+            )}
+            {hasAnyPermission(['fault-list', 'department-faults-list']) && (
+              <TouchableOpacity style={styles.quickItem}>
+                <Feather name="list" size={theme.fontSizes.xl} color={theme.colors.dark} />
+                <Text style={styles.quickTitle}>All Faults</Text>
+              </TouchableOpacity>
+            )}
+            {hasPermission('fault-assessment') && (
+              <TouchableOpacity style={styles.quickItem} onPress={() => navigation.navigate('Assessments')}>
+                <Feather name="check-square" size={theme.fontSizes.xl} color={theme.colors.dark} />
+                <Text style={styles.quickTitle}>Assess</Text>
+              </TouchableOpacity>
+            )}
+            {hasPermission('noc-clear-faults-list') && (
+              <TouchableOpacity style={styles.quickItem} onPress={() => navigation.navigate('RectifiedFaults')}>
+                <Feather name="check-circle" size={theme.fontSizes.xl} color={theme.colors.dark} />
+                <Text style={styles.quickTitle}>Rectified</Text>
+              </TouchableOpacity>
+            )}
+            {hasPermission('chief-tech-clear-faults-list') && (
+              <TouchableOpacity style={styles.quickItem} onPress={() => navigation.navigate('Escalations')}>
+                <Feather name="alert-triangle" size={theme.fontSizes.xl} color={theme.colors.dark} />
+                <Text style={styles.quickTitle}>Escalations</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity style={styles.quickItem} onPress={() => navigation.navigate('ResolvedFaults')}>
+              <Feather name="archive" size={theme.fontSizes.xl} color={theme.colors.dark} />
+              <Text style={styles.quickTitle}>Resolved</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.quickItem}>
-              <Feather name="bar-chart-2" size={theme.fontSizes.xl} color={theme.colors.dark} />
-              <Text style={styles.quickTitle}>Reports</Text>
-            </TouchableOpacity>
+            {hasPermission('refer-fault') && (
+              <TouchableOpacity style={styles.quickItem} onPress={() => navigation.navigate('ReferredFaults')}>
+                <Feather name="share-2" size={theme.fontSizes.xl} color={theme.colors.dark} />
+                <Text style={styles.quickTitle}>Referred</Text>
+              </TouchableOpacity>
+            )}
+            {hasPermission('reports') && (
+              <TouchableOpacity style={styles.quickItem}>
+                <Feather name="bar-chart-2" size={theme.fontSizes.xl} color={theme.colors.dark} />
+                <Text style={styles.quickTitle}>Reports</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </ScrollView>
        </SafeAreaView>
@@ -171,13 +223,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   mainActionText: { color: theme.colors.white, fontWeight: 'bold', fontSize: theme.fontSizes.md, marginRight: theme.spacing.sm },
-  quickRow: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: theme.spacing.lg },
+  quickRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', paddingHorizontal: theme.spacing.lg },
   quickItem: {
     backgroundColor: theme.colors.veryLightGray,
     borderRadius: theme.spacing.md,
     padding: theme.spacing.lg,
     width: '48%',
     alignItems: 'center',
+    marginBottom: theme.spacing.md,
   },
   quickTitle: { fontWeight: 'bold', color: theme.colors.dark, fontSize: theme.fontSizes.sm, marginTop: theme.spacing.sm },
 });

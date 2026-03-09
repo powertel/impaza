@@ -11,6 +11,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Services\FaultLifecycle;
 
+use App\Models\AutoAssignSetting;
+use App\Models\User;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+
 class FaultController extends Controller
 {
     public function index(Request $request)
@@ -334,6 +339,697 @@ class FaultController extends Controller
         } catch (\Throwable $e) {
             \DB::rollBack();
             return response()->json(['success' => false, 'error' => 'Failed to escalate'], 500);
+        }
+    }
+
+    public function unassigned(Request $request)
+    {
+        // Permission check: assigned-fault-list
+        if (!$request->user()->can('assigned-fault-list')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $faults = DB::table('faults')
+            ->leftJoin('fault_section','faults.id','=','fault_section.fault_id')
+            ->leftJoin('customers','faults.customer_id','=','customers.id')
+            ->leftJoin('cities','faults.city_id','=','cities.id')
+            ->leftJoin('statuses','faults.status_id','=','statuses.id')
+            ->where('fault_section.section_id','=', $request->user()->section_id)
+            ->where('faults.status_id','=', 2) // Status 2 = Open/Unassigned
+            ->whereNull('faults.assignedTo')
+            ->when(in_array((int)$request->user()->section_id, [2, 3], true), function($q) use ($request) {
+                $q->where('cities.region','=', $request->user()->region);
+            })
+            ->orderBy('faults.created_at', 'desc')
+            ->get([
+                'faults.id',
+                'faults.fault_ref_number',
+                'customers.customer',
+                'statuses.description as status',
+                'faults.priorityLevel',
+                'faults.created_at',
+                'cities.city',
+                'faults.serviceType'
+            ]);
+
+        return response()->json(['faults' => $faults]);
+    }
+
+    public function sectionFaults(Request $request)
+    {
+        // Permission check: department-faults-list or assigned-fault-list
+        if (!$request->user()->can('department-faults-list') && !$request->user()->can('assigned-fault-list')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $faults = DB::table('faults')
+            ->leftJoin('fault_section','faults.id','=','fault_section.fault_id')
+            ->leftJoin('users','faults.assignedTo','=','users.id')
+            ->leftJoin('customers','faults.customer_id','=','customers.id')
+            ->leftJoin('cities','faults.city_id','=','cities.id')
+            ->leftJoin('statuses','faults.status_id','=','statuses.id')
+            ->where('fault_section.section_id','=', $request->user()->section_id)
+            ->when(in_array((int)$request->user()->section_id, [2, 3], true), function($q) use ($request) {
+                $q->where('cities.region','=', $request->user()->region);
+            })
+            ->orderBy('faults.created_at', 'desc')
+            ->limit(100)
+            ->get([
+                'faults.id',
+                'faults.fault_ref_number',
+                'customers.customer',
+                'statuses.description as status',
+                'faults.priorityLevel',
+                'faults.created_at',
+                'cities.city',
+                'users.name as assignedToName',
+                'faults.assignedTo'
+            ]);
+
+        return response()->json(['faults' => $faults]);
+    }
+
+    public function assignableTechnicians(Request $request)
+    {
+        $technicians = DB::table('users')
+            ->leftJoin('sections','users.section_id','=','sections.id')
+            ->leftJoin('user_statuses','users.user_status','=','user_statuses.id')
+            ->where('users.section_id','=', $request->user()->section_id)
+            ->when(in_array((int)$request->user()->section_id, [2, 3], true), function($q) use ($request) {
+                $q->where('users.region','=', $request->user()->region);
+            })
+            ->where('user_statuses.status_name','=','Assignable')
+            ->orderBy('users.name','asc')
+            ->get(['users.id','users.name']);
+
+        return response()->json($technicians);
+    }
+
+    public function assign(Request $request)
+    {
+        if (!$request->user()->can('assign-fault')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'fault_id' => 'required|integer|exists:faults,id',
+            'assignedTo' => 'required|integer|exists:users,id',
+        ]);
+
+        $fault = Fault::find($request->input('fault_id'));
+        if (!$fault) {
+            return response()->json(['message' => 'Fault not found'], 404);
+        }
+
+        if ((int)$fault->status_id !== 2 || !is_null($fault->assignedTo)) {
+            return response()->json(['message' => 'Fault is not in an assignable state'], 422);
+        }
+
+        // Region check
+        $faultRegion = \DB::table('cities')->where('id', $fault->city_id)->value('region');
+        $enforceRegion = in_array((int)$request->user()->section_id, [2, 3], true);
+        if ($enforceRegion && $faultRegion !== $request->user()->region) {
+            return response()->json(['message' => 'You can only assign faults in your region'], 403);
+        }
+
+        // Ensure selected technician is in current section/region and eligible
+        $isTechEligible = \DB::table('users')
+            ->leftJoin('user_statuses','users.user_status','=','user_statuses.id')
+            ->where('users.id', '=', $request->input('assignedTo'))
+            ->where('users.section_id', '=', $request->user()->section_id)
+            ->when($enforceRegion, function($q) use ($request) {
+                $q->where('users.region', '=', $request->user()->region);
+            })
+            ->where('user_statuses.status_name', '=', 'Assignable')
+            ->exists();
+
+        if (!$isTechEligible) {
+            return response()->json(['message' => 'Selected technician is not eligible'], 422);
+        }
+
+        $fault->update([
+            'assignedTo' => (int)$request->input('assignedTo'),
+            'status_id' => 3,
+        ]);
+
+        FaultLifecycle::recordStatusChange($fault, 3, $request->user()->id);
+        FaultLifecycle::startAssignment(
+            $fault,
+            (int)$request->input('assignedTo'),
+            $request->user()->id,
+            FaultLifecycle::isOffHours(),
+            $faultRegion
+        );
+
+        return response()->json(['success' => true, 'message' => 'Fault assigned successfully']);
+    }
+
+    public function reassign(Request $request, $id)
+    {
+        if (!$request->user()->can('re-assign-fault')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        try {
+            $validated = $request->validate([
+                'assignedTo' => ['required', 'exists:users,id'],
+                'remark' => ['required','string'],
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::warning('Re-assign validation failed', [
+                'fault_id' => (int)$id,
+                'user_id' => optional($request->user())->id,
+                'path' => $request->path(),
+                'errors' => $e->errors(),
+            ]);
+            return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
+        }
+
+        $fault = Fault::find($id);
+        if (!$fault) {
+            return response()->json(['message' => 'Fault not found'], 404);
+        }
+
+        // Region enforcement for sections 2 and 3
+        $enforceRegion = in_array((int)$request->user()->section_id, [2, 3], true);
+        
+        // Ensure selected technician is eligible
+        $isTechEligible = \DB::table('users')
+            ->leftJoin('user_statuses','users.user_status','=','user_statuses.id')
+            ->where('users.id', '=', $request->input('assignedTo'))
+            ->where('users.section_id', '=', $request->user()->section_id)
+            ->when($enforceRegion, function($q) use ($request) {
+                $q->where('users.region', '=', $request->user()->region);
+            })
+            ->where('user_statuses.status_name', '=', 'Assignable')
+            ->exists();
+
+        if (!$isTechEligible) {
+            return response()->json(['message' => 'Selected technician is not eligible'], 422);
+        }
+
+        $fault->update([
+            'assignedTo' => (int)$request->input('assignedTo'),
+        ]);
+
+        // Log the reassignment remark
+        Remark::create([
+            'fault_id' => $fault->id,
+            'user_id' => $request->user()->id,
+            'remark' => 'Re-assigned: ' . $request->input('remark'),
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Fault re-assigned successfully']);
+    }
+
+    public function assessments(Request $request)
+    {
+        // Status 1 = Logged/Pending Assessment
+        $faults = DB::table('faults')
+            ->leftJoin('customers','faults.customer_id','=','customers.id')
+            ->leftJoin('statuses','faults.status_id','=','statuses.id')
+            ->leftJoin('cities','faults.city_id','=','cities.id')
+            ->where('faults.status_id', '=', 1)
+            ->orderBy('faults.created_at', 'desc')
+            ->get([
+                'faults.id',
+                'faults.fault_ref_number',
+                'customers.customer',
+                'statuses.description as status',
+                'faults.priorityLevel',
+                'faults.created_at',
+                'cities.city',
+                'faults.serviceType'
+            ]);
+
+        return response()->json(['faults' => $faults]);
+    }
+
+    public function assess(Request $request, $id)
+    {
+        if (!$request->user()->can('fault-assessment')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'priorityLevel' => ['required'],
+            'faultType' => ['required'],
+            'remark' => ['required','string'],
+        ]);
+
+        $fault = Fault::find($id);
+        if (!$fault) {
+            return response()->json(['message' => 'Fault not found'], 404);
+        }
+
+        DB::beginTransaction();
+        try {
+            $req = $request->only(['priorityLevel','faultType']);
+            $req['status_id'] = 2; // Unassigned
+            $req['assessed_by'] = $request->user()->id;
+            $fault->update($req);
+            
+            FaultLifecycle::recordStatusChange($fault, 2, $request->user()->id);
+
+            // Determine section based on faultType
+            $sectionId = null;
+            if ($request->input('faultType') === 'Logical') {
+                $sectionId = 1;
+            } elseif ($request->input('faultType') === 'Physical') {
+                $sectionId = 2;
+            }
+
+            // Update FaultSection
+            \App\Models\FaultSection::updateOrCreate(
+                ['fault_id' => $id],
+                ['section_id' => $sectionId]
+            );
+
+            if (!is_null($sectionId)) {
+                $this->autoAssign($sectionId);
+            }
+
+            // Log remark
+            $remarkActivityId = (int) (DB::table('remark_activities')
+                ->where('activity', '=', 'ON ASSESSMENT')
+                ->value('id') ?? 0);
+
+            Remark::create([
+                'fault_id' => $fault->id,
+                'user_id' => $request->user()->id,
+                'remark' => $validated['remark'],
+                'remarkActivity_id' => $remarkActivityId,
+            ]);
+
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Fault Assessed']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Assessment failed'], 500);
+        }
+    }
+
+    public function rectified(Request $request)
+    {
+        // Permission check: noc-clear-faults-list
+        if (!$request->user()->can('noc-clear-faults-list')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        // Status 4 = Rectified
+        $faults = DB::table('faults')
+            ->leftJoin('customers','faults.customer_id','=','customers.id')
+            ->leftJoin('statuses','faults.status_id','=','statuses.id')
+            ->leftJoin('cities','faults.city_id','=','cities.id')
+            ->leftJoin('users','faults.assignedTo','=','users.id')
+            ->where('faults.status_id', '=', 4)
+            ->orderBy('faults.created_at', 'desc')
+            ->get([
+                'faults.id',
+                'faults.fault_ref_number',
+                'customers.customer',
+                'statuses.description as status',
+                'faults.priorityLevel',
+                'faults.created_at',
+                'cities.city',
+                'users.name as assignedToName'
+            ]);
+
+        return response()->json(['faults' => $faults]);
+    }
+
+    public function clear(Request $request, $id)
+    {
+        if (!$request->user()->can('noc-clear-faults-clear')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'remark' => ['required', 'string'],
+            'confirmedRfo_id' => ['nullable', 'integer', 'exists:reasons_for_outages,id'],
+        ]);
+
+        $fault = Fault::find($id);
+        if (!$fault) return response()->json(['message' => 'Fault not found'], 404);
+
+        $updateData = ['status_id' => 6]; // NOC Cleared
+        if ($request->filled('confirmedRfo_id')) {
+            $updateData['confirmedRfo_id'] = (int) $validated['confirmedRfo_id'];
+        }
+        $fault->update($updateData);
+        FaultLifecycle::recordStatusChange($fault, 6, $request->user()->id);
+        FaultLifecycle::resolveAssignment($fault);
+
+        $remarkActivityId = (int) (DB::table('remark_activities')
+            ->where('activity', '=', 'ON NOC CLEAR')
+            ->value('id') ?? 0);
+
+        Remark::create([
+            'fault_id' => $fault->id,
+            'user_id' => $request->user()->id,
+            'remark' => $validated['remark'],
+            'remarkActivity_id' => $remarkActivityId,
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Fault Cleared']);
+    }
+
+    public function escalations(Request $request)
+    {
+        if (!$request->user()->can('chief-tech-clear-faults-list')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $escId = FaultLifecycle::escalatedId();
+        $mgrEscId = FaultLifecycle::managerEscalatedId();
+
+        $query = DB::table('faults')
+            ->leftJoin('customers','faults.customer_id','=','customers.id')
+            ->leftJoin('statuses','faults.status_id','=','statuses.id')
+            ->leftJoin('cities','faults.city_id','=','cities.id')
+            ->leftJoin('users','faults.assignedTo','=','users.id')
+            ->whereIn('faults.status_id', [$escId, $mgrEscId])
+            ->orderBy('faults.created_at', 'desc');
+
+        if ((int)($request->user()->section_id ?? 0) !== 1) {
+             // Logic from ChiefTechEscalationsController
+             // Usually filters by section if not section 1 (assuming section 1 is NOC/Admin?)
+             // Keeping it simple for mobile api logic similar to web
+        }
+
+        $faults = $query->get([
+            'faults.id',
+            'faults.fault_ref_number',
+            'customers.customer',
+            'statuses.description as status',
+            'faults.priorityLevel',
+            'faults.created_at',
+            'cities.city',
+            'users.name as assignedToName'
+        ]);
+
+        return response()->json(['faults' => $faults]);
+    }
+
+    public function resolved(Request $request)
+    {
+        // Status 6 = NOC Cleared / Resolved
+        // Permission: Typically open to all auth users or 'reports'
+        
+        $nocClearedId = 6;
+        $faults = DB::table('faults')
+            ->leftJoin('customers','faults.customer_id','=','customers.id')
+            ->leftJoin('statuses','faults.status_id','=','statuses.id')
+            ->leftJoin('cities','faults.city_id','=','cities.id')
+            ->leftJoin('users','faults.assignedTo','=','users.id')
+            ->where('faults.status_id', '=', $nocClearedId)
+            ->orderBy('faults.updated_at', 'desc')
+            ->limit(50) // Limit to recent resolved
+            ->get([
+                'faults.id',
+                'faults.fault_ref_number',
+                'customers.customer',
+                'statuses.description as status',
+                'faults.priorityLevel',
+                'faults.created_at',
+                'faults.updated_at',
+                'cities.city',
+                'users.name as assignedToName'
+            ]);
+
+        return response()->json(['faults' => $faults]);
+    }
+
+    public function referred(Request $request)
+    {
+        // Status 7 = Referred
+        // Permission: refer-fault? or just list
+        $faults = DB::table('faults')
+            ->leftJoin('customers','faults.customer_id','=','customers.id')
+            ->leftJoin('statuses','faults.status_id','=','statuses.id')
+            ->leftJoin('cities','faults.city_id','=','cities.id')
+            ->leftJoin('users','faults.assignedTo','=','users.id')
+            ->where('faults.status_id', '=', 7)
+            ->orderBy('faults.created_at', 'desc')
+            ->get([
+                'faults.id',
+                'faults.fault_ref_number',
+                'customers.customer',
+                'statuses.description as status',
+                'faults.priorityLevel',
+                'faults.created_at',
+                'cities.city',
+                'users.name as assignedToName'
+            ]);
+
+        return response()->json(['faults' => $faults]);
+    }
+
+    public function revoke(Request $request, $id)
+    {
+        // Permission check? ResolvedController doesn't show one explicitly, but usually it's implied.
+        // Let's assume basic auth for now or check roles in frontend.
+
+        $validated = $request->validate([
+            'remark' => ['required','string']
+        ]);
+
+        $fault = Fault::find($id);
+        if (!$fault) return response()->json(['message' => 'Fault not found'], 404);
+
+        $fault->update(['status_id' => 4]); // Reopen to Rectified
+        FaultLifecycle::recordStatusChange($fault, 4, $request->user()->id);
+        FaultLifecycle::reopenStageForStatus($fault, 4, $request->user()->id);
+
+        Remark::create([
+            'fault_id' => $fault->id,
+            'user_id' => $request->user()->id,
+            'remark' => 'Resolved revoke: '.$validated['remark'],
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Fault Reopened']);
+    }
+
+    public function refer(Request $request, $id)
+    {
+        if (!$request->user()->can('refer-fault')) {
+             return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'section_id' => ['required','exists:sections,id'],
+            'remark' => ['required','string']
+        ]);
+
+        $fault = Fault::find($id);
+        if (!$fault) return response()->json(['message' => 'Fault not found'], 404);
+
+        DB::beginTransaction();
+        try {
+            $prev = (int)($fault->status_id ?? 0);
+            $fault->update(['status_id' => 7]);
+            FaultLifecycle::recordStatusChange($fault, 7, $request->user()->id);
+            FaultLifecycle::resolveAssignment($fault);
+
+            $section = Section::find((int)$validated['section_id']);
+            $note = $section ? ('Referred to Section: ' . ($section->section ?? 'Section') . "\n" . $validated['remark']) : $validated['remark'];
+
+            \App\Models\FaultReferral::create([
+                'fault_id' => $fault->id,
+                'from_section_id' => $request->user()->section_id,
+                'to_section_id' => (int)$validated['section_id'],
+                'referred_by' => $request->user()->id,
+                'previous_status_id' => $prev,
+                'work_note' => $note,
+                'started_at' => now(),
+            ]);
+
+            Remark::create([
+                'fault_id' => $fault->id,
+                'user_id' => $request->user()->id,
+                'remark' => $note,
+            ]);
+
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Fault Referred']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Referral failed'], 500);
+        }
+    }
+
+    private function autoAssign($section_id)
+    {
+        $scopeSectionId = (int)$section_id;
+
+        $settingsCollection = AutoAssignSetting::query()
+            ->where('scope_section_id', $scopeSectionId)
+            ->where('auto_assign_enabled', true)
+            ->get();
+
+        if ($settingsCollection->isEmpty()) {
+            Log::info('Auto-assign skipped: no enabled settings for section', [
+                'assessed_section_id' => $scopeSectionId,
+            ]);
+            return;
+        }
+
+        foreach ($settingsCollection as $settings) {
+            $scopeRegion = $settings->scope_region; 
+
+            $considerRegion = (bool)($settings->consider_region ?? true);
+            $considerZones = (bool)($settings->consider_zones ?? false);
+            $considerLeave = (bool)($settings->consider_leave ?? true);
+            $isOffHours = \App\Services\FaultLifecycle::isOffHours();
+            $isWeekendOff = (bool)($settings->weekend_standby_enabled ?? true) && now()->isWeekend();
+
+            // 1. Get Eligible Technicians for this Scope
+            $usersQuery = User::join('departments','users.department_id','=','departments.id')
+                ->leftjoin('sections','users.section_id','=','sections.id')
+                ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
+                ->where('sections.id','=',$scopeSectionId)
+                ->when(in_array($scopeSectionId, [2,3], true) && !empty($scopeRegion), function($q) use ($scopeRegion) {
+                    $q->where('users.region', '=', $scopeRegion);
+                })
+                ->where(function($q) use ($isOffHours) {
+                    if ($isOffHours) {
+                        $q->whereIn('user_statuses.status_name', ['Standby','Assignable']);
+                    } else {
+                        $q->where('user_statuses.status_name', '=', 'Assignable');
+                    }
+                })
+                ->whereNotIn('user_statuses.status_name', $considerLeave ? ['Unassignable','On Leave'] : ['Unassignable'])
+                ->when($isOffHours, function($q) use ($isWeekendOff) {
+                    if ($isWeekendOff) {
+                        $q->where('users.weekend_standby', '=', true);
+                    } else {
+                        $q->where('users.weekly_standby', '=', true);
+                    }
+                });
+
+            $users = $usersQuery->pluck('users.id')->toArray();
+            
+            if (empty($users)) {
+                 $users = User::join('departments','users.department_id','=','departments.id')
+                    ->leftjoin('sections','users.section_id','=','sections.id')
+                    ->leftjoin('user_statuses','users.user_status','=','user_statuses.id')
+                    ->where('sections.id','=',$scopeSectionId)
+                    ->where('user_statuses.status_name', '=', 'Assignable')
+                    ->when(in_array($scopeSectionId, [2,3], true) && !empty($scopeRegion), function($q) use ($scopeRegion) {
+                        $q->where('users.region', '=', $scopeRegion);
+                    })
+                    ->whereNotIn('user_statuses.status_name', $considerLeave ? ['Unassignable','On Leave'] : ['Unassignable'])
+                    ->pluck('users.id')
+                    ->toArray();
+                 
+                 if (!empty($users)) {
+                    Log::warning('Auto-assign fallback: relaxed technician pool used', [
+                        'section_id' => $scopeSectionId,
+                        'scope_region' => $scopeRegion,
+                    ]);
+                 }
+            }
+
+            if (empty($users)) {
+                continue; 
+            }
+
+            // 2. Find unassigned assessed faults matching this scope
+            $faults = DB::table('fault_section')
+                ->leftjoin('faults','fault_section.fault_id','=','faults.id')
+                ->leftJoin('cities', 'faults.city_id', '=', 'cities.id')
+                ->leftJoin('pops', 'faults.pop_id', '=', 'pops.id')
+                ->where('faults.status_id','=',2) // Assessed
+                ->whereNull('faults.assignedTo')
+                ->where('fault_section.section_id','=',$scopeSectionId)
+                ->when(in_array($scopeSectionId, [2,3], true) && !empty($scopeRegion), function($q) use ($scopeRegion) {
+                    $q->where('cities.region', '=', $scopeRegion);
+                })
+                ->select('faults.id', 'cities.region as fault_region', 'pops.zone_id')
+                ->get();
+
+            if ($faults->isEmpty()) {
+                continue;
+            }
+
+            // 3. Round-Robin Assignment Loop
+            $rrKeySuffix = in_array($scopeSectionId, [2,3], true) ? ($scopeRegion ?: 'all') : 'all';
+            $rrKey = 'last_assigned_user_index_' . $scopeSectionId . '_' . $rrKeySuffix;
+            $lastAssignedUserIndex = Cache::get($rrKey, 0);
+
+            foreach ($faults as $f) {
+                $autoAssign = $f->id;
+                $faultRegion = $f->fault_region;
+                $zoneId = $f->zone_id;
+                
+                $eligibleUsers = $users;
+                $appliedZoneFilter = false;
+
+                if ($considerZones && $zoneId) {
+                    $zoneUserIds = \DB::table('technician_zone')
+                        ->where('zone_id', $zoneId)
+                        ->whereIn('user_id', $eligibleUsers)
+                        ->pluck('user_id')
+                        ->toArray();
+                    
+                    if (!empty($zoneUserIds)) {
+                        $eligibleUsers = $zoneUserIds;
+                        $appliedZoneFilter = true;
+                    }
+                }
+
+                if (!$appliedZoneFilter && $considerRegion && $faultRegion && empty($scopeRegion)) {
+                    $regionUserIds = User::whereIn('id', $eligibleUsers)
+                        ->where('region', $faultRegion)
+                        ->pluck('id')
+                        ->toArray();
+                    
+                    if (!empty($regionUserIds)) {
+                        $eligibleUsers = $regionUserIds;
+                    }
+                }
+
+                if (empty($eligibleUsers)) {
+                    Log::info('Auto-assign skipped for fault: no eligible technicians', [
+                        'fault_id' => $autoAssign,
+                        'section_id' => $scopeSectionId,
+                        'scope_region' => $scopeRegion,
+                    ]);
+                    continue;
+                }
+
+                $currentRrKey = $rrKey;
+                $currentIndex = $lastAssignedUserIndex;
+                if ($appliedZoneFilter) {
+                    $currentRrKey = 'last_assigned_user_index_' . $scopeSectionId . '_zone_' . $zoneId;
+                    $currentIndex = Cache::get($currentRrKey, 0);
+                }
+
+                $eligibleUsers = array_values($eligibleUsers);
+                $idx = $currentIndex % count($eligibleUsers);
+                $selectedUserId = $eligibleUsers[$idx];
+
+                $assign = Fault::find($autoAssign);
+                if (!$assign) continue;
+
+                $req = [];
+                $req['assignedTo'] = $selectedUserId;
+                $req['status_id'] = 3;
+                $assign->update($req);
+                
+                FaultLifecycle::recordStatusChange($assign, 3, auth()->id());
+                FaultLifecycle::startAssignment($assign, $selectedUserId, auth()->id(), $isOffHours, $faultRegion);
+
+                $nextIndex = $idx + 1;
+                Cache::put($currentRrKey, $nextIndex);
+                
+                if (!$appliedZoneFilter) {
+                    $lastAssignedUserIndex = $nextIndex;
+                    Cache::put($rrKey, $lastAssignedUserIndex);
+                }
+                
+                Log::info("Auto-assigned fault {$autoAssign} to user {$selectedUserId}");
+            }
         }
     }
 }

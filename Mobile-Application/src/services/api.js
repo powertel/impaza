@@ -3,7 +3,7 @@ import Constants from 'expo-constants';
 // Prefer Expo config (app.json/eas.json) for API URL. Avoid using process.env
 // to prevent accidental overrides with local IPs during web dev.
 const CONFIG_API_URL = Constants?.expoConfig?.extra?.apiUrl || Constants?.manifest?.extra?.apiUrl;
-const API_ORIGIN = (CONFIG_API_URL || 'https://impazamon.powertel.co.zw').replace(/\/$/, '');
+const API_ORIGIN = (CONFIG_API_URL || 'http://localhost:8087').replace(/\/$/, '');
 const API_URL = `${API_ORIGIN}`;
 if (__DEV__) console.log('API_URL', API_URL);
 
@@ -67,6 +67,47 @@ export async function addFaultRemark(id, payload) {
   return request(`/mobile/faults/${id}/remarks`, { method: 'POST', body: JSON.stringify(payload) });
 }
 
+export async function getAssessments() {
+  const data = await request('/mobile/faults/assessments');
+  return Array.isArray(data) ? data : (data?.faults || []);
+}
+
+export async function getRectifiedFaults() {
+  const data = await request('/mobile/faults/rectified');
+  return Array.isArray(data) ? data : (data?.faults || []);
+}
+
+export async function getEscalations() {
+  const data = await request('/mobile/faults/escalations');
+  return Array.isArray(data) ? data : (data?.faults || []);
+}
+
+export async function getResolvedFaults() {
+  const data = await request('/mobile/faults/resolved');
+  return Array.isArray(data) ? data : (data?.faults || []);
+}
+
+export async function getReferredFaults() {
+  const data = await request('/mobile/faults/referred');
+  return Array.isArray(data) ? data : (data?.faults || []);
+}
+
+export async function assessFault(id, payload) {
+  return request(`/mobile/faults/${id}/assess`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export async function clearFault(id, payload) {
+  return request(`/mobile/faults/${id}/clear`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export async function revokeFault(id, payload) {
+  return request(`/mobile/faults/${id}/revoke`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export async function referFault(id, payload) {
+  return request(`/mobile/faults/${id}/refer`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
 export async function getTechnicianStats(params = {}) {
   const query = Object.keys(params || {}).length ? `?${new URLSearchParams(params).toString()}` : '';
   return request(`/mobile/technician-stats${query}`);
@@ -82,4 +123,26 @@ export async function getSections() {
 
 export async function escalateFault(id, payload) {
   return request(`/mobile/faults/${id}/escalate`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export async function getUnassignedFaults() {
+  const data = await request('/mobile/faults/unassigned');
+  return Array.isArray(data) ? data : (data?.faults || []);
+}
+
+export async function getSectionFaults() {
+  const data = await request('/mobile/faults/section');
+  return Array.isArray(data) ? data : (data?.faults || []);
+}
+
+export async function getAssignableTechnicians() {
+  return request('/mobile/technicians/assignable');
+}
+
+export async function assignFault(payload) {
+  return request('/mobile/faults/assign', { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export async function reassignFault(id, payload) {
+  return request(`/mobile/faults/${id}/reassign`, { method: 'POST', body: JSON.stringify(payload) });
 }

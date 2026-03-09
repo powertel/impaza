@@ -54,7 +54,7 @@ export default function RectifyFaultScreen() {
       }
       setResult(res);
       Alert.alert('Success', 'Fault rectified successfully.', [
-        { text: 'OK', onPress: () => navigation.navigate('FaultDetail', { id, refetchAt: Date.now() }) }
+        { text: 'OK', onPress: () => navigation.navigate('RectifiedFaults') }
       ]);
     } catch (e) {
       setResult({ error: 'Failed to submit rectification.' });

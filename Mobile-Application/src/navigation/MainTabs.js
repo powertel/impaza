@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { AntDesign, Feather } from '@expo/vector-icons';
+import { usePermissions } from '../hooks/usePermissions';
 
 import DashboardScreen from '../screens/DashboardScreen';
 import FaultsListScreen from '../screens/FaultsListScreen';
@@ -9,6 +10,18 @@ import ProfileScreen from '../screens/ProfileScreen';
 const Tab = createBottomTabNavigator();
 
 export default function MainTabs() {
+  const { hasPermission, hasAnyPermission, hasRole } = usePermissions();
+  
+  // Determine if the user should see the "My Faults" tab
+  // This logic can be expanded based on specific roles or permissions
+  const showMyFaults = hasAnyPermission([
+    'fault-list', 
+    'my-fault-list', 
+    'assigned-fault-list', 
+    'noc-clear-faults-list', 
+    'chief-tech-clear-faults-list'
+  ]) || hasRole('Technician') || hasRole('Noc Supervisor') || hasRole('Chief Technician') || hasRole('NOC');
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -24,7 +37,9 @@ export default function MainTabs() {
       })}
     >
       <Tab.Screen name="Dashboard" component={DashboardScreen} />
-      <Tab.Screen name="My Faults" component={FaultsListScreen} />
+      {showMyFaults && (
+        <Tab.Screen name="My Faults" component={FaultsListScreen} />
+      )}
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
