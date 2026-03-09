@@ -27,7 +27,8 @@ export default function DashboardScreen() {
       const completionRate = (typeof data?.completionRate === 'number') ? data.completionRate : (assigned > 0 ? Math.round((completed / assigned) * 100) : 0);
       const avgResolutionSec = data?.avgResolutionSec ?? 0;
       const periodLabel = data?.periodLabel ?? '';
-      setStats({ assigned, completed, remaining, completionRate, avgResolutionSec, periodLabel });
+      const waitingAssessment = data?.waitingAssessment ?? 0;
+      setStats({ assigned, completed, remaining, completionRate, avgResolutionSec, periodLabel, waitingAssessment });
     } catch (e) {
       // swallow
     } finally {
@@ -90,7 +91,7 @@ export default function DashboardScreen() {
             </View>
           </View>
 
-          {hasAnyPermission(['technician-configuration', 'assigned-fault-list', 'noc-clear-faults-list', 'department-faults-list']) && (
+          {hasAnyPermission(['technician-configuration', 'assigned-fault-list', 'noc-clear-faults-list', 'department-faults-list', 'chief-tech-clear-faults-list', 'my-fault-list']) && (
             <>
               <Text style={styles.sectionTitle}>{stats.periodLabel ? `Stats Overview (${stats.periodLabel})` : 'Stats Overview'}</Text>
               
@@ -99,6 +100,9 @@ export default function DashboardScreen() {
                 <StatCard icon="check-circle" label="Resolved" value={stats.completed} color={theme.colors.success} />
                 <StatCard icon="alert-circle" label="Remaining" value={stats.remaining} color={theme.colors.danger} />
                 <StatCard icon="pie-chart" label="Completion Rate" value={rateText} color={theme.colors.info} />
+                {stats.waitingAssessment > 0 && (
+                  <StatCard icon="clock" label="Pending Assessment" value={stats.waitingAssessment} color={theme.colors.primary} />
+                )}
               </View>
 
               <View style={styles.avgResolutionCard}>
