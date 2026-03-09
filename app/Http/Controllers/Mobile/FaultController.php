@@ -42,7 +42,31 @@ class FaultController extends Controller
                 $join->whereNull('fsl.ended_at');
             })
             ->orderBy('faults.created_at', 'desc')
-            ->where('faults.assignedTo', '=', $userId);
+            ->where('faults.assignedTo', '=', $userId)
+            ->select([
+                'faults.id',
+                'customers.customer',
+                'faults.contactName',
+                'faults.phoneNumber',
+                'faults.contactEmail',
+                'faults.fault_ref_number',
+                'faults.address',
+                'account_manager_users.name as accountManager',
+                'links.link',
+                'statuses.id as status_id',
+                'statuses.description as status',
+                'assessed_users.name as assessedBy',
+                'faults.serviceType',
+                'faults.serviceAttribute',
+                'faults.faultType',
+                'faults.priorityLevel',
+                'faults.created_at',
+                'cities.city as city',
+                'suburbs.suburb as suburb',
+                'pops.pop as pop',
+                'reasons_for_outages.RFO as RFO',
+                'fsl.started_at as stage_started_at'
+            ]);
 
         if ($q !== '') {
             $like = "%".$q."%";
@@ -89,7 +113,7 @@ class FaultController extends Controller
 
         $faultAges = [];$faultAgeStart = [];$faultAgeEnd = [];
         $nocClearedId = (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
-        $faultIdsList = $faults->pluck('id')->all();
+        $faultIdsList = collect($faults)->pluck('id')->all();
         if (!empty($faultIdsList)) {
             $clearedLogs = DB::table('fault_stage_logs')
                 ->whereIn('fault_id', $faultIdsList)
@@ -358,11 +382,17 @@ class FaultController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $faults = DB::table('faults')
+        $perPage = (int) $request->query('per_page', 20);
+        $q = trim((string) $request->query('q', ''));
+
+        $query = DB::table('faults')
             ->leftJoin('fault_section','faults.id','=','fault_section.fault_id')
             ->leftJoin('customers','faults.customer_id','=','customers.id')
             ->leftJoin('cities','faults.city_id','=','cities.id')
             ->leftJoin('statuses','faults.status_id','=','statuses.id')
+            ->leftJoin('suburbs','faults.suburb_id','=','suburbs.id')
+            ->leftJoin('pops','faults.pop_id','=','pops.id')
+            ->leftJoin('links','faults.link_id','=','links.id')
             ->where('fault_section.section_id','=', $request->user()->section_id)
             ->where('faults.status_id','=', 2) // Status 2 = Open/Unassigned
             ->whereNull('faults.assignedTo')
@@ -370,7 +400,7 @@ class FaultController extends Controller
                 $q->where('cities.region','=', $request->user()->region);
             })
             ->orderBy('faults.created_at', 'desc')
-            ->get([
+            ->select([
                 'faults.id',
                 'faults.fault_ref_number',
                 'customers.customer',
@@ -381,7 +411,31 @@ class FaultController extends Controller
                 'faults.serviceType'
             ]);
 
-        return response()->json(['faults' => $faults]);
+        if ($q !== '') {
+            $like = "%".$q."%";
+            $query->where(function($qq) use ($like) {
+                $qq->where('faults.fault_ref_number', 'like', $like)
+                   ->orWhere('customers.customer', 'like', $like)
+                   ->orWhere('faults.contactName', 'like', $like)
+                   ->orWhere('faults.phoneNumber', 'like', $like)
+                   ->orWhere('faults.address', 'like', $like)
+                   ->orWhere('links.link', 'like', $like)
+                   ->orWhere('cities.city', 'like', $like)
+                   ->orWhere('suburbs.suburb', 'like', $like);
+            });
+        }
+
+        $paginated = $query->paginate($perPage);
+
+        return response()->json([
+            'faults' => $paginated->items(),
+            'pagination' => [
+                'current_page' => $paginated->currentPage(),
+                'last_page' => $paginated->lastPage(),
+                'per_page' => $paginated->perPage(),
+                'total' => $paginated->total(),
+            ]
+        ]);
     }
 
     public function sectionFaults(Request $request)
@@ -391,19 +445,23 @@ class FaultController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $faults = DB::table('faults')
+        $perPage = (int) $request->query('per_page', 20);
+        $q = trim((string) $request->query('q', ''));
+
+        $query = DB::table('faults')
             ->leftJoin('fault_section','faults.id','=','fault_section.fault_id')
             ->leftJoin('users','faults.assignedTo','=','users.id')
             ->leftJoin('customers','faults.customer_id','=','customers.id')
             ->leftJoin('cities','faults.city_id','=','cities.id')
             ->leftJoin('statuses','faults.status_id','=','statuses.id')
+            ->leftJoin('suburbs','faults.suburb_id','=','suburbs.id')
+            ->leftJoin('links','faults.link_id','=','links.id')
             ->where('fault_section.section_id','=', $request->user()->section_id)
             ->when(in_array((int)$request->user()->section_id, [2, 3], true), function($q) use ($request) {
                 $q->where('cities.region','=', $request->user()->region);
             })
             ->orderBy('faults.created_at', 'desc')
-            ->limit(100)
-            ->get([
+            ->select([
                 'faults.id',
                 'faults.fault_ref_number',
                 'customers.customer',
@@ -415,7 +473,29 @@ class FaultController extends Controller
                 'faults.assignedTo'
             ]);
 
-        return response()->json(['faults' => $faults]);
+        if ($q !== '') {
+            $like = "%".$q."%";
+            $query->where(function($qq) use ($like) {
+                $qq->where('faults.fault_ref_number', 'like', $like)
+                   ->orWhere('customers.customer', 'like', $like)
+                   ->orWhere('users.name', 'like', $like)
+                   ->orWhere('faults.contactName', 'like', $like)
+                   ->orWhere('cities.city', 'like', $like)
+                   ->orWhere('links.link', 'like', $like);
+            });
+        }
+
+        $paginated = $query->paginate($perPage);
+
+        return response()->json([
+            'faults' => $paginated->items(),
+            'pagination' => [
+                'current_page' => $paginated->currentPage(),
+                'last_page' => $paginated->lastPage(),
+                'per_page' => $paginated->perPage(),
+                'total' => $paginated->total(),
+            ]
+        ]);
     }
 
     public function assignableTechnicians(Request $request)
@@ -554,13 +634,18 @@ class FaultController extends Controller
     public function assessments(Request $request)
     {
         // Status 1 = Logged/Pending Assessment
-        $faults = DB::table('faults')
+        $perPage = (int) $request->query('per_page', 20);
+        $q = trim((string) $request->query('q', ''));
+
+        $query = DB::table('faults')
             ->leftJoin('customers','faults.customer_id','=','customers.id')
             ->leftJoin('statuses','faults.status_id','=','statuses.id')
             ->leftJoin('cities','faults.city_id','=','cities.id')
+            ->leftJoin('suburbs','faults.suburb_id','=','suburbs.id')
+            ->leftJoin('links','faults.link_id','=','links.id')
             ->where('faults.status_id', '=', 1)
             ->orderBy('faults.created_at', 'desc')
-            ->get([
+            ->select([
                 'faults.id',
                 'faults.fault_ref_number',
                 'customers.customer',
@@ -571,7 +656,28 @@ class FaultController extends Controller
                 'faults.serviceType'
             ]);
 
-        return response()->json(['faults' => $faults]);
+        if ($q !== '') {
+            $like = "%".$q."%";
+            $query->where(function($qq) use ($like) {
+                $qq->where('faults.fault_ref_number', 'like', $like)
+                   ->orWhere('customers.customer', 'like', $like)
+                   ->orWhere('faults.contactName', 'like', $like)
+                   ->orWhere('cities.city', 'like', $like)
+                   ->orWhere('links.link', 'like', $like);
+            });
+        }
+
+        $paginated = $query->paginate($perPage);
+
+        return response()->json([
+            'faults' => $paginated->items(),
+            'pagination' => [
+                'current_page' => $paginated->currentPage(),
+                'last_page' => $paginated->lastPage(),
+                'per_page' => $paginated->perPage(),
+                'total' => $paginated->total(),
+            ]
+        ]);
     }
 
     public function assess(Request $request, $id)
@@ -645,15 +751,19 @@ class FaultController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        // Status 4 = Rectified
-        $faults = DB::table('faults')
+        $perPage = (int) $request->query('per_page', 20);
+        $q = trim((string) $request->query('q', ''));
+
+        $query = DB::table('faults')
             ->leftJoin('customers','faults.customer_id','=','customers.id')
             ->leftJoin('statuses','faults.status_id','=','statuses.id')
             ->leftJoin('cities','faults.city_id','=','cities.id')
             ->leftJoin('users','faults.assignedTo','=','users.id')
+            ->leftJoin('suburbs','faults.suburb_id','=','suburbs.id')
+            ->leftJoin('links','faults.link_id','=','links.id')
             ->where('faults.status_id', '=', 4)
             ->orderBy('faults.created_at', 'desc')
-            ->get([
+            ->select([
                 'faults.id',
                 'faults.fault_ref_number',
                 'customers.customer',
@@ -664,7 +774,29 @@ class FaultController extends Controller
                 'users.name as assignedToName'
             ]);
 
-        return response()->json(['faults' => $faults]);
+        if ($q !== '') {
+            $like = "%".$q."%";
+            $query->where(function($qq) use ($like) {
+                $qq->where('faults.fault_ref_number', 'like', $like)
+                   ->orWhere('customers.customer', 'like', $like)
+                   ->orWhere('users.name', 'like', $like)
+                   ->orWhere('faults.contactName', 'like', $like)
+                   ->orWhere('cities.city', 'like', $like)
+                   ->orWhere('links.link', 'like', $like);
+            });
+        }
+
+        $paginated = $query->paginate($perPage);
+
+        return response()->json([
+            'faults' => $paginated->items(),
+            'pagination' => [
+                'current_page' => $paginated->currentPage(),
+                'last_page' => $paginated->lastPage(),
+                'per_page' => $paginated->perPage(),
+                'total' => $paginated->total(),
+            ]
+        ]);
     }
 
     public function clear(Request $request, $id)
@@ -709,6 +841,9 @@ class FaultController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
+        $perPage = (int) $request->query('per_page', 20);
+        $q = trim((string) $request->query('q', ''));
+
         $escId = FaultLifecycle::escalatedId();
         $mgrEscId = FaultLifecycle::managerEscalatedId();
 
@@ -717,8 +852,20 @@ class FaultController extends Controller
             ->leftJoin('statuses','faults.status_id','=','statuses.id')
             ->leftJoin('cities','faults.city_id','=','cities.id')
             ->leftJoin('users','faults.assignedTo','=','users.id')
+            ->leftJoin('suburbs','faults.suburb_id','=','suburbs.id')
+            ->leftJoin('links','faults.link_id','=','links.id')
             ->whereIn('faults.status_id', [$escId, $mgrEscId])
-            ->orderBy('faults.created_at', 'desc');
+            ->orderBy('faults.created_at', 'desc')
+            ->select([
+                'faults.id',
+                'faults.fault_ref_number',
+                'customers.customer',
+                'statuses.description as status',
+                'faults.priorityLevel',
+                'faults.created_at',
+                'cities.city',
+                'users.name as assignedToName'
+            ]);
 
         if ((int)($request->user()->section_id ?? 0) !== 1) {
              // Logic from ChiefTechEscalationsController
@@ -726,18 +873,29 @@ class FaultController extends Controller
              // Keeping it simple for mobile api logic similar to web
         }
 
-        $faults = $query->get([
-            'faults.id',
-            'faults.fault_ref_number',
-            'customers.customer',
-            'statuses.description as status',
-            'faults.priorityLevel',
-            'faults.created_at',
-            'cities.city',
-            'users.name as assignedToName'
-        ]);
+        if ($q !== '') {
+            $like = "%".$q."%";
+            $query->where(function($qq) use ($like) {
+                $qq->where('faults.fault_ref_number', 'like', $like)
+                   ->orWhere('customers.customer', 'like', $like)
+                   ->orWhere('users.name', 'like', $like)
+                   ->orWhere('faults.contactName', 'like', $like)
+                   ->orWhere('cities.city', 'like', $like)
+                   ->orWhere('links.link', 'like', $like);
+            });
+        }
 
-        return response()->json(['faults' => $faults]);
+        $paginated = $query->paginate($perPage);
+
+        return response()->json([
+            'faults' => $paginated->items(),
+            'pagination' => [
+                'current_page' => $paginated->currentPage(),
+                'last_page' => $paginated->lastPage(),
+                'per_page' => $paginated->perPage(),
+                'total' => $paginated->total(),
+            ]
+        ]);
     }
 
     public function resolved(Request $request)
@@ -746,15 +904,19 @@ class FaultController extends Controller
         // Permission: Typically open to all auth users or 'reports'
         
         $nocClearedId = 6;
-        $faults = DB::table('faults')
+        $perPage = (int) $request->query('per_page', 20);
+        $q = trim((string) $request->query('q', ''));
+
+        $query = DB::table('faults')
             ->leftJoin('customers','faults.customer_id','=','customers.id')
             ->leftJoin('statuses','faults.status_id','=','statuses.id')
             ->leftJoin('cities','faults.city_id','=','cities.id')
             ->leftJoin('users','faults.assignedTo','=','users.id')
+            ->leftJoin('suburbs','faults.suburb_id','=','suburbs.id')
+            ->leftJoin('links','faults.link_id','=','links.id')
             ->where('faults.status_id', '=', $nocClearedId)
             ->orderBy('faults.updated_at', 'desc')
-            ->limit(50) // Limit to recent resolved
-            ->get([
+            ->select([
                 'faults.id',
                 'faults.fault_ref_number',
                 'customers.customer',
@@ -766,21 +928,48 @@ class FaultController extends Controller
                 'users.name as assignedToName'
             ]);
 
-        return response()->json(['faults' => $faults]);
+        if ($q !== '') {
+            $like = "%".$q."%";
+            $query->where(function($qq) use ($like) {
+                $qq->where('faults.fault_ref_number', 'like', $like)
+                   ->orWhere('customers.customer', 'like', $like)
+                   ->orWhere('users.name', 'like', $like)
+                   ->orWhere('faults.contactName', 'like', $like)
+                   ->orWhere('cities.city', 'like', $like)
+                   ->orWhere('links.link', 'like', $like);
+            });
+        }
+
+        $paginated = $query->paginate($perPage);
+
+        return response()->json([
+            'faults' => $paginated->items(),
+            'pagination' => [
+                'current_page' => $paginated->currentPage(),
+                'last_page' => $paginated->lastPage(),
+                'per_page' => $paginated->perPage(),
+                'total' => $paginated->total(),
+            ]
+        ]);
     }
 
     public function referred(Request $request)
     {
         // Status 7 = Referred
         // Permission: refer-fault? or just list
-        $faults = DB::table('faults')
+        $perPage = (int) $request->query('per_page', 20);
+        $q = trim((string) $request->query('q', ''));
+
+        $query = DB::table('faults')
             ->leftJoin('customers','faults.customer_id','=','customers.id')
             ->leftJoin('statuses','faults.status_id','=','statuses.id')
             ->leftJoin('cities','faults.city_id','=','cities.id')
             ->leftJoin('users','faults.assignedTo','=','users.id')
+            ->leftJoin('suburbs','faults.suburb_id','=','suburbs.id')
+            ->leftJoin('links','faults.link_id','=','links.id')
             ->where('faults.status_id', '=', 7)
             ->orderBy('faults.created_at', 'desc')
-            ->get([
+            ->select([
                 'faults.id',
                 'faults.fault_ref_number',
                 'customers.customer',
@@ -791,7 +980,29 @@ class FaultController extends Controller
                 'users.name as assignedToName'
             ]);
 
-        return response()->json(['faults' => $faults]);
+        if ($q !== '') {
+            $like = "%".$q."%";
+            $query->where(function($qq) use ($like) {
+                $qq->where('faults.fault_ref_number', 'like', $like)
+                   ->orWhere('customers.customer', 'like', $like)
+                   ->orWhere('users.name', 'like', $like)
+                   ->orWhere('faults.contactName', 'like', $like)
+                   ->orWhere('cities.city', 'like', $like)
+                   ->orWhere('links.link', 'like', $like);
+            });
+        }
+
+        $paginated = $query->paginate($perPage);
+
+        return response()->json([
+            'faults' => $paginated->items(),
+            'pagination' => [
+                'current_page' => $paginated->currentPage(),
+                'last_page' => $paginated->lastPage(),
+                'per_page' => $paginated->perPage(),
+                'total' => $paginated->total(),
+            ]
+        ]);
     }
 
     public function revoke(Request $request, $id)

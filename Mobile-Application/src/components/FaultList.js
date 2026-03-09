@@ -87,12 +87,10 @@ export default function FaultList({
   // Reset list when search changes
   useEffect(() => {
     setPage(1);
-    setData([]);
-    loadData(1, debouncedSearch, true);
+    loadData(1, debouncedSearch);
   }, [debouncedSearch]);
 
-  const loadData = async (pageNum, query, isRefresh = false) => {
-    if (loading) return;
+  const loadData = async (pageNum, query) => {
     setLoading(true);
     try {
       const response = await fetchData({ page: pageNum, q: query });
@@ -100,13 +98,9 @@ export default function FaultList({
       const newItems = Array.isArray(response) ? response : (response?.faults || []);
       const pagination = response?.pagination || {};
       
-      if (isRefresh || pageNum === 1) {
-        setData(newItems);
-      } else {
-        setData(prev => [...prev, ...newItems]);
-      }
-      
+      setData(newItems);
       setLastPage(pagination.last_page || 1);
+      setPage(pageNum); // Update current page state
     } catch (e) {
       console.error(e);
     } finally {
@@ -118,20 +112,52 @@ export default function FaultList({
   const handleRefresh = () => {
     setRefreshing(true);
     setPage(1);
-    loadData(1, debouncedSearch, true);
+    loadData(1, debouncedSearch);
   };
 
-  const handleLoadMore = () => {
-    if (!loading && page < lastPage) {
-      const nextPage = page + 1;
-      setPage(nextPage);
-      loadData(nextPage, debouncedSearch);
+  const handleNextPage = () => {
+    if (page < lastPage && !loading) {
+      loadData(page + 1, debouncedSearch);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (page > 1 && !loading) {
+      loadData(page - 1, debouncedSearch);
     }
   };
 
   const renderListItem = ({ item }) => {
     if (renderItem) return renderItem({ item });
     return <DefaultFaultCard item={item} onPress={onPressItem} renderExtra={renderExtra} />;
+  };
+
+  const renderFooter = () => {
+    if (loading && data.length === 0) return null; // Initial load handled by ListEmptyComponent or overlay
+    
+    return (
+      <View style={styles.paginationContainer}>
+        <TouchableOpacity 
+          style={[styles.pageBtn, page === 1 && styles.disabledPageBtn]} 
+          onPress={handlePrevPage}
+          disabled={page === 1 || loading}
+        >
+          <Feather name="chevron-left" size={20} color={page === 1 ? theme.colors.lightGray : theme.colors.dark} />
+          <Text style={[styles.pageBtnText, page === 1 && styles.disabledPageBtnText]}>Prev</Text>
+        </TouchableOpacity>
+        
+        <Text style={styles.pageInfo}>Page {page} of {lastPage}</Text>
+        
+        <TouchableOpacity 
+          style={[styles.pageBtn, page === lastPage && styles.disabledPageBtn]} 
+          onPress={handleNextPage}
+          disabled={page === lastPage || loading}
+        >
+          <Text style={[styles.pageBtnText, page === lastPage && styles.disabledPageBtnText]}>Next</Text>
+          <Feather name="chevron-right" size={20} color={page === lastPage ? theme.colors.lightGray : theme.colors.dark} />
+        </TouchableOpacity>
+      </View>
+    );
   };
 
   return (
@@ -152,18 +178,20 @@ export default function FaultList({
         )}
       </View>
 
-      <FlatList
-        data={data}
-        keyExtractor={(item) => String(item.id)}
-        renderItem={renderListItem}
-        onRefresh={handleRefresh}
-        refreshing={refreshing}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.5}
-        contentContainerStyle={styles.listContent}
-        ListFooterComponent={loading && page > 1 ? <ActivityIndicator style={{ margin: 20 }} /> : null}
-        ListEmptyComponent={!loading && <Text style={styles.empty}>{emptyMessage}</Text>}
-      />
+      {loading && data.length === 0 ? (
+        <ActivityIndicator style={{ marginTop: 40 }} size="large" color={theme.colors.primary} />
+      ) : (
+        <FlatList
+          data={data}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={renderListItem}
+          onRefresh={handleRefresh}
+          refreshing={refreshing}
+          contentContainerStyle={styles.listContent}
+          ListFooterComponent={renderFooter}
+          ListEmptyComponent={<Text style={styles.empty}>{emptyMessage}</Text>}
+        />
+      )}
     </View>
   );
 }
@@ -195,4 +223,10 @@ const styles = StyleSheet.create({
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   status: { fontSize: theme.fontSizes.sm, color: theme.colors.dark, fontWeight: '500' },
   age: { fontSize: theme.fontSizes.xs, color: theme.colors.gray },
+  paginationContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, marginBottom: 20, paddingHorizontal: 10 },
+  pageBtn: { flexDirection: 'row', alignItems: 'center', padding: 8, backgroundColor: theme.colors.white, borderRadius: 4, elevation: 1 },
+  disabledPageBtn: { opacity: 0.5, backgroundColor: 'transparent', elevation: 0 },
+  pageBtnText: { marginHorizontal: 4, fontWeight: '600', color: theme.colors.dark },
+  disabledPageBtnText: { color: theme.colors.gray },
+  pageInfo: { fontSize: theme.fontSizes.md, fontWeight: '500', color: theme.colors.dark },
 });

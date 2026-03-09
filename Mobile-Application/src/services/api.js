@@ -43,9 +43,10 @@ export async function changePassword(payload) {
   return request('/mobile/profile/password', { method: 'POST', body: JSON.stringify(payload) });
 }
 
-export async function getMyFaults() {
-  const data = await request('/mobile/faults');
-  return Array.isArray(data) ? data : (data?.faults || []);
+export async function getMyFaults(params = {}) {
+  const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  const data = await request(`/mobile/faults${query}`);
+  return data;
 }
 
 export async function getFault(id) {
@@ -67,29 +68,34 @@ export async function addFaultRemark(id, payload) {
   return request(`/mobile/faults/${id}/remarks`, { method: 'POST', body: JSON.stringify(payload) });
 }
 
-export async function getAssessments() {
-  const data = await request('/mobile/faults/assessments');
-  return Array.isArray(data) ? data : (data?.faults || []);
+export async function getAssessments(params = {}) {
+  const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  const data = await request(`/mobile/faults/assessments${query}`);
+  return data;
 }
 
-export async function getRectifiedFaults() {
-  const data = await request('/mobile/faults/rectified');
-  return Array.isArray(data) ? data : (data?.faults || []);
+export async function getRectifiedFaults(params = {}) {
+  const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  const data = await request(`/mobile/faults/rectified${query}`);
+  return data;
 }
 
-export async function getEscalations() {
-  const data = await request('/mobile/faults/escalations');
-  return Array.isArray(data) ? data : (data?.faults || []);
+export async function getEscalations(params = {}) {
+  const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  const data = await request(`/mobile/faults/escalations${query}`);
+  return data;
 }
 
-export async function getResolvedFaults() {
-  const data = await request('/mobile/faults/resolved');
-  return Array.isArray(data) ? data : (data?.faults || []);
+export async function getResolvedFaults(params = {}) {
+  const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  const data = await request(`/mobile/faults/resolved${query}`);
+  return data;
 }
 
-export async function getReferredFaults() {
-  const data = await request('/mobile/faults/referred');
-  return Array.isArray(data) ? data : (data?.faults || []);
+export async function getReferredFaults(params = {}) {
+  const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  const data = await request(`/mobile/faults/referred${query}`);
+  return data;
 }
 
 export async function assessFault(id, payload) {
@@ -125,14 +131,16 @@ export async function escalateFault(id, payload) {
   return request(`/mobile/faults/${id}/escalate`, { method: 'POST', body: JSON.stringify(payload) });
 }
 
-export async function getUnassignedFaults() {
-  const data = await request('/mobile/faults/unassigned');
-  return Array.isArray(data) ? data : (data?.faults || []);
+export async function getUnassignedFaults(params = {}) {
+  const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  const data = await request(`/mobile/faults/unassigned${query}`);
+  return data;
 }
 
-export async function getSectionFaults() {
-  const data = await request('/mobile/faults/section');
-  return Array.isArray(data) ? data : (data?.faults || []);
+export async function getSectionFaults(params = {}) {
+  const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  const data = await request(`/mobile/faults/section${query}`);
+  return data;
 }
 
 export async function getAssignableTechnicians() {
