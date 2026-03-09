@@ -1092,6 +1092,110 @@ class FaultController extends Controller
         }
     }
 
+    public function reassignReferral(Request $request, $id)
+    {
+        $request->validate([
+            'assignedTo' => ['required', 'exists:users,id'],
+            'remark' => ['required', 'string']
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $fault = Fault::find($id);
+            if (!$fault) {
+                 return response()->json(['message' => 'Fault not found'], 404);
+            }
+
+            // Find active referral to current user's section
+            $referral = DB::table('fault_referrals')
+                ->where('fault_id', $id)
+                ->whereNull('completed_at')
+                ->where('to_section_id', $request->user()->section_id)
+                ->orderBy('started_at', 'desc')
+                ->first();
+
+            if ($referral) {
+                DB::table('fault_referrals')
+                    ->where('id', $referral->id)
+                    ->update(['completed_at' => now()]);
+            }
+            
+            // Change section ownership to current user's section
+            DB::table('fault_section')
+                ->updateOrInsert(
+                    ['fault_id' => $id],
+                    ['section_id' => $request->user()->section_id]
+                );
+
+            // Assign to technician and update status
+            $fault->assignedTo = $request->input('assignedTo');
+            $fault->status_id = 3; // Assigned
+            $fault->save();
+
+            // Add remark
+            Remark::create([
+                'fault_id' => $id,
+                'user_id' => $request->user()->id,
+                'remark' => 'Referral accepted and reassigned: ' . $request->input('remark')
+            ]);
+            
+            FaultLifecycle::recordStatusChange($fault, 3, $request->user()->id);
+
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Fault reassigned successfully']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Failed to reassign fault: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function completeReferral(Request $request, $id)
+    {
+        $request->validate([
+            'remark' => ['required', 'string']
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $fault = Fault::find($id);
+            if (!$fault) {
+                 return response()->json(['message' => 'Fault not found'], 404);
+            }
+
+            // Find active referral to current user's section
+            $referral = \App\Models\FaultReferral::where('fault_id', $id)
+                ->whereNull('completed_at')
+                ->where('to_section_id', $request->user()->section_id)
+                ->orderBy('started_at', 'desc')
+                ->first();
+
+            if (!$referral) {
+                return response()->json(['message' => 'No active referral found for this section'], 404);
+            }
+
+            $referral->completed_at = now();
+            $referral->save();
+
+            $prev = (int)($referral->previous_status_id ?? 3);
+            $fault->update(['status_id' => $prev]);
+            
+            FaultLifecycle::reopenStageForStatus($fault, $prev, $request->user()->id);
+            FaultLifecycle::reopenAssignment($fault);
+
+            Remark::create([
+                'fault_id' => $fault->id,
+                'user_id' => $request->user()->id,
+                'remark' => 'Referral completed: ' . $request->input('remark'),
+            ]);
+
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Referral work completed and fault returned']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Failed to complete referral: ' . $e->getMessage()], 500);
+        }
+    }
+
     private function autoAssign($section_id)
     {
         $scopeSectionId = (int)$section_id;

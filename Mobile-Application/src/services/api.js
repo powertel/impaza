@@ -154,3 +154,11 @@ export async function assignFault(payload) {
 export async function reassignFault(id, payload) {
   return request(`/mobile/faults/${id}/reassign`, { method: 'POST', body: JSON.stringify(payload) });
 }
+
+export async function reassignReferral(id, payload) {
+  return request(`/mobile/faults/${id}/reassign-referral`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export async function completeReferral(id, payload) {
+  return request(`/mobile/faults/${id}/complete-referral`, { method: 'POST', body: JSON.stringify(payload) });
+}

@@ -47,6 +47,8 @@ Route::prefix('mobile')->group(function () {
         Route::get('faults/{fault}', [FaultController::class, 'show']);
         Route::post('faults/assign', [FaultController::class, 'assign']);
         Route::post('faults/{id}/reassign', [FaultController::class, 'reassign']);
+        Route::post('faults/{id}/reassign-referral', [FaultController::class, 'reassignReferral']);
+        Route::post('faults/{id}/complete-referral', [FaultController::class, 'completeReferral']);
         Route::post('faults/{id}/assess', [FaultController::class, 'assess']);
         Route::post('faults/{id}/clear', [FaultController::class, 'clear']);
         Route::post('faults/{id}/revoke', [FaultController::class, 'revoke']);

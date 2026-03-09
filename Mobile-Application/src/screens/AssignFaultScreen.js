@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { getAssignableTechnicians, assignFault, reassignFault } from '../services/api';
+import { getAssignableTechnicians, assignFault, reassignFault, reassignReferral } from '../services/api';
 import { theme } from '../styles/theme';
 import { Feather } from '@expo/vector-icons';
 
 export default function AssignFaultScreen() {
   const navigation = useNavigation();
   const route = useRoute();
-  const { fault, mode } = route.params || {}; // mode: 'assign' or 'reassign'
+  const { fault, mode } = route.params || {}; // mode: 'assign', 'reassign', or 'referral-reassign'
   
   const [technicians, setTechnicians] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -38,7 +38,7 @@ export default function AssignFaultScreen() {
       Alert.alert('Error', 'Please select a technician');
       return;
     }
-    if (mode === 'reassign' && !remark.trim()) {
+    if ((mode === 'reassign' || mode === 'referral-reassign') && !remark.trim()) {
       Alert.alert('Error', 'Please provide a remark for reassignment');
       return;
     }
@@ -53,7 +53,7 @@ export default function AssignFaultScreen() {
         Alert.alert('Success', 'Fault assigned successfully', [
           { text: 'OK', onPress: () => navigation.navigate('UnassignedFaults') }
         ]);
-      } else {
+      } else if (mode === 'reassign') {
         await reassignFault(fault.id, {
           assignedTo: selectedTech,
           remark: remark
@@ -61,11 +61,28 @@ export default function AssignFaultScreen() {
         Alert.alert('Success', 'Fault reassigned successfully', [
           { text: 'OK', onPress: () => navigation.navigate('SectionFaults') }
         ]);
+      } else if (mode === 'referral-reassign') {
+        await reassignReferral(fault.id, {
+          assignedTo: selectedTech,
+          remark: remark
+        });
+        Alert.alert('Success', 'Referral accepted and reassigned successfully', [
+          { text: 'OK', onPress: () => navigation.navigate('ReferredFaults') }
+        ]);
       }
     } catch (e) {
       Alert.alert('Error', e.message || 'Operation failed');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const getButtonText = () => {
+    switch (mode) {
+      case 'assign': return 'Assign Fault';
+      case 'reassign': return 'Reassign Fault';
+      case 'referral-reassign': return 'Accept & Reassign';
+      default: return 'Submit';
     }
   };
 
@@ -103,7 +120,7 @@ export default function AssignFaultScreen() {
           )}
         </View>
 
-        {mode === 'reassign' && (
+        {(mode === 'reassign' || mode === 'referral-reassign') && (
           <View style={styles.section}>
             <Text style={styles.label}>Reason for Reassignment</Text>
             <TextInput
@@ -121,7 +138,7 @@ export default function AssignFaultScreen() {
           onPress={handleSubmit}
           disabled={submitting}
         >
-          {submitting ? <ActivityIndicator color="#fff" /> : <Text style={styles.submitBtnText}>{mode === 'assign' ? 'Assign Fault' : 'Reassign Fault'}</Text>}
+          {submitting ? <ActivityIndicator color="#fff" /> : <Text style={styles.submitBtnText}>{getButtonText()}</Text>}
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
