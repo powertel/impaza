@@ -393,6 +393,8 @@ class FaultController extends Controller
             ->leftJoin('suburbs','faults.suburb_id','=','suburbs.id')
             ->leftJoin('pops','faults.pop_id','=','pops.id')
             ->leftJoin('links','faults.link_id','=','links.id')
+            ->leftJoin('users','faults.assignedTo','=','users.id')
+            ->leftJoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
             ->where('fault_section.section_id','=', $request->user()->section_id)
             ->where('faults.status_id','=', 2) // Status 2 = Open/Unassigned
             ->whereNull('faults.assignedTo')
@@ -408,7 +410,9 @@ class FaultController extends Controller
                 'faults.priorityLevel',
                 'faults.created_at',
                 'cities.city',
-                'faults.serviceType'
+                'faults.serviceType',
+                'users.name as assignedToName',
+                'assessed_users.name as assessedBy'
             ]);
 
         if ($q !== '') {
@@ -451,6 +455,7 @@ class FaultController extends Controller
         $query = DB::table('faults')
             ->leftJoin('fault_section','faults.id','=','fault_section.fault_id')
             ->leftJoin('users','faults.assignedTo','=','users.id')
+            ->leftJoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
             ->leftJoin('customers','faults.customer_id','=','customers.id')
             ->leftJoin('cities','faults.city_id','=','cities.id')
             ->leftJoin('statuses','faults.status_id','=','statuses.id')
@@ -470,7 +475,8 @@ class FaultController extends Controller
                 'faults.created_at',
                 'cities.city',
                 'users.name as assignedToName',
-                'faults.assignedTo'
+                'faults.assignedTo',
+                'assessed_users.name as assessedBy'
             ]);
 
         if ($q !== '') {
@@ -759,6 +765,7 @@ class FaultController extends Controller
             ->leftJoin('statuses','faults.status_id','=','statuses.id')
             ->leftJoin('cities','faults.city_id','=','cities.id')
             ->leftJoin('users','faults.assignedTo','=','users.id')
+            ->leftJoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
             ->leftJoin('suburbs','faults.suburb_id','=','suburbs.id')
             ->leftJoin('links','faults.link_id','=','links.id')
             ->where('faults.status_id', '=', 4)
@@ -771,7 +778,8 @@ class FaultController extends Controller
                 'faults.priorityLevel',
                 'faults.created_at',
                 'cities.city',
-                'users.name as assignedToName'
+                'users.name as assignedToName',
+                'assessed_users.name as assessedBy'
             ]);
 
         if ($q !== '') {
@@ -852,6 +860,7 @@ class FaultController extends Controller
             ->leftJoin('statuses','faults.status_id','=','statuses.id')
             ->leftJoin('cities','faults.city_id','=','cities.id')
             ->leftJoin('users','faults.assignedTo','=','users.id')
+            ->leftJoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
             ->leftJoin('suburbs','faults.suburb_id','=','suburbs.id')
             ->leftJoin('links','faults.link_id','=','links.id')
             ->whereIn('faults.status_id', [$escId, $mgrEscId])
@@ -864,7 +873,8 @@ class FaultController extends Controller
                 'faults.priorityLevel',
                 'faults.created_at',
                 'cities.city',
-                'users.name as assignedToName'
+                'users.name as assignedToName',
+                'assessed_users.name as assessedBy'
             ]);
 
         if ((int)($request->user()->section_id ?? 0) !== 1) {
@@ -912,6 +922,7 @@ class FaultController extends Controller
             ->leftJoin('statuses','faults.status_id','=','statuses.id')
             ->leftJoin('cities','faults.city_id','=','cities.id')
             ->leftJoin('users','faults.assignedTo','=','users.id')
+            ->leftJoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
             ->leftJoin('suburbs','faults.suburb_id','=','suburbs.id')
             ->leftJoin('links','faults.link_id','=','links.id')
             ->where('faults.status_id', '=', $nocClearedId)
@@ -925,7 +936,8 @@ class FaultController extends Controller
                 'faults.created_at',
                 'faults.updated_at',
                 'cities.city',
-                'users.name as assignedToName'
+                'users.name as assignedToName',
+                'assessed_users.name as assessedBy'
             ]);
 
         if ($q !== '') {
@@ -965,6 +977,7 @@ class FaultController extends Controller
             ->leftJoin('statuses','faults.status_id','=','statuses.id')
             ->leftJoin('cities','faults.city_id','=','cities.id')
             ->leftJoin('users','faults.assignedTo','=','users.id')
+            ->leftJoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
             ->leftJoin('suburbs','faults.suburb_id','=','suburbs.id')
             ->leftJoin('links','faults.link_id','=','links.id')
             ->where('faults.status_id', '=', 7)
@@ -977,7 +990,8 @@ class FaultController extends Controller
                 'faults.priorityLevel',
                 'faults.created_at',
                 'cities.city',
-                'users.name as assignedToName'
+                'users.name as assignedToName',
+                'assessed_users.name as assessedBy'
             ]);
 
         if ($q !== '') {

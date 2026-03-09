@@ -24,6 +24,8 @@ const DefaultFaultCard = ({ item, onPress, renderExtra }) => {
   const status = item.status || 'Unknown';
   const priority = item.priorityLevel || 'Normal';
   const age = formatDistanceToNow(item.stage_started_at || item.created_at);
+  const assignedTo = item.assignedToName;
+  const assessedBy = item.assessedBy;
 
   const getPriorityStyle = (p) => {
     switch (p?.trim().toLowerCase()) {
@@ -51,6 +53,8 @@ const DefaultFaultCard = ({ item, onPress, renderExtra }) => {
           </View>
         </View>
         <Text style={styles.reference}>Ref: {reference}</Text>
+        {assignedTo && <Text style={styles.detailText}>Assigned To: {assignedTo}</Text>}
+        {assessedBy && <Text style={styles.detailText}>Assessed By: {assessedBy}</Text>}
         <View style={styles.cardFooter}>
           <Text style={styles.status}>{status}</Text>
           <Text style={styles.age}>{age}</Text>
@@ -219,8 +223,9 @@ const styles = StyleSheet.create({
   highPriorityText: { color: theme.colors.danger },
   mediumPriorityText: { color: theme.colors.warning },
   lowPriorityText: { color: theme.colors.success },
-  reference: { fontSize: theme.fontSizes.sm, color: theme.colors.gray, marginBottom: theme.spacing.lg },
-  cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  reference: { fontSize: theme.fontSizes.sm, color: theme.colors.gray, marginBottom: theme.spacing.sm },
+  detailText: { fontSize: theme.fontSizes.xs, color: theme.colors.dark, marginBottom: 2, fontWeight: '500' },
+  cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: theme.spacing.sm },
   status: { fontSize: theme.fontSizes.sm, color: theme.colors.dark, fontWeight: '500' },
   age: { fontSize: theme.fontSizes.xs, color: theme.colors.gray },
   paginationContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, marginBottom: 20, paddingHorizontal: 10 },
