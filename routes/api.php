@@ -37,6 +37,7 @@ Route::prefix('mobile')->group(function () {
 
         Route::get('faults', [FaultController::class, 'index']);
         Route::get('faults/unassigned', [FaultController::class, 'unassigned']);
+        Route::get('faults/assigned', [FaultController::class, 'assigned']);
         Route::get('faults/section', [FaultController::class, 'sectionFaults']);
         Route::get('faults/assessments', [FaultController::class, 'assessments']);
         Route::get('faults/rectified', [FaultController::class, 'rectified']);

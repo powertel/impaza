@@ -123,6 +123,12 @@ export default function DashboardScreen() {
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.quickRow}>
             {hasPermission('assigned-fault-list') && (
+              <TouchableOpacity style={styles.quickItem} onPress={() => navigation.navigate('AssignedFaults')}>
+                <Feather name="user-check" size={theme.fontSizes.xl} color={theme.colors.dark} />
+                <Text style={styles.quickTitle}>Assigned</Text>
+              </TouchableOpacity>
+            )}
+            {hasPermission('assigned-fault-list') && (
               <TouchableOpacity style={styles.quickItem} onPress={() => navigation.navigate('UnassignedFaults')}>
                 <Feather name="inbox" size={theme.fontSizes.xl} color={theme.colors.dark} />
                 <Text style={styles.quickTitle}>Unassigned</Text>

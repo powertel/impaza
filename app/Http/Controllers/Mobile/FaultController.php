@@ -442,6 +442,74 @@ class FaultController extends Controller
         ]);
     }
 
+    public function assigned(Request $request)
+    {
+        // Permission check: assigned-fault-list
+        if (!$request->user()->can('assigned-fault-list')) {
+             return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $perPage = (int) $request->query('per_page', 20);
+        $q = trim((string) $request->query('q', ''));
+
+        $query = DB::table('faults')
+            ->leftJoin('fault_section','faults.id','=','fault_section.fault_id')
+            ->leftJoin('customers','faults.customer_id','=','customers.id')
+            ->leftJoin('cities','faults.city_id','=','cities.id')
+            ->leftJoin('statuses','faults.status_id','=','statuses.id')
+            ->leftJoin('suburbs','faults.suburb_id','=','suburbs.id')
+            ->leftJoin('pops','faults.pop_id','=','pops.id')
+            ->leftJoin('links','faults.link_id','=','links.id')
+            ->leftJoin('users','faults.assignedTo','=','users.id')
+            ->leftJoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
+            ->where('fault_section.section_id','=', $request->user()->section_id)
+            ->where('faults.status_id','=', 3) // Status 3 = Assigned/Under Rectification
+            ->whereNotNull('faults.assignedTo')
+            ->when(in_array((int)$request->user()->section_id, [2, 3], true), function($q) use ($request) {
+                $q->where('cities.region','=', $request->user()->region);
+            })
+            ->orderBy('faults.created_at', 'desc')
+            ->select([
+                'faults.id',
+                'faults.fault_ref_number',
+                'customers.customer',
+                'statuses.description as status',
+                'faults.priorityLevel',
+                'faults.created_at',
+                'cities.city',
+                'faults.serviceType',
+                'users.name as assignedToName',
+                'assessed_users.name as assessedBy'
+            ]);
+
+        if ($q !== '') {
+            $like = "%".$q."%";
+            $query->where(function($qq) use ($like) {
+                $qq->where('faults.fault_ref_number', 'like', $like)
+                   ->orWhere('customers.customer', 'like', $like)
+                   ->orWhere('faults.contactName', 'like', $like)
+                   ->orWhere('users.name', 'like', $like) // Allow searching by technician name
+                   ->orWhere('faults.phoneNumber', 'like', $like)
+                   ->orWhere('faults.address', 'like', $like)
+                   ->orWhere('links.link', 'like', $like)
+                   ->orWhere('cities.city', 'like', $like)
+                   ->orWhere('suburbs.suburb', 'like', $like);
+            });
+        }
+
+        $paginated = $query->paginate($perPage);
+
+        return response()->json([
+            'faults' => $paginated->items(),
+            'pagination' => [
+                'current_page' => $paginated->currentPage(),
+                'last_page' => $paginated->lastPage(),
+                'per_page' => $paginated->perPage(),
+                'total' => $paginated->total(),
+            ]
+        ]);
+    }
+
     public function sectionFaults(Request $request)
     {
         // Permission check: department-faults-list or assigned-fault-list

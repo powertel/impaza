@@ -12,6 +12,7 @@ import AddRemarkScreen from '../screens/AddRemarkScreen';
 import EscalateFaultScreen from '../screens/EscalateFaultScreen';
 import MainTabs from './MainTabs';
 import UnassignedFaultsScreen from '../screens/UnassignedFaultsScreen';
+import AssignedFaultsScreen from '../screens/AssignedFaultsScreen';
 import SectionFaultsScreen from '../screens/SectionFaultsScreen';
 import AssignFaultScreen from '../screens/AssignFaultScreen';
 import AssessmentsScreen from '../screens/AssessmentsScreen';
@@ -40,6 +41,7 @@ export default function AppNavigator() {
         <Stack.Screen name="EscalateFault" component={EscalateFaultScreen} options={{ title: 'Escalate Fault' }} />
         <Stack.Screen name="AddRemark" component={AddRemarkScreen} options={{ title: 'Add Remark' }} />
         <Stack.Screen name="UnassignedFaults" component={UnassignedFaultsScreen} options={{ title: 'Unassigned Faults' }} />
+        <Stack.Screen name="AssignedFaults" component={AssignedFaultsScreen} options={{ title: 'Assigned Faults' }} />
         <Stack.Screen name="SectionFaults" component={SectionFaultsScreen} options={{ title: 'Section Faults' }} />
         <Stack.Screen name="AssignFault" component={AssignFaultScreen} options={{ title: 'Assign/Reassign Fault' }} />
         <Stack.Screen name="Assessments" component={AssessmentsScreen} options={{ title: 'Assessments' }} />

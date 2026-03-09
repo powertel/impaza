@@ -137,6 +137,12 @@ export async function getUnassignedFaults(params = {}) {
   return data;
 }
 
+export async function getAssignedFaults(params = {}) {
+  const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  const data = await request(`/mobile/faults/assigned${query}`);
+  return data;
+}
+
 export async function getSectionFaults(params = {}) {
   const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
   const data = await request(`/mobile/faults/section${query}`);
