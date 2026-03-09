@@ -134,12 +134,6 @@ export default function DashboardScreen() {
                 <Text style={styles.quickTitle}>Section Faults</Text>
               </TouchableOpacity>
             )}
-            {hasAnyPermission(['fault-list', 'department-faults-list']) && (
-              <TouchableOpacity style={styles.quickItem}>
-                <Feather name="list" size={theme.fontSizes.xl} color={theme.colors.dark} />
-                <Text style={styles.quickTitle}>All Faults</Text>
-              </TouchableOpacity>
-            )}
             {hasPermission('fault-assessment') && (
               <TouchableOpacity style={styles.quickItem} onPress={() => navigation.navigate('Assessments')}>
                 <Feather name="check-square" size={theme.fontSizes.xl} color={theme.colors.dark} />
@@ -166,12 +160,6 @@ export default function DashboardScreen() {
               <TouchableOpacity style={styles.quickItem} onPress={() => navigation.navigate('ReferredFaults')}>
                 <Feather name="share-2" size={theme.fontSizes.xl} color={theme.colors.dark} />
                 <Text style={styles.quickTitle}>Referred</Text>
-              </TouchableOpacity>
-            )}
-            {hasPermission('reports') && (
-              <TouchableOpacity style={styles.quickItem}>
-                <Feather name="bar-chart-2" size={theme.fontSizes.xl} color={theme.colors.dark} />
-                <Text style={styles.quickTitle}>Reports</Text>
               </TouchableOpacity>
             )}
           </View>
