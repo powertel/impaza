@@ -23,6 +23,7 @@ class FaultController extends Controller
         $userId = $request->user()->id;
         $perPage = (int) $request->query('per_page', 20);
         $q = trim((string) $request->query('q', ''));
+        $statusFilter = $request->query('status_filter', 'All'); // All, Pending, Resolved
 
         $query = DB::table('faults')
             ->leftJoin('users','faults.assignedTo','=','users.id')
@@ -42,8 +43,15 @@ class FaultController extends Controller
                 $join->whereNull('fsl.ended_at');
             })
             ->orderBy('faults.created_at', 'desc')
-            ->where('faults.assignedTo', '=', $userId)
-            ->select([
+            ->where('faults.assignedTo', '=', $userId);
+
+        if ($statusFilter === 'Resolved') {
+            $query->whereIn('faults.status_id', [4, 6]); // 4=Rectified, 6=Cleared
+        } elseif ($statusFilter === 'Pending') {
+            $query->whereNotIn('faults.status_id', [4, 6]);
+        }
+
+        $query->select([
                 'faults.id',
                 'customers.customer',
                 'faults.contactName',
