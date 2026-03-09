@@ -20,6 +20,8 @@ import EscalationsScreen from '../screens/EscalationsScreen';
 import ResolvedFaultsScreen from '../screens/ResolvedFaultsScreen';
 import ReferredFaultsScreen from '../screens/ReferredFaultsScreen';
 import AssessFaultScreen from '../screens/AssessFaultScreen';
+import ClearFaultScreen from '../screens/ClearFaultScreen';
+import RevokeFaultScreen from '../screens/RevokeFaultScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -45,6 +47,8 @@ export default function AppNavigator() {
         <Stack.Screen name="ResolvedFaults" component={ResolvedFaultsScreen} options={{ title: 'Resolved Faults' }} />
         <Stack.Screen name="ReferredFaults" component={ReferredFaultsScreen} options={{ title: 'Referred Faults' }} />
         <Stack.Screen name="AssessFault" component={AssessFaultScreen} options={{ title: 'Assess Fault' }} />
+        <Stack.Screen name="ClearFault" component={ClearFaultScreen} options={{ title: 'Clear Fault (NOC)' }} />
+        <Stack.Screen name="RevokeFault" component={RevokeFaultScreen} options={{ title: 'Revoke Fault' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -21,7 +21,10 @@ class FaultController extends Controller
     public function index(Request $request)
     {
         $userId = $request->user()->id;
-        $faults = DB::table('faults')
+        $perPage = (int) $request->query('per_page', 20);
+        $q = trim((string) $request->query('q', ''));
+
+        $query = DB::table('faults')
             ->leftJoin('users','faults.assignedTo','=','users.id')
             ->leftJoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
             ->leftJoin('customers','faults.customer_id','=','customers.id')
@@ -39,34 +42,34 @@ class FaultController extends Controller
                 $join->whereNull('fsl.ended_at');
             })
             ->orderBy('faults.created_at', 'desc')
-            ->where('faults.assignedTo', '=', $userId)
-            ->limit(50)
-            ->get([
-                'faults.id',
-                'customers.customer',
-                'faults.contactName',
-                'faults.phoneNumber',
-                'faults.contactEmail',
-                'faults.fault_ref_number',
-                'faults.address',
-                'account_manager_users.name as accountManager',
-                'links.link',
-                'statuses.id as status_id',
-                'statuses.description as status',
-                'assessed_users.name as assessedBy',
-                'faults.serviceType',
-                'faults.serviceAttribute',
-                'faults.faultType',
-                'faults.priorityLevel',
-                'faults.created_at',
-                'cities.city as city',
-                'suburbs.suburb as suburb',
-                'pops.pop as pop',
-                'reasons_for_outages.RFO as RFO',
-                'fsl.started_at as stage_started_at'
-            ]);
+            ->where('faults.assignedTo', '=', $userId);
 
-        $faultIds = $faults->pluck('id');
+        if ($q !== '') {
+            $like = "%".$q."%";
+            $query->where(function($qq) use ($like) {
+                $qq->where('faults.fault_ref_number', 'like', $like)
+                   ->orWhere('customers.customer', 'like', $like)
+                   ->orWhere('faults.contactName', 'like', $like)
+                   ->orWhere('faults.phoneNumber', 'like', $like)
+                   ->orWhere('faults.contactEmail', 'like', $like)
+                   ->orWhere('faults.address', 'like', $like)
+                   ->orWhere('links.link', 'like', $like)
+                   ->orWhere('cities.city', 'like', $like)
+                   ->orWhere('suburbs.suburb', 'like', $like)
+                   ->orWhere('pops.pop', 'like', $like);
+            });
+        }
+
+        $paginated = $query->paginate($perPage);
+        $faults = $paginated->items();
+
+        // Map to keep format consistent
+        $mappedFaults = collect($faults)->map(function($f) {
+            return $f;
+        });
+
+        // Use pluck on the collection, not array
+        $faultIds = collect($faults)->pluck('id');
         $remarksRecords = DB::table('remarks')
             ->leftJoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
             ->leftJoin('users','remarks.user_id','=','users.id')
@@ -107,7 +110,13 @@ class FaultController extends Controller
         }
 
         return response()->json([
-            'faults' => $faults,
+            'faults' => $mappedFaults,
+            'pagination' => [
+                'current_page' => $paginated->currentPage(),
+                'last_page' => $paginated->lastPage(),
+                'per_page' => $paginated->perPage(),
+                'total' => $paginated->total(),
+            ],
             'remarksByFault' => $remarksByFault,
             'faultAges' => $faultAges,
             'faultAgeStart' => $faultAgeStart,
