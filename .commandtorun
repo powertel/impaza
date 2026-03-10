@@ -28,6 +28,7 @@ docker exec impaza_mysql mysql -uroot -proot -e "CREATE USER 'impazamon'@'%' IDE
 docker exec impaza_mysql mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON impaza.* TO 'impazamon'@'%'; FLUSH PRIVILEGES;" 
 
 -Building the adroid app
+npm run start -- --port 8082 --lan --go to run development server on local network
 eas build -p android --profile preview
 
 

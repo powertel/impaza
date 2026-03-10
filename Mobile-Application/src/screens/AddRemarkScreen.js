@@ -133,7 +133,7 @@ export default function AddRemarkScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
-        <ScrollView contentContainerStyle={styles.scroll}>
+        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <View style={styles.card}>
             <Text style={styles.label}>Fault Reference</Text>
             <Text style={styles.value}>{fault?.fault_ref_number || fault?.ref_number || faultId}</Text>
@@ -186,9 +186,7 @@ export default function AddRemarkScreen() {
               </View>
             )}
           </View>
-        </ScrollView>
 
-        <View style={styles.footer}>
           <TouchableOpacity 
             style={[styles.submitBtn, loading && styles.disabledBtn]} 
             onPress={submit} 
@@ -200,7 +198,7 @@ export default function AddRemarkScreen() {
               <Text style={styles.submitBtnText}>Submit Remark</Text>
             )}
           </TouchableOpacity>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -213,7 +211,7 @@ const styles = StyleSheet.create({
   },
   scroll: { 
     padding: theme.spacing.lg,
-    paddingBottom: 100
+    paddingBottom: theme.spacing.xxl
   },
   card: {
     backgroundColor: theme.colors.surface,
@@ -312,12 +310,6 @@ const styles = StyleSheet.create({
   emptyText: {
     color: theme.colors.secondaryText,
     fontStyle: 'italic',
-  },
-  footer: {
-    padding: theme.spacing.lg,
-    backgroundColor: theme.colors.surface,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
   },
   submitBtn: {
     backgroundColor: theme.colors.primary,

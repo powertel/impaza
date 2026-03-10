@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, Image, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, useIsFocused } from '@react-navigation/native';
-import Constants from 'expo-constants';
-import { getFault } from '../services/api';
+import { API_URL, getFault } from '../services/api';
 import { usePermissions } from '../hooks/usePermissions';
 import { theme } from '../styles/theme';
 import { Feather } from '@expo/vector-icons';
@@ -18,8 +17,7 @@ export default function FaultDetailScreen() {
   const isFocused = useIsFocused();
   const [refreshing, setRefreshing] = useState(false);
   const { hasPermission, hasAnyPermission } = usePermissions();
-  const CONFIG_API_URL = Constants?.expoConfig?.extra?.apiUrl || Constants?.manifest?.extra?.apiUrl;
-  const ASSET_ORIGIN = ((CONFIG_API_URL || 'https://impazamon.powertel.co.zw').replace(/\/$/, '')).replace(/\/api$/, '');
+  const ASSET_ORIGIN = (String(API_URL).replace(/\/$/, '')).replace(/\/api$/, '');
 
   const loadFault = async () => {
     setRefreshing(true);

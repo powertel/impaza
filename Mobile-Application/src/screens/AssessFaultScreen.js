@@ -67,7 +67,7 @@ export default function AssessFaultScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
-        <ScrollView contentContainerStyle={styles.scroll}>
+        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <View style={styles.card}>
             <Text style={styles.label}>Fault Reference</Text>
             <Text style={styles.value}>{fault?.fault_ref_number || fault?.ref_number || fault?.id}</Text>
@@ -139,9 +139,7 @@ export default function AssessFaultScreen() {
               textAlignVertical="top"
             />
           </View>
-        </ScrollView>
 
-        <View style={styles.footer}>
           <TouchableOpacity 
             style={[styles.submitBtn, submitting && styles.disabledBtn]} 
             onPress={handleSubmit}
@@ -153,7 +151,7 @@ export default function AssessFaultScreen() {
               <Text style={styles.submitBtnText}>Submit Assessment</Text>
             )}
           </TouchableOpacity>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -166,7 +164,7 @@ const styles = StyleSheet.create({
   },
   scroll: { 
     padding: theme.spacing.lg,
-    paddingBottom: 100
+    paddingBottom: theme.spacing.xxl
   },
   card: {
     backgroundColor: theme.colors.surface,
@@ -233,12 +231,6 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     borderWidth: 1,
     borderColor: theme.colors.border,
-  },
-  footer: {
-    padding: theme.spacing.lg,
-    backgroundColor: theme.colors.surface,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
   },
   submitBtn: {
     backgroundColor: theme.colors.primary,
