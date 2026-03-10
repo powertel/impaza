@@ -49,10 +49,10 @@ export default function ReferredFaultsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
   header: { padding: theme.spacing.lg },
-  headerTitle: { fontSize: theme.fontSizes.xxl, fontWeight: '700', color: theme.colors.dark },
+  headerTitle: { fontSize: theme.fontSizes.xxl, fontWeight: '700', color: theme.colors.text },
   actionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 },
-  tag: { backgroundColor: '#FEF3C7', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12 },
-  tagText: { color: theme.colors.warning, fontSize: 10, fontWeight: 'bold' },
+  tag: { backgroundColor: 'rgba(139, 92, 246, 0.15)', borderWidth: 1, borderColor: 'rgba(139, 92, 246, 0.3)', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12 },
+  tagText: { color: theme.colors.referred, fontSize: 10, fontWeight: 'bold' },
   btnGroup: { flexDirection: 'row' },
   actionBtn: { backgroundColor: theme.colors.primary, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 },
   actionBtnText: { color: theme.colors.white, fontSize: 12, fontWeight: '600' }

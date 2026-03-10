@@ -1,10 +1,44 @@
 import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
 // Prefer Expo config (app.json/eas.json) for API URL. Avoid using process.env
 // to prevent accidental overrides with local IPs during web dev.
 const CONFIG_API_URL = Constants?.expoConfig?.extra?.apiUrl || Constants?.manifest?.extra?.apiUrl;
-const API_ORIGIN = (CONFIG_API_URL || 'http://localhost:8087').replace(/\/$/, '');
-const API_URL = `${API_ORIGIN}`;
+function extractHost(value) {
+  if (!value) return null;
+  const normalized = String(value).trim().replace(/^[a-zA-Z]+:\/\//, '').split('/')[0];
+  const host = normalized.split(':')[0];
+  return host || null;
+}
+
+function getDevHost() {
+  const hostUri =
+    Constants?.expoConfig?.hostUri ||
+    Constants?.manifest2?.extra?.expoClient?.hostUri ||
+    Constants?.manifest?.debuggerHost ||
+    Constants?.manifest?.hostUri;
+
+  const host = extractHost(hostUri);
+  if (!host) return null;
+  if (Platform.OS === 'android' && host === 'localhost') return '10.0.2.2';
+  return host;
+}
+
+function normalizeUrl(url) {
+  return String(url || '').replace(/\/$/, '');
+}
+
+const DEV_API_URL = (() => {
+  const host = getDevHost();
+  if (host) return `http://${host}:8087/api`;
+  if (Platform.OS === 'android') return 'http://10.0.2.2:8087/api';
+  return 'http://localhost:8087/api';
+})();
+
+const shouldUseDevApi =
+  __DEV__ && (!CONFIG_API_URL || /impazamon\.powertel\.co\.zw/i.test(String(CONFIG_API_URL)));
+
+export const API_URL = normalizeUrl(shouldUseDevApi ? DEV_API_URL : (CONFIG_API_URL || DEV_API_URL));
 if (__DEV__) console.log('API_URL', API_URL);
 
 let authToken = null;

@@ -3,17 +3,19 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { AntDesign, Feather } from '@expo/vector-icons';
 import { usePermissions } from '../hooks/usePermissions';
 
+import { theme } from '../styles/theme';
 import DashboardScreen from '../screens/DashboardScreen';
 import FaultsListScreen from '../screens/FaultsListScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+
+import AssessmentsScreen from '../screens/AssessmentsScreen';
 
 const Tab = createBottomTabNavigator();
 
 export default function MainTabs() {
   const { hasPermission, hasAnyPermission, hasRole } = usePermissions();
   
-  // Determine if the user should see the "My Faults" tab
-  // This logic can be expanded based on specific roles or permissions
+  // Determine visibility of tabs
   const showMyFaults = hasAnyPermission([
     'fault-list', 
     'my-fault-list', 
@@ -22,23 +24,41 @@ export default function MainTabs() {
     'chief-tech-clear-faults-list'
   ]) || hasRole('Technician') || hasRole('Noc Supervisor') || hasRole('Chief Technician') || hasRole('NOC');
 
+  const showAssess = hasPermission('fault-assessment') || hasRole('NOC') || hasRole('Noc Supervisor');
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarShowLabel: true,
-        tabBarActiveTintColor: '#0A66CC',
-        tabBarStyle: { height: 64, paddingBottom: 8 },
-        tabBarIcon: ({ color, size }) => {
-          if (route.name === 'Dashboard') return <AntDesign name="home" size={size} color={color} />;
-          if (route.name === 'My Faults') return <Feather name="list" size={size} color={color} />;
-          return <AntDesign name="user" size={size} color={color} />;
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.secondaryText,
+        tabBarStyle: { 
+          height: 64, 
+          paddingBottom: 10,
+          backgroundColor: theme.colors.background,
+          borderTopColor: theme.colors.border,
+          borderTopWidth: 1,
         },
+        tabBarIcon: ({ color, size }) => {
+          if (route.name === 'Home') return <AntDesign name="home" size={24} color={color} />;
+          if (route.name === 'Faults') return <Feather name="alert-triangle" size={22} color={color} />;
+          if (route.name === 'Assess') return <Feather name="check-square" size={22} color={color} />;
+          return <AntDesign name="user" size={24} color={color} />;
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '500',
+          marginTop: -4,
+        }
       })}
     >
-      <Tab.Screen name="Dashboard" component={DashboardScreen} />
+      <Tab.Screen name="Home" component={DashboardScreen} />
       {showMyFaults && (
-        <Tab.Screen name="My Faults" component={FaultsListScreen} />
+        <Tab.Screen name="Faults" component={FaultsListScreen} />
+      )}
+      {showAssess && (
+        <Tab.Screen name="Assess" component={AssessmentsScreen} />
       )}
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>

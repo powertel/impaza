@@ -3,6 +3,19 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, 
 import { theme } from '../styles/theme';
 import { Feather } from '@expo/vector-icons';
 
+const hexToRgba = (hex, alpha) => {
+  if (typeof hex !== 'string' || !hex.startsWith('#') || (hex.length !== 7 && hex.length !== 4)) {
+    return `rgba(255,255,255,${alpha})`;
+  }
+  const h = hex.length === 4
+    ? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`
+    : hex;
+  const r = parseInt(h.slice(1, 3), 16);
+  const g = parseInt(h.slice(3, 5), 16);
+  const b = parseInt(h.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+};
+
 const formatDistanceToNow = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
@@ -27,37 +40,114 @@ const DefaultFaultCard = ({ item, onPress, renderExtra }) => {
   const assignedTo = item.assignedToName;
   const assessedBy = item.assessedBy;
 
+  const getStatusStyle = () => {
+    const statusText = String(item.status || '').toLowerCase();
+    const id = Number(item.status_id);
+
+    if (statusText.includes('restor') || statusText.includes('resolv') || id === 6) {
+      return { color: theme.colors.resolved, bg: hexToRgba(theme.colors.resolved, 0.12), border: hexToRgba(theme.colors.resolved, 0.28) };
+    }
+    if (statusText.includes('rectif') || id === 4) {
+      return { color: theme.colors.warning, bg: hexToRgba(theme.colors.warning, 0.12), border: hexToRgba(theme.colors.warning, 0.28) };
+    }
+    if (statusText.includes('escalat') || id === 5) {
+      return { color: theme.colors.escalated, bg: hexToRgba(theme.colors.escalated, 0.12), border: hexToRgba(theme.colors.escalated, 0.28) };
+    }
+    if (statusText.includes('refer') || statusText.includes('referr')) {
+      return { color: theme.colors.referred, bg: hexToRgba(theme.colors.referred, 0.12), border: hexToRgba(theme.colors.referred, 0.28) };
+    }
+    if (statusText.includes('pending') || statusText.includes('await') || id === 1) {
+      return { color: theme.colors.pending, bg: hexToRgba(theme.colors.pending, 0.12), border: hexToRgba(theme.colors.pending, 0.28) };
+    }
+
+    return { color: theme.colors.assigned, bg: hexToRgba(theme.colors.assigned, 0.12), border: hexToRgba(theme.colors.assigned, 0.28) };
+  };
+
   const getPriorityStyle = (p) => {
     switch (p?.trim().toLowerCase()) {
+      case 'critical':
       case 'high':
-        return { bar: styles.highPriorityBar, tag: styles.highPriorityTag, text: styles.highPriorityText };
+        return { 
+          bar: { backgroundColor: theme.colors.danger }, 
+          tag: { backgroundColor: 'rgba(239, 68, 68, 0.1)' }, 
+          text: { color: theme.colors.danger } 
+        };
       case 'medium':
-        return { bar: styles.mediumPriorityBar, tag: styles.mediumPriorityTag, text: styles.mediumPriorityText };
+        return { 
+          bar: { backgroundColor: theme.colors.warning }, 
+          tag: { backgroundColor: 'rgba(245, 158, 11, 0.1)' }, 
+          text: { color: theme.colors.warning } 
+        };
       case 'low':
-        return { bar: styles.lowPriorityBar, tag: styles.lowPriorityTag, text: styles.lowPriorityText };
+        return { 
+          bar: { backgroundColor: theme.colors.success }, 
+          tag: { backgroundColor: 'rgba(34, 197, 94, 0.1)' }, 
+          text: { color: theme.colors.success } 
+        };
       default:
-        return { bar: styles.lowPriorityBar, tag: styles.lowPriorityTag, text: styles.lowPriorityText };
+        return { 
+          bar: { backgroundColor: theme.colors.info }, 
+          tag: { backgroundColor: 'rgba(59, 130, 246, 0.1)' }, 
+          text: { color: theme.colors.info } 
+        };
     }
   };
 
   const priorityStyle = getPriorityStyle(priority);
+  const statusStyle = getStatusStyle();
 
   return (
     <TouchableOpacity style={styles.card} onPress={() => onPress(item)}>
-      <View style={[styles.priorityBar, priorityStyle.bar]} />
       <View style={styles.cardContent}>
         <View style={styles.cardHeader}>
-          <Text style={styles.customerName}>{customerName}</Text>
+          <Text style={styles.reference}>Fault #{reference.replace('ID: ', '')}</Text>
           <View style={[styles.priorityTag, priorityStyle.tag]}>
-            <Text style={[styles.priorityTagText, priorityStyle.text]}>{priority}</Text>
+            <Text style={[styles.priorityTagText, priorityStyle.text]}>{priority.toUpperCase()}</Text>
           </View>
         </View>
-        <Text style={styles.reference}>Ref: {reference}</Text>
-        {assignedTo && <Text style={styles.detailText}>Assigned To: {assignedTo}</Text>}
-        {assessedBy && <Text style={styles.detailText}>Assessed By: {assessedBy}</Text>}
+        
+        <Text style={styles.faultTitle}>{item.title || 'Internet connectivity issue'}</Text>
+        
+        <View style={styles.detailRow}>
+          <Feather name="user" size={14} color={theme.colors.secondaryText} style={{ marginRight: 6 }} />
+          <Text style={styles.detailText}>{customerName}</Text>
+          <View style={{ width: 12 }} />
+          <Feather name="map-pin" size={14} color={theme.colors.secondaryText} style={{ marginRight: 6 }} />
+          <Text style={styles.detailText}>{item.city || 'Location N/A'}</Text>
+        </View>
+
+        <View style={styles.divider} />
+
+        {(assignedTo || assessedBy) ? (
+          <View style={styles.metaRow}>
+            {assignedTo ? (
+              <View style={styles.metaItem}>
+                <Feather name="user-check" size={14} color={theme.colors.secondaryText} style={{ marginRight: 6 }} />
+                <Text style={styles.metaText} numberOfLines={1}>Assigned: {assignedTo}</Text>
+              </View>
+            ) : null}
+            {assessedBy ? (
+              <View style={styles.metaItem}>
+                <Feather name="check-square" size={14} color={theme.colors.secondaryText} style={{ marginRight: 6 }} />
+                <Text style={styles.metaText} numberOfLines={1}>Assessed: {assessedBy}</Text>
+              </View>
+            ) : null}
+          </View>
+        ) : null}
+
         <View style={styles.cardFooter}>
-          <Text style={styles.status}>{status}</Text>
-          <Text style={styles.age}>{age}</Text>
+          <View style={styles.footerLeft}>
+            <Feather name="clock" size={14} color={theme.colors.secondaryText} style={{ marginRight: 6 }} />
+            <Text style={styles.age}>{age}</Text>
+          </View>
+          
+          <View style={[styles.statusBadge, { backgroundColor: statusStyle.bg, borderColor: statusStyle.border }]}>
+            <Text style={[styles.statusText, { color: statusStyle.color }]}>
+              {status}
+            </Text>
+          </View>
+          
+          <Feather name="chevron-right" size={18} color={theme.colors.secondaryText} />
         </View>
         {renderExtra && renderExtra(item)}
       </View>
@@ -70,7 +160,9 @@ export default function FaultList({
   renderItem, 
   onPressItem, 
   emptyMessage = "No faults found.",
-  renderExtra
+  renderExtra,
+  ListHeaderComponent,
+  onDataLoaded
 }) {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -105,6 +197,10 @@ export default function FaultList({
       setData(newItems);
       setLastPage(pagination.last_page || 1);
       setPage(pageNum); // Update current page state
+      
+      if (onDataLoaded) {
+        onDataLoaded(newItems);
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -146,7 +242,7 @@ export default function FaultList({
           onPress={handlePrevPage}
           disabled={page === 1 || loading}
         >
-          <Feather name="chevron-left" size={20} color={page === 1 ? theme.colors.lightGray : theme.colors.dark} />
+          <Feather name="chevron-left" size={20} color={page === 1 ? theme.colors.muted : theme.colors.text} />
           <Text style={[styles.pageBtnText, page === 1 && styles.disabledPageBtnText]}>Prev</Text>
         </TouchableOpacity>
         
@@ -158,7 +254,7 @@ export default function FaultList({
           disabled={page === lastPage || loading}
         >
           <Text style={[styles.pageBtnText, page === lastPage && styles.disabledPageBtnText]}>Next</Text>
-          <Feather name="chevron-right" size={20} color={page === lastPage ? theme.colors.lightGray : theme.colors.dark} />
+          <Feather name="chevron-right" size={20} color={page === lastPage ? theme.colors.muted : theme.colors.text} />
         </TouchableOpacity>
       </View>
     );
@@ -166,18 +262,20 @@ export default function FaultList({
 
   return (
     <View style={styles.container}>
+      {ListHeaderComponent}
+      
       <View style={styles.searchContainer}>
-        <Feather name="search" size={20} color={theme.colors.gray} style={styles.searchIcon} />
+        <Feather name="search" size={20} color={theme.colors.secondaryText} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search faults..."
           value={search}
           onChangeText={setSearch}
-          placeholderTextColor={theme.colors.gray}
+          placeholderTextColor={theme.colors.muted}
         />
         {search.length > 0 && (
           <TouchableOpacity onPress={() => setSearch('')}>
-            <Feather name="x" size={18} color={theme.colors.gray} />
+            <Feather name="x" size={18} color={theme.colors.secondaryText} />
           </TouchableOpacity>
         )}
       </View>
@@ -201,37 +299,62 @@ export default function FaultList({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  searchContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.white, margin: theme.spacing.lg, paddingHorizontal: theme.spacing.md, borderRadius: theme.spacing.sm, borderWidth: 1, borderColor: theme.colors.lightGray, height: 48 },
+  container: { flex: 1, backgroundColor: theme.colors.background },
+  searchContainer: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: theme.colors.surface, 
+    marginHorizontal: theme.spacing.lg,
+    marginVertical: theme.spacing.md,
+    paddingHorizontal: theme.spacing.md, 
+    borderRadius: theme.borderRadius.md, 
+    borderWidth: 1, 
+    borderColor: theme.colors.border, 
+    height: 48 
+  },
   searchIcon: { marginRight: theme.spacing.sm },
-  searchInput: { flex: 1, fontSize: theme.fontSizes.md, color: theme.colors.dark },
+  searchInput: { flex: 1, fontSize: theme.fontSizes.md, color: theme.colors.text },
   listContent: { paddingHorizontal: theme.spacing.lg, paddingBottom: theme.spacing.xl },
-  empty: { textAlign: 'center', color: theme.colors.gray, marginTop: 64 },
-  card: { backgroundColor: theme.colors.white, borderRadius: theme.spacing.md, marginBottom: theme.spacing.md, flexDirection: 'row', overflow: 'hidden', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2 },
-  priorityBar: { width: 6 },
-  highPriorityBar: { backgroundColor: theme.colors.danger },
-  mediumPriorityBar: { backgroundColor: theme.colors.warning },
-  lowPriorityBar: { backgroundColor: theme.colors.success },
-  cardContent: { flex: 1, padding: theme.spacing.md },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: theme.spacing.sm },
-  customerName: { fontSize: theme.fontSizes.lg, fontWeight: '600', color: theme.colors.dark, flex: 1 },
-  priorityTag: { borderRadius: 12, paddingHorizontal: theme.spacing.md, paddingVertical: 2, marginLeft: theme.spacing.sm },
-  highPriorityTag: { backgroundColor: '#FEE2E2' },
-  mediumPriorityTag: { backgroundColor: '#FEF3C7' },
-  lowPriorityTag: { backgroundColor: '#D1FAE5' },
-  priorityTagText: { fontSize: theme.fontSizes.xs, fontWeight: '700' },
-  highPriorityText: { color: theme.colors.danger },
-  mediumPriorityText: { color: theme.colors.warning },
-  lowPriorityText: { color: theme.colors.success },
-  reference: { fontSize: theme.fontSizes.sm, color: theme.colors.gray, marginBottom: theme.spacing.sm },
-  detailText: { fontSize: theme.fontSizes.xs, color: theme.colors.dark, marginBottom: 2, fontWeight: '500' },
-  cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: theme.spacing.sm },
-  status: { fontSize: theme.fontSizes.sm, color: theme.colors.dark, fontWeight: '500' },
-  age: { fontSize: theme.fontSizes.xs, color: theme.colors.gray },
+  empty: { textAlign: 'center', color: theme.colors.secondaryText, marginTop: 64 },
+  card: { 
+    backgroundColor: theme.colors.card, 
+    borderRadius: theme.borderRadius.lg, 
+    marginBottom: theme.spacing.md, 
+    overflow: 'hidden', 
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  cardContent: { padding: theme.spacing.md },
+  cardHeader: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    marginBottom: theme.spacing.xs 
+  },
+  reference: { fontSize: theme.fontSizes.xs, color: theme.colors.secondaryText, fontWeight: '500' },
+  priorityTag: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 2 },
+  priorityTagText: { fontSize: 10, fontWeight: '700' },
+  faultTitle: { 
+    fontSize: theme.fontSizes.md, 
+    fontWeight: '700', 
+    color: theme.colors.text, 
+    marginBottom: theme.spacing.sm 
+  },
+  detailRow: { flexDirection: 'row', alignItems: 'center', marginBottom: theme.spacing.md },
+  detailText: { fontSize: theme.fontSizes.sm, color: theme.colors.secondaryText },
+  divider: { height: 1, backgroundColor: theme.colors.border, marginBottom: theme.spacing.sm },
+  metaRow: { flexDirection: 'row', gap: theme.spacing.md, marginBottom: theme.spacing.sm },
+  metaItem: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  metaText: { fontSize: theme.fontSizes.sm, color: theme.colors.secondaryText, flex: 1 },
+  cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  footerLeft: { flexDirection: 'row', alignItems: 'center' },
+  age: { fontSize: theme.fontSizes.xs, color: theme.colors.secondaryText },
+  statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, borderWidth: 1 },
+  statusText: { fontSize: 11, fontWeight: '700' },
   paginationContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, marginBottom: 20, paddingHorizontal: 10 },
-  pageBtn: { flexDirection: 'row', alignItems: 'center', padding: 8, backgroundColor: theme.colors.white, borderRadius: 4, elevation: 1 },
+  pageBtn: { flexDirection: 'row', alignItems: 'center', padding: 8, backgroundColor: theme.colors.surface, borderRadius: 4, elevation: 1 },
   disabledPageBtn: { opacity: 0.5, backgroundColor: 'transparent', elevation: 0 },
-  pageBtnText: { marginHorizontal: 4, fontWeight: '600', color: theme.colors.dark },
-  disabledPageBtnText: { color: theme.colors.gray },
-  pageInfo: { fontSize: theme.fontSizes.md, fontWeight: '500', color: theme.colors.dark },
+  pageBtnText: { marginHorizontal: 4, fontWeight: '600', color: theme.colors.text },
+  disabledPageBtnText: { color: theme.colors.muted },
+  pageInfo: { fontSize: theme.fontSizes.md, fontWeight: '500', color: theme.colors.text },
 });

@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Image, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, Image, Alert, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRoute, useNavigation } from '@react-navigation/native';
-import { rectifyFault, getRFOs } from '../services/api';
-import { theme } from '../styles/theme';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
+import { getRFOs, rectifyFault } from '../services/api';
+import { theme } from '../styles/theme';
+import { Feather } from '@expo/vector-icons';
 
 export default function RectifyFaultScreen() {
   const route = useRoute();
@@ -30,6 +31,37 @@ export default function RectifyFaultScreen() {
     };
     load();
   }, []);
+
+  const pickImages = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('Permission required', 'Allow media library access to attach images.');
+      return;
+    }
+    const opts = { mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8 };
+    const result = await ImagePicker.launchImageLibraryAsync(opts);
+    if (result.canceled) return;
+    const selected = (result.assets || []).map(a => ({ uri: a.uri, name: a.fileName || `attachment-${Date.now()}.jpg`, type: a.mimeType || 'image/jpeg' }));
+    setImages(prev => [...prev, ...selected]);
+  };
+
+  const capturePhoto = async () => {
+    try {
+      const perm = await ImagePicker.requestCameraPermissionsAsync();
+      if (!perm.granted) {
+        Alert.alert('Permission required', 'Allow camera access to capture images.');
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.8 });
+      if (result.canceled) return;
+      const a = result.assets?.[0];
+      if (a) {
+        setImages(prev => [...prev, { uri: a.uri, name: a.fileName || `capture-${Date.now()}.jpg`, type: a.mimeType || 'image/jpeg' }]);
+      }
+    } catch (e) {
+      Alert.alert('Error', 'Failed to open camera.');
+    }
+  };
 
   const submit = async () => {
     setLoading(true);
@@ -64,108 +96,119 @@ export default function RectifyFaultScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top","left","right"]}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 24 }} keyboardShouldPersistTaps="handled">
-        <Text style={styles.title}>Rectify Fault #{id}</Text>
-        <Text style={styles.label}>Confirmed Reason For Outage</Text>
-        <TouchableOpacity style={styles.select} onPress={() => setShowRfoList(v => !v)}>
-          <Text style={styles.selectText}>{selectedRfo ? selectedRfo.RFO : 'Select RFO'}</Text>
-        </TouchableOpacity>
-        {showRfoList && (
-          <View style={styles.dropdown}>
-            {rfos.map(r => (
-              <TouchableOpacity key={r.id} style={styles.dropdownItem} onPress={() => { setSelectedRfo(r); setShowRfoList(false); }}>
-                <Text style={styles.dropdownItemText}>{r.RFO}</Text>
-              </TouchableOpacity>
-            ))}
+    <View style={styles.screen}>
+      <SafeAreaView style={{ flex: 1 }} edges={["top","left","right"]}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Feather name="arrow-left" size={24} color={theme.colors.text} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Rectify Fault</Text>
+          <View style={{ width: 40 }} />
+        </View>
+
+        <ScrollView contentContainerStyle={{ padding: theme.spacing.lg }} keyboardShouldPersistTaps="handled">
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Confirmed RFO</Text>
+            <TouchableOpacity style={styles.select} onPress={() => setShowRfoList(v => !v)}>
+              <Text style={[styles.selectText, !selectedRfo && { color: theme.colors.muted }]}>
+                {selectedRfo ? selectedRfo.RFO : 'Select Reason For Outage'}
+              </Text>
+              <Feather name="chevron-down" size={20} color={theme.colors.secondaryText} />
+            </TouchableOpacity>
+            {showRfoList && (
+              <View style={styles.dropdown}>
+                {rfos.map(r => (
+                  <TouchableOpacity key={r.id} style={styles.dropdownItem} onPress={() => { setSelectedRfo(r); setShowRfoList(false); }}>
+                    <Text style={styles.dropdownItemText}>{r.RFO}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
           </View>
-        )}
-        <TextInput
-          placeholder="Enter rectification notes"
-          style={styles.input}
-          multiline
-          numberOfLines={4}
-          value={notes}
-          onChangeText={setNotes}
-          placeholderTextColor={theme.colors.gray}
-        />
-        <TouchableOpacity style={[styles.primaryBtn, { marginTop: theme.spacing.md }]} onPress={() => { pickImages(); }}>
-          <Text style={styles.secondaryBtnText}>Attach Images</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.primaryBtn, { marginTop: theme.spacing.sm }]} onPress={async () => {
-          try {
-            console.log('capturePhoto: start', { platform: Platform.OS });
-            const perm = await ImagePicker.requestCameraPermissionsAsync();
-            console.log('capturePhoto: permission', perm);
-          if (!perm.granted) {
-            Alert.alert('Permission required', 'Allow camera access to capture images.', [
-              { text: 'Open Settings', onPress: () => { try { require('expo-linking').openSettings(); } catch (_) {} } },
-              { text: 'Cancel', style: 'cancel' }
-            ]);
-            return;
-          }
-            const opts = { mediaTypes: ['images'], quality: 0.8, cameraType: 'back' };
-            console.log('capturePhoto: launch options', opts);
-            const result = await ImagePicker.launchCameraAsync(opts);
-            console.log('capturePhoto: result', result);
-            if (result.canceled) { Alert.alert('Capture canceled'); return; }
-            const a = result.assets?.[0];
-            if (a) {
-              setImages(prev => [...prev, { uri: a.uri, name: a.fileName || `capture-${Date.now()}.jpg`, type: a.mimeType || 'image/jpeg' }]);
-              Alert.alert('Attached', 'Photo added');
-            }
-          } catch (e) {
-            console.error('capturePhoto: error', e);
-            Alert.alert('Error', 'Failed to open camera.');
-          }
-        }}>
-          <Text style={styles.secondaryBtnText}>Capture Photo</Text>
-        </TouchableOpacity>
-        {images.length > 0 && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: theme.spacing.md }}>
-            {images.map((img, i) => (
-              <Image key={`${img.uri}-${i}`} source={{ uri: img.uri }} style={{ width: 100, height: 100, borderRadius: 8, marginRight: 8, backgroundColor: theme.colors.lightGray }} />
-            ))}
-          </ScrollView>
-        )}
-        {result?.error ? <Text style={styles.error}>{result.error}</Text> : null}
-        <TouchableOpacity style={[styles.primaryBtn, (!selectedRfo || !notes.trim()) && { opacity: 0.6 }]} onPress={submit} disabled={loading || !selectedRfo || !notes.trim()}>
-          <Text style={styles.primaryBtnText}>{loading ? 'Submitting…' : 'Submit'}</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </SafeAreaView>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Rectification Notes</Text>
+            <TextInput
+              placeholder="Describe the work done..."
+              style={styles.input}
+              multiline
+              numberOfLines={4}
+              value={notes}
+              onChangeText={setNotes}
+              placeholderTextColor={theme.colors.muted}
+            />
+          </View>
+
+          <View style={styles.mediaActions}>
+            <TouchableOpacity style={styles.mediaBtn} onPress={pickImages}>
+              <Feather name="image" size={20} color={theme.colors.primary} />
+              <Text style={styles.mediaBtnText}>Attach Image</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.mediaBtn} onPress={capturePhoto}>
+              <Feather name="camera" size={20} color={theme.colors.primary} />
+              <Text style={styles.mediaBtnText}>Take Photo</Text>
+            </TouchableOpacity>
+          </View>
+
+          {images.length > 0 && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.imagePreview}>
+              {images.map((img, i) => (
+                <View key={i} style={styles.imageWrapper}>
+                  <Image source={{ uri: img.uri }} style={styles.previewImage} />
+                  <TouchableOpacity 
+                    style={styles.removeBtn} 
+                    onPress={() => setImages(prev => prev.filter((_, idx) => idx !== i))}
+                  >
+                    <Feather name="x" size={12} color="white" />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </ScrollView>
+          )}
+
+          {result?.error && (
+            <View style={styles.errorContainer}>
+              <Feather name="alert-circle" size={16} color={theme.colors.danger} />
+              <Text style={styles.errorText}>{result.error}</Text>
+            </View>
+          )}
+
+          <TouchableOpacity 
+            style={[styles.submitBtn, (!selectedRfo || !notes.trim()) && styles.disabledBtn]} 
+            onPress={submit} 
+            disabled={loading || !selectedRfo || !notes.trim()}
+          >
+            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.submitBtnText}>Submit Rectification</Text>}
+          </TouchableOpacity>
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: theme.colors.white, padding: theme.spacing.lg },
-  title: { fontSize: theme.fontSizes.lg, fontWeight: '700', color: theme.colors.black, marginBottom: theme.spacing.md },
-  label: { fontSize: theme.fontSizes.sm, color: theme.colors.dark, marginBottom: 6 },
-  select: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, paddingVertical: theme.spacing.md, paddingHorizontal: theme.spacing.md, backgroundColor: theme.colors.input, marginBottom: theme.spacing.md },
-  selectText: { color: theme.colors.text },
-  dropdown: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, backgroundColor: theme.colors.white, marginBottom: theme.spacing.md },
-  dropdownItem: { paddingVertical: 10, paddingHorizontal: theme.spacing.md },
+  screen: { flex: 1, backgroundColor: theme.colors.background },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: theme.spacing.lg, paddingVertical: theme.spacing.md },
+  backBtn: { padding: 8, borderRadius: theme.borderRadius.circle, backgroundColor: theme.colors.surface },
+  headerTitle: { fontSize: theme.fontSizes.lg, fontWeight: '700', color: theme.colors.text },
+  formGroup: { marginBottom: theme.spacing.lg },
+  label: { fontSize: theme.fontSizes.sm, color: theme.colors.secondaryText, marginBottom: 8, fontWeight: '500' },
+  select: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.borderRadius.md, padding: theme.spacing.md, backgroundColor: theme.colors.input },
+  selectText: { color: theme.colors.text, fontSize: theme.fontSizes.md },
+  dropdown: { borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.borderRadius.md, backgroundColor: theme.colors.surface, marginTop: 4 },
+  dropdownItem: { padding: theme.spacing.md, borderBottomWidth: 1, borderBottomColor: theme.colors.border },
   dropdownItemText: { color: theme.colors.text },
-  input: { borderWidth: 1, borderColor: theme.colors.lightGray, borderRadius: theme.spacing.sm, padding: theme.spacing.md, minHeight: 100, textAlignVertical: 'top', color: theme.colors.text, backgroundColor: theme.colors.input },
-  error: { color: theme.colors.danger, marginTop: theme.spacing.sm },
-  primaryBtn: { backgroundColor: theme.colors.primary, borderRadius: theme.spacing.sm, paddingVertical: theme.spacing.md, alignItems: 'center', marginTop: theme.spacing.lg },
-  primaryBtnText: { color: theme.colors.white, fontSize: theme.fontSizes.md, fontWeight: '600' }
+  input: { borderWidth: 1, borderColor: theme.colors.border, borderRadius: theme.borderRadius.md, padding: theme.spacing.md, minHeight: 120, textAlignVertical: 'top', color: theme.colors.text, backgroundColor: theme.colors.input, fontSize: theme.fontSizes.md },
+  mediaActions: { flexDirection: 'row', gap: theme.spacing.md, marginBottom: theme.spacing.lg },
+  mediaBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: theme.spacing.md, borderRadius: theme.borderRadius.md, backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.border },
+  mediaBtnText: { marginLeft: 8, color: theme.colors.text, fontWeight: '600' },
+  imagePreview: { marginBottom: theme.spacing.lg },
+  imageWrapper: { position: 'relative', marginRight: 12 },
+  previewImage: { width: 80, height: 80, borderRadius: theme.borderRadius.md, backgroundColor: theme.colors.surface },
+  removeBtn: { position: 'absolute', top: -6, right: -6, backgroundColor: theme.colors.danger, borderRadius: 10, width: 20, height: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: theme.colors.background },
+  errorContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.danger + '20', padding: 12, borderRadius: theme.borderRadius.md, marginBottom: theme.spacing.lg },
+  errorText: { color: theme.colors.danger, marginLeft: 8, fontSize: theme.fontSizes.sm },
+  submitBtn: { backgroundColor: theme.colors.primary, borderRadius: theme.borderRadius.md, paddingVertical: 16, alignItems: 'center' },
+  submitBtnText: { color: theme.colors.white, fontSize: theme.fontSizes.md, fontWeight: '700' },
+  disabledBtn: { opacity: 0.6 },
 });
-  const pickImages = async () => {
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) {
-      Alert.alert('Permission required', 'Allow media library access to attach images.', [
-        { text: 'Open Settings', onPress: () => { try { require('expo-linking').openSettings(); } catch (_) {} } },
-        { text: 'Cancel', style: 'cancel' }
-      ]);
-      return;
-    }
-    const opts = Platform.OS === 'android'
-      ? { mediaTypes: ['images'], quality: 0.8 }
-      : { mediaTypes: ['images'], quality: 0.8 };
-    const result = await ImagePicker.launchImageLibraryAsync(opts);
-    if (result.canceled) { Alert.alert('No image selected'); return; }
-    const selected = (result.assets || []).map(a => ({ uri: a.uri, name: a.fileName || `attachment-${Date.now()}.jpg`, type: a.mimeType || 'image/jpeg' }));
-    setImages(prev => [...prev, ...selected]);
-    Alert.alert('Attached', `${selected.length} image(s) added`);
-  };
