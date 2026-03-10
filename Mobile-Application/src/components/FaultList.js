@@ -118,6 +118,23 @@ const DefaultFaultCard = ({ item, onPress, renderExtra }) => {
 
         <View style={styles.divider} />
 
+        {(assignedTo || assessedBy) ? (
+          <View style={styles.metaRow}>
+            {assignedTo ? (
+              <View style={styles.metaItem}>
+                <Feather name="user-check" size={14} color={theme.colors.secondaryText} style={{ marginRight: 6 }} />
+                <Text style={styles.metaText} numberOfLines={1}>Assigned: {assignedTo}</Text>
+              </View>
+            ) : null}
+            {assessedBy ? (
+              <View style={styles.metaItem}>
+                <Feather name="check-square" size={14} color={theme.colors.secondaryText} style={{ marginRight: 6 }} />
+                <Text style={styles.metaText} numberOfLines={1}>Assessed: {assessedBy}</Text>
+              </View>
+            ) : null}
+          </View>
+        ) : null}
+
         <View style={styles.cardFooter}>
           <View style={styles.footerLeft}>
             <Feather name="clock" size={14} color={theme.colors.secondaryText} style={{ marginRight: 6 }} />
@@ -326,6 +343,9 @@ const styles = StyleSheet.create({
   detailRow: { flexDirection: 'row', alignItems: 'center', marginBottom: theme.spacing.md },
   detailText: { fontSize: theme.fontSizes.sm, color: theme.colors.secondaryText },
   divider: { height: 1, backgroundColor: theme.colors.border, marginBottom: theme.spacing.sm },
+  metaRow: { flexDirection: 'row', gap: theme.spacing.md, marginBottom: theme.spacing.sm },
+  metaItem: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  metaText: { fontSize: theme.fontSizes.sm, color: theme.colors.secondaryText, flex: 1 },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   footerLeft: { flexDirection: 'row', alignItems: 'center' },
   age: { fontSize: theme.fontSizes.xs, color: theme.colors.secondaryText },

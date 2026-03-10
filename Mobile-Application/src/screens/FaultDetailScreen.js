@@ -124,6 +124,8 @@ export default function FaultDetailScreen() {
                 return new Date(started).toLocaleString();
               })()} />
               <DetailRow icon="activity" label="Service Type" value={fault.serviceType} />
+              <DetailRow icon="user-check" label="Assigned To" value={fault.assignedToName || fault.assigned_to_name || fault.assignedTo} />
+              <DetailRow icon="check-square" label="Assessed By" value={fault.assessedByName || fault.assessed_by_name || fault.assessedBy} />
             </View>
 
             <View style={styles.section}>

@@ -49,10 +49,10 @@ export default function FaultsListScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
   header: { padding: theme.spacing.lg, paddingBottom: theme.spacing.sm },
-  headerTitle: { fontSize: theme.fontSizes.xxl, fontWeight: '700', color: theme.colors.dark },
+  headerTitle: { fontSize: theme.fontSizes.xxl, fontWeight: '700', color: theme.colors.text },
   filterContainer: { flexDirection: 'row', paddingHorizontal: theme.spacing.lg, marginBottom: theme.spacing.sm },
-  filterBtn: { paddingVertical: 6, paddingHorizontal: 16, borderRadius: 20, backgroundColor: theme.colors.lightGray, marginRight: 10 },
-  activeFilterBtn: { backgroundColor: theme.colors.primary },
-  filterText: { fontSize: theme.fontSizes.sm, fontWeight: '600', color: theme.colors.gray },
+  filterBtn: { paddingVertical: 6, paddingHorizontal: 16, borderRadius: 20, backgroundColor: theme.colors.surface, marginRight: 10, borderWidth: 1, borderColor: theme.colors.border },
+  activeFilterBtn: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
+  filterText: { fontSize: theme.fontSizes.sm, fontWeight: '600', color: theme.colors.secondaryText },
   activeFilterText: { color: theme.colors.white },
 });

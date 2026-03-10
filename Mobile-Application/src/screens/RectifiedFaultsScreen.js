@@ -58,7 +58,7 @@ export default function RectifiedFaultsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
   header: { padding: theme.spacing.lg },
-  headerTitle: { fontSize: theme.fontSizes.xxl, fontWeight: '700', color: theme.colors.dark },
+  headerTitle: { fontSize: theme.fontSizes.xxl, fontWeight: '700', color: theme.colors.text },
   actionContainer: { flexDirection: 'row', gap: 8, marginTop: 8 },
   actionBtn: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 4, alignItems: 'center' },
   clearBtn: { backgroundColor: theme.colors.success },

@@ -2,6 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
+import { theme } from '../styles/theme';
 import SplashScreen from '../screens/SplashScreen';
 import SignInScreen from '../screens/SignInScreen';
 import SignUpScreen from '../screens/SignUpScreen';
@@ -30,14 +31,23 @@ const Stack = createNativeStackNavigator();
 export default function AppNavigator() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Splash">
+      <Stack.Navigator
+        initialRouteName="Splash"
+        screenOptions={{
+          headerStyle: { backgroundColor: theme.colors.background },
+          headerTintColor: theme.colors.text,
+          headerShadowVisible: false,
+          headerTitleStyle: { color: theme.colors.text },
+          contentStyle: { backgroundColor: theme.colors.background },
+        }}
+      >
         <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
         <Stack.Screen name="SignIn" component={SignInScreen} options={{ headerShown: false }} />
         <Stack.Screen name="SignUp" component={SignUpScreen} options={{ title: 'Create Account' }} />
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ title: 'Forgot Password' }} />
         <Stack.Screen name="Main" component={MainTabs} options={{ headerShown: false }} />
-        <Stack.Screen name="FaultDetail" component={FaultDetailScreen} options={{ title: 'Fault Details' }} />
-        <Stack.Screen name="RectifyFault" component={RectifyFaultScreen} options={{ title: 'Rectify Fault' }} />
+        <Stack.Screen name="FaultDetail" component={FaultDetailScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="RectifyFault" component={RectifyFaultScreen} options={{ headerShown: false }} />
         <Stack.Screen name="EscalateFault" component={EscalateFaultScreen} options={{ title: 'Escalate Fault' }} />
         <Stack.Screen name="AddRemark" component={AddRemarkScreen} options={{ title: 'Add Remark' }} />
         <Stack.Screen name="UnassignedFaults" component={UnassignedFaultsScreen} options={{ title: 'Unassigned Faults' }} />
