@@ -3,6 +3,19 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, 
 import { theme } from '../styles/theme';
 import { Feather } from '@expo/vector-icons';
 
+const hexToRgba = (hex, alpha) => {
+  if (typeof hex !== 'string' || !hex.startsWith('#') || (hex.length !== 7 && hex.length !== 4)) {
+    return `rgba(255,255,255,${alpha})`;
+  }
+  const h = hex.length === 4
+    ? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`
+    : hex;
+  const r = parseInt(h.slice(1, 3), 16);
+  const g = parseInt(h.slice(3, 5), 16);
+  const b = parseInt(h.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+};
+
 const formatDistanceToNow = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
@@ -26,6 +39,29 @@ const DefaultFaultCard = ({ item, onPress, renderExtra }) => {
   const age = formatDistanceToNow(item.stage_started_at || item.created_at);
   const assignedTo = item.assignedToName;
   const assessedBy = item.assessedBy;
+
+  const getStatusStyle = () => {
+    const statusText = String(item.status || '').toLowerCase();
+    const id = Number(item.status_id);
+
+    if (statusText.includes('restor') || statusText.includes('resolv') || id === 6) {
+      return { color: theme.colors.resolved, bg: hexToRgba(theme.colors.resolved, 0.12), border: hexToRgba(theme.colors.resolved, 0.28) };
+    }
+    if (statusText.includes('rectif') || id === 4) {
+      return { color: theme.colors.warning, bg: hexToRgba(theme.colors.warning, 0.12), border: hexToRgba(theme.colors.warning, 0.28) };
+    }
+    if (statusText.includes('escalat') || id === 5) {
+      return { color: theme.colors.escalated, bg: hexToRgba(theme.colors.escalated, 0.12), border: hexToRgba(theme.colors.escalated, 0.28) };
+    }
+    if (statusText.includes('refer') || statusText.includes('referr')) {
+      return { color: theme.colors.referred, bg: hexToRgba(theme.colors.referred, 0.12), border: hexToRgba(theme.colors.referred, 0.28) };
+    }
+    if (statusText.includes('pending') || statusText.includes('await') || id === 1) {
+      return { color: theme.colors.pending, bg: hexToRgba(theme.colors.pending, 0.12), border: hexToRgba(theme.colors.pending, 0.28) };
+    }
+
+    return { color: theme.colors.assigned, bg: hexToRgba(theme.colors.assigned, 0.12), border: hexToRgba(theme.colors.assigned, 0.28) };
+  };
 
   const getPriorityStyle = (p) => {
     switch (p?.trim().toLowerCase()) {
@@ -58,6 +94,7 @@ const DefaultFaultCard = ({ item, onPress, renderExtra }) => {
   };
 
   const priorityStyle = getPriorityStyle(priority);
+  const statusStyle = getStatusStyle();
 
   return (
     <TouchableOpacity style={styles.card} onPress={() => onPress(item)}>
@@ -87,8 +124,8 @@ const DefaultFaultCard = ({ item, onPress, renderExtra }) => {
             <Text style={styles.age}>{age}</Text>
           </View>
           
-          <View style={[styles.statusBadge, { backgroundColor: item.status_id === 6 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(59, 130, 246, 0.1)' }]}>
-            <Text style={[styles.statusText, { color: item.status_id === 6 ? theme.colors.resolved : theme.colors.assigned }]}>
+          <View style={[styles.statusBadge, { backgroundColor: statusStyle.bg, borderColor: statusStyle.border }]}>
+            <Text style={[styles.statusText, { color: statusStyle.color }]}>
               {status}
             </Text>
           </View>
@@ -292,7 +329,7 @@ const styles = StyleSheet.create({
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   footerLeft: { flexDirection: 'row', alignItems: 'center' },
   age: { fontSize: theme.fontSizes.xs, color: theme.colors.secondaryText },
-  statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
+  statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, borderWidth: 1 },
   statusText: { fontSize: 11, fontWeight: '700' },
   paginationContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, marginBottom: 20, paddingHorizontal: 10 },
   pageBtn: { flexDirection: 'row', alignItems: 'center', padding: 8, backgroundColor: theme.colors.surface, borderRadius: 4, elevation: 1 },
