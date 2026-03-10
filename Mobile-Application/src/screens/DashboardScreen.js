@@ -133,7 +133,7 @@ export default function DashboardScreen() {
 
           {/* Main Action */}
           {hasAnyPermission(['fault-list', 'my-fault-list', 'assigned-fault-list']) && (
-            <TouchableOpacity style={styles.mainAction} onPress={() => navigation.navigate('My Faults')}>
+            <TouchableOpacity style={styles.mainAction} onPress={() => navigation.navigate('Faults')}>
               <Text style={styles.mainActionText}>View My Faults</Text>
               <AntDesign name="arrowright" size={20} color={theme.colors.white} />
             </TouchableOpacity>
