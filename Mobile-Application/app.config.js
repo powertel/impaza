@@ -1,0 +1,52 @@
+export default {
+  expo: {
+    name: "iMpazamon",
+    slug: "Mobile-Application",
+    version: "1.0.0",
+    orientation: "portrait",
+    icon: "./assets/splash-icon.png",
+    userInterfaceStyle: "light",
+    newArchEnabled: false,
+    androidStatusBar: {
+      backgroundColor: "#F5F7FF",
+      barStyle: "dark-content"
+    },
+    androidNavigationBar: {
+      backgroundColor: "#F5F7FF",
+      barStyle: "dark-content"
+    },
+    splash: {
+      image: "./assets/splash-icon.png",
+      resizeMode: "contain",
+      backgroundColor: "#F5F7FF"
+    },
+    ios: {
+      supportsTablet: true
+    },
+    android: {
+      adaptiveIcon: {
+        foregroundImage: "./assets/splash-icon.png",
+        backgroundColor: "#F5F7FF"
+      },
+      edgeToEdgeEnabled: false,
+      package: "com.powerteldev.MobileApplication"
+    },
+    web: {
+      favicon: "./assets/favicon.png"
+    },
+    updates: {
+      enabled: true,
+      url: "https://u.expo.dev/152b3f73-2c00-4325-afe4-5a26e8d5b8e1"
+    },
+    extra: {
+      apiUrl: process.env.API_URL || "https://impazamon.powertel.co.zw/api",
+      eas: {
+        projectId: "152b3f73-2c00-4325-afe4-5a26e8d5b8e1"
+      }
+    },
+    owner: "powerteldev",
+    runtimeVersion: {
+      policy: "appVersion"
+    }
+  }
+};

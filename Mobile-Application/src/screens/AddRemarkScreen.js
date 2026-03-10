@@ -69,7 +69,7 @@ export default function AddRemarkScreen() {
         console.log('submitRemark: response (json)', resp);
       }
       Alert.alert('Success', 'Remark added successfully.', [
-        { text: 'OK', onPress: () => navigation.replace('FaultDetail', { id, refetchAt: Date.now() }) }
+        { text: 'OK', onPress: () => navigation.goBack() }
       ]);
     } catch (e) {
       console.error('submitRemark: error', e);

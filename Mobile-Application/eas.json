@@ -11,7 +11,10 @@
     },
     "preview": {
       "distribution": "internal",
-      "channel": "preview"
+      "channel": "preview",
+      "env": {
+        "API_URL": "http://192.168.19.91:8087/api"
+      }
     },
     "production": {
       "autoIncrement": true,

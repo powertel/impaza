@@ -3,7 +3,7 @@ import Constants from 'expo-constants';
 // Prefer Expo config (app.json/eas.json) for API URL. Avoid using process.env
 // to prevent accidental overrides with local IPs during web dev.
 const CONFIG_API_URL = Constants?.expoConfig?.extra?.apiUrl || Constants?.manifest?.extra?.apiUrl;
-const API_ORIGIN = (CONFIG_API_URL || 'https://impazamon.powertel.co.zw').replace(/\/$/, '');
+const API_ORIGIN = (CONFIG_API_URL || 'http://localhost:8087').replace(/\/$/, '');
 const API_URL = `${API_ORIGIN}`;
 if (__DEV__) console.log('API_URL', API_URL);
 
@@ -43,9 +43,10 @@ export async function changePassword(payload) {
   return request('/mobile/profile/password', { method: 'POST', body: JSON.stringify(payload) });
 }
 
-export async function getMyFaults() {
-  const data = await request('/mobile/faults');
-  return Array.isArray(data) ? data : (data?.faults || []);
+export async function getMyFaults(params = {}) {
+  const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  const data = await request(`/mobile/faults${query}`);
+  return data;
 }
 
 export async function getFault(id) {
@@ -67,6 +68,52 @@ export async function addFaultRemark(id, payload) {
   return request(`/mobile/faults/${id}/remarks`, { method: 'POST', body: JSON.stringify(payload) });
 }
 
+export async function getAssessments(params = {}) {
+  const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  const data = await request(`/mobile/faults/assessments${query}`);
+  return data;
+}
+
+export async function getRectifiedFaults(params = {}) {
+  const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  const data = await request(`/mobile/faults/rectified${query}`);
+  return data;
+}
+
+export async function getEscalations(params = {}) {
+  const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  const data = await request(`/mobile/faults/escalations${query}`);
+  return data;
+}
+
+export async function getResolvedFaults(params = {}) {
+  const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  const data = await request(`/mobile/faults/resolved${query}`);
+  return data;
+}
+
+export async function getReferredFaults(params = {}) {
+  const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  const data = await request(`/mobile/faults/referred${query}`);
+  return data;
+}
+
+export async function assessFault(id, payload) {
+  return request(`/mobile/faults/${id}/assess`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export async function clearFault(id, payload) {
+  return request(`/mobile/faults/${id}/clear`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export async function revokeFault(id, payload) {
+  return request(`/mobile/faults/${id}/revoke`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export async function referFault(id, payload) {
+  return request(`/mobile/faults/${id}/refer`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
 export async function getTechnicianStats(params = {}) {
   const query = Object.keys(params || {}).length ? `?${new URLSearchParams(params).toString()}` : '';
   return request(`/mobile/technician-stats${query}`);
@@ -82,4 +129,42 @@ export async function getSections() {
 
 export async function escalateFault(id, payload) {
   return request(`/mobile/faults/${id}/escalate`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export async function getUnassignedFaults(params = {}) {
+  const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  const data = await request(`/mobile/faults/unassigned${query}`);
+  return data;
+}
+
+export async function getAssignedFaults(params = {}) {
+  const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  const data = await request(`/mobile/faults/assigned${query}`);
+  return data;
+}
+
+export async function getSectionFaults(params = {}) {
+  const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  const data = await request(`/mobile/faults/section${query}`);
+  return data;
+}
+
+export async function getAssignableTechnicians() {
+  return request('/mobile/technicians/assignable');
+}
+
+export async function assignFault(payload) {
+  return request('/mobile/faults/assign', { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export async function reassignFault(id, payload) {
+  return request(`/mobile/faults/${id}/reassign`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export async function reassignReferral(id, payload) {
+  return request(`/mobile/faults/${id}/reassign-referral`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export async function completeReferral(id, payload) {
+  return request(`/mobile/faults/${id}/complete-referral`, { method: 'POST', body: JSON.stringify(payload) });
 }
