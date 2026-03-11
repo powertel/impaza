@@ -13,7 +13,7 @@
       "distribution": "internal",
       "channel": "preview",
       "env": {
-        "API_URL": "http://192.168.19.91:8087/api"
+        "API_URL": "https://impazamon.powertel.co.zw/api"
       }
     },
     "production": {
