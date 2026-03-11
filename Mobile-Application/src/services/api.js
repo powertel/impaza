@@ -35,10 +35,9 @@ const DEV_API_URL = (() => {
   return 'http://localhost:8087/api';
 })();
 
-const shouldUseDevApi =
-  __DEV__ && (!CONFIG_API_URL || /impazamon\.powertel\.co\.zw/i.test(String(CONFIG_API_URL)));
+const shouldUseDevApi = __DEV__ && !CONFIG_API_URL;
 
-export const API_URL = normalizeUrl(shouldUseDevApi ? DEV_API_URL : (CONFIG_API_URL || DEV_API_URL));
+export const API_URL = normalizeUrl((shouldUseDevApi ? DEV_API_URL : CONFIG_API_URL) || DEV_API_URL);
 if (__DEV__) console.log('API_URL', API_URL);
 
 let authToken = null;
