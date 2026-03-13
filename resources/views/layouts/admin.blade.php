@@ -191,6 +191,124 @@
     
 
 
+    <script>
+      (function(){
+        function csrf() {
+          var el = document.querySelector('meta[name="csrf-token"]');
+          return el ? el.getAttribute('content') : '';
+        }
+
+        function esc(s) {
+          return String(s || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        }
+
+        function setBadge(count) {
+          var badge = document.getElementById('impazaNotifBadge');
+          if (!badge) return;
+          var n = parseInt(count || 0, 10) || 0;
+          if (n > 0) {
+            badge.textContent = String(n);
+            badge.style.display = 'inline-block';
+          } else {
+            badge.textContent = '';
+            badge.style.display = 'none';
+          }
+        }
+
+        function renderList(items) {
+          var root = document.getElementById('impazaNotifList');
+          if (!root) return;
+          if (!items || !items.length) {
+            root.innerHTML = '<div class="px-3 py-2 text-muted small">No notifications</div>';
+            return;
+          }
+          var html = items.map(function(n){
+            var data = n.data || {};
+            var title = esc(data.title || 'Notification');
+            var body = esc(data.body || data.message || '');
+            var unread = !n.read_at;
+            var rowStyle = 'padding:10px 12px; border-bottom:1px solid #f1f5f9; cursor:pointer;' + (unread ? ' background:#eef6ff;' : '');
+            var titleStyle = 'font-weight:700; font-size:12px; color:#0f172a; margin-bottom:2px;';
+            var bodyStyle = 'font-size:11px; color:#475569; white-space:normal;';
+            return '<div class="impaza-notif-item" data-id="'+n.id+'" style="'+rowStyle+'">' +
+              '<div style="'+titleStyle+'">'+title+'</div>' +
+              '<div style="'+bodyStyle+'">'+body+'</div>' +
+            '</div>';
+          }).join('');
+          root.innerHTML = html;
+        }
+
+        async function fetchCount() {
+          try {
+            var res = await fetch('{{ route('notifications.unread-count') }}', { headers: { 'Accept':'application/json' } });
+            if (!res.ok) return;
+            var json = await res.json();
+            setBadge(json.unread);
+          } catch (e) {}
+        }
+
+        async function fetchList() {
+          var root = document.getElementById('impazaNotifList');
+          if (root) root.innerHTML = '<div class="px-3 py-2 text-muted small">Loading...</div>';
+          try {
+            var res = await fetch('{{ route('notifications.index') }}?limit=15', { headers: { 'Accept':'application/json' } });
+            if (!res.ok) return;
+            var json = await res.json();
+            renderList((json && json.notifications) ? json.notifications : []);
+          } catch (e) {}
+        }
+
+        async function markRead(id) {
+          try {
+            var res = await fetch('{{ url('/notifications') }}/' + encodeURIComponent(id) + '/read', {
+              method: 'POST',
+              headers: { 'Accept':'application/json', 'X-CSRF-TOKEN': csrf() }
+            });
+            if (!res.ok) return;
+            await fetchCount();
+            await fetchList();
+          } catch (e) {}
+        }
+
+        async function markAllRead() {
+          var list = document.getElementById('impazaNotifList');
+          if (!list) return;
+          var ids = Array.prototype.slice.call(list.querySelectorAll('.impaza-notif-item')).map(function(el){ return el.getAttribute('data-id'); }).filter(Boolean);
+          for (var i = 0; i < ids.length; i++) {
+            await markRead(ids[i]);
+          }
+        }
+
+        document.addEventListener('click', function(ev){
+          var item = ev.target && ev.target.closest ? ev.target.closest('.impaza-notif-item') : null;
+          if (item && item.getAttribute) {
+            var id = item.getAttribute('data-id');
+            if (id) markRead(id);
+          }
+        });
+
+        document.addEventListener('show.bs.dropdown', function(ev){
+          if (ev && ev.target && ev.target.querySelector && ev.target.querySelector('#impazaNotifList')) {
+            fetchList();
+          }
+        });
+
+        var btn = document.getElementById('impazaNotifMarkAll');
+        if (btn) btn.addEventListener('click', function(e){ e.preventDefault(); markAllRead(); });
+        var toggle = document.getElementById('impazaNotifToggle');
+        if (toggle) toggle.addEventListener('click', function(){ fetchList(); });
+
+        fetchCount();
+        fetchList();
+        setInterval(fetchCount, 30000);
+      })();
+    </script>
+
         @yield('scripts')
 
         @include('partials.scripts')

@@ -6,6 +6,7 @@ use App\Http\Controllers\Mobile\AuthController;
 use App\Http\Controllers\Mobile\FaultController;
 use App\Http\Controllers\Mobile\StatsController;
 use App\Http\Controllers\Mobile\ProfileController;
+use App\Http\Controllers\Mobile\NotificationController;
 use App\Http\Controllers\Api\CustomerFaultsController;
 /*
 |--------------------------------------------------------------------------
@@ -63,6 +64,12 @@ Route::prefix('mobile')->group(function () {
         Route::get('rfos', [FaultController::class, 'rfos']);
         Route::get('sections', [FaultController::class, 'sections']);
         Route::get('technician-stats', [StatsController::class, 'myStats']);
+
+        Route::post('push-tokens', [NotificationController::class, 'registerPushToken']);
+        Route::get('notifications', [NotificationController::class, 'index']);
+        Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
+        Route::post('notifications/{id}/read', [NotificationController::class, 'markRead']);
+        Route::post('notifications/mark-all-read', [NotificationController::class, 'markAllRead']);
     });
 });
 

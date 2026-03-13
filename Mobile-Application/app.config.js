@@ -6,7 +6,6 @@ export default {
     orientation: "portrait",
     icon: "./assets/splash-icon.png",
     userInterfaceStyle: "light",
-    newArchEnabled: false,
     androidStatusBar: {
       backgroundColor: "#F5F7FF",
       barStyle: "dark-content"

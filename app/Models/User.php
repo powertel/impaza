@@ -80,4 +80,9 @@ class User extends Authenticatable implements MustVerifyEmail
         {
             return $this->hasMany(Fault::class, 'assignedTo');
         }
+
+    public function pushTokens()
+    {
+        return $this->hasMany(UserPushToken::class);
+    }
 }
