@@ -11,6 +11,20 @@
     </ul>
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
+      <li class="nav-item dropdown">
+        <a id="impazaNotifToggle" class="nav-link" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" style="position:relative;">
+          <i class="fas fa-bell" style="color: rgb(35, 157, 233); font-size: 16px;"></i>
+          <span id="impazaNotifBadge" class="badge bg-danger" style="display:none; position:absolute; top:6px; right:6px; font-size:10px; padding:2px 5px; border-radius:10px;"></span>
+        </a>
+        <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated topbar-dropdown-menu" style="min-width: 320px;">
+          <div class="dropdown-header d-flex align-items-center justify-content-between">
+            <span class="fw-semibold">Notifications</span>
+            <button type="button" class="btn btn-link btn-sm p-0" id="impazaNotifMarkAll" style="text-decoration:none;">Mark all read</button>
+          </div>
+          <div class="dropdown-divider"></div>
+          <div id="impazaNotifList" style="max-height: 320px; overflow:auto;"></div>
+        </div>
+      </li>
       <li class="dropdown notification-list topbar-dropdown">
             <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
                 <i class="fa fa-user" style="color: rgb(35, 157, 233);"></i> &nbsp;

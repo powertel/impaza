@@ -20,6 +20,8 @@ use Illuminate\Support\Facades\Log;
 use App\Jobs\SendInfobipTemplateMessage;
 use App\Models\FaultReferral;
 use Illuminate\Support\Facades\Mail;
+use App\Notifications\SystemNotification;
+use App\Services\ExpoPushService;
 
 class FaultLifecycle
 {
@@ -57,6 +59,12 @@ class FaultLifecycle
                 'ok' => $ok,
                 'phone' => $assigned->phonenumber,
             ]);
+            self::notifyUsers(
+                collect([$assigned]),
+                'Fault assigned',
+                "Fault {$fault->fault_ref_number} assigned to you",
+                ['fault_id' => $fault->id, 'fault_ref' => $fault->fault_ref_number, 'event' => 'assigned']
+            );
         } else {
             Log::warning("Notify: Cannot notify assigned technician - no phone number", [
                 'fault_ref' => $fault->fault_ref_number,
@@ -188,25 +196,36 @@ class FaultLifecycle
 
         if ($toStatusId === 1) {
             $nocSectionId = 1;
-            $recipients = User::query()
+            $recipientIds = User::query()
                 ->where('section_id', $nocSectionId)
                 ->leftJoin('user_statuses', 'users.user_status', '=', 'user_statuses.id')
                 ->where('user_statuses.id', '=', 1)
-                ->whereNotNull('users.phonenumber')
-                ->pluck('users.phonenumber')
+                ->pluck('users.id')
                 ->all();
-            if (empty($recipients)) {
+            $recipients = User::whereIn('id', $recipientIds)->get();
+
+            $phoneRecipients = $recipients->pluck('phonenumber')->filter()->values()->all();
+            if (empty($phoneRecipients)) {
                 $nocRaw = env('POWERTEL_SMS_NOC_RECIPIENTS');
-                $recipients = array_values(array_filter(array_map('trim', explode(',', (string)$nocRaw)), fn($x) => $x !== ''));
+                $phoneRecipients = array_values(array_filter(array_map('trim', explode(',', (string)$nocRaw)), fn($x) => $x !== ''));
             }
-            if (!empty($recipients)) {
+            if (!empty($phoneRecipients)) {
                 $nocText = self::nocMessage($fault, 1);
-                $ok = app(SmsService::class)->send($recipients, $nocText);
+                $ok = app(SmsService::class)->send($phoneRecipients, $nocText);
                 Log::info($ok ? 'Notify: NOC notified (SMS) for status 1' : 'Notify: NOC SMS failed for status 1', [
                     'ok' => $ok,
                     'fault' => $fault->fault_ref_number,
-                    'recipients' => $recipients,
+                    'recipients' => $phoneRecipients,
                 ]);
+            }
+
+            if ($recipients->isNotEmpty()) {
+                self::notifyUsers(
+                    $recipients,
+                    'New fault logged',
+                    "Fault {$fault->fault_ref_number} logged. Pending assessment.",
+                    ['fault_id' => $fault->id, 'fault_ref' => $fault->fault_ref_number, 'status_id' => $toStatusId, 'event' => 'status_changed']
+                );
             }
         }
 
@@ -228,31 +247,35 @@ class FaultLifecycle
                 $query->where('users.region', '=', $region);
             }
 
-            $recipients = $query->pluck('users.phonenumber')->all();
+            $recipientIds = (clone $query)->pluck('users.id')->all();
+            $recipients = User::whereIn('id', $recipientIds)->get();
+            $phones = $recipients->pluck('phonenumber')->filter()->values()->all();
 
             // Fallback: if no regional Chief Technician found, try all in that section
-            if (empty($recipients) && !empty($region)) {
+            if (empty($phones) && !empty($region)) {
                 Log::info("Notify: No regional Chief Technician found for SMS assessed alert to {$region}, searching all in section {$sectionId}");
-                $recipients = User::query()
+                $recipientIds = User::query()
                     ->join('positions','users.position_id','=','positions.id')
                     ->where('positions.position', '=', 'Chief Technician')
                     ->where('users.section_id', '=', $sectionId)
                     ->whereNotNull('users.phonenumber')
-                    ->pluck('users.phonenumber')
+                    ->pluck('users.id')
                     ->all();
+                $recipients = User::whereIn('id', $recipientIds)->get();
+                $phones = $recipients->pluck('phonenumber')->filter()->values()->all();
             }
 
-            if (empty($recipients)) {
+            if (empty($phones)) {
                 $fallback = env('POWERTEL_SMS_CT_RECIPIENTS');
-                $recipients = array_values(array_filter(array_map('trim', explode(',', (string)$fallback)), fn($x) => $x !== ''));
+                $phones = array_values(array_filter(array_map('trim', explode(',', (string)$fallback)), fn($x) => $x !== ''));
             }
-            if (!empty($recipients)) {
+            if (!empty($phones)) {
                 $text = "Assessment: Fault {$fault->fault_ref_number} has been assessed. Please review and proceed with rectification.";
-                $ok = app(SmsService::class)->send($recipients, $text);
+                $ok = app(SmsService::class)->send($phones, $text);
                 Log::info($ok ? 'Notify: Chief Technicians notified (SMS) for status 2' : 'Notify: Chief Technicians SMS failed for status 2', [
                     'ok' => $ok,
                     'fault' => $fault->fault_ref_number,
-                    'recipients' => $recipients,
+                    'recipients' => $phones,
                     'region' => $region,
                     'section_id' => $sectionId,
                 ]);
@@ -262,6 +285,15 @@ class FaultLifecycle
                     'region' => $region,
                     'section_id' => $sectionId,
                 ]);
+            }
+
+            if ($recipients->isNotEmpty()) {
+                self::notifyUsers(
+                    $recipients,
+                    'Fault assessed',
+                    "Fault {$fault->fault_ref_number} has been assessed. Please review.",
+                    ['fault_id' => $fault->id, 'fault_ref' => $fault->fault_ref_number, 'status_id' => $toStatusId, 'event' => 'status_changed']
+                );
             }
         }
 
@@ -285,10 +317,12 @@ class FaultLifecycle
             if (in_array($sectionId, [2, 3], true) && !empty($region)) {
                 $query->where('users.region', '=', $region);
             }
-            $recipients = $query->pluck('users.phonenumber')->all();
+            $recipientIds = (clone $query)->pluck('users.id')->all();
+            $recipients = User::whereIn('id', $recipientIds)->get();
+            $phones = $recipients->pluck('phonenumber')->filter()->values()->all();
 
             // If no regional recipient found, try all in that section before .env fallback
-            if (empty($recipients) && !empty($region)) {
+            if (empty($phones) && !empty($region)) {
                 Log::info("Notify: No regional recipient found for SMS rectified alert to {$region}, searching all in section {$sectionId}");
                 $query = User::query()
                     ->join('positions','users.position_id','=','positions.id')
@@ -300,20 +334,22 @@ class FaultLifecycle
                 } else {
                     $query->where('positions.position', '=', 'Chief Technician');
                 }
-                $recipients = $query->pluck('users.phonenumber')->all();
+                $recipientIds = (clone $query)->pluck('users.id')->all();
+                $recipients = User::whereIn('id', $recipientIds)->get();
+                $phones = $recipients->pluck('phonenumber')->filter()->values()->all();
             }
 
-            if (empty($recipients)) {
+            if (empty($phones)) {
                 $fallback = env('POWERTEL_SMS_CT_RECIPIENTS');
-                $recipients = array_values(array_filter(array_map('trim', explode(',', (string)$fallback)), fn($x) => $x !== ''));
+                $phones = array_values(array_filter(array_map('trim', explode(',', (string)$fallback)), fn($x) => $x !== ''));
             }
-            if (!empty($recipients)) {
+            if (!empty($phones)) {
                 $text = "Rectification: Fault {$fault->fault_ref_number} was rectified for {$sectionName}.";
-                $ok = app(SmsService::class)->send($recipients, $text);
+                $ok = app(SmsService::class)->send($phones, $text);
                 Log::info($ok ? 'Notify: Chief Technicians notified (SMS) for status 4' : 'Notify: Chief Technicians SMS failed for status 4', [
                     'ok' => $ok,
                     'fault' => $fault->fault_ref_number,
-                    'recipients' => $recipients,
+                    'recipients' => $phones,
                     'section_id' => $sectionId,
                     'region' => $region,
                 ]);
@@ -323,6 +359,15 @@ class FaultLifecycle
                     'section_id' => $sectionId,
                     'region' => $region,
                 ]);
+            }
+
+            if ($recipients->isNotEmpty()) {
+                self::notifyUsers(
+                    $recipients,
+                    'Fault rectified',
+                    "Fault {$fault->fault_ref_number} was rectified for {$sectionName}.",
+                    ['fault_id' => $fault->id, 'fault_ref' => $fault->fault_ref_number, 'status_id' => $toStatusId, 'event' => 'status_changed']
+                );
             }
         }
 
@@ -359,10 +404,12 @@ class FaultLifecycle
             if (in_array($sectionId, [2, 3], true) && !empty($region)) {
                 $query->where('users.region', '=', $region);
             }
-            $recipients = $query->pluck('users.phonenumber')->all();
+            $recipientIds = (clone $query)->pluck('users.id')->all();
+            $recipients = User::whereIn('id', $recipientIds)->get();
+            $phones = $recipients->pluck('phonenumber')->filter()->values()->all();
 
             // Fallback: if no regional recipient found, try all in section
-            if (empty($recipients) && !empty($region)) {
+            if (empty($phones) && !empty($region)) {
                 Log::info("Notify: No regional recipient found for SMS escalation to {$region}, searching all in section {$sectionId}");
                 $query = User::query()
                     ->join('positions','users.position_id','=','positions.id')
@@ -374,11 +421,13 @@ class FaultLifecycle
                 } else {
                     $query->where('positions.position', '=', 'Chief Technician');
                 }
-                $recipients = $query->pluck('users.phonenumber')->all();
+                $recipientIds = (clone $query)->pluck('users.id')->all();
+                $recipients = User::whereIn('id', $recipientIds)->get();
+                $phones = $recipients->pluck('phonenumber')->filter()->values()->all();
             }
 
             // Final fallback for Chief Technician SMS: search across all technical sections (2, 3)
-            if (empty($recipients)) {
+            if (empty($phones)) {
                 Log::info("Notify: No Chief Technician found for SMS escalation in section {$sectionId}, searching across technical sections (NOC/Projects)");
                 $query = User::query()
                     ->join('positions','users.position_id','=','positions.id')
@@ -390,30 +439,43 @@ class FaultLifecycle
                     $query->where('users.region', '=', $region);
                 }
                 
-                $recipients = $query->pluck('users.phonenumber')->all();
+                $recipientIds = (clone $query)->pluck('users.id')->all();
+                $recipients = User::whereIn('id', $recipientIds)->get();
+                $phones = $recipients->pluck('phonenumber')->filter()->values()->all();
 
                 // If still empty and we used region, try without region
-                if (empty($recipients) && !empty($region)) {
-                    $recipients = User::query()
+                if (empty($phones) && !empty($region)) {
+                    $recipientIds = User::query()
                         ->join('positions','users.position_id','=','positions.id')
                         ->where('positions.position', '=', 'Chief Technician')
                         ->whereIn('users.section_id', [2, 3])
                         ->whereNotNull('users.phonenumber')
-                        ->pluck('users.phonenumber')
+                        ->pluck('users.id')
                         ->all();
+                    $recipients = User::whereIn('id', $recipientIds)->get();
+                    $phones = $recipients->pluck('phonenumber')->filter()->values()->all();
                 }
             }
 
-            if (!empty($recipients)) {
+            if (!empty($phones)) {
                 $text = "Escalation: Fault {$fault->fault_ref_number} has been escalated by technician for review.";
-                $ok = app(SmsService::class)->send($recipients, $text);
+                $ok = app(SmsService::class)->send($phones, $text);
                 Log::info($ok ? 'Notify: Chief Technicians notified (SMS) for escalation' : 'Notify: Chief Technicians SMS failed for escalation', [
                     'ok' => $ok,
                     'fault' => $fault->fault_ref_number,
-                    'recipients' => $recipients,
+                    'recipients' => $phones,
                     'section_id' => $sectionId,
                     'region' => $region,
                 ]);
+            }
+
+            if ($recipients->isNotEmpty()) {
+                self::notifyUsers(
+                    $recipients,
+                    'Fault escalated',
+                    "Fault {$fault->fault_ref_number} has been escalated by technician for review.",
+                    ['fault_id' => $fault->id, 'fault_ref' => $fault->fault_ref_number, 'status_id' => $toStatusId, 'event' => 'status_changed']
+                );
             }
         } elseif ($toStatusId === self::managerEscalatedId()) {
             self::sendEscalationEmail($fault, 'Manager');
@@ -425,17 +487,28 @@ class FaultLifecycle
             if ($sectionId > 0) {
                 $query->where('users.section_id', '=', $sectionId);
             }
-            $recipients = $query->pluck('users.phonenumber')->all();
-            if (!empty($recipients)) {
+            $recipientIds = (clone $query)->pluck('users.id')->all();
+            $recipients = User::whereIn('id', $recipientIds)->get();
+            $phones = $recipients->pluck('phonenumber')->filter()->values()->all();
+            if (!empty($phones)) {
                 $text = "Escalation: Fault {$fault->fault_ref_number} has been escalated to Manager for intervention.";
-                $ok = app(SmsService::class)->send($recipients, $text);
+                $ok = app(SmsService::class)->send($phones, $text);
                 Log::info($ok ? 'Notify: Managers notified (SMS) for escalation' : 'Notify: Managers SMS failed for escalation', [
                     'ok' => $ok,
                     'fault' => $fault->fault_ref_number,
-                    'recipients' => $recipients,
+                    'recipients' => $phones,
                     'section_id' => $sectionId,
                     'region' => $region,
                 ]);
+            }
+
+            if ($recipients->isNotEmpty()) {
+                self::notifyUsers(
+                    $recipients,
+                    'Fault escalated to Manager',
+                    "Fault {$fault->fault_ref_number} has been escalated to Manager for intervention.",
+                    ['fault_id' => $fault->id, 'fault_ref' => $fault->fault_ref_number, 'status_id' => $toStatusId, 'event' => 'status_changed']
+                );
             }
         }
 
@@ -581,6 +654,30 @@ class FaultLifecycle
             return "Update: Fault {$fault->fault_ref_number} under rectification.\n{$summary}";
         }
         /* return "Fault {$fault->fault_ref_number} status updated.\n{$summary}"; */
+        return "";
+    }
+
+    protected static function notifyUsers($users, string $title, string $body, array $payload = []): void
+    {
+        $collection = collect($users)->filter(function ($u) {
+            return $u instanceof User;
+        })->unique('id')->values();
+
+        foreach ($collection as $u) {
+            try {
+                $u->notify(new SystemNotification($title, $body, $payload));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
+        try {
+            $pushTitle = 'iMpazamon';
+            $pushBody = trim($title . ': ' . $body);
+            app(ExpoPushService::class)->sendToUsers($collection, $pushTitle, $pushBody, $payload);
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     protected static function sendClearedEmail(Fault $fault): void
@@ -643,7 +740,9 @@ class FaultLifecycle
             $query->where('users.region', '=', $region);
         }
 
-        $recipients = $query->pluck('users.email')->all();
+        $recipientIds = (clone $query)->pluck('users.id')->all();
+        $recipientUsers = User::whereIn('id', $recipientIds)->get();
+        $recipients = $recipientUsers->pluck('email')->filter()->values()->all();
 
         // Fallback: if no regional supervisors found, try all supervisors in that section
         if (empty($recipients) && !empty($region)) {
@@ -658,7 +757,9 @@ class FaultLifecycle
             } else {
                 $query->whereIn('positions.position', ['Chief Technician', 'Manager', 'Technical Manager']);
             }
-            $recipients = $query->pluck('users.email')->all();
+            $recipientIds = (clone $query)->pluck('users.id')->all();
+            $recipientUsers = User::whereIn('id', $recipientIds)->get();
+            $recipients = $recipientUsers->pluck('email')->filter()->values()->all();
         }
 
         if (empty($recipients)) {
@@ -690,6 +791,15 @@ class FaultLifecycle
             Log::info("Notify: Referral email sent to section {$referral->to_section_id} for fault {$fault->fault_ref_number}");
         } catch (\Exception $e) {
             Log::error("Notify: Error sending referral email: " . $e->getMessage());
+        }
+
+        if (!empty($recipientUsers) && $recipientUsers->isNotEmpty()) {
+            self::notifyUsers(
+                $recipientUsers,
+                'Fault referred',
+                "Fault {$fault->fault_ref_number} referred to {$toSection->section}.",
+                ['fault_id' => $fault->id, 'fault_ref' => $fault->fault_ref_number, 'event' => 'referred', 'to_section_id' => (int) $referral->to_section_id]
+            );
         }
     }
 

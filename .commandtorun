@@ -29,6 +29,7 @@ docker exec impaza_mysql mysql -uroot -proot -e "GRANT ALL PRIVILEGES ON impaza.
 
 -Building the adroid app
 npm run start -- --port 8082 --lan --go to run development server on local network
+npx expo start
 eas build -p android --profile preview
 
 

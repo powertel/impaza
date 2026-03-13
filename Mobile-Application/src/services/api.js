@@ -201,3 +201,24 @@ export async function reassignReferral(id, payload) {
 export async function completeReferral(id, payload) {
   return request(`/mobile/faults/${id}/complete-referral`, { method: 'POST', body: JSON.stringify(payload) });
 }
+
+export async function registerPushToken(payload) {
+  return request('/mobile/push-tokens', { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export async function getUnreadCount() {
+  return request('/mobile/notifications/unread-count');
+}
+
+export async function getNotifications(params = {}) {
+  const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  return request(`/mobile/notifications${query}`);
+}
+
+export async function markNotificationRead(id) {
+  return request(`/mobile/notifications/${id}/read`, { method: 'POST' });
+}
+
+export async function markAllNotificationsRead() {
+  return request('/mobile/notifications/mark-all-read', { method: 'POST' });
+}

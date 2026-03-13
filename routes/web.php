@@ -36,6 +36,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\ResolvedController;
 use App\Http\Controllers\ZoneController;
+use App\Http\Controllers\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -58,6 +59,9 @@ Auth::routes();
 
 Route::group(['middleware' => ['auth']], function() {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
     // Reports dashboard
     Route::get('/dashboard/reports', [DashboardController::class, 'reports'])->name('dashboard.reports');
     // Performance Dashboard

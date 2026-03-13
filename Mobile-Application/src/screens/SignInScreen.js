@@ -28,7 +28,7 @@ export default function SignInScreen() {
     try {
       const res = await apiLogin(email, password);
       if (res?.token) {
-        login(res.user);
+        login(res.user, res.token);
         navigation.replace('Main');
       } else {
         const message = res?.error || res?.message || (res?.status === 405 ? 'Method Not Allowed' : 'Invalid credentials');
