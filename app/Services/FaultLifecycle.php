@@ -653,6 +653,18 @@ class FaultLifecycle
         } catch (\Exception $e) {
             Log::error("Notify: Error sending clearance email via SMTP: " . $e->getMessage());
         }
+
+        $ceUsers = User::query()
+            ->where('section_id', 6)
+            ->get();
+        if ($ceUsers->isNotEmpty()) {
+            self::notifyUsers(
+                $ceUsers,
+                'Fault cleared',
+                "Fault {$fault->fault_ref_number} cleared. Customer: {$customerName}.",
+                ['fault_id' => $fault->id, 'fault_ref' => $fault->fault_ref_number, 'event' => 'cleared', 'section_id' => 6]
+            );
+        }
     }
 
     protected static function sendReferralEmail(Fault $fault): void
