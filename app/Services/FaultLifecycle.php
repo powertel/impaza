@@ -343,13 +343,17 @@ class FaultLifecycle
                 ->all();
             $nocUsers = User::whereIn('id', $nocIds)->get();
 
-            $recipients = $ctUsers->concat($nocUsers)->unique('id')->values();
+            $ceUsers = User::query()
+                ->where('section_id', 6)
+                ->get();
+
+            $recipients = $ctUsers->concat($nocUsers)->concat($ceUsers)->unique('id')->values();
 
             if ($recipients->isNotEmpty()) {
                 self::notifyUsers(
                     $recipients,
                     'Fault rectified',
-                    "Fault {$fault->fault_ref_number} was rectified for {$sectionName}.",
+                    "Fault {$fault->fault_ref_number} was rectified by {$sectionName}.",
                     ['fault_id' => $fault->id, 'fault_ref' => $fault->fault_ref_number, 'status_id' => $toStatusId, 'event' => 'status_changed']
                 );
             }
