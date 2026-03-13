@@ -2,14 +2,10 @@
 
 namespace App\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
-class SystemNotification extends Notification implements ShouldQueue
+class SystemNotification extends Notification
 {
-    use Queueable;
-
     public string $title;
     public string $body;
     public array $payload;
@@ -40,4 +36,3 @@ class SystemNotification extends Notification implements ShouldQueue
         return $this->toDatabase($notifiable);
     }
 }
-
