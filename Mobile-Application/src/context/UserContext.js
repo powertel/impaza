@@ -45,10 +45,8 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     const projectId = Constants?.expoConfig?.extra?.eas?.projectId || Constants?.manifest?.extra?.eas?.projectId;
     const ensurePush = async () => {
-      if (!user || !token || !projectId) return;
-      const isExpoGo = Constants?.executionEnvironment
-        ? Constants.executionEnvironment === 'storeClient'
-        : Constants?.appOwnership === 'expo';
+      if (!user || !token) return;
+      const isExpoGo = Constants?.executionEnvironment === 'storeClient';
       if (isExpoGo) return;
       try {
         const Notifications = await import('expo-notifications');
@@ -74,10 +72,26 @@ export const UserProvider = ({ children }) => {
           status = req?.status;
         }
         if (status !== 'granted') return;
-        const expoToken = await Notifications.getExpoPushTokenAsync({ projectId });
-        const value = expoToken?.data;
+        let value = null;
+        try {
+          if (projectId) {
+            const expoToken = await Notifications.getExpoPushTokenAsync({ projectId });
+            value = expoToken?.data || null;
+          } else {
+            const expoToken = await Notifications.getExpoPushTokenAsync();
+            value = expoToken?.data || null;
+          }
+        } catch (e) {
+          try {
+            const expoToken = await Notifications.getExpoPushTokenAsync();
+            value = expoToken?.data || null;
+          } catch (e2) {
+            value = null;
+          }
+        }
         if (!value) return;
-        await registerPushToken({ token: value, platform: Platform.OS });
+        const res = await registerPushToken({ token: value, platform: Platform.OS });
+        if (__DEV__) console.log('push-token-registered', !!res?.success);
       } catch (e) {
       }
     };
