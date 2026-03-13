@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { AntDesign, Feather } from '@expo/vector-icons';
 import { usePermissions } from '../hooks/usePermissions';
+import Constants from 'expo-constants';
 
 import { theme } from '../styles/theme';
 import DashboardScreen from '../screens/DashboardScreen';
 import FaultsListScreen from '../screens/FaultsListScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
-import { getUnreadCount } from '../services/api';
+import { getNotifications, getUnreadCount } from '../services/api';
 
 import AssessmentsScreen from '../screens/AssessmentsScreen';
 
@@ -17,6 +18,7 @@ const Tab = createBottomTabNavigator();
 export default function MainTabs() {
   const { hasPermission, hasAnyPermission, hasRole } = usePermissions();
   const [unread, setUnread] = useState(0);
+  const prevUnreadRef = useRef(0);
 
   useEffect(() => {
     let mounted = true;
@@ -24,7 +26,31 @@ export default function MainTabs() {
       try {
         const res = await getUnreadCount();
         const value = parseInt(res?.unread || 0, 10) || 0;
+        const prev = prevUnreadRef.current || 0;
+        prevUnreadRef.current = value;
         if (mounted) setUnread(value);
+
+        if (value > prev) {
+          const isExpoGo = Constants?.executionEnvironment
+            ? Constants.executionEnvironment === 'storeClient'
+            : Constants?.appOwnership === 'expo';
+          if (isExpoGo) return;
+          try {
+            const Notifications = await import('expo-notifications');
+            const latest = await getNotifications({ limit: 1, unread: 1 });
+            const raw = latest?.notifications;
+            const list = Array.isArray(raw) ? raw : (raw && typeof raw === 'object' ? Object.values(raw) : []);
+            const first = list && list.length ? list[0] : null;
+            const data = first?.data || {};
+            const t = String(data.title || 'Notification');
+            const b = String(data.body || data.message || 'You have a new notification');
+            await Notifications.scheduleNotificationAsync({
+              content: { title: 'iMpazamon', body: `${t}: ${b}`, sound: 'default' },
+              trigger: null,
+            });
+          } catch (e) {
+          }
+        }
       } catch (e) {
       }
     };
