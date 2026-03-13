@@ -35,7 +35,9 @@ export default function NotificationsScreen() {
     setRefreshing(true);
     try {
       const res = await getNotifications({ limit: 30 });
-      setItems(Array.isArray(res?.notifications) ? res.notifications : []);
+      const raw = res?.notifications;
+      const list = Array.isArray(raw) ? raw : (raw && typeof raw === 'object' ? Object.values(raw) : []);
+      setItems(list);
     } catch (e) {
     } finally {
       setRefreshing(false);

@@ -26,7 +26,7 @@ class NotificationController extends Controller
                 'read_at' => $n->read_at,
                 'created_at' => $n->created_at,
             ];
-        });
+        })->values();
 
         return response()->json(['notifications' => $items]);
     }
