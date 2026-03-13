@@ -301,65 +301,49 @@ class FaultLifecycle
             $sectionId = (int) (FaultSection::where('fault_id', $fault->id)->value('section_id') ?? 0);
             $sectionName = $sectionId ? (Section::find($sectionId)->section ?? 'Section') : 'Section';
             $region = $fault->city_id ? (City::find($fault->city_id)->region ?? null) : null;
-            $query = User::query()
-                ->join('positions','users.position_id','=','positions.id')
-                ->whereNotNull('users.phonenumber');
+            $ctQuery = User::query()
+                ->join('positions', 'users.position_id', '=', 'positions.id');
 
             if ($sectionId === 1) {
-                $query->where('positions.position', '=', 'Network Controller');
+                $ctQuery->where('positions.position', '=', 'Network Controller');
             } else {
-                $query->where('positions.position', '=', 'Chief Technician');
+                $ctQuery->where('positions.position', '=', 'Chief Technician');
             }
 
             if ($sectionId > 0) {
-                $query->where('users.section_id', '=', $sectionId);
+                $ctQuery->where('users.section_id', '=', $sectionId);
             }
             if (in_array($sectionId, [2, 3], true) && !empty($region)) {
-                $query->where('users.region', '=', $region);
+                $ctQuery->where('users.region', '=', $region);
             }
-            $recipientIds = (clone $query)->pluck('users.id')->all();
-            $recipients = User::whereIn('id', $recipientIds)->get();
-            $phones = $recipients->pluck('phonenumber')->filter()->values()->all();
 
-            // If no regional recipient found, try all in that section before .env fallback
-            if (empty($phones) && !empty($region)) {
-                Log::info("Notify: No regional recipient found for SMS rectified alert to {$region}, searching all in section {$sectionId}");
-                $query = User::query()
-                    ->join('positions','users.position_id','=','positions.id')
-                    ->where('users.section_id', '=', $sectionId)
-                    ->whereNotNull('users.phonenumber');
-                
+            $ctIds = (clone $ctQuery)->pluck('users.id')->all();
+            $ctUsers = User::whereIn('id', $ctIds)->get();
+
+            if ($ctUsers->isEmpty() && !empty($region)) {
+                $ctQuery = User::query()
+                    ->join('positions', 'users.position_id', '=', 'positions.id');
                 if ($sectionId === 1) {
-                    $query->where('positions.position', '=', 'Network Controller');
+                    $ctQuery->where('positions.position', '=', 'Network Controller');
                 } else {
-                    $query->where('positions.position', '=', 'Chief Technician');
+                    $ctQuery->where('positions.position', '=', 'Chief Technician');
                 }
-                $recipientIds = (clone $query)->pluck('users.id')->all();
-                $recipients = User::whereIn('id', $recipientIds)->get();
-                $phones = $recipients->pluck('phonenumber')->filter()->values()->all();
+                if ($sectionId > 0) {
+                    $ctQuery->where('users.section_id', '=', $sectionId);
+                }
+                $ctIds = (clone $ctQuery)->pluck('users.id')->all();
+                $ctUsers = User::whereIn('id', $ctIds)->get();
             }
 
-            if (empty($phones)) {
-                $fallback = env('POWERTEL_SMS_CT_RECIPIENTS');
-                $phones = array_values(array_filter(array_map('trim', explode(',', (string)$fallback)), fn($x) => $x !== ''));
-            }
-            if (!empty($phones)) {
-                $text = "Rectification: Fault {$fault->fault_ref_number} was rectified for {$sectionName}.";
-                $ok = app(SmsService::class)->send($phones, $text);
-                Log::info($ok ? 'Notify: Chief Technicians notified (SMS) for status 4' : 'Notify: Chief Technicians SMS failed for status 4', [
-                    'ok' => $ok,
-                    'fault' => $fault->fault_ref_number,
-                    'recipients' => $phones,
-                    'section_id' => $sectionId,
-                    'region' => $region,
-                ]);
-            } else {
-                Log::warning('Notify: No Chief Technicians found for rectified fault', [
-                    'fault' => $fault->fault_ref_number,
-                    'section_id' => $sectionId,
-                    'region' => $region,
-                ]);
-            }
+            $nocIds = User::query()
+                ->where('section_id', 1)
+                ->leftJoin('user_statuses', 'users.user_status', '=', 'user_statuses.id')
+                ->where('user_statuses.id', '=', 1)
+                ->pluck('users.id')
+                ->all();
+            $nocUsers = User::whereIn('id', $nocIds)->get();
+
+            $recipients = $ctUsers->concat($nocUsers)->unique('id')->values();
 
             if ($recipients->isNotEmpty()) {
                 self::notifyUsers(
@@ -389,8 +373,7 @@ class FaultLifecycle
             $sectionId = (int) (FaultSection::where('fault_id', $fault->id)->value('section_id') ?? 0);
             $region = $fault->city_id ? (City::find($fault->city_id)->region ?? null) : null;
             $query = User::query()
-                ->join('positions','users.position_id','=','positions.id')
-                ->whereNotNull('users.phonenumber');
+                ->join('positions','users.position_id','=','positions.id');
 
             if ($sectionId === 1) {
                 $query->where('positions.position', '=', 'Network Controller');
@@ -406,67 +389,44 @@ class FaultLifecycle
             }
             $recipientIds = (clone $query)->pluck('users.id')->all();
             $recipients = User::whereIn('id', $recipientIds)->get();
-            $phones = $recipients->pluck('phonenumber')->filter()->values()->all();
 
-            // Fallback: if no regional recipient found, try all in section
-            if (empty($phones) && !empty($region)) {
-                Log::info("Notify: No regional recipient found for SMS escalation to {$region}, searching all in section {$sectionId}");
+            if ($recipients->isEmpty() && !empty($region)) {
                 $query = User::query()
-                    ->join('positions','users.position_id','=','positions.id')
-                    ->where('users.section_id', '=', $sectionId)
-                    ->whereNotNull('users.phonenumber');
-                
+                    ->join('positions','users.position_id','=','positions.id');
                 if ($sectionId === 1) {
                     $query->where('positions.position', '=', 'Network Controller');
                 } else {
                     $query->where('positions.position', '=', 'Chief Technician');
                 }
+                if ($sectionId > 0) {
+                    $query->where('users.section_id', '=', $sectionId);
+                }
                 $recipientIds = (clone $query)->pluck('users.id')->all();
                 $recipients = User::whereIn('id', $recipientIds)->get();
-                $phones = $recipients->pluck('phonenumber')->filter()->values()->all();
             }
 
-            // Final fallback for Chief Technician SMS: search across all technical sections (2, 3)
-            if (empty($phones)) {
-                Log::info("Notify: No Chief Technician found for SMS escalation in section {$sectionId}, searching across technical sections (NOC/Projects)");
+            if ($recipients->isEmpty()) {
                 $query = User::query()
                     ->join('positions','users.position_id','=','positions.id')
                     ->where('positions.position', '=', 'Chief Technician')
-                    ->whereIn('users.section_id', [2, 3])
-                    ->whereNotNull('users.phonenumber');
-                
+                    ->whereIn('users.section_id', [2, 3]);
+
                 if (!empty($region)) {
                     $query->where('users.region', '=', $region);
                 }
-                
+
                 $recipientIds = (clone $query)->pluck('users.id')->all();
                 $recipients = User::whereIn('id', $recipientIds)->get();
-                $phones = $recipients->pluck('phonenumber')->filter()->values()->all();
 
-                // If still empty and we used region, try without region
-                if (empty($phones) && !empty($region)) {
+                if ($recipients->isEmpty() && !empty($region)) {
                     $recipientIds = User::query()
                         ->join('positions','users.position_id','=','positions.id')
                         ->where('positions.position', '=', 'Chief Technician')
                         ->whereIn('users.section_id', [2, 3])
-                        ->whereNotNull('users.phonenumber')
                         ->pluck('users.id')
                         ->all();
                     $recipients = User::whereIn('id', $recipientIds)->get();
-                    $phones = $recipients->pluck('phonenumber')->filter()->values()->all();
                 }
-            }
-
-            if (!empty($phones)) {
-                $text = "Escalation: Fault {$fault->fault_ref_number} has been escalated by technician for review.";
-                $ok = app(SmsService::class)->send($phones, $text);
-                Log::info($ok ? 'Notify: Chief Technicians notified (SMS) for escalation' : 'Notify: Chief Technicians SMS failed for escalation', [
-                    'ok' => $ok,
-                    'fault' => $fault->fault_ref_number,
-                    'recipients' => $phones,
-                    'section_id' => $sectionId,
-                    'region' => $region,
-                ]);
             }
 
             if ($recipients->isNotEmpty()) {
@@ -482,25 +442,12 @@ class FaultLifecycle
             $sectionId = (int) (FaultSection::where('fault_id', $fault->id)->value('section_id') ?? 0);
             $query = User::query()
                 ->join('positions','users.position_id','=','positions.id')
-                ->whereIn('positions.position', ['Manager','Technical Manager'])
-                ->whereNotNull('users.phonenumber');
+                ->whereIn('positions.position', ['Manager','Technical Manager']);
             if ($sectionId > 0) {
                 $query->where('users.section_id', '=', $sectionId);
             }
             $recipientIds = (clone $query)->pluck('users.id')->all();
             $recipients = User::whereIn('id', $recipientIds)->get();
-            $phones = $recipients->pluck('phonenumber')->filter()->values()->all();
-            if (!empty($phones)) {
-                $text = "Escalation: Fault {$fault->fault_ref_number} has been escalated to Manager for intervention.";
-                $ok = app(SmsService::class)->send($phones, $text);
-                Log::info($ok ? 'Notify: Managers notified (SMS) for escalation' : 'Notify: Managers SMS failed for escalation', [
-                    'ok' => $ok,
-                    'fault' => $fault->fault_ref_number,
-                    'recipients' => $phones,
-                    'section_id' => $sectionId,
-                    'region' => $region,
-                ]);
-            }
 
             if ($recipients->isNotEmpty()) {
                 self::notifyUsers(
@@ -733,7 +680,7 @@ class FaultLifecycle
         if ((int)$referral->to_section_id === 1) {
             $query->where('positions.position', '=', 'Network Controller');
         } else {
-            $query->whereIn('positions.position', ['Chief Technician', 'Manager', 'Technical Manager']);
+            $query->where('positions.position', '=', 'Chief Technician');
         }
 
         if (in_array((int)$referral->to_section_id, [2, 3], true) && !empty($region)) {
@@ -755,7 +702,7 @@ class FaultLifecycle
             if ((int)$referral->to_section_id === 1) {
                 $query->where('positions.position', '=', 'Network Controller');
             } else {
-                $query->whereIn('positions.position', ['Chief Technician', 'Manager', 'Technical Manager']);
+                $query->where('positions.position', '=', 'Chief Technician');
             }
             $recipientIds = (clone $query)->pluck('users.id')->all();
             $recipientUsers = User::whereIn('id', $recipientIds)->get();
