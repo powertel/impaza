@@ -25,10 +25,6 @@
           <div id="linkRepeater" class="">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h6 class="mb-0">Link Items</h6>
-              <div class="btn-group btn-group-sm">
-                <button type="button" class="btn btn-outline-secondary me-1" id="removeLinkRepeaterItem"><i class="fas fa-minus-circle"></i> Remove Last</button>
-                <button type="button" class="btn btn-outline-primary" id="addLinkRepeaterItem"><i class="fas fa-plus-circle"></i> Add</button>
-              </div>
             </div>
             <div class="repeater-items">
               <div class="repeater-item border rounded p-3 mb-3 position-relative">
@@ -141,6 +137,12 @@
                   <!-- Row 4: Link Type -->
                   <div class="w-100"></div>
                 </div>
+              </div>
+            </div>
+            <div class="d-flex justify-content-start align-items-center mt-2">
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-primary" id="addLinkRepeaterItem"><i class="fas fa-plus-circle"></i> Add</button>
+                <button type="button" class="btn btn-outline-secondary" id="removeLinkRepeaterItem"><i class="fas fa-minus-circle"></i> Remove Last</button>
               </div>
             </div>
           </div>
