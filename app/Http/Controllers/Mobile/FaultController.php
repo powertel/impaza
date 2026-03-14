@@ -163,6 +163,8 @@ class FaultController extends Controller
             ->leftJoin('customers','faults.customer_id','=','customers.id')
             ->leftJoin('links','faults.link_id','=','links.id')
             ->leftJoin('statuses','faults.status_id','=','statuses.id')
+            ->leftJoin('users as assigned_users','faults.assignedTo','=','assigned_users.id')
+            ->leftJoin('users as assessed_users','faults.assessed_by','=','assessed_users.id')
             ->leftJoin('cities','faults.city_id','=','cities.id')
             ->leftJoin('suburbs','faults.suburb_id','=','suburbs.id')
             ->leftJoin('pops','faults.pop_id','=','pops.id')
@@ -184,6 +186,10 @@ class FaultController extends Controller
                 'links.link',
                 'statuses.id as status_id',
                 'statuses.description as status',
+                'faults.assignedTo',
+                'faults.assessed_by',
+                'assigned_users.name as assignedToName',
+                'assessed_users.name as assessedByName',
                 'faults.serviceType',
                 'faults.serviceAttribute',
                 'faults.faultType',
