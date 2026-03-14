@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Mobile;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -33,7 +34,16 @@ class ProfileController extends Controller
             ])
             ->first();
 
-        return response()->json(['user' => $profile]);
+        $userModel = User::find($u->id);
+        $roles = $userModel && method_exists($userModel, 'getRoleNames') ? $userModel->getRoleNames()->values()->all() : [];
+        $permissions = $userModel && method_exists($userModel, 'getAllPermissions') ? $userModel->getAllPermissions()->pluck('name')->values()->all() : [];
+
+        $payload = array_merge((array) $profile, [
+            'roles' => $roles,
+            'permissions' => $permissions,
+        ]);
+
+        return response()->json(['user' => $payload]);
     }
 
     // PUT /api/mobile/profile

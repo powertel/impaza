@@ -44,7 +44,7 @@ export default function SplashScreen() {
       } catch (e) {
       }
 
-      logout();
+      await logout();
       navigation.replace('SignIn');
     };
 

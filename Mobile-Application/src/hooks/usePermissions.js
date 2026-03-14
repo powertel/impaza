@@ -3,29 +3,35 @@ import { UserContext } from '../context/UserContext';
 
 export const usePermissions = () => {
   const { user } = useContext(UserContext);
+  const roles = Array.isArray(user?.roles) ? user.roles : (user?.roles && typeof user.roles === 'object' ? Object.values(user.roles) : []);
+  const permissions = Array.isArray(user?.permissions) ? user.permissions : (user?.permissions && typeof user.permissions === 'object' ? Object.values(user.permissions) : []);
 
   const hasPermission = (permissionName) => {
-    if (!user || !user.permissions) return false;
+    if (!permissionName) return false;
+    if (!user) return false;
     // Admin role usually has all permissions, but checking specific permission is safer
-    if (user.roles && user.roles.includes('Admin')) return true; 
-    return user.permissions.includes(permissionName);
+    if (roles && roles.includes('Admin')) return true;
+    return permissions.includes(permissionName);
   };
 
   const hasRole = (roleName) => {
-    if (!user || !user.roles) return false;
-    return user.roles.includes(roleName);
+    if (!roleName) return false;
+    if (!user) return false;
+    return roles.includes(roleName);
   };
 
-  const hasAnyPermission = (permissions) => {
-    if (!user || !user.permissions) return false;
-    if (user.roles && user.roles.includes('Admin')) return true;
-    return permissions.some(p => user.permissions.includes(p));
+  const hasAnyPermission = (permissionList) => {
+    if (!user) return false;
+    if (!Array.isArray(permissionList) || permissionList.length === 0) return false;
+    if (roles && roles.includes('Admin')) return true;
+    return permissionList.some(p => permissions.includes(p));
   };
 
-  const hasAllPermissions = (permissions) => {
-    if (!user || !user.permissions) return false;
-    if (user.roles && user.roles.includes('Admin')) return true;
-    return permissions.every(p => user.permissions.includes(p));
+  const hasAllPermissions = (permissionList) => {
+    if (!user) return false;
+    if (!Array.isArray(permissionList) || permissionList.length === 0) return false;
+    if (roles && roles.includes('Admin')) return true;
+    return permissionList.every(p => permissions.includes(p));
   };
 
   return {

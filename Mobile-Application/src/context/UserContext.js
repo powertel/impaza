@@ -48,8 +48,8 @@ export const UserProvider = ({ children }) => {
     setUser(null);
     setToken(null);
     setAuthToken(null);
-    clearPushToken();
-    clearUser();
+    try { await clearPushToken(); } catch (e) {}
+    try { await clearUser(); } catch (e) {}
   };
 
   useEffect(() => {

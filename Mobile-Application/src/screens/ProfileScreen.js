@@ -12,7 +12,7 @@ import PasswordStrengthMeter from '../components/PasswordStrengthMeter';
 export default function ProfileScreen() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
-  const { user, login } = useContext(UserContext);
+  const { user, login, logout } = useContext(UserContext);
 
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
@@ -52,7 +52,11 @@ export default function ProfileScreen() {
 
   useEffect(() => { loadProfile(); }, []);
 
-  const logout = () => {
+  const onLogout = async () => {
+    try {
+      await logout();
+    } catch (e) {
+    }
     setAuthToken(null);
     navigation.reset({ index: 0, routes: [{ name: 'SignIn' }] });
   };
@@ -265,7 +269,7 @@ export default function ProfileScreen() {
           {message && <Text style={styles.successMsg}>{message}</Text>}
           {error && <Text style={styles.errorMsg}>{error}</Text>}
 
-          <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
+          <TouchableOpacity style={styles.logoutBtn} onPress={onLogout}>
             <Feather name="power" size={20} color={theme.colors.danger} style={{ marginRight: 8 }} />
             <Text style={styles.logoutText}>Logout</Text>
           </TouchableOpacity>
