@@ -1,8 +1,8 @@
-import React, { createContext, useState, useEffect } from 'react';
-import { Platform } from 'react-native';
+import React, { createContext, useEffect, useRef, useState } from 'react';
+import { AppState, Platform } from 'react-native';
 import Constants from 'expo-constants';
 import { getStoredUser, storeUser, clearUser, getStoredToken, storeToken, getStoredPushToken, storePushToken, clearPushToken } from '../services/auth';
-import { setAuthToken, registerPushToken, unregisterPushToken } from '../services/api';
+import { setAuthToken, registerPushToken, unregisterPushToken, getPushTokenStatus } from '../services/api';
 
 export const UserContext = createContext();
 
@@ -10,6 +10,7 @@ export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [isHydrated, setIsHydrated] = useState(false);
+  const lastForegroundPushIdRef = useRef(null);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -62,7 +63,7 @@ export const UserProvider = ({ children }) => {
         const Notifications = await import('expo-notifications');
         Notifications.setNotificationHandler({
           handleNotification: async () => ({
-            shouldShowAlert: true,
+            shouldShowAlert: false,
             shouldPlaySound: true,
             shouldSetBadge: false,
           }),
@@ -101,13 +102,63 @@ export const UserProvider = ({ children }) => {
         }
         if (!value) return;
         const res = await registerPushToken({ token: value, platform: Platform.OS });
-        storePushToken(value);
-        if (__DEV__) console.log('push-token-registered', !!res?.success);
+        if (res?.success) {
+          storePushToken(value);
+        }
+        if (__DEV__) {
+          console.log('push-token-register-res', res);
+          try {
+            const status = await getPushTokenStatus();
+            console.log('push-token-status', status);
+          } catch (e) {
+          }
+        }
       } catch (e) {
       }
     };
     ensurePush();
   }, [user, token]);
+
+  useEffect(() => {
+    let subscription = null;
+    const isExpoGo = Constants?.executionEnvironment === 'storeClient';
+    if (isExpoGo) return () => {};
+
+    const start = async () => {
+      try {
+        const Notifications = await import('expo-notifications');
+        subscription = Notifications.addNotificationReceivedListener(async (notification) => {
+          try {
+            if (AppState.currentState !== 'active') return;
+            if (Platform.OS !== 'android') return;
+            const triggerType = notification?.request?.trigger?.type;
+            if (triggerType !== 'push') return;
+            const identifier = notification?.request?.identifier;
+            if (!identifier) return;
+            if (lastForegroundPushIdRef.current === identifier) return;
+            lastForegroundPushIdRef.current = identifier;
+
+            const title = notification?.request?.content?.title || 'iMpazamon';
+            const body = notification?.request?.content?.body || '';
+            await Notifications.scheduleNotificationAsync({
+              content: { title, body, sound: 'default' },
+              trigger: null,
+            });
+          } catch (e) {
+          }
+        });
+      } catch (e) {
+      }
+    };
+
+    start();
+    return () => {
+      try {
+        if (subscription && typeof subscription.remove === 'function') subscription.remove();
+      } catch (e) {
+      }
+    };
+  }, []);
 
   return (
     <UserContext.Provider value={{ user, token, isHydrated, login, logout }}>

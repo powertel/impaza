@@ -67,6 +67,7 @@ Route::prefix('mobile')->group(function () {
 
         Route::post('push-tokens', [NotificationController::class, 'registerPushToken']);
         Route::post('push-tokens/unregister', [NotificationController::class, 'unregisterPushToken']);
+        Route::get('push-tokens/status', [NotificationController::class, 'pushTokenStatus']);
         Route::get('notifications', [NotificationController::class, 'index']);
         Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
         Route::post('notifications/{id}/read', [NotificationController::class, 'markRead']);

@@ -210,6 +210,10 @@ export async function unregisterPushToken(payload) {
   return request('/mobile/push-tokens/unregister', { method: 'POST', body: JSON.stringify(payload) });
 }
 
+export async function getPushTokenStatus() {
+  return request('/mobile/push-tokens/status');
+}
+
 export async function getUnreadCount() {
   return request('/mobile/notifications/unread-count');
 }
