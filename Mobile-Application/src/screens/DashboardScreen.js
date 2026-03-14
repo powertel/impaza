@@ -11,7 +11,7 @@ import { usePermissions } from '../hooks/usePermissions';
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const { user } = useContext(UserContext);
+  const { user, logout } = useContext(UserContext);
   const { hasPermission, hasAnyPermission } = usePermissions();
 
   const [stats, setStats] = useState({ assigned: 0, completed: 0, remaining: 0, completionRate: 0, avgResolutionSec: 0, periodLabel: '' });
@@ -50,7 +50,11 @@ export default function DashboardScreen() {
 
   const rateText = (typeof stats.completionRate === 'number') ? `${stats.completionRate.toFixed(0)}%` : `${stats.completionRate}%`;
 
-  const logout = () => {
+  const onLogout = async () => {
+    try {
+      await logout();
+    } catch (e) {
+    }
     setAuthToken(null);
     navigation.reset({ index: 0, routes: [{ name: 'SignIn' }] });
   };

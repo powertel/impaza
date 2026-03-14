@@ -63,8 +63,8 @@ class AuthController extends Controller
         $token = $user->createToken('powertel-mobile')->plainTextToken;
 
         // Include role names and key profile fields for parity with web expectations
-        $roles = method_exists($user, 'getRoleNames') ? $user->getRoleNames() : collect();
-        $permissions = method_exists($user, 'getAllPermissions') ? $user->getAllPermissions()->pluck('name') : collect();
+        $roles = method_exists($user, 'getRoleNames') ? $user->getRoleNames()->values()->all() : [];
+        $permissions = method_exists($user, 'getAllPermissions') ? $user->getAllPermissions()->pluck('name')->values()->all() : [];
 
         return response()->json([
             'token' => $token,
