@@ -1,30 +1,55 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, StatusBar, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../styles/theme';
+import { UserContext } from '../context/UserContext';
+import { getProfile, setAuthToken } from '../services/api';
 
 export default function SplashScreen() {
   const navigation = useNavigation();
   const [activeDot, setActiveDot] = useState(0);
+  const { user, token, isHydrated, login, logout } = useContext(UserContext);
 
   const dots = useMemo(() => [0, 1, 2], []);
 
   useEffect(() => {
-    const navTimer = setTimeout(() => {
-      navigation.replace('SignIn');
-    }, 2000);
-
     const dotTimer = setInterval(() => {
       setActiveDot((prev) => (prev + 1) % 3);
     }, 450);
 
     return () => {
-      clearTimeout(navTimer);
       clearInterval(dotTimer);
     };
-  }, [navigation]);
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    const go = async () => {
+      if (!token) {
+        navigation.replace('SignIn');
+        return;
+      }
+
+      try {
+        setAuthToken(token);
+        const profile = await getProfile();
+        if (profile && profile.id) {
+          login(profile, token);
+          navigation.replace('Main');
+          return;
+        }
+      } catch (e) {
+      }
+
+      logout();
+      navigation.replace('SignIn');
+    };
+
+    go();
+  }, [isHydrated, token]);
 
   return (
     <View style={styles.container}>

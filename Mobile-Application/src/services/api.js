@@ -206,6 +206,10 @@ export async function registerPushToken(payload) {
   return request('/mobile/push-tokens', { method: 'POST', body: JSON.stringify(payload) });
 }
 
+export async function unregisterPushToken(payload) {
+  return request('/mobile/push-tokens/unregister', { method: 'POST', body: JSON.stringify(payload) });
+}
+
 export async function getUnreadCount() {
   return request('/mobile/notifications/unread-count');
 }
