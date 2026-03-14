@@ -31,7 +31,9 @@ class NotificationController extends Controller
             ]
         );
 
-        return response()->json(['success' => true]);
+        $count = UserPushToken::query()->where('user_id', $user->id)->count();
+        $tokenHash = substr(hash('sha256', $validated['token']), 0, 12);
+        return response()->json(['success' => true, 'token_hash' => $tokenHash, 'token_count' => $count]);
     }
 
     public function unregisterPushToken(Request $request)
@@ -51,6 +53,25 @@ class NotificationController extends Controller
             ->delete();
 
         return response()->json(['success' => true]);
+    }
+
+    public function pushTokenStatus(Request $request)
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['success' => false], 401);
+        }
+
+        $tokens = UserPushToken::query()
+            ->where('user_id', $user->id)
+            ->orderByDesc('last_seen_at')
+            ->get(['platform', 'device_id', 'last_seen_at', 'created_at', 'updated_at']);
+
+        return response()->json([
+            'success' => true,
+            'token_count' => $tokens->count(),
+            'tokens' => $tokens,
+        ]);
     }
 
     public function unreadCount(Request $request)

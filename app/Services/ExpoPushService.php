@@ -55,6 +55,7 @@ class ExpoPushService
                     'data' => $data,
                     'sound' => 'default',
                     'priority' => 'high',
+                    'channelId' => 'default',
                 ];
             })->values()->all();
 
@@ -72,4 +73,3 @@ class ExpoPushService
         }
     }
 }
-
