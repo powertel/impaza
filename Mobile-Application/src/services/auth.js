@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const USER_KEY = 'user';
 const TOKEN_KEY = 'token';
+const PUSH_TOKEN_KEY = 'push_token';
 
 export async function getStoredUser() {
   try {
@@ -39,10 +40,36 @@ export async function storeToken(token) {
   }
 }
 
+export async function getStoredPushToken() {
+  try {
+    return await AsyncStorage.getItem(PUSH_TOKEN_KEY);
+  } catch (e) {
+    console.error('Failed to fetch push token from storage', e);
+    return null;
+  }
+}
+
+export async function storePushToken(token) {
+  try {
+    await AsyncStorage.setItem(PUSH_TOKEN_KEY, String(token || ''));
+  } catch (e) {
+    console.error('Failed to save push token to storage', e);
+  }
+}
+
+export async function clearPushToken() {
+  try {
+    await AsyncStorage.removeItem(PUSH_TOKEN_KEY);
+  } catch (e) {
+    console.error('Failed to clear push token from storage', e);
+  }
+}
+
 export async function clearUser() {
   try {
     await AsyncStorage.removeItem(USER_KEY);
     await AsyncStorage.removeItem(TOKEN_KEY);
+    await AsyncStorage.removeItem(PUSH_TOKEN_KEY);
   } catch (e) {
     console.error('Failed to clear user from storage', e);
   }

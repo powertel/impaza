@@ -1,14 +1,15 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
-import { getStoredUser, storeUser, clearUser, getStoredToken, storeToken } from '../services/auth';
-import { setAuthToken, registerPushToken } from '../services/api';
+import { getStoredUser, storeUser, clearUser, getStoredToken, storeToken, getStoredPushToken, storePushToken, clearPushToken } from '../services/auth';
+import { setAuthToken, registerPushToken, unregisterPushToken } from '../services/api';
 
 export const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -21,6 +22,7 @@ export const UserProvider = ({ children }) => {
         setToken(storedToken);
         setAuthToken(storedToken);
       }
+      setIsHydrated(true);
     };
     loadUser();
   }, []);
@@ -35,10 +37,18 @@ export const UserProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      const pushToken = await getStoredPushToken();
+      if (pushToken && token) {
+        await unregisterPushToken({ token: pushToken });
+      }
+    } catch (e) {
+    }
     setUser(null);
     setToken(null);
     setAuthToken(null);
+    clearPushToken();
     clearUser();
   };
 
@@ -91,6 +101,7 @@ export const UserProvider = ({ children }) => {
         }
         if (!value) return;
         const res = await registerPushToken({ token: value, platform: Platform.OS });
+        storePushToken(value);
         if (__DEV__) console.log('push-token-registered', !!res?.success);
       } catch (e) {
       }
@@ -99,7 +110,7 @@ export const UserProvider = ({ children }) => {
   }, [user, token]);
 
   return (
-    <UserContext.Provider value={{ user, token, login, logout }}>
+    <UserContext.Provider value={{ user, token, isHydrated, login, logout }}>
       {children}
     </UserContext.Provider>
   );

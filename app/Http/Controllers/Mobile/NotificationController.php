@@ -34,6 +34,25 @@ class NotificationController extends Controller
         return response()->json(['success' => true]);
     }
 
+    public function unregisterPushToken(Request $request)
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['success' => false], 401);
+        }
+
+        $validated = $request->validate([
+            'token' => 'required|string|max:255',
+        ]);
+
+        UserPushToken::query()
+            ->where('user_id', $user->id)
+            ->where('expo_push_token', $validated['token'])
+            ->delete();
+
+        return response()->json(['success' => true]);
+    }
+
     public function unreadCount(Request $request)
     {
         $user = $request->user();
