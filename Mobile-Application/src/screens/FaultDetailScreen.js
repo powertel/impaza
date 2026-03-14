@@ -11,6 +11,7 @@ export default function FaultDetailScreen() {
   const route = useRoute();
   const navigation = useNavigation();
   const { id } = route.params || {};
+  const hideActions = !!route.params?.hideActions;
   const [fault, setFault] = useState(null);
   const [remarks, setRemarks] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -149,7 +150,7 @@ export default function FaultDetailScreen() {
             )}
 
             <View style={styles.actions}>
-              {String(fault.status_id) == '3' && hasPermission('remark-create') && (
+              {!hideActions && String(fault.status_id) == '3' && hasPermission('remark-create') && (
                 <TouchableOpacity style={styles.secondaryBtn} onPress={() => navigation.navigate('AddRemark', { id })}>
                   <Feather name="message-square" size={18} color={theme.colors.text} style={{ marginRight: 8 }} />
                   <Text style={styles.secondaryBtnText}>Add Remark</Text>
@@ -163,7 +164,7 @@ export default function FaultDetailScreen() {
                 </TouchableOpacity>
               )}
 
-              {String(fault.status_id) === '3' && hasAnyPermission(['rectify-fault', 'clear-fault', 'noc-clear-faults-clear', 'chief-tech-clear-faults-clear']) && (
+              {!hideActions && String(fault.status_id) === '3' && hasAnyPermission(['rectify-fault', 'clear-fault', 'noc-clear-faults-clear', 'chief-tech-clear-faults-clear']) && (
                 <TouchableOpacity style={styles.primaryBtn} onPress={() => navigation.navigate('RectifyFault', { id })}>
                   <Feather name="check-circle" size={18} color={theme.colors.white} style={{ marginRight: 8 }} />
                   <Text style={styles.primaryBtnText}>Rectify Fault</Text>

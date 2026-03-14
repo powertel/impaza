@@ -16,7 +16,7 @@ export default function SectionFaultsScreen() {
       </View>
       <FaultList
         fetchData={getSectionFaults}
-        onPressItem={(item) => navigation.navigate('FaultDetail', { id: item.id })}
+        onPressItem={(item) => navigation.navigate('FaultDetail', { id: item.id, hideActions: true })}
         emptyMessage="No faults found in section."
       />
     </SafeAreaView>
