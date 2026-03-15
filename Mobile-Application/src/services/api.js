@@ -35,9 +35,10 @@ const DEV_API_URL = (() => {
   return 'http://localhost:8087/api';
 })();
 
+const PROD_API_URL = 'https://impazamon.powertel.co.zw/api';
 const shouldUseDevApi = __DEV__ && !CONFIG_API_URL;
 
-export const API_URL = normalizeUrl((shouldUseDevApi ? DEV_API_URL : CONFIG_API_URL) || DEV_API_URL);
+export const API_URL = normalizeUrl(shouldUseDevApi ? DEV_API_URL : (CONFIG_API_URL || PROD_API_URL));
 if (__DEV__) console.log('API_URL', API_URL);
 
 let authToken = null;
@@ -212,6 +213,10 @@ export async function unregisterPushToken(payload) {
 
 export async function getPushTokenStatus() {
   return request('/mobile/push-tokens/status');
+}
+
+export async function testPushNotification(payload = {}) {
+  return request('/mobile/push-notifications/test', { method: 'POST', body: JSON.stringify(payload) });
 }
 
 export async function getUnreadCount() {

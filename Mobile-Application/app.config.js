@@ -6,22 +6,27 @@ export default {
     orientation: "portrait",
     icon: "./assets/splash-icon.png",
     userInterfaceStyle: "light",
+
     androidStatusBar: {
       backgroundColor: "#F5F7FF",
       barStyle: "dark-content"
     },
+
     androidNavigationBar: {
       backgroundColor: "#F5F7FF",
       barStyle: "dark-content"
     },
+
     splash: {
       image: "./assets/splash-icon.png",
       resizeMode: "contain",
       backgroundColor: "#F5F7FF"
     },
+
     ios: {
       supportsTablet: true
     },
+
     android: {
       adaptiveIcon: {
         foregroundImage: "./assets/splash-icon.png",
@@ -30,20 +35,18 @@ export default {
       edgeToEdgeEnabled: false,
       package: "com.powerteldev.MobileApplication"
     },
+
     web: {
       favicon: "./assets/favicon.png"
     },
-    updates: {
-      enabled: true,
-      url: "https://u.expo.dev/152b3f73-2c00-4325-afe4-5a26e8d5b8e1"
-    },
+
     extra: {
       apiUrl: process.env.API_URL || "https://impazamon.powertel.co.zw/api",
       eas: {
-        projectId: "152b3f73-2c00-4325-afe4-5a26e8d5b8e1"
+        projectId: "eb97b19f-93a1-422e-a0c5-2c8201a1298c"
       }
     },
-    owner: "powerteldev",
+
     runtimeVersion: {
       policy: "appVersion"
     }

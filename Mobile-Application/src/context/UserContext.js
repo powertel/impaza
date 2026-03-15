@@ -6,11 +6,23 @@ import { setAuthToken, registerPushToken, unregisterPushToken, getPushTokenStatu
 
 export const UserContext = createContext();
 
+const ANDROID_PUSH_CHANNEL_ID = 'impazamon_alerts';
+
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [isHydrated, setIsHydrated] = useState(false);
-  const lastForegroundPushIdRef = useRef(null);
+  const appStateRef = useRef(AppState.currentState);
+  const lastOriginRef = useRef(null);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (next) => {
+      appStateRef.current = next;
+    });
+    return () => {
+      try { sub?.remove?.(); } catch (e) {}
+    };
+  }, []);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -62,18 +74,23 @@ export const UserProvider = ({ children }) => {
       try {
         const Notifications = await import('expo-notifications');
         Notifications.setNotificationHandler({
-          handleNotification: async () => ({
-            shouldShowAlert: false,
-            shouldPlaySound: true,
-            shouldSetBadge: false,
-          }),
+          handleNotification: async (notification) => {
+            const data = notification?.request?.content?.data || {};
+            const forceTray = data && data.__forceTray === true;
+            return {
+              shouldShowAlert: forceTray,
+              shouldPlaySound: true,
+              shouldSetBadge: false,
+            };
+          },
         });
         if (Platform.OS === 'android') {
-          await Notifications.setNotificationChannelAsync('default', {
-            name: 'default',
+          await Notifications.setNotificationChannelAsync(ANDROID_PUSH_CHANNEL_ID, {
+            name: 'Alerts',
             importance: Notifications.AndroidImportance.MAX,
             vibrationPattern: [0, 250, 250, 250],
             lightColor: '#FF231F7C',
+            sound: 'default',
           });
         }
         const perms = await Notifications.getPermissionsAsync();
@@ -129,19 +146,27 @@ export const UserProvider = ({ children }) => {
         const Notifications = await import('expo-notifications');
         subscription = Notifications.addNotificationReceivedListener(async (notification) => {
           try {
-            if (AppState.currentState !== 'active') return;
+            if (appStateRef.current !== 'active') return;
             if (Platform.OS !== 'android') return;
-            const triggerType = notification?.request?.trigger?.type;
-            if (triggerType !== 'push') return;
-            const identifier = notification?.request?.identifier;
-            if (!identifier) return;
-            if (lastForegroundPushIdRef.current === identifier) return;
-            lastForegroundPushIdRef.current = identifier;
 
-            const title = notification?.request?.content?.title || 'iMpazamon';
-            const body = notification?.request?.content?.body || '';
+            const content = notification?.request?.content || {};
+            const data = content?.data || {};
+            if (data && data.__forceTray === true) return;
+
+            const title = String(content?.title || 'iMpazamon');
+            const body = String(content?.body || '');
+            const origin = String(notification?.request?.identifier || data?.id || `${title}|${body}`);
+            if (lastOriginRef.current === origin) return;
+            lastOriginRef.current = origin;
+
             await Notifications.scheduleNotificationAsync({
-              content: { title, body, sound: 'default' },
+              content: {
+                title,
+                body,
+                sound: 'default',
+                channelId: ANDROID_PUSH_CHANNEL_ID,
+                data: { ...data, __forceTray: true, __origin: origin },
+              },
               trigger: null,
             });
           } catch (e) {
@@ -153,10 +178,7 @@ export const UserProvider = ({ children }) => {
 
     start();
     return () => {
-      try {
-        if (subscription && typeof subscription.remove === 'function') subscription.remove();
-      } catch (e) {
-      }
+      try { subscription?.remove?.(); } catch (e) {}
     };
   }, []);
 

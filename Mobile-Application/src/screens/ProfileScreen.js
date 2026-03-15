@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, RefreshControl, StatusBar } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { setAuthToken, getProfile, updateProfile, changePassword } from '../services/api';
+import { setAuthToken, getProfile, updateProfile, changePassword, getPushTokenStatus, testPushNotification, API_URL } from '../services/api';
 import { theme } from '../styles/theme';
 import { UserContext } from '../context/UserContext';
 import { FontAwesome, Feather } from '@expo/vector-icons';
@@ -29,6 +29,8 @@ export default function ProfileScreen() {
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPw, setIsChangingPw] = useState(false);
+  const [pushStatus, setPushStatus] = useState(null);
+  const [pushTestResult, setPushTestResult] = useState(null);
 
   const loadProfile = async () => {
     setRefreshing(true);
@@ -59,6 +61,24 @@ export default function ProfileScreen() {
     }
     setAuthToken(null);
     navigation.reset({ index: 0, routes: [{ name: 'SignIn' }] });
+  };
+
+  const loadPushStatus = async () => {
+    try {
+      const res = await getPushTokenStatus();
+      setPushStatus(res);
+    } catch (e) {
+      setPushStatus({ success: false });
+    }
+  };
+
+  const sendTestPush = async () => {
+    try {
+      const res = await testPushNotification({});
+      setPushTestResult(res);
+    } catch (e) {
+      setPushTestResult({ success: false });
+    }
   };
 
   const getInitials = (nameStr) => {
@@ -264,6 +284,22 @@ export default function ProfileScreen() {
               </View>
               <Feather name="chevron-right" size={20} color={theme.colors.secondaryText} />
             </TouchableOpacity>
+
+            <TouchableOpacity style={styles.menuItem} onPress={loadPushStatus}>
+              <View style={styles.menuLeft}>
+                <Feather name="activity" size={20} color={theme.colors.primary} />
+                <Text style={styles.menuText}>Push Status</Text>
+              </View>
+              <Feather name="chevron-right" size={20} color={theme.colors.secondaryText} />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.menuItem} onPress={sendTestPush}>
+              <View style={styles.menuLeft}>
+                <Feather name="send" size={20} color={theme.colors.primary} />
+                <Text style={styles.menuText}>Send Test Push</Text>
+              </View>
+              <Feather name="chevron-right" size={20} color={theme.colors.secondaryText} />
+            </TouchableOpacity>
           </View>
 
           {message && <Text style={styles.successMsg}>{message}</Text>}
@@ -275,6 +311,18 @@ export default function ProfileScreen() {
           </TouchableOpacity>
           
           <Text style={styles.versionText}>Impaza Mobile v1.0.0</Text>
+          {pushStatus ? (
+            <Text style={styles.versionText}>
+              API: {API_URL}{'\n'}
+              Push tokens: {String(pushStatus?.token_count ?? 'n/a')}
+            </Text>
+          ) : null}
+          {pushTestResult ? (
+            <Text style={styles.versionText}>
+              Push test: {String(pushTestResult?.success)}{'\n'}
+              Status: {String(pushTestResult?.status ?? 'n/a')}
+            </Text>
+          ) : null}
         </ScrollView>
       </SafeAreaView>
     </View>

@@ -5,41 +5,155 @@ namespace App\Http\Controllers\Mobile;
 use App\Http\Controllers\Controller;
 use App\Models\UserPushToken;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class NotificationController extends Controller
 {
+    private function pushTokenDebug(string $message, array $context = []): void
+    {
+        try {
+            $line = json_encode([
+                'ts' => now()->toIso8601String(),
+                'message' => $message,
+                'context' => $context,
+            ], JSON_UNESCAPED_SLASHES);
+            @file_put_contents(storage_path('logs/push_tokens.log'), $line . PHP_EOL, FILE_APPEND);
+        } catch (\Throwable $e) {
+        }
+    }
+
     public function registerPushToken(Request $request)
     {
         $user = $request->user();
         if (!$user) {
+            Log::warning('Mobile push token register: unauthenticated', [
+                'ip' => $request->ip(),
+                'ua' => (string) $request->userAgent(),
+            ]);
+            $this->pushTokenDebug('register unauthenticated', [
+                'ip' => $request->ip(),
+                'ua' => (string) $request->userAgent(),
+                'host' => (string) $request->getHost(),
+            ]);
             return response()->json(['success' => false], 401);
         }
 
-        $validated = $request->validate([
-            'token' => 'required|string|max:255',
-            'platform' => 'nullable|string|max:32',
-            'device_id' => 'nullable|string|max:255',
+        try {
+            $validated = $request->validate([
+                'token' => 'required|string|max:255',
+                'platform' => 'nullable|string|max:32',
+                'device_id' => 'nullable|string|max:255',
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('Mobile push token register: validation failed', [
+                'user_id' => $user->id,
+                'ip' => $request->ip(),
+                'ua' => (string) $request->userAgent(),
+                'has_token' => $request->filled('token'),
+                'platform' => $request->input('platform'),
+                'device_id' => $request->input('device_id'),
+                'error' => $e->getMessage(),
+            ]);
+            $this->pushTokenDebug('register validation failed', [
+                'user_id' => $user->id,
+                'ip' => $request->ip(),
+                'host' => (string) $request->getHost(),
+                'has_token' => (bool) $request->filled('token'),
+                'platform' => $request->input('platform'),
+                'device_id' => $request->input('device_id'),
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+
+        $tokenHash = substr(hash('sha256', $validated['token']), 0, 12);
+        Log::info('Mobile push token register: received', [
+            'user_id' => $user->id,
+            'token_hash' => $tokenHash,
+            'platform' => $validated['platform'] ?? null,
+            'device_id' => $validated['device_id'] ?? null,
+            'db_connection' => (string) config('database.default'),
+            'db_name' => (string) (DB::connection()->getDatabaseName() ?? ''),
+            'ip' => $request->ip(),
+        ]);
+        $this->pushTokenDebug('register received', [
+            'user_id' => $user->id,
+            'token_hash' => $tokenHash,
+            'platform' => $validated['platform'] ?? null,
+            'device_id' => $validated['device_id'] ?? null,
+            'db_connection' => (string) config('database.default'),
+            'db_name' => (string) (DB::connection()->getDatabaseName() ?? ''),
+            'host' => (string) $request->getHost(),
+            'ip' => $request->ip(),
         ]);
 
-        UserPushToken::updateOrCreate(
-            ['expo_push_token' => $validated['token']],
-            [
+        try {
+            UserPushToken::updateOrCreate(
+                ['expo_push_token' => $validated['token']],
+                [
+                    'user_id' => $user->id,
+                    'platform' => $validated['platform'] ?? null,
+                    'device_id' => $validated['device_id'] ?? null,
+                    'last_seen_at' => now(),
+                ]
+            );
+        } catch (\Throwable $e) {
+            Log::error('Mobile push token register: DB write failed', [
                 'user_id' => $user->id,
+                'token_hash' => $tokenHash,
                 'platform' => $validated['platform'] ?? null,
                 'device_id' => $validated['device_id'] ?? null,
-                'last_seen_at' => now(),
-            ]
-        );
+                'db_connection' => (string) config('database.default'),
+                'db_name' => (string) (DB::connection()->getDatabaseName() ?? ''),
+                'error' => $e->getMessage(),
+            ]);
+            $this->pushTokenDebug('register db write failed', [
+                'user_id' => $user->id,
+                'token_hash' => $tokenHash,
+                'platform' => $validated['platform'] ?? null,
+                'device_id' => $validated['device_id'] ?? null,
+                'db_connection' => (string) config('database.default'),
+                'db_name' => (string) (DB::connection()->getDatabaseName() ?? ''),
+                'host' => (string) $request->getHost(),
+                'error' => $e->getMessage(),
+            ]);
+            return response()->json(['success' => false, 'message' => 'Token registration failed'], 500);
+        }
 
         $count = UserPushToken::query()->where('user_id', $user->id)->count();
-        $tokenHash = substr(hash('sha256', $validated['token']), 0, 12);
-        return response()->json(['success' => true, 'token_hash' => $tokenHash, 'token_count' => $count]);
+        Log::info('Mobile push token register: saved', [
+            'user_id' => $user->id,
+            'token_hash' => $tokenHash,
+            'token_count' => $count,
+        ]);
+        $this->pushTokenDebug('register saved', [
+            'user_id' => $user->id,
+            'token_hash' => $tokenHash,
+            'token_count' => $count,
+            'db_name' => (string) (DB::connection()->getDatabaseName() ?? ''),
+            'host' => (string) $request->getHost(),
+        ]);
+        $payload = ['success' => true, 'token_hash' => $tokenHash, 'token_count' => $count];
+        if ((bool) config('app.debug')) {
+            $payload['debug'] = [
+                'db_connection' => (string) config('database.default'),
+                'db_name' => (string) (DB::connection()->getDatabaseName() ?? ''),
+                'host' => (string) $request->getHost(),
+            ];
+        }
+        return response()->json($payload);
     }
 
     public function unregisterPushToken(Request $request)
     {
         $user = $request->user();
         if (!$user) {
+            Log::warning('Mobile push token unregister: unauthenticated', [
+                'ip' => $request->ip(),
+                'ua' => (string) $request->userAgent(),
+            ]);
             return response()->json(['success' => false], 401);
         }
 
@@ -47,11 +161,16 @@ class NotificationController extends Controller
             'token' => 'required|string|max:255',
         ]);
 
+        $tokenHash = substr(hash('sha256', $validated['token']), 0, 12);
         UserPushToken::query()
             ->where('user_id', $user->id)
             ->where('expo_push_token', $validated['token'])
             ->delete();
 
+        Log::info('Mobile push token unregister: deleted', [
+            'user_id' => $user->id,
+            'token_hash' => $tokenHash,
+        ]);
         return response()->json(['success' => true]);
     }
 
@@ -72,6 +191,58 @@ class NotificationController extends Controller
             'token_count' => $tokens->count(),
             'tokens' => $tokens,
         ]);
+    }
+
+    public function testPush(Request $request)
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['success' => false], 401);
+        }
+
+        $data = $request->validate([
+            'title' => 'nullable|string|max:120',
+            'body' => 'nullable|string|max:240',
+        ]);
+
+        $title = $data['title'] ?? 'iMpazamon';
+        $body = $data['body'] ?? 'Test push notification';
+
+        $tokens = UserPushToken::query()
+            ->where('user_id', $user->id)
+            ->pluck('expo_push_token')
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($tokens->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'No push tokens registered', 'token_count' => 0], 422);
+        }
+
+        $endpoint = 'https://exp.host/--/api/v2/push/send';
+        $messages = $tokens->map(function ($token) use ($title, $body) {
+            return [
+                'to' => $token,
+                'title' => $title,
+                'body' => $body,
+                'data' => ['event' => 'test'],
+                'sound' => 'default',
+                'priority' => 'high',
+                'channelId' => 'impazamon_alerts',
+            ];
+        })->values()->all();
+
+        try {
+            $response = Http::timeout(15)->post($endpoint, $messages);
+            return response()->json([
+                'success' => $response->successful(),
+                'token_count' => $tokens->count(),
+                'status' => $response->status(),
+                'body' => $response->json(),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     public function unreadCount(Request $request)

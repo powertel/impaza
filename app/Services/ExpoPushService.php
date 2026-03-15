@@ -55,7 +55,7 @@ class ExpoPushService
                     'data' => $data,
                     'sound' => 'default',
                     'priority' => 'high',
-                    'channelId' => 'default',
+                    'channelId' => 'impazamon_alerts',
                 ];
             })->values()->all();
 
