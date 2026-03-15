@@ -7,6 +7,10 @@ import { theme } from '../styles/theme';
 import { UserContext } from '../context/UserContext';
 import { getProfile, setAuthToken } from '../services/api';
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export default function SplashScreen() {
   const navigation = useNavigation();
   const [activeDot, setActiveDot] = useState(0);
@@ -26,29 +30,32 @@ export default function SplashScreen() {
 
   useEffect(() => {
     if (!isHydrated) return;
+    let cancelled = false;
 
     const go = async () => {
-      if (!token) {
-        navigation.replace('SignIn');
-        return;
-      }
+      await sleep(5000);
+      if (cancelled) return;
 
-      try {
-        setAuthToken(token);
-        const profile = await getProfile();
-        if (profile && profile.id) {
-          login(profile, token);
-          navigation.replace('Main');
-          return;
+      if (token) {
+        try {
+          setAuthToken(token);
+          const profile = await getProfile();
+          if (profile && profile.id) {
+            login(profile, token);
+            navigation.replace('Main');
+            return;
+          }
+        } catch (e) {
         }
-      } catch (e) {
+
+        await logout();
       }
 
-      await logout();
       navigation.replace('SignIn');
     };
 
     go();
+    return () => { cancelled = true; };
   }, [isHydrated, token]);
 
   return (

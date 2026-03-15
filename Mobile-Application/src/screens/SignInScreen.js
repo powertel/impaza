@@ -3,9 +3,11 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image,
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import { login as apiLogin } from '../services/api';
 import { theme } from '../styles/theme';
 import { UserContext } from '../context/UserContext';
+import { registerPushToken } from '../services/api';
 
 export default function SignInScreen() {
   const navigation = useNavigation();
@@ -28,7 +30,43 @@ export default function SignInScreen() {
     try {
       const res = await apiLogin(email, password);
       if (res?.token) {
+        const projectId = Constants?.expoConfig?.extra?.eas?.projectId || Constants?.manifest?.extra?.eas?.projectId;
         login(res.user, res.token);
+        try {
+          const isExpoGo = Constants?.executionEnvironment === 'storeClient';
+          if (!isExpoGo) {
+            const Notifications = await import('expo-notifications');
+            const perms = await Notifications.getPermissionsAsync();
+            let status = perms?.status;
+            if (status !== 'granted') {
+              const req = await Notifications.requestPermissionsAsync();
+              status = req?.status;
+            }
+            if (status === 'granted') {
+              let tokenValue = null;
+              try {
+                if (projectId) {
+                  const expoToken = await Notifications.getExpoPushTokenAsync({ projectId });
+                  tokenValue = expoToken?.data || null;
+                } else {
+                  const expoToken = await Notifications.getExpoPushTokenAsync();
+                  tokenValue = expoToken?.data || null;
+                }
+              } catch (e) {
+                try {
+                  const expoToken = await Notifications.getExpoPushTokenAsync();
+                  tokenValue = expoToken?.data || null;
+                } catch (e2) {
+                  tokenValue = null;
+                }
+              }
+              if (tokenValue) {
+                await registerPushToken({ token: tokenValue, platform: Platform.OS });
+              }
+            }
+          }
+        } catch (e) {
+        }
         navigation.replace('Main');
       } else {
         const message = res?.error || res?.message || (res?.status === 405 ? 'Method Not Allowed' : 'Invalid credentials');
