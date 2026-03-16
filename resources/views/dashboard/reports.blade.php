@@ -186,7 +186,7 @@
                             <div class="chart-header">
                                 <h3>Top Root Causes (Confirmed RFO)</h3>
                             </div>
-                            <div class="chart-body">
+                            <div class="chart-body chart-body-lg">
                                 <canvas id="chartRFO"></canvas>
                             </div>
                         </div>

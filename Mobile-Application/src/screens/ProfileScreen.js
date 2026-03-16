@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, ActivityIndicator, RefreshControl, StatusBar } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { setAuthToken, getProfile, updateProfile, changePassword, getPushTokenStatus, testPushNotification, API_URL } from '../services/api';
+import { setAuthToken, getProfile, updateProfile, changePassword } from '../services/api';
 import { theme } from '../styles/theme';
 import { UserContext } from '../context/UserContext';
 import { FontAwesome, Feather } from '@expo/vector-icons';
@@ -29,8 +29,7 @@ export default function ProfileScreen() {
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isChangingPw, setIsChangingPw] = useState(false);
-  const [pushStatus, setPushStatus] = useState(null);
-  const [pushTestResult, setPushTestResult] = useState(null);
+  const [notifPerm, setNotifPerm] = useState(null);
 
   const loadProfile = async () => {
     setRefreshing(true);
@@ -63,21 +62,13 @@ export default function ProfileScreen() {
     navigation.reset({ index: 0, routes: [{ name: 'SignIn' }] });
   };
 
-  const loadPushStatus = async () => {
+  const requestNotificationPermission = async () => {
     try {
-      const res = await getPushTokenStatus();
-      setPushStatus(res);
+      const Notifications = await import('expo-notifications');
+      const res = await Notifications.requestPermissionsAsync();
+      setNotifPerm(res);
     } catch (e) {
-      setPushStatus({ success: false });
-    }
-  };
-
-  const sendTestPush = async () => {
-    try {
-      const res = await testPushNotification({});
-      setPushTestResult(res);
-    } catch (e) {
-      setPushTestResult({ success: false });
+      setNotifPerm({ status: 'unknown' });
     }
   };
 
@@ -285,18 +276,10 @@ export default function ProfileScreen() {
               <Feather name="chevron-right" size={20} color={theme.colors.secondaryText} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.menuItem} onPress={loadPushStatus}>
+            <TouchableOpacity style={styles.menuItem} onPress={requestNotificationPermission}>
               <View style={styles.menuLeft}>
-                <Feather name="activity" size={20} color={theme.colors.primary} />
-                <Text style={styles.menuText}>Push Status</Text>
-              </View>
-              <Feather name="chevron-right" size={20} color={theme.colors.secondaryText} />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.menuItem} onPress={sendTestPush}>
-              <View style={styles.menuLeft}>
-                <Feather name="send" size={20} color={theme.colors.primary} />
-                <Text style={styles.menuText}>Send Test Push</Text>
+                <Feather name="check-circle" size={20} color={theme.colors.primary} />
+                <Text style={styles.menuText}>Request Notification Permission</Text>
               </View>
               <Feather name="chevron-right" size={20} color={theme.colors.secondaryText} />
             </TouchableOpacity>
@@ -311,16 +294,9 @@ export default function ProfileScreen() {
           </TouchableOpacity>
           
           <Text style={styles.versionText}>Impaza Mobile v1.0.0</Text>
-          {pushStatus ? (
+          {notifPerm ? (
             <Text style={styles.versionText}>
-              API: {API_URL}{'\n'}
-              Push tokens: {String(pushStatus?.token_count ?? 'n/a')}
-            </Text>
-          ) : null}
-          {pushTestResult ? (
-            <Text style={styles.versionText}>
-              Push test: {String(pushTestResult?.success)}{'\n'}
-              Status: {String(pushTestResult?.status ?? 'n/a')}
+              Notification permission: {String(notifPerm?.status ?? 'n/a')}
             </Text>
           ) : null}
         </ScrollView>

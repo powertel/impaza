@@ -629,6 +629,11 @@
     flex: 0 0 280px;
 }
 
+.chart-body.chart-body-lg {
+    height: 420px;
+    flex: 0 0 420px;
+}
+
 .chart-body canvas {
     flex: 1 1 auto;
     width: 100% !important;
@@ -639,6 +644,11 @@
     .chart-body {
         height: 220px;
         flex: 0 0 220px;
+    }
+
+    .chart-body.chart-body-lg {
+        height: 320px;
+        flex: 0 0 320px;
     }
 }
 
