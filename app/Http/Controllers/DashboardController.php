@@ -136,21 +136,28 @@ class DashboardController extends Controller
             $prevStart = $prevEnd->copy()->subSeconds($rangeSeconds);
         }
 
-        $periodStart = $currentStart;
-        $periodEnd = $currentEnd;
         $periodLabelText = null;
-        if ($hasDateRange) {
-            $periodLabelText = 'Custom date range';
-        } elseif ($hasQuarter && $selectedQuarter !== null) {
-            $periodLabelText = 'Quarter ' . $selectedQuarter;
-        } elseif ($selectedYear !== null && $selectedMonth !== null) {
-            $periodLabelText = $currentStart->format('F Y');
-        } elseif ($selectedYear !== null && $selectedMonth === null) {
-            $periodLabelText = (string) $selectedYear;
-        } elseif ($selectedMonth !== null && $selectedYear === null) {
-            $periodLabelText = $currentStart->format('F');
+        if ($allTime) {
+            $minCreatedAt = Fault::min('created_at');
+            $periodStart = $minCreatedAt ? Carbon::parse($minCreatedAt)->startOfDay() : $now->copy()->startOfDay();
+            $periodEnd = $now->copy()->endOfDay();
+            $periodLabelText = 'All time';
         } else {
-            $periodLabelText = 'Current month';
+            $periodStart = $currentStart;
+            $periodEnd = $currentEnd;
+            if ($hasDateRange) {
+                $periodLabelText = 'Custom date range';
+            } elseif ($hasQuarter && $selectedQuarter !== null) {
+                $periodLabelText = 'Quarter ' . $selectedQuarter;
+            } elseif ($selectedYear !== null && $selectedMonth !== null) {
+                $periodLabelText = $currentStart->format('F Y');
+            } elseif ($selectedYear !== null && $selectedMonth === null) {
+                $periodLabelText = (string) $selectedYear;
+            } elseif ($selectedMonth !== null && $selectedYear === null) {
+                $periodLabelText = $currentStart->format('F');
+            } else {
+                $periodLabelText = 'Current month';
+            }
         }
 
         if ($selectedMonth !== null && $selectedYear === null && !$hasQuarter && !$hasDateRange) {
