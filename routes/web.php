@@ -64,6 +64,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
     // Reports dashboard
     Route::get('/dashboard/reports', [DashboardController::class, 'reports'])->name('dashboard.reports');
+    Route::get('/dashboard/reports/customer-root-causes', [DashboardController::class, 'customerRootCauses'])->name('dashboard.reports.customer-root-causes');
     // Performance Dashboard
     Route::get('/performance', [PerformanceController::class, 'index'])->name('performance.index');
     Route::resource('users', UserController::class);

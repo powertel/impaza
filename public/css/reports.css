@@ -640,6 +640,14 @@
     height: 100% !important;
 }
 
+.clickable-row {
+    cursor: pointer;
+}
+
+.clickable-row:hover {
+    background: rgba(59, 130, 246, 0.06);
+}
+
 @media (max-width: 640px) {
     .chart-body {
         height: 220px;

@@ -72,6 +72,136 @@
   function el(id) { return document.getElementById(id); }
   function has(id) { return !!el(id); }
 
+  function showModalById(id) {
+    const node = document.getElementById(id);
+    if (!node) return null;
+    if (window.bootstrap?.Modal) {
+      const m = bootstrap.Modal.getOrCreateInstance(node);
+      m.show();
+      return m;
+    }
+    if (window.$ && typeof window.$ === 'function' && window.$.fn?.modal) {
+      window.$(node).modal('show');
+      return null;
+    }
+    node.style.display = 'block';
+    node.classList.add('show');
+    return null;
+  }
+
+  function setVisible(node, show) {
+    if (!node) return;
+    node.style.display = show ? '' : 'none';
+  }
+
+  function formatPeriod(period) {
+    if (!period || !period.start || !period.end) return 'All time';
+    return `${period.start} → ${period.end}`;
+  }
+
+  function renderRootCauseList(container, labels, values) {
+    if (!container) return;
+    const rows = (labels || []).map((label, i) => ({ label: String(label ?? ''), value: Number(values?.[i] ?? 0) || 0 }))
+      .filter(r => r.value > 0)
+      .sort((a, b) => b.value - a.value);
+
+    if (!rows.length) {
+      container.innerHTML = '<div class="text-muted small">No confirmed root causes found for this customer in the selected period.</div>';
+      return;
+    }
+
+    const total = rows.reduce((s, r) => s + r.value, 0) || 1;
+    const html = rows.map((r) => {
+      const pct = (r.value / total) * 100;
+      return `<div class="d-flex justify-content-between align-items-center py-1">
+        <div class="me-2">${r.label}</div>
+        <div class="text-muted">${r.value} (${pct.toFixed(1)}%)</div>
+      </div>`;
+    }).join('');
+    container.innerHTML = html;
+  }
+
+  function initCustomerRootCause() {
+    const metaEl = document.getElementById('reportsMeta');
+    const baseUrl = metaEl?.dataset?.customerRootcauseUrl;
+    if (!baseUrl) return;
+
+    const rows = document.querySelectorAll('.js-customer-rootcause');
+    if (!rows.length) return;
+
+    let modalChart = null;
+
+    const titleEl = document.getElementById('customerRootCauseTitle');
+    const metaTextEl = document.getElementById('customerRootCauseMeta');
+    const loadingEl = document.getElementById('customerRootCauseLoading');
+    const bodyEl = document.getElementById('customerRootCauseBody');
+    const errorEl = document.getElementById('customerRootCauseError');
+    const listEl = document.getElementById('customerRootCauseList');
+    const canvas = document.getElementById('customerRootCauseChart');
+
+    const openForCustomer = async (customerId) => {
+      showModalById('customerRootCauseModal');
+      if (titleEl) titleEl.textContent = 'Root Causes';
+      if (metaTextEl) metaTextEl.textContent = '';
+      setVisible(loadingEl, true);
+      setVisible(bodyEl, false);
+      setVisible(errorEl, false);
+
+      if (modalChart) {
+        try { modalChart.destroy(); } catch (e) {}
+        modalChart = null;
+      }
+
+      try {
+        const params = new URLSearchParams(window.location.search);
+        params.set('customer_id', String(customerId));
+        const url = `${baseUrl}?${params.toString()}`;
+        const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+        if (!res.ok) {
+          const txt = await res.text();
+          throw new Error(txt || `Request failed (${res.status})`);
+        }
+        const payload = await res.json();
+        if (titleEl) titleEl.textContent = `Root Causes: ${payload.customer || ''}`;
+        if (metaTextEl) metaTextEl.textContent = `${formatPeriod(payload.period)} • ${payload.total_faults ?? 0} faults`;
+
+        const labels = payload.rfo_labels || [];
+        const values = payload.rfo_values || [];
+
+        renderRootCauseList(listEl, labels, values);
+
+        if (canvas && typeof Chart !== 'undefined') {
+          const cfg = buildDonutConfig({
+            labels,
+            values,
+            palette: ['#3b82f6', '#ef4444', '#f59e0b', '#84cc16', '#14b8a6', '#60a5fa', '#a78bfa', '#f97316', '#22c55e', '#8b5cf6'],
+            maxSlices: null,
+            groupOther: false,
+            showLegend: false,
+            calloutTextMinPct: 6,
+            calloutLabelMaxChars: 18
+          });
+          modalChart = new Chart(canvas, cfg);
+        }
+
+        setVisible(loadingEl, false);
+        setVisible(bodyEl, true);
+      } catch (e) {
+        if (errorEl) errorEl.textContent = 'Failed to load root causes.';
+        setVisible(loadingEl, false);
+        setVisible(bodyEl, false);
+        setVisible(errorEl, true);
+      }
+    };
+
+    rows.forEach((row) => {
+      row.addEventListener('click', () => {
+        const id = Number(row.getAttribute('data-customer-id') || 0);
+        if (id > 0) openForCustomer(id);
+      });
+    });
+  }
+
   function normalizePie(labels, values, maxSlices = null, groupOther = false) {
     const pairs = (labels || []).map((label, idx) => ({
       label: label ?? 'N/A',
@@ -638,6 +768,7 @@
     if (!data) return;
     initCharts(data);
     initEvents();
+    initCustomerRootCause();
   }
 
   if (document.readyState === 'loading') {

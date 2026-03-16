@@ -225,7 +225,7 @@
                                             </thead>
                                             <tbody>
                                                 @forelse($portfolioRows as $row)
-                                                    <tr>
+                                                    <tr class="clickable-row js-customer-rootcause" data-customer-id="{{ $row['customer_id'] ?? 0 }}">
                                                         <td>
                                                             <div class="customer-info">
                                                                 <div class="customer-avatar">{{ substr($row['customer'], 0, 2) }}</div>
@@ -264,7 +264,7 @@
                                             </thead>
                                             <tbody>
                                                 @forelse($churnRows as $row)
-                                                    <tr>
+                                                    <tr class="clickable-row js-customer-rootcause" data-customer-id="{{ $row['customer_id'] ?? 0 }}">
                                                         <td>
                                                             <div class="customer-info">
                                                                 <div class="customer-avatar">{{ substr($row['customer'], 0, 2) }}</div>
@@ -288,6 +288,28 @@
         </div>
     </section>
 
+<div class="modal fade" id="customerRootCauseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="customerRootCauseTitle">Root Causes</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="customerRootCauseMeta" class="text-muted small mb-2"></div>
+                <div id="customerRootCauseLoading" class="py-3">Loading...</div>
+                <div id="customerRootCauseBody" style="display:none;">
+                    <div style="height: 420px;">
+                        <canvas id="customerRootCauseChart"></canvas>
+                    </div>
+                    <div id="customerRootCauseList" class="mt-3"></div>
+                </div>
+                <div id="customerRootCauseError" class="text-danger py-2" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Hidden data payload for charts -->
 <div id="reportsData" style="display:none"
      data-monthly-labels='@json($monthlyLabels)'
@@ -296,6 +318,8 @@
      data-rfo-values='@json($rfoValues)'
      data-city-faults-labels='@json($cityFaultsLabels)'
      data-city-faults-values='@json($cityFaultsValues)'></div>
+
+<div id="reportsMeta" style="display:none" data-customer-rootcause-url="{{ route('dashboard.reports.customer-root-causes') }}"></div>
 
 @push('scripts')
 <script src="{{ asset('js/reports.js') }}"></script>
