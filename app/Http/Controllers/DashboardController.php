@@ -40,13 +40,41 @@ class DashboardController extends Controller
 
         $hasQuarter = $selectedQuarter !== null;
         $hasDateRange = ($startDateInput !== null && $startDateInput !== '') || ($endDateInput !== null && $endDateInput !== '');
-        $allTime = ($selectedYear === null && $selectedMonth === null && !$hasQuarter && !$hasDateRange);
+        $allTime = false;
 
         $selectedRegionRaw = trim((string) $request->input('region', ''));
         $selectedRegion = $selectedRegionRaw === '' ? null : $selectedRegionRaw;
         $availableRegions = DB::table('cities')->select('region')->whereNotNull('region')->distinct()->orderBy('region')->pluck('region')->toArray();
 
         $now = Carbon::now();
+        if (
+            $request->has('month')
+            && $monthInput !== null
+            && $monthInput !== ''
+            && strtolower((string) $monthInput) !== 'all'
+            && (!$request->has('year') || $yearInput === null || $yearInput === '' || strtolower((string) $yearInput) === 'all')
+            && !$hasQuarter
+            && !$hasDateRange
+        ) {
+            $params = $request->query();
+            $params['year'] = (int) $now->year;
+            return redirect()->route('dashboard.reports', $params);
+        }
+        if (
+            $request->has('quarter')
+            && $selectedQuarterInput !== null
+            && $selectedQuarterInput !== ''
+            && (!$request->has('year') || $yearInput === null || $yearInput === '' || strtolower((string) $yearInput) === 'all')
+            && !$hasDateRange
+        ) {
+            $params = $request->query();
+            $params['year'] = (int) $now->year;
+            return redirect()->route('dashboard.reports', $params);
+        }
+        if ($selectedMonth !== null && $selectedYear === null && !$hasQuarter && !$hasDateRange) {
+            $selectedYear = (int) $now->year;
+        }
+        $allTime = ($selectedYear === null && $selectedMonth === null && !$hasQuarter && !$hasDateRange);
         $startOfMonth = $now->copy()->startOfMonth();
         $endOfMonth = $now->copy()->endOfMonth();
         $lastMonthStart = $now->copy()->subMonthNoOverflow()->startOfMonth();
@@ -267,10 +295,11 @@ class DashboardController extends Controller
         // Faults per past 12 months (labels and counts)
         $monthlyLabels = [];
         $monthlyCounts = [];
-        
+
+        $trendEnd = $periodEnd->copy()->endOfMonth();
         for ($i = 11; $i >= 0; $i--) {
-            $from = $now->copy()->subMonths($i)->startOfMonth();
-            $to = $now->copy()->subMonths($i)->endOfMonth();
+            $from = $trendEnd->copy()->subMonths($i)->startOfMonth();
+            $to = $trendEnd->copy()->subMonths($i)->endOfMonth();
             $label = $from->format('M Y');
             
             $monthlyQuery = Fault::whereBetween('created_at', [$from, $to]);
@@ -676,16 +705,38 @@ class DashboardController extends Controller
         $regionalPerfValues = $regionalPerfRaw->pluck('avg_dur')->map(fn($x) => (int) $x)->toArray();
 
         // Portfolio summary (top 10)
-        $linksByCustomer = Link::select('customer_id', DB::raw('COUNT(*) as c'))
-            ->groupBy('customer_id')->get()->keyBy('customer_id');
-        $openFaultsByCustomer = FaultAssignment::whereNull('resolved_at')
-            ->join('faults','fault_assignments.fault_id','=','faults.id')
-            ->select('faults.customer_id', DB::raw('COUNT(DISTINCT fault_assignments.fault_id) as c'))
-            ->groupBy('faults.customer_id')->get()->keyBy('customer_id');
-        $recentRfoByCustomer = Fault::whereNotNull('confirmedRfo_id')
-            ->where('created_at','>=',$now->copy()->subDays(90))
-            ->select('customer_id', DB::raw('COUNT(*) as c'))
-            ->groupBy('customer_id')->get()->keyBy('customer_id');
+        $linksByCustomerQuery = Link::select('links.customer_id', DB::raw('COUNT(*) as c'));
+        if ($selectedRegion) {
+            $linksByCustomerQuery->join('cities', 'links.city_id', '=', 'cities.id')
+                ->where('cities.region', $selectedRegion);
+        }
+        $linksByCustomer = $linksByCustomerQuery->groupBy('links.customer_id')->get()->keyBy('customer_id');
+
+        $openFaultsByCustomerQuery = FaultAssignment::whereNull('fault_assignments.resolved_at')
+            ->join('faults', 'fault_assignments.fault_id', '=', 'faults.id')
+            ->select('faults.customer_id', DB::raw('COUNT(DISTINCT fault_assignments.fault_id) as c'));
+        if (!$allTime) {
+            $openFaultsByCustomerQuery->whereBetween('faults.created_at', [$currentStart, $currentEnd]);
+        }
+        if ($selectedRegion) {
+            $openFaultsByCustomerQuery->join('cities', 'faults.city_id', '=', 'cities.id')
+                ->where('cities.region', $selectedRegion);
+        }
+        $openFaultsByCustomer = $openFaultsByCustomerQuery->groupBy('faults.customer_id')->get()->keyBy('customer_id');
+
+        $recentRfoByCustomerQuery = Fault::whereNotNull('confirmedRfo_id')
+            ->select('customer_id', DB::raw('COUNT(*) as c'));
+        if (!$allTime) {
+            $recentRfoByCustomerQuery->whereBetween('created_at', [$currentStart, $currentEnd]);
+        } else {
+            $recentRfoByCustomerQuery->where('created_at', '>=', $now->copy()->subDays(90));
+        }
+        if ($selectedRegion) {
+            $recentRfoByCustomerQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                $q->where('region', $selectedRegion);
+            });
+        }
+        $recentRfoByCustomer = $recentRfoByCustomerQuery->groupBy('customer_id')->get()->keyBy('customer_id');
         $portfolioRows = [];
         foreach ($linksByCustomer as $cid => $row) {
             $cust = $cid ? Customer::find($cid) : null;
@@ -700,10 +751,20 @@ class DashboardController extends Controller
         $portfolioRows = array_slice($portfolioRows, 0, 10);
 
         // Churn risk (MoM increase)
-        $custFaultsThis = Fault::whereBetween('created_at', [$startOfMonth, $endOfMonth])
-            ->select('customer_id', DB::raw('COUNT(*) as c'))->groupBy('customer_id')->get()->keyBy('customer_id');
-        $custFaultsLast = Fault::whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])
-            ->select('customer_id', DB::raw('COUNT(*) as c'))->groupBy('customer_id')->get()->keyBy('customer_id');
+        $custFaultsThisQuery = Fault::whereBetween('created_at', [$currentStart, $currentEnd])
+            ->select('customer_id', DB::raw('COUNT(*) as c'));
+        $custFaultsLastQuery = Fault::whereBetween('created_at', [$prevStart, $prevEnd])
+            ->select('customer_id', DB::raw('COUNT(*) as c'));
+        if ($selectedRegion) {
+            $custFaultsThisQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                $q->where('region', $selectedRegion);
+            });
+            $custFaultsLastQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                $q->where('region', $selectedRegion);
+            });
+        }
+        $custFaultsThis = $custFaultsThisQuery->groupBy('customer_id')->get()->keyBy('customer_id');
+        $custFaultsLast = $custFaultsLastQuery->groupBy('customer_id')->get()->keyBy('customer_id');
         $churnRows = [];
         foreach ($custFaultsThis as $cid => $r) {
             $diff = ((int) ($r->c ?? 0)) - ((int) ($custFaultsLast[$cid]->c ?? 0));

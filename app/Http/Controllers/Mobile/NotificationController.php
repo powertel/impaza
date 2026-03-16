@@ -234,11 +234,47 @@ class NotificationController extends Controller
 
         try {
             $response = Http::timeout(15)->post($endpoint, $messages);
+            $json = $response->json();
+            $items = is_array($json) ? ($json['data'] ?? null) : null;
+            $items = is_array($items) ? $items : [];
+
+            $ids = collect($items)
+                ->map(function ($item) {
+                    if (!is_array($item)) return null;
+                    if (($item['status'] ?? null) !== 'ok') return null;
+                    return $item['id'] ?? null;
+                })
+                ->filter()
+                ->values();
+
+            $receipts = null;
+            if ($ids->isNotEmpty()) {
+                try {
+                    $receiptsRes = Http::timeout(15)->post('https://exp.host/--/api/v2/push/getReceipts', [
+                        'ids' => $ids->all(),
+                    ]);
+                    $receiptsJson = $receiptsRes->json();
+                    $receipts = [
+                        'status' => $receiptsRes->status(),
+                        'ok' => $receiptsRes->successful(),
+                        'body' => $receiptsJson,
+                    ];
+                } catch (\Throwable $e) {
+                    $receipts = [
+                        'status' => null,
+                        'ok' => false,
+                        'error' => $e->getMessage(),
+                    ];
+                }
+            }
+
             return response()->json([
                 'success' => $response->successful(),
                 'token_count' => $tokens->count(),
                 'status' => $response->status(),
-                'body' => $response->json(),
+                'body' => $json,
+                'receipt_ids' => $ids,
+                'receipts' => $receipts,
             ]);
         } catch (\Throwable $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
