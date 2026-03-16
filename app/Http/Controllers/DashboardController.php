@@ -47,6 +47,17 @@ class DashboardController extends Controller
         $availableRegions = DB::table('cities')->select('region')->whereNotNull('region')->distinct()->orderBy('region')->pluck('region')->toArray();
 
         $now = Carbon::now();
+        $hasAnyFilter =
+            $request->has('year')
+            || $request->has('month')
+            || $request->has('quarter')
+            || $request->has('start_date')
+            || $request->has('end_date')
+            || $request->has('region');
+        if (!$hasAnyFilter) {
+            $selectedYear = (int) $now->year;
+            $selectedMonth = (int) $now->month;
+        }
         if (
             $request->has('month')
             && $monthInput !== null
