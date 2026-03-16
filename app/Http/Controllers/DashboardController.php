@@ -741,6 +741,7 @@ class DashboardController extends Controller
         foreach ($linksByCustomer as $cid => $row) {
             $cust = $cid ? Customer::find($cid) : null;
             $portfolioRows[] = [
+                'customer_id' => (int) ($cid ?? 0),
                 'customer' => $cust->customer ?? ('Customer ' . ($cid ?? 'N/A')),
                 'links' => (int) ($row->c ?? 0),
                 'open_faults' => (int) ($openFaultsByCustomer[$cid]->c ?? 0),
@@ -770,7 +771,7 @@ class DashboardController extends Controller
             $diff = ((int) ($r->c ?? 0)) - ((int) ($custFaultsLast[$cid]->c ?? 0));
             if ($diff > 0) {
                 $cust = $cid ? Customer::find($cid) : null;
-                $churnRows[] = [ 'customer' => $cust->customer ?? ('Customer ' . ($cid ?? 'N/A')), 'delta' => $diff ];
+                $churnRows[] = [ 'customer_id' => (int) ($cid ?? 0), 'customer' => $cust->customer ?? ('Customer ' . ($cid ?? 'N/A')), 'delta' => $diff ];
             }
         }
         usort($churnRows, fn($a,$b) => ($b['delta'] <=> $a['delta']));
@@ -933,6 +934,102 @@ class DashboardController extends Controller
             'linksPerCityValues' => $linksPerCityValues,
             'coverageGapValues' => $coverageGapValues,
             'recentFaults' => $recentFaults,
+        ]);
+    }
+
+    public function customerRootCauses(Request $request)
+    {
+        $customerId = (int) $request->input('customer_id');
+        if ($customerId <= 0) {
+            return response()->json(['message' => 'customer_id is required'], 422);
+        }
+
+        $now = Carbon::now();
+        $yearInput = $request->input('year');
+        $monthInput = $request->input('month');
+        $selectedYear = ($request->has('year') && $yearInput !== '' && strtolower((string) $yearInput) !== 'all') ? (int) $yearInput : null;
+        $selectedMonth = ($request->has('month') && $monthInput !== '' && strtolower((string) $monthInput) !== 'all') ? (int) $monthInput : null;
+        $selectedQuarterInput = $request->input('quarter');
+        $selectedQuarter = $selectedQuarterInput !== null && $selectedQuarterInput !== '' ? (int) $selectedQuarterInput : null;
+        $startDateInput = $request->input('start_date');
+        $endDateInput = $request->input('end_date');
+        $selectedRegionRaw = trim((string) $request->input('region', ''));
+        $selectedRegion = $selectedRegionRaw === '' ? null : $selectedRegionRaw;
+
+        $hasQuarter = $selectedQuarter !== null;
+        $hasDateRange = ($startDateInput !== null && $startDateInput !== '') || ($endDateInput !== null && $endDateInput !== '');
+        if ($selectedMonth !== null && $selectedYear === null && !$hasQuarter && !$hasDateRange) {
+            $selectedYear = (int) $now->year;
+        }
+        if ($hasQuarter && $selectedYear === null && !$hasDateRange) {
+            $selectedYear = (int) $now->year;
+        }
+
+        $allTime = ($selectedYear === null && $selectedMonth === null && !$hasQuarter && !$hasDateRange);
+        $currentStart = $now->copy()->startOfMonth();
+        $currentEnd = $now->copy()->endOfMonth();
+
+        if (!$hasQuarter && !$hasDateRange && ($selectedYear !== null || $selectedMonth !== null)) {
+            if ($selectedYear !== null && $selectedMonth !== null) {
+                $currentStart = Carbon::create($selectedYear, $selectedMonth, 1)->startOfMonth();
+                $currentEnd = Carbon::create($selectedYear, $selectedMonth, 1)->endOfMonth();
+            } elseif ($selectedYear !== null && $selectedMonth === null) {
+                $currentStart = Carbon::create($selectedYear, 1, 1)->startOfYear();
+                $currentEnd = Carbon::create($selectedYear, 12, 31)->endOfYear();
+            }
+        }
+
+        if ($hasQuarter) {
+            $quarterYear = $selectedYear !== null ? $selectedYear : (int) $now->year;
+            $startMonth = ($selectedQuarter - 1) * 3 + 1;
+            $currentStart = Carbon::create($quarterYear, $startMonth, 1)->startOfQuarter();
+            $currentEnd = Carbon::create($quarterYear, $startMonth, 1)->endOfQuarter();
+        } elseif ($hasDateRange) {
+            $rangeStart = $startDateInput ? Carbon::parse($startDateInput)->startOfDay() : Carbon::create(2000, 1, 1)->startOfDay();
+            $rangeEnd = $endDateInput ? Carbon::parse($endDateInput)->endOfDay() : $now->copy()->endOfDay();
+            if ($rangeEnd->lessThan($rangeStart)) {
+                $tmp = $rangeStart;
+                $rangeStart = $rangeEnd;
+                $rangeEnd = $tmp;
+            }
+            $currentStart = $rangeStart;
+            $currentEnd = $rangeEnd;
+        }
+
+        $baseQuery = Fault::query()->where('customer_id', $customerId);
+        if (!$allTime) {
+            $baseQuery->whereBetween('faults.created_at', [$currentStart, $currentEnd]);
+        }
+        if ($selectedRegion) {
+            $baseQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                $q->where('region', $selectedRegion);
+            });
+        }
+
+        $totalFaults = (clone $baseQuery)->count();
+
+        $breakdown = (clone $baseQuery)
+            ->leftJoin('reasons_for_outages as r', 'faults.confirmedRfo_id', '=', 'r.id')
+            ->selectRaw('COALESCE(r.RFO, CASE WHEN faults.confirmedRfo_id IS NULL THEN "Unspecified" ELSE CONCAT("RFO ", faults.confirmedRfo_id) END) as label, COUNT(*) as c')
+            ->groupBy('label')
+            ->orderByDesc('c')
+            ->get();
+
+        $labels = $breakdown->pluck('label')->toArray();
+        $values = $breakdown->pluck('c')->map(fn ($x) => (int) $x)->toArray();
+
+        $customerName = Customer::find($customerId)?->customer ?? ('Customer ' . $customerId);
+
+        return response()->json([
+            'customer_id' => $customerId,
+            'customer' => $customerName,
+            'period' => [
+                'start' => $allTime ? null : $currentStart->toDateString(),
+                'end' => $allTime ? null : $currentEnd->toDateString(),
+            ],
+            'total_faults' => $totalFaults,
+            'rfo_labels' => $labels,
+            'rfo_values' => $values,
         ]);
     }
 }
