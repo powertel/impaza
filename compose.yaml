@@ -19,6 +19,25 @@ services:
     networks:
       - laravel
 
+  scheduler:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: laravel_scheduler
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./storage:/var/www/html/storage
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+    environment:
+      TZ: Africa/Harare
+    depends_on:
+      - mysql
+      - redis
+    command: ["php", "artisan", "schedule:work"]
+    networks:
+      - laravel
+
   nginx:
     build:
       context: .

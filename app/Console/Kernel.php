@@ -15,8 +15,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // Auto-assign assessed faults to available technicians every five minutes
-        $schedule->command('faults:auto-assign')->everyFiveMinutes();
+        if (filter_var(env('SCHEDULE_AUTO_ASSIGN', true), FILTER_VALIDATE_BOOLEAN)) {
+            $schedule->command('faults:auto-assign')->everyFiveMinutes();
+        }
+        $schedule->command('accounts:sync')->everyTenMinutes()->withoutOverlapping();
     }
 
     /**
