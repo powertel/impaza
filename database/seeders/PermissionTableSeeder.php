@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use App\Models\User;
 
 class PermissionTableSeeder extends Seeder
 {
@@ -67,11 +69,22 @@ class PermissionTableSeeder extends Seeder
             'location-delete',
 
             'my-fault-list',
+            'my-fault-create',
+            'my-fault-edit',
+            'my-fault-delete',
             'department-faults-list',
+            'department-faults-create',
+            'department-faults-edit',
+            'department-faults-delete',
             'assigned-fault-list',
             'assessment-fault-list',
+            'assessment-fault-create',
+            'assessment-fault-edit',
+            'assessment-fault-delete',
             'noc-clear-faults-list',
+            'noc-clear-faults-create',
             'chief-tech-clear-faults-list',
+            'chief-tech-clear-faults-create',
             're-assign-fault',
 
             'remark-create',
@@ -79,6 +92,10 @@ class PermissionTableSeeder extends Seeder
             'clear-fault',
             'request-material',
             'rectify-fault',
+            'rectify-list',
+            'rectify-create',
+            'rectify-edit',
+            'rectify-delete',
 
             'refer-fault',
             'request-permit',
@@ -89,12 +106,22 @@ class PermissionTableSeeder extends Seeder
             'finance-link-update',
             'permit-list',
             'materials',
+            'material',
             'reports',
+            'resolved-faults-list',
+            'referred-faults',
+            'call-centre-reports',
+            'performance-reports',
             'noc-clear-faults-clear',
+            'noc-clear-faults-delete',
             'chief-tech-clear-faults-clear',
+            'chief-tech-clear-faults-delete',
             'technician-configuration',
             'assign-fault',
             'manage-faults',
+            'chief-tech-escalate',
+            'chief-tech-return-to-technician',
+            'manager-return-to-chief-tech',
 
             // Dashboard permissions
             'dashboard-open-faults',
@@ -103,8 +130,18 @@ class PermissionTableSeeder extends Seeder
             'dashboard-recent-faults',
          ];
 
-         foreach ($permissions as $permission) {
-              Permission::create(['name' => $permission]);
+         foreach (array_values(array_unique($permissions)) as $permission) {
+              Permission::firstOrCreate(['name' => $permission]);
+         }
+
+         $role = Role::find(1);
+         if ($role) {
+             $all = Permission::pluck('id','name')->all();
+             $role->syncPermissions($all);
+             $user = User::find(1);
+             if ($user) {
+                 $user->assignRole([$role->id]);
+             }
          }
     }
 }
