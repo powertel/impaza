@@ -16,7 +16,6 @@ class RFOSeeder extends Seeder
     public function run()
     {
         $RFO = [
-            'Unknown',
             'Faulty Mux',
             'Faulty Board',
             'Power Fault',
