@@ -16,19 +16,27 @@ class RFOSeeder extends Seeder
     public function run()
     {
         $RFO = [
-            'Unknown',
-            'Faulty Mux',
-            'Faulty Board',
-            'Power Fault',
-            'UG cable Fault',
-            'Burnt Cables',
             'Power Outage',
-            'Backbone Fault',
+            'No Fx Light',
+            'UTP Fault',
+            'Slow Speeds',
+            'Civil Works',
+            'Packet Losses',
+            'CPE Faulty',
+            'Timeouts',
             'Faulty Switch',
-            'Faulty Chassis',
             'Converter Faulty',
-            'Faulty SW/Port',
-            'CPE Faulty'
+            'RLOS',
+            'Low Power Levels',
+            'Degrades',
+            'Maxing',
+            'Cable Fault',
+            'Maintenance',
+            'Configurations',
+            'Connected Without Internet',
+            'Upstream Fault',
+            'Backbone Fault',
+            'Burnt Cables',
          ];
        
          foreach ($RFO as $Rfo) {

@@ -16,11 +16,27 @@ class SuspectedRFOSeeder extends Seeder
     public function run()
     {
         $SuspectedRFO = [
-            'No fx Light',
-            'No PON Light',
-            'BTS Down',
-            'Node Down',
-            'Unknown',
+            'Power Outage',
+            'No Fx Light',
+            'UTP Fault',
+            'Slow Speeds',
+            'Civil Works',
+            'Packet Losses',
+            'CPE Faulty',
+            'Timeouts',
+            'Faulty Switch',
+            'Converter Faulty',
+            'RLOS',
+            'Low Power Levels',
+            'Degrades',
+            'Maxing',
+            'Cable Fault',
+            'Maintenance',
+            'Configurations',
+            'Connected Without Internet',
+            'Upstream Fault',
+            'Backbone Fault',
+            'Burnt Cables',
 
          ];  
          foreach ($SuspectedRFO as $SuspectedRFO) {
