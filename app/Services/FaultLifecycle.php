@@ -151,8 +151,7 @@ class FaultLifecycle
         if ($start->gt($end)) {
             return $when->greaterThanOrEqualTo($start) || $when->lessThan($end);
         }
-        // Otherwise off-hours when between start and end same day
-        return $when->betweenIncluded($start, $end);
+        return $when->between($start, $end, true);
     }
 
     protected static function nocClearedId(): int
@@ -175,17 +174,29 @@ class FaultLifecycle
 
     public static function escalatedId(): int
     {
-        return 10;
+        static $cachedId = null;
+        if ($cachedId === null) {
+            $cachedId = (int)(Status::where('status_code', 'ESC')->value('id') ?? 10);
+        }
+        return $cachedId;
     }
 
     public static function managerEscalatedId(): int
     {
-        return 11;
+        static $cachedId = null;
+        if ($cachedId === null) {
+            $cachedId = (int)(Status::where('status_code', 'MES')->value('id') ?? 11);
+        }
+        return $cachedId;
     }
 
     public static function referredId(): int
     {
-        return 7;
+        static $cachedId = null;
+        if ($cachedId === null) {
+            $cachedId = (int)(Status::where('status_code', 'REF')->value('id') ?? 7);
+        }
+        return $cachedId;
     }
 
     protected static function notifyStatusChange(Fault $fault, int $toStatusId): void

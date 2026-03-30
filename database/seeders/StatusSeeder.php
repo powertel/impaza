@@ -15,9 +15,6 @@ class StatusSeeder extends Seeder
      */
     public function run()
     {
-
-
-
         $statuses = [
             [
                 'status_code' => 'WAS', 
@@ -48,20 +45,45 @@ class StatusSeeder extends Seeder
                 'description' => 'Fault has been refered'
             ],
             [
-                'status_code' => 'PRK ', 
+                'status_code' => 'PRK', 
                 'description' => 'Fault has been parked'
             ],
             [
-                'status_code' => 'RVK ', 
+                'status_code' => 'RVK', 
                 'description' => 'Fault has been revoked'
             ],
             [
                 'status_code' => 'ESC', 
-                'description' => 'Fault has been under escalated'
+                'description' => 'Fault  escalated to Chief Technician'
+            ],
+            [
+                'status_code' => 'MES',
+                'description' => 'Fault escalated to Manager'
             ]
         ];
-        foreach($statuses as $status){
-            Status::create($status);
+
+        $legacyCodes = [
+            'PRK ' => 'PRK',
+            'RVK ' => 'RVK',
+        ];
+        foreach ($legacyCodes as $from => $to) {
+            $legacy = Status::where('status_code', '=', $from)->first();
+            if ($legacy && !Status::where('status_code', '=', $to)->exists()) {
+                $legacy->update(['status_code' => $to]);
+            }
+        }
+
+        foreach ($statuses as $status) {
+            $code = trim((string)($status['status_code'] ?? ''));
+            $description = (string)($status['description'] ?? '');
+            if ($code === '' || $description === '') {
+                continue;
+            }
+
+            Status::updateOrCreate(
+                ['status_code' => $code],
+                ['description' => $description]
+            );
         }
        
     }

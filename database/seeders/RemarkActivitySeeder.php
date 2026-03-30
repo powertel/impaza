@@ -17,19 +17,25 @@ class RemarkActivitySeeder extends Seeder
     {
         $activities = [
             'ON LOGGING',
+            'ON EDIT',
+            'ON FAULT EDIT',
+            'ON CALL CENTRE ASSESSMENT',
+            'On Call Centre Clear',
             'ON RECTIFICATION',
             'ON REFER',
             'ON ASSESSMENT',
+            'ON CHIEF-TECH ASSIGN',
             'ON TECHNICIAN CLEAR',
             'ON CHIEF-TECH CLEAR',
             'ON CHIEF-TECH REASSIGN',
             'ON NOC CLEAR',
             'ON REASSIGN APPROVE',
-            'ON FAULT EDIT',
+            'ON MATERIAL REQUEST',
+            'ON REQUEST PERMIT',
          ];
        
-         foreach ($activities as $activity) {
-            RemarkActivity::create(['activity' => $activity]);
-         }
+        foreach (array_values(array_unique($activities)) as $activity) {
+            RemarkActivity::firstOrCreate(['activity' => $activity]);
+        }
     }
 }
