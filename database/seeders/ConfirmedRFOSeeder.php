@@ -17,7 +17,7 @@ class ConfirmedRFOSeeder extends Seeder
     {
         $ConfirmedRFO = [
             'Power Outage',
-            'No Fault',
+            'No Fx Light',
             'UTP Fault',
             'Slow Speeds',
             'Civil Works',

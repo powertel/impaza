@@ -17,7 +17,7 @@ class RFOSeeder extends Seeder
     {
         $RFO = [
             'Power Outage',
-            'No Fault',
+            'No Fx Light',
             'UTP Fault',
             'Slow Speeds',
             'Civil Works',
