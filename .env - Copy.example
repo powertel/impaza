@@ -69,4 +69,5 @@ INFOBIP_DEFAULT_COUNTRY_CODE=+263
 # Template name used for customer notifications outside the 24h window
 INFOBIP_STATUS_TEMPLATE=
 
-
+# Schedule Auto-Assign
+SCHEDULE_AUTO_ASSIGN=false

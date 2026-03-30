@@ -34,6 +34,41 @@ services:
     networks:
       - impaza
 
+  scheduler:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile.prod
+    container_name: impaza_scheduler
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - ./storage:/var/www/html/storage
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
+    env_file:
+      - .env.prod
+    environment:
+      TZ: Africa/Harare
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: "https://impazamon.powertel.co.zw"
+      DB_CONNECTION: mysql
+      DB_HOST: host.docker.internal
+      DB_PORT: 3306
+      DB_DATABASE: impaza
+      DB_USERNAME: impaza
+      DB_PASSWORD: Power@Dev25
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      REDIS_HOST: redis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - redis
+    command: ["php", "artisan", "schedule:work"]
+    networks:
+      - impaza
+
   nginx:
     build:
       context: .

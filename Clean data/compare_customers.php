@@ -8,8 +8,44 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 function norm($v) { if ($v === null) return ''; if (is_numeric($v)) return trim((string)$v); return trim((string)$v); }
 
+function normKey(string $v): string {
+    $v = strtolower(norm($v));
+    $v = preg_replace('/\s+/', '_', $v);
+    $v = preg_replace('/[^a-z0-9_]+/', '_', $v);
+    $v = preg_replace('/_+/', '_', $v);
+    return trim($v, '_');
+}
+
+function resolveInputFile(string $base, array $candidates): string {
+    foreach ($candidates as $name) {
+        $path = $base . DIRECTORY_SEPARATOR . $name;
+        if (is_file($path)) return $path;
+    }
+
+    $files = array_merge(
+        glob($base . DIRECTORY_SEPARATOR . '*.xlsx') ?: [],
+        glob($base . DIRECTORY_SEPARATOR . '*.xls') ?: [],
+        glob($base . DIRECTORY_SEPARATOR . '*.csv') ?: []
+    );
+    $files = array_values(array_filter($files, fn($p) => basename($p) !== '' && substr(basename($p), 0, 2) !== '~$'));
+
+    throw new RuntimeException(
+        "Input file not found.\nTried: " . implode(', ', $candidates) . "\nFound in folder:\n- " . implode("\n- ", array_map('basename', $files))
+    );
+}
+
+function getFirst(array $row, array $keys): string {
+    foreach ($keys as $k) {
+        if (isset($row[$k])) {
+            $v = norm($row[$k]);
+            if ($v !== '') return $v;
+        }
+    }
+    return '';
+}
+
 function readSheet(string $path): array {
-    if (!file_exists($path)) throw new RuntimeException("File not found: $path");
+    if (!is_file($path)) throw new RuntimeException("File not found: $path");
     $spreadsheet = IOFactory::load($path);
     $sheet = $spreadsheet->getActiveSheet();
     $rows = $sheet->toArray(null, true, true, true);
@@ -17,7 +53,10 @@ function readSheet(string $path): array {
     foreach ($rows as $idx => $r) { $joined = implode('', array_map('norm', array_values($r))); if ($joined !== '') { $headerRow = $idx; break; } }
     if ($headerRow === null) return [];
     $header = [];
-    foreach ($rows[$headerRow] as $col => $name) { $n = strtolower(norm($name)); if ($n !== '') $header[$col] = $n; }
+    foreach ($rows[$headerRow] as $col => $name) {
+        $n = normKey((string)$name);
+        if ($n !== '') $header[$col] = $n;
+    }
     $data = [];
     foreach ($rows as $idx => $r) {
         if ($idx <= $headerRow) continue;
@@ -31,15 +70,29 @@ function readSheet(string $path): array {
 
 function main(): void {
     $base = __DIR__;
-    $c1 = readSheet($base . DIRECTORY_SEPARATOR . 'Customers.xlsx');
-    $c2 = readSheet($base . DIRECTORY_SEPARATOR . 'Customers2.xlsx');
+    $argv = $_SERVER['argv'] ?? [];
+    $in1 = $argv[1] ?? '';
+    $in2 = $argv[2] ?? '';
+
+    $p1 = $in1 !== '' ? $in1 : resolveInputFile($base, ['Customers.xlsx', 'Customers.csv']);
+    $p2 = $in2 !== '' ? $in2 : resolveInputFile($base, ['Customers2.xlsx', 'Customers2.csv']);
+
+    $c1 = readSheet($p1);
+    $c2 = readSheet($p2);
     $set = [];
-    foreach ($c1 as $r) { $acc = $r['account_number'] ?? ''; if ($acc !== '') $set[$acc] = true; }
+    foreach ($c1 as $r) {
+        $acc = getFirst($r, ['account_number', 'accountnumber', 'account']);
+        if ($acc !== '') $set[$acc] = true;
+    }
     $out = [];
     foreach ($c2 as $r) {
-        $acc = $r['account_number'] ?? '';
+        $acc = getFirst($r, ['account_number', 'accountnumber', 'account']);
         if ($acc === '') continue;
-        if (!isset($set[$acc])) $out[] = [$acc, $r['contract_number'] ?? '', $r['customer'] ?? ''];
+        if (!isset($set[$acc])) {
+            $contract = getFirst($r, ['contract_number', 'contractnumber', 'contract_nunber']);
+            $customer = getFirst($r, ['customer', 'cutstomer', 'custome']);
+            $out[] = [$acc, $contract, $customer];
+        }
     }
     $csv = $base . DIRECTORY_SEPARATOR . 'customers2_not_in_customers.csv';
     $fp = fopen($csv, 'w');
