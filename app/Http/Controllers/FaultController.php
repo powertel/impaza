@@ -981,6 +981,7 @@ class FaultController extends Controller
                 ->with('error', 'Editing is locked after the fault is cleared by NOC.');
         }
 
+        $originalStatusId = (int) ($fault->status_id ?? 0);
         $data = $request->all();
 
         $request->validate([
@@ -1027,12 +1028,12 @@ class FaultController extends Controller
         }
 
         // Handle Resolved on Call
+        $newStatusId = $originalStatusId;
         if ($request->has('resolved_on_call') && $request->input('resolved_on_call')) {
              $nocClearedId = (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
              $data['status_id'] = $nocClearedId;
              $data['confirmedRfo_id'] = $data['suspectedRfo_id'] ?? $fault->suspectedRfo_id;
-             
-             FaultLifecycle::recordStatusChange($fault, $nocClearedId, $request->user()->id);
+             $newStatusId = $nocClearedId;
              
              // Override activity if resolved
              $remarkActivity = DB::table('remark_activities')->where('activity', 'On Call Centre Clear')->first();
@@ -1064,6 +1065,10 @@ class FaultController extends Controller
         }
 
         $fault->update($data);
+        if ($newStatusId !== $originalStatusId && $newStatusId > 0) {
+            $fault->refresh();
+            FaultLifecycle::recordStatusChange($fault, $newStatusId, $request->user()->id);
+        }
         return redirect(route('faults.index'))
         ->with('success','Fault Updated');
     }
