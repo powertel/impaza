@@ -38,6 +38,14 @@ class FaultLifecycle
 
         // Dispatch Infobip notifications for lifecycle changes
         self::notifyStatusChange($fault, $toStatusId);
+
+        if ($toStatusId === self::techClearedId() || $toStatusId === self::nocClearedId()) {
+            self::cascadeUpdateChildConfirmedRfo($fault, $actorUserId);
+        }
+
+        if ($toStatusId === self::nocClearedId()) {
+            self::cascadeResolvePopOutageChildFaults($fault, $actorUserId);
+        }
     }
 
     public static function startAssignment(Fault $fault, int $userId, ?int $actorUserId = null, bool $isStandby = false, ?string $region = null): void
@@ -205,7 +213,7 @@ class FaultLifecycle
         $summary = self::faultSummary($fault);
         $customerText = self::customerMessage($fault, $toStatusId);
 
-        if ($toStatusId === 1) {
+        if ($toStatusId === 1 && empty($fault->root_fault_id)) {
             $nocSectionId = 1;
             $recipientIds = User::query()
                 ->where('section_id', $nocSectionId)
@@ -374,7 +382,7 @@ class FaultLifecycle
         self::notifyCustomerStatus($fault, $toStatusId, $customerText);
 
         // Cleared -> notify Power Call Centre
-        if ($toStatusId === self::nocClearedId()) {
+        if ($toStatusId === self::nocClearedId() && empty($fault->root_fault_id)) {
             self::sendClearedEmail($fault);
         }
 
@@ -481,6 +489,110 @@ class FaultLifecycle
             $techText = $assigned ? self::techStatusMessage($fault, $assigned, $toStatusId) : "Fault {$fault->fault_ref_number}: {$desc}\n{$summary}";
             self::notifyAssignedTech($fault, $techText);
         } */
+    }
+
+    protected static function cascadeResolvePopOutageChildFaults(Fault $fault, ?int $actorUserId = null): void
+    {
+        if (!empty($fault->root_fault_id)) {
+            return;
+        }
+
+        $isAggregator = (bool) (Customer::query()
+            ->where('id', (int) $fault->customer_id)
+            ->value('is_pop_aggregator') ?? false);
+        if (!$isAggregator) {
+            return;
+        }
+
+        $nocClearedId = self::nocClearedId();
+        $childFaults = Fault::query()
+            ->where('root_fault_id', $fault->id)
+            ->where('status_id', '!=', $nocClearedId)
+            ->get();
+
+        if ($childFaults->isEmpty()) {
+            return;
+        }
+
+        $remarkActivityId = (int) (\DB::table('remark_activities')
+            ->where('activity', '=', 'ON NOC CLEAR')
+            ->value('id') ?? 0);
+
+        if ($remarkActivityId === 0) {
+            $remarkActivityId = (int) (\DB::table('remark_activities')->orderBy('id')->value('id') ?? 0);
+        }
+
+        foreach ($childFaults as $child) {
+            $childUpdate = ['status_id' => $nocClearedId];
+            if (!empty($fault->confirmedRfo_id)) {
+                $childUpdate['confirmedRfo_id'] = (int) $fault->confirmedRfo_id;
+            }
+            $child->update($childUpdate);
+            self::recordStatusChange($child, $nocClearedId, $actorUserId);
+
+            $remarkUserId = (int) ($actorUserId ?? 0);
+            if ($remarkActivityId !== 0 && $remarkUserId > 0) {
+                \DB::table('remarks')->insert([
+                    'fault_id' => $child->id,
+                    'user_id' => $remarkUserId,
+                    'remark' => "Resolved automatically because POP fault {$fault->fault_ref_number} was cleared by NOC.",
+                    'remarkActivity_id' => $remarkActivityId,
+                    'file_path' => null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+    }
+
+    protected static function cascadeUpdateChildConfirmedRfo(Fault $fault, ?int $actorUserId = null): void
+    {
+        if (!empty($fault->root_fault_id)) {
+            return;
+        }
+        $isAggregator = (bool) (Customer::query()
+            ->where('id', (int) $fault->customer_id)
+            ->value('is_pop_aggregator') ?? false);
+        if (!$isAggregator) {
+            return;
+        }
+        $confirmed = (int) ($fault->confirmedRfo_id ?? 0);
+        if ($confirmed <= 0) {
+            return;
+        }
+
+        $childFaults = Fault::query()
+            ->where('root_fault_id', $fault->id)
+            ->get();
+
+        if ($childFaults->isEmpty()) {
+            return;
+        }
+
+        $remarkActivityId = (int) (\DB::table('remark_activities')
+            ->where('activity', '=', 'ON NOC CLEAR')
+            ->value('id') ?? 0);
+        if ($remarkActivityId === 0) {
+            $remarkActivityId = (int) (\DB::table('remark_activities')->orderBy('id')->value('id') ?? 0);
+        }
+        $remarkUserId = (int) ($actorUserId ?? 0);
+
+        foreach ($childFaults as $child) {
+            if ((int) ($child->confirmedRfo_id ?? 0) !== $confirmed) {
+                $child->update(['confirmedRfo_id' => $confirmed]);
+                if ($remarkActivityId !== 0 && $remarkUserId > 0) {
+                    \DB::table('remarks')->insert([
+                        'fault_id' => $child->id,
+                        'user_id' => $remarkUserId,
+                        'remark' => "Confirmed RFO updated to match POP fault {$fault->fault_ref_number}.",
+                        'remarkActivity_id' => $remarkActivityId,
+                        'file_path' => null,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+        }
     }
 
     protected static function notifyAssignedTech(Fault $fault, string $text): void

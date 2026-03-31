@@ -30,7 +30,7 @@ class StatusSeeder extends Seeder
             ],
             [
                 'status_code' => 'CLT', 
-                'description' => 'Fault has been cleared by Technician'
+                'description' => 'Fault has been Rectified'
             ],
             [
                 'status_code' => 'CLC', 
@@ -38,11 +38,11 @@ class StatusSeeder extends Seeder
             ],
             [
                 'status_code' => 'CLN', 
-                'description' => 'Fault has been cleared by NOC'
+                'description' => 'Fault has been Restored'
             ],
             [
                 'status_code' => 'REF', 
-                'description' => 'Fault has been refered'
+                'description' => 'Fault has been Refered'
             ],
             [
                 'status_code' => 'PRK', 
@@ -59,6 +59,10 @@ class StatusSeeder extends Seeder
             [
                 'status_code' => 'MES',
                 'description' => 'Fault escalated to Manager'
+            ],
+            [
+                'status_code' => 'POI',
+                'description' => 'Impacted by POP outage'
             ]
         ];
 

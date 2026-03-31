@@ -55,6 +55,12 @@
             <label class="form-label">Contact Number</label>
             <input type="text" name="contact_number" class="form-control" value="{{ $customer->contact_number ?? '' }}" placeholder="Contact Number">
           </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="is_pop_aggregator" value="1" id="is_pop_aggregator_{{ $customer->id }}" {{ !empty($customer->is_pop_aggregator) ? 'checked' : '' }}>
+            <label class="form-check-label" for="is_pop_aggregator_{{ $customer->id }}">
+              POP Aggregator Customer
+            </label>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">

@@ -90,10 +90,12 @@ class CustomerController extends Controller
                     'customers.id',
                     'customers.customer',
                     'customers.account_number',
+                    'customers.contract_number',
                     'customers.account_manager_id',
                     'customers.customer_status',
                     'customers.address',
                     'customers.contact_number',
+                    'customers.is_pop_aggregator',
                     'account_manager_users.name as accountManager',
                 ]);
 
@@ -187,8 +189,9 @@ class CustomerController extends Controller
                 'account_manager_id' => 'nullable|integer|exists:account_managers,id',
                 'address' => 'nullable|string|max:255',
                 'contact_number' => 'nullable|string|max:50',
+                'is_pop_aggregator' => 'nullable|boolean',
             ]);
-            $customer = Customer::create($request->only('customer','account_number','contract_number','account_manager_id','address','contact_number'));
+            $customer = Customer::create($request->only('customer','account_number','contract_number','account_manager_id','address','contact_number','is_pop_aggregator'));
 
             DB::commit();
             return redirect()->route('customers.index')
@@ -260,7 +263,9 @@ class CustomerController extends Controller
             'customer_status' => ['nullable','integer','in:1,2,3,4'],
             'address' => ['nullable','string','max:255'],
             'contact_number' => ['nullable','string','max:50'],
+            'is_pop_aggregator' => ['nullable','boolean'],
         ]);
+        $validated['is_pop_aggregator'] = $request->has('is_pop_aggregator') ? 1 : 0;
         $customer->update($validated);
         return redirect(route('customers.index'))
             ->with('success','Customer updated successfully'); 

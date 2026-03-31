@@ -15,6 +15,7 @@ class Fault extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'root_fault_id',
         'customer_id',
 		'fault_ref_number',
         'contactName',
@@ -70,5 +71,15 @@ class Fault extends Model
     public function suspectedrfo()
     {
         return $this->belongsTo(ReasonsForOutage::class);
+    }
+
+    public function rootFault()
+    {
+        return $this->belongsTo(self::class, 'root_fault_id');
+    }
+
+    public function childFaults()
+    {
+        return $this->hasMany(self::class, 'root_fault_id');
     }
 }
