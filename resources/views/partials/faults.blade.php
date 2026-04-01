@@ -73,12 +73,12 @@ $(document).off('change', '#city').on('change', '#city', function () {
                         });
 
                     } else {
-                        $("#link").empty();
+                        $("#link").empty().append('<option selected disabled>No links found for this customer</option>');
                     }
                 }
             });
         } else {
-            $("#link").empty();
+            $("#link").empty().append('<option selected disabled>Select Link</option>');
         }
     });
 </script>

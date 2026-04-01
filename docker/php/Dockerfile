@@ -43,4 +43,4 @@ COPY . ./
 # Install PHP dependencies inside the image for baked-code workflow
 RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-interaction --no-progress --prefer-dist
 
-CMD ["php-fpm"]
+CMD ["sh", "-lc", "mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache && chmod -R ug+rwX storage bootstrap/cache && exec php-fpm"]

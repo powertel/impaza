@@ -20,6 +20,8 @@
               <dd class="col-sm-7">{{ $customer->address ?? '' }}</dd>
               <dt class="col-sm-5">Contact Number</dt>
               <dd class="col-sm-7">{{ $customer->contact_number ?? '' }}</dd>
+              <dt class="col-sm-5">POP Aggregator</dt>
+              <dd class="col-sm-7">{{ !empty($customer->is_pop_aggregator) ? 'Yes' : 'No' }}</dd>
           @php
             $manager = DB::table('account_managers')
               ->leftJoin('users','account_managers.user_id','=','users.id')

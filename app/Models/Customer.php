@@ -17,6 +17,7 @@ class Customer extends Model
         'customer_status',
         'address',
         'contact_number',
+        'is_pop_aggregator',
     ];
 
     public function links()

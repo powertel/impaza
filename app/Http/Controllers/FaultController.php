@@ -701,7 +701,8 @@ class FaultController extends Controller
                 $req['city_id'] = $lnk->city_id ?? null; 
                 $req['suburb_id'] = $lnk->suburb_id ?? null; 
                 $req['pop_id'] = $lnk->pop_id ?? null;
-                $req['serviceType'] = $lnk->service_type ?? null; // map to faults.serviceType
+                $req['serviceType'] = $lnk->service_type ?: 'N/A';
+                $req['serviceAttribute'] = trim((string) ($lnk->capacity ?? '')) !== '' ? (string) $lnk->capacity : 'N/A';
             }
             // Normalize email to null when not provided
             if(!$request->filled('contactEmail')){
@@ -786,6 +787,114 @@ class FaultController extends Controller
                     'fault_id'=> $fault->id,
                 ]
             );
+
+            $aggregatorCustomer = Customer::find($fault->customer_id);
+            if ($aggregatorCustomer && (bool) $aggregatorCustomer->is_pop_aggregator && !empty($fault->pop_id)) {
+                $aggregatorCustomerId = (int) $aggregatorCustomer->id;
+                $popImpactStatusId = (int) (DB::table('statuses')->where('status_code', '=', 'POI')->value('id') ?? 0);
+                if ($popImpactStatusId <= 0) {
+                    $popImpactStatusId = 1;
+                }
+                $impactedLinks = Link::query()
+                    ->join('customers', 'links.customer_id', '=', 'customers.id')
+                    ->where('links.pop_id', '=', (int) $fault->pop_id)
+                    ->where('links.customer_id', '!=', $aggregatorCustomerId)
+                    ->where(function($q){
+                        $q->whereNull('customers.is_pop_aggregator')
+                          ->orWhere('customers.is_pop_aggregator', '!=', 1);
+                    })
+                    ->select('links.*')
+                    ->get();
+
+                $seq = $next + 1;
+                $accountManagerCache = [];
+
+                foreach ($impactedLinks as $impactedLink) {
+                    $impactedCustomer = Customer::find($impactedLink->customer_id);
+
+                    $childAccountManagerId = null;
+                    if ($impactedCustomer) {
+                        $amUserId = $impactedCustomer->account_manager_id;
+                        if ($amUserId) {
+                            if (!array_key_exists($amUserId, $accountManagerCache)) {
+                                $amUser = User::find($amUserId);
+                                $am = AccountManager::firstOrCreate(
+                                    ['user_id' => $amUserId],
+                                    ['accountManager' => $amUser ? $amUser->name : 'Account Manager']
+                                );
+                                $accountManagerCache[$amUserId] = $am->id;
+                            }
+                            $childAccountManagerId = $accountManagerCache[$amUserId];
+                        } else {
+                            $fallbackAm = AccountManager::whereNull('user_id')
+                                ->where('accountManager', 'Unassigned')
+                                ->first();
+                            if (!$fallbackAm) {
+                                $fallbackAm = AccountManager::create([
+                                    'accountManager' => 'Unassigned',
+                                    'user_id' => null,
+                                ]);
+                            }
+                            $childAccountManagerId = $fallbackAm->id;
+                        }
+                    }
+
+                    if ($childAccountManagerId === null) {
+                        $fallbackAm = AccountManager::whereNull('user_id')
+                            ->where('accountManager', 'Unassigned')
+                            ->first();
+                        if (!$fallbackAm) {
+                            $fallbackAm = AccountManager::create([
+                                'accountManager' => 'Unassigned',
+                                'user_id' => null,
+                            ]);
+                        }
+                        $childAccountManagerId = $fallbackAm->id;
+                    }
+
+                    $childContactNumber = $impactedCustomer && !empty($impactedCustomer->contact_number)
+                        ? preg_replace('/\s+/', '', (string) $impactedCustomer->contact_number)
+                        : (string) $fault->phoneNumber;
+
+                    $childData = [
+                        'root_fault_id' => $fault->id,
+                        'fault_ref_number' => $prefix . sprintf('%03d', $seq++),
+                        'customer_id' => $impactedLink->customer_id,
+                        'contactName' => $impactedCustomer ? (string) $impactedCustomer->customer : (string) $fault->contactName,
+                        'phoneNumber' => $childContactNumber,
+                        'contactEmail' => $fault->contactEmail,
+                        'address' => $impactedCustomer && !empty($impactedCustomer->address) ? (string) $impactedCustomer->address : (string) $fault->address,
+                        'accountManager_id' => $childAccountManagerId,
+                        'city_id' => $impactedLink->city_id ?? $fault->city_id,
+                        'suburb_id' => $impactedLink->suburb_id ?? $fault->suburb_id,
+                        'pop_id' => $impactedLink->pop_id ?? $fault->pop_id,
+                        'link_id' => $impactedLink->id,
+                        'suspectedRfo_id' => $fault->suspectedRfo_id,
+                        'confirmedRfo_id' => $fault->confirmedRfo_id,
+                        'serviceType' => $impactedLink->service_type ?? $fault->serviceType,
+                        'serviceAttribute' => $fault->serviceAttribute,
+                        'status_id' => ((int) $fault->status_id === (int) $nocClearedId) ? (int) $nocClearedId : $popImpactStatusId,
+                        'faultType' => $fault->faultType ?? 'POP OUTAGE',
+                        'priorityLevel' => $fault->priorityLevel,
+                        'user_id' => $request->user()->id,
+                    ];
+
+                    $childFault = Fault::create($childData);
+                    FaultLifecycle::recordStatusChange($childFault, (int) $childData['status_id'], $request->user()->id);
+
+                    Remark::create([
+                        'fault_id' => $childFault->id,
+                        'user_id' => $request->user()->id,
+                        'remark' => $request['remark'] . " (Auto-linked to POP fault {$fault->fault_ref_number})",
+                        'remarkActivity_id' => $remarkActivity_id->id,
+                        'file_path' => null,
+                    ]);
+
+                    FaultSection::create([
+                        'fault_id' => $childFault->id,
+                    ]);
+                }
+            }
           //  $request->user()->posts()->create($request->only('body'));
             if($fault && $remark && $fault_section)
             {
@@ -872,6 +981,7 @@ class FaultController extends Controller
                 ->with('error', 'Editing is locked after the fault is cleared by NOC.');
         }
 
+        $originalStatusId = (int) ($fault->status_id ?? 0);
         $data = $request->all();
 
         $request->validate([
@@ -918,12 +1028,12 @@ class FaultController extends Controller
         }
 
         // Handle Resolved on Call
+        $newStatusId = $originalStatusId;
         if ($request->has('resolved_on_call') && $request->input('resolved_on_call')) {
              $nocClearedId = (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
              $data['status_id'] = $nocClearedId;
              $data['confirmedRfo_id'] = $data['suspectedRfo_id'] ?? $fault->suspectedRfo_id;
-             
-             FaultLifecycle::recordStatusChange($fault, $nocClearedId, $request->user()->id);
+             $newStatusId = $nocClearedId;
              
              // Override activity if resolved
              $remarkActivity = DB::table('remark_activities')->where('activity', 'On Call Centre Clear')->first();
@@ -955,6 +1065,10 @@ class FaultController extends Controller
         }
 
         $fault->update($data);
+        if ($newStatusId !== $originalStatusId && $newStatusId > 0) {
+            $fault->refresh();
+            FaultLifecycle::recordStatusChange($fault, $newStatusId, $request->user()->id);
+        }
         return redirect(route('faults.index'))
         ->with('success','Fault Updated');
     }
@@ -1049,7 +1163,8 @@ class FaultController extends Controller
                 $req['city_id'] = $lnk->city_id ?? null; 
                 $req['suburb_id'] = $lnk->suburb_id ?? null; 
                 $req['pop_id'] = $lnk->pop_id ?? null;
-                $req['serviceType'] = $lnk->service_type ?? null; // map to faults.serviceType
+                $req['serviceType'] = $lnk->service_type ?: 'N/A';
+                $req['serviceAttribute'] = trim((string) ($lnk->capacity ?? '')) !== '' ? (string) $lnk->capacity : 'N/A';
             }
             // Normalize email to null when not provided
             if(!$request->filled('contactEmail')){
