@@ -1,4 +1,11 @@
 # PHP-FPM for Laravel (Production)
+FROM node:18-alpine AS assets-builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run prod
+
 FROM php:8.2-fpm
 
 # System dependencies
@@ -35,14 +42,23 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Use tuned php-fpm pool configuration
 COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
+# Entrypoint script
+COPY docker/php/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 WORKDIR /var/www/html
 
 # Copy application source code
 COPY . ./
+
+# Copy built assets from assets-builder stage
+COPY --from=assets-builder /app/public /var/www/html/public
 
 # Install PHP dependencies optimized for production
 RUN COMPOSER_MEMORY_LIMIT=-1 composer install --no-interaction --no-progress --prefer-dist --no-dev \
     && mkdir -p storage bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache
 
-CMD ["sh", "-lc", "mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache && chmod -R ug+rwX storage bootstrap/cache && exec php-fpm"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+CMD ["php-fpm"]
