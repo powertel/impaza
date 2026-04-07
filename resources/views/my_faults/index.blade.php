@@ -65,7 +65,7 @@ My Faults
                             <span class="badge rounded-pill bg-light text-danger age-ticker fs-6" data-started-at="{{ $fault->stage_started_at ?? '' }}"></span>
                         </td>
                         <td>
-                        @if ($fault->description==='Fault is under rectification')
+                        @if ($fault->description==='Fault is under Rectification')
                             @can('noc-clear-faults-clear')
                                 <button class="btn btn-sm btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#nocClearModal-{{ $fault->id }}">
                                     <i class="fas fa-save me-1"></i>Clear
