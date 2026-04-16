@@ -10,6 +10,12 @@
     return {
       monthlyLabels: parse('monthlyLabels'),
       monthlyCounts: parse('monthlyCounts'),
+      faultCategoryLabels: parse('faultCategoryLabels'),
+      faultCategoryValues: parse('faultCategoryValues'),
+      faultCategoryMonthlyLabels: parse('faultCategoryMonthlyLabels'),
+      faultCategoryMonthlyDirect: parse('faultCategoryMonthlyDirect'),
+      faultCategoryMonthlyPop: parse('faultCategoryMonthlyPop'),
+      popImpactStatusId: parseNum('popImpactStatusId'),
       statusLabels: parse('statusLabels'),
       statusValues: parse('statusValues'),
       rfoLabels: parse('rfoLabels'),
@@ -483,6 +489,16 @@
     };
   }
 
+  function buildPieConfig(opts) {
+    const cfg = buildDonutConfig(opts);
+    cfg.type = 'pie';
+    if (cfg.options) {
+      delete cfg.options.cutout;
+      delete cfg.options.cutoutPercentage;
+    }
+    return cfg;
+  }
+
   function initCharts(data) {
     if (typeof Chart === 'undefined') return; // Chart.js not loaded
 
@@ -607,6 +623,47 @@
           animation: {
             duration: 2000,
             easing: 'easeOutQuart'
+          }
+        }
+      });
+    }
+
+    if (has('chartFaultCategorySplit')) {
+      const cfg = buildPieConfig({
+        labels: data.faultCategoryLabels,
+        values: data.faultCategoryValues,
+        palette: ['#4e73df', '#1cc88a', '#f6c23e', '#e74a3b', '#36b9cc'],
+        maxSlices: null,
+        groupOther: false,
+        showLegend: true
+      });
+      new Chart(el('chartFaultCategorySplit'), cfg);
+    }
+
+    if (has('chartFaultCategoryTrend')) {
+      new Chart(el('chartFaultCategoryTrend'), {
+        type: 'bar',
+        data: {
+          labels: data.faultCategoryMonthlyLabels,
+          datasets: [
+            {
+              label: 'Direct Faults',
+              data: data.faultCategoryMonthlyDirect,
+              backgroundColor: '#4e73df'
+            },
+            {
+              label: 'POP Impacted Faults',
+              data: data.faultCategoryMonthlyPop,
+              backgroundColor: '#1cc88a'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: 'bottom' } },
+          scales: {
+            x: { stacked: true },
+            y: { stacked: true, beginAtZero: true }
           }
         }
       });

@@ -1,8 +1,8 @@
 @extends('layouts.admin')
 
 @section('content')
-<link href="{{ asset('css/reports.css') }}" rel="stylesheet">
-<link href="{{ asset('css/call_centre.css') }}" rel="stylesheet">
+<link href="{{ asset('css/reports.css') }}?v={{ @filemtime(public_path('css/reports.css')) }}" rel="stylesheet">
+<link href="{{ asset('css/call_centre.css') }}?v={{ @filemtime(public_path('css/call_centre.css')) }}" rel="stylesheet">
 
 <section class="content">
         <div class="card border-0 shadow-lg">
@@ -86,6 +86,10 @@
                                 <i class="fas fa-undo me-1"></i>
                                 Reset
                             </a>
+                            <button type="button" id="reportsHardRefresh" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+                                <i class="fas fa-sync-alt me-1"></i>
+                                Hard Refresh
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -174,6 +178,33 @@
                             </div>
                             <div class="chart-body">
                                 <canvas id="chartMonthlyFaults"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="px-4 pb-4">
+                    <h2 class="section-title text-lg font-bold text-gray-700 mb-3 px-1">Fault Category Analysis</h2>
+                    <div class="charts-grid-secondary">
+                        <div class="chart-card cc-chart-card">
+                            <div class="chart-header">
+                                <h3>Direct vs POP Impacted</h3>
+                            </div>
+                            <div class="chart-body chart-body-lg">
+                                <div class="d-flex flex-wrap gap-2 mb-2">
+                                    <span class="badge badge-info">Total: {{ number_format($faultCategoryTotal ?? 0) }}</span>
+                                    <span class="badge badge-primary">Direct: {{ number_format($directFaultCount ?? 0) }}</span>
+                                    <span class="badge badge-success">POP Impacted: {{ number_format($popImpactedCount ?? 0) }}</span>
+                                </div>
+                                <canvas id="chartFaultCategorySplit"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card cc-chart-card">
+                            <div class="chart-header">
+                                <h3>Category Trend (12 Months)</h3>
+                            </div>
+                            <div class="chart-body">
+                                <canvas id="chartFaultCategoryTrend"></canvas>
                             </div>
                         </div>
                     </div>
@@ -314,6 +345,11 @@
 <div id="reportsData" style="display:none"
      data-monthly-labels='@json($monthlyLabels)'
      data-monthly-counts='@json($monthlyCounts)'
+     data-fault-category-labels='@json($faultCategoryLabels ?? [])'
+     data-fault-category-values='@json($faultCategoryValues ?? [])'
+     data-fault-category-monthly-labels='@json($faultCategoryMonthlyLabels ?? [])'
+     data-fault-category-monthly-direct='@json($faultCategoryMonthlyDirect ?? [])'
+     data-fault-category-monthly-pop='@json($faultCategoryMonthlyPop ?? [])'
      data-rfo-labels='@json($rfoLabels)'
      data-rfo-values='@json($rfoValues)'
      data-city-faults-labels='@json($cityFaultsLabels)'
@@ -322,7 +358,18 @@
 <div id="reportsMeta" style="display:none" data-customer-rootcause-url="{{ route('dashboard.reports.customer-root-causes') }}"></div>
 
 @push('scripts')
-<script src="{{ asset('js/reports.js') }}"></script>
+<script src="{{ asset('js/reports.js') }}?v={{ @filemtime(public_path('js/reports.js')) }}"></script>
+<script>
+  (function () {
+    var btn = document.getElementById('reportsHardRefresh');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var url = new URL(window.location.href);
+      url.searchParams.set('_hr', String(Date.now()));
+      window.location.replace(url.toString());
+    });
+  })();
+</script>
 @endpush
 @endsection
 

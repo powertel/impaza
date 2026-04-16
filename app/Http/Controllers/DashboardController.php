@@ -359,6 +359,52 @@ class DashboardController extends Controller
             $statusValues[] = (int) $row->c;
         }
 
+        // Category split: direct faults vs POP-impacted child faults
+        // Rule: child faults have root_fault_id set, direct faults have root_fault_id NULL
+        $faultCategoryBase = Fault::query();
+        if ($hasDateRange || $hasQuarter) {
+            $faultCategoryBase->whereBetween('created_at', [$currentStart, $currentEnd]);
+        } elseif ($selectedMonth !== null && $selectedYear === null) {
+            $faultCategoryBase->whereMonth('created_at', $selectedMonth);
+        } elseif ($selectedYear !== null || $selectedMonth !== null) {
+            if ($selectedYear !== null) $faultCategoryBase->whereYear('created_at', $selectedYear);
+            if ($selectedMonth !== null) $faultCategoryBase->whereMonth('created_at', $selectedMonth);
+        }
+        if ($selectedRegion) {
+            $faultCategoryBase->whereHas('city', function ($q) use ($selectedRegion) {
+                $q->where('region', $selectedRegion);
+            });
+        }
+
+        $faultCategoryTotal = (clone $faultCategoryBase)->count();
+        $popImpactedCount = (clone $faultCategoryBase)->whereNotNull('root_fault_id')->count();
+        $directFaultCount = max(0, $faultCategoryTotal - $popImpactedCount);
+        $faultCategoryLabels = ['Direct Faults', 'POP Impacted Faults'];
+        $faultCategoryValues = [$directFaultCount, $popImpactedCount];
+
+        // Monthly trend by category (last 12 months, ending at selected period end)
+        $faultCategoryMonthlyLabels = [];
+        $faultCategoryMonthlyDirect = [];
+        $faultCategoryMonthlyPop = [];
+        $trendEndForCategory = $periodEnd->copy()->endOfMonth();
+        for ($i = 11; $i >= 0; $i--) {
+            $from = $trendEndForCategory->copy()->subMonths($i)->startOfMonth();
+            $to = $trendEndForCategory->copy()->subMonths($i)->endOfMonth();
+            $faultCategoryMonthlyLabels[] = $from->format('M Y');
+
+            $monthBase = Fault::whereBetween('created_at', [$from, $to]);
+            if ($selectedRegion) {
+                $monthBase->whereHas('city', function ($q) use ($selectedRegion) {
+                    $q->where('region', $selectedRegion);
+                });
+            }
+
+            $monthPop = (clone $monthBase)->whereNotNull('root_fault_id')->count();
+            $monthTotal = (clone $monthBase)->count();
+            $faultCategoryMonthlyPop[] = (int) $monthPop;
+            $faultCategoryMonthlyDirect[] = (int) max(0, $monthTotal - $monthPop);
+        }
+
         // RFO distribution (confirmed)
         $rfoBreakdownQuery = Fault::select('confirmedRfo_id', DB::raw('COUNT(*) as c'));
         if ($hasDateRange || $hasQuarter) {
@@ -876,7 +922,8 @@ class DashboardController extends Controller
         $recentFaults = $recentFaultsQuery->get();
 
 
-        return view('dashboard.reports', [
+        return response()
+            ->view('dashboard.reports', [
             'period' => $period,
             'availableYears' => $availableYears,
             'availableRegions' => $availableRegions,
@@ -902,6 +949,14 @@ class DashboardController extends Controller
             'monthlyCounts' => $monthlyCounts,
             'statusLabels' => $statusLabels,
             'statusValues' => $statusValues,
+            'faultCategoryLabels' => $faultCategoryLabels,
+            'faultCategoryValues' => $faultCategoryValues,
+            'faultCategoryTotal' => (int) $faultCategoryTotal,
+            'directFaultCount' => (int) $directFaultCount,
+            'popImpactedCount' => (int) $popImpactedCount,
+            'faultCategoryMonthlyLabels' => $faultCategoryMonthlyLabels,
+            'faultCategoryMonthlyDirect' => $faultCategoryMonthlyDirect,
+            'faultCategoryMonthlyPop' => $faultCategoryMonthlyPop,
             'rfoLabels' => $rfoLabels,
             'rfoValues' => $rfoValues,
             'suspectedRfoLabels' => $suspectedRfoLabels,
@@ -952,7 +1007,10 @@ class DashboardController extends Controller
             'linksPerCityValues' => $linksPerCityValues,
             'coverageGapValues' => $coverageGapValues,
             'recentFaults' => $recentFaults,
-        ]);
+        ])
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 
     public function customerRootCauses(Request $request)
