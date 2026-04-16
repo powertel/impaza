@@ -1,8 +1,39 @@
+.content {
+  --cc-bg: #f3f6fb;
+  --cc-card-bg: #ffffff;
+  --cc-card-border: #e6ebf2;
+  --cc-text: #0f172a;
+  --cc-muted: #64748b;
+  --cc-shadow-sm: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --cc-shadow-md: 0 14px 34px rgba(15, 23, 42, 0.12);
+  --cc-shadow-lg: 0 24px 56px rgba(15, 23, 42, 0.16);
+}
+
+.content .card {
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.content .card-header {
+  border-bottom: 1px solid var(--cc-card-border) !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 251, 255, 0.95) 100%);
+  backdrop-filter: blur(8px);
+}
+
+.content .card-title {
+  color: var(--cc-text);
+  letter-spacing: 0.01em;
+}
+
+.content .card-title .text-primary {
+  color: #3b82f6 !important;
+}
+
 .cc-chart-card {
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-  border: 1px solid #e5e7eb;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid var(--cc-card-border);
   border-radius: 16px;
-  box-shadow: 0 12px 32px rgba(16, 24, 40, 0.12);
+  box-shadow: var(--cc-shadow-sm);
   padding: 20px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -19,7 +50,7 @@
   opacity: 0.7;
 }
 .cc-chart-card .fw-semibold {
-  color: #111827;
+  color: var(--cc-text);
   font-weight: 600;
   font-size: 1.1rem;
   margin-bottom: 16px;
@@ -34,20 +65,23 @@
   font-weight: 700;
 }
 .cc-chart-card:hover {
-  box-shadow: 0 20px 40px rgba(16, 24, 40, 0.18);
-  transform: translateY(-2px);
+  box-shadow: var(--cc-shadow-md);
+  transform: translateY(-3px);
 }
 
 .cc-filter-bar {
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--cc-card-border);
   border-radius: 12px;
   padding: 12px 14px;
   margin-top: 8px;
   margin-bottom: 12px;
-  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.07);
-  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(10px);
   overflow-x: auto;
+  position: sticky;
+  top: 6px;
+  z-index: 20;
 }
 .cc-field {
   min-width: 150px;
@@ -61,10 +95,11 @@
 .cc-field .form-select,
 .cc-field .form-control {
   border-radius: 8px;
-  border-color: #e5e7eb;
+  border-color: #dce3ee;
   padding: 6px 10px;
   font-size: 0.85rem;
   transition: all 0.2s ease;
+  background: #fff;
 }
 .cc-field .form-select:focus,
 .cc-field .form-control:focus {
@@ -105,11 +140,11 @@
 /* Modern KPI cards - Compact version */
 .cc-kpi {
   position: relative;
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid var(--cc-card-border);
   border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 4px 12px rgba(16, 24, 40, 0.08);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   height: 100%;
@@ -160,8 +195,8 @@
   line-height: 1.2;
 }
 .cc-kpi:hover {
-  box-shadow: 0 8px 20px rgba(16, 24, 40, 0.12);
-  transform: translateY(-2px);
+  box-shadow: var(--cc-shadow-md);
+  transform: translateY(-3px);
 }
 
 /* Color variants */
@@ -229,7 +264,8 @@
   width: 90vw !important;
   height: 80vh !important;
   z-index: 1050 !important;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: var(--cc-shadow-lg) !important;
+  background: #fff !important;
 }
 
 .cc-chart-card--expanded canvas {
@@ -242,13 +278,20 @@
 }
 
 /* Modern button styles */
-.btn {
+.content .btn {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.btn:hover {
+.content .btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.content .btn:focus-visible,
+.content .form-select:focus-visible,
+.content .form-control:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
 }
 
 /* Custom scrollbar */
@@ -331,7 +374,7 @@ canvas#chartShiftTraffic {
 .card-header .card-title i {
   vertical-align: middle;
 }
-.
+
 .cc-analysis-card {
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid #e5e7eb;
@@ -386,3 +429,13 @@ canvas#chartShiftTraffic {
 .bg-info-subtle { background: rgba(59,130,246,0.14) !important; }
 .bg-secondary-subtle { background: rgba(100,116,139,0.14) !important; }
 .bg-primary-subtle { background: rgba(99,102,241,0.14) !important; }
+
+/* Respect reduced-motion user preference */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
