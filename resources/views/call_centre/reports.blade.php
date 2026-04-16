@@ -5,8 +5,8 @@ Faults Analytics Dashboard
 @endsection
 
 @section('content')
-<link href="{{ asset('css/call_centre.css') }}" rel="stylesheet">
-<section class="content">
+<link href="{{ asset('css/call_centre.css') }}?v={{ @filemtime(public_path('css/call_centre.css')) }}" rel="stylesheet">
+<section class="content ux-unified">
   <div class="card border-0 shadow-lg">
     <div class="card-header bg-white border-0 py-4">
       <div class="d-flex justify-content-between align-items-center">
@@ -95,6 +95,10 @@ Faults Analytics Dashboard
               <i class="fas fa-undo me-1"></i>
               Reset
             </button>
+            <button type="button" id="callCentreHardRefresh" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+              <i class="fas fa-sync-alt me-1"></i>
+              Hard Refresh
+            </button>
           </div>
         </form>
       </div>
@@ -148,6 +152,33 @@ Faults Analytics Dashboard
       <!-- Charts Grid -->
       <div class="px-4 pb-4">
         <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="cc-chart-card">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="fw-semibold">Direct vs POP Impacted (Logged Faults)</div>
+                <button class="btn btn-sm btn-outline-secondary rounded-pill" data-bs-toggle="tooltip" title="View details">
+                  <i class="fas fa-expand"></i>
+                </button>
+              </div>
+              <div class="d-flex flex-wrap gap-2 mb-2">
+                <span class="badge rounded-pill bg-primary-subtle text-primary">Total: {{ number_format($newFaultsTotal ?? 0) }}</span>
+                <span class="badge rounded-pill bg-primary">Direct: {{ number_format($directFaultsTotal ?? 0) }}</span>
+                <span class="badge rounded-pill bg-success">POP Impacted: {{ number_format($popImpactedFaultsTotal ?? 0) }}</span>
+              </div>
+              <canvas id="chartCategorySplit"></canvas>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="cc-chart-card">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="fw-semibold">Category Trend (Logged Faults)</div>
+                <button class="btn btn-sm btn-outline-secondary rounded-pill" data-bs-toggle="tooltip" title="View details">
+                  <i class="fas fa-expand"></i>
+                </button>
+              </div>
+              <canvas id="chartCategoryTrend"></canvas>
+            </div>
+          </div>
           <div class="col-lg-6">
             <div class="cc-chart-card">
               <div class="d-flex justify-content-between align-items-center mb-3">
@@ -320,8 +351,12 @@ Faults Analytics Dashboard
 <script>
   window.callCentreData = {
     filter: @json($filter ?? 'month'),
+    categoryLabels: @json(['Direct Faults', 'POP Impacted Faults']),
+    categoryValues: @json([(int)($directFaultsTotal ?? 0), (int)($popImpactedFaultsTotal ?? 0)]),
     weeklyLabels: @json($weeklyLabels ?? []),
     weeklyNewFaults: @json($weeklyNewFaults ?? []),
+    weeklyNewFaultsDirect: @json($weeklyNewFaultsDirect ?? []),
+    weeklyNewFaultsPop: @json($weeklyNewFaultsPop ?? []),
     weeklyResolved: @json($weeklyResolved ?? []),
     weeklyOutstanding: @json($weeklyOutstanding ?? []),
     weeklyResolved3DaysPerc: @json($weeklyResolved3DaysPerc ?? []),
@@ -329,6 +364,8 @@ Faults Analytics Dashboard
     outstandingBins: @json($outstandingBins ?? []),
     dailyLabels: @json($dailyLabels ?? []),
     dailyNewFaults: @json($dailyNewFaults ?? []),
+    dailyNewFaultsDirect: @json($dailyNewFaultsDirect ?? []),
+    dailyNewFaultsPop: @json($dailyNewFaultsPop ?? []),
     dailyResolved: @json($dailyResolved ?? []),
     dailyOutstanding: @json($dailyOutstanding ?? []),
     dailyResolved3DaysPerc: @json($dailyResolved3DaysPerc ?? []),
@@ -343,6 +380,8 @@ Faults Analytics Dashboard
     monthlyLabels: @json(($monthlyActiveLabels ?? $monthlyLabels) ?? []),
     monthlyOpening: @json(($monthlyOpeningActive ?? $monthlyOpening) ?? []),
     monthlyNewFaults: @json(($monthlyNewFaultsActive ?? $monthlyNewFaults) ?? []),
+    monthlyNewFaultsDirect: @json(($monthlyNewFaultsDirectActive ?? $monthlyNewFaultsDirect) ?? []),
+    monthlyNewFaultsPop: @json(($monthlyNewFaultsPopActive ?? $monthlyNewFaultsPop) ?? []),
     monthlyResolved: @json(($monthlyResolvedActive ?? $monthlyResolved) ?? []),
     monthlyOutstanding: @json(($monthlyOutstandingActive ?? $monthlyOutstanding) ?? []),
     monthlyTotals: @json(($monthlyTotalsActive ?? $monthlyTotals) ?? []),
@@ -351,6 +390,17 @@ Faults Analytics Dashboard
     monthlyShiftAfternoon: @json(($monthlyShiftAfternoonActive ?? $monthlyShiftAfternoon) ?? []),
     monthlyShiftNight: @json(($monthlyShiftNightActive ?? $monthlyShiftNight) ?? []),
   };
+</script>
+<script>
+  (function () {
+    var btn = document.getElementById('callCentreHardRefresh');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var url = new URL(window.location.href);
+      url.searchParams.set('_hr', String(Date.now()));
+      window.location.replace(url.toString());
+    });
+  })();
 </script>
 <script src="{{ asset('js/call_centre.js') }}?v={{ file_exists(public_path('js/call_centre.js')) ? filemtime(public_path('js/call_centre.js')) : time() }}"></script>
 @endsection

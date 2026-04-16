@@ -7,12 +7,52 @@ Dashboard
 @include('partials.css')
 
 @section('content')
-<link href="{{ asset('css/dashboard.css') }}" rel="stylesheet">
-<link href="{{ asset('css/call_centre.css') }}" rel="stylesheet">
+<link href="{{ asset('css/dashboard.css') }}?v={{ @filemtime(public_path('css/dashboard.css')) }}" rel="stylesheet">
+<link href="{{ asset('css/call_centre.css') }}?v={{ @filemtime(public_path('css/call_centre.css')) }}" rel="stylesheet">
 <style>
-  .zoom-card { transition: transform .12s ease, box-shadow .12s ease; }
-  .zoom-card:hover { transform: scale(1.02); box-shadow: 0 12px 24px rgba(16,24,40,.12); }
-  .cc-kpi.zoom-card:hover { transform: scale(1.03); }
+  .home-modern {
+    --hm-text: #0f172a;
+    --hm-muted: #64748b;
+    --hm-border: #e6ebf2;
+    --hm-shadow-sm: 0 8px 24px rgba(15, 23, 42, 0.08);
+    --hm-shadow-md: 0 14px 34px rgba(15, 23, 42, 0.12);
+    --hm-shadow-lg: 0 24px 56px rgba(15, 23, 42, 0.16);
+  }
+  .home-modern .card {
+    border-radius: 18px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  }
+  .home-modern .card-header {
+    border-bottom: 1px solid var(--hm-border) !important;
+    background: linear-gradient(180deg, rgba(255,255,255,.95) 0%, rgba(249,251,255,.95) 100%);
+    backdrop-filter: blur(8px);
+  }
+  .zoom-card { transition: transform .22s cubic-bezier(0.4,0,0.2,1), box-shadow .22s cubic-bezier(0.4,0,0.2,1); }
+  .zoom-card:hover { transform: translateY(-3px); box-shadow: var(--hm-shadow-md); }
+  .cc-kpi.zoom-card:hover { transform: translateY(-3px); }
+  .home-modern .cc-filter-bar { position: sticky; top: 6px; z-index: 20; }
+  .home-modern .btn.rounded-pill { border-radius: 999px !important; }
+  .home-modern .data-table-card table thead th {
+    position: sticky;
+    top: 0;
+    background: #f8fafc;
+    z-index: 2;
+  }
+  .home-modern .data-table-card .table-body { max-height: 430px; overflow: auto; }
+  .home-modern .cc-chart-card,
+  .home-modern .personal-performance-card {
+    border: 1px solid var(--hm-border);
+    box-shadow: var(--hm-shadow-sm);
+  }
+  .home-modern .cc-chart-card:hover,
+  .home-modern .personal-performance-card:hover { box-shadow: var(--hm-shadow-md); }
+  .home-modern .table-controls .form-control,
+  .home-modern .table-controls .form-select { border-color: #dce3ee; }
+  .home-modern .table-controls .form-control:focus,
+  .home-modern .table-controls .form-select:focus { box-shadow: 0 0 0 4px rgba(59,130,246,.15); border-color: #93c5fd; }
+  .home-modern .badge { letter-spacing: .01em; }
+  .home-modern .animate-fade-in { animation: hmFadeUp .45s ease-out both; }
+  @keyframes hmFadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   .avatar.avatar-sm .avatar-text { display:inline-block; width:28px; height:28px; border-radius:50%; background:#eef2ff; color:#4f46e5; font-weight:700; line-height:28px; text-align:center; }
   .personal-performance-card { background:#ffffff; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 12px 32px rgba(16,24,40,.12); overflow:hidden; color:#111827; }
   .personal-performance-card .performance-header { border-bottom: 1px solid #f1f5f9; }
@@ -30,7 +70,7 @@ Dashboard
       : 'All Years';
   @endphp
 
-  <section class="content">
+  <section class="content ux-unified home-modern">
     <div class="card border-0 shadow-lg">
       <div class="card-header bg-white border-0 py-4">
         <div class="d-flex justify-content-between align-items-center">
@@ -82,6 +122,10 @@ Dashboard
                 <i class="fas fa-undo me-1"></i>
                 Reset
               </a>
+              <button type="button" id="homeHardRefresh" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+                <i class="fas fa-sync-alt me-1"></i>
+                Hard Refresh
+              </button>
             </div>
           </form>
         </div>
@@ -318,18 +362,7 @@ Dashboard
               <p class="text-muted mb-0">Latest fault reports and updates</p>
             </div>
             <div class="table-controls">
-              <div class="d-flex flex-wrap gap-2 align-items-center">
-                <div class="input-group input-group-sm" style="width: 260px;">
-                  <span class="input-group-text"><i class="fas fa-search"></i></span>
-                  <input type="text" class="form-control" id="recentFaultsSearch" placeholder="Search recent activity">
-                </div>
-                <select class="form-select form-select-sm" id="recentFaultsStatusFilter" style="width: 220px;">
-                  <option value="all" selected>All statuses</option>
-                  @foreach(($allStatuses ?? []) as $st)
-                    <option value="{{ $st->id }}">{{ $st->description }}</option>
-                  @endforeach
-                </select>
-              </div>
+
               <!-- <button class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-refresh me-1"></i>Refresh
               </button> -->
@@ -504,6 +537,11 @@ Dashboard
      data-monthly-counts='@json($monthlyCounts ?? [])'
      data-status-labels='@json($statusLabels ?? [])'
      data-status-values='@json($statusValues ?? [])'
+     data-status-options='@json(($allStatuses ?? collect())->map(fn($s)=>["id"=>$s->id,"description"=>$s->description])->values())'
+     data-selected-year='@json($selectedYear ?? null)'
+     data-selected-month='@json($selectedMonth ?? null)'
+     data-faults-url='{{ route('faults.index') }}'
+     data-reports-url='{{ route('dashboard.reports') }}'
      data-tech-labels='@json($techNames ?? [])'
      data-tech-values='@json($techSecs ?? [])'
      data-top-customer-labels='@json($topCustomerLabels ?? [])'
@@ -543,11 +581,20 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   // KPI Card animations
-  const kpiCards = document.querySelectorAll('.kpi-card');
+  const kpiCards = document.querySelectorAll('.cc-kpi, .cc-chart-card, .personal-performance-card');
   kpiCards.forEach((card, index) => {
     card.style.animationDelay = `${index * 0.1}s`;
     card.classList.add('animate-fade-in');
   });
+
+  const hardRefreshBtn = document.getElementById('homeHardRefresh');
+  if (hardRefreshBtn) {
+    hardRefreshBtn.addEventListener('click', function () {
+      const url = new URL(window.location.href);
+      url.searchParams.set('_hr', String(Date.now()));
+      window.location.replace(url.toString());
+    });
+  }
   
   // Search functionality
   const techSearch = document.getElementById('techSearch');
