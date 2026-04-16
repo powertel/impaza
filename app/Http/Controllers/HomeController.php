@@ -202,6 +202,8 @@ class HomeController extends Controller
         $statusLabels = $statusRows->pluck('name')->map(fn($n)=>$n ?? 'Unknown')->values()->toArray();
         $statusValues = $statusRows->pluck('c')->map(fn($x)=>(int)$x)->values()->toArray();
 
+        $allStatuses = DB::table('statuses')->orderBy('id')->get(['id','description']);
+
         // Top customers by fault count (for horizontal bars)
         $topCustQuery = DB::table('faults')
             ->leftJoin('customers','faults.customer_id','=','customers.id')
@@ -222,6 +224,9 @@ class HomeController extends Controller
 
         // Dashboard metrics (permission-gated in view)
         $nocClearedId = (int)(DB::table('statuses')->where('status_code','CLN')->value('id') ?? 6);
+        $waitingAssessmentId = (int)(DB::table('statuses')->where('status_code','WAS')->value('id') ?? 1);
+        $rectificationId = (int)(DB::table('statuses')->where('status_code','RTN')->value('id') ?? 3);
+        $popImpactId = (int)(DB::table('statuses')->where('status_code','POI')->value('id') ?? 0);
 
         $openFaultsQuery = DB::table('faults')
             ->where('status_id','!=',$nocClearedId);
@@ -235,7 +240,7 @@ class HomeController extends Controller
         $openFaultsCount = $openFaultsQuery->count();
 
         $inProgressFaultsQuery = DB::table('faults')
-            ->where('status_id','!=',$nocClearedId);
+            ->where('status_id','=', $rectificationId);
         if ($selectedRegion !== null) {
             $inProgressFaultsQuery->leftJoin('cities','faults.city_id','=','cities.id')
                                   ->where('cities.region','=',$selectedRegion);
@@ -263,6 +268,31 @@ class HomeController extends Controller
         }
         $todayFaultsQuery->whereDate('faults.created_at', Carbon::today());
         $todayFaultsCount = $todayFaultsQuery->count();
+
+        $waitingAssessmentQuery = DB::table('faults')->where('status_id', '=', $waitingAssessmentId);
+        if ($selectedRegion !== null) {
+            $waitingAssessmentQuery->leftJoin('cities','faults.city_id','=','cities.id')
+                                   ->where('cities.region','=',$selectedRegion);
+        }
+        if ($fromDate && $toDate) {
+            $waitingAssessmentQuery->whereBetween('faults.created_at', [$fromDate, $toDate]);
+        }
+        $waitingAssessmentCount = $waitingAssessmentQuery->count();
+
+        $popImpactQuery = DB::table('faults');
+        if ($popImpactId > 0) {
+            $popImpactQuery->where('status_id', '=', $popImpactId);
+        } else {
+            $popImpactQuery->whereRaw('1=0');
+        }
+        if ($selectedRegion !== null) {
+            $popImpactQuery->leftJoin('cities','faults.city_id','=','cities.id')
+                           ->where('cities.region','=',$selectedRegion);
+        }
+        if ($fromDate && $toDate) {
+            $popImpactQuery->whereBetween('faults.created_at', [$fromDate, $toDate]);
+        }
+        $popImpactCount = $popImpactQuery->count();
 
         $openFaultCreatedAts = (clone $openFaultsQuery)->pluck('faults.created_at');
 
@@ -330,7 +360,9 @@ class HomeController extends Controller
             'myAssignedCount','myResolvedCount','myAvgResolutionSec','myCompletionRate',
             'monthlyLabels','monthlyCounts','statusLabels','statusValues',
             'topCustomerLabels','topCustomerCounts',
-            'availableRegions','selectedRegion'
+            'availableRegions','selectedRegion',
+            'nocClearedId','waitingAssessmentId','rectificationId','popImpactId','waitingAssessmentCount','popImpactCount',
+            'allStatuses'
         ));
     }
 }

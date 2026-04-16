@@ -90,6 +90,7 @@ Dashboard
   <div class="px-4 py-4 bg-gradient-to-r from-gray-50 to-white">
     <div class="row g-4 mb-4">
       <div class="col-xxl-3 col-lg-3 col-md-3 col-sm-6 col-6">
+        <a href="{{ route('faults.index') }}" class="text-decoration-none">
         <div class="cc-kpi cc-kpi--blue cc-kpi--compact h-100 zoom-card">
           <div class="cc-kpi-head">
             <div class="cc-kpi-icon"><i class="fas fa-exclamation-triangle"></i></div>
@@ -98,8 +99,10 @@ Dashboard
           <div class="cc-kpi-value">{{ number_format($faultCount ?? 0) }}</div>
           <div class="cc-kpi-sub">Current overview</div>
         </div>
+        </a>
       </div>
       <div class="col-xxl-3 col-lg-3 col-md-3 col-sm-6 col-6">
+        <a href="{{ route('faults.index', ['status' => (int)($rectificationId ?? 3)]) }}" class="text-decoration-none">
         <div class="cc-kpi cc-kpi--green cc-kpi--compact h-100 zoom-card">
           <div class="cc-kpi-head">
             <div class="cc-kpi-icon"><i class="fas fa-tasks"></i></div>
@@ -108,8 +111,10 @@ Dashboard
           <div class="cc-kpi-value">{{ number_format($inProgressFaultsCount ?? 0) }}</div>
           <div class="cc-kpi-sub">Current overview</div>
         </div>
+        </a>
       </div>
       <div class="col-xxl-3 col-lg-3 col-md-3 col-sm-6 col-6">
+        <a href="{{ route('faults.index', ['status' => (int)($nocClearedId ?? 6)]) }}" class="text-decoration-none">
         <div class="cc-kpi cc-kpi--indigo cc-kpi--compact h-100 zoom-card">
           <div class="cc-kpi-head">
             <div class="cc-kpi-icon"><i class="fas fa-check-circle"></i></div>
@@ -118,9 +123,11 @@ Dashboard
           <div class="cc-kpi-value">{{ number_format($resolvedFaultsCount ?? 0) }}</div>
           <div class="cc-kpi-sub">Current overview</div>
         </div>
+        </a>
       </div>
       
       <div class="col-xxl-3 col-lg-3 col-md-3 col-sm-6 col-6">
+        <a href="{{ route('faults.index', ['age' => 'today']) }}" class="text-decoration-none">
         <div class="cc-kpi cc-kpi--slate cc-kpi--compact h-100 zoom-card">
           <div class="cc-kpi-head">
             <div class="cc-kpi-icon"><i class="fas fa-calendar-day"></i></div>
@@ -129,8 +136,31 @@ Dashboard
           <div class="cc-kpi-value">{{ number_format($todayFaultsCount ?? 0) }}</div>
           <div class="cc-kpi-sub">Current overview</div>
         </div>
+        </a>
       </div>
      
+    </div>
+  </div>
+
+  <div class="px-4 pb-4">
+    <div class="d-flex flex-wrap gap-2">
+      <a href="{{ route('faults.index', ['status' => 'lt4']) }}" class="btn btn-sm btn-outline-dark rounded-pill">
+        Open <span class="badge bg-dark ms-1">{{ (int)($openFaultsCount ?? 0) }}</span>
+      </a>
+      <a href="{{ route('faults.index', ['status' => (int)($waitingAssessmentId ?? 1)]) }}" class="btn btn-sm btn-outline-danger rounded-pill">
+        Waiting Assessment <span class="badge bg-danger ms-1">{{ (int)($waitingAssessmentCount ?? 0) }}</span>
+      </a>
+      <a href="{{ route('faults.index', ['status' => (int)($rectificationId ?? 3)]) }}" class="btn btn-sm btn-outline-warning rounded-pill">
+        Under Rectification <span class="badge bg-warning text-dark ms-1">{{ (int)($inProgressFaultsCount ?? 0) }}</span>
+      </a>
+      @if(!empty($popImpactId))
+      <a href="{{ route('faults.index', ['status' => (int)$popImpactId]) }}" class="btn btn-sm btn-outline-primary rounded-pill">
+        POP Impacted <span class="badge bg-primary ms-1">{{ (int)($popImpactCount ?? 0) }}</span>
+      </a>
+      @endif
+      <a href="{{ route('faults.index', ['status' => (int)($nocClearedId ?? 6)]) }}" class="btn btn-sm btn-outline-success rounded-pill">
+        Resolved <span class="badge bg-success ms-1">{{ (int)($resolvedFaultsCount ?? 0) }}</span>
+      </a>
     </div>
   </div>
 
@@ -288,6 +318,18 @@ Dashboard
               <p class="text-muted mb-0">Latest fault reports and updates</p>
             </div>
             <div class="table-controls">
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <div class="input-group input-group-sm" style="width: 260px;">
+                  <span class="input-group-text"><i class="fas fa-search"></i></span>
+                  <input type="text" class="form-control" id="recentFaultsSearch" placeholder="Search recent activity">
+                </div>
+                <select class="form-select form-select-sm" id="recentFaultsStatusFilter" style="width: 220px;">
+                  <option value="all" selected>All statuses</option>
+                  @foreach(($allStatuses ?? []) as $st)
+                    <option value="{{ $st->id }}">{{ $st->description }}</option>
+                  @endforeach
+                </select>
+              </div>
               <!-- <button class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-refresh me-1"></i>Refresh
               </button> -->
@@ -307,9 +349,15 @@ Dashboard
                 </thead>
                 <tbody>
                   @forelse(($recentFaults ?? []) as $fault)
+                  @php
+                    $rowStatusId = (int)($fault->status_id ?? 0);
+                    $rowStatus = trim((string)($fault->status_description ?? ''));
+                  @endphp
                   <tr>
                     <td>
-                      <span class="fw-bold text-primary">{{ $fault->fault_ref_number }}</span>
+                      <a href="{{ route('faults.index', ['q' => $fault->fault_ref_number]) }}" class="fw-bold text-primary text-decoration-none">
+                        {{ $fault->fault_ref_number }}
+                      </a>
                     </td>
                     <td>{{ Str::limit($fault->customer ?? 'N/A', 20) }}</td>
                     <td class="{{ $fault->assignedTo ? 'fw-bold' : 'text-muted' }}">{{ $fault->assignedTo ?: 'Not yet assigned' }}</td>
@@ -319,9 +367,11 @@ Dashboard
                         $statusLabel = $desc !== '' ? $desc : 'Unknown';
                         $color = \App\Models\Status::STATUS_COLOR[$statusLabel] ?? '#6c757d';
                       @endphp
-                      <span class="badge rounded-pill" style="background-color: {{ $color }}; color: black; padding: 0.4rem 0.65rem; font-weight: 600;">
-                        {{ $statusLabel }}
-                      </span>
+                      <a href="{{ route('faults.index', ['status' => $rowStatusId]) }}" class="text-decoration-none">
+                        <span class="badge rounded-pill recent-fault-status" data-status-id="{{ $rowStatusId }}" data-status="{{ $rowStatus }}" style="background-color: {{ $color }}; color: black; padding: 0.4rem 0.65rem; font-weight: 600;">
+                          {{ $statusLabel }}
+                        </span>
+                      </a>
                     </td>
                     <td>
                       <small class="text-muted">{{ \Carbon\Carbon::parse($fault->updated_at)->diffForHumans() }}</small>
@@ -344,6 +394,31 @@ Dashboard
      
     </div>
   </div>
+
+  <script>
+    (function () {
+      function norm(v) {
+        return String(v || '').toLowerCase().trim();
+      }
+      function applyRecentFilters() {
+        var q = norm(document.getElementById('recentFaultsSearch')?.value);
+        var statusVal = String(document.getElementById('recentFaultsStatusFilter')?.value || 'all');
+        var rows = document.querySelectorAll('.data-table-card table tbody tr');
+        rows.forEach(function (row) {
+          var cells = row.querySelectorAll('td');
+          if (!cells || cells.length < 5) return;
+          var hay = norm(row.innerText);
+          var badge = row.querySelector('.recent-fault-status');
+          var sid = badge ? String(badge.getAttribute('data-status-id') || '') : '';
+          var okQ = q === '' || hay.indexOf(q) !== -1;
+          var okS = statusVal === 'all' || sid === statusVal;
+          row.style.display = (okQ && okS) ? '' : 'none';
+        });
+      }
+      document.getElementById('recentFaultsSearch')?.addEventListener('input', applyRecentFilters);
+      document.getElementById('recentFaultsStatusFilter')?.addEventListener('change', applyRecentFilters);
+    })();
+  </script>
 
   @can('my-fault-list')
   <div class="px-4 pb-4">
