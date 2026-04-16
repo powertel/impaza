@@ -362,18 +362,7 @@ Dashboard
               <p class="text-muted mb-0">Latest fault reports and updates</p>
             </div>
             <div class="table-controls">
-              <div class="d-flex flex-wrap gap-2 align-items-center">
-                <div class="input-group input-group-sm" style="width: 260px;">
-                  <span class="input-group-text"><i class="fas fa-search"></i></span>
-                  <input type="text" class="form-control" id="recentFaultsSearch" placeholder="Search recent activity">
-                </div>
-                <select class="form-select form-select-sm" id="recentFaultsStatusFilter" style="width: 220px;">
-                  <option value="all" selected>All statuses</option>
-                  @foreach(($allStatuses ?? []) as $st)
-                    <option value="{{ $st->id }}">{{ $st->description }}</option>
-                  @endforeach
-                </select>
-              </div>
+
               <!-- <button class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-refresh me-1"></i>Refresh
               </button> -->
