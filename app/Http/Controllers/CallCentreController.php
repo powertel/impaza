@@ -89,6 +89,14 @@ class CallCentreController extends Controller
         $newFaultsTotal = Fault::whereBetween('created_at', [$periodStart, $periodEnd])
             ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
             ->count();
+        $directFaultsTotal = Fault::whereBetween('created_at', [$periodStart, $periodEnd])
+            ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+            ->whereNull('root_fault_id')
+            ->count();
+        $popImpactedFaultsTotal = Fault::whereBetween('created_at', [$periodStart, $periodEnd])
+            ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+            ->whereNotNull('root_fault_id')
+            ->count();
         $clearedStatusId = (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
         $latestClearedInPeriod = DB::table('fault_stage_logs')
             ->where('status_id', $clearedStatusId)
@@ -118,6 +126,8 @@ class CallCentreController extends Controller
         }
 
         $weeklyNewFaults = [];
+        $weeklyNewFaultsDirect = [];
+        $weeklyNewFaultsPop = [];
         $weeklyResolved = [];
         $weeklyOutstanding = [];
         $weeklyResolved3DaysPerc = [];
@@ -156,6 +166,14 @@ class CallCentreController extends Controller
                 ->count();
             $weeklyNewFaults[] = Fault::whereBetween('created_at', [$ws,$weEff])
                 ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                ->count();
+            $weeklyNewFaultsDirect[] = Fault::whereBetween('created_at', [$ws,$weEff])
+                ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                ->whereNull('root_fault_id')
+                ->count();
+            $weeklyNewFaultsPop[] = Fault::whereBetween('created_at', [$ws,$weEff])
+                ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                ->whereNotNull('root_fault_id')
                 ->count();
             $latestInWeek = DB::table('fault_stage_logs')
                 ->where('status_id', $clearedStatusId)
@@ -319,6 +337,8 @@ class CallCentreController extends Controller
         $assignmentsInRange = collect();
         $dailyLabels = [];
         $dailyNewFaults = [];
+        $dailyNewFaultsDirect = [];
+        $dailyNewFaultsPop = [];
         $dailyResolved = [];
         $dailyOutstanding = [];
         $dailyResolved3DaysPerc = [];
@@ -339,6 +359,14 @@ class CallCentreController extends Controller
                 $dailyLabels[] = $ds;
                 $dailyNewFaults[] = Fault::whereBetween('created_at', [$dayStart, $dayEnd])
                     ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->count();
+                $dailyNewFaultsDirect[] = Fault::whereBetween('created_at', [$dayStart, $dayEnd])
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->whereNull('root_fault_id')
+                    ->count();
+                $dailyNewFaultsPop[] = Fault::whereBetween('created_at', [$dayStart, $dayEnd])
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->whereNotNull('root_fault_id')
                     ->count();
                 $resolvedIdsUpToStart = DB::table('fault_stage_logs')
                     ->where('status_id',$clearedStatusId)
@@ -414,6 +442,8 @@ class CallCentreController extends Controller
         $monthlyLabels = [];
         $monthlyOpening = [];
         $monthlyNewFaults = [];
+        $monthlyNewFaultsDirect = [];
+        $monthlyNewFaultsPop = [];
         $monthlyResolved = [];
         $monthlyOutstanding = [];
         $monthlyTotals = [];
@@ -442,6 +472,14 @@ class CallCentreController extends Controller
                     ->count();
                 $newMonth = Fault::whereBetween('created_at', [$ms,$me])
                     ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->count();
+                $monthlyNewFaultsDirect[] = Fault::whereBetween('created_at', [$ms,$me])
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->whereNull('root_fault_id')
+                    ->count();
+                $monthlyNewFaultsPop[] = Fault::whereBetween('created_at', [$ms,$me])
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->whereNotNull('root_fault_id')
                     ->count();
                 $latestClearedInMonth = \DB::table('fault_stage_logs')
                     ->where('status_id', $clearedStatusId)
@@ -507,6 +545,8 @@ class CallCentreController extends Controller
         $monthlyActiveLabels = [];
         $monthlyOpeningActive = [];
         $monthlyNewFaultsActive = [];
+        $monthlyNewFaultsDirectActive = [];
+        $monthlyNewFaultsPopActive = [];
         $monthlyResolvedActive = [];
         $monthlyOutstandingActive = [];
         $monthlyTotalsActive = [];
@@ -525,6 +565,8 @@ class CallCentreController extends Controller
                     $monthlyActiveLabels[] = $ml;
                     $monthlyOpeningActive[] = $open;
                     $monthlyNewFaultsActive[] = $new;
+                    $monthlyNewFaultsDirectActive[] = (int)($monthlyNewFaultsDirect[$i] ?? 0);
+                    $monthlyNewFaultsPopActive[] = (int)($monthlyNewFaultsPop[$i] ?? 0);
                     $monthlyResolvedActive[] = $res;
                     $monthlyOutstandingActive[] = $out;
                     $monthlyTotalsActive[] = (int)($monthlyTotals[$i] ?? ($open + $new));
@@ -536,7 +578,8 @@ class CallCentreController extends Controller
             }
         }
 
-        return view('call_centre.reports', [
+        return response()
+            ->view('call_centre.reports', [
             'filter' => $filter,
             'availableRegions' => $availableRegions,
             'selectedRegion' => $selectedRegion,
@@ -547,9 +590,13 @@ class CallCentreController extends Controller
             'periodStart' => $periodStart,
             'periodEnd' => $periodEnd,
             'newFaultsTotal' => $newFaultsTotal,
+            'directFaultsTotal' => $directFaultsTotal,
+            'popImpactedFaultsTotal' => $popImpactedFaultsTotal,
             'resolvedTotal' => $resolvedTotal,
             'weeklyLabels' => $weeklyLabels,
             'weeklyNewFaults' => $weeklyNewFaults,
+            'weeklyNewFaultsDirect' => $weeklyNewFaultsDirect,
+            'weeklyNewFaultsPop' => $weeklyNewFaultsPop,
             'weeklyResolved' => $weeklyResolved,
             'weeklyOutstanding' => $weeklyOutstanding,
             'weeklyResolved3DaysPerc' => $weeklyResolved3DaysPerc,
@@ -562,6 +609,8 @@ class CallCentreController extends Controller
                 'periodLabelText' => $periodLabelText,
                 'dailyLabels' => $dailyLabels,
                 'dailyNewFaults' => $dailyNewFaults,
+                'dailyNewFaultsDirect' => $dailyNewFaultsDirect,
+                'dailyNewFaultsPop' => $dailyNewFaultsPop,
                 'dailyResolved' => $dailyResolved,
                 'dailyOutstanding' => $dailyOutstanding,
                 'dailyResolved3DaysPerc' => $dailyResolved3DaysPerc,
@@ -580,6 +629,8 @@ class CallCentreController extends Controller
                 'monthlyLabels' => $monthlyLabels,
                 'monthlyOpening' => $monthlyOpening,
                 'monthlyNewFaults' => $monthlyNewFaults,
+                'monthlyNewFaultsDirect' => $monthlyNewFaultsDirect,
+                'monthlyNewFaultsPop' => $monthlyNewFaultsPop,
                 'monthlyResolved' => $monthlyResolved,
                 'monthlyOutstanding' => $monthlyOutstanding,
                 'monthlyTotals' => $monthlyTotals,
@@ -590,6 +641,8 @@ class CallCentreController extends Controller
                 'monthlyActiveLabels' => $monthlyActiveLabels,
                 'monthlyOpeningActive' => $monthlyOpeningActive,
                 'monthlyNewFaultsActive' => $monthlyNewFaultsActive,
+                'monthlyNewFaultsDirectActive' => $monthlyNewFaultsDirectActive,
+                'monthlyNewFaultsPopActive' => $monthlyNewFaultsPopActive,
                 'monthlyResolvedActive' => $monthlyResolvedActive,
                 'monthlyOutstandingActive' => $monthlyOutstandingActive,
                 'monthlyTotalsActive' => $monthlyTotalsActive,
@@ -597,6 +650,9 @@ class CallCentreController extends Controller
                 'monthlyShiftMorningActive' => $monthlyShiftMorningActive,
                 'monthlyShiftAfternoonActive' => $monthlyShiftAfternoonActive,
                 'monthlyShiftNightActive' => $monthlyShiftNightActive,
-        ]);
+        ])
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 }

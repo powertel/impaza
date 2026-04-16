@@ -177,6 +177,62 @@
   }
   function barPointColors(values){ return (values || []).map(function(_,i){ return weekColors[i % weekColors.length]; }); }
 
+  if (has('chartCategorySplit')) {
+    new Chart(el('chartCategorySplit'), {
+      type: 'pie',
+      data: {
+        labels: (data.categoryLabels || ['Direct Faults', 'POP Impacted Faults']),
+        datasets: [{
+          data: (data.categoryValues || [0, 0]),
+          backgroundColor: [colors.blue, colors.green],
+          borderColor: '#ffffff',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 10 } },
+          tooltip: { backgroundColor: 'rgba(31,41,55,0.95)', titleColor: '#fff', bodyColor: '#fff', cornerRadius: 10 }
+        }
+      }
+    });
+  }
+
+  if (has('chartCategoryTrend')) {
+    var labelsCat = isYear ? monthsOrdered() : (isWeekRange ? (data.dailyLabels || []) : (data.weeklyLabels || []));
+    var directCat = isYear
+      ? reorderMonthlyValues((data.monthlyLabels || []), (data.monthlyNewFaultsDirect || []))
+      : (isWeekRange ? (data.dailyNewFaultsDirect || []) : (data.weeklyNewFaultsDirect || []));
+    var popCat = isYear
+      ? reorderMonthlyValues((data.monthlyLabels || []), (data.monthlyNewFaultsPop || []))
+      : (isWeekRange ? (data.dailyNewFaultsPop || []) : (data.weeklyNewFaultsPop || []));
+
+    new Chart(el('chartCategoryTrend'), {
+      type: 'bar',
+      data: {
+        labels: labelsCat,
+        datasets: [
+          { label: 'Direct Faults', data: directCat, backgroundColor: hexToRGBA(colors.blue, 0.85), borderColor: colors.blue, borderWidth: 2, borderRadius: 8 },
+          { label: 'POP Impacted Faults', data: popCat, backgroundColor: hexToRGBA(colors.green, 0.8), borderColor: colors.green, borderWidth: 2, borderRadius: 8 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true, position: 'top', labels: { usePointStyle: true, boxWidth: 10 } },
+          tooltip: { backgroundColor: 'rgba(31,41,55,0.95)', titleColor: '#fff', bodyColor: '#fff', cornerRadius: 10 }
+        },
+        scales: {
+          x: { stacked: true, grid: { display: false }, ticks: { color: ticksColor } },
+          y: { stacked: true, beginAtZero: true, grid: { color: gridColor, drawBorder: false }, ticks: { color: ticksColor, callback: function(v){ return formatNumber(v); } } }
+        }
+      }
+    });
+  }
+
   if (has('chartWeeklyNewSingle')) {
     var lblsNew = isYear ? monthsOrdered() : (isWeekRange ? (data.dailyLabels || []) : (data.weeklyLabels || []));
     var valsNew = isYear ? reorderMonthlyValues((data.monthlyLabels || []), (data.monthlyNewFaults || [])) : (isWeekRange ? (data.dailyNewFaults || []) : (data.weeklyNewFaults || []));
