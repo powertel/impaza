@@ -241,7 +241,9 @@ class CallCentreController extends Controller
             if ($resolvedAt) { $resolvedRows->push((object)['created_at' => $f->created_at, 'resolved_at' => $resolvedAt]); }
         }
         $bins = [
-            '0_24h' => 0,
+            '0_6h' => 0,
+            '6_12h' => 0,
+            '12_24h' => 0,
             '24_48h' => 0,
             '48_72h' => 0,
             '4_7' => 0,
@@ -253,7 +255,9 @@ class CallCentreController extends Controller
         ];
         foreach ($resolvedRows as $r) {
             $m = Carbon::parse($r->created_at)->diffInMinutes(Carbon::parse($r->resolved_at));
-            if ($m <= 1440) $bins['0_24h']++;
+            if ($m <= 360) $bins['0_6h']++;
+            elseif ($m <= 720) $bins['6_12h']++;
+            elseif ($m <= 1440) $bins['12_24h']++;
             elseif ($m <= 2880) $bins['24_48h']++;
             elseif ($m <= 4320) $bins['48_72h']++;
             elseif ($m <= 10080) $bins['4_7']++;
@@ -289,7 +293,9 @@ class CallCentreController extends Controller
             ->get(['id','created_at']);
         $outstandingTotal = $outstandingFaults->count();
         $outBins = [
-            '0_24h' => 0,
+            '0_6h' => 0,
+            '6_12h' => 0,
+            '12_24h' => 0,
             '24_48h' => 0,
             '48_72h' => 0,
             '4_7' => 0,
@@ -302,8 +308,12 @@ class CallCentreController extends Controller
         $over3DaysCount = 0;
         foreach ($outstandingFaults as $f) {
             $mOpen = Carbon::parse($f->created_at)->diffInMinutes($effectiveEnd);
-            if ($mOpen <= 1440) {
-                $outBins['0_24h']++;
+            if ($mOpen <= 360) {
+                $outBins['0_6h']++;
+            } elseif ($mOpen <= 720) {
+                $outBins['6_12h']++;
+            } elseif ($mOpen <= 1440) {
+                $outBins['12_24h']++;
             } elseif ($mOpen <= 2880) {
                 $outBins['24_48h']++;
             } elseif ($mOpen <= 4320) {
