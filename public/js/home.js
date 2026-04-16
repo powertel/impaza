@@ -17,10 +17,27 @@
     const monthlyCounts = JSON.parse(homeDataEl.dataset.monthlyCounts || '[]');
     const statusLabels = JSON.parse(homeDataEl.dataset.statusLabels || '[]');
     const statusValues = JSON.parse(homeDataEl.dataset.statusValues || '[]');
+    const statusOptions = JSON.parse(homeDataEl.dataset.statusOptions || '[]');
+    const selectedYear = JSON.parse(homeDataEl.dataset.selectedYear || 'null');
+    const selectedMonth = JSON.parse(homeDataEl.dataset.selectedMonth || 'null');
+    const faultsUrl = String(homeDataEl.dataset.faultsUrl || '/faults');
+    const reportsUrl = String(homeDataEl.dataset.reportsUrl || '/dashboard/reports');
     const techLabels = JSON.parse(homeDataEl.dataset.techLabels || '[]');
     const techValues = JSON.parse(homeDataEl.dataset.techValues || '[]');
     const topCustomerLabels = JSON.parse(homeDataEl.dataset.topCustomerLabels || '[]');
     const topCustomerValues = JSON.parse(homeDataEl.dataset.topCustomerValues || '[]');
+
+    const statusLabelToId = new Map();
+    if (Array.isArray(statusOptions)) {
+      statusOptions.forEach(s => {
+        if (!s) return;
+        const id = Number(s.id);
+        const desc = String(s.description || '').trim();
+        if (!Number.isNaN(id) && id > 0 && desc) {
+          statusLabelToId.set(desc, id);
+        }
+      });
+    }
 
     // Set Chart.js defaults for modern look
     Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
@@ -45,7 +62,7 @@
     // Monthly Trends Chart (Line Chart)
     const monthlyTrendsCtx = document.getElementById('monthlyTrendsChart');
     if (monthlyTrendsCtx) {
-      new Chart(monthlyTrendsCtx, {
+      const monthlyChart = new Chart(monthlyTrendsCtx, {
         type: 'line',
         data: {
           labels: monthlyLabels,
@@ -116,6 +133,20 @@
               }
             }
           }
+        },
+        onClick: function (_evt, elements) {
+          if (!elements || !elements.length) return;
+          const idx = elements[0].index;
+          const monthNumber = idx + 1;
+          const year = (selectedYear !== null && selectedYear !== 'all') ? Number(selectedYear) : null;
+          if (!year || Number.isNaN(year)) {
+            window.location.href = reportsUrl;
+            return;
+          }
+          const url = new URL(reportsUrl, window.location.origin);
+          url.searchParams.set('year', String(year));
+          url.searchParams.set('month', String(monthNumber));
+          window.location.href = url.toString();
         }
       });
     }
@@ -171,6 +202,16 @@
               }
             }
           }
+        },
+        onClick: function (_evt, elements) {
+          if (!elements || !elements.length) return;
+          const idx = elements[0].index;
+          const label = String((statusChart.data.labels || [])[idx] || '').trim();
+          const statusId = statusLabelToId.get(label);
+          if (!statusId) return;
+          const url = new URL(faultsUrl, window.location.origin);
+          url.searchParams.set('status', String(statusId));
+          window.location.href = url.toString();
         }
       });
 
@@ -189,10 +230,10 @@
         const rightItems = items.slice(midpoint);
 
         const renderColumn = list => list.map(item => (
-          '<div class="d-flex align-items-center mb-1">' +
+          '<button type="button" class="btn btn-link p-0 d-flex align-items-center mb-1 status-legend-item" data-status-label="' + item.label.replace(/"/g, '&quot;') + '" style="text-decoration:none;">' +
             '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + item.color + ';margin-right:8px;"></span>' +
             '<span style="font-size:13px;color:#4a5568;">' + item.label + '</span>' +
-          '</div>'
+          '</button>'
         )).join('');
 
         legendContainer.innerHTML =
@@ -200,6 +241,17 @@
             '<div class="me-3 flex-grow-1">' + renderColumn(leftItems) + '</div>' +
             '<div class="flex-grow-1 text-end">' + renderColumn(rightItems) + '</div>' +
           '</div>';
+
+        legendContainer.addEventListener('click', function (e) {
+          const btn = e.target.closest('.status-legend-item');
+          if (!btn) return;
+          const label = String(btn.getAttribute('data-status-label') || '').trim();
+          const statusId = statusLabelToId.get(label);
+          if (!statusId) return;
+          const url = new URL(faultsUrl, window.location.origin);
+          url.searchParams.set('status', String(statusId));
+          window.location.href = url.toString();
+        });
       }
     }
 
