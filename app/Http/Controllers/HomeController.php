@@ -130,7 +130,8 @@ class HomeController extends Controller
 
         $recentQuery = DB::table('faults')
             ->leftJoin('customers','faults.customer_id','=','customers.id')
-            ->leftJoin('links','faults.link_id','=','links.id');
+            ->leftJoin('links','faults.link_id','=','links.id')
+            ->leftJoin('statuses','faults.status_id','=','statuses.id');
         if ($selectedRegion !== null) {
             $recentQuery->leftJoin('cities','faults.city_id','=','cities.id')
                         ->where('cities.region','=',$selectedRegion);
@@ -144,7 +145,9 @@ class HomeController extends Controller
 			->leftjoin('users as reported_users','faults.user_id','=','reported_users.id')
             ->orderBy('faults.updated_at','desc')
             ->limit(10)
-            ->get(['faults.fault_ref_number','faults.status_id','customers.customer','links.link','faults.updated_at',                'assigned_users.name as assignedTo',
+            ->get(['faults.fault_ref_number','faults.status_id','customers.customer','links.link','faults.updated_at',
+                'statuses.status_code as status_code','statuses.description as status_description',
+                'assigned_users.name as assignedTo',
                 'reported_users.name as reportedBy',
                 'assessed_users.name as assessedBy']);
 
@@ -243,7 +246,7 @@ class HomeController extends Controller
         $inProgressFaultsCount = $inProgressFaultsQuery->count();
 
         $resolvedFaultsQuery = DB::table('faults')
-            ->where('status_id','=',6);
+            ->where('status_id','=', $nocClearedId);
         if ($selectedRegion !== null) {
             $resolvedFaultsQuery->leftJoin('cities','faults.city_id','=','cities.id')
                                 ->where('cities.region','=',$selectedRegion);
