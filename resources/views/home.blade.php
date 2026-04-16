@@ -315,11 +315,13 @@ Dashboard
                     <td class="{{ $fault->assignedTo ? 'fw-bold' : 'text-muted' }}">{{ $fault->assignedTo ?: 'Not yet assigned' }}</td>
                     <td>
                       @php
-                        $sid = (int)($fault->status_id ?? 0);
-                        $statusLabel = $sid < 4 ? 'In Progress' : ($sid === 6 ? 'Resolved' : 'Other');
-                        $badge = $sid < 4 ? 'bg-warning' : ($sid === 6 ? 'bg-success' : 'bg-secondary');
+                        $desc = trim((string)($fault->status_description ?? ''));
+                        $statusLabel = $desc !== '' ? $desc : 'Unknown';
+                        $color = \App\Models\Status::STATUS_COLOR[$statusLabel] ?? '#6c757d';
                       @endphp
-                      <span class="badge {{ $badge }}">{{ $statusLabel }}</span>
+                      <span class="badge rounded-pill" style="background-color: {{ $color }}; color: black; padding: 0.4rem 0.65rem; font-weight: 600;">
+                        {{ $statusLabel }}
+                      </span>
                     </td>
                     <td>
                       <small class="text-muted">{{ \Carbon\Carbon::parse($fault->updated_at)->diffForHumans() }}</small>
