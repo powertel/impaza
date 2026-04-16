@@ -6,7 +6,7 @@ Faults Analytics Dashboard
 
 @section('content')
 <link href="{{ asset('css/call_centre.css') }}?v={{ @filemtime(public_path('css/call_centre.css')) }}" rel="stylesheet">
-<section class="content">
+<section class="content ux-unified">
   <div class="card border-0 shadow-lg">
     <div class="card-header bg-white border-0 py-4">
       <div class="d-flex justify-content-between align-items-center">

@@ -1,3 +1,73 @@
+.ux-unified {
+  --ux-text: #0f172a;
+  --ux-muted: #64748b;
+  --ux-border: #e6ebf2;
+  --ux-bg-soft: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  --ux-shadow-sm: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --ux-shadow-md: 0 14px 34px rgba(15, 23, 42, 0.12);
+}
+
+.ux-unified .card {
+  border-radius: 18px;
+  background: var(--ux-bg-soft);
+}
+
+.ux-unified .card-header {
+  border-bottom: 1px solid var(--ux-border) !important;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 251, 255, 0.95) 100%);
+  backdrop-filter: blur(8px);
+}
+
+.ux-unified .cc-filter-bar {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--ux-border);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(10px);
+}
+
+.ux-unified .cc-field .form-select,
+.ux-unified .cc-field .form-control {
+  border-color: #dce3ee;
+  background: #fff;
+}
+
+.ux-unified .cc-field .form-select:focus,
+.ux-unified .cc-field .form-control:focus {
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+  border-color: #93c5fd;
+}
+
+.ux-unified .cc-kpi,
+.ux-unified .cc-chart-card,
+.ux-unified .cc-analysis-card,
+.ux-unified .personal-performance-card {
+  border: 1px solid var(--ux-border);
+  box-shadow: var(--ux-shadow-sm);
+}
+
+.ux-unified .cc-kpi:hover,
+.ux-unified .cc-chart-card:hover,
+.ux-unified .cc-analysis-card:hover,
+.ux-unified .personal-performance-card:hover {
+  box-shadow: var(--ux-shadow-md);
+}
+
+.ux-unified .btn {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ux-unified .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+}
+
+.ux-unified .btn:focus-visible,
+.ux-unified .form-select:focus-visible,
+.ux-unified .form-control:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+
 .content {
   --cc-bg: #f3f6fb;
   --cc-card-bg: #ffffff;
