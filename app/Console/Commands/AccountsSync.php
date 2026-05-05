@@ -20,7 +20,7 @@ class AccountsSync extends Command
 
     public function handle(AccountsSyncService $syncService): int
     {
-        $url = $this->option('url') ?: env('ACCOUNTS_SYNC_URL', 'http://192.168.15.248/api/v1/accounts');
+        $url = $this->option('url') ?: env('ACCOUNTS_SYNC_URL', 'http://192.168.15.246:8080/api/v1/accounts');
         $timeout = (int) $this->option('timeout');
         $interval = max(1, (int) $this->option('interval'));
         $loop = (bool) $this->option('loop');
