@@ -358,13 +358,94 @@
               </div>
             </div>
 
-            <div class="accordion-item border-0 shadow-sm">
+            <div class="accordion-item border-0 shadow-sm mb-3">
               <h2 class="accordion-header" id="lteSurveyAccHead6-{{ $survey->id }}">
                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#lteSurveyAcc6-{{ $survey->id }}" aria-expanded="false" aria-controls="lteSurveyAcc6-{{ $survey->id }}">
-                  <i class="fas fa-images me-2 text-primary"></i>Photos & Attachments
+                  <i class="fas fa-comments me-2 text-primary"></i>Remarks & Attachments
                 </button>
               </h2>
               <div id="lteSurveyAcc6-{{ $survey->id }}" class="accordion-collapse collapse" aria-labelledby="lteSurveyAccHead6-{{ $survey->id }}" data-bs-parent="#lteSurveyViewAcc-{{ $survey->id }}">
+                <div class="accordion-body">
+                  @php $remarkItems = collect($remarks ?? []); @endphp
+
+                  <div class="card border-0 shadow-sm rounded-3 mb-3">
+                    <div class="card-header bg-transparent border-0">
+                      <h6 class="mb-0 text-secondary"><i class="fas fa-plus-circle me-2 text-primary"></i>Add Remark</h6>
+                    </div>
+                    <div class="card-body">
+                      <form method="POST" action="{{ route('lte-site-surveys.remarks.store', $survey->id) }}" enctype="multipart/form-data" class="m-0">
+                        @csrf
+                        <div class="row g-2">
+                          <div class="col-12">
+                            <label class="form-label">Remark</label>
+                            <textarea name="remark" class="form-control" rows="3" placeholder="Enter remark..." required></textarea>
+                          </div>
+                          <div class="col-12">
+                            <label class="form-label">Attachments (optional)</label>
+                            <input type="file" name="attachments[]" multiple class="form-control" accept="image/jpeg,image/png,image/gif,image/webp,application/pdf">
+                            <div class="form-text">You can attach images or a PDF.</div>
+                          </div>
+                          <div class="col-12 d-flex justify-content-end">
+                            <button type="submit" class="btn btn-outline-primary btn-sm">
+                              <i class="fas fa-paper-plane me-1"></i> Submit Remark
+                            </button>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+
+                  <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between">
+                      <h6 class="mb-0 text-secondary"><i class="fas fa-comments me-2 text-primary"></i>Recent Remarks</h6>
+                      <span class="badge bg-light text-dark border">{{ $remarkItems->count() }}</span>
+                    </div>
+                    <div class="card-body">
+                      @forelse($remarkItems as $r)
+                        @php
+                          $hasFile = !empty($r->file_path);
+                          $mime = (string) ($r->mime_type ?? '');
+                          $isImage = $hasFile && str_starts_with($mime, 'image/');
+                          $name = trim((string) ($r->original_name ?? ''));
+                        @endphp
+                        <div class="d-flex gap-3 py-3 border-top">
+                          <div class="flex-grow-1">
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                              <div class="fw-semibold">{{ $r->user_name ?? '-' }}</div>
+                              <span class="text-muted small">• {{ $r->created_at ? \Illuminate\Support\Carbon::parse($r->created_at)->format('Y-m-d H:i') : '-' }}</span>
+                            </div>
+                            <div class="mt-1">{{ $r->remark ?? '' }}</div>
+                            @if($hasFile)
+                              <div class="mt-2">
+                                @if($isImage)
+                                  <a href="{{ route('lte-site-surveys.remarks.file', $r->id) }}" target="_blank" class="d-inline-block text-decoration-none">
+                                    <img src="{{ route('lte-site-surveys.remarks.file', $r->id) }}" alt="" class="img-fluid rounded" style="max-height: 140px; object-fit: cover;">
+                                  </a>
+                                @else
+                                  <a href="{{ route('lte-site-surveys.remarks.file', $r->id) }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-paperclip me-1"></i> {{ $name !== '' ? $name : 'Open Attachment' }}
+                                  </a>
+                                @endif
+                              </div>
+                            @endif
+                          </div>
+                        </div>
+                      @empty
+                        <div class="text-center text-muted py-3">No remarks yet.</div>
+                      @endforelse
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item border-0 shadow-sm">
+              <h2 class="accordion-header" id="lteSurveyAccHead7-{{ $survey->id }}">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#lteSurveyAcc7-{{ $survey->id }}" aria-expanded="false" aria-controls="lteSurveyAcc7-{{ $survey->id }}">
+                  <i class="fas fa-images me-2 text-primary"></i>Photos & Attachments
+                </button>
+              </h2>
+              <div id="lteSurveyAcc7-{{ $survey->id }}" class="accordion-collapse collapse" aria-labelledby="lteSurveyAccHead7-{{ $survey->id }}" data-bs-parent="#lteSurveyViewAcc-{{ $survey->id }}">
                 <div class="accordion-body">
                   <div class="card border-0 shadow-sm rounded-3">
                     <div class="card-header bg-transparent border-0">
@@ -384,11 +465,11 @@
                                 @foreach($items as $ph)
                                   @php $isImage = str_starts_with((string)($ph->mime_type ?? ''), 'image/'); @endphp
                                   @if($isImage)
-                                    <a href="{{ asset('storage/' . $ph->file_path) }}" target="_blank" class="d-inline-block">
-                                      <img src="{{ asset('storage/' . $ph->file_path) }}" alt="" style="width:120px;height:90px;object-fit:cover;border-radius:10px;border:1px solid #e5e7eb;">
+                                    <a href="{{ route('lte-site-surveys.photos.file', $ph->id) }}" target="_blank" class="d-inline-block">
+                                      <img src="{{ route('lte-site-surveys.photos.file', $ph->id) }}" alt="" style="width:120px;height:90px;object-fit:cover;border-radius:10px;border:1px solid #e5e7eb;">
                                     </a>
                                   @else
-                                    <a href="{{ asset('storage/' . $ph->file_path) }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                    <a href="{{ route('lte-site-surveys.photos.file', $ph->id) }}" target="_blank" class="btn btn-outline-secondary btn-sm">
                                       <i class="fas fa-paperclip me-1"></i> Open Attachment
                                     </a>
                                   @endif

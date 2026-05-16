@@ -202,7 +202,7 @@ LTE Site Surveys
   </div>
 
   @foreach($surveys as $survey)
-    @include('lte_site_surveys.viewModal', ['survey' => $survey, 'photoLabels' => $photoLabels])
+    @include('lte_site_surveys.viewModal', ['survey' => $survey, 'photoLabels' => $photoLabels, 'remarks' => ($remarksBySurvey[$survey->id] ?? collect())])
     @include('lte_site_surveys.editModal', ['survey' => $survey, 'users' => $users, 'materials' => $materials, 'photoLabels' => $photoLabels])
   @endforeach
 

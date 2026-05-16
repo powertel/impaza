@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -50,11 +51,32 @@ class LteSiteSurveyController extends Controller
 
         $surveys = $query->paginate($perPage)->appends($request->only('q', 'status', 'per_page'));
 
+        $remarksBySurvey = collect();
+        $surveyIds = $surveys->getCollection()->pluck('id')->filter()->values();
+        if ($surveyIds->count()) {
+            $remarksRecords = DB::table('lte_site_survey_remarks')
+                ->leftJoin('users', 'lte_site_survey_remarks.user_id', '=', 'users.id')
+                ->whereIn('lte_site_survey_remarks.lte_site_survey_id', $surveyIds)
+                ->orderBy('lte_site_survey_remarks.created_at', 'desc')
+                ->get([
+                    'lte_site_survey_remarks.id',
+                    'lte_site_survey_remarks.lte_site_survey_id',
+                    'lte_site_survey_remarks.created_at',
+                    'lte_site_survey_remarks.remark',
+                    'lte_site_survey_remarks.file_path',
+                    'lte_site_survey_remarks.mime_type',
+                    'lte_site_survey_remarks.original_name',
+                    'users.name as user_name',
+                ]);
+
+            $remarksBySurvey = $remarksRecords->groupBy('lte_site_survey_id');
+        }
+
         $materials = $this->defaultMaterials();
         $photoLabels = $this->photoLabels();
         $users = User::query()->where('is_access', 0)->orderBy('name')->get(['id', 'name']);
 
-        return view('lte_site_surveys.index', compact('surveys', 'q', 'status', 'perPage', 'materials', 'photoLabels', 'users', 'stats'))
+        return view('lte_site_surveys.index', compact('surveys', 'q', 'status', 'perPage', 'materials', 'photoLabels', 'users', 'stats', 'remarksBySurvey'))
         ->with('i');
     }
 
@@ -385,6 +407,136 @@ class LteSiteSurveyController extends Controller
         }
 
         return redirect()->route('lte-site-surveys.index')->with('success', 'Survey updated.');
+    }
+
+    public function storeRemark(Request $request, LteSiteSurvey $lte_site_survey)
+    {
+        $user = $request->user();
+        if ((int) $lte_site_survey->user_id !== (int) optional($user)->id) {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'remark' => 'required|string|min:2|max:4000',
+            'attachments' => 'nullable|array',
+            'attachments.*' => 'nullable|file|mimetypes:image/jpeg,image/png,image/gif,image/webp,image/heic,image/heif,application/pdf',
+        ]);
+
+        $remarkText = trim((string) ($data['remark'] ?? ''));
+        $files = $request->file('attachments') ?: [];
+
+        DB::beginTransaction();
+        try {
+            if (is_array($files) && count($files)) {
+                foreach ($files as $file) {
+                    if (!$file) {
+                        continue;
+                    }
+                    $stored = $file->storePublicly('lte-site-survey-remarks', 'public');
+                    DB::table('lte_site_survey_remarks')->insert([
+                        'lte_site_survey_id' => $lte_site_survey->id,
+                        'user_id' => $user->id,
+                        'remark' => $remarkText,
+                        'file_path' => $stored,
+                        'mime_type' => $file->getClientMimeType(),
+                        'original_name' => $file->getClientOriginalName(),
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            } else {
+                DB::table('lte_site_survey_remarks')->insert([
+                    'lte_site_survey_id' => $lte_site_survey->id,
+                    'user_id' => $user->id,
+                    'remark' => $remarkText,
+                    'file_path' => null,
+                    'mime_type' => null,
+                    'original_name' => null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            $logRef = (string) Str::uuid();
+            Log::error('LTE site survey remark save failed', [
+                'ref' => $logRef,
+                'route' => optional($request->route())->getName(),
+                'user_id' => optional($user)->id,
+                'survey_id' => $lte_site_survey->id,
+                'ip' => $request->ip(),
+                'message' => $e->getMessage(),
+                'exception' => get_class($e),
+            ]);
+            Log::error($e);
+            return back()->withInput()->with('error', 'Failed to save remark. Ref: ' . $logRef);
+        }
+
+        return back()->with('success', 'Remark added.');
+    }
+
+    public function servePhoto(Request $request, LteSiteSurveyPhoto $photo)
+    {
+        $user = $request->user();
+        $survey = LteSiteSurvey::query()->find($photo->lte_site_survey_id);
+        if (!$survey) {
+            abort(404);
+        }
+        if ((int) $survey->user_id !== (int) optional($user)->id) {
+            abort(403);
+        }
+
+        $disk = Storage::disk('public');
+        $filePath = (string) ($photo->file_path ?? '');
+        if ($filePath === '' || !$disk->exists($filePath)) {
+            abort(404);
+        }
+
+        $safeName = trim((string) ($photo->original_name ?? ''));
+        if ($safeName === '') {
+            $safeName = basename($filePath);
+        }
+        $safeName = str_replace(["\r", "\n", '"'], '', $safeName);
+
+        return response()->file($disk->path($filePath), [
+            'Content-Type' => (string) ($photo->mime_type ?? 'application/octet-stream'),
+            'Content-Disposition' => 'inline; filename="' . $safeName . '"',
+        ]);
+    }
+
+    public function serveRemarkFile(Request $request, int $remark)
+    {
+        $user = $request->user();
+        $row = DB::table('lte_site_survey_remarks')->where('id', $remark)->first();
+        if (!$row) {
+            abort(404);
+        }
+
+        $survey = LteSiteSurvey::query()->find($row->lte_site_survey_id);
+        if (!$survey) {
+            abort(404);
+        }
+        if ((int) $survey->user_id !== (int) optional($user)->id) {
+            abort(403);
+        }
+
+        $disk = Storage::disk('public');
+        $filePath = (string) ($row->file_path ?? '');
+        if ($filePath === '' || !$disk->exists($filePath)) {
+            abort(404);
+        }
+
+        $safeName = trim((string) ($row->original_name ?? ''));
+        if ($safeName === '') {
+            $safeName = basename($filePath);
+        }
+        $safeName = str_replace(["\r", "\n", '"'], '', $safeName);
+
+        return response()->file($disk->path($filePath), [
+            'Content-Type' => (string) ($row->mime_type ?? 'application/octet-stream'),
+            'Content-Disposition' => 'inline; filename="' . $safeName . '"',
+        ]);
     }
 
     private function buildPayloadAndCoords(array $data, $user, ?LteSiteSurvey $existing)

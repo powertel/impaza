@@ -460,11 +460,11 @@
                             @foreach($items as $ph)
                               @php $isImage = str_starts_with((string)($ph->mime_type ?? ''), 'image/'); @endphp
                               @if($isImage)
-                                <a href="{{ asset('storage/' . $ph->file_path) }}" target="_blank" class="d-inline-block">
-                                  <img src="{{ asset('storage/' . $ph->file_path) }}" alt="" style="width:90px;height:68px;object-fit:cover;border-radius:10px;border:1px solid #e5e7eb;">
+                                <a href="{{ route('lte-site-surveys.photos.file', $ph->id) }}" target="_blank" class="d-inline-block">
+                                  <img src="{{ route('lte-site-surveys.photos.file', $ph->id) }}" alt="" style="width:90px;height:68px;object-fit:cover;border-radius:10px;border:1px solid #e5e7eb;">
                                 </a>
                               @else
-                                <a href="{{ asset('storage/' . $ph->file_path) }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                <a href="{{ route('lte-site-surveys.photos.file', $ph->id) }}" target="_blank" class="btn btn-outline-secondary btn-sm">
                                   <i class="fas fa-paperclip me-1"></i> Open
                                 </a>
                               @endif

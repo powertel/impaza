@@ -70,6 +70,9 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('/performance', [PerformanceController::class, 'index'])->name('performance.index');
     Route::resource('users', UserController::class);
     Route::resource('lte-site-surveys', LteSiteSurveyController::class)->only(['index', 'create', 'store', 'show', 'update']);
+    Route::post('lte-site-surveys/{lte_site_survey}/remarks', [LteSiteSurveyController::class, 'storeRemark'])->name('lte-site-surveys.remarks.store');
+    Route::get('lte-site-surveys/remarks/{remark}/file', [LteSiteSurveyController::class, 'serveRemarkFile'])->name('lte-site-surveys.remarks.file');
+    Route::get('lte-site-surveys/photos/{photo}', [LteSiteSurveyController::class, 'servePhoto'])->name('lte-site-surveys.photos.file');
     // Toggle user access (enable/disable)
     Route::patch('users/{user}/access', [UserController::class, 'updateAccess'])->name('users.access');
     // Admin change password for a specific user
