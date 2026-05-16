@@ -53,13 +53,34 @@
           <div class="tab-content">
             <div class="tab-pane fade show active" id="lteEditTabGeneral-{{ $survey->id }}" role="tabpanel">
               <div class="row">
+                <div class="col-md-8">
+                  <div class="mb-3">
+                    <label class="form-label">Site Name</label>
+                    <input type="text" name="general[siteName]" class="form-control form-control-sm" value="{{ data_get($general, 'siteName', $survey->site_name) }}" required>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="mb-3">
+                    <label class="form-label">JC Number</label>
+                    <input type="text" name="general[jcNumber]" class="form-control form-control-sm" value="{{ data_get($general, 'jcNumber', $survey->jc_number) }}">
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="mb-3">
+                    <label class="form-label">Province/Region</label>
+                    <input type="text" name="general[provinceRegion]" class="form-control form-control-sm" value="{{ data_get($general, 'provinceRegion', $survey->province_region) }}">
+                  </div>
+                </div>
                 <div class="col-md-4">
                   <div class="mb-3">
                     <label class="form-label">Date</label>
                     <input type="date" name="meta[date]" class="form-control form-control-sm" value="{{ data_get($meta, 'date') }}">
                   </div>
                 </div>
-                <div class="col-md-8">
+                <div class="col-md-4">
                   <div class="mb-3">
                     <label class="form-label">Survey Performed By</label>
                     <select name="meta[surveyPerformedByUserId]" class="form-select form-select-sm js-select2" required>
@@ -75,35 +96,16 @@
               <div class="row">
                 <div class="col-md-6">
                   <div class="mb-3">
-                    <label class="form-label">Site Name</label>
-                    <input type="text" name="general[siteName]" class="form-control form-control-sm" value="{{ data_get($general, 'siteName', $survey->site_name) }}" required>
+                    <label class="form-label">Physical Address</label>
+                    <textarea name="general[physicalAddress]" class="form-control form-control-sm" rows="4">{{ data_get($general, 'physicalAddress', $survey->physical_address) }}</textarea>
                   </div>
                 </div>
                 <div class="col-md-6">
-                  <div class="mb-3">
-                    <label class="form-label">JC Number</label>
-                    <input type="text" name="general[jcNumber]" class="form-control form-control-sm" value="{{ data_get($general, 'jcNumber', $survey->jc_number) }}">
+                  <div class="mb-0">
+                    <label class="form-label">Contact Details</label>
+                    <textarea name="general[contactDetails]" class="form-control form-control-sm" rows="4">{{ data_get($general, 'contactDetails') }}</textarea>
                   </div>
                 </div>
-              </div>
-
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="mb-3">
-                    <label class="form-label">Province/Region</label>
-                    <input type="text" name="general[provinceRegion]" class="form-control form-control-sm" value="{{ data_get($general, 'provinceRegion', $survey->province_region) }}">
-                  </div>
-                </div>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">Physical Address</label>
-                <textarea name="general[physicalAddress]" class="form-control form-control-sm" rows="3">{{ data_get($general, 'physicalAddress', $survey->physical_address) }}</textarea>
-              </div>
-
-              <div class="mb-0">
-                <label class="form-label">Contact Details</label>
-                <textarea name="general[contactDetails]" class="form-control form-control-sm" rows="2">{{ data_get($general, 'contactDetails') }}</textarea>
               </div>
             </div>
 

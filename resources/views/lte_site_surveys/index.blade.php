@@ -260,13 +260,34 @@ LTE Site Surveys
 
             <div class="survey-step" data-step="0">
               <div class="row">
+                <div class="col-md-8">
+                  <div class="mb-3">
+                    <label class="form-label">Site Name</label>
+                    <input type="text" name="general[siteName]" class="form-control form-control-sm" value="{{ old('general.siteName') }}" required>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="mb-3">
+                    <label class="form-label">JC Number</label>
+                    <input type="text" name="general[jcNumber]" class="form-control form-control-sm" value="{{ old('general.jcNumber') }}">
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-4">
+                  <div class="mb-3">
+                    <label class="form-label">Province/Region</label>
+                    <input type="text" name="general[provinceRegion]" class="form-control form-control-sm" value="{{ old('general.provinceRegion') }}">
+                  </div>
+                </div>
                 <div class="col-md-4">
                   <div class="mb-3">
                     <label class="form-label">Date</label>
                     <input type="date" name="meta[date]" class="form-control form-control-sm" value="{{ old('meta.date') }}">
                   </div>
                 </div>
-                <div class="col-md-8">
+                <div class="col-md-4">
                   <div class="mb-3">
                     <label class="form-label">Survey Performed By</label>
                     <select name="meta[surveyPerformedByUserId]" class="form-select form-select-sm js-select2" data-placeholder="Select user" required>
@@ -282,35 +303,16 @@ LTE Site Surveys
               <div class="row">
                 <div class="col-md-6">
                   <div class="mb-3">
-                    <label class="form-label">Site Name</label>
-                    <input type="text" name="general[siteName]" class="form-control form-control-sm" value="{{ old('general.siteName') }}" required>
+                    <label class="form-label">Physical Address</label>
+                    <textarea name="general[physicalAddress]" class="form-control form-control-sm" rows="4">{{ old('general.physicalAddress') }}</textarea>
                   </div>
                 </div>
                 <div class="col-md-6">
                   <div class="mb-3">
-                    <label class="form-label">JC Number</label>
-                    <input type="text" name="general[jcNumber]" class="form-control form-control-sm" value="{{ old('general.jcNumber') }}">
+                    <label class="form-label">Contact Details</label>
+                    <textarea name="general[contactDetails]" class="form-control form-control-sm" rows="4">{{ old('general.contactDetails') }}</textarea>
                   </div>
                 </div>
-              </div>
-
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="mb-3">
-                    <label class="form-label">Province/Region</label>
-                    <input type="text" name="general[provinceRegion]" class="form-control form-control-sm" value="{{ old('general.provinceRegion') }}">
-                  </div>
-                </div>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">Physical Address</label>
-                <textarea name="general[physicalAddress]" class="form-control form-control-sm" rows="3">{{ old('general.physicalAddress') }}</textarea>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">Contact Details</label>
-                <textarea name="general[contactDetails]" class="form-control form-control-sm" rows="2">{{ old('general.contactDetails') }}</textarea>
               </div>
             </div>
 
@@ -752,7 +754,7 @@ LTE Site Surveys
 @section('scripts')
 <style>
   .lte-modal .modal-content { border-radius: 16px; overflow: hidden; }
-  .lte-modal-header { background: #0a7ea4; color: #fff; border-bottom: 0; }
+  .lte-modal-header { background: var(--bs-primary); color: #fff; border-bottom: 0; }
   .lte-modal-subtitle { color: rgba(255,255,255,0.85); }
   .lte-modal-close { filter: invert(1); opacity: 0.9; }
   .lte-modal-body { background: #f7f9fc; }
