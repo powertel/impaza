@@ -8,6 +8,8 @@ LTE Site Surveys
 LTE Site Surveys
 @endsection
 
+@include('partials.css')
+
 @section('content')
 <section class="content">
   @php
