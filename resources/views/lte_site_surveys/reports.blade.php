@@ -260,20 +260,18 @@ LTE Site Surveys Reports
           <div class="col-lg-6">
             <div class="cc-chart-card">
               <div class="fw-semibold mb-3">Backhaul Type</div>
-              <div style="height: 260px;">
+              <div style="height: 320px;">
                 <canvas id="lteChartBackhaul"></canvas>
               </div>
-              <div class="text-muted small">Backhaul is read from payload transmission.backhaulType.</div>
             </div>
           </div>
 
           <div class="col-lg-6">
             <div class="cc-chart-card">
               <div class="fw-semibold mb-3">Power Source</div>
-              <div style="height: 260px;">
+              <div style="height: 320px;">
                 <canvas id="lteChartPower"></canvas>
               </div>
-              <div class="text-muted small">Power source is read from payload power.powerSourceType.</div>
             </div>
           </div>
 
@@ -377,6 +375,7 @@ LTE Site Surveys Reports
       var el = document.getElementById(canvasId);
       if (!el) return;
       if (!rows.length) return;
+      var legendPos = rows.length > 5 ? 'right' : 'bottom';
       new Chart(el, {
         type: 'pie',
         data: {
@@ -385,14 +384,16 @@ LTE Site Surveys Reports
             data: rows.map(function (r) { return r.c; }),
             backgroundColor: colors(rows.length),
             borderColor: '#ffffff',
-            borderWidth: 2
+            borderWidth: 2,
+            
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          layout: { padding: { top: 8, bottom: 26, left: 8, right: 8 } },
           plugins: {
-            legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 10 } },
+            legend: { position: legendPos, labels: { usePointStyle: true, boxWidth: 10, padding: 14 } },
             tooltip: {
               backgroundColor: 'rgba(31,41,55,0.95)',
               titleColor: '#fff',
