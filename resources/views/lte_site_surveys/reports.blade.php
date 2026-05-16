@@ -260,25 +260,8 @@ LTE Site Surveys Reports
           <div class="col-lg-6">
             <div class="cc-chart-card">
               <div class="fw-semibold mb-3">Backhaul Type</div>
-              <div class="table-responsive">
-                <table class="table table-sm align-middle">
-                  <thead>
-                    <tr>
-                      <th>Type</th>
-                      <th class="text-end">Surveys</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @forelse(($backhaulBreakdown ?? collect()) as $row)
-                      <tr>
-                        <td class="text-capitalize">{{ str_replace('_',' ', (string)$row->k) }}</td>
-                        <td class="text-end">{{ (int)$row->c }}</td>
-                      </tr>
-                    @empty
-                      <tr><td colspan="2" class="text-muted text-center py-3">No data</td></tr>
-                    @endforelse
-                  </tbody>
-                </table>
+              <div style="height: 260px;">
+                <canvas id="lteChartBackhaul"></canvas>
               </div>
               <div class="text-muted small">Backhaul is read from payload transmission.backhaulType.</div>
             </div>
@@ -287,25 +270,8 @@ LTE Site Surveys Reports
           <div class="col-lg-6">
             <div class="cc-chart-card">
               <div class="fw-semibold mb-3">Power Source</div>
-              <div class="table-responsive">
-                <table class="table table-sm align-middle">
-                  <thead>
-                    <tr>
-                      <th>Source</th>
-                      <th class="text-end">Surveys</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @forelse(($powerBreakdown ?? collect()) as $row)
-                      <tr>
-                        <td class="text-capitalize">{{ str_replace('_',' ', (string)$row->k) }}</td>
-                        <td class="text-end">{{ (int)$row->c }}</td>
-                      </tr>
-                    @empty
-                      <tr><td colspan="2" class="text-muted text-center py-3">No data</td></tr>
-                    @endforelse
-                  </tbody>
-                </table>
+              <div style="height: 260px;">
+                <canvas id="lteChartPower"></canvas>
               </div>
               <div class="text-muted small">Power source is read from payload power.powerSourceType.</div>
             </div>
@@ -368,7 +334,9 @@ LTE Site Surveys Reports
     </div>
   </div>
 </section>
+@endsection
 
+@section('scripts')
 <script>
   (function(){
     var reset = document.querySelector('[data-cc-reset]');
@@ -378,5 +346,72 @@ LTE Site Surveys Reports
     });
   })();
 </script>
-@endsection
+<script>
+  (function () {
+    if (typeof Chart === 'undefined') return;
 
+    function normLabel(v) {
+      var s = (v == null) ? 'unknown' : String(v);
+      s = s.trim();
+      if (s === '' || s.toLowerCase() === 'null') s = 'unknown';
+      s = s.replace(/_/g, ' ');
+      return s.charAt(0).toUpperCase() + s.slice(1);
+    }
+
+    function colors(n) {
+      var palette = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#64748b', '#14b8a6', '#f97316', '#a3e635', '#60a5fa', '#fb7185'];
+      var out = [];
+      for (var i = 0; i < n; i++) out.push(palette[i % palette.length]);
+      return out;
+    }
+
+    function buildRows(raw) {
+      var rows = Array.isArray(raw) ? raw : [];
+      return rows
+        .map(function (r) { return { k: normLabel(r.k), c: parseInt(r.c || 0, 10) || 0 }; })
+        .filter(function (r) { return r.c > 0; });
+    }
+
+    function renderPie(canvasId, rawRows) {
+      var rows = buildRows(rawRows);
+      var el = document.getElementById(canvasId);
+      if (!el) return;
+      if (!rows.length) return;
+      new Chart(el, {
+        type: 'pie',
+        data: {
+          labels: rows.map(function (r) { return r.k; }),
+          datasets: [{
+            data: rows.map(function (r) { return r.c; }),
+            backgroundColor: colors(rows.length),
+            borderColor: '#ffffff',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 10 } },
+            tooltip: {
+              backgroundColor: 'rgba(31,41,55,0.95)',
+              titleColor: '#fff',
+              bodyColor: '#fff',
+              cornerRadius: 10,
+              callbacks: {
+                label: function (ctx) {
+                  var label = (ctx.label || '') + ': ' + (ctx.parsed || 0);
+                  return label;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    renderPie('lteChartBackhaul', @json(($backhaulBreakdown ?? collect())->values()));
+    renderPie('lteChartPower', @json(($powerBreakdown ?? collect())->values()));
+  })();
+</script>
+@endsection
