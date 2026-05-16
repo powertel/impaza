@@ -37,6 +37,7 @@ use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\ResolvedController;
 use App\Http\Controllers\ZoneController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\LteSiteSurveyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -68,6 +69,7 @@ Route::group(['middleware' => ['auth']], function() {
     // Performance Dashboard
     Route::get('/performance', [PerformanceController::class, 'index'])->name('performance.index');
     Route::resource('users', UserController::class);
+    Route::resource('lte-site-surveys', LteSiteSurveyController::class)->only(['index', 'create', 'store', 'show', 'update']);
     // Toggle user access (enable/disable)
     Route::patch('users/{user}/access', [UserController::class, 'updateAccess'])->name('users.access');
     // Admin change password for a specific user

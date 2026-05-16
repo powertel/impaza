@@ -27,6 +27,13 @@
             @canany(['fault-list','my-fault-list','assigned-fault-list','assessment-fault-list','chief-tech-clear-faults-list','noc-clear-faults-list','department-faults-list','manage-faults','referred-faults','resolved-faults-list'])
               <li class="nav-header">Faults</li>
             @endcanany
+            <li class="nav-header">Surveys</li>
+            <li class="nav-item">
+              <a href="{{ route('lte-site-surveys.index') }}" class="nav-link {{ request()->routeIs('lte-site-surveys.*') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-clipboard"></i>
+                <p>LTE Site Surveys</p>
+              </a>
+            </li>
             @can('fault-list')
             <li class="nav-item">
               <a href="{{ route('faults.index') }}" class="nav-link {{ request()->routeIs('faults.*') ? 'active' : '' }}">

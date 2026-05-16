@@ -235,3 +235,18 @@ export async function markNotificationRead(id) {
 export async function markAllNotificationsRead() {
   return request('/mobile/notifications/mark-all-read', { method: 'POST' });
 }
+
+export async function getLteSiteSurveys() {
+  return request('/mobile/lte-site-surveys');
+}
+
+export async function getLteSiteSurvey(id) {
+  return request(`/mobile/lte-site-surveys/${id}`);
+}
+
+export async function createLteSiteSurvey(payload) {
+  if (payload instanceof FormData) {
+    return request('/mobile/lte-site-surveys', { method: 'POST', body: payload });
+  }
+  return request('/mobile/lte-site-surveys', { method: 'POST', body: JSON.stringify(payload) });
+}
