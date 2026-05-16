@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Mobile\AuthController;
 use App\Http\Controllers\Mobile\FaultController;
+use App\Http\Controllers\Mobile\LteSiteSurveyController;
 use App\Http\Controllers\Mobile\StatsController;
 use App\Http\Controllers\Mobile\ProfileController;
 use App\Http\Controllers\Mobile\NotificationController;
@@ -35,6 +36,10 @@ Route::prefix('mobile')->group(function () {
         Route::get('profile', [ProfileController::class, 'show']);
         Route::put('profile', [ProfileController::class, 'update']);
         Route::post('profile/password', [ProfileController::class, 'changePassword']);
+
+        Route::get('lte-site-surveys', [LteSiteSurveyController::class, 'index']);
+        Route::get('lte-site-surveys/{survey}', [LteSiteSurveyController::class, 'show']);
+        Route::post('lte-site-surveys', [LteSiteSurveyController::class, 'store']);
 
         Route::get('faults', [FaultController::class, 'index']);
         Route::get('faults/unassigned', [FaultController::class, 'unassigned']);

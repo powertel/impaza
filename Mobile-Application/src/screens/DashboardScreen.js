@@ -200,6 +200,12 @@ export default function DashboardScreen() {
               </View>
               <Text style={styles.quickTitle}>Resolved</Text>
             </TouchableOpacity>
+            <TouchableOpacity style={styles.quickItem} onPress={() => navigation.navigate('LteSiteSurveys')}>
+              <View style={[styles.iconContainer, { backgroundColor: 'rgba(10, 126, 164, 0.1)' }]}>
+                <Feather name="clipboard" size={24} color={theme.colors.primary} />
+              </View>
+              <Text style={styles.quickTitle}>LTE Survey</Text>
+            </TouchableOpacity>
             {hasPermission('refer-fault') && (
               <TouchableOpacity style={styles.quickItem} onPress={() => navigation.navigate('ReferredFaults')}>
                 <View style={[styles.iconContainer, { backgroundColor: 'rgba(139, 92, 246, 0.1)' }]}>
