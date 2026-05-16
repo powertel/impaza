@@ -726,12 +726,12 @@ class LteSiteSurveyController extends Controller
     public function servePhoto(Request $request, LteSiteSurveyPhoto $photo)
     {
         $user = $request->user();
+        if (!$user) {
+            abort(403);
+        }
         $survey = LteSiteSurvey::query()->find($photo->lte_site_survey_id);
         if (!$survey) {
             abort(404);
-        }
-        if ((int) $survey->user_id !== (int) optional($user)->id) {
-            abort(403);
         }
 
         $disk = Storage::disk('public');
@@ -755,6 +755,9 @@ class LteSiteSurveyController extends Controller
     public function serveRemarkFile(Request $request, int $remark)
     {
         $user = $request->user();
+        if (!$user) {
+            abort(403);
+        }
         $row = DB::table('lte_site_survey_remarks')->where('id', $remark)->first();
         if (!$row) {
             abort(404);
@@ -763,9 +766,6 @@ class LteSiteSurveyController extends Controller
         $survey = LteSiteSurvey::query()->find($row->lte_site_survey_id);
         if (!$survey) {
             abort(404);
-        }
-        if ((int) $survey->user_id !== (int) optional($user)->id) {
-            abort(403);
         }
 
         $disk = Storage::disk('public');
