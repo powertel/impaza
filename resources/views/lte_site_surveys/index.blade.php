@@ -97,6 +97,9 @@ LTE Site Surveys
         </div>
       </div>
       <div class="card-tools">
+        <a href="{{ route('lte-site-surveys.reports') }}" class="btn btn-outline-secondary btn-sm me-2">
+          <i class="fas fa-chart-bar"></i> Reports
+        </a>
         <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#lteSiteSurveyCreateModal">
           <i class="fas fa-plus-circle"></i> New Survey
         </button>

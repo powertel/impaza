@@ -15,6 +15,253 @@ use Illuminate\Validation\ValidationException;
 
 class LteSiteSurveyController extends Controller
 {
+    public function reports(Request $request)
+    {
+        $filter = strtolower((string) $request->input('filter', 'month'));
+        $selectedRegionRaw = trim((string) $request->input('region', ''));
+        $selectedRegion = $selectedRegionRaw === '' ? null : $selectedRegionRaw;
+        $selectedStatusRaw = trim((string) $request->input('status', ''));
+        $selectedStatus = $selectedStatusRaw === '' ? null : $selectedStatusRaw;
+        $selectedCapturedBy = (int) $request->input('captured_by', 0);
+        $selectedPerformedBy = trim((string) $request->input('performed_by', ''));
+        $selectedPerformedBy = $selectedPerformedBy === '' ? null : $selectedPerformedBy;
+
+        $availableRegions = LteSiteSurvey::query()
+            ->whereNotNull('province_region')
+            ->where('province_region', '!=', '')
+            ->distinct()
+            ->orderBy('province_region')
+            ->pluck('province_region')
+            ->toArray();
+
+        $availableYears = DB::table('lte_site_surveys')
+            ->selectRaw('YEAR(created_at) as y')
+            ->distinct()
+            ->orderByDesc('y')
+            ->pluck('y')
+            ->toArray();
+
+        $availablePerformedBy = LteSiteSurvey::query()
+            ->whereNotNull('survey_performed_by')
+            ->where('survey_performed_by', '!=', '')
+            ->distinct()
+            ->orderBy('survey_performed_by')
+            ->pluck('survey_performed_by')
+            ->toArray();
+
+        $users = User::query()->where('is_access', 0)->orderBy('name')->get(['id', 'name']);
+
+        $now = Carbon::now();
+        $yearInput = $request->input('year', $now->year);
+        $isAllYears = strtolower((string) $yearInput) === 'all';
+        $selectedYear = $isAllYears ? null : (int) $yearInput;
+        $selectedMonth = (int) ($request->input('month', $now->month));
+        $quarter = (int) ($request->input('quarter', 1));
+
+        $startDateInput = trim((string) $request->input('start_date', ''));
+        $endDateInput = trim((string) $request->input('end_date', ''));
+
+        $periodStart = $now->copy()->startOfMonth();
+        $periodEnd = $now->copy()->endOfMonth();
+        $periodLabelText = 'Selected period';
+
+        try {
+            if ($filter === 'month') {
+                $y = $selectedYear ?? (int) $now->year;
+                $periodStart = Carbon::create($y, $selectedMonth, 1)->startOfMonth();
+                $periodEnd = Carbon::create($y, $selectedMonth, 1)->endOfMonth();
+                $periodLabelText = 'Monthly';
+            } elseif ($filter === 'year') {
+                if ($isAllYears && !empty($availableYears)) {
+                    $minYear = min($availableYears);
+                    $maxYear = max($availableYears);
+                    $periodStart = Carbon::create((int) $minYear, 1, 1)->startOfYear();
+                    $periodEnd = Carbon::create((int) $maxYear, 12, 31)->endOfDay();
+                    $periodLabelText = 'All years';
+                } else {
+                    $y = $selectedYear ?? (int) $now->year;
+                    $periodStart = Carbon::create($y, 1, 1)->startOfYear();
+                    $periodEnd = Carbon::create($y, 12, 31)->endOfYear();
+                    $periodLabelText = 'Yearly';
+                }
+            } elseif ($filter === 'quarter') {
+                $y = $selectedYear ?? (int) $now->year;
+                $q = max(1, min(4, (int) $quarter));
+                $startMonth = (($q - 1) * 3) + 1;
+                $periodStart = Carbon::create($y, $startMonth, 1)->startOfMonth();
+                $periodEnd = Carbon::create($y, $startMonth, 1)->addMonths(2)->endOfMonth();
+                $periodLabelText = 'Quarterly';
+            } elseif ($filter === 'weekly') {
+                if ($startDateInput !== '' && $endDateInput !== '') {
+                    $periodStart = Carbon::parse($startDateInput)->startOfDay();
+                    $periodEnd = Carbon::parse($endDateInput)->endOfDay();
+                    $periodLabelText = 'Custom range';
+                } else {
+                    $periodStart = $now->copy()->startOfWeek(Carbon::MONDAY);
+                    $periodEnd = $now->copy()->endOfWeek(Carbon::SUNDAY);
+                    $periodLabelText = 'This week';
+                }
+            }
+        } catch (\Throwable $e) {
+            $periodStart = $now->copy()->startOfMonth();
+            $periodEnd = $now->copy()->endOfMonth();
+            $periodLabelText = 'Selected period';
+        }
+
+        $applyFilters = function ($q) use (
+            $periodStart,
+            $periodEnd,
+            $selectedRegion,
+            $selectedStatus,
+            $selectedCapturedBy,
+            $selectedPerformedBy
+        ) {
+            $q->whereBetween('s.created_at', [$periodStart, $periodEnd]);
+            if ($selectedRegion) {
+                $q->where('s.province_region', $selectedRegion);
+            }
+            if ($selectedStatus) {
+                $q->where('s.status', $selectedStatus);
+            }
+            if ($selectedCapturedBy > 0) {
+                $q->where('s.user_id', $selectedCapturedBy);
+            }
+            if ($selectedPerformedBy) {
+                $q->where('s.survey_performed_by', $selectedPerformedBy);
+            }
+        };
+
+        $base = DB::table('lte_site_surveys as s');
+        $applyFilters($base);
+
+        $statusCounts = (clone $base)
+            ->select('s.status', DB::raw('COUNT(*) as c'))
+            ->groupBy('s.status')
+            ->pluck('c', 'status')
+            ->toArray();
+
+        $total = array_sum(array_map('intval', $statusCounts));
+        $draft = (int) ($statusCounts['draft'] ?? 0);
+        $submitted = (int) ($statusCounts['submitted'] ?? 0);
+
+        $withPhotos = (int) DB::table('lte_site_surveys as s')
+            ->leftJoin('lte_site_survey_photos as p', 'p.lte_site_survey_id', '=', 's.id')
+            ->whereNotNull('p.id')
+            ->when(true, function ($q) use ($applyFilters) {
+                $applyFilters($q);
+            })
+            ->distinct('s.id')
+            ->count('s.id');
+
+        $withRemarks = (int) DB::table('lte_site_surveys as s')
+            ->leftJoin('lte_site_survey_remarks as r', 'r.lte_site_survey_id', '=', 's.id')
+            ->whereNotNull('r.id')
+            ->when(true, function ($q) use ($applyFilters) {
+                $applyFilters($q);
+            })
+            ->distinct('s.id')
+            ->count('s.id');
+
+        $regionBreakdown = (clone $base)
+            ->select('s.province_region as k', DB::raw('COUNT(*) as c'))
+            ->whereNotNull('s.province_region')
+            ->where('s.province_region', '!=', '')
+            ->groupBy('s.province_region')
+            ->orderByDesc('c')
+            ->limit(12)
+            ->get();
+
+        $performedByBreakdown = (clone $base)
+            ->select('s.survey_performed_by as k', DB::raw('COUNT(*) as c'))
+            ->whereNotNull('s.survey_performed_by')
+            ->where('s.survey_performed_by', '!=', '')
+            ->groupBy('s.survey_performed_by')
+            ->orderByDesc('c')
+            ->limit(12)
+            ->get();
+
+        $backhaulBreakdown = collect();
+        $powerBreakdown = collect();
+        try {
+            $backhaulExpr = "COALESCE(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(s.payload,'$.transmission.backhaulType')),''),'unknown')";
+            $powerExpr = "COALESCE(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(s.payload,'$.power.powerSourceType')),''),'unknown')";
+
+            $backhaulBreakdown = (clone $base)
+                ->selectRaw($backhaulExpr . " as k, COUNT(*) as c")
+                ->groupBy('k')
+                ->orderByDesc('c')
+                ->get();
+
+            $powerBreakdown = (clone $base)
+                ->selectRaw($powerExpr . " as k, COUNT(*) as c")
+                ->groupBy('k')
+                ->orderByDesc('c')
+                ->get();
+        } catch (\Throwable $e) {
+            $rows = (clone $base)->select(['s.id', 's.payload'])->get();
+            $backhaulMap = [];
+            $powerMap = [];
+            foreach ($rows as $row) {
+                $payload = is_array($row->payload) ? $row->payload : (array) json_decode((string) $row->payload, true);
+                $backhaul = (string) data_get($payload, 'transmission.backhaulType', 'unknown');
+                $power = (string) data_get($payload, 'power.powerSourceType', 'unknown');
+                $backhaul = trim($backhaul) !== '' ? $backhaul : 'unknown';
+                $power = trim($power) !== '' ? $power : 'unknown';
+                $backhaulMap[$backhaul] = ($backhaulMap[$backhaul] ?? 0) + 1;
+                $powerMap[$power] = ($powerMap[$power] ?? 0) + 1;
+            }
+            arsort($backhaulMap);
+            arsort($powerMap);
+            $backhaulBreakdown = collect($backhaulMap)->map(function ($c, $k) {
+                return (object) ['k' => $k, 'c' => (int) $c];
+            })->values();
+            $powerBreakdown = collect($powerMap)->map(function ($c, $k) {
+                return (object) ['k' => $k, 'c' => (int) $c];
+            })->values();
+        }
+
+        $surveys = LteSiteSurvey::query()
+            ->from('lte_site_surveys as s')
+            ->with('user:id,name')
+            ->select('s.*')
+            ->whereBetween('s.created_at', [$periodStart, $periodEnd])
+            ->when($selectedRegion, fn ($q) => $q->where('s.province_region', $selectedRegion))
+            ->when($selectedStatus, fn ($q) => $q->where('s.status', $selectedStatus))
+            ->when($selectedCapturedBy > 0, fn ($q) => $q->where('s.user_id', $selectedCapturedBy))
+            ->when($selectedPerformedBy, fn ($q) => $q->where('s.survey_performed_by', $selectedPerformedBy))
+            ->orderByDesc('s.created_at')
+            ->paginate(20)
+            ->appends($request->query());
+
+        return view('lte_site_surveys.reports', [
+            'filter' => $filter,
+            'availableRegions' => $availableRegions,
+            'availableYears' => $availableYears,
+            'availablePerformedBy' => $availablePerformedBy,
+            'users' => $users,
+            'selectedRegion' => $selectedRegion,
+            'selectedStatus' => $selectedStatus,
+            'selectedCapturedBy' => $selectedCapturedBy,
+            'selectedPerformedBy' => $selectedPerformedBy,
+            'selectedYear' => $selectedYear,
+            'selectedMonth' => $selectedMonth,
+            'quarter' => $quarter,
+            'periodStart' => $periodStart,
+            'periodEnd' => $periodEnd,
+            'periodLabelText' => $periodLabelText,
+            'total' => $total,
+            'draft' => $draft,
+            'submitted' => $submitted,
+            'withPhotos' => $withPhotos,
+            'withRemarks' => $withRemarks,
+            'regionBreakdown' => $regionBreakdown,
+            'performedByBreakdown' => $performedByBreakdown,
+            'backhaulBreakdown' => $backhaulBreakdown,
+            'powerBreakdown' => $powerBreakdown,
+            'surveys' => $surveys,
+        ]);
+    }
+
     public function index(Request $request)
     {
         $q = trim((string) $request->input('q', ''));
