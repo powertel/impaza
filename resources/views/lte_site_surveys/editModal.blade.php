@@ -36,6 +36,7 @@
         <form method="POST" action="{{ route('lte-site-surveys.update', $survey->id) }}" enctype="multipart/form-data" class="lte-edit-form">
           @csrf
           @method('PUT')
+          <input type="hidden" name="status" class="lte-edit-status" value="{{ $survey->status ?: 'draft' }}">
 
           <ul class="nav nav-pills gap-2 mb-3" role="tablist">
             <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#lteEditTabGeneral-{{ $survey->id }}" type="button" role="tab">General</button></li>
@@ -483,10 +484,10 @@
               <i class="fas fa-times me-1"></i> Cancel
             </button>
             <div class="d-flex align-items-center gap-2">
-              <button type="submit" name="status" value="draft" class="btn btn-warning btn-sm">
+              <button type="button" class="btn btn-warning btn-sm lte-edit-save-draft">
                 <i class="fas fa-save"></i> Save Draft
               </button>
-              <button type="submit" name="status" value="submitted" class="btn btn-primary btn-sm">
+              <button type="button" class="btn btn-primary btn-sm lte-edit-submit">
                 <i class="fas fa-paper-plane"></i> Submit
               </button>
             </div>

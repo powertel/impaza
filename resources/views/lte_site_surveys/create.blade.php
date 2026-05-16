@@ -51,6 +51,7 @@ New LTE Site Survey
 
       <form method="POST" action="{{ route('lte-site-surveys.store') }}" enctype="multipart/form-data" id="surveyForm">
         @csrf
+        <input type="hidden" name="status" id="lteCreateStatus" value="draft">
 
         <div class="survey-step" data-step="0">
           <div class="row">
@@ -526,10 +527,10 @@ New LTE Site Survey
               </button>
             </div>
             <div id="submitWrap" class="d-none">
-              <button type="submit" name="status" value="draft" class="btn btn-warning btn-sm">
+              <button type="button" class="btn btn-warning btn-sm" id="lteCreateSaveDraftBtn">
                 <i class="fas fa-save"></i> Save Draft
               </button>
-              <button type="submit" name="status" value="submitted" class="btn btn-primary btn-sm">
+              <button type="button" class="btn btn-primary btn-sm" id="lteCreateSubmitBtn">
                 <i class="fas fa-paper-plane"></i> Submit
               </button>
             </div>
@@ -689,6 +690,20 @@ New LTE Site Survey
         }
       });
     }
+
+    var statusEl = document.getElementById('lteCreateStatus');
+    var saveDraftBtn = document.getElementById('lteCreateSaveDraftBtn');
+    var submitBtn = document.getElementById('lteCreateSubmitBtn');
+    function submitWithStatus(val) {
+      if (statusEl) statusEl.value = val;
+      if (formEl && typeof formEl.requestSubmit === 'function') {
+        formEl.requestSubmit();
+      } else if (formEl) {
+        formEl.submit();
+      }
+    }
+    if (saveDraftBtn) saveDraftBtn.addEventListener('click', function () { submitWithStatus('draft'); });
+    if (submitBtn) submitBtn.addEventListener('click', function () { submitWithStatus('submitted'); });
 
     prevBtn.addEventListener('click', function () {
       goTo(current - 1);

@@ -38,13 +38,21 @@ class LteSiteSurveyController extends Controller
             });
         }
 
+        $statsQuery = clone $query;
+        $stats = [
+            'total' => (clone $statsQuery)->count(),
+            'draft' => (clone $statsQuery)->where('status', 'draft')->count(),
+            'submitted' => (clone $statsQuery)->where('status', 'submitted')->count(),
+            'latest_created_at' => (clone $statsQuery)->max('created_at'),
+        ];
+
         $surveys = $query->paginate(25)->appends($request->only('q', 'status'));
 
         $materials = $this->defaultMaterials();
         $photoLabels = $this->photoLabels();
         $users = User::query()->where('is_access', 0)->orderBy('name')->get(['id', 'name']);
 
-        return view('lte_site_surveys.index', compact('surveys', 'q', 'status', 'materials', 'photoLabels', 'users'))
+        return view('lte_site_surveys.index', compact('surveys', 'q', 'status', 'materials', 'photoLabels', 'users', 'stats'))
         ->with('i');
     }
 
@@ -137,6 +145,11 @@ class LteSiteSurveyController extends Controller
                 'input' => $request->except(['photos', '_token']),
             ]);
             throw $e;
+        }
+
+        $rawStatus = $request->input('status');
+        if (in_array($rawStatus, ['draft', 'submitted'], true)) {
+            $data['status'] = $rawStatus;
         }
 
         [$status, $payload, $coords] = $this->buildPayloadAndCoords($data, $user, null);
@@ -291,6 +304,11 @@ class LteSiteSurveyController extends Controller
                 'input' => $request->except(['photos', '_token']),
             ]);
             throw $e;
+        }
+
+        $rawStatus = $request->input('status');
+        if (in_array($rawStatus, ['draft', 'submitted'], true)) {
+            $data['status'] = $rawStatus;
         }
 
         [$status, $payload, $coords] = $this->buildPayloadAndCoords($data, $user, $lte_site_survey);
