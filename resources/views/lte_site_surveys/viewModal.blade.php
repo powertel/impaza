@@ -1,9 +1,9 @@
 <div class="modal custom-modal fade" id="lteSurveyViewModal-{{ $survey->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="lteSurveyViewModalLabel-{{ $survey->id }}" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
     <div class="modal-content rounded-4 border-0 shadow-lg">
-      <div class="modal-header border-0" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 45%, #0a58ca 100%); color: #fff;">
+      <div class="modal-header border-0" style="background:#eaf2ff; border-bottom: 1px solid #cfe1ff;">
         <div class="d-flex align-items-start gap-3">
-          <span class="badge bg-white bg-opacity-25 border border-white border-opacity-25" style="width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:12px;">
+          <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:12px;">
             <i class="fas fa-broadcast-tower"></i>
           </span>
           <div>
@@ -16,25 +16,25 @@
               @endif
             </div>
             <div class="d-flex flex-wrap gap-2 mt-2">
-              <span class="badge rounded-pill bg-white bg-opacity-25 border border-white border-opacity-25 text-white">
+              <span class="badge rounded-pill bg-light text-dark border">
                 <i class="fas fa-hashtag me-1"></i>{{ $survey->id }}
               </span>
-              <span class="badge rounded-pill bg-white bg-opacity-25 border border-white border-opacity-25 text-white">
+              <span class="badge rounded-pill bg-light text-dark border">
                 <i class="fas fa-id-card me-1"></i>JC: {{ $survey->jc_number ?: '-' }}
               </span>
-              <span class="badge rounded-pill bg-white bg-opacity-25 border border-white border-opacity-25 text-white">
+              <span class="badge rounded-pill bg-light text-dark border">
                 <i class="fas fa-map-marked-alt me-1"></i>{{ $survey->province_region ?: '-' }}
               </span>
-              <span class="badge rounded-pill bg-white bg-opacity-25 border border-white border-opacity-25 text-white">
+              <span class="badge rounded-pill bg-light text-dark border">
                 <i class="fas fa-user me-1"></i>{{ optional($survey->user)->name ?: '-' }}
               </span>
-              <span class="badge rounded-pill bg-white bg-opacity-25 border border-white border-opacity-25 text-white">
+              <span class="badge rounded-pill bg-light text-dark border">
                 <i class="fas fa-calendar-alt me-1"></i>{{ optional($survey->created_at)->format('Y-m-d H:i') ?: '-' }}
               </span>
             </div>
           </div>
         </div>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body pt-0">
         @php
