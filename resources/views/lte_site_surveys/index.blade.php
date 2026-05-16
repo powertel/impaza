@@ -13,115 +13,135 @@ LTE Site Surveys
   @php
     $i = ((int) $surveys->currentPage() - 1) * (int) $surveys->perPage();
     $latestCreatedAt = $stats['latest_created_at'] ?? null;
+    $perPage = (int) ($perPage ?? $surveys->perPage());
   @endphp
 
-  <div class="lte-page-head mb-3">
-    <div class="d-flex flex-wrap align-items-start justify-content-between gap-2">
-      <div>
-        <div class="d-flex align-items-center gap-2">
-          <span class="badge lte-badge-brand"><i class="fas fa-clipboard-list"></i></span>
-          <h3 class="mb-0">LTE Site Surveys</h3>
+  <div class="row row-cols-4 g-3 mb-3">
+    <div class="col">
+      <a href="{{ route('lte-site-surveys.index', array_filter(['q' => $q, 'per_page' => $perPage])) }}" class="text-decoration-none">
+        <div class="card shadow-sm border-0">
+          <div class="rounded-top" style="height:6px; background:#6c757d"></div>
+          <div class="card-body d-flex justify-content-between align-items-center py-3">
+            <div class="d-flex align-items-center gap-3">
+              <span class="badge bg-secondary"><i class="fas fa-clipboard-list"></i></span>
+              <div>
+                <div class="text-muted small">All</div>
+                <div class="fw-semibold">Surveys</div>
+              </div>
+            </div>
+            <div class="fs-5 fw-bold text-dark">{{ (int)($stats['total'] ?? 0) }}</div>
+          </div>
         </div>
-        <div class="text-muted small mt-1">Capture, review and track LTE site survey sheets.</div>
+      </a>
+    </div>
+    <div class="col">
+      <a href="{{ route('lte-site-surveys.index', array_filter(['q' => $q, 'status' => 'draft', 'per_page' => $perPage])) }}" class="text-decoration-none">
+        <div class="card shadow-sm border-0">
+          <div class="rounded-top" style="height:6px; background:#ffc107"></div>
+          <div class="card-body d-flex justify-content-between align-items-center py-3">
+            <div class="d-flex align-items-center gap-3">
+              <span class="badge bg-warning text-dark"><i class="fas fa-pen"></i></span>
+              <div>
+                <div class="text-muted small">Draft</div>
+                <div class="fw-semibold">Surveys</div>
+              </div>
+            </div>
+            <div class="fs-5 fw-bold text-dark">{{ (int)($stats['draft'] ?? 0) }}</div>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col">
+      <a href="{{ route('lte-site-surveys.index', array_filter(['q' => $q, 'status' => 'submitted', 'per_page' => $perPage])) }}" class="text-decoration-none">
+        <div class="card shadow-sm border-0">
+          <div class="rounded-top" style="height:6px; background:#20c997"></div>
+          <div class="card-body d-flex justify-content-between align-items-center py-3">
+            <div class="d-flex align-items-center gap-3">
+              <span class="badge bg-success"><i class="fas fa-check-circle"></i></span>
+              <div>
+                <div class="text-muted small">Submitted</div>
+                <div class="fw-semibold">Surveys</div>
+              </div>
+            </div>
+            <div class="fs-5 fw-bold text-dark">{{ (int)($stats['submitted'] ?? 0) }}</div>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col">
+      <a href="{{ route('lte-site-surveys.index', array_filter(['q' => $q, 'per_page' => $perPage])) }}" class="text-decoration-none">
+        <div class="card shadow-sm border-0">
+          <div class="rounded-top" style="height:6px; background:#0d6efd"></div>
+          <div class="card-body d-flex justify-content-between align-items-center py-3">
+            <div class="d-flex align-items-center gap-3">
+              <span class="badge bg-primary"><i class="fas fa-calendar-day"></i></span>
+              <div>
+                <div class="text-muted small">Latest</div>
+                <div class="fw-semibold">Capture</div>
+              </div>
+            </div>
+            <div class="fw-bold text-dark">{{ $latestCreatedAt ? \Illuminate\Support\Carbon::parse($latestCreatedAt)->format('Y-m-d') : '-' }}</div>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="d-flex align-items-center gap-3">
+        <div>
+          <h3 class="card-title mb-0">Manage and track LTE site surveys</h3>
+        </div>
       </div>
-      <div class="d-flex align-items-center gap-2">
-        <button type="button" class="btn btn-primary btn-sm lte-btn-primary" data-bs-toggle="modal" data-bs-target="#lteSiteSurveyCreateModal">
-          <i class="fas fa-plus-circle me-1"></i> New Survey
+      <div class="card-tools">
+        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#lteSiteSurveyCreateModal">
+          <i class="fas fa-plus-circle"></i> New Survey
         </button>
       </div>
     </div>
-  </div>
-
-  <div class="row g-3 mb-3">
-    <div class="col-md-3">
-      <div class="card border-0 shadow-sm lte-stat">
-        <div class="card-body">
-          <div class="text-muted small">Total</div>
-          <div class="d-flex align-items-end justify-content-between">
-            <div class="lte-stat-value">{{ (int)($stats['total'] ?? 0) }}</div>
-            <span class="badge bg-light text-dark border">Filtered</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card border-0 shadow-sm lte-stat">
-        <div class="card-body">
-          <div class="text-muted small">Draft</div>
-          <div class="d-flex align-items-end justify-content-between">
-            <div class="lte-stat-value">{{ (int)($stats['draft'] ?? 0) }}</div>
-            <span class="badge bg-warning text-dark">Draft</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card border-0 shadow-sm lte-stat">
-        <div class="card-body">
-          <div class="text-muted small">Submitted</div>
-          <div class="d-flex align-items-end justify-content-between">
-            <div class="lte-stat-value">{{ (int)($stats['submitted'] ?? 0) }}</div>
-            <span class="badge bg-success">Submitted</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card border-0 shadow-sm lte-stat">
-        <div class="card-body">
-          <div class="text-muted small">Latest Capture</div>
-          <div class="d-flex align-items-end justify-content-between">
-            <div class="lte-stat-value lte-stat-value-sm">{{ $latestCreatedAt ? \Illuminate\Support\Carbon::parse($latestCreatedAt)->format('Y-m-d') : '-' }}</div>
-            <span class="badge bg-info text-dark">Updated</span>
-          </div>
-          <div class="text-muted small mt-1">{{ $latestCreatedAt ? \Illuminate\Support\Carbon::parse($latestCreatedAt)->diffForHumans() : '' }}</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card border-0 shadow-sm mb-3">
     <div class="card-body">
-      <form method="GET" class="row g-2 align-items-center">
-        <div class="col-lg-6">
-          <div class="input-group input-group-sm">
-            <span class="input-group-text bg-white"><i class="fas fa-search text-muted"></i></span>
-            <input type="text" name="q" value="{{ $q }}" class="form-control" placeholder="Search site name, JC number, region, coordinates">
-          </div>
-        </div>
-        <div class="col-lg-3">
-          <select name="status" class="form-select form-select-sm">
-            <option value="" {{ $status === '' ? 'selected' : '' }}>All Status</option>
-            <option value="draft" {{ $status === 'draft' ? 'selected' : '' }}>Draft</option>
-            <option value="submitted" {{ $status === 'submitted' ? 'selected' : '' }}>Submitted</option>
-          </select>
-        </div>
-        <div class="col-lg-3 d-flex justify-content-end gap-2">
-          <button class="btn btn-outline-secondary btn-sm" type="submit">
-            <i class="fas fa-filter me-1"></i> Filter
-          </button>
-          <a href="{{ route('lte-site-surveys.index') }}" class="btn btn-outline-secondary btn-sm">
-            Reset
-          </a>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div class="card border-0 shadow-sm">
-    <div class="card-body p-0">
       <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0 lte-table">
-          <thead class="lte-thead">
+        <div class="filter-toolbar d-flex justify-content-end align-items-center gap-2 mb-2">
+          <div class="input-group input-group-sm" style="width: 200px;">
+            <span class="input-group-text"><i class="fas fa-list me-1"></i> Show</span>
+            <select id="lteSurveysPageSize" class="form-select form-select-sm" style="width:auto;">
+              <option value="10"  {{ (int)$perPage===10 ? 'selected' : '' }}>10</option>
+              <option value="20"  {{ (int)$perPage===20 ? 'selected' : '' }}>20</option>
+              <option value="50"  {{ (int)$perPage===50 ? 'selected' : '' }}>50</option>
+              <option value="100" {{ (int)$perPage===100 ? 'selected' : '' }}>100</option>
+            </select>
+          </div>
+          <form method="GET" action="{{ route('lte-site-surveys.index') }}" class="m-0">
+            <div class="input-group input-group-sm" style="width: 760px; max-width: 100%;">
+              <div class="input-group-prepend">
+                <span class="input-group-text"><i class="fas fa-filter me-1"></i> Status</span>
+              </div>
+              <select name="status" id="lteSurveysStatusFilter" class="form-select form-select-sm" style="width:auto;">
+                <option value="" {{ $status === '' ? 'selected' : '' }}>All</option>
+                <option value="draft" {{ $status === 'draft' ? 'selected' : '' }}>Draft</option>
+                <option value="submitted" {{ $status === 'submitted' ? 'selected' : '' }}>Submitted</option>
+              </select>
+              <span class="input-group-text ms-2"><i class="fas fa-search"></i></span>
+              <input type="text" name="q" value="{{ $q }}" class="form-control" placeholder="Search all records">
+              <input type="hidden" name="per_page" value="{{ $perPage }}">
+              <button type="submit" class="btn btn-outline-primary"><i class="fas fa-search me-1"></i>Search</button>
+              <a href="{{ route('lte-site-surveys.index', ['per_page' => $perPage]) }}" class="btn btn-outline-secondary"><i class="fas fa-rotate-left me-1"></i>Reset</a>
+            </div>
+          </form>
+        </div>
+
+        <table class="table table-hover align-middle" id="lte-site-surveys-list" style="font-size:14px">
+          <thead>
             <tr>
-              <th style="width:72px;">#</th>
+              <th>No.</th>
               <th>Site</th>
-              <th style="width:140px;">JC</th>
-              <th style="width:140px;">Status</th>
-              <th style="width:110px;">Photos</th>
-              <th style="width:180px;">Captured By</th>
-              <th style="width:180px;">Created</th>
-              <th class="text-end" style="width:170px;">Action</th>
+              <th>JC</th>
+              <th>Status</th>
+              <th>Photos</th>
+              <th>Captured By</th>
+              <th>Created</th>
+              <th>Action(s)</th>
             </tr>
           </thead>
           <tbody>
@@ -137,59 +157,44 @@ LTE Site Surveys
                   </div>
                 </td>
                 <td class="text-muted">{{ $s->jc_number ?: '-' }}</td>
-                <td>
+                <td class="text-nowrap">
                   @if($s->status === 'submitted')
                     <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Submitted</span>
                   @else
                     <span class="badge bg-warning text-dark"><i class="fas fa-pen me-1"></i> Draft</span>
                   @endif
                 </td>
+                <td><span class="badge bg-light text-dark border">{{ (int)($s->photos_count ?? 0) }}</span></td>
                 <td>
-                  <span class="badge bg-light text-dark border">{{ (int)($s->photos_count ?? 0) }}</span>
+                  <div class="fw-semibold">{{ optional($s->user)->name ?: '-' }}</div>
+                  <div class="text-muted small">{{ $s->survey_performed_by ?: '—' }}</div>
                 </td>
-                <td>
-                  <div class="d-flex align-items-center gap-2">
-                    <span class="lte-avatar">{{ strtoupper(mb_substr((string) optional($s->user)->name, 0, 1)) ?: '?' }}</span>
-                    <div class="text-truncate">
-                      <div class="fw-semibold">{{ optional($s->user)->name ?: '-' }}</div>
-                      <div class="text-muted small">{{ $s->survey_performed_by ?: '—' }}</div>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <div class="fw-semibold">{{ optional($s->created_at)->format('Y-m-d H:i') }}</div>
-                  <div class="text-muted small">{{ optional($s->created_at)->diffForHumans() }}</div>
-                </td>
-                <td class="text-end">
-                  <div class="btn-group btn-group-sm">
-                    <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#lteSurveyViewModal-{{ $s->id }}">
-                      <i class="fas fa-eye me-1"></i> View
-                    </button>
-                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#lteSurveyEditModal-{{ $s->id }}">
+                <td class="text-nowrap">{{ $s->created_at ? \Carbon\Carbon::parse($s->created_at)->format('j F Y h:i a') : '-' }}</td>
+                <td class="text-nowrap">
+                  <div class="btn-group btn-group gap-2" role="group" aria-label="Actions">
+                    <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#lteSurveyEditModal-{{ $s->id }}">
                       <i class="fas fa-edit me-1"></i> Edit
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#lteSurveyViewModal-{{ $s->id }}">
+                      <i class="fas fa-eye me-1"></i> View
                     </button>
                   </div>
                 </td>
               </tr>
             @empty
               <tr>
-                <td colspan="8" class="text-center text-muted py-5">
-                  <div class="mb-2"><i class="fas fa-clipboard-list fa-2x text-muted"></i></div>
-                  <div class="fw-semibold">No LTE site surveys found</div>
-                  <div class="text-muted small mb-3">Try adjusting filters or create a new survey.</div>
-                  <button type="button" class="btn btn-primary btn-sm lte-btn-primary" data-bs-toggle="modal" data-bs-target="#lteSiteSurveyCreateModal">
-                    <i class="fas fa-plus-circle me-1"></i> New Survey
-                  </button>
-                </td>
+                <td colspan="8" class="text-center text-muted py-5">No LTE site surveys to display</td>
               </tr>
             @endforelse
           </tbody>
         </table>
-      </div>
-    </div>
-    <div class="card-footer bg-white border-0">
-      <div class="d-flex justify-content-end">
-        {{ $surveys->links() }}
+
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <small class="text-muted">
+            Showing {{ $surveys->firstItem() ?? 0 }} to {{ $surveys->lastItem() ?? 0 }} of {{ $surveys->total() }} results
+          </small>
+          {{ $surveys->appends(request()->except('page'))->links('pagination::bootstrap-5') }}
+        </div>
       </div>
     </div>
   </div>
@@ -1008,5 +1013,16 @@ LTE Site Surveys
       if (submitBtn) submitBtn.addEventListener('click', function () { submitWithStatus('submitted'); });
     });
   })();
+</script>
+<script>
+  document.getElementById('lteSurveysPageSize')?.addEventListener('change', function () {
+    const params = new URLSearchParams(window.location.search);
+    params.set('per_page', this.value);
+    params.delete('page');
+    window.location.search = params.toString();
+  });
+  document.getElementById('lteSurveysStatusFilter')?.addEventListener('change', function () {
+    this.form?.submit();
+  });
 </script>
 @endsection

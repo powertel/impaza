@@ -18,6 +18,8 @@ class LteSiteSurveyController extends Controller
     {
         $q = trim((string) $request->input('q', ''));
         $status = trim((string) $request->input('status', ''));
+        $perPage = (int) $request->input('per_page', 20);
+        $perPage = in_array($perPage, [10, 20, 50, 100], true) ? $perPage : 20;
 
         $query = LteSiteSurvey::query()
             ->with('user:id,name')
@@ -46,13 +48,13 @@ class LteSiteSurveyController extends Controller
             'latest_created_at' => (clone $statsQuery)->max('created_at'),
         ];
 
-        $surveys = $query->paginate(25)->appends($request->only('q', 'status'));
+        $surveys = $query->paginate($perPage)->appends($request->only('q', 'status', 'per_page'));
 
         $materials = $this->defaultMaterials();
         $photoLabels = $this->photoLabels();
         $users = User::query()->where('is_access', 0)->orderBy('name')->get(['id', 'name']);
 
-        return view('lte_site_surveys.index', compact('surveys', 'q', 'status', 'materials', 'photoLabels', 'users', 'stats'))
+        return view('lte_site_surveys.index', compact('surveys', 'q', 'status', 'perPage', 'materials', 'photoLabels', 'users', 'stats'))
         ->with('i');
     }
 
