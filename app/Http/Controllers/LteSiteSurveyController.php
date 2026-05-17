@@ -555,9 +555,6 @@ class LteSiteSurveyController extends Controller
     public function update(Request $request, LteSiteSurvey $lte_site_survey)
     {
         $user = $request->user();
-        if ((int) $lte_site_survey->user_id !== (int) optional($user)->id) {
-            abort(403);
-        }
 
         try {
             $data = $request->validate([
@@ -713,9 +710,6 @@ class LteSiteSurveyController extends Controller
     public function storeRemark(Request $request, LteSiteSurvey $lte_site_survey)
     {
         $user = $request->user();
-        if ((int) $lte_site_survey->user_id !== (int) optional($user)->id) {
-            abort(403);
-        }
 
         $data = $request->validate([
             'remark' => 'required|string|min:2|max:4000',
