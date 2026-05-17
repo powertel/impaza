@@ -13,7 +13,7 @@ import {
   KeyboardAvoidingView,
   Modal,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
@@ -213,6 +213,7 @@ export default function LteSiteSurveyWizardScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const { user } = useContext(UserContext);
+  const insets = useSafeAreaInsets();
   const surveyId = route?.params?.surveyId || route?.params?.fromSurveyId;
   const mode = route?.params?.mode || (surveyId ? 'view' : 'create');
   const readOnly = mode === 'view';
@@ -1160,9 +1161,9 @@ export default function LteSiteSurveyWizardScreen() {
           {renderStep()}
         </ScrollView>
 
-        <View style={styles.navRow}>
+        <View style={[styles.navRow, { paddingBottom: Math.max(insets.bottom, theme.spacing.md) }]}>
           <TouchableOpacity
-            style={[styles.navBtn, !canGoBack && styles.navBtnDisabled]}
+            style={[styles.navBtn, styles.navBtnSecondary, !canGoBack && styles.navBtnDisabled]}
             onPress={() => canGoBack && setStep((s) => Math.max(0, s - 1))}
             disabled={!canGoBack}
           >
@@ -1171,12 +1172,12 @@ export default function LteSiteSurveyWizardScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.navBtn, !canGoNext && styles.navBtnDisabled]}
+            style={[styles.navBtn, styles.navBtnPrimary, !canGoNext && styles.navBtnDisabled]}
             onPress={() => canGoNext && setStep((s) => Math.min(totalSteps - 1, s + 1))}
             disabled={!canGoNext}
           >
-            <Text style={[styles.navBtnText, !canGoNext && styles.navBtnTextDisabled]}>Next</Text>
-            <Feather name="chevron-right" size={18} color={canGoNext ? theme.colors.text : theme.colors.muted} />
+            <Text style={[styles.navBtnTextPrimary, !canGoNext && styles.navBtnTextDisabled]}>Next</Text>
+            <Feather name="chevron-right" size={18} color={canGoNext ? theme.colors.white : theme.colors.muted} />
           </TouchableOpacity>
         </View>
 
@@ -1361,22 +1362,27 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: theme.colors.border,
     backgroundColor: theme.colors.background,
+    gap: 12,
   },
   navBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: theme.colors.surface,
     borderWidth: 1,
     borderColor: theme.colors.border,
     paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderRadius: theme.borderRadius.md,
-    minWidth: 120,
+    flexBasis: '48%',
+    flexGrow: 0,
+    flexShrink: 1,
     justifyContent: 'center',
   },
+  navBtnSecondary: { backgroundColor: theme.colors.surface },
+  navBtnPrimary: { backgroundColor: theme.colors.primary, borderColor: theme.colors.primary },
   navBtnDisabled: { opacity: 0.6 },
   navBtnText: { color: theme.colors.text, fontWeight: '800' },
+  navBtnTextPrimary: { color: theme.colors.white, fontWeight: '800' },
   navBtnTextDisabled: { color: theme.colors.muted },
   center: { paddingVertical: 40, alignItems: 'center', justifyContent: 'center', gap: 12 },
   centerText: { color: theme.colors.secondaryText, fontWeight: '600' },

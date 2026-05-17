@@ -33,7 +33,7 @@ export default {
         backgroundColor: "#F5F7FF"
       },
       edgeToEdgeEnabled: false,
-      googleServicesFile: process.env.GOOGLE_SERVICES_JSON || "./google-services.json",
+      googleServicesFile: process.env.GOOGLE_SERVICES_JSON || "../google-services.json",
       package: "com.powerteldev.MobileApplication"
     },
 
