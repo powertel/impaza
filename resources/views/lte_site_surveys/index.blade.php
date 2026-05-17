@@ -97,6 +97,9 @@ LTE Site Surveys
         </div>
       </div>
       <div class="card-tools">
+        <a href="{{ route('lte-site-surveys.map') }}" class="btn btn-outline-secondary btn-sm me-2">
+          <i class="fas fa-map-marked-alt"></i> Map
+        </a>
         <a href="{{ route('lte-site-surveys.reports') }}" class="btn btn-outline-secondary btn-sm me-2">
           <i class="fas fa-chart-bar"></i> Reports
         </a>

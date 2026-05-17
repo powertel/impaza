@@ -262,6 +262,60 @@ class LteSiteSurveyController extends Controller
         ]);
     }
 
+    public function map(Request $request)
+    {
+        $status = trim((string) $request->input('status', ''));
+        $status = $status === '' ? null : $status;
+
+        $rows = LteSiteSurvey::query()
+            ->select(['id', 'site_name', 'province_region', 'status', 'latitude', 'longitude', 'coordinates', 'created_at'])
+            ->when($status, fn ($q) => $q->where('status', $status))
+            ->orderByDesc('created_at')
+            ->limit(5000)
+            ->get();
+
+        $points = [];
+        $missing = 0;
+        foreach ($rows as $s) {
+            $lat = $s->latitude;
+            $lng = $s->longitude;
+
+            if (($lat === null || $lat === '') || ($lng === null || $lng === '')) {
+                $coords = trim((string) ($s->coordinates ?? ''));
+                if ($coords !== '' && str_contains($coords, ',')) {
+                    [$a, $b] = array_map('trim', explode(',', $coords, 2));
+                    if (is_numeric($a) && is_numeric($b)) {
+                        $lat = (float) $a;
+                        $lng = (float) $b;
+                    }
+                }
+            }
+
+            if (!is_numeric($lat) || !is_numeric($lng)) {
+                $missing++;
+                continue;
+            }
+
+            $points[] = [
+                'id' => (int) $s->id,
+                'site_name' => (string) ($s->site_name ?: 'Untitled'),
+                'province_region' => (string) ($s->province_region ?: ''),
+                'status' => (string) ($s->status ?: ''),
+                'lat' => (float) $lat,
+                'lng' => (float) $lng,
+                'created_at' => $s->created_at ? $s->created_at->format('Y-m-d H:i') : '',
+            ];
+        }
+
+        return view('lte_site_surveys.map', [
+            'status' => $status,
+            'points' => $points,
+            'total' => $rows->count(),
+            'plotted' => count($points),
+            'missing' => $missing,
+        ]);
+    }
+
     public function index(Request $request)
     {
         $q = trim((string) $request->input('q', ''));
