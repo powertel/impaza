@@ -11,13 +11,14 @@ import {
   Image,
   Platform,
   KeyboardAvoidingView,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
-import { createLteSiteSurvey, getLteSiteSurvey } from '../services/api';
+import { createLteSiteSurvey, getAuthToken, getLteEnabledUsers, getLteSiteSurvey, lteSurveyPhotoUrl, updateLteSiteSurvey } from '../services/api';
 import { UserContext } from '../context/UserContext';
 import { theme } from '../styles/theme';
 
@@ -62,12 +63,15 @@ const defaultMaterials = {
 const emptyForm = {
   meta: {
     date: '',
+    surveyPerformedByUserId: '',
     surveyPerformedBy: '',
   },
   general: {
     siteName: '',
     jcNumber: '',
     coordinates: '',
+    latitude: '',
+    longitude: '',
     physicalAddress: '',
     provinceRegion: '',
     contactDetails: '',
@@ -111,6 +115,9 @@ const emptyForm = {
     newManholeRequired: false,
   },
   materials: defaultMaterials,
+  notes: {
+    notes: '',
+  },
   photos: {
     nearest_joint_box: [],
     fibre_route_towards_tower: [],
@@ -142,6 +149,24 @@ function Field({ label, value, onChangeText, placeholder, multiline, keyboardTyp
         keyboardType={keyboardType}
         editable={editable}
       />
+    </View>
+  );
+}
+
+function SelectField({ label, value, placeholder, onPress, disabled }) {
+  return (
+    <View style={{ marginBottom: theme.spacing.md }}>
+      <Label>{label}</Label>
+      <TouchableOpacity
+        style={[styles.selectInput, disabled && styles.inputDisabled]}
+        onPress={onPress}
+        disabled={disabled}
+      >
+        <Text style={[styles.selectText, !value && { color: theme.colors.muted }]} numberOfLines={1}>
+          {value || placeholder || 'Select'}
+        </Text>
+        <Feather name="chevron-down" size={18} color={theme.colors.secondaryText} />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -188,25 +213,33 @@ export default function LteSiteSurveyWizardScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const { user } = useContext(UserContext);
-  const fromSurveyId = route?.params?.fromSurveyId;
-  const readOnly = !!fromSurveyId;
+  const surveyId = route?.params?.surveyId || route?.params?.fromSurveyId;
+  const mode = route?.params?.mode || (surveyId ? 'view' : 'create');
+  const readOnly = mode === 'view';
+  const isEdit = mode === 'edit';
 
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [loadingRemote, setLoadingRemote] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [remotePhotos, setRemotePhotos] = useState([]);
+  const [usersOpen, setUsersOpen] = useState(false);
+  const [enabledUsers, setEnabledUsers] = useState([]);
+  const token = getAuthToken();
 
   const saveTimer = useRef(null);
 
   const steps = useMemo(() => ([
     { key: 'general', title: 'General Site Information' },
-    { key: 'access', title: 'Site Access + Tower Details' },
-    { key: 'transmission', title: 'Transmission Details' },
-    { key: 'power', title: 'Power Details' },
-    { key: 'civil', title: 'Civil Works Requirement' },
-    { key: 'materials', title: 'Materials (Civils + NTE)' },
-    { key: 'photos', title: 'Site Photos Checklist' },
-    { key: 'review', title: 'Review + Submit' },
+    { key: 'coordinates', title: 'Coordinates' },
+    { key: 'access', title: 'Access + Tower' },
+    { key: 'transmission', title: 'Transmission' },
+    { key: 'power', title: 'Power' },
+    { key: 'civil', title: 'Civil Works' },
+    { key: 'materials', title: 'Materials' },
+    { key: 'notes', title: 'Notes' },
+    { key: 'photos', title: 'Images & Attachments' },
+    { key: 'review', title: 'Overview' },
   ]), []);
 
   const totalSteps = steps.length;
@@ -218,17 +251,33 @@ export default function LteSiteSurveyWizardScreen() {
   }, []);
 
   useEffect(() => {
-    if (readOnly) return;
+    if (mode === 'view') return;
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await getLteEnabledUsers();
+        const data = res?.data;
+        if (!mounted) return;
+        setEnabledUsers(Array.isArray(data) ? data : []);
+      } catch (e) {
+        if (mounted) setEnabledUsers([]);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [mode]);
+
+  useEffect(() => {
+    if (mode !== 'create') return;
     const name = user?.name ? String(user.name) : '';
     if (!name) return;
     setForm((prev) => {
       if (prev?.meta?.surveyPerformedBy) return prev;
-      return { ...prev, meta: { ...(prev.meta || {}), surveyPerformedBy: name } };
+      return { ...prev, meta: { ...(prev.meta || {}), surveyPerformedByUserId: String(user?.id || ''), surveyPerformedBy: name } };
     });
-  }, [user, readOnly]);
+  }, [user, mode]);
 
   useEffect(() => {
-    if (readOnly) return;
+    if (mode !== 'create') return;
 
     let mounted = true;
     (async () => {
@@ -251,25 +300,37 @@ export default function LteSiteSurveyWizardScreen() {
     })();
 
     return () => { mounted = false; };
-  }, [readOnly]);
+  }, [mode]);
 
   useEffect(() => {
-    if (!fromSurveyId) return;
+    if (!surveyId) return;
     let mounted = true;
     setLoadingRemote(true);
     (async () => {
       try {
-        const res = await getLteSiteSurvey(fromSurveyId);
-        const payload = res?.data?.payload;
+        const res = await getLteSiteSurvey(surveyId);
+        const data = res?.data;
+        const payload = data?.payload;
         if (!mounted) return;
         if (payload && typeof payload === 'object') {
+          const lat = payload?.general?.latitude ?? data?.latitude ?? '';
+          const lng = payload?.general?.longitude ?? data?.longitude ?? '';
           setForm((prev) => ({
             ...prev,
             ...payload,
             materials: payload.materials || defaultMaterials,
             photos: { ...prev.photos },
+            notes: payload.notes || prev.notes,
+            general: {
+              ...(prev.general || {}),
+              ...(payload.general || {}),
+              latitude: lat === null ? '' : String(lat),
+              longitude: lng === null ? '' : String(lng),
+            },
           }));
         }
+        const photos = Array.isArray(data?.photos) ? data.photos : [];
+        setRemotePhotos(photos);
       } catch (e) {
         if (mounted) Alert.alert('Error', 'Failed to load survey.');
       } finally {
@@ -277,10 +338,10 @@ export default function LteSiteSurveyWizardScreen() {
       }
     })();
     return () => { mounted = false; };
-  }, [fromSurveyId]);
+  }, [surveyId]);
 
   useEffect(() => {
-    if (readOnly) return;
+    if (mode !== 'create') return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
       try {
@@ -291,7 +352,7 @@ export default function LteSiteSurveyWizardScreen() {
     return () => {
       if (saveTimer.current) clearTimeout(saveTimer.current);
     };
-  }, [form, readOnly]);
+  }, [form, mode]);
 
   const updateSection = (section, key, value) => {
     setForm((prev) => ({
@@ -446,15 +507,21 @@ export default function LteSiteSurveyWizardScreen() {
 
     setLoading(true);
     try {
+      const latRaw = String(form?.general?.latitude ?? '').trim();
+      const lngRaw = String(form?.general?.longitude ?? '').trim();
+      const lat = latRaw !== '' && !isNaN(Number(latRaw)) ? Number(latRaw) : null;
+      const lng = lngRaw !== '' && !isNaN(Number(lngRaw)) ? Number(lngRaw) : null;
+
       const payload = {
         meta: form.meta,
-        general: form.general,
+        general: { ...(form.general || {}), latitude: lat, longitude: lng },
         accessSecurity: form.accessSecurity,
         tower: form.tower,
         transmission: form.transmission,
         power: form.power,
         civilWorks: form.civilWorks,
         materials: form.materials,
+        notes: form.notes,
       };
 
       const fd = new FormData();
@@ -469,17 +536,28 @@ export default function LteSiteSurveyWizardScreen() {
         });
       });
 
-      const res = await createLteSiteSurvey(fd);
+      const res = isEdit ? await updateLteSiteSurvey(surveyId, fd) : await createLteSiteSurvey(fd);
       if (!res?.success) {
         Alert.alert('Error', res?.message || 'Failed to save survey.');
         return;
       }
 
       if (status === 'submitted') {
-        await AsyncStorage.removeItem(DRAFT_KEY);
-        Alert.alert('Success', 'Survey submitted.', [{ text: 'OK', onPress: () => navigation.goBack() }]);
+        if (mode === 'create') await AsyncStorage.removeItem(DRAFT_KEY);
+        Alert.alert('Success', isEdit ? 'Survey updated and submitted.' : 'Survey submitted.', [
+          {
+            text: 'OK',
+            onPress: () => {
+              if (isEdit) {
+                navigation.navigate('LteSiteSurveyView', { id: surveyId });
+              } else {
+                navigation.goBack();
+              }
+            },
+          },
+        ]);
       } else {
-        Alert.alert('Saved', 'Draft saved.');
+        Alert.alert('Saved', isEdit ? 'Draft updated.' : 'Draft saved.');
       }
     } catch (e) {
       Alert.alert('Error', 'Failed to save survey.');
@@ -490,11 +568,32 @@ export default function LteSiteSurveyWizardScreen() {
 
   const PhotoCard = ({ labelKey, title }) => {
     const list = Array.isArray(form?.photos?.[labelKey]) ? form.photos[labelKey] : (form?.photos?.[labelKey] ? [form.photos[labelKey]] : []);
+    const remoteList = Array.isArray(remotePhotos) ? remotePhotos.filter((p) => String(p?.label || '') === String(labelKey)) : [];
+    const hasAny = remoteList.length > 0 || list.length > 0;
     return (
       <View style={styles.photoCard}>
         <Text style={styles.photoTitle}>{title}</Text>
-        {list.length > 0 ? (
+        {hasAny ? (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.photoStrip}>
+            {remoteList.map((p) => {
+              const isImage = String(p?.mime_type || '').startsWith('image/');
+              if (!isImage) {
+                return (
+                  <View key={`remote-${labelKey}-${p.id}`} style={styles.fileThumbWrap}>
+                    <Feather name="file" size={18} color={theme.colors.secondaryText} />
+                    <Text style={styles.fileThumbText} numberOfLines={2}>{p?.original_name || 'Attachment'}</Text>
+                  </View>
+                );
+              }
+              return (
+                <View key={`remote-${labelKey}-${p.id}`} style={styles.photoThumbWrap}>
+                  <Image
+                    source={{ uri: lteSurveyPhotoUrl(p.id), headers: token ? { Authorization: `Bearer ${token}` } : {} }}
+                    style={styles.photoThumb}
+                  />
+                </View>
+              );
+            })}
             {list.map((f, idx) => (
               <View key={`${labelKey}-${idx}`} style={styles.photoThumbWrap}>
                 <Image source={{ uri: f.uri }} style={styles.photoThumb} />
@@ -555,12 +654,12 @@ export default function LteSiteSurveyWizardScreen() {
             placeholder="YYYY-MM-DD"
             editable={editable}
           />
-          <Field
+          <SelectField
             label="Survey Performed By"
             value={form.meta.surveyPerformedBy}
-            onChangeText={(v) => updateSection('meta', 'surveyPerformedBy', v)}
-            placeholder="Name"
-            editable={editable}
+            placeholder="Select user"
+            onPress={() => setUsersOpen(true)}
+            disabled={!editable}
           />
 
           <SectionTitle>General Site Information</SectionTitle>
@@ -579,10 +678,10 @@ export default function LteSiteSurveyWizardScreen() {
             editable={editable}
           />
           <Field
-            label="Co-ordinates"
-            value={form.general.coordinates}
-            onChangeText={(v) => updateSection('general', 'coordinates', v)}
-            placeholder="e.g. -17.8292, 31.0522"
+            label="Province/Region"
+            value={form.general.provinceRegion}
+            onChangeText={(v) => updateSection('general', 'provinceRegion', v)}
+            placeholder="Province/Region"
             editable={editable}
           />
           <Field
@@ -591,13 +690,6 @@ export default function LteSiteSurveyWizardScreen() {
             onChangeText={(v) => updateSection('general', 'physicalAddress', v)}
             placeholder="Address"
             multiline
-            editable={editable}
-          />
-          <Field
-            label="Province/Region"
-            value={form.general.provinceRegion}
-            onChangeText={(v) => updateSection('general', 'provinceRegion', v)}
-            placeholder="Province/Region"
             editable={editable}
           />
           <Field
@@ -613,6 +705,53 @@ export default function LteSiteSurveyWizardScreen() {
     }
 
     if (step === 1) {
+      const lat = form?.general?.latitude ?? '';
+      const lng = form?.general?.longitude ?? '';
+      return (
+        <>
+          <SectionTitle>Coordinates</SectionTitle>
+          <Field
+            label="Latitude"
+            value={String(lat)}
+            onChangeText={(v) => {
+              updateSection('general', 'latitude', v);
+              const nextLat = String(v || '').trim();
+              const nextLng = String(lng || '').trim();
+              if (nextLat !== '' && nextLng !== '' && !isNaN(Number(nextLat)) && !isNaN(Number(nextLng))) {
+                updateSection('general', 'coordinates', `${nextLat}, ${nextLng}`);
+              }
+            }}
+            placeholder="e.g. -17.8292"
+            keyboardType="numeric"
+            editable={editable}
+          />
+          <Field
+            label="Longitude"
+            value={String(lng)}
+            onChangeText={(v) => {
+              updateSection('general', 'longitude', v);
+              const nextLat = String(lat || '').trim();
+              const nextLng = String(v || '').trim();
+              if (nextLat !== '' && nextLng !== '' && !isNaN(Number(nextLat)) && !isNaN(Number(nextLng))) {
+                updateSection('general', 'coordinates', `${nextLat}, ${nextLng}`);
+              }
+            }}
+            placeholder="e.g. 31.0522"
+            keyboardType="numeric"
+            editable={editable}
+          />
+          <Field
+            label="Coordinates (auto)"
+            value={form.general.coordinates}
+            onChangeText={(v) => updateSection('general', 'coordinates', v)}
+            placeholder="e.g. -17.8292, 31.0522"
+            editable={editable}
+          />
+        </>
+      );
+    }
+
+    if (step === 2) {
       return (
         <>
           <SectionTitle>Site Access and Security</SectionTitle>
@@ -686,7 +825,7 @@ export default function LteSiteSurveyWizardScreen() {
       );
     }
 
-    if (step === 2) {
+    if (step === 3) {
       return (
         <>
           <SectionTitle>Transmission Details</SectionTitle>
@@ -746,7 +885,7 @@ export default function LteSiteSurveyWizardScreen() {
       );
     }
 
-    if (step === 3) {
+    if (step === 4) {
       return (
         <>
           <SectionTitle>Power Details</SectionTitle>
@@ -829,7 +968,7 @@ export default function LteSiteSurveyWizardScreen() {
       );
     }
 
-    if (step === 4) {
+    if (step === 5) {
       return (
         <>
           <SectionTitle>Civil Works Requirement</SectionTitle>
@@ -867,7 +1006,7 @@ export default function LteSiteSurveyWizardScreen() {
       );
     }
 
-    if (step === 5) {
+    if (step === 6) {
       const materials = form.materials || defaultMaterials;
       const civils = Array.isArray(materials.civils) ? materials.civils : [];
       const nte = Array.isArray(materials.nte) ? materials.nte : [];
@@ -932,7 +1071,23 @@ export default function LteSiteSurveyWizardScreen() {
       );
     }
 
-    if (step === 6) {
+    if (step === 7) {
+      return (
+        <>
+          <SectionTitle>Notes</SectionTitle>
+          <Field
+            label="Notes (optional)"
+            value={form?.notes?.notes || ''}
+            onChangeText={(v) => setForm((prev) => ({ ...prev, notes: { ...(prev.notes || {}), notes: v } }))}
+            placeholder="Anything to add..."
+            multiline
+            editable={editable}
+          />
+        </>
+      );
+    }
+
+    if (step === 8) {
       return (
         <>
           <PhotoCard labelKey="nearest_joint_box" title="Nearest Joint Box" />
@@ -946,36 +1101,45 @@ export default function LteSiteSurveyWizardScreen() {
       );
     }
 
-    const selectedPhotos = Object.values(form.photos || {}).reduce((sum, v) => sum + (Array.isArray(v) ? v.length : (v?.uri ? 1 : 0)), 0);
-    return (
-      <>
-        <SectionTitle>Summary</SectionTitle>
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryLine}><Text style={styles.summaryKey}>Site Name: </Text>{form.general.siteName || '-'}</Text>
-          <Text style={styles.summaryLine}><Text style={styles.summaryKey}>JC Number: </Text>{form.general.jcNumber || '-'}</Text>
-          <Text style={styles.summaryLine}><Text style={styles.summaryKey}>Coordinates: </Text>{form.general.coordinates || '-'}</Text>
-          <Text style={styles.summaryLine}><Text style={styles.summaryKey}>Province/Region: </Text>{form.general.provinceRegion || '-'}</Text>
-          <Text style={styles.summaryLine}><Text style={styles.summaryKey}>Photos Selected: </Text>{selectedPhotos}</Text>
-        </View>
+    if (step === 9) {
+      const selectedPhotos = Object.values(form.photos || {}).reduce((sum, v) => sum + (Array.isArray(v) ? v.length : (v?.uri ? 1 : 0)), 0);
+      return (
+        <>
+          <SectionTitle>Summary</SectionTitle>
+          <View style={styles.summaryCard}>
+            <Text style={styles.summaryLine}><Text style={styles.summaryKey}>Site Name: </Text>{form.general.siteName || '-'}</Text>
+            <Text style={styles.summaryLine}><Text style={styles.summaryKey}>JC Number: </Text>{form.general.jcNumber || '-'}</Text>
+            <Text style={styles.summaryLine}><Text style={styles.summaryKey}>Coordinates: </Text>{form.general.coordinates || '-'}</Text>
+            <Text style={styles.summaryLine}><Text style={styles.summaryKey}>Latitude: </Text>{form.general.latitude || '-'}</Text>
+            <Text style={styles.summaryLine}><Text style={styles.summaryKey}>Longitude: </Text>{form.general.longitude || '-'}</Text>
+            <Text style={styles.summaryLine}><Text style={styles.summaryKey}>Province/Region: </Text>{form.general.provinceRegion || '-'}</Text>
+            <Text style={styles.summaryLine}><Text style={styles.summaryKey}>Notes: </Text>{(form.notes?.notes || '').trim() ? 'Provided' : '—'}</Text>
+            <Text style={styles.summaryLine}><Text style={styles.summaryKey}>Photos Selected: </Text>{selectedPhotos}</Text>
+          </View>
 
-        {!readOnly ? (
-          <>
-            <TouchableOpacity style={[styles.submitBtn, loading && styles.disabledBtn]} onPress={() => submit('draft')} disabled={loading}>
-              {loading ? <ActivityIndicator color={theme.colors.white} /> : <Text style={styles.submitBtnText}>Save Draft</Text>}
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.submitBtnPrimary, loading && styles.disabledBtn]} onPress={() => submit('submitted')} disabled={loading}>
-              {loading ? <ActivityIndicator color={theme.colors.white} /> : <Text style={styles.submitBtnText}>Submit Survey</Text>}
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.resetBtn} onPress={() => Alert.alert('Reset draft', 'Clear all form values?', [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Clear', style: 'destructive', onPress: clearDraft },
-            ])} disabled={loading}>
-              <Text style={styles.resetBtnText}>Clear Draft</Text>
-            </TouchableOpacity>
-          </>
-        ) : null}
-      </>
-    );
+          {!readOnly ? (
+            <>
+              <TouchableOpacity style={[styles.submitBtn, loading && styles.disabledBtn]} onPress={() => submit('draft')} disabled={loading}>
+                {loading ? <ActivityIndicator color={theme.colors.white} /> : <Text style={styles.submitBtnText}>Save Draft</Text>}
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.submitBtnPrimary, loading && styles.disabledBtn]} onPress={() => submit('submitted')} disabled={loading}>
+                {loading ? <ActivityIndicator color={theme.colors.white} /> : <Text style={styles.submitBtnText}>{isEdit ? 'Update & Submit' : 'Submit Survey'}</Text>}
+              </TouchableOpacity>
+              {mode === 'create' ? (
+                <TouchableOpacity style={styles.resetBtn} onPress={() => Alert.alert('Reset draft', 'Clear all form values?', [
+                  { text: 'Cancel', style: 'cancel' },
+                  { text: 'Clear', style: 'destructive', onPress: clearDraft },
+                ])} disabled={loading}>
+                  <Text style={styles.resetBtnText}>Clear Draft</Text>
+                </TouchableOpacity>
+              ) : null}
+            </>
+          ) : null}
+        </>
+      );
+    }
+
+    return null;
   };
 
   const canGoBack = step > 0;
@@ -1015,6 +1179,47 @@ export default function LteSiteSurveyWizardScreen() {
             <Feather name="chevron-right" size={18} color={canGoNext ? theme.colors.text : theme.colors.muted} />
           </TouchableOpacity>
         </View>
+
+        <Modal visible={usersOpen} transparent animationType="fade" onRequestClose={() => setUsersOpen(false)}>
+          <View style={styles.modalBackdrop}>
+            <View style={styles.modalCard}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Select user</Text>
+                <TouchableOpacity onPress={() => setUsersOpen(false)}>
+                  <Feather name="x" size={20} color={theme.colors.secondaryText} />
+                </TouchableOpacity>
+              </View>
+              <ScrollView style={{ maxHeight: 380 }} keyboardShouldPersistTaps="handled">
+                {enabledUsers.length === 0 ? (
+                  <View style={styles.modalEmpty}>
+                    <Text style={styles.modalEmptyText}>No users found</Text>
+                  </View>
+                ) : (
+                  enabledUsers.map((u) => (
+                    <TouchableOpacity
+                      key={String(u.id)}
+                      style={styles.userRow}
+                      onPress={() => {
+                        setForm((prev) => ({
+                          ...prev,
+                          meta: { ...(prev.meta || {}), surveyPerformedByUserId: String(u.id), surveyPerformedBy: String(u.name || '') },
+                        }));
+                        setUsersOpen(false);
+                      }}
+                    >
+                      <Text style={styles.userName} numberOfLines={1}>{u.name}</Text>
+                      {String(form?.meta?.surveyPerformedByUserId || '') === String(u.id) ? (
+                        <Feather name="check" size={18} color={theme.colors.primary} />
+                      ) : (
+                        <Feather name="chevron-right" size={18} color={theme.colors.muted} />
+                      )}
+                    </TouchableOpacity>
+                  ))
+                )}
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -1054,6 +1259,19 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     color: theme.colors.text,
   },
+  selectInput: {
+    backgroundColor: theme.colors.input,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.borderRadius.md,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  selectText: { color: theme.colors.text, fontWeight: '600', flex: 1 },
   textarea: { minHeight: 100, paddingTop: 10 },
   inputDisabled: { opacity: 0.75 },
   pillsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
@@ -1105,6 +1323,19 @@ const styles = StyleSheet.create({
   photoStrip: { gap: 10 },
   photoThumbWrap: { width: 220, height: 180 },
   photoThumb: { width: '100%', height: '100%', borderRadius: theme.borderRadius.md, backgroundColor: theme.colors.input },
+  fileThumbWrap: {
+    width: 220,
+    height: 180,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.input,
+    padding: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  fileThumbText: { color: theme.colors.secondaryText, fontWeight: '700', fontSize: theme.fontSizes.sm, textAlign: 'center' },
   photoRemove: { position: 'absolute', top: 8, right: 8, width: 26, height: 26, borderRadius: 13, backgroundColor: theme.colors.danger, alignItems: 'center', justifyContent: 'center' },
   photoEmpty: { height: 180, borderRadius: theme.borderRadius.md, borderWidth: 1, borderColor: theme.colors.border, backgroundColor: theme.colors.input, alignItems: 'center', justifyContent: 'center', gap: 8 },
   photoEmptyText: { color: theme.colors.secondaryText, fontWeight: '600' },
@@ -1149,4 +1380,12 @@ const styles = StyleSheet.create({
   navBtnTextDisabled: { color: theme.colors.muted },
   center: { paddingVertical: 40, alignItems: 'center', justifyContent: 'center', gap: 12 },
   centerText: { color: theme.colors.secondaryText, fontWeight: '600' },
+  modalBackdrop: { flex: 1, backgroundColor: 'rgba(15,23,42,0.55)', alignItems: 'center', justifyContent: 'center', padding: theme.spacing.lg },
+  modalCard: { width: '100%', backgroundColor: theme.colors.surface, borderRadius: theme.borderRadius.lg, borderWidth: 1, borderColor: theme.colors.border, padding: theme.spacing.md },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: theme.spacing.sm },
+  modalTitle: { fontSize: theme.fontSizes.md, fontWeight: '800', color: theme.colors.text },
+  modalEmpty: { paddingVertical: 20, alignItems: 'center' },
+  modalEmptyText: { color: theme.colors.secondaryText, fontWeight: '700' },
+  userRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.border },
+  userName: { flex: 1, color: theme.colors.text, fontWeight: '800', marginRight: 12 },
 });

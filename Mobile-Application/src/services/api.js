@@ -43,6 +43,7 @@ if (__DEV__) console.log('API_URL', API_URL);
 
 let authToken = null;
 export function setAuthToken(token) { authToken = token; }
+export function getAuthToken() { return authToken; }
 
 async function request(path, options = {}) {
   const isForm = options && options.body && typeof options.body === 'object' && options.body instanceof FormData;
@@ -236,8 +237,9 @@ export async function markAllNotificationsRead() {
   return request('/mobile/notifications/mark-all-read', { method: 'POST' });
 }
 
-export async function getLteSiteSurveys() {
-  return request('/mobile/lte-site-surveys');
+export async function getLteSiteSurveys(params = {}) {
+  const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  return request(`/mobile/lte-site-surveys${query}`);
 }
 
 export async function getLteSiteSurvey(id) {
@@ -249,4 +251,30 @@ export async function createLteSiteSurvey(payload) {
     return request('/mobile/lte-site-surveys', { method: 'POST', body: payload });
   }
   return request('/mobile/lte-site-surveys', { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export async function updateLteSiteSurvey(id, payload) {
+  if (payload instanceof FormData) {
+    return request(`/mobile/lte-site-surveys/${id}`, { method: 'PUT', body: payload });
+  }
+  return request(`/mobile/lte-site-surveys/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+}
+
+export async function getLteEnabledUsers() {
+  return request('/mobile/lte-site-surveys-enabled-users');
+}
+
+export async function addLteSurveyRemark(id, payload) {
+  if (payload instanceof FormData) {
+    return request(`/mobile/lte-site-surveys/${id}/remarks`, { method: 'POST', body: payload });
+  }
+  return request(`/mobile/lte-site-surveys/${id}/remarks`, { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export function lteSurveyPhotoUrl(photoId) {
+  return `${API_URL}/mobile/lte-site-survey-photos/${photoId}`;
+}
+
+export function lteSurveyRemarkFileUrl(remarkId) {
+  return `${API_URL}/mobile/lte-site-survey-remarks/${remarkId}/file`;
 }

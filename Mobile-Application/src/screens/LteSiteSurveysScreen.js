@@ -1,20 +1,36 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, RefreshControl, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
 import { getLteSiteSurveys } from '../services/api';
 import { theme } from '../styles/theme';
 
+function Pill({ label, active, onPress }) {
+  return (
+    <TouchableOpacity style={[styles.pill, active && styles.pillActive]} onPress={onPress}>
+      <Text style={[styles.pillText, active && styles.pillTextActive]}>{label}</Text>
+    </TouchableOpacity>
+  );
+}
+
 export default function LteSiteSurveysScreen() {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState([]);
+  const [q, setQ] = useState('');
+  const [status, setStatus] = useState('all');
+  const debounceRef = useRef(null);
 
-  const load = async () => {
+  const load = async (opts = {}) => {
     setLoading(true);
     try {
-      const res = await getLteSiteSurveys();
+      const params = {
+        per_page: 50,
+        ...(opts.q != null ? { q: opts.q } : {}),
+        ...(opts.status && opts.status !== 'all' ? { status: opts.status } : {}),
+      };
+      const res = await getLteSiteSurveys(params);
       const data = res?.data || [];
       setItems(Array.isArray(data) ? data : []);
     } catch (e) {
@@ -28,6 +44,16 @@ export default function LteSiteSurveysScreen() {
     navigation.setOptions({ title: 'LTE Site Surveys' });
     load();
   }, []);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      load({ q, status });
+    }, 350);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [q, status]);
 
   const badgeStyle = (status) => {
     if (status === 'submitted') return { backgroundColor: 'rgba(34, 197, 94, 0.12)', borderColor: 'rgba(34, 197, 94, 0.35)', color: theme.colors.success, label: 'Submitted' };
@@ -47,9 +73,34 @@ export default function LteSiteSurveysScreen() {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.filters}>
+        <View style={styles.searchWrap}>
+          <Feather name="search" size={16} color={theme.colors.secondaryText} />
+          <TextInput
+            value={q}
+            onChangeText={setQ}
+            placeholder="Search site name, JC, region..."
+            placeholderTextColor={theme.colors.muted}
+            style={styles.searchInput}
+            autoCorrect={false}
+            autoCapitalize="none"
+          />
+          {q ? (
+            <TouchableOpacity onPress={() => setQ('')}>
+              <Feather name="x" size={16} color={theme.colors.secondaryText} />
+            </TouchableOpacity>
+          ) : null}
+        </View>
+        <View style={styles.pillsRow}>
+          <Pill label="All" active={status === 'all'} onPress={() => setStatus('all')} />
+          <Pill label="Submitted" active={status === 'submitted'} onPress={() => setStatus('submitted')} />
+          <Pill label="Draft" active={status === 'draft'} onPress={() => setStatus('draft')} />
+        </View>
+      </View>
+
       <ScrollView
         contentContainerStyle={styles.scroll}
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={load} tintColor={theme.colors.primary} />}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={() => load({ q, status })} tintColor={theme.colors.primary} />}
       >
         {items.length === 0 ? (
           <View style={styles.emptyCard}>
@@ -64,7 +115,7 @@ export default function LteSiteSurveysScreen() {
               <TouchableOpacity
                 key={String(s.id)}
                 style={styles.card}
-                onPress={() => navigation.navigate('LteSiteSurveyWizard', { fromSurveyId: s.id })}
+                onPress={() => navigation.navigate('LteSiteSurveyView', { id: s.id })}
               >
                 <View style={styles.cardTopRow}>
                   <Text style={styles.siteName} numberOfLines={1}>{s.site_name || 'Untitled Site'}</Text>
@@ -81,6 +132,14 @@ export default function LteSiteSurveysScreen() {
                 <View style={styles.metaRow}>
                   <Text style={styles.metaText}>{s.province_region || '-'}</Text>
                   <Text style={styles.metaText}>{s.survey_date || s.created_at || ''}</Text>
+                </View>
+
+                <View style={styles.metaRow}>
+                  <Text style={styles.metaText}>Captured By: {s?.user?.name || '-'}</Text>
+                  <View style={styles.openRow}>
+                    <Text style={styles.openText}>Open</Text>
+                    <Feather name="chevron-right" size={16} color={theme.colors.secondaryText} />
+                  </View>
                 </View>
               </TouchableOpacity>
             );
@@ -113,6 +172,31 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.md,
   },
   newBtnText: { color: theme.colors.white, fontWeight: '700' },
+  filters: { paddingHorizontal: theme.spacing.lg, paddingBottom: theme.spacing.sm, gap: theme.spacing.sm },
+  searchWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  searchInput: { flex: 1, color: theme.colors.text, fontSize: theme.fontSizes.sm },
+  pillsRow: { flexDirection: 'row', gap: 10 },
+  pill: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: theme.borderRadius.circle,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surface,
+  },
+  pillActive: { backgroundColor: 'rgba(59,130,246,0.12)', borderColor: 'rgba(59,130,246,0.35)' },
+  pillText: { fontSize: theme.fontSizes.xs, fontWeight: '700', color: theme.colors.secondaryText },
+  pillTextActive: { color: theme.colors.primary },
   scroll: { padding: theme.spacing.lg, paddingBottom: theme.spacing.xxl },
   card: {
     backgroundColor: theme.colors.surface,
@@ -133,6 +217,8 @@ const styles = StyleSheet.create({
   badgeText: { fontSize: theme.fontSizes.xs, fontWeight: '700' },
   metaRow: { marginTop: 8, flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
   metaText: { color: theme.colors.secondaryText, fontSize: theme.fontSizes.sm },
+  openRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  openText: { color: theme.colors.secondaryText, fontSize: theme.fontSizes.sm, fontWeight: '700' },
   emptyCard: {
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.md,
@@ -144,4 +230,3 @@ const styles = StyleSheet.create({
   emptyTitle: { marginTop: 10, fontWeight: '700', color: theme.colors.text, fontSize: theme.fontSizes.lg },
   emptyDesc: { marginTop: 6, color: theme.colors.secondaryText, textAlign: 'center' },
 });
-
