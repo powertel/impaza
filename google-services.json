@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "496204187669",
+    "project_id": "impazamon",
+    "storage_bucket": "impazamon.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:496204187669:android:57048de62785b34476e61c",
+        "android_client_info": {
+          "package_name": "com.powerteldev.MobileApplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDyqpW3zy9E8ERU5vSppN6T-D8f__IE4Rk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

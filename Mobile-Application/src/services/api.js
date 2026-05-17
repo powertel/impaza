@@ -255,7 +255,8 @@ export async function createLteSiteSurvey(payload) {
 
 export async function updateLteSiteSurvey(id, payload) {
   if (payload instanceof FormData) {
-    return request(`/mobile/lte-site-surveys/${id}`, { method: 'PUT', body: payload });
+    payload.append('_method', 'PUT');
+    return request(`/mobile/lte-site-surveys/${id}`, { method: 'POST', body: payload });
   }
   return request(`/mobile/lte-site-surveys/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
 }
