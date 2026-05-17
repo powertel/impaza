@@ -27,6 +27,7 @@ import RevokeFaultScreen from '../screens/RevokeFaultScreen';
 import CompleteReferralScreen from '../screens/CompleteReferralScreen';
 import LteSiteSurveysScreen from '../screens/LteSiteSurveysScreen';
 import LteSiteSurveyWizardScreen from '../screens/LteSiteSurveyWizardScreen';
+import LteSiteSurveyViewScreen from '../screens/LteSiteSurveyViewScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -66,6 +67,7 @@ export default function AppNavigator() {
         <Stack.Screen name="RevokeFault" component={RevokeFaultScreen} options={{ title: 'Revoke Fault' }} />
         <Stack.Screen name="CompleteReferral" component={CompleteReferralScreen} options={{ title: 'Complete Referral' }} />
         <Stack.Screen name="LteSiteSurveys" component={LteSiteSurveysScreen} options={{ title: 'LTE Site Surveys' }} />
+        <Stack.Screen name="LteSiteSurveyView" component={LteSiteSurveyViewScreen} options={{ title: 'LTE Survey' }} />
         <Stack.Screen name="LteSiteSurveyWizard" component={LteSiteSurveyWizardScreen} options={{ title: 'LTE Site Survey' }} />
       </Stack.Navigator>
     </NavigationContainer>

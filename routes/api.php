@@ -40,6 +40,11 @@ Route::prefix('mobile')->group(function () {
         Route::get('lte-site-surveys', [LteSiteSurveyController::class, 'index']);
         Route::get('lte-site-surveys/{survey}', [LteSiteSurveyController::class, 'show']);
         Route::post('lte-site-surveys', [LteSiteSurveyController::class, 'store']);
+        Route::put('lte-site-surveys/{survey}', [LteSiteSurveyController::class, 'update']);
+        Route::get('lte-site-surveys-enabled-users', [LteSiteSurveyController::class, 'enabledUsers']);
+        Route::post('lte-site-surveys/{survey}/remarks', [LteSiteSurveyController::class, 'storeRemark']);
+        Route::get('lte-site-survey-photos/{photo}', [LteSiteSurveyController::class, 'servePhoto']);
+        Route::get('lte-site-survey-remarks/{remark}/file', [LteSiteSurveyController::class, 'serveRemarkFile']);
 
         Route::get('faults', [FaultController::class, 'index']);
         Route::get('faults/unassigned', [FaultController::class, 'unassigned']);
