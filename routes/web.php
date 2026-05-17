@@ -70,6 +70,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('/performance', [PerformanceController::class, 'index'])->name('performance.index');
     Route::resource('users', UserController::class);
     Route::get('lte-site-surveys/reports', [LteSiteSurveyController::class, 'reports'])->name('lte-site-surveys.reports');
+    Route::get('lte-site-surveys/map', [LteSiteSurveyController::class, 'map'])->name('lte-site-surveys.map');
     Route::resource('lte-site-surveys', LteSiteSurveyController::class)->only(['index', 'create', 'store', 'show', 'update']);
     Route::post('lte-site-surveys/{lte_site_survey}/remarks', [LteSiteSurveyController::class, 'storeRemark'])->name('lte-site-surveys.remarks.store');
     Route::get('lte-site-surveys/remarks/{remark}/file', [LteSiteSurveyController::class, 'serveRemarkFile'])->name('lte-site-surveys.remarks.file');
