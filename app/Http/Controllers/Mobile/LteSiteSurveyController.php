@@ -404,6 +404,47 @@ class LteSiteSurveyController extends Controller
         ]);
     }
 
+    public function destroyPhoto(Request $request, LteSiteSurveyPhoto $photo)
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+        }
+
+        $survey = LteSiteSurvey::query()->find($photo->lte_site_survey_id);
+        if (!$survey) {
+            return response()->json(['success' => false, 'message' => 'Not found'], 404);
+        }
+
+        $disk = Storage::disk('public');
+        $filePath = (string) ($photo->file_path ?? '');
+
+        DB::beginTransaction();
+        try {
+            $photo->delete();
+            if ($filePath !== '' && $disk->exists($filePath)) {
+                $disk->delete($filePath);
+            }
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            $logRef = (string) Str::uuid();
+            Log::error('Mobile LTE site survey photo delete failed', [
+                'ref' => $logRef,
+                'user_id' => $user->id,
+                'survey_id' => optional($survey)->id,
+                'photo_id' => $photo->id,
+                'ip' => $request->ip(),
+                'message' => $e->getMessage(),
+                'exception' => get_class($e),
+            ]);
+            Log::error($e);
+            return response()->json(['success' => false, 'message' => 'Failed to remove image. Ref: ' . $logRef], 500);
+        }
+
+        return response()->json(['success' => true]);
+    }
+
     public function serveRemarkFile(Request $request, int $remark)
     {
         $user = $request->user();

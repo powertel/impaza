@@ -1027,6 +1027,56 @@ LTE Site Surveys
       if (saveDraftBtn) saveDraftBtn.addEventListener('click', function () { submitWithStatus('draft'); });
       if (submitBtn) submitBtn.addEventListener('click', function () { submitWithStatus('submitted'); });
     });
+
+    function getCsrfToken() {
+      var el = document.querySelector('meta[name="csrf-token"]');
+      return el ? el.getAttribute('content') : '';
+    }
+
+    document.addEventListener('click', function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest('[data-lte-photo-delete]') : null;
+      if (!btn) return;
+      e.preventDefault();
+
+      var url = btn.getAttribute('data-url') || '';
+      if (!url) return;
+      if (btn.dataset.busy === '1') return;
+
+      var ok = window.confirm('Remove this image/attachment?');
+      if (!ok) return;
+
+      btn.dataset.busy = '1';
+      btn.disabled = true;
+
+      fetch(url, {
+        method: 'DELETE',
+        headers: {
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': getCsrfToken(),
+        },
+      })
+        .then(function (res) {
+          return res.json().catch(function () { return null; }).then(function (json) {
+            return { ok: res.ok, json: json };
+          });
+        })
+        .then(function (out) {
+          if (!out.ok || !out.json || out.json.success !== true) {
+            var msg = out && out.json && out.json.message ? out.json.message : 'Failed to remove image.';
+            alert(msg);
+            return;
+          }
+          var wrap = btn.closest('[data-lte-photo-item]');
+          if (wrap && wrap.parentNode) wrap.parentNode.removeChild(wrap);
+        })
+        .catch(function () {
+          alert('Failed to remove image.');
+        })
+        .finally(function () {
+          btn.disabled = false;
+          btn.dataset.busy = '0';
+        });
+    });
   })();
 </script>
 <script>

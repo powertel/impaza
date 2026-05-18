@@ -18,7 +18,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
-import { createLteSiteSurvey, getAuthToken, getLteEnabledUsers, getLteSiteSurvey, lteSurveyPhotoUrl, updateLteSiteSurvey } from '../services/api';
+import { createLteSiteSurvey, deleteLteSurveyPhoto, getAuthToken, getLteEnabledUsers, getLteSiteSurvey, lteSurveyPhotoUrl, updateLteSiteSurvey } from '../services/api';
 import { UserContext } from '../context/UserContext';
 import { theme } from '../styles/theme';
 
@@ -416,6 +416,31 @@ export default function LteSiteSurveyWizardScreen() {
     setForm((prev) => ({ ...prev, photos: { ...(prev.photos || {}), [label]: [] } }));
   };
 
+  const removeRemotePhoto = (photo) => {
+    if (readOnly) return;
+    const id = photo?.id;
+    if (!id) return;
+    Alert.alert('Remove', 'Remove this uploaded image/attachment?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Remove',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const res = await deleteLteSurveyPhoto(id);
+            if (!res?.success) {
+              Alert.alert('Error', res?.message || 'Failed to remove image.');
+              return;
+            }
+            setRemotePhotos((prev) => (Array.isArray(prev) ? prev.filter((p) => String(p?.id) !== String(id)) : []));
+          } catch (e) {
+            Alert.alert('Error', 'Failed to remove image.');
+          }
+        },
+      },
+    ]);
+  };
+
   const requestLibraryPerm = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
@@ -583,6 +608,11 @@ export default function LteSiteSurveyWizardScreen() {
                   <View key={`remote-${labelKey}-${p.id}`} style={styles.fileThumbWrap}>
                     <Feather name="file" size={18} color={theme.colors.secondaryText} />
                     <Text style={styles.fileThumbText} numberOfLines={2}>{p?.original_name || 'Attachment'}</Text>
+                    {!readOnly ? (
+                      <TouchableOpacity style={styles.photoRemove} onPress={() => removeRemotePhoto(p)}>
+                        <Feather name="x" size={14} color={theme.colors.white} />
+                      </TouchableOpacity>
+                    ) : null}
                   </View>
                 );
               }
@@ -592,6 +622,11 @@ export default function LteSiteSurveyWizardScreen() {
                     source={{ uri: lteSurveyPhotoUrl(p.id), headers: token ? { Authorization: `Bearer ${token}` } : {} }}
                     style={styles.photoThumb}
                   />
+                  {!readOnly ? (
+                    <TouchableOpacity style={styles.photoRemove} onPress={() => removeRemotePhoto(p)}>
+                      <Feather name="x" size={14} color={theme.colors.white} />
+                    </TouchableOpacity>
+                  ) : null}
                 </View>
               );
             })}
