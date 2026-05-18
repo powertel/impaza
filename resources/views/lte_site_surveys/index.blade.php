@@ -180,6 +180,11 @@ LTE Site Surveys
                 <td class="text-nowrap">{{ $s->created_at ? \Carbon\Carbon::parse($s->created_at)->format('j F Y h:i a') : '-' }}</td>
                 <td class="text-nowrap">
                   <div class="btn-group btn-group gap-2" role="group" aria-label="Actions">
+                    @if($s->status === 'submitted')
+                      <a class="btn btn-outline-danger btn-sm" href="{{ route('lte-site-surveys.show', $s->id) }}">
+                        <i class="fas fa-file-pdf me-1"></i> PDF
+                      </a>
+                    @endif
                     <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#lteSurveyEditModal-{{ $s->id }}">
                       <i class="fas fa-edit me-1"></i> Edit
                     </button>

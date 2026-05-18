@@ -231,8 +231,8 @@
                           <ul class="list-group list-group-flush">
                             <li class="list-group-item px-0 d-flex justify-content-between"><span>Nearest Manhole</span><span class="fw-semibold">{{ data_get($tx, 'nearestManholeCoordinates') ?: '-' }}</span></li>
                             <li class="list-group-item px-0 d-flex justify-content-between"><span>Existing Fibre</span><span class="fw-semibold">{{ data_get($tx, 'distanceFromExistingFibre') ?: '-' }}</span></li>
-                            <li class="list-group-item px-0 d-flex justify-content-between"><span>Nearest POP</span><span class="fw-semibold">{{ data_get($tx, 'distanceFromNearestPop') ?: '-' }}</span></li>
-                            <li class="list-group-item px-0 d-flex justify-content-between"><span>POP (Alt)</span><span class="fw-semibold">{{ data_get($tx, 'distanceFromNearestPop2') ?: '-' }}</span></li>
+                            <li class="list-group-item px-0 d-flex justify-content-between"><span>POP Name</span><span class="fw-semibold">{{ data_get($tx, 'distanceFromNearestPop') ?: '-' }}</span></li>
+                            <li class="list-group-item px-0 d-flex justify-content-between"><span>Distance from POP</span><span class="fw-semibold">{{ data_get($tx, 'distanceFromNearestPop2') ?: '-' }}</span></li>
                             <li class="list-group-item px-0 d-flex justify-content-between"><span>Backhaul</span><span>{!! $enumBadge(data_get($tx, 'backhaulType')) !!}</span></li>
                           </ul>
                         </div>
