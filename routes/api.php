@@ -45,6 +45,7 @@ Route::prefix('mobile')->group(function () {
         Route::post('lte-site-surveys/{survey}/remarks', [LteSiteSurveyController::class, 'storeRemark']);
         Route::get('lte-site-survey-photos/{photo}', [LteSiteSurveyController::class, 'servePhoto']);
         Route::delete('lte-site-survey-photos/{photo}', [LteSiteSurveyController::class, 'destroyPhoto']);
+        Route::post('lte-site-survey-photos/{photo}/delete', [LteSiteSurveyController::class, 'destroyPhoto']);
         Route::get('lte-site-survey-remarks/{remark}/file', [LteSiteSurveyController::class, 'serveRemarkFile']);
 
         Route::get('faults', [FaultController::class, 'index']);
