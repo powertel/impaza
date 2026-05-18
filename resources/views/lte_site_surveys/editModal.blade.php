@@ -462,13 +462,35 @@
                             @foreach($items as $ph)
                               @php $isImage = str_starts_with((string)($ph->mime_type ?? ''), 'image/'); @endphp
                               @if($isImage)
-                                <a href="{{ route('lte-site-surveys.photos.file', $ph->id) }}" target="_blank" class="d-inline-block">
-                                  <img src="{{ route('lte-site-surveys.photos.file', $ph->id) }}" alt="" style="width:90px;height:68px;object-fit:cover;border-radius:10px;border:1px solid #e5e7eb;">
-                                </a>
+                                <div class="d-inline-block" style="position:relative" data-lte-photo-item>
+                                  <a href="{{ route('lte-site-surveys.photos.file', $ph->id) }}" target="_blank" class="d-inline-block">
+                                    <img src="{{ route('lte-site-surveys.photos.file', $ph->id) }}" alt="" style="width:90px;height:68px;object-fit:cover;border-radius:10px;border:1px solid #e5e7eb;">
+                                  </a>
+                                  <button
+                                    type="button"
+                                    class="btn btn-danger btn-sm"
+                                    style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:999px;padding:0;display:flex;align-items:center;justify-content:center"
+                                    data-lte-photo-delete
+                                    data-url="{{ route('lte-site-surveys.photos.destroy', $ph->id) }}"
+                                  >
+                                    <i class="fas fa-times" style="font-size:11px"></i>
+                                  </button>
+                                </div>
                               @else
-                                <a href="{{ route('lte-site-surveys.photos.file', $ph->id) }}" target="_blank" class="btn btn-outline-secondary btn-sm">
-                                  <i class="fas fa-paperclip me-1"></i> Open
-                                </a>
+                                <div class="d-inline-block" style="position:relative" data-lte-photo-item>
+                                  <a href="{{ route('lte-site-surveys.photos.file', $ph->id) }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-paperclip me-1"></i> Open
+                                  </a>
+                                  <button
+                                    type="button"
+                                    class="btn btn-danger btn-sm"
+                                    style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:999px;padding:0;display:flex;align-items:center;justify-content:center"
+                                    data-lte-photo-delete
+                                    data-url="{{ route('lte-site-surveys.photos.destroy', $ph->id) }}"
+                                  >
+                                    <i class="fas fa-times" style="font-size:11px"></i>
+                                  </button>
+                                </div>
                               @endif
                             @endforeach
                           </div>

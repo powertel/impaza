@@ -17,6 +17,11 @@ class LteSiteSurveyController extends Controller
 {
     public function reports(Request $request)
     {
+        $user = $request->user();
+        if (!$user || !$user->can('surveys-list')) {
+            abort(403);
+        }
+
         $filter = strtolower((string) $request->input('filter', 'month'));
         $selectedRegionRaw = trim((string) $request->input('region', ''));
         $selectedRegion = $selectedRegionRaw === '' ? null : $selectedRegionRaw;
@@ -264,6 +269,11 @@ class LteSiteSurveyController extends Controller
 
     public function map(Request $request)
     {
+        $user = $request->user();
+        if (!$user || !$user->can('surveys-list')) {
+            abort(403);
+        }
+
         $status = trim((string) $request->input('status', ''));
         $status = $status === '' ? null : $status;
 
@@ -318,6 +328,11 @@ class LteSiteSurveyController extends Controller
 
     public function index(Request $request)
     {
+        $user = $request->user();
+        if (!$user || !$user->can('surveys-list')) {
+            abort(403);
+        }
+
         $q = trim((string) $request->input('q', ''));
         $status = trim((string) $request->input('status', ''));
         $perPage = (int) $request->input('per_page', 20);
@@ -383,6 +398,11 @@ class LteSiteSurveyController extends Controller
 
     public function create()
     {
+        $user = request()->user();
+        if (!$user || !$user->can('survey-create')) {
+            abort(403);
+        }
+
         $materials = $this->defaultMaterials();
         $photoLabels = $this->photoLabels();
         $users = User::query()->where('is_access', 0)->orderBy('name')->get(['id', 'name']);
@@ -390,8 +410,13 @@ class LteSiteSurveyController extends Controller
         return view('lte_site_surveys.create', compact('materials', 'photoLabels', 'users'));
     }
 
-    public function show(LteSiteSurvey $lte_site_survey)
+    public function show(Request $request, LteSiteSurvey $lte_site_survey)
     {
+        $user = $request->user();
+        if (!$user || !$user->can('surveys-list')) {
+            abort(403);
+        }
+
         $lte_site_survey->load(['user:id,name', 'photos']);
 
         return view('lte_site_surveys.show', ['survey' => $lte_site_survey]);
@@ -400,6 +425,9 @@ class LteSiteSurveyController extends Controller
     public function store(Request $request)
     {
         $user = $request->user();
+        if (!$user || !$user->can('survey-create')) {
+            abort(403);
+        }
 
         try {
             $data = $request->validate([
@@ -555,6 +583,9 @@ class LteSiteSurveyController extends Controller
     public function update(Request $request, LteSiteSurvey $lte_site_survey)
     {
         $user = $request->user();
+        if (!$user || !$user->can('survey-edit')) {
+            abort(403);
+        }
 
         try {
             $data = $request->validate([
@@ -710,6 +741,9 @@ class LteSiteSurveyController extends Controller
     public function storeRemark(Request $request, LteSiteSurvey $lte_site_survey)
     {
         $user = $request->user();
+        if (!$user || !$user->can('survey-edit')) {
+            abort(403);
+        }
 
         $data = $request->validate([
             'remark' => 'required|string|min:2|max:4000',
@@ -774,7 +808,7 @@ class LteSiteSurveyController extends Controller
     public function servePhoto(Request $request, LteSiteSurveyPhoto $photo)
     {
         $user = $request->user();
-        if (!$user) {
+        if (!$user || !$user->can('surveys-list')) {
             abort(403);
         }
         $survey = LteSiteSurvey::query()->find($photo->lte_site_survey_id);
@@ -800,10 +834,59 @@ class LteSiteSurveyController extends Controller
         ]);
     }
 
+    public function destroyPhoto(Request $request, LteSiteSurveyPhoto $photo)
+    {
+        $user = $request->user();
+        if (!$user || !$user->can('survey-edit')) {
+            abort(403);
+        }
+
+        $survey = LteSiteSurvey::query()->find($photo->lte_site_survey_id);
+        if (!$survey) {
+            abort(404);
+        }
+
+        $disk = Storage::disk('public');
+        $filePath = (string) ($photo->file_path ?? '');
+
+        DB::beginTransaction();
+        try {
+            $photo->delete();
+            if ($filePath !== '' && $disk->exists($filePath)) {
+                $disk->delete($filePath);
+            }
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            $logRef = (string) Str::uuid();
+            Log::error('LTE site survey photo delete failed', [
+                'ref' => $logRef,
+                'route' => optional($request->route())->getName(),
+                'user_id' => optional($user)->id,
+                'survey_id' => optional($survey)->id,
+                'photo_id' => $photo->id,
+                'ip' => $request->ip(),
+                'message' => $e->getMessage(),
+                'exception' => get_class($e),
+            ]);
+            Log::error($e);
+
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Failed to remove image. Ref: ' . $logRef], 500);
+            }
+            return back()->with('error', 'Failed to remove image. Ref: ' . $logRef);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+        return back()->with('success', 'Image removed.');
+    }
+
     public function serveRemarkFile(Request $request, int $remark)
     {
         $user = $request->user();
-        if (!$user) {
+        if (!$user || !$user->can('surveys-list')) {
             abort(403);
         }
         $row = DB::table('lte_site_survey_remarks')->where('id', $remark)->first();

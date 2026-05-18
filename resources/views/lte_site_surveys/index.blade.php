@@ -103,9 +103,11 @@ LTE Site Surveys
         <a href="{{ route('lte-site-surveys.reports') }}" class="btn btn-outline-secondary btn-sm me-2">
           <i class="fas fa-chart-bar"></i> Reports
         </a>
-        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#lteSiteSurveyCreateModal">
-          <i class="fas fa-plus-circle"></i> New Survey
-        </button>
+        @can('survey-create')
+          <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#lteSiteSurveyCreateModal">
+            <i class="fas fa-plus-circle"></i> New Survey
+          </button>
+        @endcan
       </div>
     </div>
     <div class="card-body">
@@ -185,9 +187,11 @@ LTE Site Surveys
                         <i class="fas fa-file-pdf me-1"></i> PDF
                       </a>
                     @endif
-                    <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#lteSurveyEditModal-{{ $s->id }}">
-                      <i class="fas fa-edit me-1"></i> Edit
-                    </button>
+                    @can('survey-edit')
+                      <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#lteSurveyEditModal-{{ $s->id }}">
+                        <i class="fas fa-edit me-1"></i> Edit
+                      </button>
+                    @endcan
                     <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#lteSurveyViewModal-{{ $s->id }}">
                       <i class="fas fa-eye me-1"></i> View
                     </button>
@@ -214,20 +218,23 @@ LTE Site Surveys
 
   @foreach($surveys as $survey)
     @include('lte_site_surveys.viewModal', ['survey' => $survey, 'photoLabels' => $photoLabels, 'remarks' => ($remarksBySurvey[$survey->id] ?? collect())])
-    @include('lte_site_surveys.editModal', ['survey' => $survey, 'users' => $users, 'materials' => $materials, 'photoLabels' => $photoLabels])
+    @can('survey-edit')
+      @include('lte_site_surveys.editModal', ['survey' => $survey, 'users' => $users, 'materials' => $materials, 'photoLabels' => $photoLabels])
+    @endcan
   @endforeach
 
-  <div class="modal fade lte-modal" id="lteSiteSurveyCreateModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
-      <div class="modal-content border-0 shadow-lg">
-        <div class="modal-header lte-modal-header">
-          <div>
-            <h5 class="modal-title mb-0">LTE Site Survey Sheet</h5>
-            <div class="lte-modal-subtitle small">Progressive form (step-by-step)</div>
+  @can('survey-create')
+    <div class="modal fade lte-modal" id="lteSiteSurveyCreateModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+          <div class="modal-header lte-modal-header">
+            <div>
+              <h5 class="modal-title mb-0">LTE Site Survey Sheet</h5>
+              <div class="lte-modal-subtitle small">Progressive form (step-by-step)</div>
+            </div>
+            <button type="button" class="btn-close lte-modal-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <button type="button" class="btn-close lte-modal-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body lte-modal-body">
+          <div class="modal-body lte-modal-body">
           @if (session('error') || $errors->any())
             <div class="alert alert-danger">
               <div class="fw-semibold">Unable to submit. Please fix the following and try again.</div>
@@ -755,10 +762,11 @@ LTE Site Surveys
               </div>
             </div>
           </form>
-        </div>
+          </div>
       </div>
     </div>
-  </div>
+    </div>
+  @endcan
 </section>
 @endsection
 
@@ -1026,6 +1034,56 @@ LTE Site Surveys
       }
       if (saveDraftBtn) saveDraftBtn.addEventListener('click', function () { submitWithStatus('draft'); });
       if (submitBtn) submitBtn.addEventListener('click', function () { submitWithStatus('submitted'); });
+    });
+
+    function getCsrfToken() {
+      var el = document.querySelector('meta[name="csrf-token"]');
+      return el ? el.getAttribute('content') : '';
+    }
+
+    document.addEventListener('click', function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest('[data-lte-photo-delete]') : null;
+      if (!btn) return;
+      e.preventDefault();
+
+      var url = btn.getAttribute('data-url') || '';
+      if (!url) return;
+      if (btn.dataset.busy === '1') return;
+
+      var ok = window.confirm('Remove this image/attachment?');
+      if (!ok) return;
+
+      btn.dataset.busy = '1';
+      btn.disabled = true;
+
+      fetch(url, {
+        method: 'DELETE',
+        headers: {
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': getCsrfToken(),
+        },
+      })
+        .then(function (res) {
+          return res.json().catch(function () { return null; }).then(function (json) {
+            return { ok: res.ok, json: json };
+          });
+        })
+        .then(function (out) {
+          if (!out.ok || !out.json || out.json.success !== true) {
+            var msg = out && out.json && out.json.message ? out.json.message : 'Failed to remove image.';
+            alert(msg);
+            return;
+          }
+          var wrap = btn.closest('[data-lte-photo-item]');
+          if (wrap && wrap.parentNode) wrap.parentNode.removeChild(wrap);
+        })
+        .catch(function () {
+          alert('Failed to remove image.');
+        })
+        .finally(function () {
+          btn.disabled = false;
+          btn.dataset.busy = '0';
+        });
     });
   })();
 </script>

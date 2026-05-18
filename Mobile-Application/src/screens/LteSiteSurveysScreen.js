@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
 import { getLteSiteSurveys } from '../services/api';
+import { usePermissions } from '../hooks/usePermissions';
 import { theme } from '../styles/theme';
 
 function Pill({ label, active, onPress }) {
@@ -16,6 +17,9 @@ function Pill({ label, active, onPress }) {
 
 export default function LteSiteSurveysScreen() {
   const navigation = useNavigation();
+  const { hasPermission } = usePermissions();
+  const canList = hasPermission('surveys-list');
+  const canCreate = hasPermission('survey-create');
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState([]);
   const [q, setQ] = useState('');
@@ -42,10 +46,11 @@ export default function LteSiteSurveysScreen() {
 
   useEffect(() => {
     navigation.setOptions({ title: 'LTE Site Surveys' });
-    load();
-  }, []);
+    if (canList) load();
+  }, [canList]);
 
   useEffect(() => {
+    if (!canList) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       load({ q, status });
@@ -60,6 +65,18 @@ export default function LteSiteSurveysScreen() {
     return { backgroundColor: 'rgba(245, 158, 11, 0.12)', borderColor: 'rgba(245, 158, 11, 0.35)', color: theme.colors.warning, label: 'Draft' };
   };
 
+  if (!canList) {
+    return (
+      <SafeAreaView style={styles.container} edges={['bottom']}>
+        <View style={styles.noPermWrap}>
+          <Feather name="lock" size={22} color={theme.colors.secondaryText} />
+          <Text style={styles.noPermTitle}>No access</Text>
+          <Text style={styles.noPermDesc}>You don't have permission to view LTE site surveys.</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
       <View style={styles.headerRow}>
@@ -67,10 +84,12 @@ export default function LteSiteSurveysScreen() {
           <Text style={styles.title}>LTE Site Surveys</Text>
           <Text style={styles.subtitle}>Capture and submit LTE site survey details</Text>
         </View>
-        <TouchableOpacity style={styles.newBtn} onPress={() => navigation.navigate('LteSiteSurveyWizard')}>
-          <Feather name="plus" size={18} color={theme.colors.white} />
-          <Text style={styles.newBtnText}>New</Text>
-        </TouchableOpacity>
+        {canCreate ? (
+          <TouchableOpacity style={styles.newBtn} onPress={() => navigation.navigate('LteSiteSurveyWizard')}>
+            <Feather name="plus" size={18} color={theme.colors.white} />
+            <Text style={styles.newBtnText}>New</Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
 
       <View style={styles.filters}>
@@ -152,6 +171,9 @@ export default function LteSiteSurveysScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
+  noPermWrap: { flex: 1, padding: theme.spacing.lg, alignItems: 'center', justifyContent: 'center', gap: 10 },
+  noPermTitle: { fontSize: theme.fontSizes.lg, fontWeight: '800', color: theme.colors.text },
+  noPermDesc: { color: theme.colors.secondaryText, textAlign: 'center' },
   headerRow: {
     paddingHorizontal: theme.spacing.lg,
     paddingTop: theme.spacing.md,

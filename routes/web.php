@@ -75,6 +75,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::post('lte-site-surveys/{lte_site_survey}/remarks', [LteSiteSurveyController::class, 'storeRemark'])->name('lte-site-surveys.remarks.store');
     Route::get('lte-site-surveys/remarks/{remark}/file', [LteSiteSurveyController::class, 'serveRemarkFile'])->name('lte-site-surveys.remarks.file');
     Route::get('lte-site-surveys/photos/{photo}', [LteSiteSurveyController::class, 'servePhoto'])->name('lte-site-surveys.photos.file');
+    Route::delete('lte-site-surveys/photos/{photo}', [LteSiteSurveyController::class, 'destroyPhoto'])->name('lte-site-surveys.photos.destroy');
     // Toggle user access (enable/disable)
     Route::patch('users/{user}/access', [UserController::class, 'updateAccess'])->name('users.access');
     // Admin change password for a specific user
