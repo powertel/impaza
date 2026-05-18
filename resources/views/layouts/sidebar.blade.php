@@ -135,13 +135,17 @@
               </li>
             @endcan
 
-            <li class="nav-header">Surveys</li>
-            <li class="nav-item">
-              <a href="{{ route('lte-site-surveys.index') }}" class="nav-link {{ request()->routeIs('lte-site-surveys.*') ? 'active' : '' }}">
-                <i class="nav-icon fas fa-clipboard"></i>
-                <p>LTE Site Surveys</p>
-              </a>
-            </li>
+            @canany(['surveys-list'])
+              <li class="nav-header">Surveys</li>
+            @endcanany
+            @can('surveys-list')
+              <li class="nav-item">
+                <a href="{{ route('lte-site-surveys.index') }}" class="nav-link {{ request()->routeIs('lte-site-surveys.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-clipboard"></i>
+                  <p>LTE Site Surveys</p>
+                </a>
+              </li>
+            @endcan
 
             @canany(['permit-list'])
               <li class="nav-header">Permits</li>

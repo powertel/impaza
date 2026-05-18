@@ -20,6 +20,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
 import { createLteSiteSurvey, deleteLteSurveyPhoto, getAuthToken, getLteEnabledUsers, getLteSiteSurvey, lteSurveyPhotoUrl, updateLteSiteSurvey } from '../services/api';
 import { UserContext } from '../context/UserContext';
+import { usePermissions } from '../hooks/usePermissions';
 import { theme } from '../styles/theme';
 
 const DRAFT_KEY = 'lte_site_survey_draft_v1';
@@ -213,11 +214,37 @@ export default function LteSiteSurveyWizardScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const { user } = useContext(UserContext);
+  const { hasPermission } = usePermissions();
   const insets = useSafeAreaInsets();
   const surveyId = route?.params?.surveyId || route?.params?.fromSurveyId;
   const mode = route?.params?.mode || (surveyId ? 'view' : 'create');
-  const readOnly = mode === 'view';
+  const canList = hasPermission('surveys-list');
+  const canCreate = hasPermission('survey-create');
+  const canEdit = hasPermission('survey-edit');
   const isEdit = mode === 'edit';
+  const readOnly = mode === 'view' || (isEdit && !canEdit);
+
+  if (mode === 'create' && !canCreate) {
+    return (
+      <SafeAreaView style={styles.container} edges={['bottom']}>
+        <View style={styles.center}>
+          <Feather name="lock" size={22} color={theme.colors.secondaryText} />
+          <Text style={styles.centerText}>You don't have permission to create LTE site surveys.</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (surveyId && !canList) {
+    return (
+      <SafeAreaView style={styles.container} edges={['bottom']}>
+        <View style={styles.center}>
+          <Feather name="lock" size={22} color={theme.colors.secondaryText} />
+          <Text style={styles.centerText}>You don't have permission to view LTE site surveys.</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -252,7 +279,7 @@ export default function LteSiteSurveyWizardScreen() {
   }, []);
 
   useEffect(() => {
-    if (mode === 'view') return;
+    if (readOnly) return;
     let mounted = true;
     (async () => {
       try {
@@ -268,7 +295,7 @@ export default function LteSiteSurveyWizardScreen() {
   }, [mode]);
 
   useEffect(() => {
-    if (mode !== 'create') return;
+    if (mode !== 'create' || readOnly) return;
     const name = user?.name ? String(user.name) : '';
     if (!name) return;
     setForm((prev) => {
@@ -278,7 +305,7 @@ export default function LteSiteSurveyWizardScreen() {
   }, [user, mode]);
 
   useEffect(() => {
-    if (mode !== 'create') return;
+    if (mode !== 'create' || readOnly) return;
 
     let mounted = true;
     (async () => {
@@ -342,7 +369,7 @@ export default function LteSiteSurveyWizardScreen() {
   }, [surveyId]);
 
   useEffect(() => {
-    if (mode !== 'create') return;
+    if (mode !== 'create' || readOnly) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(async () => {
       try {

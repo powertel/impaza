@@ -17,6 +17,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { Feather } from '@expo/vector-icons';
 import { addLteSurveyRemark, getAuthToken, getLteSiteSurvey, lteSurveyPhotoUrl, lteSurveyRemarkFileUrl } from '../services/api';
+import { usePermissions } from '../hooks/usePermissions';
 import { theme } from '../styles/theme';
 
 function badgeStyle(status) {
@@ -46,6 +47,9 @@ export default function LteSiteSurveyViewScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const id = route?.params?.id;
+  const { hasPermission } = usePermissions();
+  const canList = hasPermission('surveys-list');
+  const canEdit = hasPermission('survey-edit');
 
   const [loading, setLoading] = useState(false);
   const [survey, setSurvey] = useState(null);
@@ -72,8 +76,19 @@ export default function LteSiteSurveyViewScreen() {
 
   useEffect(() => {
     navigation.setOptions({ title: 'LTE Survey' });
-    load();
-  }, [id]);
+    if (canList) load();
+  }, [id, canList]);
+
+  if (!canList) {
+    return (
+      <SafeAreaView style={styles.container} edges={['bottom']}>
+        <View style={styles.center}>
+          <Feather name="lock" size={22} color={theme.colors.secondaryText} />
+          <Text style={styles.centerText}>You don't have permission to view LTE site surveys.</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   const payload = survey?.payload && typeof survey.payload === 'object' ? survey.payload : {};
   const meta = payload?.meta || {};
@@ -182,14 +197,18 @@ export default function LteSiteSurveyViewScreen() {
       </View>
 
       <View style={styles.actionsRow}>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('LteSiteSurveyWizard', { surveyId: id, mode: 'edit' })}>
-          <Feather name="edit-2" size={16} color={theme.colors.primary} />
-          <Text style={styles.actionBtnText}>Edit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn} onPress={() => setRemarkOpen(true)}>
-          <Feather name="message-square" size={16} color={theme.colors.primary} />
-          <Text style={styles.actionBtnText}>Remark</Text>
-        </TouchableOpacity>
+        {canEdit ? (
+          <>
+            <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('LteSiteSurveyWizard', { surveyId: id, mode: 'edit' })}>
+              <Feather name="edit-2" size={16} color={theme.colors.primary} />
+              <Text style={styles.actionBtnText}>Edit</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.actionBtn} onPress={() => setRemarkOpen(true)}>
+              <Feather name="message-square" size={16} color={theme.colors.primary} />
+              <Text style={styles.actionBtnText}>Remark</Text>
+            </TouchableOpacity>
+          </>
+        ) : null}
       </View>
 
       <ScrollView
@@ -444,4 +463,3 @@ const styles = StyleSheet.create({
   saveBtn: { flex: 1, backgroundColor: theme.colors.primary, paddingVertical: 12, borderRadius: theme.borderRadius.md, alignItems: 'center' },
   saveBtnText: { color: theme.colors.white, fontWeight: '800' },
 });
-

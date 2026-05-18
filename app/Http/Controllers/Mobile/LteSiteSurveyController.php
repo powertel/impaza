@@ -20,6 +20,9 @@ class LteSiteSurveyController extends Controller
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
         }
+        if (!$user->can('surveys-list')) {
+            return response()->json(['success' => false, 'message' => 'Forbidden'], 403);
+        }
 
         $perPage = (int) $request->query('per_page', 20);
         $perPage = in_array($perPage, [10, 20, 50, 100], true) ? $perPage : 20;
@@ -75,6 +78,9 @@ class LteSiteSurveyController extends Controller
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
         }
+        if (!$user->can('surveys-list')) {
+            return response()->json(['success' => false, 'message' => 'Forbidden'], 403);
+        }
 
         $survey->load(['photos:id,lte_site_survey_id,label,file_path,mime_type,original_name,created_at']);
 
@@ -104,6 +110,9 @@ class LteSiteSurveyController extends Controller
         $user = $request->user();
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+        }
+        if (!$user->can('survey-create')) {
+            return response()->json(['success' => false, 'message' => 'Forbidden'], 403);
         }
 
         $data = $request->validate([
@@ -210,6 +219,9 @@ class LteSiteSurveyController extends Controller
         $user = $request->user();
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+        }
+        if (!$user->can('survey-edit')) {
+            return response()->json(['success' => false, 'message' => 'Forbidden'], 403);
         }
 
         $data = $request->validate([
@@ -318,6 +330,9 @@ class LteSiteSurveyController extends Controller
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
         }
+        if (!$user->can('surveys-list')) {
+            return response()->json(['success' => false, 'message' => 'Forbidden'], 403);
+        }
 
         $users = DB::table('users')
             ->where('is_access', '=', 0)
@@ -332,6 +347,9 @@ class LteSiteSurveyController extends Controller
         $user = $request->user();
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+        }
+        if (!$user->can('survey-edit')) {
+            return response()->json(['success' => false, 'message' => 'Forbidden'], 403);
         }
 
         $data = $request->validate([
@@ -383,6 +401,9 @@ class LteSiteSurveyController extends Controller
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
         }
+        if (!$user->can('surveys-list')) {
+            return response()->json(['success' => false, 'message' => 'Forbidden'], 403);
+        }
 
         $survey = LteSiteSurvey::query()->find($photo->lte_site_survey_id);
         if (!$survey) {
@@ -409,6 +430,9 @@ class LteSiteSurveyController extends Controller
         $user = $request->user();
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+        }
+        if (!$user->can('survey-edit')) {
+            return response()->json(['success' => false, 'message' => 'Forbidden'], 403);
         }
 
         $survey = LteSiteSurvey::query()->find($photo->lte_site_survey_id);
@@ -450,6 +474,9 @@ class LteSiteSurveyController extends Controller
         $user = $request->user();
         if (!$user) {
             return response()->json(['success' => false, 'message' => 'Unauthenticated'], 401);
+        }
+        if (!$user->can('surveys-list')) {
+            return response()->json(['success' => false, 'message' => 'Forbidden'], 403);
         }
 
         $row = DB::table('lte_site_survey_remarks')->where('id', $remark)->first();
