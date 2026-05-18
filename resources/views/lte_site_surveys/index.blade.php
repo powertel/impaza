@@ -141,7 +141,7 @@ LTE Site Surveys
           </form>
         </div>
 
-        <table class="table table-hover align-middle" id="lte-site-surveys-list" style="font-size:14px">
+        <table class="table table-hover align-middle lte-mobile-stack" id="lte-site-surveys-list" style="font-size:14px">
           <thead>
             <tr>
               <th>No.</th>
@@ -157,8 +157,8 @@ LTE Site Surveys
           <tbody>
             @forelse($surveys as $s)
               <tr>
-                <td class="text-muted">{{ ++$i }}</td>
-                <td>
+                <td class="text-muted" data-label="No.">{{ ++$i }}</td>
+                <td data-label="Site">
                   <div class="fw-semibold">{{ $s->site_name ?: 'Untitled' }}</div>
                   <div class="text-muted small">
                     <span>{{ $s->province_region ?: 'No region' }}</span>
@@ -166,21 +166,21 @@ LTE Site Surveys
                     <span>{{ $s->coordinates ?: 'No coordinates' }}</span>
                   </div>
                 </td>
-                <td class="text-muted">{{ $s->jc_number ?: '-' }}</td>
-                <td class="text-nowrap">
+                <td class="text-muted" data-label="JC">{{ $s->jc_number ?: '-' }}</td>
+                <td class="text-nowrap" data-label="Status">
                   @if($s->status === 'submitted')
                     <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Submitted</span>
                   @else
                     <span class="badge bg-warning text-dark"><i class="fas fa-pen me-1"></i> Draft</span>
                   @endif
                 </td>
-                <td><span class="badge bg-light text-dark border">{{ (int)($s->photos_count ?? 0) }}</span></td>
-                <td>
+                <td data-label="Photos"><span class="badge bg-light text-dark border">{{ (int)($s->photos_count ?? 0) }}</span></td>
+                <td data-label="Captured By">
                   <div class="fw-semibold">{{ optional($s->user)->name ?: '-' }}</div>
                   <div class="text-muted small">{{ $s->survey_performed_by ?: '—' }}</div>
                 </td>
-                <td class="text-nowrap">{{ $s->created_at ? \Carbon\Carbon::parse($s->created_at)->format('j F Y h:i a') : '-' }}</td>
-                <td class="text-nowrap">
+                <td class="text-nowrap" data-label="Created">{{ $s->created_at ? \Carbon\Carbon::parse($s->created_at)->format('j F Y h:i a') : '-' }}</td>
+                <td class="text-nowrap" data-label="Actions">
                   <div class="btn-group btn-group gap-2" role="group" aria-label="Actions">
                     @if($s->status === 'submitted')
                       <a class="btn btn-outline-danger btn-sm" href="{{ route('lte-site-surveys.show', $s->id) }}">
@@ -199,7 +199,7 @@ LTE Site Surveys
                 </td>
               </tr>
             @empty
-              <tr>
+              <tr class="lte-empty-row">
                 <td colspan="8" class="text-center text-muted py-5">No LTE site surveys to display</td>
               </tr>
             @endforelse
@@ -795,6 +795,45 @@ LTE Site Surveys
   .lte-thead th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #64748b; background: #f8fafc; border-bottom: 1px solid #e5e7eb; }
   .lte-table tbody tr { border-top: 1px solid #eef2f7; }
   .lte-avatar { width: 30px; height: 30px; border-radius: 999px; background: #eaf2ff; color: #1d4ed8; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; border: 1px solid #dbeafe; flex: 0 0 auto; }
+
+  @media (max-width: 768px) {
+    #lte-site-surveys-list.lte-mobile-stack thead { display: none; }
+    #lte-site-surveys-list.lte-mobile-stack,
+    #lte-site-surveys-list.lte-mobile-stack tbody,
+    #lte-site-surveys-list.lte-mobile-stack tr,
+    #lte-site-surveys-list.lte-mobile-stack td { display: block; width: 100%; }
+
+    #lte-site-surveys-list.lte-mobile-stack tr {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    #lte-site-surveys-list.lte-mobile-stack tr.lte-empty-row {
+      background: transparent;
+      border: 0;
+      padding: 0;
+      margin: 0;
+    }
+
+    #lte-site-surveys-list.lte-mobile-stack td { border: 0; padding: 8px 0; }
+    #lte-site-surveys-list.lte-mobile-stack td::before {
+      content: attr(data-label);
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: #6b7280;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    #lte-site-surveys-list.lte-mobile-stack .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    #lte-site-surveys-list.lte-mobile-stack .btn-group .btn { flex: 1 1 auto; }
+    #lte-site-surveys-list.lte-mobile-stack td.text-nowrap { white-space: normal !important; }
+  }
 </style>
 <script>
   (function () {
