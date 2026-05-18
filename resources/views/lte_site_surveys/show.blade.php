@@ -229,9 +229,9 @@ LTE Site Survey
                       <td class="fw-semibold">{{ $tx['distanceFromExistingFibre'] ?? '-' }}</td>
                     </tr>
                     <tr>
-                      <td class="text-muted">Nearest POP Distance</td>
+                      <td class="text-muted">POP Name</td>
                       <td class="fw-semibold">{{ $tx['distanceFromNearestPop'] ?? '-' }}</td>
-                      <td class="text-muted">POP Distance (Alt)</td>
+                      <td class="text-muted">Distance from POP</td>
                       <td class="fw-semibold">{{ $tx['distanceFromNearestPop2'] ?? '-' }}</td>
                     </tr>
                     <tr>

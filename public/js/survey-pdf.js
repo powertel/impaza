@@ -235,7 +235,7 @@
   }
 
   function yesNo(v) {
-    return v ? '[x] Yes' : '[ ] No';
+    return v ? 'Yes' : 'No';
   }
 
   function newPage(doc) {
@@ -254,6 +254,18 @@
       head: [['Item', 'Status']],
       body: rows,
       columnStyles: { 0: { cellWidth: 120 }, 1: { cellWidth: 66 } },
+      didParseCell: function (d) {
+        if (d.section !== 'body') return;
+        if (d.column.index !== 1) return;
+        var v = safeString(d.cell.raw).trim().toLowerCase();
+        if (v === 'yes') {
+          d.cell.styles.textColor = [16, 185, 129];
+          d.cell.styles.fontStyle = 'bold';
+        } else if (v === 'no') {
+          d.cell.styles.textColor = [239, 68, 68];
+          d.cell.styles.fontStyle = 'bold';
+        }
+      },
     });
     return doc.lastAutoTable.finalY + 6;
   }
@@ -272,8 +284,8 @@
     return addInfoTable(doc, startY, [
       { k: 'Nearest Manhole', v: safeString(tx.nearestManholeCoordinates || '-') },
       { k: 'Existing Fibre', v: safeString(tx.distanceFromExistingFibre || '-') },
-      { k: 'Nearest POP', v: safeString(tx.distanceFromNearestPop || '-') },
-      { k: 'POP (Alt)', v: safeString(tx.distanceFromNearestPop2 || '-') },
+      { k: 'POP', v: safeString(tx.distanceFromNearestPop || '-') },
+      { k: 'Distance from POP', v: safeString(tx.distanceFromNearestPop2 || '-') },
       { k: 'Allocated Port', v: safeString(tx.allocatedPort || '-') },
       { k: 'Backhaul Type', v: titleCase(tx.backhaulType || '-') },
       { k: 'Backhaul Capacity', v: safeString(tx.requiredBackhaulCapacity || '-') },
@@ -569,7 +581,16 @@
             if (frame) frame.src = blobUrl;
             var modalEl = $('#lteSurveyPdfPreviewModal');
             if (modalEl && window.bootstrap && window.bootstrap.Modal) {
-              window.bootstrap.Modal.getOrCreateInstance(modalEl).show();
+              var instance = window.bootstrap.Modal.getOrCreateInstance(modalEl);
+              var cleanup = function () {
+                if (frame) frame.src = '';
+                if (typeof URL !== 'undefined' && URL.revokeObjectURL) {
+                  try { URL.revokeObjectURL(blobUrl); } catch (e) {}
+                }
+                modalEl.removeEventListener('hidden.bs.modal', cleanup);
+              };
+              modalEl.addEventListener('hidden.bs.modal', cleanup);
+              instance.show();
             } else {
               window.open(blobUrl, '_blank');
             }
@@ -584,7 +605,14 @@
     var btns = document.querySelectorAll('[data-lte-pdf-action]');
     btns.forEach(function (b) {
       if (!(b instanceof HTMLButtonElement)) return;
-      b.disabled = isBusy || b.disabled;
+      if (isBusy) {
+        b.dataset.ltePdfWasDisabled = b.disabled ? '1' : '0';
+        b.disabled = true;
+        return;
+      }
+      var wasDisabled = b.dataset.ltePdfWasDisabled === '1';
+      delete b.dataset.ltePdfWasDisabled;
+      b.disabled = wasDisabled;
     });
   }
 

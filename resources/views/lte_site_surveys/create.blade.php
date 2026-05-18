@@ -225,13 +225,13 @@ New LTE Site Survey
               <div class="row">
                 <div class="col-md-6">
                   <div class="mb-3">
-                    <label class="form-label">Distance from nearest POP</label>
+                    <label class="form-label">Nearest POP (Name)</label>
                     <input type="text" name="transmission[distanceFromNearestPop]" class="form-control form-control-sm" value="{{ old('transmission.distanceFromNearestPop') }}">
                   </div>
                 </div>
                 <div class="col-md-6">
                   <div class="mb-3">
-                    <label class="form-label">Distance from nearest POP (alternative)</label>
+                    <label class="form-label">Distance from nearest POP</label>
                     <input type="text" name="transmission[distanceFromNearestPop2]" class="form-control form-control-sm" value="{{ old('transmission.distanceFromNearestPop2') }}">
                   </div>
                 </div>

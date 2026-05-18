@@ -845,14 +845,14 @@ export default function LteSiteSurveyWizardScreen() {
             editable={editable}
           />
           <Field
-            label="Distance from nearest POP"
+            label="POP Name"
             value={form.transmission.distanceFromNearestPop}
             onChangeText={(v) => updateSection('transmission', 'distanceFromNearestPop', v)}
             placeholder="e.g. 5km"
             editable={editable}
           />
           <Field
-            label="Distance from nearest POP (alternative)"
+            label="Distance from POP"
             value={form.transmission.distanceFromNearestPop2}
             onChangeText={(v) => updateSection('transmission', 'distanceFromNearestPop2', v)}
             placeholder="Optional"

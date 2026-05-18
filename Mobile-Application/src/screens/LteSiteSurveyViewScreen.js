@@ -220,8 +220,8 @@ export default function LteSiteSurveyViewScreen() {
         <SectionCard title="Transmission">
           <Row label="Nearest Manhole" value={tx?.nearestManholeCoordinates} />
           <Row label="Existing Fibre Distance" value={tx?.distanceFromExistingFibre} />
-          <Row label="Nearest POP" value={tx?.distanceFromNearestPop} />
-          <Row label="POP (Alt)" value={tx?.distanceFromNearestPop2} />
+          <Row label="POP" value={tx?.distanceFromNearestPop} />
+          <Row label="Distance from POP" value={tx?.distanceFromNearestPop2} />
           <Row label="Allocated Port" value={tx?.allocatedPort} />
           <Row label="Required Backhaul" value={tx?.requiredBackhaulCapacity} />
           <Row label="Backhaul Type" value={tx?.backhaulType} />
