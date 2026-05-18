@@ -273,7 +273,7 @@ export async function addLteSurveyRemark(id, payload) {
 }
 
 export async function deleteLteSurveyPhoto(photoId) {
-  return request(`/mobile/lte-site-survey-photos/${photoId}`, { method: 'DELETE' });
+  return request(`/mobile/lte-site-survey-photos/${photoId}/delete`, { method: 'POST' });
 }
 
 export function lteSurveyPhotoUrl(photoId) {
