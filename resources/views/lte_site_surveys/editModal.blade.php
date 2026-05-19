@@ -403,16 +403,16 @@
                     <div class="card-header">Civils</div>
                     <div class="card-body p-0">
                       <div class="table-responsive">
-                        <table class="table table-sm align-middle mb-0">
+                        <table class="table table-sm align-middle mb-0 lte-mat-table">
                           <thead>
                             <tr><th>Description</th><th style="width:120px;">Unit</th><th style="width:120px;">Qty</th></tr>
                           </thead>
                           <tbody>
                             @foreach($civilsRows as $i => $row)
                               <tr>
-                                <td><input type="text" class="form-control form-control-sm" name="materials[civils][{{ $i }}][description]" value="{{ $row['description'] ?? '' }}"></td>
-                                <td><input type="text" class="form-control form-control-sm" name="materials[civils][{{ $i }}][unit]" value="{{ $row['unit'] ?? '' }}"></td>
-                                <td><input type="text" class="form-control form-control-sm" name="materials[civils][{{ $i }}][qty]" value="{{ $row['qty'] ?? '' }}"></td>
+                                <td data-label="Description"><input type="text" class="form-control form-control-sm" name="materials[civils][{{ $i }}][description]" value="{{ $row['description'] ?? '' }}"></td>
+                                <td data-label="Unit"><input type="text" class="form-control form-control-sm" name="materials[civils][{{ $i }}][unit]" value="{{ $row['unit'] ?? '' }}"></td>
+                                <td data-label="Qty"><input type="text" class="form-control form-control-sm" name="materials[civils][{{ $i }}][qty]" value="{{ $row['qty'] ?? '' }}"></td>
                               </tr>
                             @endforeach
                           </tbody>
@@ -426,16 +426,16 @@
                     <div class="card-header">NTE</div>
                     <div class="card-body p-0">
                       <div class="table-responsive">
-                        <table class="table table-sm align-middle mb-0">
+                        <table class="table table-sm align-middle mb-0 lte-mat-table">
                           <thead>
                             <tr><th>Description</th><th style="width:120px;">Unit</th><th style="width:120px;">Qty</th></tr>
                           </thead>
                           <tbody>
                             @foreach($nteRows as $i => $row)
                               <tr>
-                                <td><input type="text" class="form-control form-control-sm" name="materials[nte][{{ $i }}][description]" value="{{ $row['description'] ?? '' }}"></td>
-                                <td><input type="text" class="form-control form-control-sm" name="materials[nte][{{ $i }}][unit]" value="{{ $row['unit'] ?? '' }}"></td>
-                                <td><input type="text" class="form-control form-control-sm" name="materials[nte][{{ $i }}][qty]" value="{{ $row['qty'] ?? '' }}"></td>
+                                <td data-label="Description"><input type="text" class="form-control form-control-sm" name="materials[nte][{{ $i }}][description]" value="{{ $row['description'] ?? '' }}"></td>
+                                <td data-label="Unit"><input type="text" class="form-control form-control-sm" name="materials[nte][{{ $i }}][unit]" value="{{ $row['unit'] ?? '' }}"></td>
+                                <td data-label="Qty"><input type="text" class="form-control form-control-sm" name="materials[nte][{{ $i }}][qty]" value="{{ $row['qty'] ?? '' }}"></td>
                               </tr>
                             @endforeach
                           </tbody>
