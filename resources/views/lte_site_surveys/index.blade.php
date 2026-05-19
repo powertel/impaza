@@ -225,7 +225,7 @@ LTE Site Surveys
 
   @can('survey-create')
     <div class="modal fade lte-modal" id="lteSiteSurveyCreateModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+      <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered modal-fullscreen-md-down">
         <div class="modal-content border-0 shadow-lg">
           <div class="modal-header lte-modal-header">
             <div>
@@ -612,7 +612,7 @@ LTE Site Surveys
                     <div class="card-header">Civils</div>
                     <div class="card-body p-0">
                       <div class="table-responsive">
-                        <table class="table table-sm mb-0">
+                        <table class="table table-sm mb-0 lte-mat-table">
                           <thead>
                             <tr>
                               <th>Description</th>
@@ -623,13 +623,13 @@ LTE Site Surveys
                           <tbody>
                             @foreach(($materials['civils'] ?? []) as $i => $row)
                               <tr>
-                                <td>
+                                <td data-label="Description">
                                   <input type="text" class="form-control form-control-sm" name="materials[civils][{{ $i }}][description]" value="{{ old('materials.civils.' . $i . '.description', $row['description'] ?? '') }}">
                                 </td>
-                                <td>
+                                <td data-label="Unit">
                                   <input type="text" class="form-control form-control-sm" name="materials[civils][{{ $i }}][unit]" value="{{ old('materials.civils.' . $i . '.unit', $row['unit'] ?? '') }}">
                                 </td>
-                                <td>
+                                <td data-label="Qty">
                                   <input type="text" class="form-control form-control-sm" name="materials[civils][{{ $i }}][qty]" value="{{ old('materials.civils.' . $i . '.qty', $row['qty'] ?? '') }}">
                                 </td>
                               </tr>
@@ -645,7 +645,7 @@ LTE Site Surveys
                     <div class="card-header">NTE</div>
                     <div class="card-body p-0">
                       <div class="table-responsive">
-                        <table class="table table-sm mb-0">
+                        <table class="table table-sm mb-0 lte-mat-table">
                           <thead>
                             <tr>
                               <th>Description</th>
@@ -656,13 +656,13 @@ LTE Site Surveys
                           <tbody>
                             @foreach(($materials['nte'] ?? []) as $i => $row)
                               <tr>
-                                <td>
+                                <td data-label="Description">
                                   <input type="text" class="form-control form-control-sm" name="materials[nte][{{ $i }}][description]" value="{{ old('materials.nte.' . $i . '.description', $row['description'] ?? '') }}">
                                 </td>
-                                <td>
+                                <td data-label="Unit">
                                   <input type="text" class="form-control form-control-sm" name="materials[nte][{{ $i }}][unit]" value="{{ old('materials.nte.' . $i . '.unit', $row['unit'] ?? '') }}">
                                 </td>
-                                <td>
+                                <td data-label="Qty">
                                   <input type="text" class="form-control form-control-sm" name="materials[nte][{{ $i }}][qty]" value="{{ old('materials.nte.' . $i . '.qty', $row['qty'] ?? '') }}">
                                 </td>
                               </tr>
@@ -833,6 +833,51 @@ LTE Site Surveys
     #lte-site-surveys-list.lte-mobile-stack .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
     #lte-site-surveys-list.lte-mobile-stack .btn-group .btn { flex: 1 1 auto; }
     #lte-site-surveys-list.lte-mobile-stack td.text-nowrap { white-space: normal !important; }
+  }
+
+  @media (max-width: 768px) {
+    .lte-modal .modal-content { border-radius: 0; min-height: 100vh; }
+    .lte-modal .modal-body { padding: 12px; }
+    .lte-modal-header { position: sticky; top: 0; z-index: 1; }
+    .lte-modal-top { padding: 12px; }
+    #lteSurveyStepTitle { font-size: 14px; }
+
+    .lte-stepper { flex-wrap: nowrap !important; overflow-x: auto; padding-bottom: 6px; }
+    .lte-stepper::-webkit-scrollbar { height: 0; }
+    .lte-stepper .lte-step-btn { white-space: nowrap; flex: 0 0 auto; }
+
+    .lte-modal-footerbar { flex-direction: column; align-items: stretch !important; gap: 10px; }
+    #lteSurveyPrevBtn { width: 100%; }
+    #lteSurveyNavNextWrap, #lteSurveySubmitWrap { width: 100%; }
+    #lteSurveyNavNextWrap .btn, #lteSurveySubmitWrap .btn { width: 100%; }
+    #lteSurveySubmitWrap { display: flex; flex-direction: column; gap: 10px; }
+  }
+
+  @media (max-width: 768px) {
+    .lte-mat-table thead { display: none; }
+    .lte-mat-table,
+    .lte-mat-table tbody,
+    .lte-mat-table tr,
+    .lte-mat-table td { display: block; width: 100%; }
+
+    .lte-mat-table tr {
+      border-top: 1px solid #e5e7eb;
+      padding: 10px 12px;
+    }
+
+    .lte-mat-table td { border: 0; padding: 8px 0; }
+    .lte-mat-table td::before {
+      content: attr(data-label);
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: #6b7280;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .lte-mat-table .form-control { width: 100%; }
   }
 </style>
 <script>
