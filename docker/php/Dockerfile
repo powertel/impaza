@@ -17,6 +17,15 @@ ENV TZ=Africa/Harare
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
     && echo "date.timezone = ${TZ}" > /usr/local/etc/php/conf.d/timezone.ini
 
+# Increase upload limits for survey photos/attachments
+RUN { \
+      echo "upload_max_filesize=64M"; \
+      echo "post_max_size=64M"; \
+      echo "max_file_uploads=50"; \
+      echo "max_execution_time=300"; \
+      echo "max_input_time=300"; \
+    } > /usr/local/etc/php/conf.d/uploads.ini
+
 # PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd pdo_mysql bcmath exif zip
