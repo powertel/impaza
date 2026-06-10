@@ -406,6 +406,9 @@
             if (!seconds || seconds < 10) seconds = 60;
             if (seconds > 300) seconds = 300;
             var url = '{{ route('keepalive') }}';
+            var routeName = @json(optional(request()->route())->getName());
+            var autoRefreshRoutes = ['home', 'faults.index', 'dashboard.reports', 'call_centre.reports'];
+
             window.setInterval(function () {
               try { window.dispatchEvent(new Event('impaza:activity')); } catch (e) {}
               try {
@@ -415,6 +418,17 @@
                   cache: 'no-store',
                   headers: { 'Accept': 'application/json' }
                 }).catch(function(){});
+              } catch (e) {}
+
+              try {
+                if (autoRefreshRoutes.indexOf(routeName) === -1) return;
+                if (document.hidden) return;
+                if (document.querySelector('.modal.show')) return;
+                var ae = document.activeElement;
+                if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'SELECT' || ae.tagName === 'TEXTAREA')) return;
+                var refreshUrl = new URL(window.location.href);
+                refreshUrl.searchParams.set('_ar', String(Date.now()));
+                window.location.replace(refreshUrl.toString());
               } catch (e) {}
             }, seconds * 1000);
           })();
