@@ -153,6 +153,12 @@
   top: 6px;
   z-index: 20;
 }
+.cc-filter-bar--two-rows {
+  overflow-x: visible;
+}
+.cc-filter-bar--two-rows .cc-field {
+  flex: 1 1 170px;
+}
 .cc-field {
   min-width: 150px;
 }

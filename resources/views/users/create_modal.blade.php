@@ -107,6 +107,20 @@
 
           <div class="row g-3 mt-1">
             <div class="col-md-6">
+              <label class="form-label">Dashboard Auto Refresh</label>
+              <select class="form-select @error('dashboard_auto_refresh_enabled') is-invalid @enderror" name="dashboard_auto_refresh_enabled">
+                <option value="0" {{ old('dashboard_auto_refresh_enabled','0')==='0' ? 'selected' : '' }}>Disabled</option>
+                <option value="1" {{ old('dashboard_auto_refresh_enabled')==='1' ? 'selected' : '' }}>Enabled</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Refresh Interval (seconds)</label>
+              <input type="number" class="form-control @error('dashboard_refresh_seconds') is-invalid @enderror" name="dashboard_refresh_seconds" min="10" max="3600" value="{{ (int) old('dashboard_refresh_seconds', 60) }}">
+            </div>
+          </div>
+
+          <div class="row g-3 mt-1">
+            <div class="col-md-6">
               <label class="form-label">Password</label>
               <div class="password-wrapper">
             <input id="create_password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" placeholder="Password" minlength="8" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+" autocomplete="new-password">

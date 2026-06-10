@@ -80,7 +80,7 @@ services:
     container_name: laravel_redis
     restart: unless-stopped
     ports:
-      - "6380:6379"  # mapped to host
+      - "127.0.0.1:16379:6379"  # mapped to host
     environment:
       TZ: Africa/Harare
     networks:

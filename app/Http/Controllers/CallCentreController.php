@@ -13,6 +13,10 @@ class CallCentreController extends Controller
     public function index(Request $request)
     {
         $filter = strtolower((string) $request->input('filter', 'month'));
+        $impact = strtolower(trim((string) $request->input('impact', 'all')));
+        if (!in_array($impact, ['all', 'direct', 'pop'], true)) {
+            $impact = 'all';
+        }
         $selectedRegionRaw = trim((string) $request->input('region', ''));
         $selectedRegion = $selectedRegionRaw === '' ? null : $selectedRegionRaw;
         $availableRegions = DB::table('cities')->select('region')->whereNotNull('region')->distinct()->orderBy('region')->pluck('region')->toArray();
@@ -88,22 +92,33 @@ class CallCentreController extends Controller
 
         $newFaultsTotal = Fault::whereBetween('created_at', [$periodStart, $periodEnd])
             ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+            ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+            ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
             ->count();
         $directFaultsTotal = Fault::whereBetween('created_at', [$periodStart, $periodEnd])
             ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+            ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+            ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
             ->whereNull('root_fault_id')
             ->count();
         $popImpactedFaultsTotal = Fault::whereBetween('created_at', [$periodStart, $periodEnd])
             ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+            ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+            ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
             ->whereNotNull('root_fault_id')
             ->count();
         $clearedStatusId = (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
         $latestClearedInPeriod = DB::table('fault_stage_logs')
-            ->where('status_id', $clearedStatusId)
-            ->whereBetween('started_at', [$periodStart, $periodEnd])
-            ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
-            ->select('fault_id', DB::raw('MAX(started_at) as resolved_at'))
-            ->groupBy('fault_id')
+            ->where('fault_stage_logs.status_id', $clearedStatusId)
+            ->whereBetween('fault_stage_logs.started_at', [$periodStart, $periodEnd])
+            ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_stage_logs.fault_id', $faultIdsRegion); })
+            ->when($impact !== 'all', function($q) use ($impact) {
+                $q->join('faults', 'fault_stage_logs.fault_id', '=', 'faults.id');
+                if ($impact === 'direct') $q->whereNull('faults.root_fault_id');
+                if ($impact === 'pop') $q->whereNotNull('faults.root_fault_id');
+            })
+            ->select('fault_stage_logs.fault_id', DB::raw('MAX(fault_stage_logs.started_at) as resolved_at'))
+            ->groupBy('fault_stage_logs.fault_id')
             ->get();
         $resolvedTotal = $latestClearedInPeriod->count();
 
@@ -152,48 +167,73 @@ class CallCentreController extends Controller
             }
             $weEff = $we->gt($todayEnd) ? $todayEnd->copy() : $we->copy();
             $resolvedUpToStartIds = DB::table('fault_stage_logs')
-                ->where('status_id', $clearedStatusId)
-                ->where('started_at','<=',$ws)
-                ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
-                ->select('fault_id', DB::raw('MAX(started_at) as ra'))
-                ->groupBy('fault_id')
-                ->pluck('fault_id')
+                ->where('fault_stage_logs.status_id', $clearedStatusId)
+                ->where('fault_stage_logs.started_at','<=',$ws)
+                ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_stage_logs.fault_id', $faultIdsRegion); })
+                ->when($impact !== 'all', function($q) use ($impact) {
+                    $q->join('faults', 'fault_stage_logs.fault_id', '=', 'faults.id');
+                    if ($impact === 'direct') $q->whereNull('faults.root_fault_id');
+                    if ($impact === 'pop') $q->whereNotNull('faults.root_fault_id');
+                })
+                ->select('fault_stage_logs.fault_id', DB::raw('MAX(fault_stage_logs.started_at) as ra'))
+                ->groupBy('fault_stage_logs.fault_id')
+                ->pluck('fault_stage_logs.fault_id')
                 ->unique()
                 ->values();
             $openingCount = Fault::where('created_at','<',$ws)
                 ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                 ->whereNotIn('id', $resolvedUpToStartIds)
                 ->count();
             $weeklyNewFaults[] = Fault::whereBetween('created_at', [$ws,$weEff])
                 ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                 ->count();
             $weeklyNewFaultsDirect[] = Fault::whereBetween('created_at', [$ws,$weEff])
                 ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                 ->whereNull('root_fault_id')
                 ->count();
             $weeklyNewFaultsPop[] = Fault::whereBetween('created_at', [$ws,$weEff])
                 ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                 ->whereNotNull('root_fault_id')
                 ->count();
             $latestInWeek = DB::table('fault_stage_logs')
-                ->where('status_id', $clearedStatusId)
-                ->whereBetween('started_at', [$ws,$weEff])
-                ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
-                ->select('fault_id', DB::raw('MAX(started_at) as resolved_at'))
-                ->groupBy('fault_id')
+                ->where('fault_stage_logs.status_id', $clearedStatusId)
+                ->whereBetween('fault_stage_logs.started_at', [$ws,$weEff])
+                ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_stage_logs.fault_id', $faultIdsRegion); })
+                ->when($impact !== 'all', function($q) use ($impact) {
+                    $q->join('faults', 'fault_stage_logs.fault_id', '=', 'faults.id');
+                    if ($impact === 'direct') $q->whereNull('faults.root_fault_id');
+                    if ($impact === 'pop') $q->whereNotNull('faults.root_fault_id');
+                })
+                ->select('fault_stage_logs.fault_id', DB::raw('MAX(fault_stage_logs.started_at) as resolved_at'))
+                ->groupBy('fault_stage_logs.fault_id')
                 ->get();
             $weeklyResolved[] = $latestInWeek->count();
             $resolvedUpToDateIds = DB::table('fault_stage_logs')
-                ->where('status_id', $clearedStatusId)
-                ->where('started_at','<=',$weEff)
-                ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
-                ->select('fault_id', DB::raw('MAX(started_at) as ra'))
-                ->groupBy('fault_id')
-                ->pluck('fault_id')
+                ->where('fault_stage_logs.status_id', $clearedStatusId)
+                ->where('fault_stage_logs.started_at','<=',$weEff)
+                ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_stage_logs.fault_id', $faultIdsRegion); })
+                ->when($impact !== 'all', function($q) use ($impact) {
+                    $q->join('faults', 'fault_stage_logs.fault_id', '=', 'faults.id');
+                    if ($impact === 'direct') $q->whereNull('faults.root_fault_id');
+                    if ($impact === 'pop') $q->whereNotNull('faults.root_fault_id');
+                })
+                ->select('fault_stage_logs.fault_id', DB::raw('MAX(fault_stage_logs.started_at) as ra'))
+                ->groupBy('fault_stage_logs.fault_id')
+                ->pluck('fault_stage_logs.fault_id')
                 ->unique()
                 ->values();
             $weeklyOutstanding[] = Fault::where('created_at','<=',$weEff)
                 ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                 ->whereNotIn('id', $resolvedUpToDateIds)
                 ->count();
             $weeklyOpening[] = $openingCount;
@@ -213,16 +253,22 @@ class CallCentreController extends Controller
 
             $morningCount = Fault::whereBetween('created_at', [$ws,$weEff])
                 ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                 ->whereTime('created_at', '>=', '06:00')
                 ->whereTime('created_at', '<=', '13:59')
                 ->count();
             $afternoonCount = Fault::whereBetween('created_at', [$ws,$weEff])
                 ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                 ->whereTime('created_at', '>=', '14:00')
                 ->whereTime('created_at', '<=', '21:59')
                 ->count();
             $nightCount = Fault::whereBetween('created_at', [$ws,$weEff])
                 ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                 ->where(function($q){
                     $q->whereTime('created_at', '>=', '22:00')
                       ->orWhereTime('created_at', '<=', '05:59');
@@ -279,16 +325,23 @@ class CallCentreController extends Controller
         if ($effectiveEnd->gt($todayEnd)) { $effectiveEnd = $todayEnd; }
 
         $resolvedUpToEndIds = DB::table('fault_stage_logs')
-            ->where('status_id', $clearedStatusId)
-            ->where('started_at','<=',$effectiveEnd)
-            ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
-            ->select('fault_id', DB::raw('MAX(started_at) as ra'))
-            ->groupBy('fault_id')
-            ->pluck('fault_id')
+            ->where('fault_stage_logs.status_id', $clearedStatusId)
+            ->where('fault_stage_logs.started_at','<=',$effectiveEnd)
+            ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_stage_logs.fault_id', $faultIdsRegion); })
+            ->when($impact !== 'all', function($q) use ($impact) {
+                $q->join('faults', 'fault_stage_logs.fault_id', '=', 'faults.id');
+                if ($impact === 'direct') $q->whereNull('faults.root_fault_id');
+                if ($impact === 'pop') $q->whereNotNull('faults.root_fault_id');
+            })
+            ->select('fault_stage_logs.fault_id', DB::raw('MAX(fault_stage_logs.started_at) as ra'))
+            ->groupBy('fault_stage_logs.fault_id')
+            ->pluck('fault_stage_logs.fault_id')
             ->unique()
             ->values();
         $outstandingFaults = Fault::where('created_at','<=',$effectiveEnd)
             ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+            ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+            ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
             ->whereNotIn('id', $resolvedUpToEndIds)
             ->get(['id','created_at']);
         $outstandingTotal = $outstandingFaults->count();
@@ -342,6 +395,8 @@ class CallCentreController extends Controller
 
         $faultsInRange = Fault::whereBetween('created_at', [$periodStart, $periodEnd])
             ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+            ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+            ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
             ->select('id','created_at')
             ->get();
         $assignmentsInRange = collect();
@@ -369,48 +424,73 @@ class CallCentreController extends Controller
                 $dailyLabels[] = $ds;
                 $dailyNewFaults[] = Fault::whereBetween('created_at', [$dayStart, $dayEnd])
                     ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                    ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                     ->count();
                 $dailyNewFaultsDirect[] = Fault::whereBetween('created_at', [$dayStart, $dayEnd])
                     ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                    ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                     ->whereNull('root_fault_id')
                     ->count();
                 $dailyNewFaultsPop[] = Fault::whereBetween('created_at', [$dayStart, $dayEnd])
                     ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                    ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                     ->whereNotNull('root_fault_id')
                     ->count();
                 $resolvedIdsUpToStart = DB::table('fault_stage_logs')
-                    ->where('status_id',$clearedStatusId)
-                    ->where('started_at','<=',$dayStart)
-                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
-                    ->select('fault_id', DB::raw('MAX(started_at) as ra'))
-                    ->groupBy('fault_id')
-                    ->pluck('fault_id')
+                    ->where('fault_stage_logs.status_id',$clearedStatusId)
+                    ->where('fault_stage_logs.started_at','<=',$dayStart)
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_stage_logs.fault_id', $faultIdsRegion); })
+                    ->when($impact !== 'all', function($q) use ($impact) {
+                        $q->join('faults', 'fault_stage_logs.fault_id', '=', 'faults.id');
+                        if ($impact === 'direct') $q->whereNull('faults.root_fault_id');
+                        if ($impact === 'pop') $q->whereNotNull('faults.root_fault_id');
+                    })
+                    ->select('fault_stage_logs.fault_id', DB::raw('MAX(fault_stage_logs.started_at) as ra'))
+                    ->groupBy('fault_stage_logs.fault_id')
+                    ->pluck('fault_stage_logs.fault_id')
                     ->unique()
                     ->values();
                 $openingCountDay = Fault::where('created_at','<',$dayStart)
                     ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                    ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                     ->whereNotIn('id', $resolvedIdsUpToStart)
                     ->count();
                 $dailyOpening[] = $openingCountDay;
                 $latestInDay = DB::table('fault_stage_logs')
-                    ->where('status_id',$clearedStatusId)
-                    ->whereBetween('started_at', [$dayStart, $dayEnd])
-                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
-                    ->select('fault_id', DB::raw('MAX(started_at) as resolved_at'))
-                    ->groupBy('fault_id')
+                    ->where('fault_stage_logs.status_id',$clearedStatusId)
+                    ->whereBetween('fault_stage_logs.started_at', [$dayStart, $dayEnd])
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_stage_logs.fault_id', $faultIdsRegion); })
+                    ->when($impact !== 'all', function($q) use ($impact) {
+                        $q->join('faults', 'fault_stage_logs.fault_id', '=', 'faults.id');
+                        if ($impact === 'direct') $q->whereNull('faults.root_fault_id');
+                        if ($impact === 'pop') $q->whereNotNull('faults.root_fault_id');
+                    })
+                    ->select('fault_stage_logs.fault_id', DB::raw('MAX(fault_stage_logs.started_at) as resolved_at'))
+                    ->groupBy('fault_stage_logs.fault_id')
                     ->get();
                 $dailyResolved[] = $latestInDay->count();
                 $resolvedIdsUpToDay = DB::table('fault_stage_logs')
-                    ->where('status_id',$clearedStatusId)
-                    ->where('started_at','<=',$dayEnd)
-                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
-                    ->select('fault_id', DB::raw('MAX(started_at) as ra'))
-                    ->groupBy('fault_id')
-                    ->pluck('fault_id')
+                    ->where('fault_stage_logs.status_id',$clearedStatusId)
+                    ->where('fault_stage_logs.started_at','<=',$dayEnd)
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_stage_logs.fault_id', $faultIdsRegion); })
+                    ->when($impact !== 'all', function($q) use ($impact) {
+                        $q->join('faults', 'fault_stage_logs.fault_id', '=', 'faults.id');
+                        if ($impact === 'direct') $q->whereNull('faults.root_fault_id');
+                        if ($impact === 'pop') $q->whereNotNull('faults.root_fault_id');
+                    })
+                    ->select('fault_stage_logs.fault_id', DB::raw('MAX(fault_stage_logs.started_at) as ra'))
+                    ->groupBy('fault_stage_logs.fault_id')
+                    ->pluck('fault_stage_logs.fault_id')
                     ->unique()
                     ->values();
                 $dailyOutstanding[] = Fault::where('created_at','<=',$dayEnd)
                     ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                    ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                     ->whereNotIn('id', $resolvedIdsUpToDay)
                     ->count();
                 $dailyTotals[] = $openingCountDay + end($dailyNewFaults);
@@ -427,16 +507,22 @@ class CallCentreController extends Controller
                 $dailyResolved3DaysPerc[] = $totDay > 0 ? round(($w3Day / $totDay) * 100, 2) : 0;
                 $morningDay = Fault::whereBetween('created_at', [$dayStart,$dayEnd])
                     ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                    ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                     ->whereTime('created_at','>=','06:00')
                     ->whereTime('created_at','<=','13:59')
                     ->count();
                 $afternoonDay = Fault::whereBetween('created_at', [$dayStart,$dayEnd])
                     ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                    ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                     ->whereTime('created_at','>=','14:00')
                     ->whereTime('created_at','<=','21:59')
                     ->count();
                 $nightDay = Fault::whereBetween('created_at', [$dayStart,$dayEnd])
                     ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                    ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                     ->where(function($q){
                         $q->whereTime('created_at','>=','22:00')
                           ->orWhereTime('created_at','<=','05:59');
@@ -468,48 +554,73 @@ class CallCentreController extends Controller
                 $me = \Carbon\Carbon::create($baseYear, $m, 1)->endOfMonth();
                 $monthlyLabels[] = $ms->format('M');
                 $resolvedIdsUpToStart = \DB::table('fault_stage_logs')
-                    ->where('status_id', $clearedStatusId)
-                    ->where('started_at', '<=', $ms)
-                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
-                    ->select('fault_id', \DB::raw('MAX(started_at) as ra'))
-                    ->groupBy('fault_id')
-                    ->pluck('fault_id')
+                    ->where('fault_stage_logs.status_id', $clearedStatusId)
+                    ->where('fault_stage_logs.started_at', '<=', $ms)
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_stage_logs.fault_id', $faultIdsRegion); })
+                    ->when($impact !== 'all', function($q) use ($impact) {
+                        $q->join('faults', 'fault_stage_logs.fault_id', '=', 'faults.id');
+                        if ($impact === 'direct') $q->whereNull('faults.root_fault_id');
+                        if ($impact === 'pop') $q->whereNotNull('faults.root_fault_id');
+                    })
+                    ->select('fault_stage_logs.fault_id', \DB::raw('MAX(fault_stage_logs.started_at) as ra'))
+                    ->groupBy('fault_stage_logs.fault_id')
+                    ->pluck('fault_stage_logs.fault_id')
                     ->unique()
                     ->values();
                 $openMonth = Fault::where('created_at','<',$ms)
                     ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                    ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                     ->whereNotIn('id', $resolvedIdsUpToStart)
                     ->count();
                 $newMonth = Fault::whereBetween('created_at', [$ms,$me])
                     ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                    ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                     ->count();
                 $monthlyNewFaultsDirect[] = Fault::whereBetween('created_at', [$ms,$me])
                     ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                    ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                     ->whereNull('root_fault_id')
                     ->count();
                 $monthlyNewFaultsPop[] = Fault::whereBetween('created_at', [$ms,$me])
                     ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                    ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                     ->whereNotNull('root_fault_id')
                     ->count();
                 $latestClearedInMonth = \DB::table('fault_stage_logs')
-                    ->where('status_id', $clearedStatusId)
-                    ->whereBetween('started_at', [$ms,$me])
-                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
-                    ->select('fault_id', \DB::raw('MAX(started_at) as resolved_at'))
-                    ->groupBy('fault_id')
+                    ->where('fault_stage_logs.status_id', $clearedStatusId)
+                    ->whereBetween('fault_stage_logs.started_at', [$ms,$me])
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_stage_logs.fault_id', $faultIdsRegion); })
+                    ->when($impact !== 'all', function($q) use ($impact) {
+                        $q->join('faults', 'fault_stage_logs.fault_id', '=', 'faults.id');
+                        if ($impact === 'direct') $q->whereNull('faults.root_fault_id');
+                        if ($impact === 'pop') $q->whereNotNull('faults.root_fault_id');
+                    })
+                    ->select('fault_stage_logs.fault_id', \DB::raw('MAX(fault_stage_logs.started_at) as resolved_at'))
+                    ->groupBy('fault_stage_logs.fault_id')
                     ->get();
                 $resolvedMonth = $latestClearedInMonth->count();
                 $resolvedIdsUpToEnd = \DB::table('fault_stage_logs')
-                    ->where('status_id', $clearedStatusId)
-                    ->where('started_at', '<=', $me)
-                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_id', $faultIdsRegion); })
-                    ->select('fault_id', \DB::raw('MAX(started_at) as ra'))
-                    ->groupBy('fault_id')
-                    ->pluck('fault_id')
+                    ->where('fault_stage_logs.status_id', $clearedStatusId)
+                    ->where('fault_stage_logs.started_at', '<=', $me)
+                    ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('fault_stage_logs.fault_id', $faultIdsRegion); })
+                    ->when($impact !== 'all', function($q) use ($impact) {
+                        $q->join('faults', 'fault_stage_logs.fault_id', '=', 'faults.id');
+                        if ($impact === 'direct') $q->whereNull('faults.root_fault_id');
+                        if ($impact === 'pop') $q->whereNotNull('faults.root_fault_id');
+                    })
+                    ->select('fault_stage_logs.fault_id', \DB::raw('MAX(fault_stage_logs.started_at) as ra'))
+                    ->groupBy('fault_stage_logs.fault_id')
+                    ->pluck('fault_stage_logs.fault_id')
                     ->unique()
                     ->values();
                 $outMonth = Fault::where('created_at','<=',$me)
                     ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                    ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                     ->whereNotIn('id', $resolvedIdsUpToEnd)
                     ->count();
                 $idsMonth = $latestClearedInMonth->pluck('fault_id')->unique()->values();
@@ -531,16 +642,22 @@ class CallCentreController extends Controller
 
                 $morningMonth = Fault::whereBetween('created_at', [$ms,$me])
                     ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                    ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                     ->whereTime('created_at', '>=', '06:00')
                     ->whereTime('created_at', '<=', '13:59')
                     ->count();
                 $afternoonMonth = Fault::whereBetween('created_at', [$ms,$me])
                     ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                    ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                     ->whereTime('created_at', '>=', '14:00')
                     ->whereTime('created_at', '<=', '21:59')
                     ->count();
                 $nightMonth = Fault::whereBetween('created_at', [$ms,$me])
                     ->when(!empty($faultIdsRegion), function($q) use ($faultIdsRegion){ $q->whereIn('id', $faultIdsRegion); })
+                    ->when($impact === 'direct', function($q){ $q->whereNull('root_fault_id'); })
+                    ->when($impact === 'pop', function($q){ $q->whereNotNull('root_fault_id'); })
                     ->where(function($q){
                         $q->whereTime('created_at','>=','22:00')
                           ->orWhereTime('created_at','<=','05:59');
@@ -591,6 +708,7 @@ class CallCentreController extends Controller
         return response()
             ->view('call_centre.reports', [
             'filter' => $filter,
+            'impact' => $impact,
             'availableRegions' => $availableRegions,
             'selectedRegion' => $selectedRegion,
             'availableYears' => $availableYears,

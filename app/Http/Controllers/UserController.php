@@ -148,6 +148,8 @@ class UserController extends Controller
                 'region' => 'nullable|string',
                 'phonenumber' => ['nullable','string','max:32','regex:/^\+?[0-9\s-]{7,20}$/'],
                 'is_access' => 'required|in:0,1',
+                'dashboard_auto_refresh_enabled' => 'nullable|in:0,1',
+                'dashboard_refresh_seconds' => 'nullable|integer|min:10|max:3600',
             ]);
 
             $input = $request->all();
@@ -160,6 +162,14 @@ class UserController extends Controller
 
             // Normalize is_access to int 0/1
             $input['is_access'] = (int)($input['is_access'] ?? 0) === 1 ? 1 : 0;
+
+            if (array_key_exists('dashboard_auto_refresh_enabled', $input)) {
+                $input['dashboard_auto_refresh_enabled'] = (int)($input['dashboard_auto_refresh_enabled'] ?? 0) === 1 ? 1 : 0;
+            }
+            if (array_key_exists('dashboard_refresh_seconds', $input)) {
+                $sec = (int) ($input['dashboard_refresh_seconds'] ?? 60);
+                $input['dashboard_refresh_seconds'] = $sec > 0 ? $sec : 60;
+            }
 
             $user = User::create($input);
             $user->assignRole($request->input('roles'));
@@ -250,6 +260,8 @@ class UserController extends Controller
                 'region' => 'nullable|string',
                 'phonenumber' => ['nullable','string','max:32','regex:/^\+?[0-9\s-]{7,20}$/'],
                 'is_access' => 'nullable|in:0,1',
+                'dashboard_auto_refresh_enabled' => 'nullable|in:0,1',
+                'dashboard_refresh_seconds' => 'nullable|integer|min:10|max:3600',
             ]);
 
             $input = $request->all();
@@ -270,6 +282,14 @@ class UserController extends Controller
             // Normalize is_access if provided
             if (array_key_exists('is_access', $input)) {
                 $input['is_access'] = (int)($input['is_access'] ?? 0) === 1 ? 1 : 0;
+            }
+
+            if (array_key_exists('dashboard_auto_refresh_enabled', $input)) {
+                $input['dashboard_auto_refresh_enabled'] = (int)($input['dashboard_auto_refresh_enabled'] ?? 0) === 1 ? 1 : 0;
+            }
+            if (array_key_exists('dashboard_refresh_seconds', $input)) {
+                $sec = (int) ($input['dashboard_refresh_seconds'] ?? 60);
+                $input['dashboard_refresh_seconds'] = $sec > 0 ? $sec : 60;
             }
 
             $user = User::find($id);
