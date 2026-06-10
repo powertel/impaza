@@ -398,6 +398,28 @@
         </script>
         @endsection
 
+        <script>
+          (function () {
+            var enabled = {{ auth()->check() && (int)(auth()->user()->dashboard_auto_refresh_enabled ?? 0) === 1 ? 'true' : 'false' }};
+            var seconds = {{ auth()->check() ? (int)(auth()->user()->dashboard_refresh_seconds ?? 60) : 0 }};
+            if (!enabled) return;
+            if (!seconds || seconds < 10) seconds = 60;
+            if (seconds > 300) seconds = 300;
+            var url = '{{ route('keepalive') }}';
+            window.setInterval(function () {
+              try { window.dispatchEvent(new Event('impaza:activity')); } catch (e) {}
+              try {
+                fetch(url + '?_ts=' + String(Date.now()), {
+                  method: 'GET',
+                  credentials: 'same-origin',
+                  cache: 'no-store',
+                  headers: { 'Accept': 'application/json' }
+                }).catch(function(){});
+              } catch (e) {}
+            }, seconds * 1000);
+          })();
+        </script>
+
         @include('partials.idle_logout')
 </body>
 
