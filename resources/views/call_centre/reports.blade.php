@@ -33,7 +33,7 @@ Faults Analytics Dashboard
     <div class="card-body p-0">
       <!-- Filter Section -->
       <div class="bg-gray-50 px-4 py-3 border-bottom">
-        <form method="get" action="{{ route('call_centre.reports') }}" class="cc-filter-bar d-flex flex-nowrap align-items-end justify-content-between gap-3">
+        <form method="get" action="{{ route('call_centre.reports') }}" class="cc-filter-bar cc-filter-bar--two-rows d-flex flex-wrap align-items-end gap-3">
           <div class="cc-field">
             <label class="form-label"><i class="fas fa-sliders-h me-1"></i>Time Period</label>
             <select name="filter" class="form-select form-select-sm" title="Select filter type">
@@ -77,6 +77,7 @@ Faults Analytics Dashboard
               <option value="pop" {{ ($impact ?? '') === 'pop' ? 'selected' : '' }}>POP Impacted</option>
             </select>
           </div>
+          <div class="w-100"></div>
           <div class="cc-field">
             <label class="form-label"><i class="fas fa-map-marker-alt me-1"></i>Region</label>
             <select name="region" class="form-select form-select-sm" title="Choose region">
