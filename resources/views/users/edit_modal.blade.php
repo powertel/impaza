@@ -97,6 +97,20 @@
             </div>
           </div>
 
+          <div class="row g-3 mt-1">
+            <div class="col-md-6">
+              <label class="form-label">Dashboard Auto Refresh</label>
+              <select class="form-select @error('dashboard_auto_refresh_enabled') is-invalid @enderror" name="dashboard_auto_refresh_enabled">
+                <option value="0" {{ (string)($user->dashboard_auto_refresh_enabled ?? '0')==='0' ? 'selected' : '' }}>Disabled</option>
+                <option value="1" {{ (string)($user->dashboard_auto_refresh_enabled ?? '0')==='1' ? 'selected' : '' }}>Enabled</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Refresh Interval (seconds)</label>
+              <input type="number" class="form-control @error('dashboard_refresh_seconds') is-invalid @enderror" name="dashboard_refresh_seconds" min="10" max="3600" value="{{ (int)($user->dashboard_refresh_seconds ?? 60) }}">
+            </div>
+          </div>
+
           <!-- Password fields removed; use dedicated Change Password modal -->
         </form>
       </div>

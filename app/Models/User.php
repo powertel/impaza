@@ -28,6 +28,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'phonenumber',
         'user_status',
         'is_access',
+        'dashboard_auto_refresh_enabled',
+        'dashboard_refresh_seconds',
         'region',
         'weekly_standby',
         'weekend_standby'
@@ -58,6 +60,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'weekly_standby' => 'boolean',
         'weekend_standby' => 'boolean',
         'is_access' => 'boolean',
+        'dashboard_auto_refresh_enabled' => 'boolean',
+        'dashboard_refresh_seconds' => 'integer',
     ];
 
     public function remarks()

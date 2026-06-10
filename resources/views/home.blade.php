@@ -595,6 +595,27 @@ document.addEventListener('DOMContentLoaded', function() {
       window.location.replace(url.toString());
     });
   }
+
+  const autoRefreshEnabled = {{ auth()->check() && (int)(auth()->user()->dashboard_auto_refresh_enabled ?? 0) === 1 ? 'true' : 'false' }};
+  let refreshSeconds = {{ auth()->check() ? (int)(auth()->user()->dashboard_refresh_seconds ?? 60) : 0 }};
+  if (autoRefreshEnabled) {
+    if (!refreshSeconds || refreshSeconds < 10) refreshSeconds = 60;
+    const timer = window.setInterval(function () {
+      try {
+        if (document.hidden) return;
+        if (document.querySelector('.modal.show')) return;
+        const ae = document.activeElement;
+        if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'SELECT' || ae.tagName === 'TEXTAREA')) return;
+        const url = new URL(window.location.href);
+        url.searchParams.set('_ar', String(Date.now()));
+        window.location.replace(url.toString());
+      } catch (e) {
+      }
+    }, refreshSeconds * 1000);
+    window.addEventListener('beforeunload', function () {
+      try { window.clearInterval(timer); } catch (e) {}
+    });
+  }
   
   // Search functionality
   const techSearch = document.getElementById('techSearch');
