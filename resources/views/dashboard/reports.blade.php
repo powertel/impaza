@@ -369,28 +369,6 @@
         window.location.replace(url.toString());
       });
     }
-
-    var enabled = {{ auth()->check() && (int)(auth()->user()->dashboard_auto_refresh_enabled ?? 0) === 1 ? 'true' : 'false' }};
-    var seconds = {{ auth()->check() ? (int)(auth()->user()->dashboard_refresh_seconds ?? 60) : 0 }};
-    if (!enabled) return;
-    if (!seconds || seconds < 10) seconds = 60;
-
-    var timer = window.setInterval(function () {
-      try {
-        if (document.hidden) return;
-        if (document.querySelector('.modal.show')) return;
-        var ae = document.activeElement;
-        if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'SELECT' || ae.tagName === 'TEXTAREA')) return;
-        var url = new URL(window.location.href);
-        url.searchParams.set('_ar', String(Date.now()));
-        window.location.replace(url.toString());
-      } catch (e) {
-      }
-    }, seconds * 1000);
-
-    window.addEventListener('beforeunload', function () {
-      try { window.clearInterval(timer); } catch (e) {}
-    });
   })();
 </script>
 @endpush
