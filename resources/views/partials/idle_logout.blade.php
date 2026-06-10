@@ -14,6 +14,8 @@
     window.addEventListener(evt, resetTimer, { passive: true });
   });
 
+  window.addEventListener('impaza:activity', resetTimer, { passive: true });
+
   // Cross-tab logout broadcast
   window.addEventListener('storage', function(e) {
     if (e.key === 'impaza_force_logout') {
