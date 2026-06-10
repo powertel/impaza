@@ -70,6 +70,14 @@ Faults Analytics Dashboard
             </select>
           </div>
           <div class="cc-field">
+            <label class="form-label"><i class="fas fa-network-wired me-1"></i>Impact Type</label>
+            <select name="impact" class="form-select form-select-sm" title="Choose impact type">
+              <option value="all" {{ ($impact ?? 'all') === 'all' ? 'selected' : '' }}>All</option>
+              <option value="direct" {{ ($impact ?? '') === 'direct' ? 'selected' : '' }}>Direct</option>
+              <option value="pop" {{ ($impact ?? '') === 'pop' ? 'selected' : '' }}>POP Impacted</option>
+            </select>
+          </div>
+          <div class="cc-field">
             <label class="form-label"><i class="fas fa-map-marker-alt me-1"></i>Region</label>
             <select name="region" class="form-select form-select-sm" title="Choose region">
               <option value="" {{ empty($selectedRegion ?? '') ? 'selected' : '' }}>All Regions</option>
