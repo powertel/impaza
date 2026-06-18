@@ -299,6 +299,15 @@
             </li>
             @endcan
 
+            @can('user-list')
+            <li class="nav-item">
+              <a href="{{ route('system-usage-settings.edit') }}" class="nav-link {{ request()->routeIs('system-usage-settings.*') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-envelope-open-text"></i>
+                <p>Usage Mail</p>
+              </a>
+            </li>
+            @endcan
+
             @can('performance-reports')
             <li class="nav-item">
               <a href="{{ route('performance.index') }}" class="nav-link {{ request()->routeIs('performance.index') ? 'active' : '' }}">

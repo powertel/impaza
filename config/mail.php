@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', 'smtp'),
+    'default' => env('MAIL_MAILER', env('ZESA_MAIL_MAILER', 'smtp')),
 
     /*
     |--------------------------------------------------------------------------
@@ -36,11 +36,11 @@ return [
     'mailers' => [
         'smtp' => [
             'transport' => 'smtp',
-            'host' => env('MAIL_HOST', 'smtp.mailgun.org'),
-            'port' => env('MAIL_PORT', 587),
-            'encryption' => env('MAIL_ENCRYPTION', 'tls'),
-            'username' => env('MAIL_USERNAME'),
-            'password' => env('MAIL_PASSWORD'),
+            'host' => env('MAIL_HOST', env('ZESA_MAIL_HOST', 'smtp.mailgun.org')),
+            'port' => env('MAIL_PORT', env('ZESA_MAIL_PORT', 587)),
+            'encryption' => env('MAIL_ENCRYPTION', env('ZESA_MAIL_ENCRYPTION', 'tls')),
+            'username' => env('MAIL_USERNAME', env('ZESA_MAIL_USERNAME')),
+            'password' => env('MAIL_PASSWORD', env('ZESA_MAIL_PASSWORD')),
             'timeout' => null,
             'local_domain' => env('MAIL_EHLO_DOMAIN'),
             'verify_peer' => env('MAIL_VERIFY_PEER', true),
@@ -93,8 +93,8 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'address' => env('MAIL_FROM_ADDRESS', env('ZESA_MAIL_FROM_ADDRESS', env('ZESA_MAIL_USERNAME', 'hello@example.com'))),
+        'name' => env('MAIL_FROM_NAME', env('ZESA_MAIL_FROM_NAME', 'Impaza')),
     ],
 
     /*

@@ -35,6 +35,7 @@ use App\Http\Controllers\TechnicianConfigController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PerformanceController;
 use App\Http\Controllers\ResolvedController;
+use App\Http\Controllers\SystemUsageReportController;
 use App\Http\Controllers\ZoneController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\LteSiteSurveyController;
@@ -74,6 +75,9 @@ Route::group(['middleware' => ['auth']], function() {
     // Reports dashboard
     Route::get('/dashboard/reports', [DashboardController::class, 'reports'])->name('dashboard.reports');
     Route::get('/dashboard/reports/customer-root-causes', [DashboardController::class, 'customerRootCauses'])->name('dashboard.reports.customer-root-causes');
+    Route::get('/reports/system-usage-settings', [SystemUsageReportController::class, 'edit'])->name('system-usage-settings.edit');
+    Route::post('/reports/system-usage-settings', [SystemUsageReportController::class, 'update'])->name('system-usage-settings.update');
+    Route::post('/reports/system-usage-settings/send-test', [SystemUsageReportController::class, 'sendTest'])->name('system-usage-settings.send-test');
     // Performance Dashboard
     Route::get('/performance', [PerformanceController::class, 'index'])->name('performance.index');
     Route::resource('users', UserController::class);
