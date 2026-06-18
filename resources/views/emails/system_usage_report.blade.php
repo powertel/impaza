@@ -25,33 +25,36 @@
             box-shadow: 0 18px 48px rgba(15, 23, 42, 0.10);
         }
         .hero {
-            background: linear-gradient(135deg, #0d3f8f 0%, #1f6feb 100%);
-            color: #ffffff;
+            background: #eef5ff;
+            color: #142033;
             padding: 38px 42px 30px;
             border-bottom: 1px solid #d7e5ff;
+            border-top: 6px solid #1f6feb;
         }
         .eyebrow {
             display: inline-block;
             margin-bottom: 12px;
             padding: 6px 12px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.18);
-            border: 1px solid rgba(255, 255, 255, 0.22);
+            background: #dbeafe;
+            border: 1px solid #bfdbfe;
             font-size: 11px;
             font-weight: 700;
             letter-spacing: 0.12em;
             text-transform: uppercase;
+            color: #1e40af;
         }
         .hero h1 {
             margin: 0 0 10px;
             font-size: 30px;
             line-height: 1.18;
+            color: #0f172a;
         }
         .hero p {
             margin: 0;
             font-size: 15px;
             line-height: 1.7;
-            color: rgba(255, 255, 255, 0.92);
+            color: #425166;
         }
         .content {
             padding: 32px 42px 42px;
@@ -67,8 +70,8 @@
             width: 33.33%;
             padding: 14px 16px;
             border-radius: 16px;
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: #ffffff;
+            border: 1px solid #d7e5ff;
             vertical-align: top;
         }
         .hero-meta .meta-label {
@@ -77,14 +80,14 @@
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.76);
+            color: #5b6b81;
             margin-bottom: 5px;
         }
         .hero-meta .meta-value {
             display: block;
             font-size: 15px;
             font-weight: 700;
-            color: #ffffff;
+            color: #0f172a;
             line-height: 1.5;
         }
         .section {
@@ -341,11 +344,22 @@
             .summary-card,
             .metric-pill,
             .region-card,
-            .profile-kpis td {
+            .profile-kpis td,
+            .hero-meta td {
                 background: #111827 !important;
                 border-color: #334155 !important;
                 color: #e5edf7 !important;
                 box-shadow: none !important;
+            }
+            .hero {
+                background: #162133 !important;
+                border-top-color: #3b82f6 !important;
+                color: #e5edf7 !important;
+            }
+            .eyebrow {
+                background: #1e3a8a !important;
+                border-color: #2563eb !important;
+                color: #dbeafe !important;
             }
             .content {
                 background: #0f172a !important;
@@ -360,7 +374,9 @@
             .panel-header h3,
             .section-title,
             .region-title,
-            .data-table td strong {
+            .data-table td strong,
+            .hero h1,
+            .hero-meta .meta-value {
                 color: #f8fafc !important;
             }
             .section-copy,
@@ -370,7 +386,9 @@
             .observation-list li,
             .muted-empty,
             .footer,
-            .footer p {
+            .footer p,
+            .hero p,
+            .hero-meta .meta-label {
                 color: #cbd5e1 !important;
             }
             .summary-card .label,
@@ -443,23 +461,23 @@
 </head>
 <body>
     <div class="container">
-        <div class="hero">
-            <span class="eyebrow">Management Report</span>
-            <h1>Impazamon Weekly System Usage Report</h1>
-            <p>This management report presents weekly system usage for the monitored operational teams, with role-based performance measures, regional categorisation, and formally recorded lifecycle activity extracted from the Impaza platform.</p>
-            <table class="hero-meta" role="presentation">
+        <div class="hero" style="background:#eef5ff; color:#142033; padding:38px 42px 30px; border-bottom:1px solid #d7e5ff; border-top:6px solid #1f6feb;">
+            <span class="eyebrow" style="display:inline-block; margin-bottom:12px; padding:6px 12px; border-radius:999px; background:#dbeafe; border:1px solid #bfdbfe; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#1e40af;">Management Report</span>
+            <h1 style="margin:0 0 10px; font-size:30px; line-height:1.18; color:#0f172a;">Impazamon Weekly System Usage Report</h1>
+            <p style="margin:0; font-size:15px; line-height:1.7; color:#425166;">This management report presents weekly system usage for the monitored operational teams, with role-based performance measures, regional categorisation, and formally recorded lifecycle activity extracted from the Impaza platform.</p>
+            <table class="hero-meta" role="presentation" style="width:100%; margin-top:18px; border-collapse:separate; border-spacing:10px;">
                 <tr>
-                    <td>
-                        <span class="meta-label">Reporting Period</span>
-                        <span class="meta-value">{{ $report['period']['label'] }}</span>
+                    <td style="width:33.33%; padding:14px 16px; border-radius:16px; background:#ffffff; border:1px solid #d7e5ff; vertical-align:top;">
+                        <span class="meta-label" style="display:block; font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#5b6b81; margin-bottom:5px;">Reporting Period</span>
+                        <span class="meta-value" style="display:block; font-size:15px; font-weight:700; color:#0f172a; line-height:1.5;">{{ $report['period']['label'] }}</span>
                     </td>
-                    <td>
-                        <span class="meta-label">Generated</span>
-                        <span class="meta-value">{{ $report['generated_at']->format('d M Y H:i') }}</span>
+                    <td style="width:33.33%; padding:14px 16px; border-radius:16px; background:#ffffff; border:1px solid #d7e5ff; vertical-align:top;">
+                        <span class="meta-label" style="display:block; font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#5b6b81; margin-bottom:5px;">Generated</span>
+                        <span class="meta-value" style="display:block; font-size:15px; font-weight:700; color:#0f172a; line-height:1.5;">{{ $report['generated_at']->format('d M Y H:i') }}</span>
                     </td>
-                    <td>
-                        <span class="meta-label">Coverage</span>
-                        <span class="meta-value">Network Operations, Customer Experience, and Service Management Centre</span>
+                    <td style="width:33.33%; padding:14px 16px; border-radius:16px; background:#ffffff; border:1px solid #d7e5ff; vertical-align:top;">
+                        <span class="meta-label" style="display:block; font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#5b6b81; margin-bottom:5px;">Coverage</span>
+                        <span class="meta-value" style="display:block; font-size:15px; font-weight:700; color:#0f172a; line-height:1.5;">Network Operations, Customer Experience, and Service Management Centre</span>
                     </td>
                 </tr>
             </table>
