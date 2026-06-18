@@ -772,7 +772,6 @@
                                     <tr>
                                         <th>User</th>
                                         <th>Region</th>
-                                        <th>Section / Role</th>
                                         <th>Total Actions</th>
                                     </tr>
                                 </thead>
@@ -781,12 +780,11 @@
                                         <tr>
                                             <td>{{ $user['name'] }}</td>
                                             <td>{{ $user['region'] }}</td>
-                                            <td>{{ $user['section_role_label'] }}</td>
                                             <td><span class="badge">{{ number_format($user['total_actions']) }}</span></td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="4">No activity recorded for the selected period.</td>
+                                            <td colspan="3">No activity recorded for the selected period.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
