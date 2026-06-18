@@ -138,7 +138,7 @@ Dashboard
         <div class="cc-kpi cc-kpi--blue cc-kpi--compact h-100 zoom-card">
           <div class="cc-kpi-head">
             <div class="cc-kpi-icon"><i class="fas fa-exclamation-triangle"></i></div>
-            <div class="cc-kpi-title">Total Faults</div>
+            <div class="cc-kpi-title">Real Faults</div>
           </div>
           <div class="cc-kpi-value">{{ number_format($faultCount ?? 0) }}</div>
           <div class="cc-kpi-sub">Current overview</div>
@@ -175,7 +175,7 @@ Dashboard
         <div class="cc-kpi cc-kpi--slate cc-kpi--compact h-100 zoom-card">
           <div class="cc-kpi-head">
             <div class="cc-kpi-icon"><i class="fas fa-calendar-day"></i></div>
-            <div class="cc-kpi-title">Faults Today</div>
+            <div class="cc-kpi-title">Real Faults Today</div>
           </div>
           <div class="cc-kpi-value">{{ number_format($todayFaultsCount ?? 0) }}</div>
           <div class="cc-kpi-sub">Current overview</div>
@@ -197,11 +197,6 @@ Dashboard
       <a href="{{ route('faults.index', ['status' => (int)($rectificationId ?? 3)]) }}" class="btn btn-sm btn-outline-warning rounded-pill">
         Under Rectification <span class="badge bg-warning text-dark ms-1">{{ (int)($inProgressFaultsCount ?? 0) }}</span>
       </a>
-      @if(!empty($popImpactId))
-      <a href="{{ route('faults.index', ['status' => (int)$popImpactId]) }}" class="btn btn-sm btn-outline-primary rounded-pill">
-        POP Impacted <span class="badge bg-primary ms-1">{{ (int)($popImpactCount ?? 0) }}</span>
-      </a>
-      @endif
       <a href="{{ route('faults.index', ['status' => (int)($nocClearedId ?? 6)]) }}" class="btn btn-sm btn-outline-success rounded-pill">
         Resolved <span class="badge bg-success ms-1">{{ (int)($resolvedFaultsCount ?? 0) }}</span>
       </a>
