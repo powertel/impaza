@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Mail;
 class SystemUsageReportService
 {
     protected array $metricLabels = [
-        'faults_logged' => 'Faults Logged',
+        'faults_logged' => 'Real Faults',
         'remarks_added' => 'Remarks Added',
         'status_updates' => 'Status Updates',
         'assignments_received' => 'Assignments Received',
@@ -422,17 +422,17 @@ class SystemUsageReportService
 
         $query = DB::table('fault_stage_logs')
             ->join('faults as f', 'f.id', '=', 'fault_stage_logs.fault_id')
-            ->whereIn('started_by', $userIds)
-            ->whereIn('status_id', $statusIds)
-            ->whereBetween('started_at', [$start, $end])
+            ->whereIn('fault_stage_logs.started_by', $userIds)
+            ->whereIn('fault_stage_logs.status_id', $statusIds)
+            ->whereBetween('fault_stage_logs.started_at', [$start, $end])
             ->whereNull('f.root_fault_id');
 
         $this->excludePopImpactedStatus($query, 'f.status_id');
 
         return $query
-            ->select('started_by', DB::raw('COUNT(*) as aggregate'))
-            ->groupBy('started_by')
-            ->pluck('aggregate', 'started_by')
+            ->select('fault_stage_logs.started_by', DB::raw('COUNT(*) as aggregate'))
+            ->groupBy('fault_stage_logs.started_by')
+            ->pluck('aggregate', 'fault_stage_logs.started_by')
             ->map(fn ($value) => (int) $value)
             ->all();
     }
@@ -451,17 +451,17 @@ class SystemUsageReportService
 
         $query = DB::table('remarks')
             ->join('faults as f', 'f.id', '=', 'remarks.fault_id')
-            ->whereIn('user_id', $userIds)
-            ->whereIn('remarkActivity_id', $activityIds)
-            ->whereBetween('created_at', [$start, $end])
+            ->whereIn('remarks.user_id', $userIds)
+            ->whereIn('remarks.remarkActivity_id', $activityIds)
+            ->whereBetween('remarks.created_at', [$start, $end])
             ->whereNull('f.root_fault_id');
 
         $this->excludePopImpactedStatus($query, 'f.status_id');
 
         return $query
-            ->select('user_id', DB::raw('COUNT(*) as aggregate'))
-            ->groupBy('user_id')
-            ->pluck('aggregate', 'user_id')
+            ->select('remarks.user_id', DB::raw('COUNT(*) as aggregate'))
+            ->groupBy('remarks.user_id')
+            ->pluck('aggregate', 'remarks.user_id')
             ->map(fn ($value) => (int) $value)
             ->all();
     }
@@ -867,13 +867,13 @@ class SystemUsageReportService
                 'metric_labels' => [
                     'monitored_users' => 'Monitored Users',
                     'active_users' => 'Active Users',
-                    'faults_logged' => 'Faults Logged',
+                    'faults_logged' => 'Real Faults',
                     'remarks_added' => 'Remarks Added',
                     'total_actions' => 'Total Actions',
                 ],
                 'detail_columns' => [
                     ['key' => 'region', 'label' => 'Region'],
-                    ['key' => 'faults_logged', 'label' => 'Faults Logged'],
+                    ['key' => 'faults_logged', 'label' => 'Real Faults'],
                     ['key' => 'remarks_added', 'label' => 'Remarks'],
                     ['key' => 'total_actions', 'label' => 'Actions'],
                 ],
