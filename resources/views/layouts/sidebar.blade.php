@@ -289,18 +289,21 @@
                 <p>Reports</p>
               </a>
             </li>
-            <li class="nav-item">
-              <a href="{{ route('system-usage-settings.edit') }}" class="nav-link {{ request()->routeIs('system-usage-settings.*') ? 'active' : '' }}">
-                <i class="nav-icon fas fa-envelope-open-text"></i>
-                <p>Usage Mail</p>
-              </a>
-            </li>
             @endcan
             @can('call-centre-reports')
             <li class="nav-item">
               <a href="{{ route('call_centre.reports') }}" class="nav-link {{ request()->routeIs('call_centre.reports') ? 'active' : '' }}">
                 <i class="nav-icon fas fa-headset"></i>
                 <p>Contact Centre</p>
+              </a>
+            </li>
+            @endcan
+
+            @can('user-list')
+            <li class="nav-item">
+              <a href="{{ route('system-usage-settings.edit') }}" class="nav-link {{ request()->routeIs('system-usage-settings.*') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-envelope-open-text"></i>
+                <p>Usage Mail</p>
               </a>
             </li>
             @endcan
