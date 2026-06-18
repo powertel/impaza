@@ -8,7 +8,7 @@
         body {
             margin: 0;
             padding: 24px 0;
-            background: #f3f6fb;
+            background: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #172033;
         }
@@ -17,14 +17,16 @@
             max-width: 920px;
             margin: 0 auto;
             background: #ffffff;
+            border: 1px solid #dbe3ee;
             border-radius: 18px;
             overflow: hidden;
-            box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12);
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
         }
         .hero {
             background: linear-gradient(135deg, #0f4aa1 0%, #1d72f3 100%);
             color: #ffffff;
             padding: 36px 40px 28px;
+            border-bottom: 1px solid #d7e5ff;
         }
         .hero h1 {
             margin: 0 0 10px;
@@ -39,20 +41,24 @@
         }
         .content {
             padding: 32px 40px 40px;
+            background: #ffffff;
         }
         .meta {
             display: inline-block;
             margin-top: 16px;
             padding: 10px 16px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.28);
             font-size: 13px;
             letter-spacing: 0.2px;
         }
         .section-title {
-            margin: 0 0 14px;
+            margin: 0 0 16px;
             font-size: 18px;
             color: #0f172a;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e8eef7;
         }
         .summary-grid {
             width: 100%;
@@ -62,11 +68,12 @@
         }
         .summary-card {
             width: 25%;
-            background: #f8fbff;
-            border: 1px solid #d9e7ff;
+            background: #ffffff;
+            border: 1px solid #d7e5ff;
             border-radius: 16px;
             padding: 18px;
             vertical-align: top;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
         }
         .summary-card .label {
             display: block;
@@ -93,10 +100,11 @@
         }
         .metric-pill {
             display: block;
-            background: #f8fafc;
+            background: #ffffff;
             border: 1px solid #e2e8f0;
             border-radius: 14px;
             padding: 14px 16px;
+            box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
         }
         .metric-pill strong {
             display: block;
@@ -110,14 +118,15 @@
         }
         .panel {
             margin: 0 0 28px;
-            border: 1px solid #e5edf7;
+            border: 1px solid #dbe5f0;
             border-radius: 18px;
             overflow: hidden;
             background: #ffffff;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
         }
         .panel-header {
             background: #f8fbff;
-            border-bottom: 1px solid #e5edf7;
+            border-bottom: 1px solid #dbe5f0;
             padding: 18px 22px;
         }
         .panel-header h3 {
@@ -132,13 +141,15 @@
         }
         .panel-body {
             padding: 22px;
+            background: #ffffff;
         }
         .region-card {
             margin-bottom: 16px;
             padding: 18px;
             border-radius: 14px;
-            background: #f8fafc;
+            background: #fbfdff;
             border: 1px solid #e2e8f0;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
         }
         .region-card:last-child {
             margin-bottom: 0;
@@ -160,6 +171,9 @@
         table.data-table {
             width: 100%;
             border-collapse: collapse;
+            border: 1px solid #e6edf5;
+            border-radius: 12px;
+            overflow: hidden;
         }
         .data-table th,
         .data-table td {
@@ -169,9 +183,12 @@
             font-size: 13px;
         }
         .data-table th {
-            background: #f8fbff;
+            background: #f5f9ff;
             color: #475569;
             font-weight: 600;
+        }
+        .data-table tr:nth-child(even) td {
+            background: #fbfdff;
         }
         .badge {
             display: inline-block;
