@@ -310,10 +310,10 @@ class SystemUsageReportService
 
         return [
             'faults_logged' => $this->pluckGroupedCounts('faults', 'user_id', 'created_at', $userIds, $start, $end),
-            'remarks_added' => $this->pluckGroupedCounts('remarks', 'user_id', 'created_at', $userIds, $start, $end),
-            'status_updates' => $this->pluckGroupedCounts('fault_stage_logs', 'started_by', 'started_at', $userIds, $start, $end),
-            'assignments_received' => $this->pluckGroupedCounts('fault_assignments', 'user_id', 'assigned_at', $userIds, $start, $end),
-            'referrals_made' => $this->pluckGroupedCounts('fault_referrals', 'referred_by', 'started_at', $userIds, $start, $end),
+            'remarks_added' => $this->pluckGroupedCounts('remarks', 'user_id', 'created_at', $userIds, $start, $end, 'fault_id'),
+            'status_updates' => $this->pluckGroupedCounts('fault_stage_logs', 'started_by', 'started_at', $userIds, $start, $end, 'fault_id'),
+            'assignments_received' => $this->pluckGroupedCounts('fault_assignments', 'user_id', 'assigned_at', $userIds, $start, $end, 'fault_id'),
+            'referrals_made' => $this->pluckGroupedCounts('fault_referrals', 'referred_by', 'started_at', $userIds, $start, $end, 'fault_id'),
             'surveys_submitted' => $this->pluckSurveyCounts($userIds, $start, $end),
         ];
     }
@@ -366,14 +366,26 @@ class SystemUsageReportService
         string $dateColumn,
         array $userIds,
         Carbon $start,
-        Carbon $end
+        Carbon $end,
+        ?string $faultColumn = null
     ): array {
-        return DB::table($table)
-            ->whereIn($userColumn, $userIds)
-            ->whereBetween($dateColumn, [$start, $end])
-            ->select($userColumn, DB::raw('COUNT(*) as aggregate'))
-            ->groupBy($userColumn)
-            ->pluck('aggregate', $userColumn)
+        $query = DB::table($table . ' as source')
+            ->whereIn('source.' . $userColumn, $userIds)
+            ->whereBetween('source.' . $dateColumn, [$start, $end]);
+
+        if ($table === 'faults') {
+            $query->whereNull('source.root_fault_id');
+            $this->excludePopImpactedStatus($query, 'source.status_id');
+        } elseif ($faultColumn) {
+            $query->join('faults as f', 'f.id', '=', 'source.' . $faultColumn);
+            $query->whereNull('f.root_fault_id');
+            $this->excludePopImpactedStatus($query, 'f.status_id');
+        }
+
+        return $query
+            ->select('source.' . $userColumn, DB::raw('COUNT(*) as aggregate'))
+            ->groupBy('source.' . $userColumn)
+            ->pluck('aggregate', 'source.' . $userColumn)
             ->map(fn ($value) => (int) $value)
             ->all();
     }
@@ -408,10 +420,16 @@ class SystemUsageReportService
             return [];
         }
 
-        return DB::table('fault_stage_logs')
+        $query = DB::table('fault_stage_logs')
+            ->join('faults as f', 'f.id', '=', 'fault_stage_logs.fault_id')
             ->whereIn('started_by', $userIds)
             ->whereIn('status_id', $statusIds)
             ->whereBetween('started_at', [$start, $end])
+            ->whereNull('f.root_fault_id');
+
+        $this->excludePopImpactedStatus($query, 'f.status_id');
+
+        return $query
             ->select('started_by', DB::raw('COUNT(*) as aggregate'))
             ->groupBy('started_by')
             ->pluck('aggregate', 'started_by')
@@ -431,10 +449,16 @@ class SystemUsageReportService
             return [];
         }
 
-        return DB::table('remarks')
+        $query = DB::table('remarks')
+            ->join('faults as f', 'f.id', '=', 'remarks.fault_id')
             ->whereIn('user_id', $userIds)
             ->whereIn('remarkActivity_id', $activityIds)
             ->whereBetween('created_at', [$start, $end])
+            ->whereNull('f.root_fault_id');
+
+        $this->excludePopImpactedStatus($query, 'f.status_id');
+
+        return $query
             ->select('user_id', DB::raw('COUNT(*) as aggregate'))
             ->groupBy('user_id')
             ->pluck('aggregate', 'user_id')
@@ -455,8 +479,10 @@ class SystemUsageReportService
             ->all();
 
         $query = DB::table('fault_assignments as fa')
+            ->join('faults as f', 'f.id', '=', 'fa.fault_id')
             ->whereIn('fa.user_id', $userIds)
             ->whereBetween('fa.assigned_at', [$start, $end])
+            ->whereNull('f.root_fault_id')
             ->select(
                 'fa.id',
                 'fa.user_id',
@@ -464,6 +490,8 @@ class SystemUsageReportService
                     'MAX(CASE WHEN r.id IS NOT NULL THEN 1 ELSE 0 END) as has_manual_assignment_note'
                 ))
             );
+
+        $this->excludePopImpactedStatus($query, 'f.status_id');
 
         if (!empty($manualRemarkActivityIds)) {
             $query->leftJoin('remarks as r', function ($join) use ($manualRemarkActivityIds) {
@@ -656,6 +684,7 @@ class SystemUsageReportService
             'Regional totals are derived from each monitored user\'s recorded region and are rolled up across the selected reporting period.',
             'Assessment, technician attendance, chief technician clearance, and NOC restoration figures are counted from formal lifecycle status transitions captured in system stage logs.',
             'System assignment counts for technicians are based on assignment records and exclude chief technician manual assignment events when a matching chief-tech assignment note is recorded alongside the dispatch.',
+            'POP-impacted child faults are excluded so the email reflects direct, real faults only and does not inflate usage with automatically generated downstream impact records.',
         ];
     }
 
@@ -962,6 +991,28 @@ class SystemUsageReportService
         ];
 
         return $remarkActivityIds;
+    }
+
+    protected function popImpactedStatusId(): int
+    {
+        static $popImpactedStatusId = null;
+
+        if ($popImpactedStatusId !== null) {
+            return $popImpactedStatusId;
+        }
+
+        $popImpactedStatusId = (int) (DB::table('statuses')->where('status_code', 'POI')->value('id') ?? 0);
+
+        return $popImpactedStatusId;
+    }
+
+    protected function excludePopImpactedStatus($query, string $statusColumn): void
+    {
+        $popImpactedStatusId = $this->popImpactedStatusId();
+
+        if ($popImpactedStatusId > 0) {
+            $query->where($statusColumn, '!=', $popImpactedStatusId);
+        }
     }
 
     protected function normalizeEmails(array $values): array
