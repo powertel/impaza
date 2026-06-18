@@ -3,62 +3,126 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impaza Weekly System Usage Report</title>
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
+    <title>Impazamon Weekly System Usage Report</title>
     <style>
         body {
             margin: 0;
-            padding: 24px 0;
-            background: #ffffff;
+            padding: 24px 12px;
+            background: #f3f6fb;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #172033;
+            color: #142033;
         }
         .container {
             width: 100%;
-            max-width: 920px;
+            max-width: 980px;
             margin: 0 auto;
             background: #ffffff;
-            border: 1px solid #dbe3ee;
-            border-radius: 18px;
+            border: 1px solid #d9e3ef;
+            border-radius: 22px;
             overflow: hidden;
-            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+            box-shadow: 0 18px 48px rgba(15, 23, 42, 0.10);
         }
         .hero {
-            background: linear-gradient(135deg, #0f4aa1 0%, #1d72f3 100%);
+            background: linear-gradient(135deg, #0d3f8f 0%, #1f6feb 100%);
             color: #ffffff;
-            padding: 36px 40px 28px;
+            padding: 38px 42px 30px;
             border-bottom: 1px solid #d7e5ff;
+        }
+        .eyebrow {
+            display: inline-block;
+            margin-bottom: 12px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
         }
         .hero h1 {
             margin: 0 0 10px;
-            font-size: 28px;
-            line-height: 1.2;
+            font-size: 30px;
+            line-height: 1.18;
         }
         .hero p {
             margin: 0;
             font-size: 15px;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.92);
         }
         .content {
-            padding: 32px 40px 40px;
+            padding: 32px 42px 42px;
             background: #ffffff;
         }
-        .meta {
-            display: inline-block;
-            margin-top: 16px;
-            padding: 10px 16px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.28);
-            font-size: 13px;
-            letter-spacing: 0.2px;
+        .hero-meta {
+            width: 100%;
+            margin-top: 18px;
+            border-collapse: separate;
+            border-spacing: 10px;
+        }
+        .hero-meta td {
+            width: 33.33%;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            vertical-align: top;
+        }
+        .hero-meta .meta-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.76);
+            margin-bottom: 5px;
+        }
+        .hero-meta .meta-value {
+            display: block;
+            font-size: 15px;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.5;
+        }
+        .section {
+            margin-bottom: 28px;
+        }
+        .section:last-child {
+            margin-bottom: 0;
         }
         .section-title {
-            margin: 0 0 16px;
-            font-size: 18px;
+            margin: 0 0 14px;
+            font-size: 19px;
             color: #0f172a;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e8eef7;
+        }
+        .section-copy {
+            margin: 0 0 16px;
+            font-size: 14px;
+            line-height: 1.7;
+            color: #52637a;
+        }
+        .note-panel {
+            margin-bottom: 18px;
+            padding: 18px 20px;
+            border-radius: 18px;
+            background: #f8fbff;
+            border: 1px solid #d9e7ff;
+        }
+        .note-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        .note-list li {
+            margin-bottom: 8px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #425166;
+        }
+        .note-list li:last-child {
+            margin-bottom: 0;
         }
         .summary-grid {
             width: 100%;
@@ -71,9 +135,9 @@
             background: #ffffff;
             border: 1px solid #d7e5ff;
             border-radius: 16px;
-            padding: 18px;
+            padding: 18px 18px 20px;
             vertical-align: top;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+            box-shadow: 0 4px 14px rgba(31, 111, 235, 0.06);
         }
         .summary-card .label {
             display: block;
@@ -87,6 +151,16 @@
             font-size: 28px;
             font-weight: 700;
             color: #0f4aa1;
+        }
+        .observation-list {
+            margin: 0;
+            padding-left: 18px;
+        }
+        .observation-list li {
+            margin-bottom: 10px;
+            font-size: 14px;
+            line-height: 1.7;
+            color: #3d4b60;
         }
         .metric-grid {
             width: 100%;
@@ -131,17 +205,47 @@
         }
         .panel-header h3 {
             margin: 0;
-            font-size: 17px;
+            font-size: 18px;
             color: #0f172a;
         }
         .panel-header p {
             margin: 6px 0 0;
             font-size: 13px;
+            line-height: 1.6;
             color: #64748b;
         }
         .panel-body {
             padding: 22px;
             background: #ffffff;
+        }
+        .profile-kpis {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 10px;
+            margin: 0 0 18px;
+        }
+        .profile-kpis td {
+            width: 25%;
+            padding: 14px 15px;
+            border-radius: 14px;
+            border: 1px solid #dde6f2;
+            background: #fbfdff;
+            vertical-align: top;
+        }
+        .profile-kpis .kpi-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #5b6b81;
+            margin-bottom: 6px;
+        }
+        .profile-kpis .kpi-value {
+            display: block;
+            font-size: 24px;
+            font-weight: 700;
+            color: #163b7a;
         }
         .region-card {
             margin-bottom: 16px;
@@ -164,6 +268,10 @@
             margin: 0 0 12px;
             font-size: 12px;
             color: #64748b;
+            line-height: 1.6;
+        }
+        .micro strong {
+            color: #334155;
         }
         .table-wrap {
             overflow-x: auto;
@@ -190,6 +298,9 @@
         .data-table tr:nth-child(even) td {
             background: #fbfdff;
         }
+        .data-table td strong {
+            color: #0f172a;
+        }
         .badge {
             display: inline-block;
             padding: 6px 10px;
@@ -200,12 +311,94 @@
             font-weight: 600;
         }
         .footer {
-            padding: 22px 40px 30px;
+            padding: 22px 42px 30px;
             background: #f8fafc;
             color: #64748b;
             font-size: 12px;
             line-height: 1.6;
             border-top: 1px solid #e2e8f0;
+        }
+        .footer p {
+            margin: 0 0 8px;
+        }
+        .footer p:last-child {
+            margin-bottom: 0;
+        }
+        .muted-empty {
+            margin: 0;
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #0f172a !important;
+                color: #e5edf7 !important;
+            }
+            .container,
+            .panel,
+            .panel-body,
+            .summary-card,
+            .metric-pill,
+            .region-card,
+            .profile-kpis td {
+                background: #111827 !important;
+                border-color: #334155 !important;
+                color: #e5edf7 !important;
+                box-shadow: none !important;
+            }
+            .content {
+                background: #0f172a !important;
+            }
+            .panel-header,
+            .note-panel,
+            .footer {
+                background: #162133 !important;
+                border-color: #334155 !important;
+                color: #cbd5e1 !important;
+            }
+            .panel-header h3,
+            .section-title,
+            .region-title,
+            .data-table td strong {
+                color: #f8fafc !important;
+            }
+            .section-copy,
+            .panel-header p,
+            .micro,
+            .note-list li,
+            .observation-list li,
+            .muted-empty,
+            .footer,
+            .footer p {
+                color: #cbd5e1 !important;
+            }
+            .summary-card .label,
+            .metric-pill span,
+            .profile-kpis .kpi-label {
+                color: #94a3b8 !important;
+            }
+            .summary-card .value,
+            .profile-kpis .kpi-value,
+            .metric-pill strong,
+            .badge {
+                color: #bfdbfe !important;
+            }
+            .data-table th {
+                background: #1e293b !important;
+                color: #e2e8f0 !important;
+                border-color: #334155 !important;
+            }
+            .data-table td {
+                border-color: #243244 !important;
+                color: #e2e8f0 !important;
+            }
+            .data-table tr:nth-child(even) td {
+                background: #162133 !important;
+            }
+            .badge {
+                background: #1d4ed8 !important;
+            }
         }
         @media only screen and (max-width: 680px) {
             .hero,
@@ -216,21 +409,33 @@
             }
             .summary-grid,
             .metric-grid,
+            .hero-meta,
+            .profile-kpis,
             .summary-grid tbody,
             .metric-grid tbody,
+            .hero-meta tbody,
+            .profile-kpis tbody,
             .summary-grid tr,
             .metric-grid tr,
+            .hero-meta tr,
+            .profile-kpis tr,
             .summary-grid td,
-            .metric-grid td {
+            .metric-grid td,
+            .hero-meta td,
+            .profile-kpis td {
                 display: block;
                 width: 100%;
             }
             .summary-grid,
-            .metric-grid {
+            .metric-grid,
+            .hero-meta,
+            .profile-kpis {
                 border-spacing: 0;
             }
             .summary-card,
-            .metric-grid td {
+            .metric-grid td,
+            .hero-meta td,
+            .profile-kpis td {
                 margin-bottom: 12px;
             }
         }
@@ -239,69 +444,171 @@
 <body>
     <div class="container">
         <div class="hero">
-            <h1>Weekly System Usage Report</h1>
-            <p>Usage activity for the requested sections and roles, grouped by region and summarised for the selected reporting week.</p>
-            <div class="meta">
-                Reporting Period: {{ $report['period']['label'] }} |
-                Generated: {{ $report['generated_at']->format('d M Y H:i') }}
-            </div>
+            <span class="eyebrow">Management Report</span>
+            <h1>Impazamon Weekly System Usage Report</h1>
+            <p>This management report presents weekly system usage for the monitored operational teams, with role-based performance measures, regional categorisation, and formally recorded lifecycle activity extracted from the Impaza platform.</p>
+            <table class="hero-meta" role="presentation">
+                <tr>
+                    <td>
+                        <span class="meta-label">Reporting Period</span>
+                        <span class="meta-value">{{ $report['period']['label'] }}</span>
+                    </td>
+                    <td>
+                        <span class="meta-label">Generated</span>
+                        <span class="meta-value">{{ $report['generated_at']->format('d M Y H:i') }}</span>
+                    </td>
+                    <td>
+                        <span class="meta-label">Coverage</span>
+                        <span class="meta-value">Network Operations, Customer Experience, and Service Management Centre</span>
+                    </td>
+                </tr>
+            </table>
         </div>
 
         <div class="content">
-            <h2 class="section-title">Executive Summary</h2>
-            <table class="summary-grid" role="presentation">
-                <tr>
-                    <td class="summary-card">
-                        <span class="label">Monitored Users</span>
-                        <span class="value">{{ number_format($report['summary']['monitored_users']) }}</span>
-                    </td>
-                    <td class="summary-card">
-                        <span class="label">Active Users</span>
-                        <span class="value">{{ number_format($report['summary']['active_users']) }}</span>
-                    </td>
-                    <td class="summary-card">
-                        <span class="label">Regions</span>
-                        <span class="value">{{ number_format($report['summary']['regions']) }}</span>
-                    </td>
-                    <td class="summary-card">
-                        <span class="label">Total Actions</span>
-                        <span class="value">{{ number_format($report['summary']['total_actions']) }}</span>
-                    </td>
-                </tr>
-            </table>
+            <div class="section">
+                <h2 class="section-title">Executive Summary</h2>
+                <p class="section-copy">The summary below provides a consolidated weekly view of monitored user participation and total platform activity across the defined operational teams.</p>
 
-            <table class="metric-grid" role="presentation">
-                <tr>
-                    @foreach($report['metric_labels'] as $metricKey => $metricLabel)
-                        <td>
-                            <div class="metric-pill">
-                                <strong>{{ number_format($report['summary']['metrics'][$metricKey] ?? 0) }}</strong>
-                                <span>{{ $metricLabel }}</span>
-                            </div>
+                <table class="summary-grid" role="presentation">
+                    <tr>
+                        <td class="summary-card">
+                            <span class="label">Monitored Users</span>
+                            <span class="value">{{ number_format($report['summary']['monitored_users']) }}</span>
                         </td>
-                        @if(($loop->iteration % 3) === 0 && !$loop->last)
-                            </tr><tr>
-                        @endif
-                    @endforeach
-                </tr>
-            </table>
+                        <td class="summary-card">
+                            <span class="label">Active Users</span>
+                            <span class="value">{{ number_format($report['summary']['active_users']) }}</span>
+                        </td>
+                        <td class="summary-card">
+                            <span class="label">Regions</span>
+                            <span class="value">{{ number_format($report['summary']['regions']) }}</span>
+                        </td>
+                        <td class="summary-card">
+                            <span class="label">Total Actions</span>
+                            <span class="value">{{ number_format($report['summary']['total_actions']) }}</span>
+                        </td>
+                    </tr>
+                </table>
 
-            <div class="panel">
-                <div class="panel-header">
-                    <h3>Usage By Section and Role</h3>
-                    <p>Monitored groups requested for this report.</p>
+                <table class="metric-grid" role="presentation">
+                    <tr>
+                        @foreach($report['metric_labels'] as $metricKey => $metricLabel)
+                            <td>
+                                <div class="metric-pill">
+                                    <strong>{{ number_format($report['summary']['metrics'][$metricKey] ?? 0) }}</strong>
+                                    <span>{{ $metricLabel }}</span>
+                                </div>
+                            </td>
+                            @if(($loop->iteration % 3) === 0 && !$loop->last)
+                                </tr><tr>
+                            @endif
+                        @endforeach
+                    </tr>
+                </table>
+
+                @if(!empty($report['executive_observations']))
+                    <div class="note-panel">
+                        <ul class="observation-list">
+                            @foreach($report['executive_observations'] as $observation)
+                                <li>{{ $observation }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Scope and Methodology</h2>
+                <p class="section-copy">This report follows a formal operational reporting approach by distinguishing user scope, regional coverage, lifecycle status transitions, and role-specific actions captured in the system.</p>
+                <div class="note-panel">
+                    <ul class="note-list">
+                        @foreach($report['methodology'] as $note)
+                            <li>{{ $note }}</li>
+                        @endforeach
+                    </ul>
                 </div>
-                <div class="panel-body">
-                    @forelse($report['groups'] as $group)
-                        <div class="region-card">
-                            <p class="region-title">{{ $group['label'] }}</p>
-                            <p class="micro">
-                                Users: {{ number_format($group['monitored_users']) }} |
-                                Active: {{ number_format($group['active_users']) }} |
-                                Total Actions: {{ number_format($group['total_actions']) }}
-                            </p>
+            </div>
 
-                            <table class="metric-grid" role="presentation" style="margin-bottom: 12px;">
+            <div class="section">
+                <h2 class="section-title">Operational Performance by Role</h2>
+                <p class="section-copy">The following sections provide role-based operational measures. In particular, NOC performance highlights faults assessed and faults attended to, technician performance highlights system assignments, attendance, and actions, and chief technician performance highlights dispatch and control actions.</p>
+
+                @forelse($report['operational_profiles'] as $profile)
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>{{ $profile['title'] }}</h3>
+                            <p><strong>{{ $profile['subtitle'] }}.</strong> {{ $profile['description'] }}</p>
+                        </div>
+                        <div class="panel-body">
+                            <table class="profile-kpis" role="presentation">
+                                <tr>
+                                    @foreach($profile['metric_labels'] as $metricKey => $metricLabel)
+                                        <td>
+                                            <span class="kpi-label">{{ $metricLabel }}</span>
+                                            <span class="kpi-value">{{ number_format($profile['metrics'][$metricKey] ?? 0) }}</span>
+                                        </td>
+                                        @if(($loop->iteration % 4) === 0 && !$loop->last)
+                                            </tr><tr>
+                                        @endif
+                                    @endforeach
+                                </tr>
+                            </table>
+
+                            @if(!empty($profile['top_users']))
+                                <div class="table-wrap">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Officer</th>
+                                                @foreach($profile['detail_columns'] as $column)
+                                                    <th>{{ $column['label'] }}</th>
+                                                @endforeach
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($profile['top_users'] as $user)
+                                                <tr>
+                                                    <td>
+                                                        <strong>{{ $user['name'] }}</strong><br>
+                                                        {{ $user['email'] }}
+                                                    </td>
+                                                    @foreach($profile['detail_columns'] as $column)
+                                                        <td>
+                                                            @if($column['key'] === 'region')
+                                                                {{ $user['region'] }}
+                                                            @else
+                                                                {{ number_format($user[$column['key']] ?? 0) }}
+                                                            @endif
+                                                        </td>
+                                                    @endforeach
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @else
+                                <p class="muted-empty">No activity was recorded for this operational profile in the selected reporting period.</p>
+                            @endif
+                        </div>
+                    </div>
+                @empty
+                    <p class="muted-empty">No role-based operational activity was available for the selected reporting period.</p>
+                @endforelse
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Section and Role Governance View</h2>
+                <p class="section-copy">This section summarises monitored usage by operational section, then shows the role composition within each section together with the regional distribution of recorded activity.</p>
+
+                @forelse($report['groups'] as $group)
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>{{ $group['label'] }}</h3>
+                            <p>Monitored users: {{ number_format($group['monitored_users']) }} | Active users: {{ number_format($group['active_users']) }} | Total actions: {{ number_format($group['total_actions']) }}</p>
+                        </div>
+                        <div class="panel-body">
+                            <table class="metric-grid" role="presentation" style="margin-bottom: 16px;">
                                 <tr>
                                     @foreach($report['metric_labels'] as $metricKey => $metricLabel)
                                         <td>
@@ -317,16 +624,43 @@
                                 </tr>
                             </table>
 
+                            @if(!empty($group['roles']))
+                                <div class="table-wrap" style="margin-bottom: 16px;">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Role</th>
+                                                <th>Monitored Users</th>
+                                                <th>Active Users</th>
+                                                <th>Total Actions</th>
+                                                <th>Leading User</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($group['roles'] as $role)
+                                                <tr>
+                                                    <td>{{ $role['label'] }}</td>
+                                                    <td>{{ number_format($role['monitored_users']) }}</td>
+                                                    <td>{{ number_format($role['active_users']) }}</td>
+                                                    <td>{{ number_format($role['total_actions']) }}</td>
+                                                    <td>{{ data_get($role, 'top_users.0.name', 'No activity') }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endif
+
                             @if(!empty($group['regions']))
                                 <div class="table-wrap">
                                     <table class="data-table">
                                         <thead>
                                             <tr>
                                                 <th>Region</th>
-                                                <th>Users</th>
-                                                <th>Active</th>
+                                                <th>Monitored Users</th>
+                                                <th>Active Users</th>
                                                 <th>Total Actions</th>
-                                                <th>Top User</th>
+                                                <th>Leading User</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -344,113 +678,111 @@
                                 </div>
                             @endif
                         </div>
-                    @empty
-                        <p style="margin:0; color:#64748b;">No users matched the configured sections and roles for this report.</p>
-                    @endforelse
-                </div>
+                    </div>
+                @empty
+                    <p class="muted-empty">No monitored groups matched the configured roles during the selected reporting period.</p>
+                @endforelse
             </div>
 
-            <div class="panel">
-                <div class="panel-header">
-                    <h3>Regional Breakdown</h3>
-                    <p>Aggregated usage across all monitored groups, categorised by region.</p>
-                </div>
-                <div class="panel-body">
-                    @forelse($report['regions'] as $region)
-                        <div class="region-card">
-                            <p class="region-title">{{ $region['region'] }}</p>
-                            <p class="micro">
-                                Users: {{ number_format($region['monitored_users']) }} |
-                                Active: {{ number_format($region['active_users']) }} |
-                                Total Actions: {{ number_format($region['total_actions']) }}
-                            </p>
+            <div class="section">
+                <h2 class="section-title">Regional Breakdown</h2>
+                <p class="section-copy">Regional categorisation is based on the monitored user profile and provides a management view of where recorded activity was concentrated during the reporting week.</p>
 
-                            <table class="metric-grid" role="presentation" style="margin-bottom: 12px;">
-                                <tr>
-                                    @foreach($report['metric_labels'] as $metricKey => $metricLabel)
-                                        <td>
-                                            <div class="metric-pill">
-                                                <strong>{{ number_format($region['metrics'][$metricKey] ?? 0) }}</strong>
-                                                <span>{{ $metricLabel }}</span>
-                                            </div>
-                                        </td>
-                                        @if(($loop->iteration % 3) === 0 && !$loop->last)
-                                            </tr><tr>
-                                        @endif
-                                    @endforeach
-                                </tr>
-                            </table>
+                @forelse($report['regions'] as $region)
+                    <div class="region-card">
+                        <p class="region-title">{{ $region['region'] }}</p>
+                        <p class="micro">
+                            <strong>Monitored Users:</strong> {{ number_format($region['monitored_users']) }} |
+                            <strong>Active Users:</strong> {{ number_format($region['active_users']) }} |
+                            <strong>Total Actions:</strong> {{ number_format($region['total_actions']) }}
+                        </p>
 
-                            @if(!empty($region['top_users']))
-                                <div class="table-wrap">
-                                    <table class="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>User</th>
-                                                <th>Section / Role</th>
-                                                <th>Email</th>
-                                                <th>Total Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($region['top_users'] as $user)
-                                                <tr>
-                                                    <td>{{ $user['name'] }}</td>
-                                                    <td>{{ $user['group_label'] }}</td>
-                                                    <td>{{ $user['email'] }}</td>
-                                                    <td><span class="badge">{{ number_format($user['total_actions']) }}</span></td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            @endif
-                        </div>
-                    @empty
-                        <p style="margin:0; color:#64748b;">No regional activity was captured in this reporting period.</p>
-                    @endforelse
-                </div>
-            </div>
-
-            <div class="panel">
-                <div class="panel-header">
-                    <h3>Top Active Users</h3>
-                    <p>Highest total recorded actions during the reporting week.</p>
-                </div>
-                <div class="panel-body">
-                    <div class="table-wrap">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>User</th>
-                                    <th>Region</th>
-                                    <th>Section / Role</th>
-                                    <th>Total Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($report['top_users'] as $user)
-                                    <tr>
-                                        <td>{{ $user['name'] }}</td>
-                                        <td>{{ $user['region'] }}</td>
-                                        <td>{{ $user['group_label'] }}</td>
-                                        <td><span class="badge">{{ number_format($user['total_actions']) }}</span></td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="4">No activity recorded for the selected period.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
+                        <table class="metric-grid" role="presentation" style="margin-bottom: 12px;">
+                            <tr>
+                                @foreach($report['metric_labels'] as $metricKey => $metricLabel)
+                                    <td>
+                                        <div class="metric-pill">
+                                            <strong>{{ number_format($region['metrics'][$metricKey] ?? 0) }}</strong>
+                                            <span>{{ $metricLabel }}</span>
+                                        </div>
+                                    </td>
+                                    @if(($loop->iteration % 3) === 0 && !$loop->last)
+                                        </tr><tr>
+                                    @endif
+                                @endforeach
+                            </tr>
                         </table>
+
+                        @if(!empty($region['top_users']))
+                            <div class="table-wrap">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Section / Role</th>
+                                            <th>Email</th>
+                                            <th>Total Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($region['top_users'] as $user)
+                                            <tr>
+                                                <td>{{ $user['name'] }}</td>
+                                                <td>{{ $user['section_role_label'] }}</td>
+                                                <td>{{ $user['email'] }}</td>
+                                                <td><span class="badge">{{ number_format($user['total_actions']) }}</span></td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </div>
+                @empty
+                    <p class="muted-empty">No regional activity was captured in this reporting period.</p>
+                @endforelse
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Top Active Users</h2>
+                <p class="section-copy">The following ranked view shows the monitored users with the highest total recorded action volume during the reporting period.</p>
+                <div class="panel">
+                    <div class="panel-body">
+                        <div class="table-wrap">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Region</th>
+                                        <th>Section / Role</th>
+                                        <th>Total Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($report['top_users'] as $user)
+                                        <tr>
+                                            <td>{{ $user['name'] }}</td>
+                                            <td>{{ $user['region'] }}</td>
+                                            <td>{{ $user['section_role_label'] }}</td>
+                                            <td><span class="badge">{{ number_format($user['total_actions']) }}</span></td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4">No activity recorded for the selected period.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="footer">
-            This is an automated email from Impaza.
-            The usage totals are derived from recorded system actions currently available in the application, including fault logging, remarks, status updates, assignments, referrals, and survey submissions.
+            <p>This is an automated management email generated by Impaza.</p>
+            <p>The report is intended to support formal weekly operational oversight and should be interpreted together with team workflow context, including assessments, dispatch activity, rectification stages, chief technician actions, and NOC restoration events.</p>
+            <p>Recorded usage totals are derived from system data currently available in the application, including fault logging, remarks, status updates, assignments, referrals, and survey submissions.</p>
         </div>
     </div>
 </body>

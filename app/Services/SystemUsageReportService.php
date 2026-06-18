@@ -21,6 +21,17 @@ class SystemUsageReportService
         'surveys_submitted' => 'Surveys Submitted',
     ];
 
+    protected array $operationalMetricLabels = [
+        'assessments_completed' => 'Faults Assessed',
+        'technician_resolutions' => 'Faults Attended',
+        'chief_tech_clears' => 'Chief Tech Clears',
+        'noc_restorations' => 'NOC Restorations',
+        'chief_tech_assignments' => 'Assignments Made',
+        'chief_tech_reassignments' => 'Reassignments Made',
+        'chief_tech_escalations' => 'Escalations Raised',
+        'system_assignments_received' => 'System Assignments',
+    ];
+
     public function resolvePeriod(?string $startInput = null, ?string $endInput = null): array
     {
         if ($startInput || $endInput) {
@@ -99,7 +110,7 @@ class SystemUsageReportService
         }
 
         $report = $this->buildReport($start, $end);
-        $subject = sprintf('Impaza Weekly System Usage Report: %s', $report['period']['label']);
+        $subject = sprintf('Impazamon Weekly System Usage Report: %s', $report['period']['label']);
 
         $primaryRecipient = array_shift($recipients);
         $allRecipients = array_values(array_filter(array_merge([$primaryRecipient], $recipients)));
@@ -184,16 +195,24 @@ class SystemUsageReportService
         $userIds = $users->pluck('id')->all();
 
         $metrics = $this->usageMetricsByUser($userIds, $start, $end);
+        $operationalMetrics = $this->operationalMetricsByUser($userIds, $start, $end);
 
-        $users = $users->map(function (array $user) use ($metrics) {
+        $users = $users->map(function (array $user) use ($metrics, $operationalMetrics) {
             $usage = [];
             foreach (array_keys($this->metricLabels) as $metricKey) {
                 $usage[$metricKey] = (int) ($metrics[$metricKey][$user['id']] ?? 0);
             }
 
+            $operational = [];
+            foreach (array_keys($this->operationalMetricLabels) as $metricKey) {
+                $operational[$metricKey] = (int) ($operationalMetrics[$metricKey][$user['id']] ?? 0);
+            }
+
             $user['usage'] = $usage;
+            $user['operational'] = $operational;
             $user['total_actions'] = array_sum($usage);
             $user['active'] = $user['total_actions'] > 0;
+            $user['section_role_label'] = trim(sprintf('%s / %s', $user['group_label'], $user['role_label']));
 
             return $user;
         })->sortByDesc('total_actions')->values();
@@ -206,9 +225,13 @@ class SystemUsageReportService
                 'label' => sprintf('%s to %s', $start->format('d M Y'), $end->format('d M Y')),
             ],
             'metric_labels' => $this->metricLabels,
+            'operational_metric_labels' => $this->operationalMetricLabels,
             'summary' => $this->summaryForUsers($users),
+            'executive_observations' => $this->executiveObservations($users),
+            'methodology' => $this->methodologyNotes(),
             'groups' => $this->groupBreakdown($users),
             'regions' => $this->regionBreakdown($users),
+            'operational_profiles' => $this->operationalProfiles($users),
             'top_users' => $users->take(10)->values()->all(),
             'users' => $users->values()->all(),
         ];
@@ -261,9 +284,12 @@ class SystemUsageReportService
                 ];
             })
             ->map(function (array $user) {
-                $group = $this->matchGroup($user);
-                $user['group_key'] = $group['key'] ?? null;
-                $user['group_label'] = $group['label'] ?? 'Other';
+                $match = $this->matchGroup($user);
+                $user['group_key'] = $match['group_key'] ?? null;
+                $user['group_label'] = $match['group_label'] ?? 'Other';
+                $user['role_key'] = $match['role_key'] ?? null;
+                $user['role_label'] = $match['role_label'] ?? 'Other';
+                $user['profile_key'] = $match['profile_key'] ?? null;
 
                 return $user;
             })
@@ -288,6 +314,48 @@ class SystemUsageReportService
             'assignments_received' => $this->pluckGroupedCounts('fault_assignments', 'user_id', 'assigned_at', $userIds, $start, $end),
             'referrals_made' => $this->pluckGroupedCounts('fault_referrals', 'referred_by', 'started_at', $userIds, $start, $end),
             'surveys_submitted' => $this->pluckSurveyCounts($userIds, $start, $end),
+        ];
+    }
+
+    protected function operationalMetricsByUser(array $userIds, Carbon $start, Carbon $end): array
+    {
+        if (empty($userIds)) {
+            return collect(array_keys($this->operationalMetricLabels))
+                ->mapWithKeys(fn ($key) => [$key => []])
+                ->all();
+        }
+
+        $statusIds = $this->statusIds();
+        $remarkActivityIds = $this->remarkActivityIds();
+        $assignmentSplit = $this->pluckSystemAssignmentSplit($userIds, $start, $end, [
+            $remarkActivityIds['chief_tech_assign'] ?? 0,
+            $remarkActivityIds['chief_tech_reassign'] ?? 0,
+        ]);
+
+        return [
+            'assessments_completed' => $this->pluckStatusCounts($userIds, $statusIds['assessed'], $start, $end),
+            'technician_resolutions' => $this->pluckStatusCounts($userIds, $statusIds['technician_cleared'], $start, $end),
+            'chief_tech_clears' => $this->pluckStatusCounts($userIds, $statusIds['chief_tech_cleared'], $start, $end),
+            'noc_restorations' => $this->pluckStatusCounts($userIds, $statusIds['noc_cleared'], $start, $end),
+            'chief_tech_assignments' => $this->pluckRemarkActivityCounts(
+                $userIds,
+                [$remarkActivityIds['chief_tech_assign'] ?? 0],
+                $start,
+                $end
+            ),
+            'chief_tech_reassignments' => $this->pluckRemarkActivityCounts(
+                $userIds,
+                [$remarkActivityIds['chief_tech_reassign'] ?? 0],
+                $start,
+                $end
+            ),
+            'chief_tech_escalations' => $this->pluckStatusCounts(
+                $userIds,
+                [$statusIds['escalated'], $statusIds['manager_escalated']],
+                $start,
+                $end
+            ),
+            'system_assignments_received' => $assignmentSplit['system'],
         ];
     }
 
@@ -327,6 +395,108 @@ class SystemUsageReportService
             ->all();
     }
 
+    protected function pluckStatusCounts(array $userIds, int|array $statusIds, Carbon $start, Carbon $end): array
+    {
+        $statusIds = collect((array) $statusIds)
+            ->filter(fn ($value) => (int) $value > 0)
+            ->map(fn ($value) => (int) $value)
+            ->values()
+            ->all();
+
+        if (empty($statusIds)) {
+            return [];
+        }
+
+        return DB::table('fault_stage_logs')
+            ->whereIn('started_by', $userIds)
+            ->whereIn('status_id', $statusIds)
+            ->whereBetween('started_at', [$start, $end])
+            ->select('started_by', DB::raw('COUNT(*) as aggregate'))
+            ->groupBy('started_by')
+            ->pluck('aggregate', 'started_by')
+            ->map(fn ($value) => (int) $value)
+            ->all();
+    }
+
+    protected function pluckRemarkActivityCounts(array $userIds, array $activityIds, Carbon $start, Carbon $end): array
+    {
+        $activityIds = collect($activityIds)
+            ->filter(fn ($value) => (int) $value > 0)
+            ->map(fn ($value) => (int) $value)
+            ->values()
+            ->all();
+
+        if (empty($activityIds)) {
+            return [];
+        }
+
+        return DB::table('remarks')
+            ->whereIn('user_id', $userIds)
+            ->whereIn('remarkActivity_id', $activityIds)
+            ->whereBetween('created_at', [$start, $end])
+            ->select('user_id', DB::raw('COUNT(*) as aggregate'))
+            ->groupBy('user_id')
+            ->pluck('aggregate', 'user_id')
+            ->map(fn ($value) => (int) $value)
+            ->all();
+    }
+
+    protected function pluckSystemAssignmentSplit(
+        array $userIds,
+        Carbon $start,
+        Carbon $end,
+        array $manualRemarkActivityIds
+    ): array {
+        $manualRemarkActivityIds = collect($manualRemarkActivityIds)
+            ->filter(fn ($value) => (int) $value > 0)
+            ->map(fn ($value) => (int) $value)
+            ->values()
+            ->all();
+
+        $query = DB::table('fault_assignments as fa')
+            ->whereIn('fa.user_id', $userIds)
+            ->whereBetween('fa.assigned_at', [$start, $end])
+            ->select(
+                'fa.id',
+                'fa.user_id',
+                DB::raw(sprintf(
+                    'MAX(CASE WHEN r.id IS NOT NULL THEN 1 ELSE 0 END) as has_manual_assignment_note'
+                ))
+            );
+
+        if (!empty($manualRemarkActivityIds)) {
+            $query->leftJoin('remarks as r', function ($join) use ($manualRemarkActivityIds) {
+                $join->on('r.fault_id', '=', 'fa.fault_id')
+                    ->whereIn('r.remarkActivity_id', $manualRemarkActivityIds)
+                    ->whereRaw('ABS(TIMESTAMPDIFF(MINUTE, r.created_at, fa.assigned_at)) <= 10');
+            });
+        }
+
+        $rows = $query
+            ->groupBy('fa.id', 'fa.user_id')
+            ->get();
+
+        $system = [];
+        $manual = [];
+
+        foreach ($rows as $row) {
+            $userId = (int) $row->user_id;
+            $isManual = (int) ($row->has_manual_assignment_note ?? 0) === 1;
+
+            if ($isManual) {
+                $manual[$userId] = ($manual[$userId] ?? 0) + 1;
+                continue;
+            }
+
+            $system[$userId] = ($system[$userId] ?? 0) + 1;
+        }
+
+        return [
+            'system' => $system,
+            'manual' => $manual,
+        ];
+    }
+
     protected function summaryForUsers(Collection $users): array
     {
         $totals = $this->metricTotals($users);
@@ -353,6 +523,7 @@ class SystemUsageReportService
                     'active_users' => $groupUsers->where('active', true)->count(),
                     'total_actions' => $groupUsers->sum('total_actions'),
                     'metrics' => $this->metricTotals($groupUsers),
+                    'roles' => $this->roleBreakdown($groupUsers),
                     'regions' => $this->regionBreakdown($groupUsers),
                     'top_users' => $groupUsers->sortByDesc('total_actions')->take(5)->values()->all(),
                 ];
@@ -363,6 +534,31 @@ class SystemUsageReportService
             ->all();
 
         return $groups;
+    }
+
+    protected function roleBreakdown(Collection $users): array
+    {
+        return $users
+            ->groupBy(fn (array $user) => $user['role_key'])
+            ->map(function (Collection $roleUsers) {
+                $roleUsers = $roleUsers->sortByDesc('total_actions')->values();
+                $firstUser = $roleUsers->first();
+
+                return [
+                    'key' => $firstUser['role_key'],
+                    'label' => $firstUser['role_label'],
+                    'profile_key' => $firstUser['profile_key'],
+                    'monitored_users' => $roleUsers->count(),
+                    'active_users' => $roleUsers->where('active', true)->count(),
+                    'total_actions' => $roleUsers->sum('total_actions'),
+                    'metrics' => $this->metricTotals($roleUsers),
+                    'operational_metrics' => $this->operationalTotals($roleUsers),
+                    'top_users' => $roleUsers->take(5)->values()->all(),
+                ];
+            })
+            ->sortByDesc('total_actions')
+            ->values()
+            ->all();
     }
 
     protected function regionBreakdown(Collection $users): array
@@ -397,6 +593,152 @@ class SystemUsageReportService
         return $totals;
     }
 
+    protected function operationalTotals(Collection $users): array
+    {
+        $totals = [];
+
+        foreach (array_keys($this->operationalMetricLabels) as $metricKey) {
+            $totals[$metricKey] = (int) $users->sum(fn (array $user) => (int) ($user['operational'][$metricKey] ?? 0));
+        }
+
+        return $totals;
+    }
+
+    protected function executiveObservations(Collection $users): array
+    {
+        if ($users->isEmpty()) {
+            return [
+                'No monitored users matched the configured sections and roles for the selected reporting period.',
+            ];
+        }
+
+        $summary = $this->summaryForUsers($users);
+        $topRegion = collect($this->regionBreakdown($users))->first();
+        $topUser = $users->first();
+
+        $observations = [
+            sprintf(
+                'The report covers %s monitored users across %s regions, with %s users recording at least one tracked action.',
+                number_format($summary['monitored_users']),
+                number_format($summary['regions']),
+                number_format($summary['active_users'])
+            ),
+            sprintf(
+                'A total of %s system actions were recorded during the reporting window, including logging, remarks, status updates, assignments, referrals, and survey submissions.',
+                number_format($summary['total_actions'])
+            ),
+        ];
+
+        if (!empty($topRegion)) {
+            $observations[] = sprintf(
+                '%s recorded the highest action volume with %s total tracked actions.',
+                $topRegion['region'],
+                number_format($topRegion['total_actions'])
+            );
+        }
+
+        if (!empty($topUser)) {
+            $observations[] = sprintf(
+                '%s was the most active monitored user with %s recorded actions.',
+                $topUser['name'],
+                number_format($topUser['total_actions'])
+            );
+        }
+
+        return $observations;
+    }
+
+    protected function methodologyNotes(): array
+    {
+        return [
+            'User scope is limited to Network Operations technicians, Customer Experience call centre and chief technician roles, and Service Management Centre NOC or NOC supervisor roles.',
+            'Regional totals are derived from each monitored user\'s recorded region and are rolled up across the selected reporting period.',
+            'Assessment, technician attendance, chief technician clearance, and NOC restoration figures are counted from formal lifecycle status transitions captured in system stage logs.',
+            'System assignment counts for technicians are based on assignment records and exclude chief technician manual assignment events when a matching chief-tech assignment note is recorded alongside the dispatch.',
+        ];
+    }
+
+    protected function operationalProfiles(Collection $users): array
+    {
+        return collect($this->operationalProfileConfigs())
+            ->map(function (array $profile) use ($users) {
+                $profileUsers = $users
+                    ->where('profile_key', $profile['key'])
+                    ->sortByDesc(fn (array $user) => $this->profileSortValue($user, $profile['sort_metric']))
+                    ->values();
+
+                if ($profileUsers->isEmpty()) {
+                    return null;
+                }
+
+                return [
+                    'key' => $profile['key'],
+                    'title' => $profile['title'],
+                    'subtitle' => $profile['subtitle'],
+                    'description' => $profile['description'],
+                    'monitored_users' => $profileUsers->count(),
+                    'active_users' => $profileUsers->where('active', true)->count(),
+                    'metrics' => $this->aggregateProfileMetrics($profileUsers, array_keys($profile['metric_labels'])),
+                    'metric_labels' => $profile['metric_labels'],
+                    'detail_columns' => $profile['detail_columns'],
+                    'top_users' => $profileUsers->take(6)->values()->map(function (array $user) use ($profile) {
+                        $details = [
+                            'name' => $user['name'],
+                            'email' => $user['email'],
+                            'region' => $user['region'],
+                            'role_label' => $user['role_label'],
+                            'group_label' => $user['group_label'],
+                            'section_role_label' => $user['section_role_label'],
+                        ];
+
+                        foreach ($profile['detail_columns'] as $column) {
+                            $details[$column['key']] = $this->metricValueForUser($user, $column['key']);
+                        }
+
+                        return $details;
+                    })->all(),
+                ];
+            })
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    protected function aggregateProfileMetrics(Collection $users, array $metricKeys): array
+    {
+        $totals = [];
+
+        foreach ($metricKeys as $metricKey) {
+            if ($metricKey === 'active_users') {
+                $totals[$metricKey] = $users->where('active', true)->count();
+                continue;
+            }
+
+            if ($metricKey === 'monitored_users') {
+                $totals[$metricKey] = $users->count();
+                continue;
+            }
+
+            $totals[$metricKey] = (int) $users->sum(fn (array $user) => $this->metricValueForUser($user, $metricKey));
+        }
+
+        return $totals;
+    }
+
+    protected function metricValueForUser(array $user, string $metricKey): int
+    {
+        if ($metricKey === 'total_actions') {
+            return (int) ($user['total_actions'] ?? 0);
+        }
+
+        return (int) ($user['operational'][$metricKey] ?? $user['usage'][$metricKey] ?? 0);
+    }
+
+    protected function profileSortValue(array $user, string $metricKey): int
+    {
+        return $this->metricValueForUser($user, $metricKey) ?: (int) ($user['total_actions'] ?? 0);
+    }
+
     protected function matchGroup(array $user): ?array
     {
         $sectionName = $this->normalizeLabel($user['section_name'] ?? '');
@@ -413,9 +755,17 @@ class SystemUsageReportService
                 continue;
             }
 
-            foreach ($candidates as $candidate) {
-                if (in_array($candidate, $group['roles'], true)) {
-                    return $group;
+            foreach ($group['roles'] as $role) {
+                foreach ($candidates as $candidate) {
+                    if (in_array($candidate, $role['aliases'], true)) {
+                        return [
+                            'group_key' => $group['key'],
+                            'group_label' => $group['label'],
+                            'role_key' => $role['key'],
+                            'role_label' => $role['label'],
+                            'profile_key' => $role['profile'],
+                        ];
+                    }
                 }
             }
         }
@@ -427,24 +777,191 @@ class SystemUsageReportService
     {
         return [
             [
-                'key' => 'network-operations-technician',
-                'label' => 'Network Operations / Technician',
+                'key' => 'network-operations',
+                'label' => 'Network Operations',
                 'sections' => ['network operations'],
-                'roles' => ['technician', 'techniciain'],
+                'roles' => [
+                    [
+                        'key' => 'network-operations-technician',
+                        'label' => 'Technician',
+                        'profile' => 'technician',
+                        'aliases' => ['technician', 'techniciain'],
+                    ],
+                ],
             ],
             [
-                'key' => 'customer-experience-call-centre-chief-tech',
-                'label' => 'Customer Experience / Call Centre and Chief Technician',
+                'key' => 'customer-experience',
+                'label' => 'Customer Experience',
                 'sections' => ['customer experience'],
-                'roles' => ['call centre', 'chief technician'],
+                'roles' => [
+                    [
+                        'key' => 'customer-experience-call-centre',
+                        'label' => 'Call Centre',
+                        'profile' => 'call_centre',
+                        'aliases' => ['call centre'],
+                    ],
+                    [
+                        'key' => 'customer-experience-chief-technician',
+                        'label' => 'Chief Technician',
+                        'profile' => 'chief_technician',
+                        'aliases' => ['chief technician'],
+                    ],
+                ],
             ],
             [
-                'key' => 'service-management-centre-noc',
-                'label' => 'Service Management Centre / Noc Supervisor and Noc',
+                'key' => 'service-management-centre',
+                'label' => 'Service Management Centre',
                 'sections' => ['service management centre'],
-                'roles' => ['noc supervisor', 'noc', 'network controller'],
+                'roles' => [
+                    [
+                        'key' => 'service-management-centre-noc',
+                        'label' => 'NOC / NOC Supervisor',
+                        'profile' => 'noc',
+                        'aliases' => ['noc supervisor', 'noc', 'network controller'],
+                    ],
+                ],
             ],
         ];
+    }
+
+    protected function operationalProfileConfigs(): array
+    {
+        return [
+            [
+                'key' => 'call_centre',
+                'title' => 'Customer Experience: Call Centre',
+                'subtitle' => 'Reporting and assessment activity',
+                'description' => 'Captures intake, assessment, and supporting activity recorded by monitored call centre officers.',
+                'sort_metric' => 'total_actions',
+                'metric_labels' => [
+                    'monitored_users' => 'Monitored Users',
+                    'active_users' => 'Active Users',
+                    'faults_logged' => 'Faults Logged',
+                    'assessments_completed' => 'Faults Assessed',
+                    'remarks_added' => 'Remarks Added',
+                    'total_actions' => 'Total Actions',
+                ],
+                'detail_columns' => [
+                    ['key' => 'region', 'label' => 'Region'],
+                    ['key' => 'faults_logged', 'label' => 'Faults Logged'],
+                    ['key' => 'assessments_completed', 'label' => 'Assessed'],
+                    ['key' => 'remarks_added', 'label' => 'Remarks'],
+                    ['key' => 'total_actions', 'label' => 'Actions'],
+                ],
+            ],
+            [
+                'key' => 'technician',
+                'title' => 'Network Operations: Technicians',
+                'subtitle' => 'Assignment, attendance, and action activity',
+                'description' => 'Highlights technician workload, including faults routed through the assignment engine, attendance closures, and all recorded operational actions.',
+                'sort_metric' => 'system_assignments_received',
+                'metric_labels' => [
+                    'monitored_users' => 'Monitored Users',
+                    'active_users' => 'Active Users',
+                    'system_assignments_received' => 'System Assignments',
+                    'assignments_received' => 'All Assignments',
+                    'technician_resolutions' => 'Faults Attended',
+                    'total_actions' => 'Total Actions',
+                ],
+                'detail_columns' => [
+                    ['key' => 'region', 'label' => 'Region'],
+                    ['key' => 'system_assignments_received', 'label' => 'System Assigned'],
+                    ['key' => 'assignments_received', 'label' => 'All Assigned'],
+                    ['key' => 'technician_resolutions', 'label' => 'Attended'],
+                    ['key' => 'total_actions', 'label' => 'Actions'],
+                ],
+            ],
+            [
+                'key' => 'chief_technician',
+                'title' => 'Customer Experience: Chief Technicians',
+                'subtitle' => 'Control, dispatch, and escalation activity',
+                'description' => 'Reports the chief technician actions that materially move work forward, including assignments, reassignments, stage clearances, and escalations.',
+                'sort_metric' => 'chief_tech_assignments',
+                'metric_labels' => [
+                    'monitored_users' => 'Monitored Users',
+                    'active_users' => 'Active Users',
+                    'chief_tech_assignments' => 'Assignments Made',
+                    'chief_tech_reassignments' => 'Reassignments',
+                    'chief_tech_clears' => 'Chief Tech Clears',
+                    'chief_tech_escalations' => 'Escalations Raised',
+                    'total_actions' => 'Total Actions',
+                ],
+                'detail_columns' => [
+                    ['key' => 'region', 'label' => 'Region'],
+                    ['key' => 'chief_tech_assignments', 'label' => 'Assigned'],
+                    ['key' => 'chief_tech_reassignments', 'label' => 'Reassigned'],
+                    ['key' => 'chief_tech_clears', 'label' => 'Cleared'],
+                    ['key' => 'chief_tech_escalations', 'label' => 'Escalated'],
+                    ['key' => 'total_actions', 'label' => 'Actions'],
+                ],
+            ],
+            [
+                'key' => 'noc',
+                'title' => 'Service Management Centre: NOC and NOC Supervisors',
+                'subtitle' => 'Assessment, restoration, and control activity',
+                'description' => 'Shows how NOC teams used the platform to assess incoming faults, restore service, and execute supporting control-room actions.',
+                'sort_metric' => 'noc_restorations',
+                'metric_labels' => [
+                    'monitored_users' => 'Monitored Users',
+                    'active_users' => 'Active Users',
+                    'assessments_completed' => 'Faults Assessed',
+                    'noc_restorations' => 'Faults Attended',
+                    'status_updates' => 'Status Updates',
+                    'total_actions' => 'Total Actions',
+                ],
+                'detail_columns' => [
+                    ['key' => 'region', 'label' => 'Region'],
+                    ['key' => 'assessments_completed', 'label' => 'Assessed'],
+                    ['key' => 'noc_restorations', 'label' => 'Attended'],
+                    ['key' => 'status_updates', 'label' => 'Status Updates'],
+                    ['key' => 'total_actions', 'label' => 'Actions'],
+                ],
+            ],
+        ];
+    }
+
+    protected function statusIds(): array
+    {
+        static $statusIds = null;
+
+        if ($statusIds !== null) {
+            return $statusIds;
+        }
+
+        $lookup = DB::table('statuses')
+            ->whereIn('status_code', ['ASD', 'CLT', 'CLC', 'CLN', 'ESC', 'MES'])
+            ->pluck('id', 'status_code');
+
+        $statusIds = [
+            'assessed' => (int) ($lookup['ASD'] ?? 2),
+            'technician_cleared' => (int) ($lookup['CLT'] ?? 4),
+            'chief_tech_cleared' => (int) ($lookup['CLC'] ?? 5),
+            'noc_cleared' => (int) ($lookup['CLN'] ?? 6),
+            'escalated' => (int) ($lookup['ESC'] ?? 10),
+            'manager_escalated' => (int) ($lookup['MES'] ?? 11),
+        ];
+
+        return $statusIds;
+    }
+
+    protected function remarkActivityIds(): array
+    {
+        static $remarkActivityIds = null;
+
+        if ($remarkActivityIds !== null) {
+            return $remarkActivityIds;
+        }
+
+        $lookup = DB::table('remark_activities')
+            ->whereIn('activity', ['ON CHIEF-TECH ASSIGN', 'ON CHIEF-TECH REASSIGN'])
+            ->pluck('id', 'activity');
+
+        $remarkActivityIds = [
+            'chief_tech_assign' => (int) ($lookup['ON CHIEF-TECH ASSIGN'] ?? 0),
+            'chief_tech_reassign' => (int) ($lookup['ON CHIEF-TECH REASSIGN'] ?? 0),
+        ];
+
+        return $remarkActivityIds;
     }
 
     protected function normalizeEmails(array $values): array
