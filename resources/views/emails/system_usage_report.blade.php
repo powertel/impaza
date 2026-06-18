@@ -550,7 +550,7 @@
 
             <div class="section">
                 <h2 class="section-title">Operational Performance by Role</h2>
-                <p class="section-copy">The following sections provide role-based operational measures. In particular, NOC performance highlights faults assessed and faults attended to, technician performance highlights system assignments, attendance, and actions, and chief technician performance highlights dispatch and control actions.</p>
+                <p class="section-copy">The following sections provide role-based operational measures. In particular, NOC performance highlights faults assessed and faults rectified, technician performance highlights system assignments, rectification activity, and actions, and chief technician performance highlights dispatch and control actions.</p>
 
                 @forelse($report['operational_profiles'] as $profile)
                     <div class="panel">
@@ -737,7 +737,7 @@
                                     <thead>
                                         <tr>
                                             <th>User</th>
-                                            <th>Section / Role</th>
+                                            <th>Section</th>
                                             <th>Email</th>
                                             <th>Total Actions</th>
                                         </tr>
@@ -746,7 +746,7 @@
                                         @foreach($region['top_users'] as $user)
                                             <tr>
                                                 <td>{{ $user['name'] }}</td>
-                                                <td>{{ $user['section_role_label'] }}</td>
+                                                <td>{{ $user['section_label'] }}</td>
                                                 <td>{{ $user['email'] }}</td>
                                                 <td><span class="badge">{{ number_format($user['total_actions']) }}</span></td>
                                             </tr>

@@ -23,7 +23,7 @@ class SystemUsageReportService
 
     protected array $operationalMetricLabels = [
         'assessments_completed' => 'Faults Assessed',
-        'technician_resolutions' => 'Faults Attended',
+        'technician_resolutions' => 'Faults Rectified',
         'chief_tech_clears' => 'Chief Tech Clears',
         'noc_restorations' => 'NOC Restorations',
         'chief_tech_assignments' => 'Assignments Made',
@@ -212,6 +212,7 @@ class SystemUsageReportService
             $user['operational'] = $operational;
             $user['total_actions'] = array_sum($usage);
             $user['active'] = $user['total_actions'] > 0;
+            $user['section_label'] = $user['group_label'];
             $user['section_role_label'] = trim(sprintf('%s / %s', $user['group_label'], $user['role_label']));
 
             return $user;
@@ -688,6 +689,7 @@ class SystemUsageReportService
                             'region' => $user['region'],
                             'role_label' => $user['role_label'],
                             'group_label' => $user['group_label'],
+                            'section_label' => $user['section_label'],
                             'section_role_label' => $user['section_role_label'],
                         ];
 
@@ -830,21 +832,19 @@ class SystemUsageReportService
             [
                 'key' => 'call_centre',
                 'title' => 'Customer Experience: Call Centre',
-                'subtitle' => 'Reporting and assessment activity',
-                'description' => 'Captures intake, assessment, and supporting activity recorded by monitored call centre officers.',
+                'subtitle' => 'Reporting and support activity',
+                'description' => 'Captures intake and supporting activity recorded by monitored call centre officers.',
                 'sort_metric' => 'total_actions',
                 'metric_labels' => [
                     'monitored_users' => 'Monitored Users',
                     'active_users' => 'Active Users',
                     'faults_logged' => 'Faults Logged',
-                    'assessments_completed' => 'Faults Assessed',
                     'remarks_added' => 'Remarks Added',
                     'total_actions' => 'Total Actions',
                 ],
                 'detail_columns' => [
                     ['key' => 'region', 'label' => 'Region'],
                     ['key' => 'faults_logged', 'label' => 'Faults Logged'],
-                    ['key' => 'assessments_completed', 'label' => 'Assessed'],
                     ['key' => 'remarks_added', 'label' => 'Remarks'],
                     ['key' => 'total_actions', 'label' => 'Actions'],
                 ],
@@ -852,22 +852,22 @@ class SystemUsageReportService
             [
                 'key' => 'technician',
                 'title' => 'Network Operations: Technicians',
-                'subtitle' => 'Assignment, attendance, and action activity',
-                'description' => 'Highlights technician workload, including faults routed through the assignment engine, attendance closures, and all recorded operational actions.',
+                'subtitle' => 'Assignment, rectification, and action activity',
+                'description' => 'Highlights technician workload, including faults routed through the assignment engine, rectification closures, and all recorded operational actions.',
                 'sort_metric' => 'system_assignments_received',
                 'metric_labels' => [
                     'monitored_users' => 'Monitored Users',
                     'active_users' => 'Active Users',
                     'system_assignments_received' => 'System Assignments',
                     'assignments_received' => 'All Assignments',
-                    'technician_resolutions' => 'Faults Attended',
+                    'technician_resolutions' => 'Faults Rectified',
                     'total_actions' => 'Total Actions',
                 ],
                 'detail_columns' => [
                     ['key' => 'region', 'label' => 'Region'],
                     ['key' => 'system_assignments_received', 'label' => 'System Assigned'],
                     ['key' => 'assignments_received', 'label' => 'All Assigned'],
-                    ['key' => 'technician_resolutions', 'label' => 'Attended'],
+                    ['key' => 'technician_resolutions', 'label' => 'Rectified'],
                     ['key' => 'total_actions', 'label' => 'Actions'],
                 ],
             ],
@@ -898,21 +898,21 @@ class SystemUsageReportService
             [
                 'key' => 'noc',
                 'title' => 'Service Management Centre: NOC and NOC Supervisors',
-                'subtitle' => 'Assessment, restoration, and control activity',
-                'description' => 'Shows how NOC teams used the platform to assess incoming faults, restore service, and execute supporting control-room actions.',
+                'subtitle' => 'Assessment, rectification, and control activity',
+                'description' => 'Shows how NOC teams used the platform to assess incoming faults, drive final restoration activity, and execute supporting control-room actions.',
                 'sort_metric' => 'noc_restorations',
                 'metric_labels' => [
                     'monitored_users' => 'Monitored Users',
                     'active_users' => 'Active Users',
                     'assessments_completed' => 'Faults Assessed',
-                    'noc_restorations' => 'Faults Attended',
+                    'noc_restorations' => 'Faults Rectified',
                     'status_updates' => 'Status Updates',
                     'total_actions' => 'Total Actions',
                 ],
                 'detail_columns' => [
                     ['key' => 'region', 'label' => 'Region'],
                     ['key' => 'assessments_completed', 'label' => 'Assessed'],
-                    ['key' => 'noc_restorations', 'label' => 'Attended'],
+                    ['key' => 'noc_restorations', 'label' => 'Rectified'],
                     ['key' => 'status_updates', 'label' => 'Status Updates'],
                     ['key' => 'total_actions', 'label' => 'Actions'],
                 ],
