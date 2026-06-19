@@ -287,6 +287,13 @@ class AccountsSyncService
         }
 
         if (
+            str_contains($incomingFingerprint, $existingFingerprint)
+            || str_contains($existingFingerprint, $incomingFingerprint)
+        ) {
+            return true;
+        }
+
+        if (
             $incomingServiceType !== null
             && $existingServiceType !== null
             && $incomingServiceType !== $existingServiceType
@@ -294,8 +301,7 @@ class AccountsSyncService
             return false;
         }
 
-        return str_contains($incomingFingerprint, $existingFingerprint)
-            || str_contains($existingFingerprint, $incomingFingerprint);
+        return false;
     }
 
     private function linkNameFingerprint(mixed $value): ?string
@@ -309,9 +315,26 @@ class AccountsSyncService
         $name = preg_replace('/^\d+\s*[- ]\s*/', '', $name);
         $name = preg_replace('/[^A-Z0-9]+/', ' ', $name);
         $name = preg_replace('/\s+/', ' ', $name);
+        $name = $this->applyLinkAliases($name);
         $name = trim($name);
 
         return $name === '' ? null : $name;
+    }
+
+    private function applyLinkAliases(string $value): string
+    {
+        $aliases = [
+            '/\bPWT ?INT\b/' => 'INTERNET',
+        ];
+
+        $normalized = preg_replace(array_keys($aliases), array_values($aliases), $value);
+        if (!is_string($normalized)) {
+            return $value;
+        }
+
+        $normalized = preg_replace('/\s+/', ' ', $normalized);
+
+        return is_string($normalized) ? trim($normalized) : trim($value);
     }
 
     private function normalizeServiceNames(mixed $services): array
