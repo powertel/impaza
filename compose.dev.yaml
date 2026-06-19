@@ -33,7 +33,7 @@ services:
       dockerfile: docker/php/Dockerfile
     working_dir: /var/www/html
     env_file:
-      - .env-docker.example
+      - .env
     volumes:
       - ./app:/var/www/html/app
       - ./resources:/var/www/html/resources
@@ -48,7 +48,6 @@ services:
       APP_ENV: local
       APP_DEBUG: "true"
       TZ: Africa/Harare
-      ACCOUNTS_SYNC_URL: "http://192.168.15.248/api/v1/accounts"
       SCHEDULE_AUTO_ASSIGN: "false"
     depends_on:
       - mysql

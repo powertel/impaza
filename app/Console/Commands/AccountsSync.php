@@ -28,8 +28,7 @@ class AccountsSync extends Command
         do {
             $startedAt = microtime(true);
 
-            $payload = $this->fetchAccountsPayload($url, $timeout);
-            $accounts = $this->extractAccountsArray($payload);
+            $accounts = $this->fetchAccounts($url, $timeout);
 
             $defaults = [
                 'city_id' => $this->envInt('ACCOUNTS_SYNC_DEFAULT_CITY_ID') ?? $this->minId('cities'),
@@ -57,7 +56,22 @@ class AccountsSync extends Command
         return Command::SUCCESS;
     }
 
-    private function fetchAccountsPayload(string $url, int $timeout): array
+    private function fetchAccounts(string $url, int $timeout): array
+    {
+        $request = $this->makeAccountsRequest($timeout);
+        $payload = $this->fetchAccountsPayload($request, $url);
+        $accounts = $this->extractAccountsArray($payload);
+        $lastPage = $this->extractLastPage($payload);
+
+        for ($page = 2; $page <= $lastPage; $page++) {
+            $pagePayload = $this->fetchAccountsPayload($request, $this->urlWithPage($url, $page));
+            $accounts = array_merge($accounts, $this->extractAccountsArray($pagePayload));
+        }
+
+        return $accounts;
+    }
+
+    private function makeAccountsRequest(int $timeout)
     {
         $headers = [];
 
@@ -71,11 +85,15 @@ class AccountsSync extends Command
             $headers['Authorization'] = 'Bearer ' . trim($bearer);
         }
 
-        $response = Http::retry(3, 500)
+        return Http::retry(3, 500)
             ->timeout(max(1, $timeout))
             ->acceptJson()
-            ->withHeaders($headers)
-            ->get($url);
+            ->withHeaders($headers);
+    }
+
+    private function fetchAccountsPayload($request, string $url): array
+    {
+        $response = $request->get($url);
 
         $response->throw();
 
@@ -102,6 +120,72 @@ class AccountsSync extends Command
         }
 
         return [];
+    }
+
+    private function extractLastPage(array $payload): int
+    {
+        $candidates = [
+            $payload['pagination']['last_page'] ?? null,
+            $payload['pagination']['lastPage'] ?? null,
+            $payload['meta']['last_page'] ?? null,
+            $payload['last_page'] ?? null,
+        ];
+
+        foreach ($candidates as $candidate) {
+            if (is_int($candidate) && $candidate >= 1) {
+                return $candidate;
+            }
+
+            if (is_string($candidate) && preg_match('/^\d+$/', trim($candidate))) {
+                return max(1, (int) trim($candidate));
+            }
+        }
+
+        return 1;
+    }
+
+    private function urlWithPage(string $url, int $page): string
+    {
+        $parts = parse_url($url);
+        if ($parts === false) {
+            return $url;
+        }
+
+        $query = [];
+        if (isset($parts['query'])) {
+            parse_str($parts['query'], $query);
+        }
+        $query['page'] = $page;
+
+        $rebuilt = '';
+        if (isset($parts['scheme'])) {
+            $rebuilt .= $parts['scheme'] . '://';
+        }
+        if (isset($parts['user'])) {
+            $rebuilt .= $parts['user'];
+            if (isset($parts['pass'])) {
+                $rebuilt .= ':' . $parts['pass'];
+            }
+            $rebuilt .= '@';
+        }
+        if (isset($parts['host'])) {
+            $rebuilt .= $parts['host'];
+        }
+        if (isset($parts['port'])) {
+            $rebuilt .= ':' . $parts['port'];
+        }
+        $rebuilt .= $parts['path'] ?? '';
+
+        $queryString = http_build_query($query);
+        if ($queryString !== '') {
+            $rebuilt .= '?' . $queryString;
+        }
+
+        if (isset($parts['fragment'])) {
+            $rebuilt .= '#' . $parts['fragment'];
+        }
+
+        return $rebuilt;
     }
 
     private function envInt(string $key): ?int
