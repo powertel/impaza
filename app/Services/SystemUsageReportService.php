@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Mail;
 class SystemUsageReportService
 {
     protected array $metricLabels = [
-        'faults_logged' => 'Real Faults',
+        'faults_logged' => 'Direct Faults',
         'remarks_added' => 'Remarks Added',
         'status_updates' => 'Status Updates',
         'assignments_received' => 'Assignments Received',
@@ -684,7 +684,7 @@ class SystemUsageReportService
             'Regional totals are derived from each monitored user\'s recorded region and are rolled up across the selected reporting period.',
             'Assessment, technician attendance, chief technician clearance, and NOC restoration figures are counted from formal lifecycle status transitions captured in system stage logs.',
             'System assignment counts for technicians are based on assignment records and exclude chief technician manual assignment events when a matching chief-tech assignment note is recorded alongside the dispatch.',
-            'POP-impacted child faults are excluded so the email reflects direct, real faults only and does not inflate usage with automatically generated downstream impact records.',
+            'POP-impacted child faults are excluded so the email reflects direct, Direct Faults only and does not inflate usage with automatically generated downstream impact records.',
         ];
     }
 
@@ -867,13 +867,13 @@ class SystemUsageReportService
                 'metric_labels' => [
                     'monitored_users' => 'Monitored Users',
                     'active_users' => 'Active Users',
-                    'faults_logged' => 'Real Faults',
+                    'faults_logged' => 'Direct Faults',
                     'remarks_added' => 'Remarks Added',
                     'total_actions' => 'Total Actions',
                 ],
                 'detail_columns' => [
                     ['key' => 'region', 'label' => 'Region'],
-                    ['key' => 'faults_logged', 'label' => 'Real Faults'],
+                    ['key' => 'faults_logged', 'label' => 'Direct Faults'],
                     ['key' => 'remarks_added', 'label' => 'Remarks'],
                     ['key' => 'total_actions', 'label' => 'Actions'],
                 ],

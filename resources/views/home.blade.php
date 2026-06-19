@@ -138,7 +138,7 @@ Dashboard
         <div class="cc-kpi cc-kpi--blue cc-kpi--compact h-100 zoom-card">
           <div class="cc-kpi-head">
             <div class="cc-kpi-icon"><i class="fas fa-exclamation-triangle"></i></div>
-            <div class="cc-kpi-title">Real Faults</div>
+            <div class="cc-kpi-title">Total Faults</div>
           </div>
           <div class="cc-kpi-value">{{ number_format($faultCount ?? 0) }}</div>
           <div class="cc-kpi-sub">Current overview</div>
@@ -175,7 +175,7 @@ Dashboard
         <div class="cc-kpi cc-kpi--slate cc-kpi--compact h-100 zoom-card">
           <div class="cc-kpi-head">
             <div class="cc-kpi-icon"><i class="fas fa-calendar-day"></i></div>
-            <div class="cc-kpi-title">Real Faults Today</div>
+            <div class="cc-kpi-title">Faults Today</div>
           </div>
           <div class="cc-kpi-value">{{ number_format($todayFaultsCount ?? 0) }}</div>
           <div class="cc-kpi-sub">Current overview</div>

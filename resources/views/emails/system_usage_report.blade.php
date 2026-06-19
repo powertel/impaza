@@ -460,6 +460,15 @@
     </style>
 </head>
 <body>
+    @php
+        $tableWrapStyle = 'border:1px solid #dbe5f0; border-radius:14px; overflow:hidden; background:#ffffff;';
+        $tableStyle = 'width:100%; border-collapse:separate; border-spacing:0; background:#ffffff;';
+        $thStyle = 'padding:12px 14px; background:#f5f9ff; color:#475569; font-size:13px; font-weight:700; text-align:left; border-bottom:1px solid #dbe5f0; border-right:1px solid #e5edf5;';
+        $tdStyle = 'padding:12px 14px; color:#1f2937; font-size:13px; text-align:left; vertical-align:top; border-bottom:1px solid #ebf1f7; border-right:1px solid #eef3f8; background:#ffffff;';
+        $tdAltStyle = 'padding:12px 14px; color:#1f2937; font-size:13px; text-align:left; vertical-align:top; border-bottom:1px solid #ebf1f7; border-right:1px solid #eef3f8; background:#fbfdff;';
+        $lastCellStyle = 'border-right:none;';
+        $lastRowStyle = 'border-bottom:none;';
+    @endphp
     <div class="container">
         <div class="hero" style="background:#eef5ff; color:#142033; padding:38px 42px 30px; border-bottom:1px solid #d7e5ff; border-top:6px solid #1f6feb;">
             <span class="eyebrow" style="display:inline-block; margin-bottom:12px; padding:6px 12px; border-radius:999px; background:#dbeafe; border:1px solid #bfdbfe; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#1e40af;">Management Report</span>
@@ -574,25 +583,25 @@
                             </table>
 
                             @if(!empty($profile['top_users']))
-                                <div class="table-wrap">
-                                    <table class="data-table">
+                                <div class="table-wrap" style="{{ $tableWrapStyle }}">
+                                    <table class="data-table" style="{{ $tableStyle }}">
                                         <thead>
                                             <tr>
-                                                <th>Officer</th>
+                                                <th style="{{ $thStyle }}">Officer</th>
                                                 @foreach($profile['detail_columns'] as $column)
-                                                    <th>{{ $column['label'] }}</th>
+                                                    <th style="{{ $thStyle }}{{ $loop->last ? ' ' . $lastCellStyle : '' }}">{{ $column['label'] }}</th>
                                                 @endforeach
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach($profile['top_users'] as $user)
                                                 <tr>
-                                                    <td>
+                                                    <td style="{{ $loop->odd ? $tdStyle : $tdAltStyle }}">
                                                         <strong>{{ $user['name'] }}</strong><br>
                                                         {{ $user['email'] }}
                                                     </td>
                                                     @foreach($profile['detail_columns'] as $column)
-                                                        <td>
+                                                        <td style="{{ ($loop->parent->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastCellStyle : '') . ($loop->parent->last ? ' ' . $lastRowStyle : '') }}">
                                                             @if($column['key'] === 'region')
                                                                 {{ $user['region'] }}
                                                             @else
@@ -643,25 +652,25 @@
                             </table>
 
                             @if(!empty($group['roles']))
-                                <div class="table-wrap" style="margin-bottom: 16px;">
-                                    <table class="data-table">
+                                <div class="table-wrap" style="margin-bottom: 16px; {{ $tableWrapStyle }}">
+                                    <table class="data-table" style="{{ $tableStyle }}">
                                         <thead>
                                             <tr>
-                                                <th>Role</th>
-                                                <th>Monitored Users</th>
-                                                <th>Active Users</th>
-                                                <th>Total Actions</th>
-                                                <th>Leading User</th>
+                                                <th style="{{ $thStyle }}">Role</th>
+                                                <th style="{{ $thStyle }}">Monitored Users</th>
+                                                <th style="{{ $thStyle }}">Active Users</th>
+                                                <th style="{{ $thStyle }}">Total Actions</th>
+                                                <th style="{{ $thStyle }}{{ $lastCellStyle }}">Leading User</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach($group['roles'] as $role)
                                                 <tr>
-                                                    <td>{{ $role['label'] }}</td>
-                                                    <td>{{ number_format($role['monitored_users']) }}</td>
-                                                    <td>{{ number_format($role['active_users']) }}</td>
-                                                    <td>{{ number_format($role['total_actions']) }}</td>
-                                                    <td>{{ data_get($role, 'top_users.0.name', 'No activity') }}</td>
+                                                    <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ $role['label'] }}</td>
+                                                    <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ number_format($role['monitored_users']) }}</td>
+                                                    <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ number_format($role['active_users']) }}</td>
+                                                    <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ number_format($role['total_actions']) }}</td>
+                                                    <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ' ' . $lastCellStyle . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ data_get($role, 'top_users.0.name', 'No activity') }}</td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
@@ -670,25 +679,25 @@
                             @endif
 
                             @if(!empty($group['regions']))
-                                <div class="table-wrap">
-                                    <table class="data-table">
+                                <div class="table-wrap" style="{{ $tableWrapStyle }}">
+                                    <table class="data-table" style="{{ $tableStyle }}">
                                         <thead>
                                             <tr>
-                                                <th>Region</th>
-                                                <th>Monitored Users</th>
-                                                <th>Active Users</th>
-                                                <th>Total Actions</th>
-                                                <th>Leading User</th>
+                                                <th style="{{ $thStyle }}">Region</th>
+                                                <th style="{{ $thStyle }}">Monitored Users</th>
+                                                <th style="{{ $thStyle }}">Active Users</th>
+                                                <th style="{{ $thStyle }}">Total Actions</th>
+                                                <th style="{{ $thStyle }}{{ $lastCellStyle }}">Leading User</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach($group['regions'] as $region)
                                                 <tr>
-                                                    <td>{{ $region['region'] }}</td>
-                                                    <td>{{ number_format($region['monitored_users']) }}</td>
-                                                    <td>{{ number_format($region['active_users']) }}</td>
-                                                    <td>{{ number_format($region['total_actions']) }}</td>
-                                                    <td>{{ data_get($region, 'top_users.0.name', 'No activity') }}</td>
+                                                    <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ $region['region'] }}</td>
+                                                    <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ number_format($region['monitored_users']) }}</td>
+                                                    <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ number_format($region['active_users']) }}</td>
+                                                    <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ number_format($region['total_actions']) }}</td>
+                                                    <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ' ' . $lastCellStyle . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ data_get($region, 'top_users.0.name', 'No activity') }}</td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
@@ -732,23 +741,23 @@
                         </table>
 
                         @if(!empty($region['top_users']))
-                            <div class="table-wrap">
-                                <table class="data-table">
+                            <div class="table-wrap" style="{{ $tableWrapStyle }}">
+                                <table class="data-table" style="{{ $tableStyle }}">
                                     <thead>
                                         <tr>
-                                            <th>User</th>
-                                            <th>Section</th>
-                                            <th>Email</th>
-                                            <th>Total Actions</th>
+                                            <th style="{{ $thStyle }}">User</th>
+                                            <th style="{{ $thStyle }}">Section</th>
+                                            <th style="{{ $thStyle }}">Email</th>
+                                            <th style="{{ $thStyle }}{{ $lastCellStyle }}">Total Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($region['top_users'] as $user)
                                             <tr>
-                                                <td>{{ $user['name'] }}</td>
-                                                <td>{{ $user['section_label'] }}</td>
-                                                <td>{{ $user['email'] }}</td>
-                                                <td><span class="badge">{{ number_format($user['total_actions']) }}</span></td>
+                                                <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ $user['name'] }}</td>
+                                                <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ $user['section_label'] }}</td>
+                                                <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ $user['email'] }}</td>
+                                                <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ' ' . $lastCellStyle . ($loop->last ? ' ' . $lastRowStyle : '') }}"><span class="badge">{{ number_format($user['total_actions']) }}</span></td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -766,25 +775,25 @@
                 <p class="section-copy">The following ranked view shows the monitored users with the highest total recorded action volume during the reporting period.</p>
                 <div class="panel">
                     <div class="panel-body">
-                        <div class="table-wrap">
-                            <table class="data-table">
+                        <div class="table-wrap" style="{{ $tableWrapStyle }}">
+                            <table class="data-table" style="{{ $tableStyle }}">
                                 <thead>
                                     <tr>
-                                        <th>User</th>
-                                        <th>Region</th>
-                                        <th>Total Actions</th>
+                                        <th style="{{ $thStyle }}">User</th>
+                                        <th style="{{ $thStyle }}">Region</th>
+                                        <th style="{{ $thStyle }}{{ $lastCellStyle }}">Total Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse($report['top_users'] as $user)
                                         <tr>
-                                            <td>{{ $user['name'] }}</td>
-                                            <td>{{ $user['region'] }}</td>
-                                            <td><span class="badge">{{ number_format($user['total_actions']) }}</span></td>
+                                            <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ $user['name'] }}</td>
+                                            <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ $user['region'] }}</td>
+                                            <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ' ' . $lastCellStyle . ($loop->last ? ' ' . $lastRowStyle : '') }}"><span class="badge">{{ number_format($user['total_actions']) }}</span></td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="3">No activity recorded for the selected period.</td>
+                                            <td colspan="3" style="{{ $tdStyle }} {{ $lastCellStyle }} {{ $lastRowStyle }}">No activity recorded for the selected period.</td>
                                         </tr>
                                     @endforelse
                                 </tbody>

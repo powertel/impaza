@@ -9,9 +9,9 @@ System Usage Report Settings
 @php
     $latestStatus = $latestDelivery->status ?? null;
     $statusClass = $latestStatus === 'sent' ? 'success' : ($latestStatus === 'failed' ? 'danger' : 'secondary');
-    $deliveryCount = collect($deliveries ?? [])->count();
-    $successCount = collect($deliveries ?? [])->where('status', 'sent')->count();
-    $failedCount = collect($deliveries ?? [])->where('status', 'failed')->count();
+    $deliveryCount = $deliveryCount ?? (($deliveries ?? null) ? $deliveries->total() : 0);
+    $successCount = $successCount ?? 0;
+    $failedCount = $failedCount ?? 0;
     $recipientCount = collect(preg_split('/[\s,;]+/', (string) ($settings->recipients ?? ''), -1, PREG_SPLIT_NO_EMPTY) ?: [])->filter()->count();
     $triggerMeta = [
         'scheduled' => ['label' => 'Scheduled Run', 'icon' => 'fas fa-calendar-check', 'class' => 'usage-trigger--scheduled'],
@@ -202,6 +202,32 @@ System Usage Report Settings
     color: #be123c;
     font-size: 0.8rem;
     line-height: 1.45;
+  }
+
+  .usage-mail-page .usage-pagination .pagination {
+    margin-bottom: 0;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .usage-mail-page .usage-pagination .page-link {
+    border-radius: 10px;
+    border-color: #dbe5f0;
+    color: #1d4ed8;
+    min-width: 40px;
+    text-align: center;
+    box-shadow: none;
+  }
+
+  .usage-mail-page .usage-pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-color: #1d4ed8;
+    color: #fff;
+  }
+
+  .usage-mail-page .usage-pagination .page-item.disabled .page-link {
+    color: #94a3b8;
+    background: #f8fafc;
   }
 
   .usage-mail-page .usage-trigger-badge {
@@ -639,6 +665,15 @@ System Usage Report Settings
               </tbody>
             </table>
           </div>
+
+          @if(($deliveries ?? null) && method_exists($deliveries, 'hasPages') && $deliveries->hasPages())
+            <div class="usage-pagination d-flex justify-content-between align-items-center flex-wrap gap-3 mt-3">
+              <small class="text-muted">
+                Showing {{ number_format($deliveries->firstItem()) }} to {{ number_format($deliveries->lastItem()) }} of {{ number_format($deliveries->total()) }} entries
+              </small>
+              {{ $deliveries->onEachSide(1)->links() }}
+            </div>
+          @endif
         </div>
       </div>
 
