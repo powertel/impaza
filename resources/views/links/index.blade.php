@@ -57,6 +57,16 @@ links
         <div class="d-flex justify-content-between align-items-center">
           <h3 class="card-title mb-0">Links</h3>
           <div class="card-tools">
+           
+            <a href="{{ $needsConfiguration ? route('links.index', request()->except(['needs_configuration', 'page'])) : route('links.index', array_merge(request()->except('page'), ['needs_configuration' => 1])) }}"
+               class="btn btn-warning btn-sm">
+                <i class="fas fa-tools me-1"></i>
+                {{ $needsConfiguration ? 'View All Links' : 'Links To Configure' }}
+                @if(!$needsConfiguration)
+                  <span class="badge bg-light text-dark ms-1">{{ $linksNeedingConfigurationCount ?? 0 }}</span>
+                @endif
+            </a>
+          
             @can('link-create')
                 <button type="button" class="btn btn-primary btn-sm" 
                         data-bs-toggle="modal" 
@@ -86,6 +96,17 @@ links
     </div>
     <!-- /.card-header -->
     <div class="card-body">
+        @if($needsConfiguration)
+          <div class="alert alert-warning d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+              <strong>Links Pending Configuration</strong>
+              <span class="ms-2 text-muted">New customers: {{ $newCustomerLinksToConfigure }} | Existing customers: {{ $existingCustomerLinksToConfigure }}</span>
+            </div>
+            <a href="{{ route('links.index', request()->except(['needs_configuration', 'page'])) }}" class="btn btn-outline-secondary btn-sm">
+              <i class="fas fa-list me-1"></i> Back To All Links
+            </a>
+          </div>
+        @endif
         <div class="table-responsive">
             <div class="filter-toolbar d-flex justify-content-end align-items-center gap-2 mb-2">
                 <div class="input-group input-group-sm" style="width: 200px;">
@@ -114,8 +135,9 @@ links
                         <input type="text" name="q" value="{{ request('q','') }}" class="form-control" placeholder="Search all records">
                         <input type="hidden" name="per_page" value="{{ $perPage }}">
                         <input type="hidden" name="status" value="{{ $statusSel }}">
+                        <input type="hidden" name="needs_configuration" value="{{ $needsConfiguration ? 1 : '' }}">
                         <button type="submit" class="btn btn-outline-primary"><i class="fas fa-search me-1"></i>Search</button>
-                        <a href="{{ route('links.index', ['per_page' => $perPage]) }}" class="btn btn-outline-secondary"><i class="fas fa-rotate-left me-1"></i>Reset</a>
+                        <a href="{{ route('links.index', array_filter(['per_page' => $perPage, 'needs_configuration' => $needsConfiguration ? 1 : null], fn ($value) => $value !== null && $value !== '')) }}" class="btn btn-outline-secondary"><i class="fas fa-rotate-left me-1"></i>Reset</a>
                     </div>
                 </form>
             </div>
@@ -134,12 +156,20 @@ links
                 </thead>
                 <tbody>
                     @foreach ($links as $link)
-                    <tr >
+                    @php
+                      $needsSetup = empty($link->city_id) || empty($link->suburb_id) || empty($link->pop_id);
+                    @endphp
+                    <tr class="{{ $needsSetup ? 'table-warning' : '' }}">
                         <td>{{ $links->firstItem() + $loop->index }}</td>
-                        <td>{{ $link->customer}}</td>
-                        <td>{{ $link->city}}</td>
-                        <td>{{ $link->suburb}}</td>
-                        <td>{{ $link->pop}}</td>
+                        <td>
+                          <div>{{ $link->customer}}</div>
+                          @if($needsSetup)
+                            <small class="badge bg-warning text-dark mt-1">{{ $link->configuration_owner_type }}</small>
+                          @endif
+                        </td>
+                        <td>{{ $link->city ?? 'Needs configuration' }}</td>
+                        <td>{{ $link->suburb ?? 'Needs configuration' }}</td>
+                        <td>{{ $link->pop ?? 'Needs configuration' }}</td>
                         <td>{{ $link->link}}</td>
                         <td>
                           @php $colors = \App\Models\LinkStatus::STATUS_COLOR; $color = $colors[$link->link_status ?? ''] ?? '#e9ecef'; @endphp

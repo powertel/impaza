@@ -27,12 +27,23 @@ class LinkController extends Controller
      *
      * @return \Illuminate\Http\Response
     */
-    public function index()
+    public function index(Request $request)
     {
-        $perPage = (int) request('per_page', 20);
+        $perPage = (int) $request->input('per_page', 20);
         $perPage = in_array($perPage, [10,20,50,100]) ? $perPage : 20;
-        $q = trim((string) request('q', ''));
-        $statusId = request('status');
+        $q = trim((string) $request->input('q', ''));
+        $statusId = $request->input('status');
+        $needsConfiguration = $request->boolean('needs_configuration');
+
+        $configuredSiblingExistsSql = "EXISTS (
+            SELECT 1
+            FROM links AS sibling_links
+            WHERE sibling_links.customer_id = links.customer_id
+              AND sibling_links.id <> links.id
+              AND sibling_links.city_id IS NOT NULL
+              AND sibling_links.suburb_id IS NOT NULL
+              AND sibling_links.pop_id IS NOT NULL
+        )";
 
         $linksQuery = DB::table('links')
             ->leftjoin('customers','links.customer_id','=','customers.id')
@@ -41,7 +52,29 @@ class LinkController extends Controller
             ->leftjoin('pops','links.pop_id','=','pops.id')
             ->leftJoin('link_types','links.linkType_id','=','link_types.id')
             ->leftJoin('link_statuses','links.link_status','=','link_statuses.id')
-            ->select(['links.id','links.jcc_number','links.link','link_types.linkType as linkType','links.service_type','links.capacity','customers.customer','cities.city','pops.pop','suburbs.suburb','link_statuses.link_status as link_status'])
+            ->select([
+                'links.id',
+                'links.customer_id',
+                'links.city_id',
+                'links.suburb_id',
+                'links.pop_id',
+                'links.jcc_number',
+                'links.link',
+                'link_types.linkType as linkType',
+                'links.service_type',
+                'links.capacity',
+                'customers.customer',
+                'cities.city',
+                'pops.pop',
+                'suburbs.suburb',
+                'link_statuses.link_status as link_status',
+            ])
+            ->selectRaw(
+                "CASE
+                    WHEN {$configuredSiblingExistsSql} THEN 'Existing Customer'
+                    ELSE 'New Customer'
+                END AS configuration_owner_type"
+            )
             ->orderBy('customers.customer', 'asc');
 
         if ($q !== '') {
@@ -63,6 +96,14 @@ class LinkController extends Controller
             $linksQuery->where('links.link_status', '=', (int) $statusId);
         }
 
+        if ($needsConfiguration) {
+            $linksQuery->where(function ($query) {
+                $query->whereNull('links.city_id')
+                    ->orWhereNull('links.suburb_id')
+                    ->orWhereNull('links.pop_id');
+            });
+        }
+
         $links = $linksQuery->paginate($perPage)->withQueryString();
         $customers = DB::table('customers')->orderBy('customers.customer', 'asc')->get();
         $cities = City::all();
@@ -75,7 +116,38 @@ class LinkController extends Controller
             ->groupBy('link_status')
             ->pluck('total', 'link_status');
         $totalLinks = DB::table('links')->count();
-        return view('links.index',compact('links','customers','cities','suburbs','pops','linkTypes','linkStatuses','statusCounts','totalLinks'))
+        $linksNeedingConfigurationCount = DB::table('links')
+            ->where(function ($query) {
+                $query->whereNull('city_id')
+                    ->orWhereNull('suburb_id')
+                    ->orWhereNull('pop_id');
+            })
+            ->count();
+        $newCustomerLinksToConfigure = DB::table('links')
+            ->where(function ($query) {
+                $query->whereNull('links.city_id')
+                    ->orWhereNull('links.suburb_id')
+                    ->orWhereNull('links.pop_id');
+            })
+            ->whereRaw("NOT {$configuredSiblingExistsSql}")
+            ->count();
+        $existingCustomerLinksToConfigure = max(0, $linksNeedingConfigurationCount - $newCustomerLinksToConfigure);
+
+        return view('links.index',compact(
+            'links',
+            'customers',
+            'cities',
+            'suburbs',
+            'pops',
+            'linkTypes',
+            'linkStatuses',
+            'statusCounts',
+            'totalLinks',
+            'needsConfiguration',
+            'linksNeedingConfigurationCount',
+            'newCustomerLinksToConfigure',
+            'existingCustomerLinksToConfigure'
+        ))
         ->with('i');
     }
 
