@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Services\AccountsSyncService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 class AccountsSync extends Command
@@ -31,9 +30,9 @@ class AccountsSync extends Command
             $accounts = $this->fetchAccounts($url, $timeout);
 
             $defaults = [
-                'city_id' => $this->envInt('ACCOUNTS_SYNC_DEFAULT_CITY_ID') ?? $this->minId('cities'),
-                'suburb_id' => $this->envInt('ACCOUNTS_SYNC_DEFAULT_SUBURB_ID') ?? $this->minId('suburbs'),
-                'pop_id' => $this->envInt('ACCOUNTS_SYNC_DEFAULT_POP_ID') ?? $this->minId('pops'),
+                'city_id' => $this->envInt('ACCOUNTS_SYNC_DEFAULT_CITY_ID'),
+                'suburb_id' => $this->envInt('ACCOUNTS_SYNC_DEFAULT_SUBURB_ID'),
+                'pop_id' => $this->envInt('ACCOUNTS_SYNC_DEFAULT_POP_ID'),
                 'linkType_id' => $this->envInt('ACCOUNTS_SYNC_DEFAULT_LINK_TYPE_ID') ?? 2,
                 'link_status' => $this->envInt('ACCOUNTS_SYNC_DEFAULT_LINK_STATUS') ?? 2,
             ];
@@ -200,15 +199,4 @@ class AccountsSync extends Command
         }
         return (int) $s;
     }
-
-    private function minId(string $table): ?int
-    {
-        try {
-            $id = DB::table($table)->min('id');
-            return $id ? (int) $id : null;
-        } catch (\Throwable $e) {
-            return null;
-        }
-    }
 }
-

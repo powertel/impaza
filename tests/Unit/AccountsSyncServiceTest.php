@@ -98,5 +98,47 @@ class AccountsSyncServiceTest extends TestCase
             ],
         ], $out);
     }
+
+    public function testLinkNameFingerprintRemovesLeadingNumericPrefixAndNormalizesSpacing(): void
+    {
+        $service = new AccountsSyncService();
+        $method = new \ReflectionMethod($service, 'linkNameFingerprint');
+        $method->setAccessible(true);
+
+        $this->assertSame(
+            'H O FML FUNERAL SERVICES METROLINK',
+            $method->invoke($service, '000060 - H/O-FML FUNERAL SERVICES METROLINK')
+        );
+    }
+
+    public function testLooksLikeSameLinkAcceptsRenamedVariantForSameServiceType(): void
+    {
+        $service = new AccountsSyncService();
+        $fingerprintMethod = new \ReflectionMethod($service, 'linkNameFingerprint');
+        $fingerprintMethod->setAccessible(true);
+        $matchMethod = new \ReflectionMethod($service, 'looksLikeSameLink');
+        $matchMethod->setAccessible(true);
+
+        $incoming = $fingerprintMethod->invoke($service, '000060 - H/O-FML FUNERAL SERVICES METROLINK');
+        $existing = $fingerprintMethod->invoke($service, 'FML_H/O-FML FUNERAL SERVICES METROLINK');
+        $serviceType = $fingerprintMethod->invoke($service, 'Metro VPN');
+
+        $this->assertTrue($matchMethod->invoke($service, $incoming, $existing, $serviceType, $serviceType));
+    }
+
+    public function testLooksLikeSameLinkRejectsDifferentLinksWithSameServiceType(): void
+    {
+        $service = new AccountsSyncService();
+        $fingerprintMethod = new \ReflectionMethod($service, 'linkNameFingerprint');
+        $fingerprintMethod->setAccessible(true);
+        $matchMethod = new \ReflectionMethod($service, 'looksLikeSameLink');
+        $matchMethod->setAccessible(true);
+
+        $incoming = $fingerprintMethod->invoke($service, 'FML_HRE-WEKWE 2MB');
+        $existing = $fingerprintMethod->invoke($service, 'FML_HRE-GWERU 2MB');
+        $serviceType = $fingerprintMethod->invoke($service, 'Intercity VPN');
+
+        $this->assertFalse($matchMethod->invoke($service, $incoming, $existing, $serviceType, $serviceType));
+    }
 }
 

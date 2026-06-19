@@ -92,10 +92,7 @@ class AccountsSyncService
                         'link_status' => $normalizedLink['link_status'] ?? $defaultLinkStatus,
                     ]);
 
-                    $existing = Link::query()
-                        ->where('customer_id', $customer->id)
-                        ->where('link', $linkName)
-                        ->first();
+                    $existing = $this->findExistingLink($customer->id, $normalizedLink);
 
                     if ($existing) {
                         $result['links_skipped_existing']++;
@@ -217,6 +214,104 @@ class AccountsSyncService
             ),
             'contract_number' => $this->stringOrNull($linkPayload['contract_number'] ?? $linkPayload['contractNumber'] ?? null),
         ];
+    }
+
+    private function findExistingLink(int $customerId, array $normalizedLink): ?Link
+    {
+        $linkName = $normalizedLink['link'] ?? null;
+        if ($linkName !== null) {
+            $exact = Link::query()
+                ->where('customer_id', $customerId)
+                ->where('link', $linkName)
+                ->first();
+
+            if ($exact) {
+                return $exact;
+            }
+        }
+
+        foreach (['jcc_number', 'sapcodes'] as $field) {
+            $value = $normalizedLink[$field] ?? null;
+            if ($value === null) {
+                continue;
+            }
+
+            $match = Link::query()
+                ->where('customer_id', $customerId)
+                ->where($field, $value)
+                ->first();
+
+            if ($match) {
+                return $match;
+            }
+        }
+
+        if ($linkName === null) {
+            return null;
+        }
+
+        $incomingFingerprint = $this->linkNameFingerprint($linkName);
+        if ($incomingFingerprint === null) {
+            return null;
+        }
+
+        $incomingServiceType = $this->linkNameFingerprint($normalizedLink['service_type'] ?? null);
+
+        $candidates = Link::query()
+            ->where('customer_id', $customerId)
+            ->get(['id', 'link', 'service_type']);
+
+        foreach ($candidates as $candidate) {
+            $candidateFingerprint = $this->linkNameFingerprint($candidate->link);
+            if ($candidateFingerprint === null) {
+                continue;
+            }
+
+            $candidateServiceType = $this->linkNameFingerprint($candidate->service_type);
+            if ($this->looksLikeSameLink($incomingFingerprint, $candidateFingerprint, $incomingServiceType, $candidateServiceType)) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+
+    private function looksLikeSameLink(
+        string $incomingFingerprint,
+        string $existingFingerprint,
+        ?string $incomingServiceType,
+        ?string $existingServiceType
+    ): bool {
+        if ($incomingFingerprint === $existingFingerprint) {
+            return true;
+        }
+
+        if (
+            $incomingServiceType !== null
+            && $existingServiceType !== null
+            && $incomingServiceType !== $existingServiceType
+        ) {
+            return false;
+        }
+
+        return str_contains($incomingFingerprint, $existingFingerprint)
+            || str_contains($existingFingerprint, $incomingFingerprint);
+    }
+
+    private function linkNameFingerprint(mixed $value): ?string
+    {
+        $name = $this->stringOrNull($value);
+        if ($name === null) {
+            return null;
+        }
+
+        $name = strtoupper($name);
+        $name = preg_replace('/^\d+\s*[- ]\s*/', '', $name);
+        $name = preg_replace('/[^A-Z0-9]+/', ' ', $name);
+        $name = preg_replace('/\s+/', ' ', $name);
+        $name = trim($name);
+
+        return $name === '' ? null : $name;
     }
 
     private function normalizeServiceNames(mixed $services): array
