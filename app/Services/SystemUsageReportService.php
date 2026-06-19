@@ -110,7 +110,7 @@ class SystemUsageReportService
         }
 
         $report = $this->buildReport($start, $end);
-        $subject = sprintf('Impazamon Weekly System Usage Report: %s', $report['period']['label']);
+        $subject = sprintf('%s: %s', $report['period']['report_title'], $report['period']['label']);
 
         $primaryRecipient = array_shift($recipients);
         $allRecipients = array_values(array_filter(array_merge([$primaryRecipient], $recipients)));
@@ -224,6 +224,7 @@ class SystemUsageReportService
                 'start' => $start,
                 'end' => $end,
                 'label' => sprintf('%s to %s', $start->format('d M Y'), $end->format('d M Y')),
+                ...$this->periodDescriptor($start, $end),
             ],
             'metric_labels' => $this->metricLabels,
             'operational_metric_labels' => $this->operationalMetricLabels,
@@ -235,6 +236,23 @@ class SystemUsageReportService
             'operational_profiles' => $this->operationalProfiles($users),
             'top_users' => $users->take(10)->values()->all(),
             'users' => $users->values()->all(),
+        ];
+    }
+
+    protected function periodDescriptor(Carbon $start, Carbon $end): array
+    {
+        $normalizedStart = $start->copy()->startOfDay();
+        $normalizedEnd = $end->copy()->endOfDay();
+
+        $isWeekly = $normalizedStart->copy()->startOfWeek(Carbon::MONDAY)->isSameDay($normalizedStart)
+            && $normalizedEnd->copy()->endOfWeek(Carbon::SUNDAY)->isSameDay($normalizedEnd)
+            && $normalizedStart->diffInDays($normalizedEnd) === 6;
+
+        return [
+            'is_weekly' => $isWeekly,
+            'report_title' => $isWeekly
+                ? 'Impazamon Weekly System Usage Report'
+                : 'Impazamon System Usage Report',
         ];
     }
 
