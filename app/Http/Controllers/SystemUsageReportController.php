@@ -7,7 +7,6 @@ use App\Models\SystemUsageReportSetting;
 use App\Services\SystemUsageReportService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -22,7 +21,7 @@ class SystemUsageReportController extends Controller
     public function edit(Request $request, SystemUsageReportService $reportService)
     {
         $settings = $reportService->currentSettings();
-        $deliveries = $this->paginatedDeliveries($request);
+        $deliveries = $this->deliveries();
         $latestDelivery = $this->latestDelivery();
         $deliveryCount = SystemUsageReportDelivery::tableExists() ? SystemUsageReportDelivery::count() : 0;
         $successCount = SystemUsageReportDelivery::tableExists() ? SystemUsageReportDelivery::where('status', 'sent')->count() : 0;
@@ -51,19 +50,10 @@ class SystemUsageReportController extends Controller
         ]);
     }
 
-    protected function paginatedDeliveries(Request $request): LengthAwarePaginator
+    protected function deliveries(): Collection
     {
         if (!SystemUsageReportDelivery::tableExists()) {
-            return new LengthAwarePaginator(
-                collect(),
-                0,
-                10,
-                LengthAwarePaginator::resolveCurrentPage(),
-                [
-                    'path' => $request->url(),
-                    'query' => $request->query(),
-                ]
-            );
+            return collect();
         }
 
         return DB::table('system_usage_report_deliveries as d')
@@ -83,8 +73,7 @@ class SystemUsageReportController extends Controller
                 'u.name as initiated_by_name'
             )
             ->orderByDesc('d.started_at')
-            ->paginate(10)
-            ->withQueryString();
+            ->get();
     }
 
     protected function latestDelivery()

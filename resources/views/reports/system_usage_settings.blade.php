@@ -9,7 +9,7 @@ System Usage Report Settings
 @php
     $latestStatus = $latestDelivery->status ?? null;
     $statusClass = $latestStatus === 'sent' ? 'success' : ($latestStatus === 'failed' ? 'danger' : 'secondary');
-    $deliveryCount = $deliveryCount ?? (($deliveries ?? null) ? $deliveries->total() : 0);
+    $deliveryCount = $deliveryCount ?? collect($deliveries ?? [])->count();
     $successCount = $successCount ?? 0;
     $failedCount = $failedCount ?? 0;
     $recipientCount = collect(preg_split('/[\s,;]+/', (string) ($settings->recipients ?? ''), -1, PREG_SPLIT_NO_EMPTY) ?: [])->filter()->count();
@@ -204,13 +204,29 @@ System Usage Report Settings
     line-height: 1.45;
   }
 
-  .usage-mail-page .usage-pagination .pagination {
-    margin-bottom: 0;
-    gap: 6px;
-    flex-wrap: wrap;
+  .usage-mail-page .dataTables_wrapper .dataTables_filter input,
+  .usage-mail-page .dataTables_wrapper .dataTables_length select {
+    border-radius: 10px;
+    border: 1px solid #dbe5f0;
+    padding: 0.4rem 0.75rem;
+    box-shadow: none;
   }
 
-  .usage-mail-page .usage-pagination .page-link {
+  .usage-mail-page .dataTables_wrapper .dataTables_info,
+  .usage-mail-page .dataTables_wrapper .dataTables_length,
+  .usage-mail-page .dataTables_wrapper .dataTables_filter {
+    color: #64748b;
+    font-size: 0.86rem;
+  }
+
+  .usage-mail-page .dataTables_wrapper .dataTables_paginate .paginate_button {
+    padding: 0 !important;
+    margin-left: 6px;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  .usage-mail-page .dataTables_wrapper .dataTables_paginate .paginate_button .page-link {
     border-radius: 10px;
     border-color: #dbe5f0;
     color: #1d4ed8;
@@ -219,14 +235,15 @@ System Usage Report Settings
     box-shadow: none;
   }
 
-  .usage-mail-page .usage-pagination .page-item.active .page-link {
+  .usage-mail-page .dataTables_wrapper .dataTables_paginate .paginate_button.current .page-link,
+  .usage-mail-page .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover .page-link {
     background: linear-gradient(135deg, #2563eb, #1d4ed8);
     border-color: #1d4ed8;
-    color: #fff;
+    color: #fff !important;
   }
 
-  .usage-mail-page .usage-pagination .page-item.disabled .page-link {
-    color: #94a3b8;
+  .usage-mail-page .dataTables_wrapper .dataTables_paginate .paginate_button.disabled .page-link {
+    color: #94a3b8 !important;
     background: #f8fafc;
   }
 
@@ -280,43 +297,6 @@ System Usage Report Settings
 
     .usage-mail-page .usage-detail-grid {
       grid-template-columns: 1fr;
-    }
-
-    .usage-mail-page .usage-history-table thead {
-      display: none;
-    }
-
-    .usage-mail-page .usage-history-table,
-    .usage-mail-page .usage-history-table tbody,
-    .usage-mail-page .usage-history-table tr,
-    .usage-mail-page .usage-history-table td {
-      display: block;
-      width: 100%;
-    }
-
-    .usage-mail-page .usage-history-table tbody tr {
-      border: 1px solid #e6ebf2;
-      border-radius: 14px;
-      margin-bottom: 14px;
-      padding: 12px 14px;
-      background: #fff;
-      box-shadow: var(--cc-shadow-sm);
-    }
-
-    .usage-mail-page .usage-history-table tbody td {
-      border: 0;
-      padding: 8px 0;
-    }
-
-    .usage-mail-page .usage-history-table tbody td::before {
-      content: attr(data-label);
-      display: block;
-      font-size: 0.74rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: #64748b;
-      margin-bottom: 4px;
     }
 
     .usage-mail-page .usage-error-chip {
@@ -614,7 +594,7 @@ System Usage Report Settings
           </div>
 
           <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0 usage-history-table">
+            <table id="usageDeliveryHistoryTable" class="table table-hover align-middle mb-0 usage-history-table">
               <thead>
                 <tr>
                   <th>Started</th>
@@ -635,21 +615,21 @@ System Usage Report Settings
                     ];
                   @endphp
                   <tr>
-                    <td data-label="Started">{{ $delivery->started_at ? \Carbon\Carbon::parse($delivery->started_at)->format('d M Y H:i') : 'N/A' }}</td>
-                    <td data-label="Trigger">
+                    <td data-order="{{ $delivery->started_at ? \Carbon\Carbon::parse($delivery->started_at)->format('Y-m-d H:i:s') : '' }}">{{ $delivery->started_at ? \Carbon\Carbon::parse($delivery->started_at)->format('d M Y H:i') : 'N/A' }}</td>
+                    <td>
                       <span class="usage-trigger-badge {{ $deliveryTrigger['class'] }}">
                         <i class="{{ $deliveryTrigger['icon'] }}"></i>
                         {{ $deliveryTrigger['label'] }}
                       </span>
                     </td>
-                    <td data-label="Status">
+                    <td>
                       <span class="badge rounded-pill {{ ($delivery->status ?? '') === 'sent' ? 'bg-success' : (($delivery->status ?? '') === 'failed' ? 'bg-danger' : 'bg-secondary') }}">
                         {{ ucfirst($delivery->status ?? 'unknown') }}
                       </span>
                     </td>
-                    <td data-label="Recipient">{{ $delivery->primary_recipient ?: 'N/A' }}</td>
-                    <td data-label="Initiated By">{{ $delivery->initiated_by_name ?: 'Background scheduler' }}</td>
-                    <td data-label="Error">
+                    <td>{{ $delivery->primary_recipient ?: 'N/A' }}</td>
+                    <td>{{ $delivery->initiated_by_name ?: 'Background scheduler' }}</td>
+                    <td>
                       @if($delivery->error_message)
                         <span class="usage-error-chip">{{ $delivery->error_message }}</span>
                       @else
@@ -665,15 +645,6 @@ System Usage Report Settings
               </tbody>
             </table>
           </div>
-
-          @if(($deliveries ?? null) && method_exists($deliveries, 'hasPages') && $deliveries->hasPages())
-            <div class="usage-pagination d-flex justify-content-between align-items-center flex-wrap gap-3 mt-3">
-              <small class="text-muted">
-                Showing {{ number_format($deliveries->firstItem()) }} to {{ number_format($deliveries->lastItem()) }} of {{ number_format($deliveries->total()) }} entries
-              </small>
-              {{ $deliveries->onEachSide(1)->links() }}
-            </div>
-          @endif
         </div>
       </div>
 
@@ -708,4 +679,32 @@ System Usage Report Settings
     </div>
   </div>
 </section>
+@endsection
+
+@section('scripts')
+@parent
+<script>
+  $(function () {
+    var table = $('#usageDeliveryHistoryTable');
+    if (!table.length || !$.fn.DataTable) {
+      return;
+    }
+
+    table.DataTable({
+      responsive: true,
+      autoWidth: false,
+      order: [[0, 'desc']],
+      pageLength: 10,
+      lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+      language: {
+        search: 'Quick Search:',
+        lengthMenu: 'Show _MENU_ entries',
+        emptyTable: 'No delivery history recorded yet.'
+      },
+      dom: '<"row align-items-center mb-3"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+           '<"row"<"col-sm-12"tr>>' +
+           '<"row align-items-center mt-3"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>'
+    });
+  });
+</script>
 @endsection

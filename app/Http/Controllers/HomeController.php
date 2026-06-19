@@ -43,6 +43,9 @@ class HomeController extends Controller
             ->pluck('y')
             ->toArray();
 
+        $latestFaultCreatedAt = DB::table('faults')->max('created_at');
+        $latestFaultDate = $latestFaultCreatedAt ? Carbon::parse($latestFaultCreatedAt) : Carbon::now();
+
         // Determine selected year; treat empty or 'all' as All Years
         $hasYearParam = $request->has('year');
         $yearInput = $request->input('year');
@@ -51,7 +54,7 @@ class HomeController extends Controller
         } elseif ($hasYearParam) {
             $selectedYear = (int)$yearInput;
         } else {
-            $selectedYear = (int)($availableYears[0] ?? Carbon::now()->year);
+            $selectedYear = (int)($availableYears[0] ?? $latestFaultDate->year);
         }
 
         // Available months (scoped to selected year if present)
@@ -67,10 +70,16 @@ class HomeController extends Controller
             ->toArray();
 
         // Determine selected month (ignored if All Years)
+        $hasMonthParam = $request->has('month');
         $selectedMonthInput = $request->input('month');
         $selectedMonth = ($selectedMonthInput !== null && $selectedMonthInput !== '' && strtolower((string)$selectedMonthInput) !== 'all') ? (int)$selectedMonthInput : null;
         if ($selectedYear === null) {
             $selectedMonth = null; // month selection disabled for All Years
+        } elseif (!$hasMonthParam) {
+            $defaultMonth = $selectedYear === (int) $latestFaultDate->year
+                ? (int) $latestFaultDate->month
+                : (int) ($availableMonths[count($availableMonths) - 1] ?? $latestFaultDate->month);
+            $selectedMonth = in_array($defaultMonth, $availableMonths) ? $defaultMonth : null;
         } elseif ($selectedMonth !== null && !in_array($selectedMonth, $availableMonths)) {
             $selectedMonth = null; // fallback if invalid
         }
