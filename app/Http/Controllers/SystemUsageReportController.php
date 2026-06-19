@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SystemUsageReportDelivery;
 use App\Models\SystemUsageReportSetting;
 use App\Services\SystemUsageReportService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class SystemUsageReportController extends Controller
@@ -15,16 +19,22 @@ class SystemUsageReportController extends Controller
         $this->middleware('permission:reports');
     }
 
-    public function edit(SystemUsageReportService $reportService)
+    public function edit(Request $request, SystemUsageReportService $reportService)
     {
         $settings = $reportService->currentSettings();
-        $deliveries = $reportService->recentDeliveries();
-        $latestDelivery = $deliveries->first();
+        $deliveries = $this->paginatedDeliveries($request);
+        $latestDelivery = $this->latestDelivery();
+        $deliveryCount = SystemUsageReportDelivery::tableExists() ? SystemUsageReportDelivery::count() : 0;
+        $successCount = SystemUsageReportDelivery::tableExists() ? SystemUsageReportDelivery::where('status', 'sent')->count() : 0;
+        $failedCount = SystemUsageReportDelivery::tableExists() ? SystemUsageReportDelivery::where('status', 'failed')->count() : 0;
 
         return view('reports.system_usage_settings', [
             'settings' => $settings,
             'deliveries' => $deliveries,
             'latestDelivery' => $latestDelivery,
+            'deliveryCount' => $deliveryCount,
+            'successCount' => $successCount,
+            'failedCount' => $failedCount,
             'defaultMetrics' => [
                 'Faults Logged',
                 'Remarks Added',
@@ -39,6 +49,68 @@ class SystemUsageReportController extends Controller
                 'Service Management Centre / Noc Supervisor and Noc',
             ],
         ]);
+    }
+
+    protected function paginatedDeliveries(Request $request): LengthAwarePaginator
+    {
+        if (!SystemUsageReportDelivery::tableExists()) {
+            return new LengthAwarePaginator(
+                collect(),
+                0,
+                10,
+                LengthAwarePaginator::resolveCurrentPage(),
+                [
+                    'path' => $request->url(),
+                    'query' => $request->query(),
+                ]
+            );
+        }
+
+        return DB::table('system_usage_report_deliveries as d')
+            ->leftJoin('users as u', 'u.id', '=', 'd.initiated_by')
+            ->select(
+                'd.id',
+                'd.trigger_type',
+                'd.status',
+                'd.subject',
+                'd.primary_recipient',
+                'd.recipients',
+                'd.period_start',
+                'd.period_end',
+                'd.started_at',
+                'd.finished_at',
+                'd.error_message',
+                'u.name as initiated_by_name'
+            )
+            ->orderByDesc('d.started_at')
+            ->paginate(10)
+            ->withQueryString();
+    }
+
+    protected function latestDelivery()
+    {
+        if (!SystemUsageReportDelivery::tableExists()) {
+            return null;
+        }
+
+        return DB::table('system_usage_report_deliveries as d')
+            ->leftJoin('users as u', 'u.id', '=', 'd.initiated_by')
+            ->select(
+                'd.id',
+                'd.trigger_type',
+                'd.status',
+                'd.subject',
+                'd.primary_recipient',
+                'd.recipients',
+                'd.period_start',
+                'd.period_end',
+                'd.started_at',
+                'd.finished_at',
+                'd.error_message',
+                'u.name as initiated_by_name'
+            )
+            ->orderByDesc('d.started_at')
+            ->first();
     }
 
     public function update(Request $request, SystemUsageReportService $reportService): RedirectResponse
