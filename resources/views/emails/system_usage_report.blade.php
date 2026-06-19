@@ -483,7 +483,7 @@
         <div class="hero" style="background:#eef5ff; color:#142033; padding:38px 42px 30px; border-bottom:1px solid #d7e5ff; border-top:6px solid #1f6feb;">
             <span class="eyebrow" style="display:inline-block; margin-bottom:12px; padding:6px 12px; border-radius:999px; background:#dbeafe; border:1px solid #bfdbfe; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#1e40af;">Management Report</span>
             <h1 style="margin:0 0 10px; font-size:30px; line-height:1.18; color:#0f172a;">{{ $report['period']['report_title'] }}</h1>
-            <p style="margin:0; font-size:15px; line-height:1.7; color:#425166;">This management report presents system usage for the monitored operational teams, with role-based performance measures, regional categorisation, and formally recorded lifecycle activity extracted from the Impaza platform.</p>
+            <p style="margin:0; font-size:15px; line-height:1.7; color:#425166;"></p>
             <table class="hero-meta" role="presentation" style="width:100%; margin-top:18px; border-collapse:separate; border-spacing:10px;">
                 <tr>
                     <td style="width:33.33%; padding:14px 16px; border-radius:16px; background:#ffffff; border:1px solid #d7e5ff; vertical-align:top;">
@@ -555,7 +555,7 @@
                 @endif
             </div>
 
-            <div class="section">
+           <!--  <div class="section">
                 <h2 class="section-title">Scope and Methodology</h2>
                 <p class="section-copy">This report follows a formal operational reporting approach by distinguishing user scope, regional coverage, lifecycle status transitions, and role-specific actions captured in the system.</p>
                 <div class="note-panel">
@@ -566,10 +566,10 @@
                     </ul>
                 </div>
             </div>
-
+ -->
             <div class="section">
                 <h2 class="section-title">Operational Performance by Role</h2>
-                <p class="section-copy">The following sections provide role-based operational measures. In particular, NOC performance highlights faults assessed and faults rectified, technician performance highlights system assignments, rectification activity, and actions, and chief technician performance highlights dispatch and control actions.</p>
+                <p class="section-copy"></p>
 
                 @forelse($report['operational_profiles'] as $profile)
                     <div class="panel">

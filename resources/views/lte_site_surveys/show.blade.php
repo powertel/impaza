@@ -225,7 +225,7 @@ LTE Site Survey
                     <tr>
                       <td class="text-muted" style="width: 35%;">Nearest Manhole Coordinates</td>
                       <td class="fw-semibold">{{ $tx['nearestManholeCoordinates'] ?? '-' }}</td>
-                      <td class="text-muted" style="width: 35%;">Existing Fibre Distance</td>
+                      <td class="text-muted" style="width: 35%;">Distance from Existing Fibre</td>
                       <td class="fw-semibold">{{ $tx['distanceFromExistingFibre'] ?? '-' }}</td>
                     </tr>
                     <tr>

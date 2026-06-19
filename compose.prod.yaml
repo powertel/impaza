@@ -38,6 +38,7 @@ services:
       context: .
       dockerfile: docker/php/Dockerfile.prod
     container_name: impaza_scheduler
+    init: true
     restart: unless-stopped
     working_dir: /var/www/html
     volumes:
