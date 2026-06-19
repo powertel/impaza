@@ -111,6 +111,22 @@ class AccountsSyncServiceTest extends TestCase
         );
     }
 
+    public function testLinkNameFingerprintAppliesPwtIntAlias(): void
+    {
+        $service = new AccountsSyncService();
+        $method = new \ReflectionMethod($service, 'linkNameFingerprint');
+        $method->setAccessible(true);
+
+        $this->assertSame(
+            'Z MBOMBI INTERNET J10597',
+            $method->invoke($service, '000010-Z MBOMBI-PWTINT J10597')
+        );
+        $this->assertSame(
+            'Z MBOMBI INTERNET J10597',
+            $method->invoke($service, '000010-Z MBOMBI-PWT INT J10597')
+        );
+    }
+
     public function testLooksLikeSameLinkAcceptsRenamedVariantForSameServiceType(): void
     {
         $service = new AccountsSyncService();
@@ -139,6 +155,22 @@ class AccountsSyncServiceTest extends TestCase
         $serviceType = $fingerprintMethod->invoke($service, 'Intercity VPN');
 
         $this->assertFalse($matchMethod->invoke($service, $incoming, $existing, $serviceType, $serviceType));
+    }
+
+    public function testLooksLikeSameLinkAcceptsPwtIntAliasEvenWhenServiceTypesDiffer(): void
+    {
+        $service = new AccountsSyncService();
+        $fingerprintMethod = new \ReflectionMethod($service, 'linkNameFingerprint');
+        $fingerprintMethod->setAccessible(true);
+        $matchMethod = new \ReflectionMethod($service, 'looksLikeSameLink');
+        $matchMethod->setAccessible(true);
+
+        $incoming = $fingerprintMethod->invoke($service, '000010-Z MBOMBI-PWTINT J10597');
+        $existing = $fingerprintMethod->invoke($service, 'MBOMBI-INTERNET');
+        $incomingServiceType = $fingerprintMethod->invoke($service, 'PowerBiz');
+        $existingServiceType = $fingerprintMethod->invoke($service, 'Internet');
+
+        $this->assertTrue($matchMethod->invoke($service, $incoming, $existing, $incomingServiceType, $existingServiceType));
     }
 }
 
