@@ -261,6 +261,16 @@
         .region-card:last-child {
             margin-bottom: 0;
         }
+        .subregion-card {
+            margin-bottom: 18px;
+            padding: 18px;
+            border-radius: 16px;
+            background: #fbfdff;
+            border: 1px solid #dbe5f0;
+        }
+        .subregion-card:last-child {
+            margin-bottom: 0;
+        }
         .region-title {
             margin: 0 0 10px;
             font-size: 15px;
@@ -582,38 +592,65 @@
                                 </tr>
                             </table>
 
-                            @if(!empty($profile['top_users']))
-                                <div class="table-wrap" style="{{ $tableWrapStyle }}">
-                                    <table class="data-table" style="{{ $tableStyle }}">
-                                        <thead>
+                            @if(!empty($profile['regional_profiles']))
+                                @foreach($profile['regional_profiles'] as $regionalProfile)
+                                    <div class="subregion-card">
+                                        <p class="region-title">{{ $regionalProfile['region'] }} Region</p>
+                                        <p class="micro">
+                                            <strong>Monitored Users:</strong> {{ number_format($regionalProfile['monitored_users']) }} |
+                                            <strong>Active Users:</strong> {{ number_format($regionalProfile['active_users']) }} |
+                                            <strong>Total Actions:</strong> {{ number_format($regionalProfile['metrics']['total_actions'] ?? 0) }}
+                                        </p>
+
+                                        <table class="metric-grid" role="presentation" style="margin-bottom: 14px;">
                                             <tr>
-                                                <th style="{{ $thStyle }}">Officer</th>
-                                                @foreach($profile['detail_columns'] as $column)
-                                                    <th style="{{ $thStyle }}{{ $loop->last ? ' ' . $lastCellStyle : '' }}">{{ $column['label'] }}</th>
+                                                @foreach($profile['metric_labels'] as $metricKey => $metricLabel)
+                                                    <td>
+                                                        <div class="metric-pill">
+                                                            <strong>{{ number_format($regionalProfile['metrics'][$metricKey] ?? 0) }}</strong>
+                                                            <span>{{ $metricLabel }}</span>
+                                                        </div>
+                                                    </td>
+                                                    @if(($loop->iteration % 3) === 0 && !$loop->last)
+                                                        </tr><tr>
+                                                    @endif
                                                 @endforeach
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach($profile['top_users'] as $user)
-                                                <tr>
-                                                    <td style="{{ $loop->odd ? $tdStyle : $tdAltStyle }}">
-                                                        <strong>{{ $user['name'] }}</strong><br>
-                                                        {{ $user['email'] }}
-                                                    </td>
-                                                    @foreach($profile['detail_columns'] as $column)
-                                                        <td style="{{ ($loop->parent->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastCellStyle : '') . ($loop->parent->last ? ' ' . $lastRowStyle : '') }}">
-                                                            @if($column['key'] === 'region')
-                                                                {{ $user['region'] }}
-                                                            @else
-                                                                {{ number_format($user[$column['key']] ?? 0) }}
-                                                            @endif
-                                                        </td>
-                                                    @endforeach
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
+                                        </table>
+
+                                        @if(!empty($regionalProfile['top_users']))
+                                            <div class="table-wrap" style="{{ $tableWrapStyle }}">
+                                                <table class="data-table" style="{{ $tableStyle }}">
+                                                    <thead>
+                                                        <tr>
+                                                            <th style="{{ $thStyle }}">Officer</th>
+                                                            @foreach($regionalProfile['detail_columns'] as $column)
+                                                                <th style="{{ $thStyle }}{{ $loop->last ? ' ' . $lastCellStyle : '' }}">{{ $column['label'] }}</th>
+                                                            @endforeach
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach($regionalProfile['top_users'] as $user)
+                                                            <tr>
+                                                                <td style="{{ $loop->odd ? $tdStyle : $tdAltStyle }}">
+                                                                    <strong>{{ $user['name'] }}</strong><br>
+                                                                    {{ $user['email'] }}
+                                                                </td>
+                                                                @foreach($regionalProfile['detail_columns'] as $column)
+                                                                    <td style="{{ ($loop->parent->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastCellStyle : '') . ($loop->parent->last ? ' ' . $lastRowStyle : '') }}">
+                                                                        {{ number_format($user[$column['key']] ?? 0) }}
+                                                                    </td>
+                                                                @endforeach
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        @else
+                                            <p class="muted-empty">No activity was recorded for this region in the selected reporting period.</p>
+                                        @endif
+                                    </div>
+                                @endforeach
                             @else
                                 <p class="muted-empty">No activity was recorded for this operational profile in the selected reporting period.</p>
                             @endif

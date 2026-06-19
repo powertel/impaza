@@ -729,6 +729,7 @@ class SystemUsageReportService
                     'metrics' => $this->aggregateProfileMetrics($profileUsers, array_keys($profile['metric_labels'])),
                     'metric_labels' => $profile['metric_labels'],
                     'detail_columns' => $profile['detail_columns'],
+                    'regional_profiles' => $this->operationalProfileRegions($profileUsers, $profile),
                     'top_users' => $profileUsers->take(6)->values()->map(function (array $user) use ($profile) {
                         $details = [
                             'name' => $user['name'],
@@ -751,6 +752,55 @@ class SystemUsageReportService
             ->filter()
             ->values()
             ->all();
+    }
+
+    protected function operationalProfileRegions(Collection $users, array $profile): array
+    {
+        $detailColumns = collect($profile['detail_columns'])
+            ->reject(fn (array $column) => $column['key'] === 'region')
+            ->values()
+            ->all();
+
+        return $users
+            ->groupBy(fn (array $user) => $user['region'])
+            ->map(function (Collection $regionUsers, string $region) use ($profile, $detailColumns) {
+                $regionUsers = $regionUsers
+                    ->sortByDesc(fn (array $user) => $this->profileSortValue($user, $profile['sort_metric']))
+                    ->values();
+
+                return [
+                    'region' => $region,
+                    'monitored_users' => $regionUsers->count(),
+                    'active_users' => $regionUsers->where('active', true)->count(),
+                    'metrics' => $this->aggregateProfileMetrics($regionUsers, array_keys($profile['metric_labels'])),
+                    'detail_columns' => $detailColumns,
+                    'top_users' => $regionUsers->take(6)->values()->map(function (array $user) use ($detailColumns) {
+                        $details = [
+                            'name' => $user['name'],
+                            'email' => $user['email'],
+                            'region' => $user['region'],
+                        ];
+
+                        foreach ($detailColumns as $column) {
+                            $details[$column['key']] = $this->metricValueForUser($user, $column['key']);
+                        }
+
+                        return $details;
+                    })->all(),
+                ];
+            })
+            ->sortBy(fn (array $regionProfile) => $this->regionSortOrder($regionProfile['region']))
+            ->values()
+            ->all();
+    }
+
+    protected function regionSortOrder(string $region): int
+    {
+        return match ($region) {
+            'East' => 0,
+            'West' => 1,
+            default => 2,
+        };
     }
 
     protected function aggregateProfileMetrics(Collection $users, array $metricKeys): array
@@ -1053,8 +1103,13 @@ class SystemUsageReportService
 
     protected function normalizeRegion(?string $region): string
     {
-        $region = trim((string) $region);
+        $region = strtolower(trim((string) $region));
 
-        return $region !== '' ? $region : 'Unassigned';
+        return match ($region) {
+            'east', 'eastern', '0' => 'East',
+            'west', 'western', '1' => 'West',
+            '', 'null' => 'Unassigned',
+            default => ucfirst($region),
+        };
     }
 }
