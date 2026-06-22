@@ -171,6 +171,11 @@ Customer Connectivity Surveys
                 <td class="text-nowrap" data-label="Created">{{ $s->created_at ? \Carbon\Carbon::parse($s->created_at)->format('j F Y h:i a') : '-' }}</td>
                 <td class="text-nowrap" data-label="Actions">
                   <div class="btn-group btn-group gap-2" role="group" aria-label="Actions">
+                    @can('survey-edit')
+                      <a class="btn btn-outline-primary btn-sm" href="{{ route('customer-connectivity-surveys.show', $s->id) }}?edit=1">
+                        <i class="fas fa-edit me-1"></i> Edit
+                      </a>
+                    @endcan
                     <a class="btn btn-outline-success btn-sm" href="{{ route('customer-connectivity-surveys.show', $s->id) }}">
                       <i class="fas fa-eye me-1"></i> View
                     </a>
