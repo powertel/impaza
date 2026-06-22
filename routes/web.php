@@ -39,6 +39,7 @@ use App\Http\Controllers\SystemUsageReportController;
 use App\Http\Controllers\ZoneController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\LteSiteSurveyController;
+use App\Http\Controllers\CustomerConnectivitySurveyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -88,6 +89,11 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('lte-site-surveys/remarks/{remark}/file', [LteSiteSurveyController::class, 'serveRemarkFile'])->name('lte-site-surveys.remarks.file');
     Route::get('lte-site-surveys/photos/{photo}', [LteSiteSurveyController::class, 'servePhoto'])->name('lte-site-surveys.photos.file');
     Route::delete('lte-site-surveys/photos/{photo}', [LteSiteSurveyController::class, 'destroyPhoto'])->name('lte-site-surveys.photos.destroy');
+    Route::get('customer-connectivity-surveys', [CustomerConnectivitySurveyController::class, 'index'])->name('customer-connectivity-surveys.index');
+    Route::get('customer-connectivity-surveys/create', [CustomerConnectivitySurveyController::class, 'create'])->name('customer-connectivity-surveys.create');
+    Route::post('customer-connectivity-surveys', [CustomerConnectivitySurveyController::class, 'store'])->name('customer-connectivity-surveys.store');
+    Route::get('customer-connectivity-surveys/{survey}', [CustomerConnectivitySurveyController::class, 'show'])->name('customer-connectivity-surveys.show');
+    Route::get('customer-connectivity-surveys/photos/{photo}', [CustomerConnectivitySurveyController::class, 'servePhoto'])->name('customer-connectivity-surveys.photos.file');
     // Toggle user access (enable/disable)
     Route::patch('users/{user}/access', [UserController::class, 'updateAccess'])->name('users.access');
     // Admin change password for a specific user

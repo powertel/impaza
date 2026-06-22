@@ -146,6 +146,14 @@
                 </a>
               </li>
             @endcan
+            @can('surveys-list')
+              <li class="nav-item">
+                <a href="{{ route('customer-connectivity-surveys.index') }}" class="nav-link {{ request()->routeIs('customer-connectivity-surveys.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-wifi"></i>
+                  <p>Customer Connectivity Surveys</p>
+                </a>
+              </li>
+            @endcan
 
             @canany(['permit-list'])
               <li class="nav-header">Permits</li>

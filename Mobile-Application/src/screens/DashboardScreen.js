@@ -208,6 +208,14 @@ export default function DashboardScreen() {
                 <Text style={styles.quickTitle}>LTE Survey</Text>
               </TouchableOpacity>
             )}
+            {hasPermission('surveys-list') && (
+              <TouchableOpacity style={styles.quickItem} onPress={() => navigation.navigate('CustomerConnectivitySurveys')}>
+                <View style={[styles.iconContainer, { backgroundColor: 'rgba(16, 185, 129, 0.1)' }]}>
+                  <Feather name="wifi" size={24} color={theme.colors.success} />
+                </View>
+                <Text style={styles.quickTitle}>Connectivity</Text>
+              </TouchableOpacity>
+            )}
             {hasPermission('refer-fault') && (
               <TouchableOpacity style={styles.quickItem} onPress={() => navigation.navigate('ReferredFaults')}>
                 <View style={[styles.iconContainer, { backgroundColor: 'rgba(139, 92, 246, 0.1)' }]}>

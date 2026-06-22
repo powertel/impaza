@@ -283,3 +283,35 @@ export function lteSurveyPhotoUrl(photoId) {
 export function lteSurveyRemarkFileUrl(remarkId) {
   return `${API_URL}/mobile/lte-site-survey-remarks/${remarkId}/file`;
 }
+
+export async function getCustomerConnectivitySurveys(params = {}) {
+  const query = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  return request(`/mobile/customer-connectivity-surveys${query}`);
+}
+
+export async function getCustomerConnectivitySurvey(id) {
+  return request(`/mobile/customer-connectivity-surveys/${id}`);
+}
+
+export async function createCustomerConnectivitySurvey(payload) {
+  if (payload instanceof FormData) {
+    return request('/mobile/customer-connectivity-surveys', { method: 'POST', body: payload });
+  }
+  return request('/mobile/customer-connectivity-surveys', { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export async function updateCustomerConnectivitySurvey(id, payload) {
+  if (payload instanceof FormData) {
+    payload.append('_method', 'PUT');
+    return request(`/mobile/customer-connectivity-surveys/${id}`, { method: 'POST', body: payload });
+  }
+  return request(`/mobile/customer-connectivity-surveys/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+}
+
+export async function deleteCustomerConnectivitySurveyPhoto(photoId) {
+  return request(`/mobile/customer-connectivity-survey-photos/${photoId}/delete`, { method: 'POST' });
+}
+
+export function customerConnectivitySurveyPhotoUrl(photoId) {
+  return `${API_URL}/mobile/customer-connectivity-survey-photos/${photoId}`;
+}
