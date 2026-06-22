@@ -28,6 +28,9 @@ import CompleteReferralScreen from '../screens/CompleteReferralScreen';
 import LteSiteSurveysScreen from '../screens/LteSiteSurveysScreen';
 import LteSiteSurveyWizardScreen from '../screens/LteSiteSurveyWizardScreen';
 import LteSiteSurveyViewScreen from '../screens/LteSiteSurveyViewScreen';
+import CustomerConnectivitySurveysScreen from '../screens/CustomerConnectivitySurveysScreen';
+import CustomerConnectivitySurveyWizardScreen from '../screens/CustomerConnectivitySurveyWizardScreen';
+import CustomerConnectivitySurveyViewScreen from '../screens/CustomerConnectivitySurveyViewScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -69,6 +72,9 @@ export default function AppNavigator() {
         <Stack.Screen name="LteSiteSurveys" component={LteSiteSurveysScreen} options={{ title: 'LTE Site Surveys' }} />
         <Stack.Screen name="LteSiteSurveyView" component={LteSiteSurveyViewScreen} options={{ title: 'LTE Survey' }} />
         <Stack.Screen name="LteSiteSurveyWizard" component={LteSiteSurveyWizardScreen} options={{ title: 'LTE Site Survey' }} />
+        <Stack.Screen name="CustomerConnectivitySurveys" component={CustomerConnectivitySurveysScreen} options={{ title: 'Connectivity Surveys' }} />
+        <Stack.Screen name="CustomerConnectivitySurveyView" component={CustomerConnectivitySurveyViewScreen} options={{ title: 'Connectivity Survey' }} />
+        <Stack.Screen name="CustomerConnectivitySurveyWizard" component={CustomerConnectivitySurveyWizardScreen} options={{ title: 'Connectivity Survey' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

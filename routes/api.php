@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Mobile\AuthController;
 use App\Http\Controllers\Mobile\FaultController;
+use App\Http\Controllers\Mobile\CustomerConnectivitySurveyController;
 use App\Http\Controllers\Mobile\LteSiteSurveyController;
 use App\Http\Controllers\Mobile\StatsController;
 use App\Http\Controllers\Mobile\ProfileController;
@@ -47,6 +48,14 @@ Route::prefix('mobile')->group(function () {
         Route::delete('lte-site-survey-photos/{photo}', [LteSiteSurveyController::class, 'destroyPhoto']);
         Route::post('lte-site-survey-photos/{photo}/delete', [LteSiteSurveyController::class, 'destroyPhoto']);
         Route::get('lte-site-survey-remarks/{remark}/file', [LteSiteSurveyController::class, 'serveRemarkFile']);
+
+        Route::get('customer-connectivity-surveys', [CustomerConnectivitySurveyController::class, 'index']);
+        Route::get('customer-connectivity-surveys/{survey}', [CustomerConnectivitySurveyController::class, 'show']);
+        Route::post('customer-connectivity-surveys', [CustomerConnectivitySurveyController::class, 'store']);
+        Route::put('customer-connectivity-surveys/{survey}', [CustomerConnectivitySurveyController::class, 'update']);
+        Route::get('customer-connectivity-survey-photos/{photo}', [CustomerConnectivitySurveyController::class, 'servePhoto']);
+        Route::delete('customer-connectivity-survey-photos/{photo}', [CustomerConnectivitySurveyController::class, 'destroyPhoto']);
+        Route::post('customer-connectivity-survey-photos/{photo}/delete', [CustomerConnectivitySurveyController::class, 'destroyPhoto']);
 
         Route::get('faults', [FaultController::class, 'index']);
         Route::get('faults/unassigned', [FaultController::class, 'unassigned']);
