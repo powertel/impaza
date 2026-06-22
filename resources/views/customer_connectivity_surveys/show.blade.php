@@ -87,6 +87,17 @@ Customer Connectivity Survey
 
         <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
           {!! $statusPill($survey->status) !!}
+          <div class="btn-group" role="group" aria-label="PDF Actions">
+            <button type="button" class="btn btn-outline-secondary btn-sm" data-cc-pdf-action="preview" {{ $survey->status !== 'submitted' ? 'disabled' : '' }}>
+              <i class="fas fa-eye me-1"></i> Preview PDF
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" data-cc-pdf-action="download" {{ $survey->status !== 'submitted' ? 'disabled' : '' }}>
+              <i class="fas fa-download me-1"></i> Download PDF
+            </button>
+            <button type="button" class="btn btn-outline-primary btn-sm" data-cc-pdf-action="regenerate" {{ $survey->status !== 'submitted' ? 'disabled' : '' }}>
+              <i class="fas fa-sync-alt me-1"></i> Regenerate
+            </button>
+          </div>
           @if($mapsUrl)
             <a href="{{ $mapsUrl }}" target="_blank" class="btn btn-outline-secondary btn-sm">
               <i class="fas fa-map-marker-alt me-1"></i> Open Map
@@ -466,4 +477,57 @@ Customer Connectivity Survey
     </div>
   </div>
 </section>
+
+<div class="modal fade" id="ccSurveyPdfPreviewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Customer Connectivity Survey PDF Preview</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0" style="height: 80vh;">
+        <iframe id="ccSurveyPdfPreviewFrame" style="width:100%; height:100%; border:0;"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+@endsection
+
+@section('scripts')
+@php
+  $payloadArr = is_array($survey->payload) ? $survey->payload : (array) $survey->payload;
+  $pdfData = [
+    'id' => $survey->id,
+    'status' => $survey->status,
+    'customer_name' => $survey->customer_name,
+    'account_or_jc_number' => $survey->account_or_jc_number,
+    'site_name' => $survey->site_name,
+    'coordinates' => $survey->coordinates,
+    'latitude' => $survey->latitude,
+    'longitude' => $survey->longitude,
+    'survey_performed_by' => $survey->survey_performed_by,
+    'created_at' => optional($survey->created_at)->toIso8601String(),
+    'captured_by' => optional($survey->user)->name,
+    'payload' => $payloadArr,
+    'photos' => $survey->photos->map(function ($ph) {
+      return [
+        'id' => $ph->id,
+        'label' => $ph->label,
+        'mime_type' => $ph->mime_type,
+        'original_name' => $ph->original_name,
+        'url' => route('customer-connectivity-surveys.photos.file', $ph->id),
+      ];
+    })->values()->all(),
+  ];
+@endphp
+<script>
+  window.__CC_SURVEY_PDF_ASSETS__ = {
+    logoUrl: @json(asset('images/powertel.png')),
+    jspdfChunkUrl: @json(asset('js/node_modules_jspdf_dist_jspdf_es_min_js.js')),
+    autotableChunkUrl: @json(asset('js/node_modules_jspdf-autotable_dist_jspdf_plugin_autotable_js.js')),
+    html2canvasChunkUrl: @json(asset('js/node_modules_html2canvas_dist_html2canvas_js.js')),
+  };
+  window.__CC_SURVEY_PDF_DATA__ = @json($pdfData);
+</script>
+<script src="{{ asset('js/survey-pdf.js') }}?v={{ file_exists(public_path('js/survey-pdf.js')) ? filemtime(public_path('js/survey-pdf.js')) : time() }}"></script>
 @endsection

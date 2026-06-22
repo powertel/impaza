@@ -33,10 +33,17 @@
     return yyyy + '-' + mm + '-' + dd;
   }
 
-  function buildFilename(data) {
+  function buildFilename(data, opts) {
+    var o = opts || {};
+    var base = sanitizeFilenamePart((o.prefix || 'Survey').replace(/\s+/g, '_'));
     var site = sanitizeFilenamePart(data.site_name || (data.payload && data.payload.general && data.payload.general.siteName) || 'Site');
+    var customer = sanitizeFilenamePart(data.customer_name || (data.payload && data.payload.general && data.payload.general.customerName) || '');
     var date = formatDateForFilename((data.payload && data.payload.meta && data.payload.meta.date) || data.created_at);
-    return 'LTE_Survey_' + site + '_' + (date || 'date') + '.pdf';
+    var parts = [base];
+    if (customer) parts.push(customer);
+    if (site) parts.push(site);
+    parts.push(date || 'date');
+    return parts.join('_') + '.pdf';
   }
 
   function loadScriptOnce(url, key) {
@@ -94,8 +101,8 @@
 
   function fetchAsDataUrl(url) {
     if (!url) return Promise.resolve(null);
-    if (!window.__ltePdfImageCache) window.__ltePdfImageCache = {};
-    if (window.__ltePdfImageCache[url]) return Promise.resolve(window.__ltePdfImageCache[url]);
+    if (!window.__surveyPdfImageCache) window.__surveyPdfImageCache = {};
+    if (window.__surveyPdfImageCache[url]) return Promise.resolve(window.__surveyPdfImageCache[url]);
 
     return fetch(url, { credentials: 'same-origin' })
       .then(function (r) {
@@ -110,7 +117,7 @@
         });
       })
       .then(function (dataUrl) {
-        window.__ltePdfImageCache[url] = dataUrl;
+        window.__surveyPdfImageCache[url] = dataUrl;
         return dataUrl;
       })
       .catch(function () { return null; });
@@ -130,7 +137,8 @@
     doc.setTextColor(33, 37, 41);
   }
 
-  function addHeader(doc, data, assets) {
+  function addHeader(doc, data, assets, opts) {
+    var o = opts || {};
     var dims = getPageDims(doc);
     var marginX = 12;
     var y = 10;
@@ -150,20 +158,24 @@
       var titleY = y + logoH + 9;
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(16);
-      doc.text('LTE Site Survey Report', dims.w / 2, titleY, { align: 'center' });
+      doc.text(safeString(o.reportTitle || 'LTE Site Survey Report'), dims.w / 2, titleY, { align: 'center' });
 
-      var site = safeString(data.site_name || (data.payload && data.payload.general && data.payload.general.siteName) || 'Untitled Site');
-      var region = safeString(data.province_region || (data.payload && data.payload.general && data.payload.general.provinceRegion) || '-');
-      var date = safeString((data.payload && data.payload.meta && data.payload.meta.date) || '');
-      var status = titleCase(data.status || 'draft');
+      var line1 = safeString(o.subLine1 || (data.site_name || (data.payload && data.payload.general && data.payload.general.siteName) || 'Untitled Site'));
+      var line2 = safeString(o.subLine2 || '');
+      if (!line2) {
+        var region = safeString(data.province_region || (data.payload && data.payload.general && data.payload.general.provinceRegion) || '-');
+        var date = safeString((data.payload && data.payload.meta && data.payload.meta.date) || '');
+        var status = titleCase(data.status || 'draft');
+        line2 = 'Region: ' + region + '   |   Date: ' + (date || '-') + '   |   Status: ' + status;
+      }
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       doc.setTextColor(55, 65, 81);
-      doc.text(site, dims.w / 2, titleY + 6, { align: 'center' });
+      doc.text(line1, dims.w / 2, titleY + 6, { align: 'center' });
       doc.setFontSize(9);
       doc.setTextColor(107, 114, 128);
-      doc.text('Region: ' + region + '   |   Date: ' + (date || '-') + '   |   Status: ' + status, dims.w / 2, titleY + 11, { align: 'center' });
+      doc.text(line2, dims.w / 2, titleY + 11, { align: 'center' });
       doc.setTextColor(33, 37, 41);
 
       doc.setDrawColor(229, 231, 235);
@@ -371,8 +383,8 @@
     return 'JPEG';
   }
 
-  function addPhotosSection(doc, startY, photos) {
-    startY = addSectionTitle(doc, 'SECTION H — SITE PHOTOS', startY);
+  function addPhotosSection(doc, startY, photos, title) {
+    startY = addSectionTitle(doc, safeString(title || 'SECTION H — SITE PHOTOS'), startY);
 
     var dims = getPageDims(doc);
     var marginX = 12;
@@ -470,7 +482,7 @@
     return chain.then(function () { return y; });
   }
 
-  function buildSections(doc, data, startY) {
+  function buildLteSections(doc, data, startY) {
     var payload = data.payload || {};
     var meta = payload.meta || {};
     var general = payload.general || {};
@@ -544,13 +556,139 @@
     return y;
   }
 
-  function generateSurveyPDF(mode) {
-    var assets = window.__LTE_SURVEY_PDF_ASSETS__ || {};
-    var data = window.__LTE_SURVEY_PDF_DATA__ || {};
+  function yesNoText(v) {
+    var s = safeString(v).trim().toLowerCase();
+    if (s === 'yes' || s === 'y' || s === 'true' || s === '1') return 'Yes';
+    if (s === 'no' || s === 'n' || s === 'false' || s === '0') return 'No';
+    if (!s) return '-';
+    return titleCase(s);
+  }
+
+  function buildConnectivitySections(doc, data, startY) {
+    var payload = data.payload || {};
+    var meta = payload.meta || {};
+    var general = payload.general || {};
+    var service = payload.serviceRequirements || {};
+    var permissions = payload.permissions || {};
+    var outdoor = payload.outdoor || {};
+    var indoor = payload.indoor || {};
+    var boq = payload.boq || {};
+
+    var y = startY || 18;
+    y = addSectionTitle(doc, 'SECTION A — GENERAL INFORMATION', y);
+    y = addInfoTable(doc, y, [
+      { k: 'Survey Date', v: safeString(meta.date || '-') },
+      { k: 'Surveyed By', v: safeString(meta.surveyPerformedBy || data.survey_performed_by || '-') },
+      { k: 'Customer', v: safeString(general.customerName || data.customer_name || '-') },
+      { k: 'Account/JC', v: safeString(general.accountOrJcNumber || data.account_or_jc_number || '-') },
+      { k: 'Site', v: safeString(general.siteName || data.site_name || '-') },
+      { k: 'Coordinates', v: safeString(general.coordinates || data.coordinates || '-') },
+      { k: 'Latitude', v: safeString(general.latitude || data.latitude || '-') },
+      { k: 'Longitude', v: safeString(general.longitude || data.longitude || '-') },
+      { k: 'Address', v: safeString(general.physicalAddress || '-') },
+      { k: 'Contact', v: safeString([general.customerContactName, general.customerContactPhone, general.customerContactEmail].filter(Boolean).join(' • ') || '-') },
+    ]);
+
+    y = addSectionTitle(doc, 'SECTION B — SERVICE REQUIREMENTS', y);
+    y = addInfoTable(doc, y, [
+      { k: 'Service Type', v: safeString(service.serviceType || '-') },
+      { k: 'Handover', v: safeString(service.handoverInterface || '-') },
+      { k: 'BW Down (Mbps)', v: safeString(service.bandwidthDown || '-') },
+      { k: 'BW Up (Mbps)', v: safeString(service.bandwidthUp || '-') },
+      { k: 'Purpose', v: safeString(service.servicePurpose || '-') },
+      { k: 'Redundancy', v: yesNoText(service.redundancyRequired) },
+      { k: 'Public IPs', v: yesNoText(service.publicIpsRequired) },
+      { k: 'Public IP Qty', v: safeString(service.publicIpsQty || '-') },
+    ]);
+    y = addSectionTitle(doc, 'VLAN / ROUTING NOTES', y);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    var vlan = safeString(service.vlanNotes || '').trim();
+    if (!vlan) vlan = 'No notes captured.';
+    var dims = getPageDims(doc);
+    var lines = doc.splitTextToSize(vlan, dims.w - 24);
+    doc.text(lines, 12, y);
+    y += (lines.length * 5) + 4;
+
+    y = addSectionTitle(doc, 'SECTION C — SITE ACCESS & PERMISSIONS', y);
+    y = addInfoTable(doc, y, [
+      { k: 'Access Contact', v: safeString(permissions.accessContact || '-') },
+      { k: 'Survey Done With', v: safeString(permissions.surveyDoneWith || '-') },
+      { k: 'Working Hours', v: safeString(permissions.workingHours || '-') },
+      { k: 'Permissions Required', v: safeString(permissions.permissionsRequired || '-') },
+      { k: 'Notes', v: safeString(permissions.notes || '-') },
+      { k: '', v: '' },
+    ]);
+
+    y = addSectionTitle(doc, 'SECTION D — OUTDOOR CONNECTIVITY', y);
+    y = addInfoTable(doc, y, [
+      { k: 'Nearest POP/Node', v: safeString(outdoor.nearestPopNode || '-') },
+      { k: 'Switch/OLT', v: safeString(outdoor.feederSwitchOlt || '-') },
+      { k: 'Free Port', v: yesNoText(outdoor.freePortAvailable) },
+      { k: 'Port ID', v: safeString(outdoor.portId || '-') },
+      { k: 'Distance', v: safeString(outdoor.estimatedDistance || '-') },
+      { k: 'Route Type', v: safeString(outdoor.routeType || '-') },
+      { k: 'Infrastructure', v: safeString(outdoor.existingInfrastructure || '-') },
+      { k: 'Risks', v: safeString(outdoor.obstructionsRisks || '-') },
+      { k: 'Nearest Ref', v: safeString(outdoor.nearestManholePoleReference || '-') },
+      { k: 'Manhole/JB', v: safeString(outdoor.manholeJbDetails || '-') },
+    ]);
+
+    y = addSectionTitle(doc, 'SECTION E — INDOOR ASSESSMENT', y);
+    y = addInfoTable(doc, y, [
+      { k: 'Space', v: safeString(indoor.spaceForEquipment || '-') },
+      { k: 'Cabinet Available', v: yesNoText(indoor.cabinetAvailable) },
+      { k: 'Cabinet Size', v: safeString(indoor.cabinetSize || '-') },
+      { k: 'New Cabinet', v: yesNoText(indoor.newCabinetRequired) },
+      { k: 'Power Available', v: yesNoText(indoor.powerAvailable) },
+      { k: 'Socket Type', v: safeString(indoor.socketType || '-') },
+      { k: 'Socket Distance', v: safeString(indoor.distanceToSocket || '-') },
+      { k: 'Back-up Power', v: safeString(indoor.backupPower || '-') },
+      { k: 'Air-conditioning', v: yesNoText(indoor.airConditioning) },
+      { k: 'Earthing', v: safeString(indoor.earthing || '-') },
+    ]);
+
+    var civilsItems = normalizeItems(boq.civils);
+    var nteItems = normalizeItems(boq.nte);
+    y = addMaterialsTable(doc, y, 'SECTION F — BOQ (Civils)', civilsItems);
+    y = addMaterialsTable(doc, y, 'SECTION G — BOQ (NTE)', nteItems);
+
+    return y;
+  }
+
+  function getContextByType(type) {
+    if (type === 'cc') {
+      return {
+        type: 'cc',
+        assets: window.__CC_SURVEY_PDF_ASSETS__ || {},
+        data: window.__CC_SURVEY_PDF_DATA__ || {},
+        reportTitle: 'Customer Connectivity Survey Report',
+        filenamePrefix: 'Connectivity_Survey',
+        previewFrameId: '#ccSurveyPdfPreviewFrame',
+        previewModalId: '#ccSurveyPdfPreviewModal',
+        photosSectionTitle: 'SECTION H — PHOTOS & ATTACHMENTS',
+      };
+    }
+    return {
+      type: 'lte',
+      assets: window.__LTE_SURVEY_PDF_ASSETS__ || {},
+      data: window.__LTE_SURVEY_PDF_DATA__ || {},
+      reportTitle: 'LTE Site Survey Report',
+      filenamePrefix: 'LTE_Survey',
+      previewFrameId: '#lteSurveyPdfPreviewFrame',
+      previewModalId: '#lteSurveyPdfPreviewModal',
+      photosSectionTitle: 'SECTION H — SITE PHOTOS',
+    };
+  }
+
+  function generateSurveyPDF(mode, type) {
+    var ctx = getContextByType(type || 'lte');
+    var assets = ctx.assets || {};
+    var data = ctx.data || {};
     if (!data || !data.id) throw new Error('Survey data not available');
 
     if (mode === 'regenerate') {
-      window.__ltePdfImageCache = {};
+      window.__surveyPdfImageCache = {};
     }
 
     return ensureLibsLoaded(assets).then(function (libs) {
@@ -558,18 +696,37 @@
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(33, 37, 41);
 
-      return addHeader(doc, data, assets).then(function (startY) {
+      var subLine1;
+      var subLine2;
+      if (ctx.type === 'cc') {
+        var payload = data.payload || {};
+        var g = (payload && payload.general) ? payload.general : {};
+        var m = (payload && payload.meta) ? payload.meta : {};
+        var customer = safeString(data.customer_name || g.customerName || 'Customer');
+        var site = safeString(data.site_name || g.siteName || 'Site');
+        var date = safeString(m.date || '') || formatDateForFilename(data.created_at) || '-';
+        var status = titleCase(data.status || 'draft');
+        subLine1 = customer + ' • ' + site;
+        subLine2 = 'Date: ' + (date || '-') + '   |   Status: ' + status;
+      }
+
+      return addHeader(doc, data, assets, {
+        reportTitle: ctx.reportTitle,
+        subLine1: subLine1,
+        subLine2: subLine2,
+      }).then(function (startY) {
         var y = startY;
-        y = buildSections(doc, data, y);
+        if (ctx.type === 'cc') y = buildConnectivitySections(doc, data, y);
+        else y = buildLteSections(doc, data, y);
         var photosStart = newPage(doc);
-        return addPhotosSection(doc, photosStart, data.photos || []).then(function (afterPhotosY) {
+        return addPhotosSection(doc, photosStart, data.photos || [], ctx.photosSectionTitle).then(function () {
           var pageCount = doc.getNumberOfPages();
           for (var p = 1; p <= pageCount; p++) {
             doc.setPage(p);
             addFooter(doc, p, pageCount);
           }
 
-          var filename = buildFilename(data);
+          var filename = buildFilename(data, { prefix: ctx.filenamePrefix });
           if (mode === 'download' || mode === 'regenerate') {
             doc.save(filename);
             return;
@@ -577,9 +734,9 @@
 
           if (mode === 'preview') {
             var blobUrl = doc.output('bloburl');
-            var frame = $('#lteSurveyPdfPreviewFrame');
+            var frame = $(ctx.previewFrameId);
             if (frame) frame.src = blobUrl;
-            var modalEl = $('#lteSurveyPdfPreviewModal');
+            var modalEl = $(ctx.previewModalId);
             if (modalEl && window.bootstrap && window.bootstrap.Modal) {
               var instance = window.bootstrap.Modal.getOrCreateInstance(modalEl);
               var cleanup = function () {
@@ -601,34 +758,39 @@
     });
   }
 
-  function setBusy(isBusy) {
-    var btns = document.querySelectorAll('[data-lte-pdf-action]');
+  function setBusyFor(selector, key, isBusy) {
+    var btns = document.querySelectorAll(selector);
     btns.forEach(function (b) {
       if (!(b instanceof HTMLButtonElement)) return;
       if (isBusy) {
-        b.dataset.ltePdfWasDisabled = b.disabled ? '1' : '0';
+        b.dataset[key] = b.disabled ? '1' : '0';
         b.disabled = true;
         return;
       }
-      var wasDisabled = b.dataset.ltePdfWasDisabled === '1';
-      delete b.dataset.ltePdfWasDisabled;
+      var wasDisabled = b.dataset[key] === '1';
+      delete b.dataset[key];
       b.disabled = wasDisabled;
     });
   }
 
-  function bind() {
-    var btns = document.querySelectorAll('[data-lte-pdf-action]');
+  function bindOne(selector, attr, type) {
+    var btns = document.querySelectorAll(selector);
     if (!btns.length) return;
     btns.forEach(function (btn) {
       btn.addEventListener('click', function () {
-        var action = btn.getAttribute('data-lte-pdf-action');
-        setBusy(true);
+        var action = btn.getAttribute(attr);
+        setBusyFor(selector, (type === 'cc' ? 'ccPdfWasDisabled' : 'ltePdfWasDisabled'), true);
         Promise.resolve()
-          .then(function () { return generateSurveyPDF(action); })
+          .then(function () { return generateSurveyPDF(action, type); })
           .catch(function (e) { alert(safeString(e && e.message ? e.message : e)); })
-          .finally(function () { setBusy(false); });
+          .finally(function () { setBusyFor(selector, (type === 'cc' ? 'ccPdfWasDisabled' : 'ltePdfWasDisabled'), false); });
       });
     });
+  }
+
+  function bind() {
+    bindOne('[data-lte-pdf-action]', 'data-lte-pdf-action', 'lte');
+    bindOne('[data-cc-pdf-action]', 'data-cc-pdf-action', 'cc');
   }
 
   if (document.readyState === 'loading') {
