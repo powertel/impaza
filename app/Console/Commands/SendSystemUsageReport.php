@@ -38,8 +38,8 @@ class SendSystemUsageReport extends Command
             $this->info('Preparing weekly system usage report');
             $this->line('Period: ' . $result['report']['period']['label']);
             $this->line('Primary recipient: ' . $result['primary_recipient']);
-            if (!empty($result['bcc_recipients'])) {
-                $this->line('BCC recipients: ' . implode(', ', $result['bcc_recipients']));
+            if (!empty($result['recipients'])) {
+                $this->line('Recipients: ' . implode(', ', $result['recipients']));
             }
 
             $this->info('System usage report sent successfully.');

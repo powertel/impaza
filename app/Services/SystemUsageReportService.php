@@ -112,8 +112,8 @@ class SystemUsageReportService
         $report = $this->buildReport($start, $end);
         $subject = sprintf('%s: %s', $report['period']['report_title'], $report['period']['label']);
 
-        $primaryRecipient = array_shift($recipients);
-        $allRecipients = array_values(array_filter(array_merge([$primaryRecipient], $recipients)));
+        $primaryRecipient = $recipients[0] ?? null;
+        $allRecipients = array_values(array_filter($recipients));
         $delivery = $this->startDeliveryLog([
             'trigger_type' => $context['trigger_type'] ?? 'scheduled',
             'initiated_by' => $context['initiated_by'] ?? null,
@@ -125,15 +125,13 @@ class SystemUsageReportService
         ]);
 
         try {
-            Mail::send('emails.system_usage_report', [
-                'report' => $report,
-            ], function ($message) use ($primaryRecipient, $recipients, $subject) {
-                $message->to($primaryRecipient)->subject($subject);
-
-                if (!empty($recipients)) {
-                    $message->bcc($recipients);
-                }
-            });
+            foreach ($allRecipients as $recipient) {
+                Mail::send('emails.system_usage_report', [
+                    'report' => $report,
+                ], function ($message) use ($recipient, $subject) {
+                    $message->to($recipient)->subject($subject);
+                });
+            }
         } catch (\Throwable $exception) {
             $this->finishDeliveryLog($delivery, 'failed', $exception->getMessage());
             throw $exception;
@@ -145,7 +143,7 @@ class SystemUsageReportService
             'report' => $report,
             'subject' => $subject,
             'primary_recipient' => $primaryRecipient,
-            'bcc_recipients' => $recipients,
+            'recipients' => $allRecipients,
         ];
     }
 
