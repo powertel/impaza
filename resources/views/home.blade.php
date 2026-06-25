@@ -15,6 +15,153 @@ Dashboard
         align-items: start;
     }
 
+    .dashboard-panel,
+    .dashboard-side-card {
+        border-radius: 18px;
+        border: 1px solid rgba(226, 232, 240, .9);
+        box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 10px 28px rgba(15, 23, 42, .05);
+        overflow: hidden;
+    }
+
+    .dashboard-panel .card-header,
+    .dashboard-side-card .card-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 16px;
+        border-bottom: 1px solid rgba(226, 232, 240, .85);
+        background: rgba(248, 250, 252, .82);
+    }
+
+    html[data-theme="dark"] .dashboard-panel,
+    html[data-theme="dark"] .dashboard-side-card {
+        border-color: rgba(30, 41, 59, .95);
+        box-shadow: 0 1px 2px rgba(2, 6, 23, .35), 0 10px 28px rgba(2, 6, 23, .35);
+    }
+
+    html[data-theme="dark"] .dashboard-panel .card-header,
+    html[data-theme="dark"] .dashboard-side-card .card-header {
+        background: rgba(15, 23, 42, .86);
+        border-bottom-color: rgba(30, 41, 59, .9);
+    }
+
+    .dashboard-card-copy {
+        min-width: 0;
+    }
+
+    .dashboard-card-title {
+        font-size: .92rem;
+        font-weight: 700;
+        line-height: 1.2;
+        color: var(--impaza-text);
+        margin: 0;
+    }
+
+    .dashboard-card-subtitle {
+        font-size: .72rem;
+        color: var(--impaza-muted);
+        margin-top: 3px;
+        line-height: 1.35;
+    }
+
+    .dashboard-panel .card-body,
+    .dashboard-side-card .card-body {
+        padding: 16px;
+    }
+
+    .dashboard-side-card .card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .dashboard-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 28px;
+        padding: 0 10px;
+        border-radius: 999px;
+        border: 1px solid var(--impaza-border);
+        background: var(--impaza-card);
+        color: var(--impaza-muted);
+        font-size: .72rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .dashboard-side-section {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .dashboard-action-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .dashboard-action-tile {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 74px;
+        border-radius: 14px;
+        text-decoration: none;
+        border: 1px solid var(--impaza-border);
+        background: var(--impaza-card);
+        transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+    }
+
+    .dashboard-action-tile:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--impaza-shadow-sm);
+        text-decoration: none;
+    }
+
+    .dashboard-action-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .82rem;
+    }
+
+    .dashboard-action-label {
+        font-size: .73rem;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    .dashboard-activity-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 9px 0;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(226, 232, 240, .75);
+    }
+
+    .dashboard-activity-item:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    html[data-theme="dark"] .dashboard-activity-item {
+        border-bottom-color: rgba(30, 41, 59, .8);
+    }
+
+    .dashboard-filter-grid {
+        display: grid;
+        gap: 10px;
+    }
+
     .home-kpi-grid > * {
         min-width: 0;
     }
@@ -418,11 +565,11 @@ Dashboard
             <div class="col-xxl-9 col-xl-8">
                 <div class="row g-3 mb-3">
                     <div class="col-xl-7">
-                        <div class="card h-100">
-                            <div class="card-header d-flex align-items-start justify-content-between">
-                                <div>
-                                    <div class="fw-bold">Monthly Fault Trends</div>
-                                    <div class="small text-muted">Logged faults over time</div>
+                        <div class="card h-100 dashboard-panel">
+                            <div class="card-header">
+                                <div class="dashboard-card-copy">
+                                    <div class="dashboard-card-title">Fault Trends</div>
+                                    <div class="dashboard-card-subtitle">Fault resolution patterns over time</div>
                                 </div>
                                 <select id="trendsRange" class="form-select form-select-sm"
                                     style="max-width:140px;background:var(--impaza-card);border-color:var(--impaza-border);color:var(--impaza-text);">
@@ -437,14 +584,13 @@ Dashboard
                         </div>
                     </div>
                     <div class="col-xl-5">
-                        <div class="card h-100">
-                            <div class="card-header d-flex align-items-start justify-content-between">
-                                <div>
-                                    <div class="fw-bold">Fault Status Distribution</div>
-                                    <div class="small text-muted">Current status breakdown</div>
+                        <div class="card h-100 dashboard-panel">
+                            <div class="card-header">
+                                <div class="dashboard-card-copy">
+                                    <div class="dashboard-card-title">Fault Status Distribution</div>
+                                    <div class="dashboard-card-subtitle">Current status breakdown</div>
                                 </div>
-                                <span class="badge rounded-pill"
-                                    style="background:rgba(16,185,129,.12);color:var(--impaza-success);border:1px solid rgba(16,185,129,.25);">
+                                <span class="dashboard-chip" style="color:var(--impaza-success);">
                                     Total {{ number_format(collect($statusValues ?? [])->sum() ?: 0) }}
                                 </span>
                             </div>
@@ -455,9 +601,9 @@ Dashboard
                     </div>
                 </div>
 
-                <div class="impaza-table-card has-sticky">
+                <div class="impaza-table-card has-sticky dashboard-panel">
                     <div class="itc-header">
-                        <div>
+                        <div class="dashboard-card-copy">
                             <h5 class="itc-title mb-0">Recent Faults</h5>
                             <div class="itc-subtitle">Latest reported and updated faults</div>
                         </div>
@@ -567,60 +713,68 @@ Dashboard
             </div>
 
             <div class="col-xxl-3 col-xl-4">
-                <div class="card mb-3">
+                @canany(['fault-list', 'assign-fault', 'assessment-fault-list', 'reports'])
+                <div class="card mb-3 dashboard-side-card">
                     <div class="card-header">
-                        <div class="fw-bold">Quick Actions</div>
+                        <div class="dashboard-card-copy">
+                            <div class="dashboard-card-title">Quick Actions</div>
+                            <div class="dashboard-card-subtitle">Only actions you can access</div>
+                        </div>
                     </div>
                     <div class="card-body">
-                        <div class="row g-2">
+                        <div class="dashboard-action-grid">
                             @can('fault-list')
-                                <div class="col-6">
-                                    <a href="{{ route('faults.index') }}" class="btn w-100 rounded-3 py-3"
-                                        style="background:rgba(99,102,241,.10);color:var(--impaza-primary);border:1px solid rgba(99,102,241,.22);">
-                                        <div class="mb-2"><i class="fas fa-plus"></i></div>
-                                        <div class="fw-semibold" style="font-size:.78rem;">Log Fault</div>
-                                    </a>
-                                </div>
+                                <a href="{{ route('faults.index') }}" class="dashboard-action-tile"
+                                    style="color:var(--impaza-primary);background:rgba(99,102,241,.08);border-color:rgba(99,102,241,.18);">
+                                    <span class="dashboard-action-icon" style="background:rgba(99,102,241,.12);color:var(--impaza-primary);">
+                                        <i class="fas fa-plus-circle"></i>
+                                    </span>
+                                    <span class="dashboard-action-label">Log Fault</span>
+                                </a>
                             @endcan
                             @can('assign-fault')
-                                <div class="col-6">
-                                    <a href="{{ route('assign.create') }}" class="btn w-100 rounded-3 py-3"
-                                        style="background:rgba(6,182,212,.12);color:var(--impaza-info);border:1px solid rgba(6,182,212,.25);">
-                                        <div class="mb-2"><i class="fas fa-user-check"></i></div>
-                                        <div class="fw-semibold" style="font-size:.78rem;">Assign</div>
-                                    </a>
-                                </div>
+                                <a href="{{ route('assign.create') }}" class="dashboard-action-tile"
+                                    style="color:var(--impaza-info);background:rgba(6,182,212,.10);border-color:rgba(6,182,212,.20);">
+                                    <span class="dashboard-action-icon" style="background:rgba(6,182,212,.12);color:var(--impaza-info);">
+                                        <i class="fas fa-user-check"></i>
+                                    </span>
+                                    <span class="dashboard-action-label">Assign Fault</span>
+                                </a>
                             @endcan
                             @can('assessment-fault-list')
-                                <div class="col-6">
-                                    <a href="{{ route('assessments.index') }}" class="btn w-100 rounded-3 py-3"
-                                        style="background:rgba(245,158,11,.12);color:var(--impaza-warning);border:1px solid rgba(245,158,11,.25);">
-                                        <div class="mb-2"><i class="fas fa-clipboard-check"></i></div>
-                                        <div class="fw-semibold" style="font-size:.78rem;">Assess</div>
-                                    </a>
-                                </div>
+                                <a href="{{ route('assessments.index') }}" class="dashboard-action-tile"
+                                    style="color:var(--impaza-warning);background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.22);">
+                                    <span class="dashboard-action-icon" style="background:rgba(245,158,11,.12);color:var(--impaza-warning);">
+                                        <i class="fas fa-clipboard-check"></i>
+                                    </span>
+                                    <span class="dashboard-action-label">Assess</span>
+                                </a>
                             @endcan
                             @can('reports')
-                                <div class="col-6">
-                                    <a href="{{ route('dashboard.reports') }}" class="btn w-100 rounded-3 py-3"
-                                        style="background:rgba(16,185,129,.12);color:var(--impaza-success);border:1px solid rgba(16,185,129,.25);">
-                                        <div class="mb-2"><i class="fas fa-chart-bar"></i></div>
-                                        <div class="fw-semibold" style="font-size:.78rem;">Reports</div>
-                                    </a>
-                                </div>
+                                <a href="{{ route('dashboard.reports') }}" class="dashboard-action-tile"
+                                    style="color:var(--impaza-success);background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.20);">
+                                    <span class="dashboard-action-icon" style="background:rgba(16,185,129,.12);color:var(--impaza-success);">
+                                        <i class="fas fa-chart-bar"></i>
+                                    </span>
+                                    <span class="dashboard-action-label">Report</span>
+                                </a>
                             @endcan
                         </div>
                     </div>
                 </div>
+                @endcanany
 
                 @can('fault-list')
-                    <div class="card mb-3">
+                    <div class="card mb-3 dashboard-side-card">
                         <div class="card-header">
-                            <div class="fw-bold">Smart Filters</div>
+                            <div class="dashboard-card-copy">
+                                <div class="dashboard-card-title">Smart Filters</div>
+                                <div class="dashboard-card-subtitle">Jump to filtered fault views</div>
+                            </div>
                         </div>
                         <div class="card-body">
-                            <form method="GET" action="{{ route('faults.index') }}">
-                                <div class="mb-2">
+                            <form method="GET" action="{{ route('faults.index') }}" class="dashboard-filter-grid">
+                                <div>
                                     <label class="form-label mb-1">Region</label>
                                     <select name="region" class="form-select form-select-sm">
                                         <option value="">All Regions</option>
@@ -629,7 +783,7 @@ Dashboard
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="mb-2">
+                                <div>
                                     <label class="form-label mb-1">Status</label>
                                     <select name="status" class="form-select form-select-sm">
                                         <option value="">All Statuses</option>
@@ -638,7 +792,7 @@ Dashboard
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="mb-3">
+                                <div>
                                     <label class="form-label mb-1">Priority</label>
                                     <select name="priority" class="form-select form-select-sm">
                                         <option value="">All Priorities</option>
@@ -655,9 +809,12 @@ Dashboard
                     </div>
                 @endcan
 
-                <div class="card mb-3">
+                <div class="card mb-3 dashboard-side-card">
                     <div class="card-header">
-                        <div class="fw-bold">Activity Feed</div>
+                        <div class="dashboard-card-copy">
+                            <div class="dashboard-card-title">Activity Feed</div>
+                            <div class="dashboard-card-subtitle">Recent changes and updates</div>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="d-flex flex-column">
@@ -667,8 +824,7 @@ Dashboard
                                     $afColor = \App\Models\Status::STATUS_COLOR[$afStatus] ?? '#6c757d';
                                 @endphp
                                 <a href="{{ route('faults.index', ['q' => $fault->fault_ref_number]) }}"
-                                    class="d-flex align-items-start gap-2 py-2 text-decoration-none"
-                                    style="border-bottom:1px solid var(--impaza-border);">
+                                    class="dashboard-activity-item">
                                     <span class="d-inline-block rounded-circle"
                                         style="width:10px;height:10px;margin-top:5px;background:{{ $afColor }};"></span>
                                     <span class="d-flex flex-column" style="min-width:0;">
