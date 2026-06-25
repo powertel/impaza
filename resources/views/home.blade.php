@@ -23,6 +23,8 @@ Dashboard
         max-width: 100%;
         min-width: 0;
         box-sizing: border-box;
+        margin: 0;
+        background: var(--impaza-card);
         border-radius: 18px;
         border: 1px solid rgba(226, 232, 240, .9);
         box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 10px 28px rgba(15, 23, 42, .05);
@@ -75,6 +77,10 @@ Dashboard
     .dashboard-panel .card-body,
     .dashboard-side-card .card-body {
         padding: 16px;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
     }
 
     .dashboard-panel .card-body {
@@ -107,6 +113,7 @@ Dashboard
         display: flex;
         flex-direction: column;
         gap: 12px;
+        width: 100%;
         min-width: 0;
     }
 
@@ -115,11 +122,13 @@ Dashboard
         grid-template-columns: minmax(0, 1.35fr) minmax(0, .95fr);
         gap: 12px;
         align-items: stretch;
+        width: 100%;
         min-width: 0;
     }
 
     .dashboard-chart-col {
         display: flex;
+        width: 100%;
         min-width: 0;
     }
 
@@ -127,11 +136,22 @@ Dashboard
         display: flex;
         flex-direction: column;
         gap: 12px;
+        align-items: stretch;
         width: 100%;
         min-width: 0;
     }
 
+    .dashboard-main-column > *,
+    .dashboard-side-column > *,
+    .dashboard-charts-grid > *,
+    .dashboard-side-stack > * {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+
     .dashboard-side-stack > .dashboard-side-card {
+        flex: 0 0 auto;
         margin-bottom: 0 !important;
     }
 
@@ -146,6 +166,69 @@ Dashboard
         background: var(--impaza-card);
         color: var(--impaza-muted);
         font-size: .72rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .fault-distribution-layout {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+        min-height: 300px;
+    }
+
+    .fault-distribution-chart {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .fault-distribution-chart #apexStatus {
+        width: min(100%, 320px);
+        min-height: 260px;
+    }
+
+    .fault-distribution-legend {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px 16px;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .fault-legend-item {
+        display: grid;
+        grid-template-columns: 12px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        padding: 8px 10px;
+        border: 1px solid rgba(148, 163, 184, .16);
+        border-radius: 12px;
+        background: rgba(148, 163, 184, .06);
+    }
+
+    .fault-legend-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+    }
+
+    .fault-legend-label {
+        font-size: .92rem;
+        color: var(--impaza-text);
+        font-weight: 500;
+        min-width: 0;
+        line-height: 1.25;
+        word-break: keep-all;
+    }
+
+    .fault-legend-value {
+        font-size: .86rem;
+        color: var(--impaza-muted);
         font-weight: 600;
         white-space: nowrap;
     }
@@ -237,6 +320,10 @@ Dashboard
     }
 
     .dashboard-panel .itc-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
         padding: 14px 16px;
         min-height: 68px;
         border-bottom: 1px solid rgba(226, 232, 240, .85);
@@ -251,6 +338,22 @@ Dashboard
     @media (max-width: 1199.98px) {
         .dashboard-charts-grid {
             grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 991.98px) {
+        .fault-distribution-layout {
+            gap: 12px;
+        }
+
+        .fault-distribution-legend {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .fault-distribution-chart #apexStatus {
+            width: min(100%, 280px);
         }
     }
 
@@ -688,7 +791,12 @@ Dashboard
                                 </span>
                             </div>
                             <div class="card-body">
-                                <div id="apexStatus" style="min-height:300px;"></div>
+                                <div class="fault-distribution-layout">
+                                    <div class="fault-distribution-chart">
+                                        <div id="apexStatus"></div>
+                                    </div>
+                                    <div id="statusLegend" class="fault-distribution-legend"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -971,6 +1079,18 @@ document.addEventListener('DOMContentLoaded', function () {
     var statusOptions = JSON.parse(el.dataset.statusOptions || '[]');
     var faultsUrl = String(el.dataset.faultsUrl || '/faults');
 
+    function compactStatusLabel(label) {
+        var normalized = String(label || '').trim().toLowerCase();
+        if (normalized === 'fault has been restored' || normalized === 'resolved') return 'Resolved';
+        if (normalized === 'fault is under rectification' || normalized === 'under rectification') return 'Under Rectification';
+        if (normalized === 'fault has been assessed' || normalized === 'assessed') return 'Assessed';
+        if (normalized === 'waiting for assessment' || normalized === 'waiting assessment') return 'Waiting Assessment';
+        if (normalized === 'open' || normalized === 'all open faults') return 'Open';
+        return String(label || 'Other');
+    }
+
+    var statusDisplayLabels = statusLabels.map(compactStatusLabel);
+
     var COL = {
         primary: '#6366F1',
         success: '#10B981',
@@ -1056,10 +1176,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var statusEl = document.getElementById('apexStatus');
     if (statusEl && Array.isArray(statusValues) && statusValues.length) {
+        var legendEl = document.getElementById('statusLegend');
         var statusChart = new ApexCharts(statusEl, {
             chart: {
                 type: 'donut',
-                height: 300,
+                height: 280,
                 fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
                 events: {
                     dataPointSelection: function (_e, _ctx, cfg) {
@@ -1074,33 +1195,40 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
             },
             series: statusValues,
-            labels: statusLabels,
+            labels: statusDisplayLabels,
             colors: [COL.primary, COL.success, COL.warning, COL.danger, COL.info, COL.muted],
             stroke: { width: 2, colors: [strokeBg] },
             dataLabels: { enabled: false },
-            legend: {
-                position: 'right',
-                fontSize: '12px',
-                labels: { colors: textColor },
-                formatter: function (name, opts) {
-                    var v = opts.w.globals.series[opts.seriesIndex] || 0;
-                    var total = opts.w.globals.seriesTotals.reduce(function (a, b) { return a + b; }, 0) || 1;
-                    var pct = Math.round((v / total) * 100);
-                    return name + '  ' + pct + '% (' + v + ')';
-                },
-            },
+            legend: { show: false },
             plotOptions: {
                 pie: {
+                    expandOnClick: false,
+                    offsetY: 8,
                     donut: {
-                        size: '70%',
+                        size: '64%',
                         labels: {
                             show: true,
-                            name: { color: textColor },
-                            value: { color: titleColor },
+                            name: {
+                                show: true,
+                                color: textColor,
+                                offsetY: -10,
+                            },
+                            value: {
+                                show: true,
+                                color: titleColor,
+                                fontSize: '38px',
+                                fontWeight: 700,
+                                offsetY: 10,
+                                formatter: function (_value, opts) {
+                                    return opts.w.globals.seriesTotals.reduce(function (a, b) { return a + b; }, 0);
+                                },
+                            },
                             total: {
                                 show: true,
                                 label: 'Total',
                                 color: textColor,
+                                fontSize: '16px',
+                                fontWeight: 600,
                                 formatter: function (w) {
                                     return w.globals.seriesTotals.reduce(function (a, b) { return a + b; }, 0);
                                 },
@@ -1110,14 +1238,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
             },
             tooltip: { theme: isDark() ? 'dark' : 'light' },
-            responsive: [
-                {
-                    breakpoint: 1200,
-                    options: { legend: { position: 'bottom' } },
-                },
-            ],
         });
         statusChart.render();
+
+        if (legendEl) {
+            var total = statusValues.reduce(function (a, b) { return a + b; }, 0) || 1;
+            legendEl.innerHTML = statusDisplayLabels.map(function (label, index) {
+                var value = Number(statusValues[index] || 0);
+                var pct = ((value / total) * 100).toFixed(1);
+                var color = [COL.primary, COL.success, COL.warning, COL.danger, COL.info, COL.muted][index] || COL.muted;
+                return [
+                    '<div class="fault-legend-item">',
+                    '<span class="fault-legend-dot" style="background:' + color + ';"></span>',
+                    '<span class="fault-legend-label">' + label + '</span>',
+                    '<span class="fault-legend-value">' + pct + '% (' + value + ')</span>',
+                    '</div>'
+                ].join('');
+            }).join('');
+        }
     }
 
     var net = logged.map(function (v, i) {
