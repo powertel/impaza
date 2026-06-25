@@ -209,6 +209,17 @@ Dashboard
         border: 1px solid rgba(148, 163, 184, .16);
         border-radius: 12px;
         background: rgba(148, 163, 184, .06);
+        cursor: pointer;
+        transition: border-color .18s ease, background .18s ease, transform .18s ease, box-shadow .18s ease;
+    }
+
+    .fault-legend-item:hover,
+    .fault-legend-item:focus-visible {
+        background: rgba(99, 102, 241, .08);
+        border-color: rgba(99, 102, 241, .28);
+        box-shadow: 0 8px 18px rgba(15, 23, 42, .08);
+        transform: translateY(-1px);
+        outline: none;
     }
 
     .fault-legend-dot {
@@ -1091,6 +1102,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var statusDisplayLabels = statusLabels.map(compactStatusLabel);
 
+    function goToStatus(index) {
+        var label = statusLabels[index];
+        var opt = statusOptions.find(function (o) {
+            return String(o.description) === String(label);
+        });
+        if (opt) {
+            window.location.href = faultsUrl + '?status=' + encodeURIComponent(opt.id);
+        }
+    }
+
     var COL = {
         primary: '#6366F1',
         success: '#10B981',
@@ -1184,13 +1205,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
                 events: {
                     dataPointSelection: function (_e, _ctx, cfg) {
-                        var label = statusLabels[cfg.dataPointIndex];
-                        var opt = statusOptions.find(function (o) {
-                            return String(o.description) === String(label);
-                        });
-                        if (opt) {
-                            window.location.href = faultsUrl + '?status=' + encodeURIComponent(opt.id);
-                        }
+                        goToStatus(cfg.dataPointIndex);
                     },
                 },
             },
@@ -1248,13 +1263,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 var pct = ((value / total) * 100).toFixed(1);
                 var color = [COL.primary, COL.success, COL.warning, COL.danger, COL.info, COL.muted][index] || COL.muted;
                 return [
-                    '<div class="fault-legend-item">',
+                    '<div class="fault-legend-item" role="button" tabindex="0" data-status-index="' + index + '" aria-label="View ' + label + ' faults">',
                     '<span class="fault-legend-dot" style="background:' + color + ';"></span>',
                     '<span class="fault-legend-label">' + label + '</span>',
                     '<span class="fault-legend-value">' + pct + '% (' + value + ')</span>',
                     '</div>'
                 ].join('');
             }).join('');
+
+            legendEl.querySelectorAll('.fault-legend-item').forEach(function (item) {
+                item.addEventListener('click', function () {
+                    goToStatus(Number(item.dataset.statusIndex));
+                });
+                item.addEventListener('keydown', function (event) {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        goToStatus(Number(item.dataset.statusIndex));
+                    }
+                });
+            });
         }
     }
 
