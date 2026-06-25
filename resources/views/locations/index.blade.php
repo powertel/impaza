@@ -150,7 +150,7 @@ Locations
   $visibleLocations = $locations->count();
   $perPage = request('per_page', 20);
 @endphp
-<section class="content">
+<section class="content workflow-faults-page locations-page">
   <div class="workflow-kpis locations-summary-grid">
     <div class="locations-summary-card" style="--summary-color:#6366F1;">
       <div class="locations-summary-body">
@@ -190,7 +190,7 @@ Locations
     </div>
   </div>
 
-  <div class="card workflow-faults-page locations-page">
+  <div class="card">
     <div class="card-header">
       <div>
         <h3 class="card-title">Manage Locations</h3>

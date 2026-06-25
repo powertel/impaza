@@ -42,9 +42,9 @@
                   @error('city_id')
                     <div class="invalid-feedback">{{ $message }}</div>
                   @enderror
-                  </div>
                 </div>
               </div>
+            </div>
           </div>
 
           <div class="fault-modal-section">
@@ -75,9 +75,9 @@
                   <button type="button" class="btn btn-outline-secondary btn-sm" id="removeLocationRepeaterItem"><i class="fas fa-minus me-1"></i> Remove last</button>
                 </div>
               </div>
-              <button type="button" class="btn btn-light btn-sm" id="removeLocationRepeaterItem"><i class="fas fa-minus"></i> Remove last</button>
             </div>
           </div>
+        </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
             <i class="fas fa-times me-1"></i> Cancel

@@ -150,7 +150,7 @@ Pops
   $locationCoverage = $pops->pluck('suburb')->filter()->unique()->count();
   $perPage = request('per_page', 20);
 @endphp
-<section class="content">
+<section class="content workflow-faults-page pops-page">
   <div class="pops-summary-grid">
     <div class="pops-summary-card" style="--summary-color:#6366F1;">
       <div class="pops-summary-body">
@@ -190,7 +190,7 @@ Pops
     </div>
   </div>
 
-  <div class="card workflow-faults-page pops-page">
+  <div class="card">
     <div class="card-header">
       <div>
         <h3 class="card-title">Manage POPs</h3>
@@ -304,4 +304,3 @@ Pops
     });
   </script>
 @endsection
-
