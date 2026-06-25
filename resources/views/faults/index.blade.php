@@ -124,52 +124,61 @@ Faults
     </div>
     <!-- /.card-header -->
     <div class="card-body">
-        <div class="table-responsive">
-            <div class="filter-toolbar d-flex justify-content-end align-items-center gap-2 mb-2">
-                <div class="input-group input-group-sm" style="width: 200px;">
-                    <span class="input-group-text"><i class="fas fa-list me-1"></i> Show</span>
-                    @php $perPage = request('per_page', 20); @endphp
-                    <select id="faultsPageSize" class="form-select form-select-sm" style="width:auto;">
-                        <option value="10"  {{ (int)$perPage===10 ? 'selected' : '' }}>10</option>
-                        <option value="20"  {{ (int)$perPage===20 ? 'selected' : '' }}>20</option>
-                        <option value="50"  {{ (int)$perPage===50 ? 'selected' : '' }}>50</option>
-                        <option value="100" {{ (int)$perPage===100 ? 'selected' : '' }}>100</option>
-                    </select>
-                </div>
-                <form method="GET" action="{{ route('faults.index') }}" class="m-0">
-                    <div class="input-group input-group-sm" style="width: 760px; max-width: 100%;">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text"><i class="fas fa-filter me-1"></i> Status</span>
-                        </div>
-                        @php $statusFilter = request('status', 'all'); @endphp
-                        <select name="status" id="faultsStatusFilter" class="form-select form-select-sm" style="width:auto;">
-                            <option value="all"   {{ $statusFilter === 'all' ? 'selected' : '' }}>All</option>
-                            <option value="lt4"   {{ $statusFilter === 'lt4' ? 'selected' : '' }}>Open Faults</option>
-                            @foreach(($openStatuses ?? collect()) as $st)
-                                <option value="{{ $st->id }}" {{ $statusFilter == (string)$st->id ? 'selected' : '' }}>{{ $st->description }}</option>
-                            @endforeach
+        <div class="impaza-data-panel">
+            <div class="filter-toolbar impaza-list-toolbar">
+                <div class="impaza-list-toolbar-left">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="fas fa-list me-1"></i> Show</span>
+                        @php $perPage = request('per_page', 20); @endphp
+                        <select id="faultsPageSize" class="form-select form-select-sm">
+                            <option value="10"  {{ (int)$perPage===10 ? 'selected' : '' }}>10</option>
+                            <option value="20"  {{ (int)$perPage===20 ? 'selected' : '' }}>20</option>
+                            <option value="50"  {{ (int)$perPage===50 ? 'selected' : '' }}>50</option>
+                            <option value="100" {{ (int)$perPage===100 ? 'selected' : '' }}>100</option>
                         </select>
-
-                        <div class="input-group-prepend ms-2">
-                            <span class="input-group-text"><i class="fas fa-clock me-1"></i> Age</span>
-                        </div>
-                        @php $ageFilter = request('age', 'all'); @endphp
-                        <select name="age" id="faultsAgeFilter" class="form-select form-select-sm me-1" style="width:50px;">
-                            <option value="all"    {{ $ageFilter === 'all' ? 'selected' : '' }}>All</option>
-                            <option value="today"  {{ $ageFilter === 'today' ? 'selected' : '' }}>Today</option>
-                            <option value="lt72"   {{ $ageFilter === 'lt72' ? 'selected' : '' }}>Within 72 hours</option>
-                            <option value="gt72"   {{ $ageFilter === 'gt72' ? 'selected' : '' }}>Over 72 hours</option>
-                        </select>
-
-                        <span class="input-group-text"><i class="fas fa-search"></i></span>
-                        <input type="text" name="q" value="{{ request('q','') }}" class="form-control" placeholder="Search all records">
-                        <input type="hidden" name="per_page" value="{{ $perPage }}">
-                        <button type="submit" class="btn btn-outline-primary"><i class="fas fa-search me-1"></i>Search</button>
-                        <a href="{{ route('faults.index', ['per_page' => $perPage]) }}" class="btn btn-outline-secondary"><i class="fas fa-rotate-left me-1"></i>Reset</a>
                     </div>
-                </form>
+                </div>
+                <div class="impaza-list-toolbar-right">
+                    <form method="GET" action="{{ route('faults.index') }}" class="m-0">
+                        <div class="impaza-list-filter-row">
+                            @php $statusFilter = request('status', 'all'); @endphp
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="fas fa-filter me-1"></i> Status</span>
+                                <select name="status" id="faultsStatusFilter" class="form-select form-select-sm">
+                                    <option value="all"   {{ $statusFilter === 'all' ? 'selected' : '' }}>All</option>
+                                    <option value="lt4"   {{ $statusFilter === 'lt4' ? 'selected' : '' }}>Open Faults</option>
+                                    @foreach(($openStatuses ?? collect()) as $st)
+                                        <option value="{{ $st->id }}" {{ $statusFilter == (string)$st->id ? 'selected' : '' }}>{{ $st->description }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            @php $ageFilter = request('age', 'all'); @endphp
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="fas fa-clock me-1"></i> Age</span>
+                                <select name="age" id="faultsAgeFilter" class="form-select form-select-sm">
+                                    <option value="all"    {{ $ageFilter === 'all' ? 'selected' : '' }}>All</option>
+                                    <option value="today"  {{ $ageFilter === 'today' ? 'selected' : '' }}>Today</option>
+                                    <option value="lt72"   {{ $ageFilter === 'lt72' ? 'selected' : '' }}>Within 72 hours</option>
+                                    <option value="gt72"   {{ $ageFilter === 'gt72' ? 'selected' : '' }}>Over 72 hours</option>
+                                </select>
+                            </div>
+
+                            <div class="input-group input-group-sm impaza-search">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" name="q" value="{{ request('q','') }}" class="form-control" placeholder="Search all records">
+                                <input type="hidden" name="per_page" value="{{ $perPage }}">
+                            </div>
+
+                            <button type="submit" class="btn btn-outline-primary btn-sm"><i class="fas fa-search me-1"></i>Search</button>
+                            <a href="{{ route('faults.index', ['per_page' => $perPage]) }}" class="btn btn-outline-secondary btn-sm"><i class="fas fa-rotate-left me-1"></i>Reset</a>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <table class="table  table-hover align-middle" id="faults-list" style="font-size:14px">
+
+            <div class="table-responsive impaza-table-wrap">
+            <table class="table table-hover align-middle impaza-table" id="faults-list">
                 <thead>
                     <tr>
                     <!-- <th>No.</th>-->
@@ -239,6 +248,7 @@ Faults
                     @endif
                 </tbody> 
             </table>
+            </div>
             @include('faults.create')
 
             @foreach ($faults as $fault)
@@ -263,7 +273,7 @@ Faults
                     'ageEnd' => ($faultAgeEnd[$fault->id] ?? null),
                 ])
             @endforeach
-            <div class="d-flex justify-content-between align-items-center mt-3">
+            <div class="impaza-table-footer d-flex justify-content-between align-items-center">
               <small class="text-muted">
                 Showing {{ $faults->firstItem() }} to {{ $faults->lastItem() }} of {{ $faults->total() }} results
               </small>

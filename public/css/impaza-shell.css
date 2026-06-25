@@ -1,0 +1,51 @@
+/* =====================================================================
+   iMPAZAMON standalone layout shell + AdminLTE compatibility.
+   This owns the app layout once adminlte.css is removed from the bundle.
+   Loaded in <head> after app.css. Pure Bootstrap 5.3 underneath.
+   ===================================================================== */
+
+/* ---- Base wrapper ---- */
+html, body { height: 100%; }
+body.impaza-app { min-height: 100vh; }
+.wrapper { position: relative; min-height: 100vh; }
+
+/* ---- Sidebar nav: reset label block margins AdminLTE used to handle ---- */
+.nav-sidebar .nav-link p { margin: 0; }
+.nav-sidebar { list-style: none; padding-left: 0; margin-bottom: 0; }
+.nav-sidebar .nav-item { width: 100%; }
+
+/* ---- AdminLTE .card-tools shim (header action area, used in ~34 views) ---- */
+.card-header:has(.card-tools) { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.card-header:has(.card-tools) > :first-child { margin-right: auto; }
+.card-tools { display: inline-flex; align-items: center; gap: 6px; }
+/* Fallback for engines without :has() — keep tools to the right */
+.card-tools { float: right; }
+.card-header:has(.card-tools) .card-tools { float: none; }
+
+/* ---- content-header (AdminLTE page header band) ---- */
+.content-header { padding: 14px 22px 4px; }
+.content-header h1, .content-header .h1 { font-size: 1.25rem; font-weight: 700; color: var(--impaza-text); margin: 0; }
+
+/* ---- callout shim ---- */
+.callout { padding: 12px 16px; border-radius: 10px; border-left: 4px solid var(--impaza-border); background: var(--impaza-card); box-shadow: var(--impaza-shadow-sm); margin-bottom: 1rem; }
+.callout-info { border-left-color: var(--impaza-info); }
+.callout-warning { border-left-color: var(--impaza-warning); }
+.callout-danger { border-left-color: var(--impaza-danger); }
+.callout-success { border-left-color: var(--impaza-success); }
+
+/* ---- card-primary (AdminLTE colored card) → tasteful accent ---- */
+.card-primary:not(.card-outline) > .card-header { background: var(--impaza-primary); color: #fff; }
+.card-primary:not(.card-outline) > .card-header .card-title { color: #fff; }
+
+/* ---- Mobile off-canvas sidebar + overlay (AdminLTE handled this before) ---- */
+@media (max-width: 991.98px) {
+  .main-sidebar { transform: translateX(-100%); transition: transform .25s ease; z-index: 1045; width: 250px; }
+  body.sidebar-open .main-sidebar { transform: translateX(0); box-shadow: 0 20px 50px rgba(2,6,23,.5); }
+  .impaza-sidebar-overlay { position: fixed; inset: 0; background: rgba(2,6,23,.5); z-index: 1044; opacity: 0; visibility: hidden; transition: opacity .2s ease; border: 0; padding: 0; margin: 0; }
+  body.sidebar-open .impaza-sidebar-overlay { opacity: 1; visibility: visible; }
+  .content-wrapper, .main-header { margin-left: 0 !important; }
+}
+@media (min-width: 992px) {
+  .main-sidebar { transform: none; }
+  .impaza-sidebar-overlay { display: none !important; }
+}

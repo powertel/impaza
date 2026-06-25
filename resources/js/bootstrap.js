@@ -1,14 +1,12 @@
 window._ = require("lodash");
 
 try {
-    // jQuery remains available for AdminLTE and other plugins
+    // jQuery remains available for DataTables, Select2 and other plugins
     window.$ = window.jQuery = require("jquery");
 
-    // Bootstrap 5 bundle (includes @popperjs/core v2)
+    // Bootstrap 5.3 bundle (includes @popperjs/core v2) — sole UI framework.
+    // AdminLTE removed; sidebar toggle/collapse handled by vanilla JS in the layout.
     window.bootstrap = require("bootstrap/dist/js/bootstrap.bundle");
-
-    // AdminLTE still loads (layout helpers); avoid BS4-specific plugins
-    require("admin-lte");
 
     // DataTables styling for Bootstrap 5 (if installed)
     try { require("datatables.net-bs5")(window, $); } catch (_) {}

@@ -162,6 +162,7 @@ $(document).off('change', '.customer-select').on('change', '.customer-select', f
 // Disable Save until all required fields in the create modal are valid
 $(function(){
   var $saveBtn = $('button[form="UF"][type="submit"]');
+  var $nextBtn = $('[data-impaza-stepper-next="UF"]');
   function computeValidity(mark){
     var requiredSelectors = [
       '#customer', 'input[name="contactName"]', 'input[name="phoneNumber"]',
@@ -191,11 +192,41 @@ $(function(){
     }
     $saveBtn.prop('disabled', !allValid);
   }
+  function computeStepValidity(step){
+    var map = {
+      1: ['#customer', '#link'],
+      2: ['input[name="contactName"]', 'input[name="phoneNumber"]', 'select[name="suspectedRfo_id"]'],
+      3: ['textarea[name="remark"]'],
+      4: []
+    };
+    var req = map[step] || [];
+    var ok = true;
+    req.forEach(function(sel){
+      var $el = $(sel);
+      if(!$el.length){ ok = false; return; }
+      var isSelect = $el.is('select');
+      var val = isSelect ? $el.val() : ($el.val()||'').trim();
+      var empty = !val;
+      if(empty){ ok = false; }
+    });
+    if(step === 2){
+      var phone = ($('input[name="phoneNumber"]').val()||'').trim();
+      if(!/^2637\d{8}$/.test(phone)){ ok = false; }
+    }
+    $nextBtn.prop('disabled', !ok);
+  }
   $saveBtn.prop('disabled', true);
   // On modal open: compute validity without marking fields invalid
-  $('#createFaultModal').on('shown.bs.modal', function(){ computeValidity(false); });
+  $('#createFaultModal').on('shown.bs.modal', function(){
+    computeValidity(false);
+    try { computeStepValidity(1); } catch (e) {}
+  });
   // When user interacts: compute and mark invalids
-  $(document).on('input change', '#createFaultModal input, #createFaultModal select, #createFaultModal textarea', function(){ computeValidity(true); });
+  $(document).on('input change', '#createFaultModal input, #createFaultModal select, #createFaultModal textarea', function(){
+    computeValidity(true);
+    var step = parseInt($('#createFaultModal').attr('data-impaza-step') || '1', 10) || 1;
+    computeStepValidity(step);
+  });
 
   // Normalize phone input to digits only
   $(document).on('input', 'input[name="phoneNumber"]', function(){
@@ -209,6 +240,25 @@ $(function(){
       placeholder: 'Select Customer',
       width: '100%',
       dropdownParent: $('#createFaultModal')
+    });
+  }
+  var dz = document.querySelector('#createFaultModal [data-impaza-dropzone]');
+  if (dz && attachmentInput) {
+    function stop(e){ e.preventDefault(); e.stopPropagation(); }
+    dz.addEventListener('dragenter', function(e){ stop(e); dz.classList.add('is-dragover'); });
+    dz.addEventListener('dragover', function(e){ stop(e); dz.classList.add('is-dragover'); });
+    dz.addEventListener('dragleave', function(e){ stop(e); dz.classList.remove('is-dragover'); });
+    dz.addEventListener('drop', function(e){
+      stop(e);
+      dz.classList.remove('is-dragover');
+      var files = e.dataTransfer && e.dataTransfer.files ? e.dataTransfer.files : null;
+      if (!files || !files.length) return;
+      if (window.DataTransfer) {
+        var dt = new DataTransfer();
+        dt.items.add(files[0]);
+        attachmentInput.files = dt.files;
+      }
+      attachmentInput.dispatchEvent(new Event('change', { bubbles: true }));
     });
   }
 });

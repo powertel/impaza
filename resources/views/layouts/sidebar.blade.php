@@ -1,21 +1,21 @@
 <!-- Main Sidebar Container -->
-<aside class="main-sidebar sidebar-dark-primary elevation-4">
+<aside class="main-sidebar impaza-sidebar sidebar-dark-primary elevation-4">
 
 
     <!-- Sidebar -->
-    <div class="sidebar" style="display: flex; flex-direction: column; min-height: 0;">
+    <div class="sidebar">
         <!-- Sidebar user panel (optional) -->
-        <div class="user-panel d-flex bg-transparent p-2" style="flex: 0 0 auto;">
-            <div class="image" style="width: 100%; text-align: left;">
-                <img src="{{ asset('img/impazamon-v2.png') }}" alt="Logo" style="max-height: none; width: 90%; margin-left: 0;">
+        <div class="user-panel d-flex bg-transparent">
+            <div class="image w-100 text-left">
+                <img src="{{ asset('img/impazamon-v2.png') }}" alt="Logo" class="impaza-brand-logo" style="width: 90%; max-height: none;">
             </div>
         </div>
 
         
 
         <!-- Sidebar Menu -->
-        <nav class="mt-2" style="flex: 1 1 auto;">
-          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false" style="margin: 0; padding: 0;">
+        <nav class="mt-2">
+          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
             <li class="nav-header">Main</li>
             <li class="nav-item">
               <a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
@@ -370,7 +370,30 @@
           </ul>
         </nav>
         <!-- /.sidebar-menu -->
+
+        @auth
+          @php
+            $impazaUser = Auth::user();
+            $impazaInitial = strtoupper(mb_substr((string)($impazaUser->name ?? 'U'), 0, 1));
+            $impazaRole = data_get($impazaUser, 'role');
+            if (!$impazaRole && is_object($impazaUser) && method_exists($impazaUser, 'getRoleNames')) {
+              try { $impazaRole = $impazaUser->getRoleNames()->first(); } catch (\Throwable $e) { $impazaRole = null; }
+            }
+          @endphp
+          <div class="impaza-sidebar-footer">
+            <div class="impaza-sidebar-user">
+              <div class="avatar">{{ $impazaInitial }}</div>
+              <div class="meta">
+                <div class="name">{{ $impazaUser->name }}</div>
+                <div class="role">{{ $impazaRole ?: 'Signed in' }}</div>
+              </div>
+              <div class="actions">
+                <a href="{{ route('user.profile') }}" title="Profile" aria-label="Profile"><i class="fas fa-user"></i></a>
+                <a href="{{ route('logout') }}" title="Logout" aria-label="Logout" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="fas fa-power-off"></i></a>
+              </div>
+            </div>
+          </div>
+        @endauth
     </div>
     <!-- /.sidebar -->
 </aside>
-

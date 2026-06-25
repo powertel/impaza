@@ -10,9 +10,9 @@
         "production": "mix --production"
     },
     "devDependencies": {
-        "@popperjs/core": "^2.11.5",
+        "@popperjs/core": "^2.11.8",
         "axios": "^0.25.0",
-        "bootstrap": "^5.1.3",
+        "bootstrap": "^5.3.8",
         "laravel-mix": "^6.0.6",
         "lodash": "^4.17.19",
         "postcss": "^8.1.14",
@@ -26,7 +26,6 @@
         "@fortawesome/fontawesome-free": "^6.1.1",
         "admin-lte": "^3.2.0",
         "autoprefixer": "10.4.5",
-        "bootstrap-vue": "^2.22.0",
         "datatables.net": "^2.3.4",
         "datatables.net-bs5": "^2.3.4",
         "jquery": "^3.6.0",
