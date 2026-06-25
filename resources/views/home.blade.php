@@ -244,6 +244,39 @@ Dashboard
         white-space: nowrap;
     }
 
+    .recent-status-link {
+        display: inline-flex;
+        text-decoration: none;
+    }
+
+    .recent-status-link:hover,
+    .recent-status-link:focus-visible {
+        text-decoration: none;
+        outline: none;
+    }
+
+    .recent-status-link .impaza-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 24px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: .68rem;
+        font-weight: 700;
+        letter-spacing: .01em;
+        white-space: nowrap;
+        box-shadow: none;
+        transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    }
+
+    .recent-status-link:hover .impaza-badge,
+    .recent-status-link:focus-visible .impaza-badge {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 14px rgba(15, 23, 42, .08);
+        filter: saturate(1.05);
+    }
+
     .dashboard-side-section {
         display: flex;
         flex-direction: column;
@@ -850,6 +883,14 @@ Dashboard
                                             $rowStatus = trim((string) ($fault->status_description ?? ''));
                                             $statusLabel = $rowStatus !== '' ? $rowStatus : 'Unknown';
                                             $statusColor = \App\Models\Status::STATUS_COLOR[$statusLabel] ?? '#6c757d';
+                                            $statusDisplayLabel = match (strtolower($statusLabel)) {
+                                                'fault has been restored', 'resolved' => 'Fault Restored',
+                                                'fault is under rectification', 'under rectification' => 'Under Rectification',
+                                                'waiting for assessment', 'waiting assessment' => 'Waiting Assessment',
+                                                'fault has been assessed', 'assessed' => 'Assessed',
+                                                'open' => 'Open',
+                                                default => $statusLabel,
+                                            };
                                             $assignee = trim((string) ($fault->assignedTo ?? ''));
                                             $prio = trim((string) ($fault->priority ?? ''));
                                             $prioTone = strtolower($prio);
@@ -891,8 +932,8 @@ Dashboard
                                                 {{ $fault->date_logged ? \Carbon\Carbon::parse($fault->date_logged)->format('d M Y H:i') : '—' }}
                                             </td>
                                             <td>
-                                                <a href="{{ route('faults.index', ['status' => $rowStatusId]) }}">
-                                                    <x-status-badge :label="$statusLabel" :color="$statusColor" />
+                                                <a href="{{ route('faults.index', ['status' => $rowStatusId]) }}" class="recent-status-link">
+                                                    <x-status-badge :label="$statusDisplayLabel" :color="$statusColor" :soft="true" />
                                                 </a>
                                             </td>
                                             <td class="text-muted">{{ $ageStr }}</td>
