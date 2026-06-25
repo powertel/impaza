@@ -16,9 +16,9 @@ class Status extends Model
     const STATUS_COLOR = [
         // Pending / triage
         'Waiting for Assessment' => '#fd0404ff',          // gray-500
-        'Fault has been Assessed' =>'yellow',         // yellow-400
+        'Fault has been Assessed' => '#cfcf0dff',         // yellow-400
         // In progress
-        'Fault is under Rectification' => '#f99f04ff',    // amber-500
+        'Fault is under Rectification' => '#d18604ff',    // amber-500
         // Cleared states
         'Fault has been Rectified' => '#94a3b8', // lime-500
         'Fault has been cleared by CT' => '#22c55e',    // emerald-500
