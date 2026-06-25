@@ -11,7 +11,7 @@ Dashboard
     .home-kpi-grid {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 12px;
+        gap: 16px;
         align-items: start;
     }
 
@@ -127,6 +127,8 @@ Dashboard
 
     .dashboard-main-row {
         align-items: stretch;
+        --bs-gutter-x: 16px;
+        --bs-gutter-y: 16px;
     }
 
     .dashboard-main-row > [class*="col-"] {
@@ -137,7 +139,7 @@ Dashboard
     .dashboard-side-column {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 16px;
         width: 100%;
         min-width: 0;
     }
@@ -145,7 +147,7 @@ Dashboard
     .dashboard-charts-grid {
         display: grid;
         grid-template-columns: minmax(0, 1.35fr) minmax(0, .95fr);
-        gap: 12px;
+        gap: 16px;
         align-items: stretch;
         width: 100%;
         min-width: 0;
@@ -160,7 +162,7 @@ Dashboard
     .dashboard-side-stack {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 16px;
         align-items: stretch;
         width: 100%;
         min-width: 0;
