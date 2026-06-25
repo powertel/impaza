@@ -2,6 +2,23 @@
 
 <script>
 (function(){
+  function moveInlineModalsToBody() {
+    document.querySelectorAll('.modal').forEach(function(modal){
+      if (modal && modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+      }
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', moveInlineModalsToBody);
+  } else {
+    moveInlineModalsToBody();
+  }
+})();
+</script>
+
+<script>
+(function(){
   var baseModal = 1055;
   var baseBackdrop = 1040;
   function updateStack(){

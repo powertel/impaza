@@ -1,5 +1,22 @@
 <!-- Show Fault Modal (Modernized) -->
 @php
+    $faultRefNumber = data_get($fault, 'fault_ref_number', data_get($fault, 'ref_number', 'N/A'));
+    $faultCustomer = data_get($fault, 'customer', 'N/A');
+    $faultAccountManager = data_get($fault, 'accountManager', 'N/A');
+    $faultCity = data_get($fault, 'city', 'N/A');
+    $faultSuburb = data_get($fault, 'suburb', 'N/A');
+    $faultLink = data_get($fault, 'link', 'N/A');
+    $faultPop = data_get($fault, 'pop', 'N/A');
+    $faultServiceType = data_get($fault, 'serviceType', 'N/A');
+    $faultAddress = data_get($fault, 'address', 'N/A');
+    $faultAssignedTo = data_get($fault, 'assignedTo', data_get($fault, 'name', 'Not yet assigned'));
+    $faultAssessedBy = data_get($fault, 'assessedBy', 'N/A');
+    $faultContactName = data_get($fault, 'contactName', 'N/A');
+    $faultPhoneNumber = data_get($fault, 'phoneNumber', 'N/A');
+    $faultContactEmail = data_get($fault, 'contactEmail', 'N/A');
+    $faultReportedBy = data_get($fault, 'reportedBy', 'N/A');
+    $faultSuspectedRFO = data_get($fault, 'RFO', 'N/A');
+    $faultConfirmedRFO = data_get($fault, 'confirmedRFO', 'N/A');
     $showStatusRaw = trim((string) ($fault->description ?? ''));
     $showStatusLabel = match (strtolower($showStatusRaw)) {
         'fault has been restored', 'resolved' => 'Fault Restored',
@@ -25,9 +42,9 @@
                     <h5 class="modal-title mb-0" id="showFaultModalLabel-{{ $fault->id }}">
                         <i class="fas fa-eye me-2"></i>View Fault
                     </h5>
-                    <div class="text-muted small mt-1">Full fault profile, service details, and conversation history for {{ $fault->fault_ref_number }}.</div>
+                    <div class="text-muted small mt-1">Full fault profile, service details, and conversation history for {{ $faultRefNumber }}.</div>
                     <div class="fault-modal-meta">
-                        <span class="fault-modal-meta-item"><i class="fas fa-hashtag"></i> {{ $fault->fault_ref_number }}</span>
+                        <span class="fault-modal-meta-item"><i class="fas fa-hashtag"></i> {{ $faultRefNumber }}</span>
                         <span class="fault-modal-meta-item">
                             <x-status-badge :label="$showStatusLabel" :color="$showStatusColor" :soft="true" />
                         </span>
@@ -59,31 +76,31 @@
                                 <div class="fault-modal-grid">
                                     <div class="fault-modal-kv">
                                         <span class="fault-modal-kv-label">Customer</span>
-                                        <div class="fault-modal-kv-value">{{ $fault->customer }}</div>
+                                        <div class="fault-modal-kv-value">{{ $faultCustomer }}</div>
                                     </div>
                                     <div class="fault-modal-kv">
                                         <span class="fault-modal-kv-label">Account Manager</span>
-                                        <div class="fault-modal-kv-value">{{ $fault->accountManager ?: 'N/A' }}</div>
+                                        <div class="fault-modal-kv-value">{{ $faultAccountManager }}</div>
                                     </div>
                                     <div class="fault-modal-kv">
                                         <span class="fault-modal-kv-label">City/Town</span>
-                                        <div class="fault-modal-kv-value">{{ $fault->city }}</div>
+                                        <div class="fault-modal-kv-value">{{ $faultCity }}</div>
                                     </div>
                                     <div class="fault-modal-kv">
                                         <span class="fault-modal-kv-label">Location</span>
-                                        <div class="fault-modal-kv-value">{{ $fault->suburb }}</div>
+                                        <div class="fault-modal-kv-value">{{ $faultSuburb }}</div>
                                     </div>
                                     <div class="fault-modal-kv">
                                         <span class="fault-modal-kv-label">Link</span>
-                                        <div class="fault-modal-kv-value">{{ $fault->link }}</div>
+                                        <div class="fault-modal-kv-value">{{ $faultLink }}</div>
                                     </div>
                                     <div class="fault-modal-kv">
                                         <span class="fault-modal-kv-label">POP</span>
-                                        <div class="fault-modal-kv-value">{{ $fault->pop }}</div>
+                                        <div class="fault-modal-kv-value">{{ $faultPop }}</div>
                                     </div>
                                     <div class="fault-modal-kv">
                                         <span class="fault-modal-kv-label">Service Type</span>
-                                        <div class="fault-modal-kv-value"><span class="badge rounded-pill bg-secondary-subtle text-secondary border">{{ $fault->serviceType }}</span></div>
+                                        <div class="fault-modal-kv-value"><span class="badge rounded-pill bg-secondary-subtle text-secondary border">{{ $faultServiceType }}</span></div>
                                     </div>
                                     <div class="fault-modal-kv">
                                         <span class="fault-modal-kv-label">Age</span>
@@ -93,19 +110,19 @@
                                     </div>
                                     <div class="fault-modal-kv">
                                         <span class="fault-modal-kv-label">Address</span>
-                                        <div class="fault-modal-kv-value">{{ $fault->address ?: 'N/A' }}</div>
+                                        <div class="fault-modal-kv-value">{{ $faultAddress }}</div>
                                     </div>
                                     <div class="fault-modal-kv">
                                         <span class="fault-modal-kv-label">Assigned To</span>
-                                        <div class="fault-modal-kv-value">{{ $fault->assignedTo ?? 'Not yet assigned' }}</div>
+                                        <div class="fault-modal-kv-value">{{ $faultAssignedTo }}</div>
                                     </div>
                                     <div class="fault-modal-kv">
                                         <span class="fault-modal-kv-label">Assessed By</span>
-                                        <div class="fault-modal-kv-value">{{ $fault->assessedBy ?? 'N/A' }}</div>
+                                        <div class="fault-modal-kv-value">{{ $faultAssessedBy }}</div>
                                     </div>
                                     <div class="fault-modal-kv">
                                         <span class="fault-modal-kv-label">Ref. No.</span>
-                                        <div class="fault-modal-kv-value">{{ $fault->fault_ref_number }}</div>
+                                        <div class="fault-modal-kv-value">{{ $faultRefNumber }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -125,27 +142,27 @@
                                 <div class="fault-modal-grid">
                                     <div class="fault-modal-kv">
                                         <span class="fault-modal-kv-label">Contact Name</span>
-                                        <div class="fault-modal-kv-value">{{ $fault->contactName ?: 'N/A' }}</div>
+                                        <div class="fault-modal-kv-value">{{ $faultContactName }}</div>
                                     </div>
                                     <div class="fault-modal-kv">
                                         <span class="fault-modal-kv-label">Phone Number</span>
-                                        <div class="fault-modal-kv-value">{{ $fault->phoneNumber ?: 'N/A' }}</div>
+                                        <div class="fault-modal-kv-value">{{ $faultPhoneNumber }}</div>
                                     </div>
                                     <div class="fault-modal-kv">
                                         <span class="fault-modal-kv-label">Email Address</span>
-                                        <div class="fault-modal-kv-value">{{ $fault->contactEmail ?: 'N/A' }}</div>
+                                        <div class="fault-modal-kv-value">{{ $faultContactEmail }}</div>
                                     </div>
                                     <div class="fault-modal-kv">
                                         <span class="fault-modal-kv-label">Reported By</span>
-                                        <div class="fault-modal-kv-value">{{ $fault->reportedBy ?: 'N/A' }}</div>
+                                        <div class="fault-modal-kv-value">{{ $faultReportedBy }}</div>
                                     </div>
                                     <div class="fault-modal-kv">
                                         <span class="fault-modal-kv-label">Suspected RFO</span>
-                                        <div class="fault-modal-kv-value">{{ $fault->RFO ?: 'N/A' }}</div>
+                                        <div class="fault-modal-kv-value">{{ $faultSuspectedRFO }}</div>
                                     </div>
                                     <div class="fault-modal-kv">
                                         <span class="fault-modal-kv-label">Confirmed RFO</span>
-                                        <div class="fault-modal-kv-value">{{ $fault->confirmedRFO ?: 'N/A' }}</div>
+                                        <div class="fault-modal-kv-value">{{ $faultConfirmedRFO }}</div>
                                     </div>
                                 </div>
                             </div>

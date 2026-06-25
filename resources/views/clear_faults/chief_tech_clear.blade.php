@@ -8,7 +8,7 @@ Rectified Faults
 
 @section('content')
 
-<section class="content">
+<section class="content workflow-faults-page">
 
 <div class="card">
 
@@ -55,19 +55,20 @@ Rectified Faults
                 <tbody>
                     @foreach ( $faults as $fault )
                     <tr >
-                        <td>{{ ++$i }}</td>
-                        <td>{{ $fault->fault_ref_number}}</td>
-                        <td>{{ $fault->customer }}</td>
-                        <td>{{ $fault->link }}</td>
-                        <td class="text-nowrap">
+                        <td data-label="No.">{{ ++$i }}</td>
+                        <td data-label="Ref No.">{{ $fault->fault_ref_number}}</td>
+                        <td data-label="Customer">{{ $fault->customer }}</td>
+                        <td data-label="Link Name">{{ $fault->link }}</td>
+                        <td class="text-nowrap" data-label="Status">
                             <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
                                 {{$fault->description}}
                             </span>
                         </td>
-                        <td>
+                        <td data-label="Fault Age">
                             <span class="badge rounded-pill bg-light text-danger age-ticker fs-6" data-started-at="{{ $fault->stage_started_at ?? '' }}"></span>
                         </td>
-                        <td>
+                        <td data-label="Action(s)">
+                            <div class="workflow-actions">
                             @can('chief-tech-clear-faults-clear')
                                 <!-- <button type="button" class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#chiefTechClearModal-{{ $fault->id }}">
                                     <i class="fas fa-save me-1"></i> Clear
@@ -76,6 +77,7 @@ Rectified Faults
                             <button type="button" class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
                                 <i class="fas fa-eye me-1"></i> View
                             </button>
+                            </div>
                         </td>
                     </tr>
                     @endforeach

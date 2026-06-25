@@ -5,7 +5,7 @@ Department Faults
 @endsection
 @include('partials.css')
 @section('content')
-<section class="content">
+<section class="content workflow-faults-page">
 
 <div class="card">
 
@@ -55,32 +55,34 @@ Department Faults
                 <tbody>
                     @foreach ( $faults as $fault )
                     <tr>
-                        <td>{{ $faults->firstItem() + $loop->index }}</td>
-                        <td>{{$fault->fault_ref_number}}</td>
-                        <td>{{ $fault->customer }}</td>
+                        <td data-label="No.">{{ $faults->firstItem() + $loop->index }}</td>
+                        <td data-label="Ref No.">{{$fault->fault_ref_number}}</td>
+                        <td data-label="Customer">{{ $fault->customer }}</td>
                         <!-- <td>{{ $fault->accountManager }}</td> -->
-                        <td>{{ $fault->link }}</td>
-                        <td class="{{ $fault->name ? 'fw-bold' : 'text-muted' }}">{{ $fault->name ?: 'Not yet assigned' }}</td>
-                        <td class="text-nowrap">
+                        <td data-label="Link Name">{{ $fault->link }}</td>
+                        <td class="{{ $fault->name ? 'fw-bold' : 'text-muted' }}" data-label="Assigned To">{{ $fault->name ?: 'Not yet assigned' }}</td>
+                        <td class="text-nowrap" data-label="Status">
                             <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
                                 {{$fault->description}}
                             </span>
                         </td>
-                        <td>
+                        <td data-label="Fault Age">
                             <span class="badge rounded-pill bg-light text-danger age-ticker fs-6" data-started-at="{{ $fault->stage_started_at ?? '' }}"></span>
                         </td>
-                        <td>
-                            <button class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
-                                <i class="fas fa-eye me-1"></i>View
-                            </button>
-                            @if(!empty($fault->referral_id))
-                              <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#completeReferralModal-{{ $fault->id }}">
-                                <i class="fas fa-check me-1"></i>Complete Referral
-                              </button>
-                              <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#reassignReferralModal-{{ $fault->id }}">
-                                <i class="fas fa-user-plus me-1"></i>Reassign
-                              </button>
-                            @endif
+                        <td data-label="Action(s)">
+                            <div class="workflow-actions">
+                                <button class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                                    <i class="fas fa-eye me-1"></i>View
+                                </button>
+                                @if(!empty($fault->referral_id))
+                                  <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#completeReferralModal-{{ $fault->id }}">
+                                    <i class="fas fa-check me-1"></i>Complete Referral
+                                  </button>
+                                  <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#reassignReferralModal-{{ $fault->id }}">
+                                    <i class="fas fa-user-plus me-1"></i>Reassign
+                                  </button>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @endforeach
@@ -98,7 +100,7 @@ Department Faults
                     @include('department_faults.reassign_referral_modal', [ 'fault' => $fault, 'technicians' => $technicians ])
                 @endif
             @endforeach
-            <div class="d-flex justify-content-between align-items-center mt-2">
+            <div class="d-flex justify-content-between align-items-center mt-2 workflow-pagination">
                 <div class="text-muted">
                     Showing {{ $faults->firstItem() ?? 0 }} to {{ $faults->lastItem() ?? 0 }} of {{ $faults->total() }} results
                     @if (request('q'))

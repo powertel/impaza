@@ -8,7 +8,7 @@ Escalations
 
 @section('content')
 
-<section class="content">
+<section class="content workflow-faults-page">
 
 <div class="card">
 
@@ -33,41 +33,41 @@ Escalations
                     @php($i = 0)
                     @foreach ($faults as $fault)
                     <tr>
-                        <td>{{ ++$i }}</td>
-                        <td>{{ $fault->fault_ref_number }}</td>
-                        <td>{{ $fault->customer }}</td>
-                        <td>{{ $fault->link }}</td>
-                        <td class="text-nowrap">
+                        <td data-label="No.">{{ ++$i }}</td>
+                        <td data-label="Ref No.">{{ $fault->fault_ref_number }}</td>
+                        <td data-label="Customer">{{ $fault->customer }}</td>
+                        <td data-label="Link Name">{{ $fault->link }}</td>
+                        <td class="text-nowrap" data-label="Status">
                             <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
                                 {{ $fault->description }}
                             </span>
                         </td>
-                        <td class="text-nowrap">
-                            
-                            <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
-                                <i class="fas fa-eye me-1"></i> View
-                            </button>
-                            @can('chief-tech-return-to-technician')
-                            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#returnRectModal-{{ $fault->id }}">
-                                <i class="fas fa-undo me-1"></i> Return to Rectification
-                            </button>
-                            @endcan
-                            <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#referModal-{{ $fault->id }}">
-                                <i class="fas fa-share-square me-1"></i> Refer to section
-                            </button>
-                            @can('chief-tech-escalate')
-                            <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#escalateMgrModal-{{ $fault->id }}">
-                                <i class="fas fa-level-up-alt me-1"></i> Escalate to Manager
-                            </button>
-                            @endcan
-                            @if ((int)($fault->status_id ?? 0) === \App\Services\FaultLifecycle::managerEscalatedId())
-                              @can('manager-return-to-chief-tech')
-                              <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal" data-bs-target="#returnFromManagerModal-{{ $fault->id }}">
-                                  <i class="fas fa-level-down-alt me-1"></i> Return from Manager
-                              </button>
-                              @endcan
-                            @endif
-                            
+                        <td class="text-nowrap" data-label="Action(s)">
+                            <div class="workflow-actions">
+                                <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                                    <i class="fas fa-eye me-1"></i> View
+                                </button>
+                                @can('chief-tech-return-to-technician')
+                                <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#returnRectModal-{{ $fault->id }}">
+                                    <i class="fas fa-undo me-1"></i> Return to Rectification
+                                </button>
+                                @endcan
+                                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#referModal-{{ $fault->id }}">
+                                    <i class="fas fa-share-square me-1"></i> Refer to section
+                                </button>
+                                @can('chief-tech-escalate')
+                                <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#escalateMgrModal-{{ $fault->id }}">
+                                    <i class="fas fa-level-up-alt me-1"></i> Escalate to Manager
+                                </button>
+                                @endcan
+                                @if ((int)($fault->status_id ?? 0) === \App\Services\FaultLifecycle::managerEscalatedId())
+                                  @can('manager-return-to-chief-tech')
+                                  <button class="btn btn-outline-warning btn-sm" data-bs-toggle="modal" data-bs-target="#returnFromManagerModal-{{ $fault->id }}">
+                                      <i class="fas fa-level-down-alt me-1"></i> Return from Manager
+                                  </button>
+                                  @endcan
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @endforeach

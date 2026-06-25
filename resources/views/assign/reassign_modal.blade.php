@@ -1,19 +1,24 @@
 @can('re-assign-fault')
 <div class="modal custom-modal fade" id="reassignModal-{{ $fault->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="reassignModalLabel-{{ $fault->id }}" aria-hidden="true">
-  <div class="modal-dialog modal-xl">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content rounded-4 border-0 shadow-lg">
       <div class="modal-header border-0">
-        <div class="d-flex align-items-center">
-          <span class="badge bg-primary me-2"><i class="fas fa-arrows-rotate"></i></span>
-          <div>
-            <h5 class="modal-title mb-0" id="reassignModalLabel-{{ $fault->id }}">Re-Assign Fault</h5>
-            <small class="text-muted">Ref. {{ $fault->fault_ref_number ?? 'N/A' }} • {{ $fault->customer ?? 'N/A' }}</small>
+        <div class="fault-modal-header-copy">
+          <h5 class="modal-title mb-0" id="reassignModalLabel-{{ $fault->id }}"><i class="fas fa-arrows-rotate me-2"></i>Re-Assign Fault</h5>
+          <small class="text-muted">Ref. {{ $fault->fault_ref_number ?? 'N/A' }} • {{ $fault->customer ?? 'N/A' }}</small>
+          <div class="fault-modal-meta">
+            <span class="fault-modal-meta-item"><i class="fas fa-link"></i> {{ $fault->link ?? 'N/A' }}</span>
+            <span class="fault-modal-meta-item"><i class="fas fa-user-tag"></i> {{ $fault->name ?? 'Unassigned' }}</span>
           </div>
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <div class="modal-body pt-0">
+        <div class="fault-modal-note mb-4">
+          <i class="fas fa-circle-info"></i>
+          <div>Reassign the fault with a clear handover note so the next technician understands the current state and next action.</div>
+        </div>
         <div class="row g-4">
           <div class="col-lg-6">
             <div class="row g-4">
@@ -160,12 +165,16 @@
             <span class="badge bg-info me-2"><i class="fas fa-comments"></i></span>
             <h6 class="mb-0 text-secondary">Conversation</h6>
           </div>
-          <div id="remarksScroller-{{ $fault->id }}" class="border rounded-3 bg-white p-3" style="max-height: 360px; overflow-y: auto;">
-            <div class="chat-messages">
+          <div id="remarksScroller-{{ $fault->id }}" class="border rounded-3 bg-white p-3">
+            <div class="chat-messages fault-modal-stream">
               @foreach($remarks->sortBy('created_at') as $r)
                 @php
                   $currentName = optional(auth()->user())->name;
                   $isOwn = $currentName && (strtolower(trim($r->name)) === strtolower(trim($currentName)));
+                  $attachmentPath = (string) ($r->file_path ?? '');
+                  $attachmentUrl = ($attachmentPath !== '' && \Illuminate\Support\Facades\Storage::disk('public')->exists($attachmentPath))
+                    ? \Illuminate\Support\Facades\Storage::disk('public')->url($attachmentPath)
+                    : null;
                 @endphp
                 <div class="chat-msg {{ $isOwn ? 'chat-msg-self' : 'chat-msg-other' }}">
                   <div class="chat-msg-meta d-flex align-items-center gap-2">
@@ -174,15 +183,26 @@
                     @if(!empty($r->activity))
                       <span>• {{ $r->activity }}</span>
                     @endif
-                    @if($r->file_path)
+                    @if($attachmentUrl)
                       <span class="ms-auto">
-                        <a href="{{ asset('storage/'.$r->file_path) }}" class="btn btn-link btn-sm p-0 text-decoration-none" download>
+                        <a href="{{ $attachmentUrl }}" class="btn btn-link btn-sm p-0 text-decoration-none" download>
                           <i class="fas fa-download me-1"></i>Download
                         </a>
                       </span>
                     @endif
                   </div>
                   <div class="chat-msg-body">{{ $r->remark }}</div>
+                  @if($r->file_path)
+                    <div class="fault-modal-attachment">
+                      @if($attachmentUrl)
+                        <a href="{{ $attachmentUrl }}" target="_blank" class="fault-modal-attachment-thumb">
+                          <img src="{{ $attachmentUrl }}" alt="Attachment" class="img-fluid rounded">
+                        </a>
+                      @else
+                        <div class="fault-modal-attachment-missing"><i class="fas fa-paperclip"></i><span>Attachment unavailable</span></div>
+                      @endif
+                    </div>
+                  @endif
                 </div>
               @endforeach
             </div>
@@ -191,11 +211,11 @@
         @endif
       </div>
 
-      <div class="modal-footer border-0">
-        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+      <div class="modal-footer border-0 fault-modal-footer">
+        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill" data-bs-dismiss="modal">
           <i class="fas fa-times me-1"></i> Cancel
         </button>
-        <button type="submit" form="reassign-form-{{ $fault->id }}" class="btn btn-primary btn-sm">
+        <button type="submit" form="reassign-form-{{ $fault->id }}" class="btn btn-primary btn-sm rounded-pill">
           <i class="fas fa-save me-1"></i> Save
         </button>
       </div>

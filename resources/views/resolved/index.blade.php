@@ -5,7 +5,7 @@ Cleared
 @endsection
 
 @section('content')
-<section class="content">
+<section class="content workflow-faults-page">
   <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
       <h3 class="card-title mb-0">Cleared by NOC (last 24 hours)</h3>
@@ -48,20 +48,22 @@ Cleared
           <tbody>
             @foreach ($faults as $fault)
             <tr>
-              <td>{{ $fault->fault_ref_number }}</td>
-              <td>{{ $fault->customer }}</td>
-              <td>{{ $fault->accountManager }}</td>
-              <td>{{ $fault->link }}</td>
-              <td class="{{ $fault->assignedTo ? 'fw-bold' : 'text-muted' }}">{{ $fault->assignedTo ?: 'Not assigned' }}</td>
-              <td class="text-muted">{{ $fault->reportedBy }}</td>
-              <td>{{ \Carbon\Carbon::parse($fault->updated_at)->format('j F Y h:i a') }}</td>
-              <td>
-                <button  class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
-                    <i class="fas fa-eye me-1"></i> View
-                </button>
-                <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#resolvedRevoke-{{ $fault->id }}">
-                  <i class="fas fa-undo me-1"></i> Revoke
-                </button>
+              <td data-label="Ref. No.">{{ $fault->fault_ref_number }}</td>
+              <td data-label="Customer">{{ $fault->customer }}</td>
+              <td data-label="Account Manager">{{ $fault->accountManager }}</td>
+              <td data-label="Link">{{ $fault->link }}</td>
+              <td class="{{ $fault->assignedTo ? 'fw-bold' : 'text-muted' }}" data-label="Assigned To">{{ $fault->assignedTo ?: 'Not assigned' }}</td>
+              <td class="text-muted" data-label="Logged By">{{ $fault->reportedBy }}</td>
+              <td data-label="Cleared At">{{ \Carbon\Carbon::parse($fault->updated_at)->format('j F Y h:i a') }}</td>
+              <td data-label="Action">
+                <div class="workflow-actions">
+                    <button  class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                        <i class="fas fa-eye me-1"></i> View
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#resolvedRevoke-{{ $fault->id }}">
+                      <i class="fas fa-undo me-1"></i> Revoke
+                    </button>
+                </div>
               </td>
             </tr>
             @endforeach
@@ -74,26 +76,33 @@ Cleared
         </table>
 
         @foreach ($faults as $fault)
-        <div class="modal fade" id="resolvedRevoke-{{ $fault->id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal custom-modal fade" id="resolvedRevoke-{{ $fault->id }}" tabindex="-1" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content">
               <div class="modal-header">
-                <h5 class="modal-title">Revoke Fault</h5>
+                <div class="fault-modal-header-copy">
+                  <h5 class="modal-title">Revoke Fault</h5>
+                  <div class="text-muted small mt-1">Move {{ $fault->fault_ref_number }} back to the NOC workflow with a reason.</div>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <form method="POST" action="{{ route('resolved.revoke', $fault->id) }}">
                 @csrf
                 <div class="modal-body">
+                  <div class="fault-modal-note mb-3">
+                    <i class="fas fa-triangle-exclamation"></i>
+                    <div>This action returns the fault to the previous stage, so include a clear operational reason for the reversal.</div>
+                  </div>
                   <div class="mb-2">
                     <label class="form-label">Remark</label>
                     <textarea name="remark" class="form-control" rows="3" required></textarea>
                   </div>
-                  <div class="alert alert-warning mb-0">This will move the fault back to NOC</div>
+                  <div class="fault-modal-attachment-missing"><i class="fas fa-rotate-left"></i><span>This will move the fault back to NOC.</span></div>
                 </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                <div class="modal-footer fault-modal-footer">
+                  <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill" data-bs-dismiss="modal">
                     <i class="fas fa-times me-1"></i> Cancel</button>
-                  <button type="submit" class="btn btn-danger">
+                  <button type="submit" class="btn btn-danger btn-sm rounded-pill">
                     <i class="fas fa-undo me-1"></i> Revoke</button>
                 </div>
               </form>
@@ -110,7 +119,7 @@ Cleared
         ])
         @endforeach
 
-        <div class="d-flex justify-content-between align-items-center mt-3">
+        <div class="d-flex justify-content-between align-items-center mt-3 workflow-pagination">
           <small class="text-muted">
             Showing {{ $faults->firstItem() }} to {{ $faults->lastItem() }} of {{ $faults->total() }} results
           </small>

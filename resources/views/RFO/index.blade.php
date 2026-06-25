@@ -8,7 +8,7 @@ RFO
 
 @section('content')
 
-<section class="content" >
+<section class="content workflow-faults-page" >
 <div class="card" >
     <div class="card-header">
         <h3 class="card-title">Reasons For Outage</h3>
@@ -49,14 +49,14 @@ RFO
                 <tbody>
                     @foreach ($rfos as $rfo)
                     <tr >
-                        <td>{{++$i}}</td>
-                        <td>{{ $rfo->RFO}}</td>
-                        <td>
-                                
-                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editRfoModal{{ $rfo->id }}">
-                                <i class="fas fa-edit me-1"></i>Edit
-                            </button>
-      
+                        <td data-label="No.">{{++$i}}</td>
+                        <td data-label="Reason For Outage">{{ $rfo->RFO}}</td>
+                        <td data-label="Action(s)">
+                            <div class="workflow-actions">
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editRfoModal{{ $rfo->id }}">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     @include('RFO.edit', ['rfo' => $rfo])
