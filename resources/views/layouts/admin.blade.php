@@ -219,17 +219,40 @@
         .content-header .breadcrumb a:hover { color: var(--impaza-text); }
         .content-header .breadcrumb .active { color: var(--impaza-text); font-weight: 600; }
 
-        .table-responsive { background: var(--impaza-card); border: 1px solid var(--impaza-border); border-radius: 14px; }
+        .table-responsive {
+          background: var(--impaza-card);
+          border: 1px solid var(--impaza-border);
+          border-radius: 18px;
+          box-shadow: var(--impaza-shadow-sm);
+        }
         .card .table-responsive { box-shadow: none; }
         .table-responsive { overflow: auto; }
-        .table-responsive thead th { position: sticky; top: 0; z-index: 2; background: var(--impaza-bg); }
-        html[data-theme="dark"] .table-responsive thead th { background: #0B1220; }
+        .table-responsive thead th {
+          position: sticky;
+          top: 0;
+          z-index: 2;
+          background: color-mix(in srgb, var(--impaza-primary) 3%, var(--impaza-card));
+        }
+        html[data-theme="dark"] .table-responsive thead th { background: color-mix(in srgb, var(--impaza-primary) 10%, #0B1220); }
 
         .table { margin-bottom: 0; }
-        .table thead th { text-transform: uppercase; letter-spacing: .06em; font-size: 10px; border-top: 0; border-bottom: 1px solid var(--impaza-border); }
-        .table tbody td { border-top: 1px solid rgba(226,232,240,.85); color: var(--impaza-text); vertical-align: middle; }
+        .table thead th {
+          text-transform: uppercase;
+          letter-spacing: .06em;
+          font-size: 10px;
+          font-weight: 700;
+          padding: 14px 12px;
+          border-top: 0;
+          border-bottom: 1px solid var(--impaza-border);
+        }
+        .table tbody td {
+          padding: 13px 12px;
+          border-top: 1px solid rgba(226,232,240,.85);
+          color: var(--impaza-text);
+          vertical-align: middle;
+        }
         html[data-theme="dark"] .table tbody td { border-top-color: rgba(30,41,59,.85); }
-        .table.table-hover tbody tr:hover { background: rgba(99,102,241,.06); }
+        .table.table-hover tbody tr:hover { background: rgba(99,102,241,.05); }
         html[data-theme="dark"] .table.table-hover tbody tr:hover { background: rgba(99,102,241,.12); }
 
         .table .text-muted { color: var(--impaza-muted) !important; }

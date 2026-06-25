@@ -1,4 +1,21 @@
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+  [
+    '#createFaultModal',
+    '[id^="editFaultModal-"]',
+    '[id^="showFaultModal-"]',
+    '[id^="PicModal-"]'
+  ].forEach(function(selector){
+    document.querySelectorAll(selector).forEach(function(modal){
+      if (modal && modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+      }
+    });
+  });
+});
+</script>
+
+<script>
 $(document).off('change', '#city').on('change', '#city', function () {
         var CityID = $(this).val();
         if (CityID) {
@@ -243,6 +260,7 @@ $(function(){
     });
   }
   var dz = document.querySelector('#createFaultModal [data-impaza-dropzone]');
+  var attachmentInput = document.getElementById('attachment');
   if (dz && attachmentInput) {
     function stop(e){ e.preventDefault(); e.stopPropagation(); }
     dz.addEventListener('dragenter', function(e){ stop(e); dz.classList.add('is-dragover'); });
