@@ -818,6 +818,51 @@
         color: var(--impaza-text);
         line-height: 1.5;
     }
+    .legacy-remarks-list {
+        overflow-y: auto;
+        padding-right: 6px;
+    }
+    .legacy-remark-row {
+        display: flex;
+        margin-bottom: 1rem;
+    }
+    .legacy-remark-row-self {
+        justify-content: flex-end;
+    }
+    .legacy-remark-row-other {
+        justify-content: flex-start;
+    }
+    .legacy-remark-bubble {
+        width: min(100%, 760px);
+        max-width: 75%;
+        padding: .75rem .9rem;
+        border-radius: 16px;
+        border: 1px solid var(--impaza-border);
+        box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+        color: var(--impaza-text);
+    }
+    .legacy-remark-bubble-self {
+        background: color-mix(in srgb, var(--impaza-success) 10%, var(--impaza-card));
+    }
+    .legacy-remark-bubble-other {
+        background: color-mix(in srgb, var(--impaza-primary) 6%, var(--impaza-card));
+    }
+    .legacy-remark-meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: .5rem;
+        margin-bottom: .35rem;
+    }
+    .legacy-remark-body {
+        color: var(--impaza-text);
+        line-height: 1.5;
+        white-space: pre-wrap;
+    }
+    .legacy-remark-bubble .text-muted,
+    .legacy-remark-meta .text-muted {
+        color: var(--impaza-muted) !important;
+    }
 
     /* Dashboard specific refinements */
     .dashboard-page .stat-card { border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 2px rgba(16,24,40,.06); }
