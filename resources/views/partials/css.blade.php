@@ -491,6 +491,29 @@
     .faults-toolbar-field {
         min-width: 0;
     }
+    .faults-toolbar .input-group-text,
+    .faults-toolbar .form-control,
+    .faults-toolbar .form-select {
+        min-height: 36px;
+        border-color: var(--impaza-border);
+        background: color-mix(in srgb, var(--impaza-primary) 2%, var(--impaza-card));
+        color: var(--impaza-text);
+        box-shadow: none;
+    }
+    .faults-toolbar .input-group-text {
+        color: var(--impaza-muted);
+    }
+    .faults-toolbar .form-control::placeholder {
+        color: var(--impaza-muted);
+        opacity: 1;
+    }
+    .faults-toolbar .form-control:focus,
+    .faults-toolbar .form-select:focus {
+        background: var(--impaza-card);
+        color: var(--impaza-text);
+        border-color: rgba(99, 102, 241, .55);
+        box-shadow: 0 0 0 .2rem rgba(99, 102, 241, .12);
+    }
     .faults-toolbar-field .input-group-text,
     .faults-toolbar-search .input-group-text {
         min-width: 42px;
