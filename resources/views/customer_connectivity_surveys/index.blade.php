@@ -16,6 +16,39 @@ Customer Connectivity Surveys
     grid-template-columns: minmax(120px, 150px) minmax(180px, 220px) minmax(280px, 1fr) auto auto;
   }
 
+  .cc-surveys-page .workspace-summary-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .cc-surveys-page .workspace-summary-body {
+    gap: 12px;
+    padding: 14px 16px;
+  }
+
+  .cc-surveys-page .workspace-summary-copy {
+    gap: 10px;
+  }
+
+  .cc-surveys-page .workspace-summary-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    font-size: .88rem;
+  }
+
+  .cc-surveys-page .workspace-summary-label {
+    font-size: .68rem;
+  }
+
+  .cc-surveys-page .workspace-summary-title {
+    font-size: .8rem;
+  }
+
+  .cc-surveys-page .workspace-summary-value {
+    font-size: 1.25rem;
+    white-space: nowrap;
+  }
+
   .cc-surveys-page .survey-toolbar-form {
     display: contents;
   }
@@ -199,6 +232,10 @@ Customer Connectivity Surveys
   }
 
   @media (max-width: 991.98px) {
+    .cc-surveys-page .workspace-summary-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .cc-surveys-page .survey-toolbar {
       grid-template-columns: 1fr 1fr;
     }
@@ -209,6 +246,10 @@ Customer Connectivity Surveys
   }
 
   @media (max-width: 768px) {
+    .cc-surveys-page .workspace-summary-grid {
+      grid-template-columns: 1fr;
+    }
+
     .cc-surveys-page .survey-toolbar {
       grid-template-columns: 1fr;
     }
