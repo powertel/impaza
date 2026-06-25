@@ -74,6 +74,31 @@ Dashboard
         line-height: 1.35;
     }
 
+    .dashboard-header-split {
+        align-items: center !important;
+    }
+
+    .dashboard-header-split .dashboard-card-copy {
+        flex: 1 1 auto;
+    }
+
+    .dashboard-header-action {
+        margin-left: auto;
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .dashboard-header-action .form-select {
+        width: 180px;
+        max-width: 100%;
+        background: var(--impaza-card);
+        border-color: var(--impaza-border);
+        color: var(--impaza-text);
+        box-shadow: none;
+    }
+
     .dashboard-panel .card-body,
     .dashboard-side-card .card-body {
         padding: 16px;
@@ -392,6 +417,20 @@ Dashboard
 
         .fault-distribution-legend {
             grid-template-columns: 1fr;
+        }
+
+        .dashboard-header-split {
+            align-items: flex-start !important;
+        }
+
+        .dashboard-header-action {
+            width: 100%;
+            margin-left: 0;
+            justify-content: flex-start;
+        }
+
+        .dashboard-header-action .form-select {
+            width: 100%;
         }
     }
 
@@ -806,17 +845,18 @@ Dashboard
                 <div class="dashboard-charts-grid">
                     <div class="dashboard-chart-col">
                         <div class="card h-100 dashboard-panel">
-                            <div class="card-header">
+                            <div class="card-header dashboard-header-split">
                                 <div class="dashboard-card-copy">
                                     <div class="dashboard-card-title">Fault Trends</div>
                                     <div class="dashboard-card-subtitle">Fault resolution patterns over time</div>
                                 </div>
-                                <select id="trendsRange" class="form-select form-select-sm"
-                                    style="max-width:140px;background:var(--impaza-card);border-color:var(--impaza-border);color:var(--impaza-text);">
-                                    <option value="6">Last 6 Months</option>
-                                    <option value="12" selected>Last 12 Months</option>
-                                    <option value="all">All</option>
-                                </select>
+                                <div class="dashboard-header-action">
+                                    <select id="trendsRange" class="form-select form-select-sm">
+                                        <option value="6">Last 6 Months</option>
+                                        <option value="12" selected>Last 12 Months</option>
+                                        <option value="all">All</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <div id="apexTrends" style="min-height:300px;"></div>
@@ -1318,11 +1358,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 var pct = ((value / total) * 100).toFixed(1);
                 var color = [COL.primary, COL.success, COL.warning, COL.danger, COL.info, COL.muted][index] || COL.muted;
                 return [
-                    '<div class="fault-legend-item" role="button" tabindex="0" data-status-index="' + index + '" aria-label="View ' + label + ' faults">',
-                    '<span class="fault-legend-dot" style="background:' + color + ';"></span>',
-                    '<span class="fault-legend-label">' + label + '</span>',
-                    '<span class="fault-legend-value">' + pct + '% (' + value + ')</span>',
-                    '</div>'
+          
                 ].join('');
             }).join('');
 
@@ -1368,4 +1404,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+
+              <!--   return [
+                    '<div class="fault-legend-item" role="button" tabindex="0" data-status-index="' + index + '" aria-label="View ' + label + ' faults">',
+                    '<span class="fault-legend-dot" style="background:' + color + ';"></span>',
+                    '<span class="fault-legend-label">' + label + '</span>',
+                    '<span class="fault-legend-value">' + pct + '% (' + value + ')</span>',
+                    '</div>' 
+                ].join(''); -->
 @endsection
