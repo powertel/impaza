@@ -10,137 +10,463 @@ Customer Connectivity Surveys
 
 @include('partials.css')
 
+@section('styles')
+<style>
+  .cc-surveys-page .survey-toolbar {
+    grid-template-columns: minmax(120px, 150px) minmax(180px, 220px) minmax(280px, 1fr) auto auto;
+  }
+
+  .cc-surveys-page .survey-toolbar-form {
+    display: contents;
+  }
+
+  .cc-surveys-page .toolbar-search-wrap,
+  .cc-surveys-page .toolbar-search-wrap .input-group {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .cc-surveys-page .toolbar-card-link {
+    color: inherit;
+  }
+
+  .cc-surveys-page .cc-table td,
+  .cc-surveys-page .cc-table th {
+    padding: 16px 14px;
+  }
+
+  .cc-surveys-page .cc-thead th {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #8ea0bd;
+    background: rgba(59, 130, 246, 0.06);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  }
+
+  .cc-surveys-page .cc-table tbody tr {
+    border-top: 1px solid rgba(148, 163, 184, 0.12);
+  }
+
+  .cc-surveys-page .cc-table tbody tr:hover {
+    background: rgba(59, 130, 246, 0.04);
+  }
+
+  .cc-modal .modal-content {
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .cc-modal-header {
+    background: linear-gradient(135deg, #111c44 0%, #2563eb 100%);
+    color: #fff;
+    border-bottom: 0;
+  }
+
+  .cc-modal-subtitle {
+    color: rgba(255,255,255,0.82);
+  }
+
+  .cc-modal-close {
+    filter: invert(1);
+    opacity: 0.92;
+  }
+
+  .cc-modal-body {
+    background: linear-gradient(180deg, #f4f7fb 0%, #eef4ff 100%);
+  }
+
+  .cc-modal-top {
+    background: rgba(255,255,255,0.92);
+    border: 1px solid #dce8ff;
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+  }
+
+  .cc-stepper .cc-step-btn {
+    border-radius: 999px;
+    border: 1px solid #d6dff0;
+    background: #fff;
+    color: #111827;
+    font-weight: 600;
+  }
+
+  .cc-stepper .cc-step-btn.is-active {
+    background: rgba(37, 99, 235, 0.12);
+    border-color: rgba(37, 99, 235, 0.28);
+    color: #1d4ed8;
+  }
+
+  .cc-modal-footerbar {
+    position: sticky;
+    bottom: 0;
+    background: rgba(244, 247, 251, 0.95);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid #dbe3ef;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .cc-modal .card {
+    border: 1px solid #dce8ff;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+  }
+
+  .cc-modal .card-header {
+    border-bottom: 1px solid #dbe7ff;
+    font-weight: 700;
+    background: linear-gradient(180deg, #eef4ff 0%, #e5eeff 100%);
+  }
+
+  .cc-modal .form-control,
+  .cc-modal .form-select {
+    border-radius: 10px;
+  }
+
+  .cc-surveys-page .cc-survey-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+  }
+
+  .cc-surveys-page .cc-survey-pill.is-submitted {
+    background: rgba(16, 185, 129, 0.14);
+    border-color: rgba(16, 185, 129, 0.24);
+    color: #047857;
+  }
+
+  .cc-surveys-page .cc-survey-pill.is-draft {
+    background: rgba(245, 158, 11, 0.14);
+    border-color: rgba(245, 158, 11, 0.22);
+    color: #b45309;
+  }
+
+  html[data-theme="dark"] .cc-surveys-page .cc-thead th {
+    color: #9fb0ca;
+    background: rgba(30, 41, 59, 0.9);
+    border-bottom-color: rgba(148, 163, 184, 0.18);
+  }
+
+  html[data-theme="dark"] .cc-surveys-page .cc-table tbody tr {
+    border-top-color: rgba(148, 163, 184, 0.1);
+  }
+
+  html[data-theme="dark"] .cc-surveys-page .cc-table tbody tr:hover {
+    background: rgba(59, 130, 246, 0.08);
+  }
+
+  html[data-theme="dark"] .cc-modal-body {
+    background: linear-gradient(180deg, #0b1220 0%, #101a31 100%);
+  }
+
+  html[data-theme="dark"] .cc-modal-top {
+    background: rgba(15, 23, 42, 0.94);
+    border-color: rgba(148, 163, 184, 0.18);
+  }
+
+  html[data-theme="dark"] .cc-stepper .cc-step-btn {
+    background: #0b1220;
+    border-color: rgba(148, 163, 184, 0.18);
+    color: #dbe5f6;
+  }
+
+  html[data-theme="dark"] .cc-stepper .cc-step-btn.is-active {
+    background: rgba(37, 99, 235, 0.2);
+    color: #bfdbfe;
+  }
+
+  html[data-theme="dark"] .cc-modal-footerbar {
+    background: rgba(11, 18, 32, 0.95);
+    border-top-color: rgba(148, 163, 184, 0.18);
+  }
+
+  html[data-theme="dark"] .cc-modal .card {
+    border-color: rgba(148, 163, 184, 0.16);
+    background: linear-gradient(180deg, #0f172a 0%, #111c33 100%);
+  }
+
+  html[data-theme="dark"] .cc-modal .card-header {
+    background: linear-gradient(180deg, #172554 0%, #1e3a8a 100%);
+    border-bottom-color: rgba(148, 163, 184, 0.16);
+    color: #e5eefb;
+  }
+
+  @media (max-width: 991.98px) {
+    .cc-surveys-page .survey-toolbar {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .cc-surveys-page .toolbar-search-wrap {
+      grid-column: span 2;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .cc-surveys-page .survey-toolbar {
+      grid-template-columns: 1fr;
+    }
+
+    .cc-surveys-page .toolbar-search-wrap {
+      grid-column: auto;
+    }
+
+    #cc-surveys-list.cc-mobile-stack thead {
+      display: none;
+    }
+
+    #cc-surveys-list.cc-mobile-stack,
+    #cc-surveys-list.cc-mobile-stack tbody,
+    #cc-surveys-list.cc-mobile-stack tr,
+    #cc-surveys-list.cc-mobile-stack td {
+      display: block;
+      width: 100%;
+    }
+
+    #cc-surveys-list.cc-mobile-stack tr {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    #cc-surveys-list.cc-mobile-stack tr.cc-empty-row {
+      background: transparent;
+      border: 0;
+      padding: 0;
+      margin: 0;
+    }
+
+    #cc-surveys-list.cc-mobile-stack td {
+      border: 0;
+      padding: 8px 0;
+    }
+
+    #cc-surveys-list.cc-mobile-stack td::before {
+      content: attr(data-label);
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: #6b7280;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    #cc-surveys-list.cc-mobile-stack .workspace-actions {
+      justify-content: stretch;
+    }
+
+    #cc-surveys-list.cc-mobile-stack .workspace-actions .btn {
+      flex: 1 1 auto;
+    }
+
+    #cc-surveys-list.cc-mobile-stack td.text-nowrap {
+      white-space: normal !important;
+    }
+
+    .cc-modal .modal-content {
+      border-radius: 0;
+      min-height: 100vh;
+    }
+
+    .cc-modal .modal-body {
+      padding: 12px;
+    }
+
+    .cc-modal-header {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .cc-modal-top {
+      padding: 12px;
+    }
+
+    #ccSurveyStepTitle {
+      font-size: 14px;
+    }
+
+    .cc-stepper {
+      flex-wrap: nowrap !important;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+
+    .cc-stepper::-webkit-scrollbar {
+      height: 0;
+    }
+
+    .cc-stepper .cc-step-btn {
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .cc-modal-footerbar {
+      flex-direction: column;
+      align-items: stretch !important;
+      gap: 10px;
+    }
+
+    #ccSurveyPrevBtn,
+    #ccSurveyNavNextWrap,
+    #ccSurveySubmitWrap {
+      width: 100%;
+    }
+
+    #ccSurveyNavNextWrap .btn,
+    #ccSurveySubmitWrap .btn {
+      width: 100%;
+    }
+
+    #ccSurveySubmitWrap {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+  }
+</style>
+@endsection
+
 @section('content')
-<section class="content">
+<section class="content workflow-faults-page cc-surveys-page">
   @php
     $i = ((int) $surveys->currentPage() - 1) * (int) $surveys->perPage();
     $latestCreatedAt = $stats['latest_created_at'] ?? null;
     $perPage = (int) ($perPage ?? $surveys->perPage());
   @endphp
 
-  <div class="row row-cols-4 g-3 mb-3">
-    <div class="col">
-      <a href="{{ route('customer-connectivity-surveys.index', array_filter(['q' => $q, 'per_page' => $perPage])) }}" class="text-decoration-none">
-        <div class="card shadow-sm border-0">
-          <div class="rounded-top" style="height:6px; background:#6c757d"></div>
-          <div class="card-body d-flex justify-content-between align-items-center py-3">
-            <div class="d-flex align-items-center gap-3">
-              <span class="badge bg-secondary"><i class="fas fa-wifi"></i></span>
-              <div>
-                <div class="text-muted small">All</div>
-                <div class="fw-semibold">Surveys</div>
-              </div>
+  <div class="workspace-summary-grid">
+    <a href="{{ route('customer-connectivity-surveys.index', array_filter(['q' => $q, 'per_page' => $perPage])) }}" class="text-decoration-none toolbar-card-link">
+      <div class="workspace-summary-card" style="--summary-color:#64748B;">
+        <div class="workspace-summary-body">
+          <div class="workspace-summary-copy">
+            <span class="workspace-summary-icon"><i class="fas fa-wifi"></i></span>
+            <div>
+              <div class="workspace-summary-label">All Surveys</div>
+              <div class="workspace-summary-title">Connectivity records</div>
             </div>
-            <div class="fs-5 fw-bold text-dark">{{ (int)($stats['total'] ?? 0) }}</div>
           </div>
+          <div class="workspace-summary-value">{{ (int)($stats['total'] ?? 0) }}</div>
         </div>
-      </a>
-    </div>
-    <div class="col">
-      <a href="{{ route('customer-connectivity-surveys.index', array_filter(['q' => $q, 'status' => 'submitted', 'per_page' => $perPage])) }}" class="text-decoration-none">
-        <div class="card shadow-sm border-0">
-          <div class="rounded-top" style="height:6px; background:#198754"></div>
-          <div class="card-body d-flex justify-content-between align-items-center py-3">
-            <div class="d-flex align-items-center gap-3">
-              <span class="badge bg-success"><i class="fas fa-paper-plane"></i></span>
-              <div>
-                <div class="text-muted small">Submitted</div>
-                <div class="fw-semibold">Surveys</div>
-              </div>
+      </div>
+    </a>
+    <a href="{{ route('customer-connectivity-surveys.index', array_filter(['q' => $q, 'status' => 'submitted', 'per_page' => $perPage])) }}" class="text-decoration-none toolbar-card-link">
+      <div class="workspace-summary-card" style="--summary-color:#10B981;">
+        <div class="workspace-summary-body">
+          <div class="workspace-summary-copy">
+            <span class="workspace-summary-icon"><i class="fas fa-paper-plane"></i></span>
+            <div>
+              <div class="workspace-summary-label">Submitted</div>
+              <div class="workspace-summary-title">Ready for processing</div>
             </div>
-            <div class="fs-5 fw-bold text-dark">{{ (int)($stats['submitted'] ?? 0) }}</div>
           </div>
+          <div class="workspace-summary-value">{{ (int)($stats['submitted'] ?? 0) }}</div>
         </div>
-      </a>
-    </div>
-    <div class="col">
-      <a href="{{ route('customer-connectivity-surveys.index', array_filter(['q' => $q, 'status' => 'draft', 'per_page' => $perPage])) }}" class="text-decoration-none">
-        <div class="card shadow-sm border-0">
-          <div class="rounded-top" style="height:6px; background:#f59e0b"></div>
-          <div class="card-body d-flex justify-content-between align-items-center py-3">
-            <div class="d-flex align-items-center gap-3">
-              <span class="badge bg-warning text-dark"><i class="fas fa-save"></i></span>
-              <div>
-                <div class="text-muted small">Draft</div>
-                <div class="fw-semibold">Surveys</div>
-              </div>
+      </div>
+    </a>
+    <a href="{{ route('customer-connectivity-surveys.index', array_filter(['q' => $q, 'status' => 'draft', 'per_page' => $perPage])) }}" class="text-decoration-none toolbar-card-link">
+      <div class="workspace-summary-card" style="--summary-color:#F59E0B;">
+        <div class="workspace-summary-body">
+          <div class="workspace-summary-copy">
+            <span class="workspace-summary-icon"><i class="fas fa-save"></i></span>
+            <div>
+              <div class="workspace-summary-label">Draft</div>
+              <div class="workspace-summary-title">Awaiting completion</div>
             </div>
-            <div class="fs-5 fw-bold text-dark">{{ (int)($stats['draft'] ?? 0) }}</div>
           </div>
+          <div class="workspace-summary-value">{{ (int)($stats['draft'] ?? 0) }}</div>
         </div>
-      </a>
-    </div>
-    <div class="col">
-      <a href="{{ route('customer-connectivity-surveys.index', array_filter(['q' => $q, 'per_page' => $perPage])) }}" class="text-decoration-none">
-        <div class="card shadow-sm border-0">
-          <div class="rounded-top" style="height:6px; background:#0d6efd"></div>
-          <div class="card-body d-flex justify-content-between align-items-center py-3">
-            <div class="d-flex align-items-center gap-3">
-              <span class="badge bg-primary"><i class="fas fa-calendar-day"></i></span>
-              <div>
-                <div class="text-muted small">Latest</div>
-                <div class="fw-semibold">Capture</div>
-              </div>
+      </div>
+    </a>
+    <a href="{{ route('customer-connectivity-surveys.index', array_filter(['q' => $q, 'per_page' => $perPage])) }}" class="text-decoration-none toolbar-card-link">
+      <div class="workspace-summary-card" style="--summary-color:#3B82F6;">
+        <div class="workspace-summary-body">
+          <div class="workspace-summary-copy">
+            <span class="workspace-summary-icon"><i class="fas fa-calendar-day"></i></span>
+            <div>
+              <div class="workspace-summary-label">Latest Capture</div>
+              <div class="workspace-summary-title">Most recent survey date</div>
             </div>
-            <div class="fw-bold text-dark">{{ $latestCreatedAt ? \Illuminate\Support\Carbon::parse($latestCreatedAt)->format('Y-m-d') : '-' }}</div>
           </div>
+          <div class="workspace-summary-value" style="font-size:1rem;">{{ $latestCreatedAt ? \Illuminate\Support\Carbon::parse($latestCreatedAt)->format('Y-m-d') : '-' }}</div>
         </div>
-      </a>
-    </div>
+      </div>
+    </a>
   </div>
 
   <div class="card">
     <div class="card-header">
-      <div class="d-flex align-items-center gap-3">
-        <div>
-          <h3 class="card-title mb-0">Manage and track customer connectivity surveys</h3>
-        </div>
+      <div>
+        <h3 class="card-title">Manage Customer Connectivity Surveys</h3>
+        <div class="page-lead">Search, filter, review, and maintain customer connectivity surveys from one responsive workspace with dark-theme friendly controls.</div>
       </div>
       <div class="card-tools">
+        <span class="record-chip"><i class="fas fa-wifi"></i> {{ $surveys->total() }} total records</span>
         @can('survey-create')
-          <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#ccSurveyCreateModal">
-            <i class="fas fa-plus-circle"></i> New Survey
+          <button type="button" class="btn btn-primary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#ccSurveyCreateModal">
+            <i class="fas fa-plus-circle me-1"></i> New Survey
           </button>
         @endcan
       </div>
     </div>
-    <div class="card-body">
-      <div class="table-responsive">
-        <div class="filter-toolbar d-flex justify-content-end align-items-center gap-2 mb-2">
-          <div class="input-group input-group-sm" style="width: 200px;">
-            <span class="input-group-text"><i class="fas fa-list me-1"></i> Show</span>
-            <select id="ccSurveysPageSize" class="form-select form-select-sm" style="width:auto;">
-              <option value="10"  {{ (int)$perPage===10 ? 'selected' : '' }}>10</option>
-              <option value="20"  {{ (int)$perPage===20 ? 'selected' : '' }}>20</option>
-              <option value="50"  {{ (int)$perPage===50 ? 'selected' : '' }}>50</option>
-              <option value="100" {{ (int)$perPage===100 ? 'selected' : '' }}>100</option>
+    <div class="faults-toolbar">
+      <form method="GET" action="{{ route('customer-connectivity-surveys.index') }}" class="filter-toolbar survey-toolbar survey-toolbar-form">
+        <div class="faults-toolbar-field">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="fas fa-list"></i></span>
+            <select id="ccSurveysPageSize" class="form-select" aria-label="Rows per page">
+              <option value="10"  {{ (int)$perPage===10 ? 'selected' : '' }}>Show 10</option>
+              <option value="20"  {{ (int)$perPage===20 ? 'selected' : '' }}>Show 20</option>
+              <option value="50"  {{ (int)$perPage===50 ? 'selected' : '' }}>Show 50</option>
+              <option value="100" {{ (int)$perPage===100 ? 'selected' : '' }}>Show 100</option>
             </select>
           </div>
-          <form method="GET" action="{{ route('customer-connectivity-surveys.index') }}" class="m-0">
-            <div class="input-group input-group-sm" style="width: 760px; max-width: 100%;">
-              <div class="input-group-prepend">
-                <span class="input-group-text"><i class="fas fa-filter me-1"></i> Status</span>
-              </div>
-              <select name="status" class="form-select form-select-sm" style="width: 140px;">
-                <option value="" {{ ($status === null) ? 'selected' : '' }}>All</option>
-                <option value="submitted" {{ ($status === 'submitted') ? 'selected' : '' }}>Submitted</option>
-                <option value="draft" {{ ($status === 'draft') ? 'selected' : '' }}>Draft</option>
-              </select>
-              <input type="hidden" name="per_page" id="ccPerPageInput" value="{{ (int)$perPage }}">
-              <div class="input-group-prepend">
-                <span class="input-group-text"><i class="fas fa-search me-1"></i> Search</span>
-              </div>
-              <input type="text" name="q" value="{{ $q }}" class="form-control form-control-sm" placeholder="Customer, account/JC, site, coords...">
-              <div class="input-group-append">
-                <button class="btn btn-primary btn-sm" type="submit"><i class="fas fa-search"></i></button>
-              </div>
-            </div>
-          </form>
         </div>
 
+        <div class="faults-toolbar-field">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="fas fa-filter"></i></span>
+            <select name="status" class="form-select">
+              <option value="" {{ ($status === null || $status === '') ? 'selected' : '' }}>All Statuses</option>
+              <option value="submitted" {{ ($status === 'submitted') ? 'selected' : '' }}>Submitted</option>
+              <option value="draft" {{ ($status === 'draft') ? 'selected' : '' }}>Draft</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="toolbar-search-wrap">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+            <input type="text" name="q" value="{{ $q }}" class="form-control" placeholder="Search customers, account numbers, sites, coordinates, or captured by">
+          </div>
+        </div>
+
+        <input type="hidden" name="per_page" id="ccPerPageInput" value="{{ (int)$perPage }}">
+
+        <button class="btn btn-primary btn-sm px-3" type="submit">
+          <i class="fas fa-search me-1"></i> Search
+        </button>
+
+        <a href="{{ route('customer-connectivity-surveys.index', ['per_page' => (int)$perPage]) }}" class="btn btn-outline-secondary btn-sm px-3">
+          <i class="fas fa-rotate-left me-1"></i> Reset
+        </a>
+      </form>
+    </div>
+
+    <div class="card-body">
+      <div class="table-responsive">
         <table class="table table-hover align-middle cc-table cc-mobile-stack" id="cc-surveys-list" style="font-size:14px">
-          <thead class="table-light cc-thead">
-            <tr>
+          <thead>
+            <tr class="cc-thead">
               <th>ID</th>
               <th>Status</th>
               <th>Customer</th>
@@ -155,22 +481,37 @@ Customer Connectivity Surveys
           <tbody>
             @forelse ($surveys as $s)
               <tr>
-                <td class="text-nowrap text-muted" data-label="ID">#{{ $s->id }}</td>
+                <td class="text-nowrap text-muted" data-label="ID"><span class="age-ticker">#{{ $s->id }}</span></td>
                 <td data-label="Status">
                   @if ($s->status === 'submitted')
-                    <span class="badge bg-success">Submitted</span>
+                    <span class="cc-survey-pill is-submitted"><i class="fas fa-paper-plane"></i> Submitted</span>
                   @else
-                    <span class="badge bg-warning text-dark">Draft</span>
+                    <span class="cc-survey-pill is-draft"><i class="fas fa-save"></i> Draft</span>
                   @endif
                 </td>
-                <td data-label="Customer">{{ $s->customer_name ?: '-' }}</td>
-                <td data-label="Account/JC">{{ $s->account_or_jc_number ?: '-' }}</td>
-                <td data-label="Site">{{ $s->site_name ?: '-' }}</td>
-                <td data-label="Photos">{{ $s->photos_count ?? 0 }}</td>
-                <td data-label="Captured By">{{ optional($s->user)->name ?: '-' }}</td>
-                <td class="text-nowrap" data-label="Created">{{ $s->created_at ? \Carbon\Carbon::parse($s->created_at)->format('j F Y h:i a') : '-' }}</td>
+                <td data-label="Customer">
+                  <div class="workspace-cell-main">{{ $s->customer_name ?: '-' }}</div>
+                  <div class="workspace-cell-sub">Connectivity survey customer</div>
+                </td>
+                <td data-label="Account/JC">
+                  <div class="workspace-cell-main">{{ $s->account_or_jc_number ?: '-' }}</div>
+                  <div class="workspace-cell-sub">Account or JC reference</div>
+                </td>
+                <td data-label="Site">
+                  <div class="workspace-cell-main">{{ $s->site_name ?: '-' }}</div>
+                  <div class="workspace-cell-sub">{{ $s->coordinates ?: 'No coordinates' }}</div>
+                </td>
+                <td data-label="Photos"><span class="badge rounded-pill" style="background: rgba(59, 130, 246, .12); color: #1d4ed8;">{{ $s->photos_count ?? 0 }} files</span></td>
+                <td data-label="Captured By">
+                  <div class="workspace-cell-main">{{ optional($s->user)->name ?: '-' }}</div>
+                  <div class="workspace-cell-sub">Survey owner</div>
+                </td>
+                <td class="text-nowrap" data-label="Created">
+                  <div class="workspace-cell-main">{{ $s->created_at ? \Carbon\Carbon::parse($s->created_at)->format('j M Y') : '-' }}</div>
+                  <div class="workspace-cell-sub">{{ $s->created_at ? \Carbon\Carbon::parse($s->created_at)->format('h:i a') : '' }}</div>
+                </td>
                 <td class="text-nowrap" data-label="Actions">
-                  <div class="btn-group btn-group gap-2" role="group" aria-label="Actions">
+                  <div class="workspace-actions" role="group" aria-label="Actions">
                     @can('survey-edit')
                       <a class="btn btn-outline-primary btn-sm" href="{{ route('customer-connectivity-surveys.show', $s->id) }}?edit=1">
                         <i class="fas fa-edit me-1"></i> Edit
@@ -201,15 +542,15 @@ Customer Connectivity Surveys
   </div>
 
   @can('survey-create')
-    <div class="modal fade cc-modal" id="ccSurveyCreateModal" tabindex="-1" aria-hidden="true">
+    <div class="modal custom-modal fade cc-modal" id="ccSurveyCreateModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered modal-fullscreen-md-down">
         <div class="modal-content border-0 shadow-lg">
           <div class="modal-header cc-modal-header">
             <div>
-              <h5 class="modal-title mb-0">Customer Connectivity Survey Sheet</h5>
-              <div class="cc-modal-subtitle small">Progressive form (step-by-step)</div>
+              <h5 class="modal-title mb-0"><i class="fas fa-wifi me-2"></i>Create Customer Connectivity Survey</h5>
+              <div class="cc-modal-subtitle small">Capture service requirements, site readiness, and attachments in a guided multi-step workspace.</div>
             </div>
-            <button type="button" class="btn-close cc-modal-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close cc-modal-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body cc-modal-body">
             @if (session('error') || $errors->any())
@@ -856,83 +1197,14 @@ Customer Connectivity Surveys
 @endsection
 
 @section('scripts')
-<style>
-  .cc-modal .modal-content { border-radius: 16px; overflow: hidden; }
-  .cc-modal-header { background: var(--bs-primary); color: #fff; border-bottom: 0; }
-  .cc-modal-subtitle { color: rgba(255,255,255,0.85); }
-  .cc-modal-close { filter: invert(1); opacity: 0.9; }
-  .cc-modal-body { background: #f7f9fc; }
-  .cc-modal-top { background: #fff; border: 1px solid #eef2f7; border-radius: 14px; padding: 14px; }
-  .cc-stepper .cc-step-btn { border-radius: 999px; border: 1px solid #e5e7eb; background: #fff; color: #111827; font-weight: 600; }
-  .cc-stepper .cc-step-btn.is-active { background: rgba(10, 126, 164, 0.12); border-color: rgba(10, 126, 164, 0.35); color: #0a7ea4; }
-  .cc-modal-footerbar { position: sticky; bottom: 0; background: rgba(247,249,252,0.95); backdrop-filter: blur(6px); border-top: 1px solid #e5e7eb; padding-top: 12px; padding-bottom: 12px; }
-  .cc-modal .card { border: 1px solid #eef2f7; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04); }
-  .cc-modal .card-header { border-bottom: 1px solid #d2e4ff; font-weight: 700; background: #eaf2ff; }
-  .cc-modal .form-control, .cc-modal .form-select { border-radius: 10px; }
-
-  .cc-table td, .cc-table th { padding: 14px 16px; }
-  .cc-thead th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #64748b; background: #f8fafc; border-bottom: 1px solid #e5e7eb; }
-  .cc-table tbody tr { border-top: 1px solid #eef2f7; }
-
-  @media (max-width: 768px) {
-    #cc-surveys-list.cc-mobile-stack thead { display: none; }
-    #cc-surveys-list.cc-mobile-stack,
-    #cc-surveys-list.cc-mobile-stack tbody,
-    #cc-surveys-list.cc-mobile-stack tr,
-    #cc-surveys-list.cc-mobile-stack td { display: block; width: 100%; }
-
-    #cc-surveys-list.cc-mobile-stack tr {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 12px;
-      margin-bottom: 12px;
-    }
-
-    #cc-surveys-list.cc-mobile-stack tr.cc-empty-row {
-      background: transparent;
-      border: 0;
-      padding: 0;
-      margin: 0;
-    }
-
-    #cc-surveys-list.cc-mobile-stack td { border: 0; padding: 8px 0; }
-    #cc-surveys-list.cc-mobile-stack td::before {
-      content: attr(data-label);
-      display: block;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: .04em;
-      color: #6b7280;
-      font-weight: 700;
-      margin-bottom: 2px;
-    }
-
-    #cc-surveys-list.cc-mobile-stack .btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
-    #cc-surveys-list.cc-mobile-stack .btn-group .btn { flex: 1 1 auto; }
-    #cc-surveys-list.cc-mobile-stack td.text-nowrap { white-space: normal !important; }
-  }
-
-  @media (max-width: 768px) {
-    .cc-modal .modal-content { border-radius: 0; min-height: 100vh; }
-    .cc-modal .modal-body { padding: 12px; }
-    .cc-modal-header { position: sticky; top: 0; z-index: 1; }
-    .cc-modal-top { padding: 12px; }
-    #ccSurveyStepTitle { font-size: 14px; }
-
-    .cc-stepper { flex-wrap: nowrap !important; overflow-x: auto; padding-bottom: 6px; }
-    .cc-stepper::-webkit-scrollbar { height: 0; }
-    .cc-stepper .cc-step-btn { white-space: nowrap; flex: 0 0 auto; }
-
-    .cc-modal-footerbar { flex-direction: column; align-items: stretch !important; gap: 10px; }
-    #ccSurveyPrevBtn { width: 100%; }
-    #ccSurveyNavNextWrap, #ccSurveySubmitWrap { width: 100%; }
-    #ccSurveyNavNextWrap .btn, #ccSurveySubmitWrap .btn { width: 100%; }
-    #ccSurveySubmitWrap { display: flex; flex-direction: column; gap: 10px; }
-  }
-</style>
 <script>
   (function () {
+    document.querySelectorAll('#ccSurveyCreateModal').forEach(function (modal) {
+      if (modal && modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+      }
+    });
+
     var per = document.getElementById('ccSurveysPageSize');
     var perInput = document.getElementById('ccPerPageInput');
     if (per && perInput) {
