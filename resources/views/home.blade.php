@@ -860,51 +860,6 @@ Dashboard
                 </div>
                 @endcanany
 
-                @can('fault-list')
-                    <div class="card dashboard-side-card">
-                        <div class="card-header">
-                            <div class="dashboard-card-copy">
-                                <div class="dashboard-card-title">Smart Filters</div>
-                                <div class="dashboard-card-subtitle">Jump to filtered fault views</div>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <form method="GET" action="{{ route('faults.index') }}" class="dashboard-filter-grid">
-                                <div>
-                                    <label class="form-label mb-1">Region</label>
-                                    <select name="region" class="form-select form-select-sm">
-                                        <option value="">All Regions</option>
-                                        @foreach(($availableRegions ?? []) as $r)
-                                            <option value="{{ $r }}">{{ $r }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="form-label mb-1">Status</label>
-                                    <select name="status" class="form-select form-select-sm">
-                                        <option value="">All Statuses</option>
-                                        @foreach(($allStatuses ?? []) as $s)
-                                            <option value="{{ $s->id }}">{{ $s->description }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="form-label mb-1">Priority</label>
-                                    <select name="priority" class="form-select form-select-sm">
-                                        <option value="">All Priorities</option>
-                                        <option value="High">High</option>
-                                        <option value="Medium">Medium</option>
-                                        <option value="Low">Low</option>
-                                    </select>
-                                </div>
-                                <button type="submit" class="btn btn-primary btn-sm w-100 rounded-pill">
-                                    <i class="fas fa-filter me-1"></i> Apply
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                @endcan
-
                 <div class="card dashboard-side-card">
                     <div class="card-header">
                         <div class="dashboard-card-copy">
