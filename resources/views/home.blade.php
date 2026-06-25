@@ -889,6 +889,13 @@ Dashboard
                                                 'waiting for assessment', 'waiting assessment' => 'Waiting Assessment',
                                                 'fault has been assessed', 'assessed' => 'Assessed',
                                                 'open' => 'Open',
+                                                'fault has been rectified', 'rectified' => 'Rectified',
+                                                'fault has been cleared by ct', 'cleared by ct' => 'Cleared by CT',
+                                                'fault has been refered', 'fault has been referred', 'referred' => 'Referred',
+                                                'fault has been parked', 'parked' => 'Parked',
+                                                'fault has been revoked', 'revoked' => 'Revoked',
+                                                'fault  escalated to chief technician', 'fault escalated to chief technician', 'escalated to chief technician' => 'Escalated',
+                                                'impacted by pop outage' => 'POP Outage',
                                                 default => $statusLabel,
                                             };
                                             $assignee = trim((string) ($fault->assignedTo ?? ''));
@@ -1138,6 +1145,13 @@ document.addEventListener('DOMContentLoaded', function () {
         if (normalized === 'fault has been assessed' || normalized === 'assessed') return 'Assessed';
         if (normalized === 'waiting for assessment' || normalized === 'waiting assessment') return 'Waiting Assessment';
         if (normalized === 'open' || normalized === 'all open faults') return 'Open';
+        if (normalized === 'fault has been rectified' || normalized === 'rectified') return 'Rectified';
+        if (normalized === 'fault has been cleared by ct' || normalized === 'cleared by ct') return 'Cleared by CT';
+        if (normalized === 'fault has been refered' || normalized === 'fault has been referred' || normalized === 'referred') return 'Referred';
+        if (normalized === 'fault has been parked' || normalized === 'parked') return 'Parked';
+        if (normalized === 'fault has been revoked' || normalized === 'revoked') return 'Revoked';
+        if (normalized === 'fault  escalated to chief technician' || normalized === 'fault escalated to chief technician' || normalized === 'escalated to chief technician') return 'Escalated';
+        if (normalized === 'impacted by pop outage') return 'POP Outage';
         return String(label || 'Other');
     }
 
