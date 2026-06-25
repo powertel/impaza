@@ -850,13 +850,13 @@ Dashboard
                                     <div class="dashboard-card-title">Fault Trends</div>
                                     <div class="dashboard-card-subtitle">Fault resolution patterns over time</div>
                                 </div>
-                                <div class="dashboard-header-action">
+                              <!--   <div class="dashboard-header-action">
                                     <select id="trendsRange" class="form-select form-select-sm">
                                         <option value="6">Last 6 Months</option>
                                         <option value="12" selected>Last 12 Months</option>
                                         <option value="all">All</option>
                                     </select>
-                                </div>
+                                </div> -->
                             </div>
                             <div class="card-body">
                                 <div id="apexTrends" style="min-height:300px;"></div>
