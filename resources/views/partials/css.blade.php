@@ -60,6 +60,48 @@
     .custom-modal .form-select,
     .custom-modal .select2-selection {
         border-radius: 12px;
+        background: var(--impaza-card) !important;
+        color: var(--impaza-text) !important;
+        border-color: var(--impaza-border) !important;
+    }
+    .custom-modal .form-control:focus,
+    .custom-modal .form-select:focus,
+    .custom-modal .select2-container--default .select2-selection--single:focus,
+    .custom-modal .select2-container--default.select2-container--focus .select2-selection--single,
+    .custom-modal .select2-container--default.select2-container--focus .select2-selection--multiple {
+        background: var(--impaza-card) !important;
+        color: var(--impaza-text) !important;
+        border-color: rgba(99, 102, 241, .55) !important;
+    }
+    .custom-modal .select2-container--default .select2-selection--single,
+    .custom-modal .select2-container--default .select2-selection--multiple,
+    .custom-modal .select2-dropdown,
+    .custom-modal .select2-search__field {
+        background: var(--impaza-card) !important;
+        color: var(--impaza-text) !important;
+        border-color: var(--impaza-border) !important;
+    }
+    .custom-modal .select2-container--default .select2-selection--single .select2-selection__rendered,
+    .custom-modal .select2-container--default .select2-selection--multiple .select2-selection__rendered,
+    .custom-modal .select2-container--default .select2-search--dropdown .select2-search__field {
+        color: var(--impaza-text) !important;
+    }
+    .custom-modal .select2-container--default .select2-selection--single .select2-selection__placeholder,
+    .custom-modal .select2-container--default .select2-selection--multiple .select2-selection__placeholder {
+        color: var(--impaza-muted) !important;
+    }
+    .custom-modal input:-webkit-autofill,
+    .custom-modal input:-webkit-autofill:hover,
+    .custom-modal input:-webkit-autofill:focus,
+    .custom-modal textarea:-webkit-autofill,
+    .custom-modal textarea:-webkit-autofill:hover,
+    .custom-modal textarea:-webkit-autofill:focus,
+    .custom-modal select:-webkit-autofill,
+    .custom-modal select:-webkit-autofill:hover,
+    .custom-modal select:-webkit-autofill:focus {
+        -webkit-text-fill-color: var(--impaza-text);
+        -webkit-box-shadow: 0 0 0 1000px var(--impaza-card) inset;
+        transition: background-color 9999s ease-out 0s;
     }
     .custom-modal .btn-close {
         filter: none;

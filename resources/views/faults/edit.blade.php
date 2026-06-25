@@ -147,6 +147,10 @@
                                         @php
                                             $currentName = optional(auth()->user())->name;
                                             $isOwn = $currentName && (strtolower(trim($remark->name)) === strtolower(trim($currentName)));
+                                            $attachmentPath = (string) ($remark->file_path ?? '');
+                                            $attachmentUrl = ($attachmentPath !== '' && \Illuminate\Support\Facades\Storage::disk('public')->exists($attachmentPath))
+                                                ? \Illuminate\Support\Facades\Storage::disk('public')->url($attachmentPath)
+                                                : null;
                                         @endphp
                                         <div class="chat-msg {{ $isOwn ? 'chat-msg-self ms-auto' : 'chat-msg-other' }}">
                                             <div class="chat-msg-meta">
@@ -159,9 +163,16 @@
                                             <div class="chat-msg-body">{{ $remark->remark }}</div>
                                             @if($remark->file_path)
                                                 <div class="mt-2">
-                                                    <a href="{{ asset('storage/'.$remark->file_path) }}" target="_blank" class="d-inline-block text-decoration-none" title="View attachment">
-                                                        <img src="{{ asset('storage/'.$remark->file_path) }}" alt="Attachment" class="img-fluid rounded" style="max-height: 100px; object-fit: cover;">
-                                                    </a>
+                                                    @if($attachmentUrl)
+                                                        <a href="{{ $attachmentUrl }}" target="_blank" class="d-inline-block text-decoration-none" title="View attachment">
+                                                            <img src="{{ $attachmentUrl }}" alt="Attachment" class="img-fluid rounded" style="max-height: 100px; object-fit: cover;">
+                                                        </a>
+                                                    @else
+                                                        <div class="small text-muted d-inline-flex align-items-center gap-2 px-3 py-2 rounded border">
+                                                            <i class="fas fa-paperclip"></i>
+                                                            <span>Attachment unavailable</span>
+                                                        </div>
+                                                    @endif
                                                 </div>
                                             @endif
                                         </div>

@@ -137,6 +137,9 @@
                                     @php
                                         $currentName = optional(auth()->user())->name;
                                         $isOwn = $currentName && (strtolower(trim($remark->name)) === strtolower(trim($currentName)));
+                                        $attachmentPath = (string) ($remark->file_path ?? '');
+                                        $attachmentExists = $attachmentPath !== '' && \Illuminate\Support\Facades\Storage::disk('public')->exists($attachmentPath);
+                                        $attachmentUrl = $attachmentExists ? \Illuminate\Support\Facades\Storage::disk('public')->url($attachmentPath) : null;
                                     @endphp
                                     <div class="chat-msg {{ $isOwn ? 'chat-msg-self ms-auto' : 'chat-msg-other' }}">
                                         <div class="chat-msg-meta">
@@ -149,31 +152,40 @@
                                         <div class="chat-msg-body">{{ $remark->remark }}</div>
                                         @if($remark->file_path)
                                             <div class="mt-2">
-                                                <a href="#" class="d-inline-block text-decoration-none" data-bs-toggle="modal" data-bs-target="#PicModal-{{ $remark->id }}" aria-controls="PicModal-{{ $remark->id }}" title="View attachment">
-                                                    <img src="{{ asset('storage/'.$remark->file_path) }}" alt="Attachment" class="img-fluid rounded" style="max-height: 160px; object-fit: cover; cursor: pointer;">
-                                                </a>
-                                                <a href="{{ asset('storage/'.$remark->file_path) }}" class="btn btn-link btn-sm text-decoration-none" download>
-                                                    <i class="fas fa-download me-1"></i>
-                                                </a>
+                                                @if($attachmentUrl)
+                                                    <a href="#" class="d-inline-block text-decoration-none" data-bs-toggle="modal" data-bs-target="#PicModal-{{ $remark->id }}" aria-controls="PicModal-{{ $remark->id }}" title="View attachment">
+                                                        <img src="{{ $attachmentUrl }}" alt="Attachment" class="img-fluid rounded" style="max-height: 160px; object-fit: cover; cursor: pointer;">
+                                                    </a>
+                                                    <a href="{{ $attachmentUrl }}" class="btn btn-link btn-sm text-decoration-none" download>
+                                                        <i class="fas fa-download me-1"></i>
+                                                    </a>
+                                                @else
+                                                    <div class="small text-muted d-inline-flex align-items-center gap-2 px-3 py-2 rounded border">
+                                                        <i class="fas fa-paperclip"></i>
+                                                        <span>Attachment unavailable</span>
+                                                    </div>
+                                                @endif
                                             </div>
 
-                                            <div class="modal custom-modal fade" id="PicModal-{{ $remark->id }}" data-bs-backdrop="false" data-bs-keyboard="true" tabindex="-1" aria-labelledby="PicModalLabel-{{ $remark->id }}" aria-hidden="true">
-                                                <div class="modal-dialog modal-xl modal-dialog-centered">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="PicModalLabel-{{ $remark->id }}"><i class="fas fa-paperclip me-2"></i>Attachment</h5>
-                                                            <button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <img src="{{ asset('storage/'.$remark->file_path) }}" alt="Attachment" class="img-fluid rounded">
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <a href="{{ asset('storage/'.$remark->file_path) }}" class="btn btn-outline-primary" download><i class="fas fa-download me-1"></i>Download</a>
-                                                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                                            @if($attachmentUrl)
+                                                <div class="modal custom-modal fade" id="PicModal-{{ $remark->id }}" data-bs-backdrop="false" data-bs-keyboard="true" tabindex="-1" aria-labelledby="PicModalLabel-{{ $remark->id }}" aria-hidden="true">
+                                                    <div class="modal-dialog modal-xl modal-dialog-centered">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="PicModalLabel-{{ $remark->id }}"><i class="fas fa-paperclip me-2"></i>Attachment</h5>
+                                                                <button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <img src="{{ $attachmentUrl }}" alt="Attachment" class="img-fluid rounded">
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <a href="{{ $attachmentUrl }}" class="btn btn-outline-primary" download><i class="fas fa-download me-1"></i>Download</a>
+                                                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            @endif
                                         @endif
                                     </div>
                                 @endforeach
