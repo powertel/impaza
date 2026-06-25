@@ -714,6 +714,11 @@
         border-bottom: 1px solid var(--impaza-border);
         background: color-mix(in srgb, var(--impaza-primary) 4%, var(--impaza-card));
     }
+    .workflow-faults-page .card-header > :first-child,
+    .content.workflow-faults-page .card-header > :first-child {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
     .workflow-faults-page .card-title,
     .content.workflow-faults-page .card-title {
         margin: 0;
@@ -722,6 +727,9 @@
         color: var(--impaza-text);
         letter-spacing: -.01em;
         text-transform: none;
+        float: none !important;
+        display: block;
+        line-height: 1.25;
     }
     .workflow-faults-page .card-tools,
     .content.workflow-faults-page .card-tools {
@@ -730,6 +738,9 @@
         justify-content: flex-end;
         flex-wrap: wrap;
         gap: 10px;
+        flex: 0 0 auto;
+        float: none !important;
+        margin-left: auto;
     }
     .workflow-faults-page .card-body,
     .content.workflow-faults-page .card-body {
@@ -862,6 +873,7 @@
     }
     .workflow-faults-page .page-lead,
     .content.workflow-faults-page .page-lead {
+        display: block;
         max-width: 64ch;
         color: var(--impaza-muted);
         font-size: .78rem;
