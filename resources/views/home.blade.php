@@ -17,6 +17,12 @@ Dashboard
 
     .dashboard-panel,
     .dashboard-side-card {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
         border-radius: 18px;
         border: 1px solid rgba(226, 232, 240, .9);
         box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 10px 28px rgba(15, 23, 42, .05);
@@ -30,6 +36,7 @@ Dashboard
         justify-content: space-between;
         gap: 12px;
         padding: 14px 16px;
+        min-height: 68px;
         border-bottom: 1px solid rgba(226, 232, 240, .85);
         background: rgba(248, 250, 252, .82);
     }
@@ -70,10 +77,62 @@ Dashboard
         padding: 16px;
     }
 
+    .dashboard-panel .card-body {
+        flex: 1 1 auto;
+    }
+
+    .dashboard-panel,
+    .dashboard-side-card,
+    .impaza-table-card.dashboard-panel {
+        position: relative;
+        isolation: isolate;
+    }
+
     .dashboard-side-card .card-body {
         display: flex;
         flex-direction: column;
         gap: 12px;
+    }
+
+    .dashboard-main-row {
+        align-items: stretch;
+    }
+
+    .dashboard-main-row > [class*="col-"] {
+        min-width: 0;
+    }
+
+    .dashboard-main-column,
+    .dashboard-side-column {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .dashboard-charts-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(0, .95fr);
+        gap: 12px;
+        align-items: stretch;
+        min-width: 0;
+    }
+
+    .dashboard-chart-col {
+        display: flex;
+        min-width: 0;
+    }
+
+    .dashboard-side-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .dashboard-side-stack > .dashboard-side-card {
+        margin-bottom: 0 !important;
     }
 
     .dashboard-chip {
@@ -160,6 +219,39 @@ Dashboard
     .dashboard-filter-grid {
         display: grid;
         gap: 10px;
+    }
+
+    .dashboard-panel .itc-header,
+    .dashboard-panel .itc-body,
+    .dashboard-panel .table-responsive,
+    .dashboard-panel .table {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    .dashboard-panel .table-responsive {
+        overflow-x: auto;
+        overflow-y: auto;
+    }
+
+    .dashboard-panel .itc-header {
+        padding: 14px 16px;
+        min-height: 68px;
+        border-bottom: 1px solid rgba(226, 232, 240, .85);
+        background: rgba(248, 250, 252, .82);
+    }
+
+    html[data-theme="dark"] .dashboard-panel .itc-header {
+        background: rgba(15, 23, 42, .86);
+        border-bottom-color: rgba(30, 41, 59, .9);
+    }
+
+    @media (max-width: 1199.98px) {
+        .dashboard-charts-grid {
+            grid-template-columns: 1fr;
+        }
     }
 
     .home-kpi-grid > * {
@@ -561,10 +653,11 @@ Dashboard
             @endcan
         </div>
 
-        <div class="row g-3">
+        <div class="row g-3 dashboard-main-row">
             <div class="col-xxl-9 col-xl-8">
-                <div class="row g-3 mb-3">
-                    <div class="col-xl-7">
+                <div class="dashboard-main-column">
+                <div class="dashboard-charts-grid">
+                    <div class="dashboard-chart-col">
                         <div class="card h-100 dashboard-panel">
                             <div class="card-header">
                                 <div class="dashboard-card-copy">
@@ -583,7 +676,7 @@ Dashboard
                             </div>
                         </div>
                     </div>
-                    <div class="col-xl-5">
+                    <div class="dashboard-chart-col">
                         <div class="card h-100 dashboard-panel">
                             <div class="card-header">
                                 <div class="dashboard-card-copy">
@@ -710,11 +803,14 @@ Dashboard
                         </div>
                     </div>
                 </div>
+                </div>
             </div>
 
             <div class="col-xxl-3 col-xl-4">
+                <div class="dashboard-side-column">
+                <div class="dashboard-side-stack">
                 @canany(['fault-list', 'assign-fault', 'assessment-fault-list', 'reports'])
-                <div class="card mb-3 dashboard-side-card">
+                <div class="card dashboard-side-card">
                     <div class="card-header">
                         <div class="dashboard-card-copy">
                             <div class="dashboard-card-title">Quick Actions</div>
@@ -765,7 +861,7 @@ Dashboard
                 @endcanany
 
                 @can('fault-list')
-                    <div class="card mb-3 dashboard-side-card">
+                    <div class="card dashboard-side-card">
                         <div class="card-header">
                             <div class="dashboard-card-copy">
                                 <div class="dashboard-card-title">Smart Filters</div>
@@ -809,7 +905,7 @@ Dashboard
                     </div>
                 @endcan
 
-                <div class="card mb-3 dashboard-side-card">
+                <div class="card dashboard-side-card">
                     <div class="card-header">
                         <div class="dashboard-card-copy">
                             <div class="dashboard-card-title">Activity Feed</div>
@@ -843,7 +939,8 @@ Dashboard
                         </div>
                     </div>
                 </div>
-
+                </div>
+                </div>
             </div>
         </div>
     </div>
