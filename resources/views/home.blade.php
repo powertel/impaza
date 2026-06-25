@@ -1197,7 +1197,7 @@ document.addEventListener('DOMContentLoaded', function () {
             series: statusValues,
             labels: statusDisplayLabels,
             colors: [COL.primary, COL.success, COL.warning, COL.danger, COL.info, COL.muted],
-            stroke: { width: 2, colors: [strokeBg] },
+            stroke: { width: 0, colors: ['transparent'] },
             dataLabels: { enabled: false },
             legend: { show: false },
             plotOptions: {
