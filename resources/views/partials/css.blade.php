@@ -26,6 +26,18 @@
         box-shadow: 0 20px 60px rgba(15, 23, 42, .18);
         overflow: hidden;
     }
+    .custom-modal .modal-dialog-scrollable .modal-content {
+        max-height: calc(100vh - 2rem);
+    }
+    .custom-modal .modal-content > form {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        flex: 1 1 auto;
+    }
+    .custom-modal .modal-dialog-scrollable .modal-content > form {
+        max-height: inherit;
+    }
     html[data-theme="dark"] .custom-modal .modal-content {
         box-shadow: 0 24px 70px rgba(2, 6, 23, .62);
     }
@@ -74,6 +86,11 @@
         padding: 20px 22px;
         background: var(--impaza-card);
         color: var(--impaza-text);
+    }
+    .custom-modal .modal-dialog-scrollable .modal-body {
+        overflow-y: auto;
+        min-height: 0;
+        overscroll-behavior: contain;
     }
     .custom-modal .modal-footer {
         padding: 14px 22px;

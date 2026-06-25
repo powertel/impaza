@@ -1,28 +1,58 @@
 @can('link-create')
-<div class="modal fade" id="createLinkModal" tabindex="-1" aria-labelledby="createLinkModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl">
+<div class="modal custom-modal fade" id="createLinkModal" tabindex="-1" aria-labelledby="createLinkModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="createLinkModalLabel">Create Links</h5>
+        <div class="fault-modal-header-copy">
+          <h5 class="modal-title" id="createLinkModalLabel"><i class="fas fa-link me-2"></i>Create Links</h5>
+          <div class="text-muted small mt-1">Create one or more service links with the refreshed business modal workflow, including location mapping and service details.</div>
+          <div class="fault-modal-meta">
+            <span class="fault-modal-meta-item"><i class="fas fa-layer-group"></i> Bulk Create</span>
+            <span class="fault-modal-meta-item"><i class="fas fa-map-marker-alt"></i> Full Mapping</span>
+          </div>
+        </div>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form action="{{ route('links.store') }}" method="POST">
         @csrf
         <div class="modal-body">
-          <div class="mb-3">
-            <label for="customer_id" class="form-label">Customer</label>
-            <select id="customer_id" name="customer_id" class="form-select select2 @error('customer_id') is-invalid @enderror" required>
-              <option  disabled selected>Select Customer</option>
-              @foreach($customers as $cust)
-                <option value="{{ $cust->id }}" data-contract-number="{{ $cust->contract_number }}" {{ old('customer_id') == $cust->id ? 'selected' : '' }}>{{ $cust->customer }}</option>
-              @endforeach
-            </select>
-            @error('customer_id')
-              <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+          <div class="fault-modal-note mb-3">
+            <i class="fas fa-circle-info"></i>
+            <div>Select the customer once, then add one or more link rows with service, contract, and location details.</div>
+          </div>
+          <div class="fault-modal-section mb-3">
+            <div class="fault-modal-section-header">
+              <span class="fault-modal-section-icon"><i class="fas fa-users"></i></span>
+              <div>
+                <div class="fault-modal-section-title">Customer Context</div>
+                <div class="fault-modal-section-subtitle">Choose the customer that owns the links being created.</div>
+              </div>
+            </div>
+            <div class="fault-modal-section-body">
+              <div class="mb-0">
+                <label for="customer_id" class="form-label">Customer</label>
+                <select id="customer_id" name="customer_id" class="form-select select2 @error('customer_id') is-invalid @enderror" required>
+                  <option disabled selected>Select Customer</option>
+                  @foreach($customers as $cust)
+                    <option value="{{ $cust->id }}" data-contract-number="{{ $cust->contract_number }}" {{ old('customer_id') == $cust->id ? 'selected' : '' }}>{{ $cust->customer }}</option>
+                  @endforeach
+                </select>
+                @error('customer_id')
+                  <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+              </div>
+            </div>
           </div>
 
-          <div id="linkRepeater" class="">
+          <div id="linkRepeater" class="fault-modal-section">
+            <div class="fault-modal-section-header">
+              <span class="fault-modal-section-icon"><i class="fas fa-link"></i></span>
+              <div>
+                <div class="fault-modal-section-title">Link Items</div>
+                <div class="fault-modal-section-subtitle">Add each service link with the required mapping and service metadata.</div>
+              </div>
+            </div>
+            <div class="fault-modal-section-body">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h6 class="mb-0">Link Items</h6>
             </div>
@@ -141,10 +171,11 @@
             </div>
             <div class="d-flex justify-content-start align-items-center mt-2">
               <div class="d-flex gap-2">
-                <button type="button" class="btn btn-outline-primary" id="addLinkRepeaterItem"><i class="fas fa-plus-circle"></i> Add</button>
-                <button type="button" class="btn btn-outline-secondary" id="removeLinkRepeaterItem"><i class="fas fa-minus-circle"></i> Remove Last</button>
+                <button type="button" class="btn btn-outline-primary btn-sm" id="addLinkRepeaterItem"><i class="fas fa-plus-circle me-1"></i> Add</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="removeLinkRepeaterItem"><i class="fas fa-minus-circle me-1"></i> Remove Last</button>
               </div>
             </div>
+          </div>
           </div>
           <!-- Hidden templates for repeater option cloning -->
           <div id="linkSelectTemplates" class="d-none">
@@ -174,7 +205,7 @@
           <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
             <i class="fas fa-times me-1"></i> Cancel
           </button>
-          <button type="submit" class="btn btn-outline-success btn-sm">
+          <button type="submit" class="btn btn-primary btn-sm">
             <i class="fas fa-save me-1"></i> Save
           </button>
         </div>
