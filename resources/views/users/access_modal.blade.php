@@ -1,6 +1,6 @@
 <!-- Access (Enable/Disable) Modal -->
-<div class="modal fade" id="accessUserModal-{{ $user->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="accessUserModalLabel-{{ $user->id }}" aria-hidden="true">
-  <div class="modal-dialog  modal-md">
+<div class="modal custom-modal fade" id="accessUserModal-{{ $user->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="accessUserModalLabel-{{ $user->id }}" aria-hidden="true">
+  <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="accessUserModalLabel-{{ $user->id }}"><i class="fas fa-user-lock me-2"></i>Account Access</h5>

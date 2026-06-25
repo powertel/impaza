@@ -3,134 +3,240 @@
 Users
 @endsection
 @include('partials.css')
+@section('styles')
+<style>
+  .users-page .users-toolbar {
+    grid-template-columns: minmax(120px, 150px) minmax(260px, 1fr) auto auto;
+  }
+
+  .users-page .toolbar-search-form,
+  .users-page .toolbar-search-form .input-group {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .users-page .users-status-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .users-page .users-status-primary {
+    color: #111827 !important;
+  }
+
+  @media (max-width: 991.98px) {
+    .users-page .users-toolbar {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .users-page .toolbar-search-form {
+      grid-column: span 2;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .users-page .users-toolbar {
+      grid-template-columns: 1fr;
+    }
+
+    .users-page .toolbar-search-form {
+      grid-column: auto;
+    }
+  }
+</style>
+@endsection
 @section('content')
+@php
+  $perPage = request('per_page', 20);
+  $visibleUsers = collect($users->items());
+  $enabledUsers = $visibleUsers->where('is_access', 0)->count();
+  $disabledUsers = $visibleUsers->where('is_access', 1)->count();
+@endphp
 
-<section class="content">
+<section class="content workflow-faults-page users-page">
+  <div class="workspace-summary-grid">
+    <div class="workspace-summary-card" style="--summary-color:#6366F1;">
+      <div class="workspace-summary-body">
+        <div class="workspace-summary-copy">
+          <span class="workspace-summary-icon"><i class="fas fa-users"></i></span>
+          <div>
+            <div class="workspace-summary-label">Total Users</div>
+            <div class="workspace-summary-title">Directory coverage</div>
+          </div>
+        </div>
+        <div class="workspace-summary-value">{{ $users->total() }}</div>
+      </div>
+    </div>
 
-<div class="card">
+    <div class="workspace-summary-card" style="--summary-color:#10B981;">
+      <div class="workspace-summary-body">
+        <div class="workspace-summary-copy">
+          <span class="workspace-summary-icon"><i class="fas fa-user-check"></i></span>
+          <div>
+            <div class="workspace-summary-label">Access Enabled</div>
+            <div class="workspace-summary-title">Visible on this page</div>
+          </div>
+        </div>
+        <div class="workspace-summary-value">{{ $enabledUsers }}</div>
+      </div>
+    </div>
 
-    <!--Card Header-->
+    <div class="workspace-summary-card" style="--summary-color:#F59E0B;">
+      <div class="workspace-summary-body">
+        <div class="workspace-summary-copy">
+          <span class="workspace-summary-icon"><i class="fas fa-user-lock"></i></span>
+          <div>
+            <div class="workspace-summary-label">Access Disabled</div>
+            <div class="workspace-summary-title">Needs review</div>
+          </div>
+        </div>
+        <div class="workspace-summary-value">{{ $disabledUsers }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
     <div class="card-header">
-        <h3 class="card-title">Users</h3>
-        <div class="card-tools">
-            @can('user-create')
-              <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createUserModal"><i class="fas fa-plus-circle"></i>Create User</button>
-            @endcan
-
-        </div>
+      <div>
+        <h3 class="card-title">Manage Users</h3>
+        <div class="page-lead">Search, review, edit, and manage platform access from one responsive workspace with dark-theme friendly controls.</div>
+      </div>
+      <div class="card-tools">
+        <span class="record-chip"><i class="fas fa-user-friends"></i> {{ $users->total() }} total records</span>
+        @can('user-create')
+          <button class="btn btn-primary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#createUserModal">
+            <i class="fas fa-plus-circle me-1"></i> Create User
+          </button>
+        @endcan
+      </div>
     </div>
-    <!-- /.card-header -->
-<div class="card-body">
-        <div class="table-responsive">
-            @php($perPage = request('per_page', 20))
-            <div class="filter-toolbar d-flex justify-content-end align-items-center gap-2 mb-2">
-                <div class="input-group input-group-sm" style="width: 200px;">
-                    <span class="input-group-text"><i class="fas fa-list me-1"></i> Show</span>
-                    <select id="usersPageSize" class="form-select form-select-sm" style="width:auto;">
-                        <option value="10"  {{ (int)$perPage===10 ? 'selected' : '' }}>10</option>
-                        <option value="20"  {{ (int)$perPage===20 ? 'selected' : '' }}>20</option>
-                        <option value="50"  {{ (int)$perPage===50 ? 'selected' : '' }}>50</option>
-                        <option value="100" {{ (int)$perPage===100 ? 'selected' : '' }}>100</option>
-                    </select>
-                </div>
-                <form id="usersSearchForm" method="GET" action="{{ route('users.index') }}" class="m-0">
-                    <div class="input-group input-group-sm" style="width: 360px;">
-                        <span class="input-group-text"><i class="fas fa-search"></i></span>
-                        <input type="text" name="q" value="{{ request('q','') }}" class="form-control" placeholder="Search all records">
-                        <input type="hidden" name="per_page" value="{{ $perPage }}">
-                        <button type="submit" class="btn btn-outline-primary"><i class="fas fa-search me-1"></i>Search</button>
-                        <a href="{{ route('users.index', ['per_page' => $perPage]) }}" class="btn btn-outline-secondary"><i class="fas fa-rotate-left me-1"></i>Reset</a>
-                    </div>
-                </form>
-            </div>
-            <table class="table table-hover" id="usersTable">
-                <thead>
-                    <tr>
-                        <th>No.</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Roles</th>
-                        <th>Department</th>
-                        <th>Section</th>
-                        <th>Status</th>
-                        <th>Action(s)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($users as $user)
-                    <tr>
-                        <td>{{ $users->firstItem() + $loop->index }}</td>
-                        <td>{{ $user->name }}</td>
-                        <td>{{ $user->email }}</td>
-                        <td>
-                        @if(!empty($user->getRoleNames()))
-                            @foreach($user->getRoleNames() as $v)
-                                <label class="badge rounded-pill badge-info">{{ $v }}</label>
-                            @endforeach
-                        @endif
-                        </td>
-                        <td>{{ $user->department }}</td>
-                        <td>{{ $user->section}}</td>
-                    <!--  <td>{{ $user->status_name}}</td> -->
 
-                        <td class="text-nowrap">
-                            <span class="badge rounded-pill" style="background-color: {{ App\Models\UserStatus::STATUS_COLOR[ $user->status_name ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
-                                {{ $user->status_name }}
-                            </span>
-                            <span class="badge rounded-pill ms-2 {{ ((int)($user->is_access ?? 0) === 0) ? 'bg-success' : 'bg-danger' }}">
-                                {{ ((int)($user->is_access ?? 0) === 0) ? 'Enabled' : 'Disabled' }}
-                            </span>
-                        </td>
+    <div class="faults-toolbar">
+      <div class="filter-toolbar users-toolbar">
+        <div class="faults-toolbar-field">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="fas fa-list"></i></span>
+            <select id="usersPageSize" class="form-select" aria-label="Rows per page">
+              <option value="10" {{ (int)$perPage===10 ? 'selected' : '' }}>Show 10</option>
+              <option value="20" {{ (int)$perPage===20 ? 'selected' : '' }}>Show 20</option>
+              <option value="50" {{ (int)$perPage===50 ? 'selected' : '' }}>Show 50</option>
+              <option value="100" {{ (int)$perPage===100 ? 'selected' : '' }}>Show 100</option>
+            </select>
+          </div>
+        </div>
 
-                        <td>
-                            <form action="{{ route('users.destroy',$user->id) }}" method="POST">
-                                <button type="button" class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showUserModal-{{ $user->id }}">
-                                <i class="fas fa-eye me-1"></i> View
-                                </button>
-                                @can('user-edit')
-                                <button type="button" class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#editUserModal-{{ $user->id }}">
-                                <i class="fas fa-edit me-1"></i>  Edit
-                                </button>
-                                <button type="button" class="btn {{ ((int)($user->is_access ?? 0) === 0) ? 'btn-outline-danger' : 'btn-outline-success' }}" data-bs-toggle="modal" data-bs-target="#accessUserModal-{{ $user->id }}">
-                                  <i class="fas fa-user-lock me-1"></i>
-                                  {{ ((int)($user->is_access ?? 0) === 0) ? 'Disable' : 'Enable' }}
-                                </button>
-                                @endcan
-                               <!--  @csrf
-                                @method('DELETE')
-                                @can('user-delete')
-                                <button type="button" class="btn btn-outline-danger btn-sm show_confirm" data-toggle="tooltip" title='Delete' style="padding:0px 2px; color:#fff;">
-                                    <i class="fas fa-trash"></i>Delete
-                                </button> 
-                                @endcan -->
-                            </form>
-                        </td>
+        <form id="usersSearchForm" method="GET" action="{{ route('users.index') }}" class="toolbar-search-form">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+            <input type="text" name="q" value="{{ request('q','') }}" class="form-control" placeholder="Search users, emails, roles, departments, or sections">
+            <input type="hidden" name="per_page" value="{{ $perPage }}">
+          </div>
+        </form>
 
-                    </tr>
+        <button type="submit" form="usersSearchForm" class="btn btn-primary btn-sm px-3">
+          <i class="fas fa-search me-1"></i> Search
+        </button>
+
+        <a href="{{ route('users.index', ['per_page' => $perPage]) }}" class="btn btn-outline-secondary btn-sm px-3">
+          <i class="fas fa-rotate-left me-1"></i> Reset
+        </a>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover faults-table" id="usersTable">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>User</th>
+              <th>Roles</th>
+              <th>Department</th>
+              <th>Section</th>
+              <th>Status</th>
+              <th class="text-end">Action(s)</th>
+            </tr>
+          </thead>
+          <tbody>
+            @forelse ($users as $user)
+              <tr>
+                <td>
+                  <span class="age-ticker">#{{ $users->firstItem() + $loop->index }}</span>
+                </td>
+                <td>
+                  <div class="workspace-cell-main">{{ $user->name }}</div>
+                  <div class="workspace-cell-sub">{{ $user->email }}</div>
+                </td>
+                <td>
+                  <div class="workspace-chip-stack">
+                    @forelse($user->getRoleNames() as $v)
+                      <span class="badge rounded-pill" style="background: rgba(14, 165, 233, .12); color: #0369A1;">{{ $v }}</span>
                     @empty
-                    <tr>
-                        <td colspan="8" class="text-center py-4">
-                            <i class="fas fa-info-circle me-1"></i> No users found.
-                        </td>
-                    </tr>
+                      <span class="workspace-cell-sub">No roles assigned</span>
                     @endforelse
-                </tbody>
-            </table>
-            <div class="d-flex justify-content-between align-items-center mt-3">
-              <small class="text-muted">
-                @if($users->count())
-                  Showing {{ $users->firstItem() }} to {{ $users->lastItem() }} of {{ $users->total() }} results
-                @else
-                  Showing 0 results
-                @endif
-              </small>
-              {{ $users->appends(request()->except('page'))->links('pagination::bootstrap-5') }}
-            </div>
-            <div id="usersPager" class="mt-2"></div>
-        </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="workspace-cell-main">{{ $user->department ?: 'Not assigned' }}</div>
+                  <div class="workspace-cell-sub">Department mapping</div>
+                </td>
+                <td>
+                  <div class="workspace-cell-main">{{ $user->section ?: 'Not assigned' }}</div>
+                  <div class="workspace-cell-sub">Section coverage</div>
+                </td>
+                <td class="text-nowrap">
+                  <div class="users-status-stack">
+                    <span class="badge rounded-pill users-status-primary" style="background-color: {{ App\Models\UserStatus::STATUS_COLOR[$user->status_name] ?? '#CBD5E1' }};">
+                      {{ $user->status_name }}
+                    </span>
+                    <span class="badge rounded-pill {{ ((int)($user->is_access ?? 0) === 0) ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-danger-subtle text-danger border border-danger-subtle' }}">
+                      {{ ((int)($user->is_access ?? 0) === 0) ? 'Enabled' : 'Disabled' }}
+                    </span>
+                  </div>
+                </td>
+                <td>
+                  <div class="workspace-actions">
+                    <form action="{{ route('users.destroy',$user->id) }}" method="POST">
+                      <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#showUserModal-{{ $user->id }}">
+                        <i class="fas fa-eye me-1"></i> View
+                      </button>
+                      @can('user-edit')
+                        <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editUserModal-{{ $user->id }}">
+                          <i class="fas fa-edit me-1"></i> Edit
+                        </button>
+                        <button type="button" class="btn btn-sm {{ ((int)($user->is_access ?? 0) === 0) ? 'btn-outline-danger' : 'btn-outline-success' }}" data-bs-toggle="modal" data-bs-target="#accessUserModal-{{ $user->id }}">
+                          <i class="fas fa-user-lock me-1"></i> {{ ((int)($user->is_access ?? 0) === 0) ? 'Disable' : 'Enable' }}
+                        </button>
+                      @endcan
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            @empty
+              <tr>
+                <td colspan="7" class="text-center py-4">
+                  <i class="fas fa-info-circle me-1"></i> No users found.
+                </td>
+              </tr>
+            @endforelse
+          </tbody>
+        </table>
+      </div>
+
+      <div class="faults-table-footer">
+        <small class="text-muted">
+          @if($users->count())
+            Showing {{ $users->firstItem() }} to {{ $users->lastItem() }} of {{ $users->total() }} results
+          @else
+            Showing 0 results
+          @endif
+        </small>
+        {{ $users->appends(request()->except('page'))->links('pagination::bootstrap-5') }}
+      </div>
+      <div id="usersPager" class="mt-2"></div>
     </div>
-    <!-- /.card-body -->
-</div>
+  </div>
 
 @include('users.create_modal', ['roles' => $roles, 'department' => $department, 'section' => $section, 'position' => $position, 'user_statuses' => $user_statuses, 'regions' => $regions, 'currentUserRegion' => $currentUserRegion])
 
@@ -148,6 +254,12 @@ Users
 @include('partials.users')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[id^="createUserModal"], [id^="showUserModal-"], [id^="editUserModal-"], [id^="accessUserModal-"], [id^="changePasswordModal-"]').forEach(function(modal) {
+        if (modal && modal.parentElement !== document.body) {
+            document.body.appendChild(modal);
+        }
+    });
+
     const sel = document.getElementById('usersPageSize');
     if (sel) {
         sel.addEventListener('change', function(ev) {
