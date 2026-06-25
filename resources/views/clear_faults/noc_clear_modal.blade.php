@@ -1,23 +1,50 @@
 @can('noc-clear-faults-clear')
 <div class="modal custom-modal fade" id="nocClearModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="nocClearModalLabel-{{ $fault->id }}" aria-hidden="true">
-  <div class="modal-dialog modal-xl">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="nocClearModalLabel-{{ $fault->id }}">Confirm Clear (NOC)</h5>
+        <div class="fault-modal-header-copy">
+          <h5 class="modal-title" id="nocClearModalLabel-{{ $fault->id }}"><i class="fas fa-check-circle me-2"></i>Confirm Clear</h5>
+          <div class="text-muted small mt-1">Close {{ $fault->fault_ref_number ?? 'this fault' }} from the NOC queue after reviewing the latest updates.</div>
+          <div class="fault-modal-meta">
+            <span class="fault-modal-meta-item"><i class="fas fa-user"></i> {{ $fault->customer ?? 'N/A' }}</span>
+            <span class="fault-modal-meta-item"><i class="fas fa-link"></i> {{ $fault->link ?? 'N/A' }}</span>
+          </div>
+        </div>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form action="{{ route('noc-clear.update',$fault->id) }}" method="POST">
         @csrf
         @method('PUT')
         <div class="modal-body">
-          <div class="row g-3 mb-3">
-            <div class="col-md-6">
-              <label class="form-label">Customer</label>
-              <input type="text" class="form-control" value="{{ $fault->customer }}" disabled>
+          <div class="fault-modal-note mb-3">
+            <i class="fas fa-circle-info"></i>
+            <div>Confirm the service has been restored, capture the final NOC note, and keep the conversation trail visible before closing the fault.</div>
+          </div>
+
+          <div class="fault-modal-section mb-3">
+            <div class="fault-modal-section-header">
+              <span class="fault-modal-section-icon"><i class="fas fa-clipboard-list"></i></span>
+              <div>
+                <div class="fault-modal-section-title">Clearance Summary</div>
+                <div class="fault-modal-section-subtitle">Quick fault context before completing the NOC clearance step.</div>
+              </div>
             </div>
-            <div class="col-md-6">
-              <label class="form-label">Link</label>
-              <input type="text" class="form-control" value="{{ $fault->link }}" disabled>
+            <div class="fault-modal-section-body">
+              <div class="fault-modal-grid">
+                <div class="fault-modal-kv">
+                  <span class="fault-modal-kv-label">Customer</span>
+                  <div class="fault-modal-kv-value">{{ $fault->customer ?? 'N/A' }}</div>
+                </div>
+                <div class="fault-modal-kv">
+                  <span class="fault-modal-kv-label">Link</span>
+                  <div class="fault-modal-kv-value">{{ $fault->link ?? 'N/A' }}</div>
+                </div>
+                <div class="fault-modal-kv">
+                  <span class="fault-modal-kv-label">Action</span>
+                  <div class="fault-modal-kv-value">Move fault to <span class="badge rounded-pill bg-secondary-subtle text-secondary border">Cleared by NOC</span></div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -83,11 +110,11 @@
 
           <p class="mt-3 mb-0 text-danger">Are you sure you want to mark this fault as <strong>Cleared by NOC</strong>?</p>
         </div>
-        <div class="modal-footer">
+        <div class="modal-footer fault-modal-footer">
           <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
             <i class="fas fa-times me-1"></i> Cancel
           </button>
-          <button type="submit" class="btn btn-outline-success btn-sm">
+          <button type="submit" class="btn btn-outline-success btn-sm rounded-pill">
             <i class="fas fa-save me-1"></i> Clear
           </button>
         </div>

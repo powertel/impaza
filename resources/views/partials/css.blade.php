@@ -495,9 +495,9 @@
     .faults-toolbar .form-control,
     .faults-toolbar .form-select {
         min-height: 36px;
-        border-color: var(--impaza-border);
-        background: color-mix(in srgb, var(--impaza-primary) 2%, var(--impaza-card));
-        color: var(--impaza-text);
+        border-color: var(--impaza-border) !important;
+        background-color: color-mix(in srgb, var(--impaza-primary) 2%, var(--impaza-card)) !important;
+        color: var(--impaza-text) !important;
         box-shadow: none;
     }
     .faults-toolbar .input-group-text {
@@ -509,10 +509,28 @@
     }
     .faults-toolbar .form-control:focus,
     .faults-toolbar .form-select:focus {
-        background: var(--impaza-card);
-        color: var(--impaza-text);
-        border-color: rgba(99, 102, 241, .55);
+        background-color: var(--impaza-card) !important;
+        color: var(--impaza-text) !important;
+        border-color: rgba(99, 102, 241, .55) !important;
         box-shadow: 0 0 0 .2rem rgba(99, 102, 241, .12);
+    }
+    html[data-theme="dark"] .faults-toolbar .form-control,
+    html[data-theme="dark"] .faults-toolbar .form-select,
+    html[data-theme="dark"] .faults-toolbar .input-group-text {
+        background-color: #0f172a !important;
+        color: #e2e8f0 !important;
+        border-color: #1e293b !important;
+    }
+    html[data-theme="dark"] .faults-toolbar .form-select {
+        color-scheme: dark;
+        -webkit-text-fill-color: #e2e8f0;
+    }
+    html[data-theme="dark"] .faults-toolbar .form-control::placeholder {
+        color: #94a3b8;
+    }
+    html[data-theme="dark"] .faults-toolbar .form-select option {
+        background-color: #0f172a;
+        color: #e2e8f0;
     }
     .faults-toolbar-field .input-group-text,
     .faults-toolbar-search .input-group-text {

@@ -6,6 +6,16 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <script>
+        (function () {
+            try {
+                var theme = window.localStorage.getItem('impaza-theme') || 'light';
+                document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
 
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -213,6 +223,7 @@
 
         .content-header { padding: 14px 0; }
         .content-header h1 { font-size: 16px; font-weight: 800; color: var(--impaza-text); letter-spacing: -0.01em; }
+        .content-wrapper { background: var(--impaza-bg); }
         .content-header .breadcrumb { margin-bottom: 0; }
         .content-header .breadcrumb .breadcrumb-item + .breadcrumb-item::before { color: rgba(100,116,139,.7); }
         .content-header .breadcrumb a { color: var(--impaza-muted); text-decoration: none; }
@@ -573,7 +584,7 @@
                 <div class="container-fluid">
                     <div class="row mb-2">
                         <div class="col-sm-6">
-                            <h1 class="m-0 text-dark">@yield('pageName')</h1>
+                            <h1 class="m-0">@yield('pageName')</h1>
                         </div><!-- /.col -->
                         <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
