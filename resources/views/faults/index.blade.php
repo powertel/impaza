@@ -189,11 +189,13 @@ Faults
 
   .faults-table thead th {
     white-space: nowrap;
-    padding: 14px 12px;
+    padding: 11px 12px;
+    font-size: .7rem;
   }
 
   .faults-table tbody td {
-    padding: 14px 12px;
+    padding: 10px 12px;
+    vertical-align: middle;
   }
 
   .faults-table .faults-ref {
@@ -209,13 +211,13 @@ Faults
   .faults-table .faults-cell-main {
     font-weight: 600;
     color: var(--impaza-text);
-    line-height: 1.35;
+    line-height: 1.28;
   }
 
   .faults-table .faults-cell-sub {
     margin-top: 3px;
     font-size: .72rem;
-    line-height: 1.4;
+    line-height: 1.3;
     color: var(--impaza-muted);
   }
 
@@ -259,13 +261,13 @@ Faults
     display: flex;
     justify-content: flex-end;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
   }
 
   .faults-actions .btn {
-    min-height: 32px;
+    min-height: 30px;
     border-radius: 999px;
-    padding-inline: 12px;
+    padding-inline: 10px;
     font-weight: 600;
   }
 
@@ -354,6 +356,89 @@ Faults
     .faults-table-footer {
       flex-direction: column;
       align-items: flex-start;
+    }
+
+    .faults-table-shell {
+      padding: 14px 14px 12px;
+    }
+
+    .faults-table-wrap {
+      overflow: visible;
+      background: transparent;
+      border-radius: 0;
+    }
+
+    .faults-table {
+      min-width: 0 !important;
+      border-collapse: separate;
+      border-spacing: 0 10px;
+    }
+
+    .faults-table thead {
+      display: none;
+    }
+
+    .faults-table tbody {
+      display: block;
+    }
+
+    .faults-table tbody tr {
+      display: block;
+      border: 1px solid var(--impaza-border);
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--impaza-primary) 2%, var(--impaza-card));
+      box-shadow: var(--impaza-shadow-sm);
+      overflow: hidden;
+    }
+
+    .faults-table tbody td {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      width: 100%;
+      padding: 9px 14px;
+      border: 0;
+      text-align: right;
+    }
+
+    .faults-table tbody td + td {
+      border-top: 1px solid color-mix(in srgb, var(--impaza-border) 85%, transparent);
+    }
+
+    .faults-table tbody td::before {
+      content: attr(data-label);
+      flex: 0 0 42%;
+      text-align: left;
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--impaza-muted);
+    }
+
+    .faults-table .faults-ref,
+    .faults-table .faults-cell-main,
+    .faults-table .faults-cell-sub {
+      text-align: right;
+    }
+
+    .faults-table .faults-ref {
+      align-items: flex-end;
+    }
+
+    .faults-table .faults-status-link,
+    .faults-table .faults-age-pill {
+      margin-left: auto;
+    }
+
+    .faults-actions {
+      width: 100%;
+      justify-content: flex-end;
+    }
+
+    .faults-table td.text-end {
+      text-align: right !important;
     }
   }
 </style>
@@ -568,40 +653,40 @@ Faults
               $ageEnd = $faultAgeEnd[$fault->id] ?? null;
             @endphp
             <tr>
-              <td>
+              <td data-label="Ref. No.">
                 <div class="faults-ref">
                   <a href="{{ route('faults.index', ['q' => $fault->fault_ref_number]) }}">{{ $fault->fault_ref_number }}</a>
                   <span class="faults-cell-sub">Fault record</span>
                 </div>
               </td>
-              <td>
+              <td data-label="Customer">
                 <div class="faults-cell-main">{{ Str::limit($fault->customer, 26) }}</div>
               </td>
-              <td>
+              <td data-label="Account Manager">
                 <div class="faults-cell-main">{{ $fault->accountManager ?: 'Unassigned' }}</div>
               </td>
-              <td>
+              <td data-label="Link">
                 <div class="faults-cell-main">{{ Str::limit($fault->link, 34) }}</div>
               </td>
-              <td>
+              <td data-label="Assigned To">
                 <div class="faults-cell-main {{ $fault->assignedTo ? '' : 'text-muted' }}">{{ $fault->assignedTo ?: 'Not yet assigned' }}</div>
               </td>
-              <td>
+              <td data-label="Date Reported">
                 <div class="faults-cell-main">{{ Carbon\Carbon::parse($fault->created_at)->format('d M Y') }}</div>
                 <div class="faults-cell-sub">{{ Carbon\Carbon::parse($fault->created_at)->format('h:i a') }}</div>
               </td>
-              <td>
+              <td data-label="Logged By">
                 <div class="faults-cell-main">{{ $fault->reportedBy }}</div>
               </td>
-              <td class="text-nowrap">
+              <td class="text-nowrap" data-label="Status">
                 <a href="{{ route('faults.index', ['status' => $fault->status_id]) }}" class="faults-status-link">
                   <x-status-badge :label="$statusLabel" :color="$statusColor" :soft="true" />
                 </a>
               </td>
-              <td>
+              <td data-label="Age">
                 <span class="faults-age-pill fault-age" data-age-start="{{ $ageStart }}" data-age-end="{{ $ageEnd }}">{{ $ageText }}</span>
               </td>
-              <td>
+              <td class="text-end" data-label="Actions">
                 <div class="faults-actions">
                   @can('fault-edit')
                     @if ($fault->status_id != 6)
