@@ -232,19 +232,32 @@ Faults
   }
 
   .faults-table-wrap {
+    border: 0;
     border-radius: 18px;
+    background: transparent;
+    box-shadow: none;
     overflow: auto;
   }
 
   .faults-table thead th {
     white-space: nowrap;
-    padding: 11px 12px;
+    padding: 10px 11px;
     font-size: .7rem;
+    border-bottom-color: color-mix(in srgb, var(--impaza-border) 40%, transparent);
   }
 
   .faults-table tbody td {
-    padding: 10px 12px;
+    padding: 9px 11px;
     vertical-align: middle;
+    border-top-color: color-mix(in srgb, var(--impaza-border) 40%, transparent);
+  }
+
+  html[data-theme="dark"] .faults-table thead th {
+    border-bottom-color: color-mix(in srgb, var(--impaza-border) 18%, transparent);
+  }
+
+  html[data-theme="dark"] .faults-table tbody td {
+    border-top-color: color-mix(in srgb, var(--impaza-border) 18%, transparent);
   }
 
   .faults-table .faults-ref {

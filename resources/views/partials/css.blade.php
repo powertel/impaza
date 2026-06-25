@@ -84,6 +84,12 @@
         color: var(--impaza-text);
         margin-bottom: 6px;
     }
+    .custom-modal .input-group-text {
+        border-radius: 12px;
+        background: color-mix(in srgb, var(--impaza-primary) 4%, var(--impaza-card)) !important;
+        color: var(--impaza-muted) !important;
+        border-color: var(--impaza-border) !important;
+    }
     .custom-modal .form-control,
     .custom-modal .form-select,
     .custom-modal .select2-selection {
@@ -351,6 +357,49 @@
         background: color-mix(in srgb, var(--impaza-muted) 14%, transparent) !important;
         color: var(--impaza-muted) !important;
         border: 1px solid color-mix(in srgb, var(--impaza-muted) 22%, transparent);
+    }
+    .custom-modal .card:not(.border-0):not(.fault-modal-section) {
+        border: 1px solid var(--impaza-border);
+        border-radius: 18px;
+        background: color-mix(in srgb, var(--impaza-primary) 2%, var(--impaza-card));
+        box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+        overflow: hidden;
+    }
+    .custom-modal .card:not(.border-0):not(.fault-modal-section) .card-header,
+    .custom-modal .card:not(.border-0):not(.fault-modal-section) .card-footer {
+        padding: 14px 18px;
+        border-color: var(--impaza-border);
+        background: color-mix(in srgb, var(--impaza-primary) 5%, var(--impaza-card));
+    }
+    .custom-modal .card:not(.border-0):not(.fault-modal-section) .card-body {
+        padding: 18px;
+        background: transparent;
+    }
+    .custom-modal .repeater-item,
+    .custom-modal .list-group-item {
+        border-color: color-mix(in srgb, var(--impaza-border) 86%, transparent) !important;
+        background: color-mix(in srgb, var(--impaza-primary) 2%, var(--impaza-card));
+        color: var(--impaza-text);
+    }
+    .custom-modal .table {
+        color: var(--impaza-text);
+    }
+    .custom-modal .table thead th {
+        border-bottom-color: var(--impaza-border);
+        color: var(--impaza-muted);
+        font-size: .72rem;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        background: transparent;
+    }
+    .custom-modal .table tbody td {
+        border-color: color-mix(in srgb, var(--impaza-border) 86%, transparent);
+    }
+    .custom-modal .table tbody tr:hover {
+        background: color-mix(in srgb, var(--impaza-primary) 3%, var(--impaza-card));
+    }
+    .custom-modal .modal-title + .text-muted {
+        max-width: 56ch;
     }
 
     /* Shared fault workflow table/page system */
@@ -718,6 +767,14 @@
         vertical-align: middle;
         border-color: color-mix(in srgb, var(--impaza-border) 86%, transparent);
     }
+    html[data-theme="dark"] .workflow-faults-page .table thead th,
+    html[data-theme="dark"] .content.workflow-faults-page .table thead th {
+        border-bottom-color: color-mix(in srgb, var(--impaza-border) 22%, transparent);
+    }
+    html[data-theme="dark"] .workflow-faults-page .table tbody td,
+    html[data-theme="dark"] .content.workflow-faults-page .table tbody td {
+        border-color: color-mix(in srgb, var(--impaza-border) 22%, transparent);
+    }
     .workflow-faults-page .table tbody tr:hover,
     .content.workflow-faults-page .table tbody tr:hover {
         background: color-mix(in srgb, var(--impaza-primary) 3%, var(--impaza-card));
@@ -786,14 +843,111 @@
     .content.workflow-faults-page .workflow-kpis .card-body {
         padding: 16px 18px;
     }
+    .workflow-faults-page .page-lead,
+    .content.workflow-faults-page .page-lead {
+        max-width: 64ch;
+        color: var(--impaza-muted);
+        font-size: .78rem;
+        line-height: 1.5;
+        margin-top: 4px;
+    }
+    .workflow-faults-page .record-chip,
+    .content.workflow-faults-page .record-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 28px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid color-mix(in srgb, var(--impaza-border) 86%, transparent);
+        background: color-mix(in srgb, var(--impaza-primary) 5%, var(--impaza-card));
+        color: var(--impaza-muted);
+        font-size: .72rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .workflow-faults-page .record-meta,
+    .content.workflow-faults-page .record-meta {
+        display: inline-flex;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+    }
+    .workflow-faults-page .record-main,
+    .content.workflow-faults-page .record-main {
+        font-weight: 600;
+        color: var(--impaza-text);
+        line-height: 1.3;
+    }
+    .workflow-faults-page .record-sub,
+    .content.workflow-faults-page .record-sub {
+        color: var(--impaza-muted);
+        font-size: .72rem;
+        line-height: 1.35;
+    }
+    .workflow-faults-page .toolbar-search,
+    .content.workflow-faults-page .toolbar-search {
+        min-width: 0;
+    }
+    .workflow-faults-page .toolbar-search .input-group,
+    .content.workflow-faults-page .toolbar-search .input-group,
+    .workflow-faults-page .toolbar-search.form,
+    .content.workflow-faults-page .toolbar-search.form {
+        width: 100%;
+    }
+    .workflow-faults-page .table-note,
+    .content.workflow-faults-page .table-note {
+        color: var(--impaza-muted);
+        font-size: .74rem;
+    }
+    .workflow-faults-page .empty-state,
+    .content.workflow-faults-page .empty-state {
+        padding: 28px 18px !important;
+        color: var(--impaza-muted) !important;
+    }
+    .workflow-faults-page .dropdown-menu,
+    .content.workflow-faults-page .dropdown-menu {
+        border-radius: 16px;
+        border-color: var(--impaza-border);
+        box-shadow: var(--impaza-shadow-sm);
+    }
+    html[data-theme="dark"] .workflow-faults-page .dropdown-menu,
+    html[data-theme="dark"] .content.workflow-faults-page .dropdown-menu {
+        background: #0f172a;
+        border-color: #1e293b;
+    }
+    html[data-theme="dark"] .workflow-faults-page .dropdown-item,
+    html[data-theme="dark"] .content.workflow-faults-page .dropdown-item {
+        color: #e2e8f0;
+    }
+    html[data-theme="dark"] .workflow-faults-page .dropdown-item:hover,
+    html[data-theme="dark"] .content.workflow-faults-page .dropdown-item:hover {
+        background: rgba(99, 102, 241, .14);
+    }
+    html[data-theme="dark"] .workflow-faults-page .dropdown-divider,
+    html[data-theme="dark"] .content.workflow-faults-page .dropdown-divider {
+        border-color: #1e293b;
+    }
+    html[data-theme="dark"] .workflow-faults-page .page-link,
+    html[data-theme="dark"] .content.workflow-faults-page .page-link {
+        background: #0f172a;
+        color: #e2e8f0;
+        border-color: #1e293b;
+    }
+    html[data-theme="dark"] .workflow-faults-page .page-item.active .page-link,
+    html[data-theme="dark"] .content.workflow-faults-page .page-item.active .page-link {
+        background: var(--impaza-primary);
+        border-color: var(--impaza-primary);
+        color: #fff;
+    }
 
     /* Smooth modal entrance */
-    .custom-modal .modal.fade .modal-dialog {
+    .custom-modal.fade .modal-dialog {
         transition: transform .22s ease-out, opacity .22s ease-out;
         transform: translateY(12px) scale(.985);
         opacity: 0;
     }
-    .custom-modal .modal.show .modal-dialog {
+    .custom-modal.show .modal-dialog {
         transform: translateY(0) scale(1);
         opacity: 1;
     }
@@ -1132,6 +1286,10 @@
         .workflow-faults-page .table tbody td + td,
         .content.workflow-faults-page .table tbody td + td {
             border-top: 1px solid color-mix(in srgb, var(--impaza-border) 85%, transparent);
+        }
+        html[data-theme="dark"] .workflow-faults-page .table tbody td + td,
+        html[data-theme="dark"] .content.workflow-faults-page .table tbody td + td {
+            border-top-color: color-mix(in srgb, var(--impaza-border) 18%, transparent);
         }
         .workflow-faults-page .table tbody td::before,
         .content.workflow-faults-page .table tbody td::before {
