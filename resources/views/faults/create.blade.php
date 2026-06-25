@@ -3,11 +3,16 @@
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <div>
+                <div class="fault-modal-header-copy">
                     <h5 class="modal-title" id="createFaultModalLabel">
                         <i class="fas fa-tools me-2"></i>Log Fault
                     </h5>
                     <div class="text-muted small mt-1">Capture the affected service, contact details, and first technical update.</div>
+                    <div class="fault-modal-meta">
+                        <span class="fault-modal-meta-item"><i class="fas fa-circle-plus"></i> New Intake</span>
+                        <span class="fault-modal-meta-item"><i class="fas fa-image"></i> Attachment Optional</span>
+                        <span class="fault-modal-meta-item"><i class="fas fa-bolt"></i> Quick Capture</span>
+                    </div>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -15,6 +20,11 @@
             <div class="modal-body">
                 <form id="UF" action="{{ route('faults.store') }}" method="POST" enctype="multipart/form-data">
                     {{ csrf_field() }}
+
+                    <div class="fault-modal-note mb-3">
+                        <i class="fas fa-circle-info"></i>
+                        <div>Use this form to log the first customer report, link the affected service, and capture the initial technical notes in one place.</div>
+                    </div>
 
                     <div class="fault-modal-section mb-3">
                         <div class="fault-modal-section-header">
@@ -154,10 +164,12 @@
                                         <img id="attachmentPreview" src="" class="img-thumbnail" style="max-height:200px;">
                                     </div>
                                 </div>
-                                <div class="col-md-12 d-flex justify-content-end">
-                                    <div class="form-check mt-2">
+                                <div class="col-md-12">
+                                    <div class="fault-modal-toggle">
+                                        <div class="form-check mt-2">
                                         <input class="form-check-input me-1" type="checkbox" id="resolvedOnCall" name="resolved_on_call" value="1" {{ old('resolved_on_call') ? 'checked' : '' }}>
                                         <label class="form-check-label fw-semibold" for="resolvedOnCall">Resolved on call</label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -166,11 +178,11 @@
                 </form>
             </div>
 
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+            <div class="modal-footer fault-modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill" data-bs-dismiss="modal">
                     <i class="fas fa-times me-1"></i> Cancel
                 </button>
-                <button type="submit" form="UF" class="btn btn-primary btn-sm">
+                <button type="submit" form="UF" class="btn btn-primary btn-sm rounded-pill">
                     <i class="fas fa-save me-1"></i> Log Fault
                 </button>
             </div>

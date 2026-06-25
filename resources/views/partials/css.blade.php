@@ -42,6 +42,34 @@
         font-weight: 700;
         letter-spacing: -.01em;
     }
+    .custom-modal .fault-modal-header-copy {
+        min-width: 0;
+    }
+    .custom-modal .fault-modal-header-copy .modal-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .custom-modal .fault-modal-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+    }
+    .custom-modal .fault-modal-meta-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 28px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid color-mix(in srgb, var(--impaza-border) 86%, transparent);
+        background: color-mix(in srgb, var(--impaza-primary) 5%, var(--impaza-card));
+        color: var(--impaza-muted);
+        font-size: .72rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
     .custom-modal .modal-body {
         padding: 20px 22px;
         background: var(--impaza-card);
@@ -143,6 +171,9 @@
         border-bottom: 1px solid var(--impaza-border);
         background: color-mix(in srgb, var(--impaza-primary) 5%, var(--impaza-card));
     }
+    .custom-modal .fault-modal-section-header > div:last-child {
+        min-width: 0;
+    }
     .custom-modal .fault-modal-section-icon {
         width: 36px;
         height: 36px;
@@ -198,6 +229,103 @@
     .custom-modal .fault-modal-kv-value .badge {
         vertical-align: middle;
     }
+    .custom-modal .fault-modal-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid color-mix(in srgb, var(--impaza-primary) 20%, var(--impaza-border));
+        background: color-mix(in srgb, var(--impaza-primary) 5%, var(--impaza-card));
+        color: var(--impaza-muted);
+        font-size: .78rem;
+        line-height: 1.45;
+    }
+    .custom-modal .fault-modal-note i {
+        color: var(--impaza-primary);
+        margin-top: 2px;
+    }
+    .custom-modal .fault-modal-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        width: 100%;
+    }
+    .custom-modal .fault-modal-toggle .form-check {
+        margin-bottom: 0;
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid color-mix(in srgb, var(--impaza-border) 86%, transparent);
+        background: color-mix(in srgb, var(--impaza-primary) 2%, var(--impaza-card));
+    }
+    .custom-modal .fault-modal-toggle .form-check-label {
+        color: var(--impaza-text);
+    }
+    .custom-modal .fault-modal-stream {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-height: 420px;
+        overflow-y: auto;
+        padding-right: 6px;
+    }
+    .custom-modal .fault-modal-empty {
+        padding: 18px;
+        border: 1px dashed var(--impaza-border);
+        border-radius: 14px;
+        text-align: center;
+        color: var(--impaza-muted);
+        background: color-mix(in srgb, var(--impaza-primary) 2%, var(--impaza-card));
+    }
+    .custom-modal .fault-modal-attachment {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    .custom-modal .fault-modal-attachment-thumb {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        max-width: 220px;
+        padding: 6px;
+        border-radius: 16px;
+        border: 1px solid color-mix(in srgb, var(--impaza-border) 88%, transparent);
+        background: color-mix(in srgb, var(--impaza-primary) 3%, var(--impaza-card));
+        text-decoration: none;
+    }
+    .custom-modal .fault-modal-attachment-thumb img {
+        max-height: 160px;
+        object-fit: cover;
+    }
+    .custom-modal .fault-modal-attachment-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .custom-modal .fault-modal-attachment-actions .btn {
+        border-radius: 999px;
+        min-height: 30px;
+        padding-inline: 12px;
+    }
+    .custom-modal .fault-modal-attachment-missing {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px dashed var(--impaza-border);
+        color: var(--impaza-muted);
+        background: color-mix(in srgb, var(--impaza-primary) 2%, var(--impaza-card));
+        font-size: .78rem;
+    }
+    .custom-modal .fault-modal-footer .btn,
+    .custom-modal .modal-footer .btn {
+        border-radius: 999px;
+        min-height: 34px;
+        padding-inline: 14px;
+        font-weight: 600;
+    }
 
     /* Smooth modal entrance */
     .custom-modal .modal.fade .modal-dialog {
@@ -221,19 +349,33 @@
     /* Chat-style remarks */
     .chat-messages { display: flex; flex-direction: column; gap: .75rem; }
     .chat-msg {
-        max-width: 75%;
-        padding: .75rem .9rem;
-        border-radius: 1rem;
+        width: min(100%, 760px);
+        max-width: 82%;
+        padding: .85rem .95rem;
+        border-radius: 18px;
         background: color-mix(in srgb, var(--impaza-primary) 4%, var(--impaza-card));
         border: 1px solid var(--impaza-border);
+        box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
     }
     .chat-msg-self {
         align-self: flex-end;
         background: rgba(99, 102, 241, .10);
     }
     .chat-msg-other { align-self: flex-start; }
-    .chat-msg-meta { font-size: .75rem; color: var(--impaza-muted); margin-bottom: .25rem; }
-    .chat-msg-body { white-space: pre-wrap; color: var(--impaza-text); }
+    .chat-msg-meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px;
+        font-size: .75rem;
+        color: var(--impaza-muted);
+        margin-bottom: .35rem;
+    }
+    .chat-msg-body {
+        white-space: pre-wrap;
+        color: var(--impaza-text);
+        line-height: 1.5;
+    }
 
     /* Dashboard specific refinements */
     .dashboard-page .stat-card { border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 1px 2px rgba(16,24,40,.06); }

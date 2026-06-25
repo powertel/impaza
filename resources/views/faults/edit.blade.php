@@ -1,13 +1,38 @@
 <!-- Edit Fault Modal -->
+@php
+    $editStatusRaw = trim((string) ($fault->description ?? ''));
+    $editStatusLabel = match (strtolower($editStatusRaw)) {
+        'fault has been restored', 'resolved' => 'Fault Restored',
+        'fault is under rectification', 'under rectification' => 'Under Rectification',
+        'waiting for assessment', 'waiting assessment' => 'Waiting Assessment',
+        'fault has been assessed', 'assessed' => 'Assessed',
+        'fault has been rectified', 'rectified' => 'Rectified',
+        'fault has been cleared by ct', 'cleared by ct' => 'Cleared by CT',
+        'fault has been refered', 'fault has been referred', 'referred' => 'Referred',
+        'fault has been parked', 'parked' => 'Parked',
+        'fault has been revoked', 'revoked' => 'Revoked',
+        'fault  escalated to chief technician', 'fault escalated to chief technician', 'escalated to chief technician' => 'Escalated',
+        'impacted by pop outage' => 'POP Outage',
+        default => $editStatusRaw !== '' ? $editStatusRaw : 'Open',
+    };
+    $editStatusColor = \App\Models\Status::STATUS_COLOR[$editStatusRaw] ?? \App\Models\Status::STATUS_COLOR[$editStatusLabel] ?? '#64748B';
+@endphp
 <div class="modal custom-modal fade" id="editFaultModal-{{ $fault->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editFaultModalLabel-{{ $fault->id }}" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <div>
+                <div class="fault-modal-header-copy">
                     <h5 class="modal-title" id="editFaultModalLabel-{{ $fault->id }}">
                         <i class="fas fa-edit me-2"></i>Edit Fault
                     </h5>
                     <div class="text-muted small mt-1">Update customer details, remarks, and attachments for {{ $fault->fault_ref_number }}.</div>
+                    <div class="fault-modal-meta">
+                        <span class="fault-modal-meta-item"><i class="fas fa-hashtag"></i> {{ $fault->fault_ref_number }}</span>
+                        <span class="fault-modal-meta-item">
+                            <x-status-badge :label="$editStatusLabel" :color="$editStatusColor" :soft="true" />
+                        </span>
+                        <span class="fault-modal-meta-item"><i class="fas fa-link"></i> {{ $fault->link ?: 'Current Link' }}</span>
+                    </div>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -15,6 +40,10 @@
                 <form id="UF-edit-{{ $fault->id }}" action="{{ route('faults.update', $fault->id ) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
+                    <div class="fault-modal-note mb-3">
+                        <i class="fas fa-pen-to-square"></i>
+                        <div>Use this workspace to update contact details, review the conversation history, and append the latest technical action without losing the original audit trail.</div>
+                    </div>
                     <div class="fault-modal-section mb-3">
                         <div class="fault-modal-section-header">
                             <span class="fault-modal-section-icon"><i class="fas fa-network-wired"></i></span>
@@ -141,7 +170,7 @@
                             </div>
                         </div>
                         <div class="fault-modal-section-body">
-                            <div id="remarksScroller-edit-{{ $fault->id }}" class="chat-messages" style="max-height: 300px; overflow-y: auto; padding-right: 6px;">
+                            <div id="remarksScroller-edit-{{ $fault->id }}" class="chat-messages fault-modal-stream">
                                 @if(isset($remarks) && count($remarks) > 0)
                                     @foreach($remarks->sortBy('created_at') as $remark)
                                         @php
@@ -162,13 +191,21 @@
                                             </div>
                                             <div class="chat-msg-body">{{ $remark->remark }}</div>
                                             @if($remark->file_path)
-                                                <div class="mt-2">
+                                                <div class="fault-modal-attachment">
                                                     @if($attachmentUrl)
-                                                        <a href="{{ $attachmentUrl }}" target="_blank" class="d-inline-block text-decoration-none" title="View attachment">
-                                                            <img src="{{ $attachmentUrl }}" alt="Attachment" class="img-fluid rounded" style="max-height: 100px; object-fit: cover;">
+                                                        <a href="{{ $attachmentUrl }}" target="_blank" class="fault-modal-attachment-thumb" title="View attachment">
+                                                            <img src="{{ $attachmentUrl }}" alt="Attachment" class="img-fluid rounded">
                                                         </a>
+                                                        <div class="fault-modal-attachment-actions">
+                                                            <a href="{{ $attachmentUrl }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                                <i class="fas fa-up-right-from-square me-1"></i> Open
+                                                            </a>
+                                                            <a href="{{ $attachmentUrl }}" class="btn btn-outline-secondary btn-sm" download>
+                                                                <i class="fas fa-download me-1"></i> Download
+                                                            </a>
+                                                        </div>
                                                     @else
-                                                        <div class="small text-muted d-inline-flex align-items-center gap-2 px-3 py-2 rounded border">
+                                                        <div class="fault-modal-attachment-missing">
                                                             <i class="fas fa-paperclip"></i>
                                                             <span>Attachment unavailable</span>
                                                         </div>
@@ -178,7 +215,7 @@
                                         </div>
                                     @endforeach
                                 @else
-                                    <div class="text-center text-muted py-3">No remarks found.</div>
+                                    <div class="fault-modal-empty">No remarks found.</div>
                                 @endif
                             </div>
                         </div>
@@ -210,10 +247,12 @@
                                         <img class="img-thumbnail edit-attachment-preview" data-fault-id="{{ $fault->id }}" style="max-height:200px;">
                                     </div>
                                 </div>
-                                <div class="col-md-12 d-flex justify-content-end">
-                                    <div class="form-check mt-2">
+                                <div class="col-md-12">
+                                    <div class="fault-modal-toggle">
+                                        <div class="form-check mt-2">
                                         <input class="form-check-input me-1" type="checkbox" id="resolvedOnCall-edit-{{ $fault->id }}" name="resolved_on_call" value="1" {{ old('resolved_on_call') ? 'checked' : '' }}>
                                         <label class="form-check-label fw-semibold ms-1" for="resolvedOnCall-edit-{{ $fault->id }}">Resolved on call</label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -221,11 +260,11 @@
                     </div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+            <div class="modal-footer fault-modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill" data-bs-dismiss="modal">
                   <i class="fas fa-times me-1"></i> Cancel
                 </button>
-                <button type="submit" form="UF-edit-{{ $fault->id }}" class="btn btn-primary btn-sm">
+                <button type="submit" form="UF-edit-{{ $fault->id }}" class="btn btn-primary btn-sm rounded-pill">
                   <i class="fas fa-save me-1"></i> Save
                 </button>
             </div>
