@@ -1,4 +1,4 @@
-<div class="modal fade" id="returnFromManagerModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="returnFromManagerLabel-{{ $fault->id }}" aria-hidden="true">
+<div class="modal custom-modal fade" id="returnFromManagerModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="returnFromManagerLabel-{{ $fault->id }}" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">

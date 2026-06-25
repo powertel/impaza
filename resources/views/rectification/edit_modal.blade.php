@@ -1,5 +1,5 @@
 @can('rectify-fault')
-<div class="modal fade" id="rectifyEditModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="rectifyEditModalLabel-{{ $fault->id }}" aria-hidden="true">
+<div class="modal custom-modal fade" id="rectifyEditModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="rectifyEditModalLabel-{{ $fault->id }}" aria-hidden="true">
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
       <div class="modal-header">

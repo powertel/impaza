@@ -1,4 +1,4 @@
-<div class="modal fade" id="reassignReferralModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="reassignReferralModalLabel-{{ $fault->id }}" aria-hidden="true">
+<div class="modal custom-modal fade" id="reassignReferralModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="reassignReferralModalLabel-{{ $fault->id }}" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">

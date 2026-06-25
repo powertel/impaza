@@ -1,5 +1,5 @@
 @can('materials')
-<div class="modal fade" id="requestMaterialCreateModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="requestMaterialCreateModalLabel-{{ $fault->id }}" aria-hidden="true">
+<div class="modal custom-modal fade" id="requestMaterialCreateModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="requestMaterialCreateModalLabel-{{ $fault->id }}" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">

@@ -1,5 +1,5 @@
 @can('noc-clear-faults-clear')
-<div class="modal fade" id="nocRevokeModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="nocRevokeModalLabel-{{ $fault->id }}" aria-hidden="true">
+<div class="modal custom-modal fade" id="nocRevokeModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="nocRevokeModalLabel-{{ $fault->id }}" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">

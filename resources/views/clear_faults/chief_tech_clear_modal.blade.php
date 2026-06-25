@@ -1,5 +1,5 @@
 @can('chief-tech-clear-faults-clear')
-<div class="modal fade" id="chiefTechClearModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="chiefTechClearModalLabel-{{ $fault->id }}" aria-hidden="true">
+<div class="modal custom-modal fade" id="chiefTechClearModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="chiefTechClearModalLabel-{{ $fault->id }}" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
