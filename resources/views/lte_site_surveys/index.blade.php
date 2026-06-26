@@ -193,6 +193,17 @@ LTE Site Surveys
     border-bottom-color: rgba(148, 163, 184, 0.18);
   }
 
+  html[data-theme="dark"] .lte-surveys-page .lte-table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--impaza-text);
+    --bs-table-hover-bg: rgba(99, 102, 241, 0.08);
+    --bs-table-hover-color: var(--impaza-text);
+  }
+
+  html[data-theme="dark"] .lte-surveys-page .lte-table tbody > tr > * {
+    background-color: transparent;
+  }
+
   html[data-theme="dark"] .lte-surveys-page .lte-table tbody tr {
     border-top-color: rgba(148, 163, 184, 0.1);
   }

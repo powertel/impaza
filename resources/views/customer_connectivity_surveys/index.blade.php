@@ -187,6 +187,17 @@ Customer Connectivity Surveys
     border-bottom-color: rgba(148, 163, 184, 0.18);
   }
 
+  html[data-theme="dark"] .cc-surveys-page .cc-table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--impaza-text);
+    --bs-table-hover-bg: rgba(59, 130, 246, 0.08);
+    --bs-table-hover-color: var(--impaza-text);
+  }
+
+  html[data-theme="dark"] .cc-surveys-page .cc-table tbody > tr > * {
+    background-color: transparent;
+  }
+
   html[data-theme="dark"] .cc-surveys-page .cc-table tbody tr {
     border-top-color: rgba(148, 163, 184, 0.1);
   }

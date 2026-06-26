@@ -581,6 +581,18 @@ html[data-theme="dark"] .cc-chart-card .text-muted {
   color: var(--cc-muted) !important;
 }
 
+html[data-theme="dark"] .ux-unified .text-dark,
+html[data-theme="dark"] .content.ux-unified .text-dark {
+  color: var(--cc-text) !important;
+}
+
+html[data-theme="dark"] .ux-unified .badge.bg-light,
+html[data-theme="dark"] .content.ux-unified .badge.bg-light {
+  background: rgba(148, 163, 184, 0.12) !important;
+  border-color: rgba(148, 163, 184, 0.18) !important;
+  color: var(--cc-text) !important;
+}
+
 html[data-theme="dark"] .cc-filter-bar {
   background: rgba(15, 23, 42, 0.92);
   border-color: var(--cc-card-border);
