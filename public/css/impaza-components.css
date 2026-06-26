@@ -49,8 +49,9 @@ a.impaza-stat:hover { transform: translateY(-3px); box-shadow: var(--impaza-shad
 .impaza-table-card .itc-title { font-size: .95rem; font-weight: 700; color: var(--impaza-text); margin: 0; }
 .impaza-table-card .itc-subtitle { font-size: .75rem; color: var(--impaza-muted); margin: 2px 0 0; }
 .impaza-table-card .itc-actions { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.impaza-table-card .table { margin: 0; color: var(--impaza-text); }
+.impaza-table-card .table { --bs-table-bg: transparent; --bs-table-color: var(--impaza-text); --bs-table-hover-bg: rgba(99,102,241,.06); --bs-table-hover-color: var(--impaza-text); margin: 0; color: var(--impaza-text); background-color: transparent; }
 .impaza-table-card .table thead th { font-size: .72rem; color: var(--impaza-muted); font-weight: 600; background: var(--impaza-card); border-bottom: 1px solid var(--impaza-border); white-space: nowrap; }
+.impaza-table-card .table tbody > tr > * { background-color: transparent; }
 .impaza-table-card .table tbody td { font-size: .8rem; vertical-align: middle; border-color: var(--impaza-border); }
 .impaza-table-card .table tbody tr:hover { background: rgba(99,102,241,.05); }
 .impaza-table-card.has-sticky thead th { position: sticky; top: 0; z-index: 2; }

@@ -309,6 +309,22 @@ System Usage Report Settings
     color: #e5eefb !important;
   }
 
+  html[data-theme="dark"] .usage-mail-page .text-dark {
+    color: #e5eefb !important;
+  }
+
+  html[data-theme="dark"] .usage-mail-page .table {
+    --bs-table-bg: transparent;
+    --bs-table-color: #e5eefb;
+    --bs-table-hover-bg: rgba(59, 130, 246, 0.08);
+    --bs-table-hover-color: #e5eefb;
+    background-color: transparent;
+  }
+
+  html[data-theme="dark"] .usage-mail-page .table tbody > tr > * {
+    background-color: transparent !important;
+  }
+
   html[data-theme="dark"] .usage-mail-page .usage-form-card .form-label {
     color: #e2e8f0;
   }
@@ -318,9 +334,9 @@ System Usage Report Settings
   html[data-theme="dark"] .usage-mail-page .usage-form-card textarea,
   html[data-theme="dark"] .usage-mail-page .dataTables_wrapper .dataTables_filter input,
   html[data-theme="dark"] .usage-mail-page .dataTables_wrapper .dataTables_length select {
-    background: #0b1220;
-    border-color: rgba(148, 163, 184, 0.18);
-    color: #e5eefb;
+    background: #0b1220 !important;
+    border-color: rgba(148, 163, 184, 0.18) !important;
+    color: #e5eefb !important;
   }
 
   html[data-theme="dark"] .usage-mail-page .usage-form-card .form-control:focus,
