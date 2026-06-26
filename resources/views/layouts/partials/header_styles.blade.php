@@ -4,7 +4,6 @@
   position: sticky;
   top: 0;
   z-index: 1040;
-  position: sticky;
   background: transparent;
   border-bottom: 0;
   box-shadow: none;
