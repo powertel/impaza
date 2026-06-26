@@ -6,7 +6,7 @@
 @endphp
 <nav class="main-header navbar navbar-expand impaza-topbar">
   <div class="impaza-topbar-left">
-    <a class="nav-link impaza-topbar-icon" data-widget="pushmenu" href="#" role="button" aria-label="Toggle sidebar"><i class="fas fa-bars"></i></a>
+    <a class="nav-link impaza-topbar-icon" id="impazaSidebarToggle" data-widget="pushmenu" href="#" role="button" aria-label="Toggle sidebar" aria-controls="impazaSidebar" aria-expanded="true"><i class="fas fa-bars"></i></a>
     <div class="d-none d-md-flex impaza-topbar-breadcrumb">
       <a href="{{ route('home') }}">Home</a>
       <span class="sep">/</span>

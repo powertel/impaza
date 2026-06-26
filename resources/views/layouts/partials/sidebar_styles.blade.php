@@ -113,6 +113,9 @@
   .sidebar-mini.sidebar-collapse .nav-sidebar .nav-link p { display: none; }
   .sidebar-mini.sidebar-collapse .nav-sidebar .nav-link i.nav-icon { margin-right: 0; font-size: 1rem; }
   .sidebar-mini.sidebar-collapse .impaza-brand-logo { width: 42px !important; }
+  .sidebar-mini.sidebar-collapse .main-sidebar { overflow: visible !important; }
+  .sidebar-mini.sidebar-collapse .main-sidebar .sidebar { overflow: visible !important; }
+  .sidebar-mini.sidebar-collapse .main-sidebar .sidebar nav { overflow-x: visible !important; }
 }
 @media (max-width: 991.98px) {
   /* Keep consistent scrolling and header offset on small screens */

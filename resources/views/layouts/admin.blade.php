@@ -520,19 +520,55 @@
       // Persist + restore the collapsed sidebar state across pages.
       // Apply saved state before AdminLTE initializes to avoid a flash.
       (function () {
+        function isDesktop() {
+          return window.matchMedia('(min-width: 992px)').matches;
+        }
+
+        function getToggle() {
+          return document.getElementById('impazaSidebarToggle');
+        }
+
+        function syncSidebarToggleState() {
+          var toggle = getToggle();
+          if (!toggle) return;
+          var expanded = isDesktop()
+            ? !document.body.classList.contains('sidebar-collapse')
+            : document.body.classList.contains('sidebar-open');
+          toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        }
+
+        function persistDesktopSidebarState() {
+          try {
+            localStorage.setItem(
+              'impaza-sidebar',
+              document.body.classList.contains('sidebar-collapse') ? 'collapsed' : 'open'
+            );
+          } catch (e) {}
+        }
+
         try {
-          if (window.matchMedia('(min-width: 992px)').matches &&
+          if (isDesktop() &&
               localStorage.getItem('impaza-sidebar') === 'collapsed') {
             document.body.classList.add('sidebar-collapse');
           }
         } catch (e) {}
+
         document.addEventListener('DOMContentLoaded', function () {
-          try {
-            new MutationObserver(function () {
-              localStorage.setItem('impaza-sidebar',
-                document.body.classList.contains('sidebar-collapse') ? 'collapsed' : 'open');
-            }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
-          } catch (e) {}
+          syncSidebarToggleState();
+
+          window.addEventListener('resize', function () {
+            if (isDesktop()) {
+              document.body.classList.remove('sidebar-open');
+              try {
+                if (localStorage.getItem('impaza-sidebar') === 'collapsed') {
+                  document.body.classList.add('sidebar-collapse');
+                } else {
+                  document.body.classList.remove('sidebar-collapse');
+                }
+              } catch (e) {}
+            }
+            syncSidebarToggleState();
+          });
         });
 
         // Sidebar toggle (replaces AdminLTE pushmenu): desktop collapses the
@@ -541,23 +577,35 @@
           var toggle = e.target.closest('[data-widget="pushmenu"]');
           if (toggle) {
             e.preventDefault();
-            if (window.matchMedia('(min-width: 992px)').matches) {
+            if (isDesktop()) {
               document.body.classList.toggle('sidebar-collapse');
+              persistDesktopSidebarState();
             } else {
               document.body.classList.toggle('sidebar-open');
             }
+            syncSidebarToggleState();
             return;
           }
           if (e.target.classList && e.target.classList.contains('impaza-sidebar-overlay')) {
             document.body.classList.remove('sidebar-open');
+            syncSidebarToggleState();
           }
         });
+
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape' && document.body.classList.contains('sidebar-open')) {
+            document.body.classList.remove('sidebar-open');
+            syncSidebarToggleState();
+          }
+        });
+
         // Close mobile sidebar when a nav link is tapped
         document.addEventListener('DOMContentLoaded', function () {
           document.querySelectorAll('.main-sidebar .nav-sidebar .nav-link').forEach(function (lnk) {
             lnk.addEventListener('click', function () {
-              if (!window.matchMedia('(min-width: 992px)').matches) {
+              if (!isDesktop()) {
                 document.body.classList.remove('sidebar-open');
+                syncSidebarToggleState();
               }
             });
           });

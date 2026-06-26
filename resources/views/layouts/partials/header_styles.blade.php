@@ -85,6 +85,11 @@ html[data-theme="dark"] .impaza-topbar-search .kbd { background: rgba(2,6,23,.55
 }
 .impaza-topbar-icon:hover { background: rgba(99,102,241,.08); border-color: rgba(99,102,241,.20); color: var(--impaza-text); }
 .impaza-topbar-icon:active { transform: translateY(1px); }
+.impaza-topbar-icon[aria-expanded="false"] {
+  background: rgba(99,102,241,.12);
+  border-color: rgba(99,102,241,.24);
+  color: var(--impaza-primary);
+}
 
 .impaza-topbar-dropdown-menu {
   border-radius: 14px;

@@ -1,5 +1,5 @@
 <!-- Main Sidebar Container -->
-<aside class="main-sidebar impaza-sidebar sidebar-dark-primary elevation-4">
+<aside class="main-sidebar impaza-sidebar sidebar-dark-primary elevation-4" id="impazaSidebar">
 
 
     <!-- Sidebar -->

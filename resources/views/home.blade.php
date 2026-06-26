@@ -406,6 +406,40 @@ Dashboard
         border-bottom-color: rgba(30, 41, 59, .9);
     }
 
+    .ux-unified .impaza-table-card .table {
+        --bs-table-bg: transparent;
+        --bs-table-color: var(--impaza-text);
+        --bs-table-hover-bg: rgba(99, 102, 241, .06);
+        --bs-table-hover-color: var(--impaza-text);
+        margin-bottom: 0;
+        color: var(--impaza-text);
+    }
+
+    .ux-unified .impaza-table-card .table tbody > tr > * { background-color: transparent; }
+
+    html[data-theme="dark"] .ux-unified .impaza-table-card .itc-body {
+        background: var(--impaza-card);
+    }
+
+    html[data-theme="dark"] .ux-unified .impaza-table-card .table thead th {
+        background: rgba(15, 23, 42, .86);
+        border-bottom-color: rgba(30, 41, 59, .9);
+        color: rgba(148, 163, 184, .95);
+    }
+
+    html[data-theme="dark"] .ux-unified .impaza-table-card .table tbody td {
+        border-color: rgba(30, 41, 59, .75);
+        color: rgba(226, 232, 240, .92);
+    }
+
+    html[data-theme="dark"] .ux-unified .impaza-table-card .table tbody tr:hover > * {
+        background-color: rgba(99, 102, 241, .08);
+    }
+
+    html[data-theme="dark"] .ux-unified .impaza-table-card .text-muted {
+        color: rgba(148, 163, 184, .92) !important;
+    }
+
     @media (max-width: 1199.98px) {
         .dashboard-charts-grid {
             grid-template-columns: 1fr;
