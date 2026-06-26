@@ -4,10 +4,6 @@
 LTE Site Surveys
 @endsection
 
-@section('pageName')
-LTE Site Surveys
-@endsection
-
 @include('partials.css')
 
 @section('styles')

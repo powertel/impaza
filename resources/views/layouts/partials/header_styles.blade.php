@@ -43,8 +43,8 @@ html[data-theme="dark"] .main-header {
   width: min(680px, 100%);
   height: 36px;
   border-radius: 999px;
-  border: 1px solid var(--impaza-border);
-  background: rgba(255,255,255,.75);
+  border: 1px solid rgba(148,163,184,.30);
+  background: rgba(15,23,42,.04);
   color: var(--impaza-muted);
   display: inline-flex;
   align-items: center;
@@ -53,8 +53,11 @@ html[data-theme="dark"] .main-header {
   padding: 0 12px 0 14px;
   box-shadow: 0 1px 0 rgba(15,23,42,.02);
   transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
 }
-.impaza-topbar-search:hover { border-color: rgba(99,102,241,.45); }
+.impaza-topbar-search:hover { border-color: rgba(99,102,241,.45); background: rgba(15,23,42,.06); }
 .impaza-topbar-search:focus { outline: none; border-color: rgba(99,102,241,.55); box-shadow: 0 0 0 .2rem rgba(99,102,241,.18); }
 .impaza-topbar-search .left { display: inline-flex; align-items: center; gap: 10px; }
 .impaza-topbar-search .left i { color: var(--impaza-muted); }
@@ -62,8 +65,8 @@ html[data-theme="dark"] .main-header {
 .impaza-topbar-search .kbd {
   font-size: 10px;
   color: var(--impaza-muted);
-  border: 1px solid var(--impaza-border);
-  background: rgba(248,250,252,.9);
+  border: 1px solid rgba(148,163,184,.30);
+  background: rgba(15,23,42,.04);
   padding: 3px 8px;
   border-radius: 999px;
 }

@@ -26,8 +26,17 @@ Login
     --error: #e75050;
   }
 
-  /* override layout wrapper to allow full-width stage */
-  .login-box { width: 100% !important; max-width: none !important; margin: 0 !important; padding: 6vh 6vw; }
+  /* override layout wrapper to center the auth stage in the viewport */
+  .login-box {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 100vh;
+    margin: 0 !important;
+    padding: 32px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
   body.login-page {
     min-height: 100vh !important;
@@ -36,12 +45,16 @@ Login
 
   .login-stage {
     position: relative;
-    max-width: 1100px;
-    margin: 0 auto;
+    width: min(100%, 940px);
+    min-height: min(520px, calc(100vh - 64px));
+    margin: 0;
     padding: 36px;
     border-radius: 24px;
     background: var(--bg-1);
-
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
   .login-stage::after {
     content: "";
@@ -62,7 +75,7 @@ Login
     font-weight: 800;
     letter-spacing: 0.3px;
   }
-  .brand-top img { width: 28px; height: 28px; object-fit: contain; border-radius: 6px; }
+  .brand-top img { width: auto; max-width: 180px; height: auto; object-fit: contain; }
 
   .login-card {
     width: 100%;
@@ -80,11 +93,12 @@ Login
   .form-header h2 { margin: 0; font-size: 20px; font-weight: 800; color: var(--text-main); }
   .form-header .subtitle { margin: 6px 0 0; font-size: 13px; color: var(--text-muted); }
 
-  .form-group { margin-bottom: 16px; }
-  .form-label { display: block; margin-bottom: 6px; font-weight: 600; color: var(--text-main); font-size: 13px; }
+  .form-group { margin-bottom: 12px; }
+  .form-label { display: block; margin-bottom: 4px; font-weight: 600; color: var(--text-main); font-size: 12px; }
   .form-control.custom {
     width: 100%;
-    padding: 12px 14px;
+    min-height: 38px;
+    padding: 7px 12px;
     border-radius: 12px;
     border: 1px solid #c7d2e3; /* stronger contrast */
     background: #ffffff; /* solid white for visibility */
@@ -103,11 +117,11 @@ Login
 
   /* show/hide password toggle */
   .password-wrapper { position: relative; }
-  .form-control.custom.password { padding-right: 40px; }
+  .form-control.custom.password { padding-right: 36px; }
   .toggle-password {
     position: absolute;
     top: 50%;
-    right: 12px;
+    right: 10px;
     transform: translateY(-50%);
     background: none;
     border: none;
@@ -147,7 +161,7 @@ Login
 
   .btn-primary.modern {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    width: 100%; padding: 12px 16px; border: none; border-radius: 12px;
+    width: 100%; min-height: 38px; padding: 8px 16px; border: none; border-radius: 12px;
     font-weight: 700; letter-spacing: 0.2px; color: #ffffff;
     background: var(--brand-primary);
     box-shadow: 0 10px 20px rgba(76,111,255,0.30);
@@ -177,12 +191,16 @@ Login
   .btn-google:hover { box-shadow: 0 10px 20px rgba(17,23,34,0.08); }
   .btn-google svg { width: 18px; height: 18px; }
 
-  .footer-links { margin-top: 12px; text-align: center; font-size: 13px; color: var(--text-muted); }
+  .footer-links { margin-top: 10px; text-align: center; font-size: 12px; color: var(--text-muted); }
   .footer-links a { color: #6a86ff; text-decoration: none; }
   .footer-links a:hover { text-decoration: underline; }
 
   @media (max-width: 720px) {
-    .login-stage { padding: 22px; }
+    .login-box { padding: 18px; }
+    .login-stage {
+      min-height: auto;
+      padding: 22px;
+    }
     .login-card { padding: 22px; }
   }
 </style>
@@ -190,7 +208,7 @@ Login
 <div id="app" style="display:none"></div>
 <div class="login-stage">
   <div class="brand-top">
-    <img src="{{ asset('img/impazamon-v2.png') }}" alt="Logo" style="max-height: none; width: 100%; margin-left: 0;">
+    <img src="{{ asset('img/impazamon-v2.png') }}" alt="Logo">
   </div>
 
   <div class="login-card">

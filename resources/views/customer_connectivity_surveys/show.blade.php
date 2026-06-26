@@ -4,9 +4,6 @@
 Connectivity Survey #{{ $survey->id }}
 @endsection
 
-@section('pageName')
-Customer Connectivity Survey
-@endsection
 
 @section('content')
 <section class="content ux-unified">

@@ -4,9 +4,6 @@
 LTE Site Survey #{{ $survey->id }}
 @endsection
 
-@section('pageName')
-LTE Site Survey
-@endsection
 
 @section('content')
 <section class="content ux-unified">

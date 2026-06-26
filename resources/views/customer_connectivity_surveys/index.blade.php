@@ -4,9 +4,6 @@
 Customer Connectivity Surveys
 @endsection
 
-@section('pageName')
-Customer Connectivity Surveys
-@endsection
 
 @include('partials.css')
 
