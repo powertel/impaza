@@ -224,14 +224,13 @@
 
 /* Smooth width/offset transition for sidebar, content and topbar */
 .main-sidebar { transition: width .22s ease; }
-.content-wrapper,
-.main-header { transition: margin-left .22s ease; }
+.content-wrapper { transition: margin-left .22s ease; }
 
 @media (min-width: 992px) {
   /* Brand: center + shrink the logo when collapsed */
-  .sidebar-mini.sidebar-collapse .user-panel { padding: 12px 6px !important; }
-  .sidebar-mini.sidebar-collapse .user-panel .image { width: 100% !important; text-align: center !important; }
-  .sidebar-mini.sidebar-collapse .impaza-brand-logo { width: 40px !important; margin: 0 auto; }
+  .sidebar-mini.sidebar-collapse .user-panel { padding: 0 6px !important; height: var(--header-height); }
+  .sidebar-mini.sidebar-collapse .user-panel .image { width: 100% !important; display: flex; justify-content: center; }
+  .sidebar-mini.sidebar-collapse .impaza-brand-logo { width: auto !important; height: 26px !important; margin: 0 auto; }
 
   /* Footer user card: collapse to a centered avatar only */
   .sidebar-mini.sidebar-collapse .impaza-sidebar-footer { padding: 10px 8px; }

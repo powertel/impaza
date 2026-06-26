@@ -104,6 +104,8 @@ html[data-theme="dark"] .impaza-topbar-search .kbd { background: rgba(2,6,23,.55
   body.sidebar-mini:not(.sidebar-collapse) { --impaza-sidebar-w: 240px; }
   body.sidebar-mini.sidebar-collapse { --impaza-sidebar-w: 76px; }
 
+  .sidebar-mini .main-header { margin-left: 0 !important; }
+
   .main-header::before {
     content: '';
     position: absolute;
@@ -115,6 +117,7 @@ html[data-theme="dark"] .impaza-topbar-search .kbd { background: rgba(2,6,23,.55
     border-bottom: 1px solid var(--impaza-border);
     backdrop-filter: blur(10px);
     box-shadow: var(--impaza-shadow-sm);
+    transition: left .22s ease;
     z-index: 0;
     pointer-events: none;
   }
@@ -124,7 +127,7 @@ html[data-theme="dark"] .impaza-topbar-search .kbd { background: rgba(2,6,23,.55
     border-bottom-color: var(--impaza-border);
   }
 
-  .impaza-topbar { padding-left: calc(var(--impaza-sidebar-w, 240px) + 10px); padding-right: 10px; }
+  .impaza-topbar { padding-left: calc(var(--impaza-sidebar-w, 240px) + 10px); padding-right: 10px; transition: padding-left .22s ease; }
 }
 
 @media (max-width: 991.98px) {
