@@ -73,6 +73,15 @@
         .table { font-size: 12px; color: var(--impaza-text); }
         .table thead th { font-size: 11px; color: var(--impaza-muted); font-weight: 600; }
         .table tbody td { font-size: 12px; }
+        html[data-theme="dark"] .table {
+            --bs-table-bg: transparent;
+            --bs-table-color: var(--impaza-text);
+            --bs-table-hover-bg: rgba(99,102,241,.08);
+            --bs-table-hover-color: var(--impaza-text);
+            background-color: transparent;
+        }
+        html[data-theme="dark"] .table tbody > tr > * { background-color: transparent; }
+        html[data-theme="dark"] .table thead > tr > * { background-color: var(--impaza-card); }
 
         /* Breadcrumbs */
         .breadcrumb { font-size: 11px; }
