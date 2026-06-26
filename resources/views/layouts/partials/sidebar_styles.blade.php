@@ -18,6 +18,10 @@
    /* Ensure sidebar sits above AdminLTE's #sidebar-overlay (z-index:1037) but below header (z-index:1040) */
    z-index: 1039;
  }
+
+@media (min-width: 992px) {
+  .main-sidebar { top: 0; height: 100vh; }
+}
 .main-sidebar .sidebar {
    height: 100%;
    padding-top: 0; /* keep brand close to header */
@@ -79,7 +83,9 @@
 .nav-sidebar .nav-link:active { transform: translateY(1px); }
 
 /* Tight spacing overrides for brand and nav */
-.user-panel { margin: 0 !important; padding: 12px 14px !important; border-bottom: 1px solid rgba(148,163,184,.14); }
+.user-panel { margin: 0 !important; padding: 0 14px !important; border-bottom: 1px solid rgba(148,163,184,.14); height: var(--header-height); display: flex; align-items: center; }
+.user-panel .image { display: flex; align-items: center; height: 100%; }
+.user-panel .image img.impaza-brand-logo { width: auto !important; height: 30px !important; max-width: 100% !important; }
 .user-panel .info h3 { margin: 0 !important; font-size: 14px; line-height: 1.2; }
 .impaza-brand-logo { display: block; filter: drop-shadow(0 8px 18px rgba(2,6,23,.28)); }
 /* Remove nav extra margin; rely on theme defaults */
@@ -96,23 +102,22 @@
 /* Layout adjustments at breakpoints */
 @media (min-width: 992px) {
   .sidebar-mini .main-sidebar { width: 240px; }
-  .sidebar-mini .content-wrapper, .sidebar-mini .main-header { margin-left: 240px; }
+  .sidebar-mini .content-wrapper { margin-left: 240px; }
 }
 @media (min-width: 1280px) {
   .sidebar-mini .main-sidebar { width: 240px; }
-  .sidebar-mini .content-wrapper, .sidebar-mini .main-header { margin-left: 240px; }
+  .sidebar-mini .content-wrapper { margin-left: 240px; }
 }
 
 @media (min-width: 992px) {
   .sidebar-mini.sidebar-collapse .main-sidebar { width: 76px; }
-  .sidebar-mini.sidebar-collapse .content-wrapper,
-  .sidebar-mini.sidebar-collapse .main-header { margin-left: 76px; }
+  .sidebar-mini.sidebar-collapse .content-wrapper { margin-left: 76px; }
 
   .sidebar-mini.sidebar-collapse .nav-sidebar .nav-header { display: none; }
   .sidebar-mini.sidebar-collapse .nav-sidebar .nav-link { justify-content: center; padding-left: 0; padding-right: 0; border-radius: 14px; margin-left: 12px; margin-right: 12px; }
   .sidebar-mini.sidebar-collapse .nav-sidebar .nav-link p { display: none; }
   .sidebar-mini.sidebar-collapse .nav-sidebar .nav-link i.nav-icon { margin-right: 0; font-size: 1rem; }
-  .sidebar-mini.sidebar-collapse .impaza-brand-logo { width: 42px !important; }
+  .sidebar-mini.sidebar-collapse .impaza-brand-logo { width: auto !important; height: 26px !important; }
   .sidebar-mini.sidebar-collapse .main-sidebar { overflow: visible !important; }
   .sidebar-mini.sidebar-collapse .main-sidebar .sidebar { overflow: visible !important; }
   .sidebar-mini.sidebar-collapse .main-sidebar .sidebar nav { overflow-x: visible !important; }
