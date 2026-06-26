@@ -85,9 +85,10 @@
 /* Tight spacing overrides for brand and nav */
 .user-panel { margin: 0 !important; padding: 0 14px !important; border-bottom: 1px solid rgba(148,163,184,.14); height: var(--header-height); display: flex; align-items: center; }
 .user-panel .image { display: flex; align-items: center; height: 100%; }
-.user-panel .image img.impaza-brand-logo { width: auto !important; height: 30px !important; max-width: 100% !important; }
+.user-panel .image img.impaza-brand-logo { width: auto !important; height: 30px !important; max-width: 100% !important; opacity: 1; }
 .user-panel .info h3 { margin: 0 !important; font-size: 14px; line-height: 1.2; }
-.impaza-brand-logo { display: block; filter: drop-shadow(0 8px 18px rgba(2,6,23,.28)); }
+.impaza-brand-logo { display: block; filter: none; }
+html[data-theme="dark"] .impaza-brand-logo { filter: brightness(1.12) contrast(1.08); }
 /* Remove nav extra margin; rely on theme defaults */
 /* .sidebar .nav.mt-2 { margin-top: 4px !important; } */
 

@@ -7,7 +7,7 @@
         <!-- Sidebar user panel (optional) -->
         <div class="user-panel d-flex bg-transparent">
             <div class="image w-100 text-left">
-                <img src="{{ asset('img/impazamon-v2.png') }}" alt="Logo" class="impaza-brand-logo" style="width: 90%; max-height: none;">
+                <img src="{{ asset('img/impazamon-v2.png') }}" alt="Logo" class="impaza-brand-logo">
             </div>
         </div>
 
