@@ -14,8 +14,8 @@
     </div>
   </div>
 
-  <div class="d-none d-md-flex impaza-topbar-center">
-    <button type="button" class="impaza-topbar-search" id="impazaGlobalSearchOpen" aria-label="Open search">
+  <div class="d-none d-xl-flex impaza-topbar-center">
+    <button type="button" class="impaza-topbar-search" data-impaza-global-search="1" aria-label="Open search">
       <span class="left">
         <i class="fas fa-search"></i>
         <span class="placeholder">Search faults, customers, sites, surveys...</span>
@@ -25,6 +25,11 @@
   </div>
 
   <ul class="navbar-nav ml-auto impaza-topbar-right">
+    <li class="nav-item d-md-flex d-xl-none">
+      <button type="button" class="btn impaza-topbar-icon" data-impaza-global-search="1" aria-label="Open search">
+        <i class="fas fa-search"></i>
+      </button>
+    </li>
     <li class="nav-item">
       <button type="button" class="btn impaza-topbar-icon" id="impazaThemeToggle" aria-label="Toggle theme" aria-pressed="false">
         <i class="fas fa-moon"></i>

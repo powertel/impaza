@@ -857,8 +857,9 @@
         });
 
         document.addEventListener('DOMContentLoaded', function () {
-          var btn = document.getElementById('impazaGlobalSearchOpen');
-          if (btn) btn.addEventListener('click', function (e) { e.preventDefault(); openSearch(); });
+          document.querySelectorAll('[data-impaza-global-search]').forEach(function (btn) {
+            btn.addEventListener('click', function (e) { e.preventDefault(); openSearch(); });
+          });
         });
       })();
     </script>
