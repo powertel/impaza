@@ -7,7 +7,8 @@
         <!-- Sidebar user panel (optional) -->
         <div class="user-panel d-flex bg-transparent">
             <div class="image w-100 text-left">
-                <img src="{{ asset('img/impazamon-v2.png') }}" alt="Logo" class="impaza-brand-logo">
+                <!-- <img src="{{ asset('img/impazamon-v2.png') }}" alt="iMPAZAMON" class="impaza-brand-logo light-mode-logo" decoding="async"> -->
+                <img src="{{ asset('img/impazamon-v2-dark.png') }}" alt="iMPAZAMON" class="impaza-brand-logo " decoding="async">
             </div>
         </div>
 
@@ -150,7 +151,7 @@
               <li class="nav-item">
                 <a href="{{ route('customer-connectivity-surveys.index') }}" class="nav-link {{ request()->routeIs('customer-connectivity-surveys.*') ? 'active' : '' }}">
                   <i class="nav-icon fas fa-wifi"></i>
-                  <p>Customer Connectivity Surveys</p>
+                  <p>Customer Surveys</p>
                 </a>
               </li>
             @endcan
