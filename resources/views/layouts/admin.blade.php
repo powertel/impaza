@@ -713,7 +713,7 @@
           var root = document.getElementById('impazaNotifList');
           if (!root) return;
           if (!items || !items.length) {
-            root.innerHTML = '<div class="px-3 py-2 text-muted small">No notifications</div>';
+            root.innerHTML = '<div class="impaza-notif-empty">No notifications</div>';
             return;
           }
           var html = items.map(function(n){
@@ -721,12 +721,9 @@
             var title = esc(data.title || 'Notification');
             var body = esc(data.body || data.message || '');
             var unread = !n.read_at;
-            var rowStyle = 'padding:10px 12px; border-bottom:1px solid #f1f5f9; cursor:pointer;' + (unread ? ' background:#eef6ff;' : '');
-            var titleStyle = 'font-weight:700; font-size:12px; color:#0f172a; margin-bottom:2px;';
-            var bodyStyle = 'font-size:11px; color:#475569; white-space:normal;';
-            return '<div class="impaza-notif-item" data-id="'+n.id+'" style="'+rowStyle+'">' +
-              '<div style="'+titleStyle+'">'+title+'</div>' +
-              '<div style="'+bodyStyle+'">'+body+'</div>' +
+            return '<div class="impaza-notif-item' + (unread ? ' is-unread' : '') + '" data-id="'+n.id+'">' +
+              '<div class="impaza-notif-title">'+title+'</div>' +
+              '<div class="impaza-notif-body">'+body+'</div>' +
             '</div>';
           }).join('');
           root.innerHTML = html;

@@ -101,6 +101,52 @@ html[data-theme="dark"] .impaza-topbar-search .kbd { background: rgba(2,6,23,.55
   border: 1px solid var(--impaza-border);
   box-shadow: var(--impaza-shadow);
   overflow: hidden;
+  background: var(--impaza-card);
+}
+.impaza-topbar-dropdown-menu .dropdown-header {
+  background: var(--impaza-card);
+  color: var(--impaza-text);
+}
+.impaza-topbar-dropdown-menu .dropdown-divider {
+  border-top-color: var(--impaza-border);
+}
+#impazaNotifMarkAll {
+  color: var(--impaza-primary);
+}
+#impazaNotifMarkAll:hover {
+  color: #4F46E5;
+}
+.impaza-notif-empty {
+  padding: 12px 14px;
+  color: var(--impaza-muted);
+  font-size: 11px;
+}
+.impaza-notif-item {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--impaza-border);
+  cursor: pointer;
+  background: transparent;
+  transition: background-color .15s ease;
+}
+.impaza-notif-item:hover {
+  background: rgba(99,102,241,.08);
+}
+.impaza-notif-item.is-unread {
+  background: rgba(99,102,241,.10);
+}
+.impaza-notif-item:last-child {
+  border-bottom: 0;
+}
+.impaza-notif-title {
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--impaza-text);
+  margin-bottom: 2px;
+}
+.impaza-notif-body {
+  font-size: 11px;
+  color: var(--impaza-muted);
+  white-space: normal;
 }
 
 @media (min-width: 992px) {
