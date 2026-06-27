@@ -5,7 +5,7 @@ Performance Dashboard
 @endsection
 
 @section('content')
-<link href="{{ asset('css/call_centre.css') }}" rel="stylesheet">
+<link href="{{ asset('css/call_centre.css') }}?v={{ @filemtime(public_path('css/call_centre.css')) }}" rel="stylesheet">
 <section class="content">
     <div class="card border-0 shadow-lg">
         <div class="card-header bg-white border-0 py-4">
@@ -405,10 +405,12 @@ Performance Dashboard
     /* Additional custom styles to match call_centre if needed */
     .cc-chart-card {
         height: 100%;
-        background: #fff;
+        background: var(--cc-card-bg);
+        color: var(--cc-text);
+        border: 1px solid var(--cc-card-border);
         border-radius: 0.5rem;
         padding: 1.5rem;
-        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        box-shadow: var(--cc-shadow-sm);
     }
 </style>
 @endsection

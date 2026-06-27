@@ -3,12 +3,12 @@
         <div class="card">
             <div class="card-header ui-sortable-handle" style="cursor: move">
                 <h3 class="card-title">
-                    <i class="fas fa-users mr-1"></i>
+                        <i class="fas fa-users me-1"></i>
                     Users
                 </h3>
                 <div class="card-tools">
-                    <ul class="nav nav-pills ml-auto">
-                        <li class="nav-item mr-1">
+                    <ul class="nav nav-pills ms-auto">
+                        <li class="nav-item me-1">
                             <button
                                 class="btn btn-sm btn-primary"
                                 @click="createMode"
@@ -28,16 +28,13 @@
                                     class="form-control float-right"
                                     placeholder="Search by name, email"
                                 />
-
-                                <div class="input-group-append">
-                                    <button
-                                        type="submit"
-                                        class="btn btn-default"
-                                        @click="search"
-                                    >
-                                        <i class="fas fa-search"></i>
-                                    </button>
-                                </div>
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-secondary"
+                                    @click="search"
+                                >
+                                    <i class="fas fa-search"></i>
+                                </button>
                             </div>
                         </li>
                     </ul>
@@ -118,7 +115,7 @@
                             </div>
 
                             <div class="col-md-6">
-                                <img :src="img" class="img-circle" />
+                                <img :src="img" class="rounded-circle img-fluid" />
                             </div>
                         </div>
                     </div>
@@ -153,12 +150,10 @@
                         </h5>
                         <button
                             type="button"
-                            class="close"
+                            class="btn-close"
                             data-bs-dismiss="modal"
                             aria-label="Close"
-                        >
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        ></button>
                     </div>
                     <form
                         @submit.prevent="
@@ -166,7 +161,7 @@
                         "
                     >
                         <div class="modal-body">
-                            <div class="form-group">
+                            <div class="mb-3">
                                 <label> Name </label>
                                 <input
                                     v-model="form.name"
@@ -175,7 +170,7 @@
                                     placeholder="Name"
                                     class="form-control"
                                     :class="{
-                                        'is-invaild': form.errors.has('name'),
+                                        'is-invalid': form.errors.has('name'),
                                     }"
                                 />
                                 <has-error
@@ -184,7 +179,7 @@
                                 ></has-error>
                             </div>
 
-                            <div class="form-group">
+                            <div class="mb-3">
                                 <label> Email </label>
                                 <input
                                     v-model="form.email"
@@ -193,7 +188,7 @@
                                     placeholder="Email"
                                     class="form-control"
                                     :class="{
-                                        'is-invaild': form.errors.has('email'),
+                                        'is-invalid': form.errors.has('email'),
                                     }"
                                 />
                                 <has-error
@@ -202,7 +197,7 @@
                                 ></has-error>
                             </div>
 
-                            <div class="form-group">
+                            <div class="mb-3">
                                 <label> Phone Number </label>
                                 <input
                                     v-model="form.phone"
@@ -211,7 +206,7 @@
                                     placeholder="Phone Number"
                                     class="form-control"
                                     :class="{
-                                        'is-invaild': form.errors.has('phone'),
+                                        'is-invalid': form.errors.has('phone'),
                                     }"
                                 />
                                 <has-error
@@ -220,21 +215,27 @@
                                 ></has-error>
                             </div>
 
-                            <div class="form-group">
+                            <div class="mb-3">
                                 <label> Choose Role </label>
-                                <b-form-select
+                                <select
                                     v-model="form.role"
-                                    :options="roles"
-                                    text-field="name"
-                                    value-field="id"
-                                ></b-form-select>
+                                    class="form-select"
+                                >
+                                    <option
+                                        v-for="role in roles"
+                                        :key="role.id"
+                                        :value="role.id"
+                                    >
+                                        {{ role.name }}
+                                    </option>
+                                </select>
                                 <has-error
                                     :form="form"
                                     field="role"
                                 ></has-error>
                             </div>
 
-                            <div class="form-group">
+                            <div class="mb-3">
                                 <label> Password </label>
                                 <input
                                     v-model="form.password"
@@ -243,7 +244,7 @@
                                     placeholder="Password"
                                     class="form-control"
                                     :class="{
-                                        'is-invaild':
+                                        'is-invalid':
                                             form.errors.has('password'),
                                     }"
                                 />
@@ -253,17 +254,32 @@
                                 ></has-error>
                             </div>
 
-                            <b-form-group label="Assign Permissions">
-                                <b-form-checkbox
-                                    v-for="option in permissions"
-                                    v-model="form.permissions"
-                                    :key="option.name"
-                                    :value="option.name"
-                                    name="flavour-3a"
+                            <div class="mb-3">
+                                <label class="form-label"
+                                    >Assign Permissions</label
                                 >
-                                    {{ option.name }}
-                                </b-form-checkbox>
-                            </b-form-group>
+                                <div class="d-flex flex-column gap-2">
+                                    <div
+                                        v-for="(option, index) in permissions"
+                                        :key="option.name"
+                                        class="form-check"
+                                    >
+                                        <input
+                                            class="form-check-input"
+                                            type="checkbox"
+                                            :id="'user-perm-' + index"
+                                            v-model="form.permissions"
+                                            :value="option.name"
+                                        />
+                                        <label
+                                            class="form-check-label"
+                                            :for="'user-perm-' + index"
+                                        >
+                                            {{ option.name }}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="modal-footer justify-content-between">
                             <button
@@ -273,15 +289,19 @@
                             >
                                 Close
                             </button>
-                            <b-button
-                                variant="primary"
+                            <button
+                                type="button"
+                                class="btn btn-lg btn-primary"
                                 v-if="!load"
-                                class="btn-lg"
                                 disabled
                             >
-                                <b-spinner small type="grow"></b-spinner>
+                                <span
+                                    class="spinner-grow spinner-grow-sm me-2"
+                                    role="status"
+                                    aria-hidden="true"
+                                ></span>
                                 {{ action }}
-                            </b-button>
+                            </button>
                             <button
                                 type="submit"
                                 v-if="load"
@@ -350,7 +370,9 @@ export default {
         },
         createMode() {
             this.editMode = false;
-            $("#createUser").modal("show");
+            window.bootstrap.Modal.getOrCreateInstance(
+                document.getElementById("createUser")
+            ).show();
         },
         deleteUser(user) {
             swal.fire({
@@ -406,10 +428,11 @@ export default {
                 });
         },
         viewUser(user) {
-            $("#viewUser").modal("show");
             this.img = "http://localhost:8000/img/" + user.photo;
             this.user = user;
-            window.bootstrap.Modal.getOrCreateInstance(document.getElementById('viewUser')).show();
+            window.bootstrap.Modal.getOrCreateInstance(
+                document.getElementById("viewUser")
+            ).show();
         },
         getRoles() {
             axios.get("/getAllRoles").then((response) => {

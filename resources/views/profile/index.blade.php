@@ -4,169 +4,258 @@
 Profile
 @endsection
 @include('partials.css')
-@section('content')
+@section('styles')
+<style>
+  .profile-page .profile-layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+    gap: 16px;
+  }
 
-<section class="content">
-  <div class="container-fluid">
-    @php($user = auth()->user())
-    <div class="row justify-content-center">
-      <div class="col-lg-4 col-md-5 mb-3">
-        <div class="card border-0 shadow-sm rounded-3 h-100">
-          <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between">
-            <h5 class="mb-0">My Profile</h5>
-            <!-- @if ($user)
-              <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
-                <i class="fas fa-key me-1"></i> Change
-              </button>
-            @endif -->
+  .profile-page .profile-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profile-page .profile-hero-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--impaza-text);
+  }
+
+  .profile-page .profile-hero-meta {
+    font-size: .8rem;
+    color: var(--impaza-muted);
+  }
+
+  .profile-page .profile-role-list {
+    justify-content: center;
+  }
+
+  .profile-page .profile-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .profile-page .profile-form-grid .full-span {
+    grid-column: 1 / -1;
+  }
+
+  @media (max-width: 991.98px) {
+    .profile-page .profile-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .profile-page .profile-form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+@endsection
+@section('content')
+@php
+  $user = auth()->user();
+  $dept = optional($user)->department_id ? optional(\App\Models\Department::find($user->department_id))->department : null;
+  $section = optional($user)->section_id ? optional(\App\Models\Section::find($user->section_id))->section : null;
+  $position = optional($user)->position_id ? optional(\App\Models\Position::find($user->position_id))->position : null;
+  $roleNames = $user ? $user->getRoleNames() : collect();
+@endphp
+
+<section class="content workflow-faults-page profile-page">
+  <div class="workspace-summary-grid">
+    <div class="workspace-summary-card" style="--summary-color:#6366F1;">
+      <div class="workspace-summary-body">
+        <div class="workspace-summary-copy">
+          <span class="workspace-summary-icon"><i class="fas fa-user"></i></span>
+          <div>
+            <div class="workspace-summary-label">Profile Status</div>
+            <div class="workspace-summary-title">{{ optional($user)->email_verified_at ? 'Verified account' : 'Pending verification' }}</div>
           </div>
-          <div class="card-body">
-            <div class="text-center mb-3">
-              <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width:80px; height:80px; font-size:1.6rem;">
+        </div>
+        <div class="workspace-summary-value">{{ $roleNames->count() }}</div>
+      </div>
+    </div>
+    <div class="workspace-summary-card" style="--summary-color:#0EA5E9;">
+      <div class="workspace-summary-body">
+        <div class="workspace-summary-copy">
+          <span class="workspace-summary-icon"><i class="fas fa-building"></i></span>
+          <div>
+            <div class="workspace-summary-label">Department</div>
+            <div class="workspace-summary-title">{{ $dept ?? 'Not assigned' }}</div>
+          </div>
+        </div>
+        <div class="workspace-summary-value">{{ $section ? 1 : 0 }}</div>
+      </div>
+    </div>
+    <div class="workspace-summary-card" style="--summary-color:#10B981;">
+      <div class="workspace-summary-body">
+        <div class="workspace-summary-copy">
+          <span class="workspace-summary-icon"><i class="fas fa-map-marker-alt"></i></span>
+          <div>
+            <div class="workspace-summary-label">Region</div>
+            <div class="workspace-summary-title">{{ optional($user)->region ?? 'Not set' }}</div>
+          </div>
+        </div>
+        <div class="workspace-summary-value">{{ $user && $user->weekly_standby ? 'W' : '-' }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h3 class="card-title">Manage Profile</h3>
+        <div class="page-lead">Review your account information, update personal details, and manage password security from one modern account workspace.</div>
+      </div>
+      <div class="card-tools">
+        <span class="record-chip"><i class="fas fa-id-badge"></i> {{ $roleNames->count() }} active role{{ $roleNames->count() === 1 ? '' : 's' }}</span>
+        @if ($user)
+          <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+            <i class="fas fa-key me-1"></i> Change Password
+          </button>
+        @endif
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div class="profile-layout">
+        <div class="workspace-panel">
+          <div class="workspace-panel-body">
+            <div class="profile-hero">
+              <div class="workspace-avatar">
                 {{ optional($user)->name ? strtoupper(substr($user->name,0,1)) : 'U' }}
               </div>
+              <div>
+                <div class="profile-hero-name">{{ optional($user)->name ?? 'Guest' }}</div>
+                <div class="profile-hero-meta">{{ optional($user)->email ?? 'No email available' }}</div>
+              </div>
+              <div class="workspace-chip-stack profile-role-list">
+                @forelse($roleNames as $role)
+                  <span class="badge rounded-pill" style="background: rgba(16, 185, 129, .14); color: #047857;">{{ $role }}</span>
+                @empty
+                  <span class="workspace-cell-sub">No roles assigned</span>
+                @endforelse
+              </div>
             </div>
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item d-flex justify-content-between align-items-start">
+          </div>
+        </div>
+
+        <div class="workspace-panel">
+          <div class="workspace-panel-header">
+            <div>
+              <h5 class="workspace-panel-title mb-0"><i class="fas fa-circle-info me-1"></i>Account Overview</h5>
+              <div class="workspace-panel-lead">Current identity, reporting line, and standby coverage details.</div>
+            </div>
+          </div>
+          <div class="workspace-panel-body">
+            <div class="workspace-stat-list">
+              <div class="workspace-stat-row">
                 <div>
-                  <small class="text-muted">Name</small>
-                  <div class="fw-semibold">{{ optional($user)->name ?? 'Guest' }}</div>
+                  <div class="workspace-stat-label">Phone</div>
+                  <div class="workspace-cell-main">{{ optional($user)->phonenumber ?? '—' }}</div>
                 </div>
-              </li>
-              <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div class="workspace-stat-value">Direct line</div>
+              </div>
+              <div class="workspace-stat-row">
                 <div>
-                  <small class="text-muted">Email</small>
-                  <div class="fw-semibold">{{ optional($user)->email ?? '—' }}</div>
+                  <div class="workspace-stat-label">Department</div>
+                  <div class="workspace-cell-main">{{ $dept ?? '—' }}</div>
                 </div>
-              </li>
-              <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div class="workspace-stat-value">{{ $section ?? 'No section' }}</div>
+              </div>
+              <div class="workspace-stat-row">
                 <div>
-                  <small class="text-muted">Phone</small>
-                  <div class="fw-semibold">{{ optional($user)->phonenumber ?? '—' }}</div>
+                  <div class="workspace-stat-label">Position</div>
+                  <div class="workspace-cell-main">{{ $position ?? '—' }}</div>
                 </div>
-              </li>
-              <li class="list-group-item d-flex justify-content-between align-items-start">
-                @php($dept = optional($user)->department_id ? optional(\App\Models\Department::find($user->department_id))->department : null)
+                <div class="workspace-stat-value">{{ optional($user)->region ?? 'No region' }}</div>
+              </div>
+              <div class="workspace-stat-row">
                 <div>
-                  <small class="text-muted">Department</small>
-                  <div class="fw-semibold">{{ $dept ?? '—' }}</div>
-                </div>
-              </li>
-              <li class="list-group-item d-flex justify-content-between align-items-start">
-                @php($section = optional($user)->section_id ? optional(\App\Models\Section::find($user->section_id))->section : null)
-                <div>
-                  <small class="text-muted">Section</small>
-                  <div class="fw-semibold">{{ $section ?? '—' }}</div>
-                </div>
-              </li>
-              <li class="list-group-item d-flex justify-content-between align-items-start">
-                @php($position = optional($user)->position_id ? optional(\App\Models\Position::find($user->position_id))->position : null)
-                <div>
-                  <small class="text-muted">Position</small>
-                  <div class="fw-semibold">{{ $position ?? '—' }}</div>
-                </div>
-              </li>
-              <li class="list-group-item d-flex justify-content-between align-items-start">
-                <div class="w-100">
-                  <small class="text-muted">Roles</small>
-                  <div>
-                    @if ($user && $user->getRoleNames())
-                      @foreach($user->getRoleNames() as $role)
-                        <span class="badge bg-success me-1">{{ $role }}</span>
-                      @endforeach
-                    @else
-                      <span class="text-muted">—</span>
-                    @endif
+                  <div class="workspace-stat-label">Standby</div>
+                  <div class="workspace-chip-stack">
+                    <span class="badge rounded-pill {{ $user && $user->weekly_standby ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'bg-secondary-subtle text-secondary border border-secondary-subtle' }}">Weekly: {{ $user && $user->weekly_standby ? 'Yes' : 'No' }}</span>
+                    <span class="badge rounded-pill {{ $user && $user->weekend_standby ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'bg-secondary-subtle text-secondary border border-secondary-subtle' }}">Weekend: {{ $user && $user->weekend_standby ? 'Yes' : 'No' }}</span>
                   </div>
                 </div>
-              </li>
-              <li class="list-group-item d-flex justify-content-between align-items-start">
-                <div>
-                  <small class="text-muted">Region</small>
-                  <div class="fw-semibold">{{ optional($user)->region ?? '—' }}</div>
-                </div>
-              </li>
-              <li class="list-group-item d-flex justify-content-between align-items-start">
-                <div>
-                  <small class="text-muted">Standby</small>
-                  <div>
-                    <span class="badge {{ $user && $user->weekly_standby ? 'bg-primary' : 'bg-secondary' }} me-2">Weekly: {{ $user && $user->weekly_standby ? 'Yes' : 'No' }}</span>
-                    <span class="badge {{ $user && $user->weekend_standby ? 'bg-primary' : 'bg-secondary' }}">Weekend: {{ $user && $user->weekend_standby ? 'Yes' : 'No' }}</span>
-                  </div>
-                </div>
-              </li>
-              <li class="list-group-item d-flex justify-content-between align-items-start">
-                <div>
-                  <small class="text-muted">Email Verified</small>
-                  <div class="fw-semibold">{{ optional($user)->email_verified_at ? optional($user)->email_verified_at->format('Y-m-d H:i') : 'Not verified' }}</div>
-                </div>
-              </li>
-            </ul>
+                <div class="workspace-stat-value">{{ optional($user)->email_verified_at ? optional($user)->email_verified_at->format('d M Y') : 'Not verified' }}</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="col-lg-8 col-md-7">
-        <div class="card border-0 shadow-sm rounded-3">
-          <div class="card-header bg-transparent border-0">
-            <h5 class="mb-0"><i class="fas fa-user-edit me-1"></i>Edit Profile</h5>
+      <div class="workspace-panel mt-3">
+        <div class="workspace-panel-header">
+          <div>
+            <h5 class="workspace-panel-title mb-0"><i class="fas fa-user-edit me-1"></i>Edit Profile</h5>
+            <div class="workspace-panel-lead">Update your contact details while keeping reporting structure fields read-only for consistency.</div>
           </div>
-          <div class="card-body">
-            <form method="POST" action="{{ route('user.postProfile') }}">
-              @csrf
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <label for="name" class="form-label">Name</label>
-                  <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" value="{{ optional($user)->name }}" required placeholder="Name">
-                  @error('name')
-                    <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                  @enderror
-                </div>
-                <div class="col-md-6">
-                  <label for="phone" class="form-label">Phone Number</label>
-                  <input type="text" name="phonenumber" id="phone" class="form-control @error('phonenumber') is-invalid @enderror" placeholder="e.g 263786533333" value="{{ optional($user)->phonenumber }}" required>
-                  @error('phonenumber')
-                    <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                  @enderror
-                </div>
-                <div class="col-md-6">
-                  <label for="email" class="form-label">Email</label>
-                  <input type="email" id="email" class="form-control" value="{{ optional($user)->email }}" disabled>
-                </div>
-                <div class="col-md-6">
-                  <label for="department" class="form-label">Department</label>
-                  <input type="text" id="department" class="form-control" value="{{ $dept ?? '—' }}" disabled>
-                </div>
-                <div class="col-md-6">
-                  <label for="section" class="form-label">Section</label>
-                  <input type="text" id="section" class="form-control" value="{{ $section ?? '—' }}" disabled>
-                </div>
-                <div class="col-md-6">
-                  <label for="position" class="form-label">Position</label>
-                  <input type="text" id="position" class="form-control" value="{{ $position ?? '—' }}" disabled>
-                </div>
+        </div>
+        <div class="workspace-panel-body">
+          <form method="POST" action="{{ route('user.postProfile') }}">
+            @csrf
+            <div class="profile-form-grid">
+              <div>
+                <label for="name" class="form-label">Name</label>
+                <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" value="{{ optional($user)->name }}" required placeholder="Name">
+                @error('name')
+                  <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                @enderror
               </div>
-              <div class="d-flex justify-content-start align-items-center gap-2 mt-3">
-                <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Update Profile</button>
-                @if ($user)
-                <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
-                  <i class="fas fa-key me-1"></i>Change Password
-                </button>
-                @endif
+              <div>
+                <label for="phone" class="form-label">Phone Number</label>
+                <input type="text" name="phonenumber" id="phone" class="form-control @error('phonenumber') is-invalid @enderror" placeholder="e.g 263786533333" value="{{ optional($user)->phonenumber }}" required>
+                @error('phonenumber')
+                  <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                @enderror
               </div>
-            </form>
-          </div>
+              <div>
+                <label for="email" class="form-label">Email</label>
+                <input type="email" id="email" class="form-control" value="{{ optional($user)->email }}" disabled>
+              </div>
+              <div>
+                <label for="department" class="form-label">Department</label>
+                <input type="text" id="department" class="form-control" value="{{ $dept ?? '—' }}" disabled>
+              </div>
+              <div>
+                <label for="section" class="form-label">Section</label>
+                <input type="text" id="section" class="form-control" value="{{ $section ?? '—' }}" disabled>
+              </div>
+              <div>
+                <label for="position" class="form-label">Position</label>
+                <input type="text" id="position" class="form-control" value="{{ $position ?? '—' }}" disabled>
+              </div>
+            </div>
+            <div class="d-flex justify-content-start align-items-center flex-wrap gap-2 mt-3">
+              <button type="submit" class="btn btn-primary btn-sm px-3"><i class="fas fa-save me-1"></i> Update Profile</button>
+              @if ($user)
+              <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                <i class="fas fa-key me-1"></i> Change Password
+              </button>
+              @endif
+            </div>
+          </form>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordLabel" aria-hidden="true">
+  <div class="modal custom-modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="changePasswordLabel"><i class="fas fa-key me-1"></i>Change Password</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <div>
+            <h5 class="modal-title" id="changePasswordLabel"><i class="fas fa-key me-1"></i>Change Password</h5>
+            <div class="modal-subtitle">Choose a strong new password that meets the current security rules.</div>
+          </div>
+          <button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <form method="POST" action="{{ route('user.password.update') }}">
           @csrf

@@ -284,6 +284,105 @@ System Usage Report Settings
     border-color: #cbd5e1;
   }
 
+  html[data-theme="dark"] .usage-mail-page .usage-stat-card,
+  html[data-theme="dark"] .usage-mail-page .usage-form-card {
+    background: linear-gradient(180deg, #0f172a 0%, #111c33 100%);
+    border-color: rgba(148, 163, 184, 0.18);
+    box-shadow: 0 24px 56px rgba(2, 6, 23, 0.42);
+  }
+
+  html[data-theme="dark"] .usage-mail-page .usage-stat-label,
+  html[data-theme="dark"] .usage-mail-page .usage-stat-sub,
+  html[data-theme="dark"] .usage-mail-page .usage-panel-note,
+  html[data-theme="dark"] .usage-mail-page .usage-meta,
+  html[data-theme="dark"] .usage-mail-page .usage-list li,
+  html[data-theme="dark"] .usage-mail-page .text-muted {
+    color: #94a3b8 !important;
+  }
+
+  html[data-theme="dark"] .usage-mail-page .usage-stat-value,
+  html[data-theme="dark"] .usage-mail-page .usage-detail-item strong,
+  html[data-theme="dark"] .usage-mail-page .fw-semibold,
+  html[data-theme="dark"] .usage-mail-page .usage-list li,
+  html[data-theme="dark"] .usage-mail-page .table,
+  html[data-theme="dark"] .usage-mail-page .table > :not(caption) > * > * {
+    color: #e5eefb !important;
+  }
+
+  html[data-theme="dark"] .usage-mail-page .text-dark {
+    color: #e5eefb !important;
+  }
+
+  html[data-theme="dark"] .usage-mail-page .table {
+    --bs-table-bg: transparent;
+    --bs-table-color: #e5eefb;
+    --bs-table-hover-bg: rgba(59, 130, 246, 0.08);
+    --bs-table-hover-color: #e5eefb;
+    background-color: transparent;
+  }
+
+  html[data-theme="dark"] .usage-mail-page .table tbody > tr > * {
+    background-color: transparent !important;
+  }
+
+  html[data-theme="dark"] .usage-mail-page .usage-form-card .form-label {
+    color: #e2e8f0;
+  }
+
+  html[data-theme="dark"] .usage-mail-page .usage-form-card .form-control,
+  html[data-theme="dark"] .usage-mail-page .usage-form-card .form-select,
+  html[data-theme="dark"] .usage-mail-page .usage-form-card textarea,
+  html[data-theme="dark"] .usage-mail-page .dataTables_wrapper .dataTables_filter input,
+  html[data-theme="dark"] .usage-mail-page .dataTables_wrapper .dataTables_length select {
+    background: #0b1220 !important;
+    border-color: rgba(148, 163, 184, 0.18) !important;
+    color: #e5eefb !important;
+  }
+
+  html[data-theme="dark"] .usage-mail-page .usage-form-card .form-control:focus,
+  html[data-theme="dark"] .usage-mail-page .usage-form-card .form-select:focus,
+  html[data-theme="dark"] .usage-mail-page .usage-form-card textarea:focus,
+  html[data-theme="dark"] .usage-mail-page .dataTables_wrapper .dataTables_filter input:focus,
+  html[data-theme="dark"] .usage-mail-page .dataTables_wrapper .dataTables_length select:focus {
+    border-color: rgba(96, 165, 250, 0.55);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.18);
+  }
+
+  html[data-theme="dark"] .usage-mail-page .usage-switch-wrap,
+  html[data-theme="dark"] .usage-mail-page .usage-detail-item {
+    background: rgba(15, 23, 42, 0.72);
+    border-color: rgba(148, 163, 184, 0.16);
+  }
+
+  html[data-theme="dark"] .usage-mail-page .usage-list li {
+    border-bottom-color: rgba(148, 163, 184, 0.12);
+  }
+
+  html[data-theme="dark"] .usage-mail-page .usage-history-table thead th {
+    background: rgba(15, 23, 42, 0.88);
+    color: #cbd5e1;
+    border-bottom-color: rgba(148, 163, 184, 0.18);
+  }
+
+  html[data-theme="dark"] .usage-mail-page .usage-history-table tbody tr:hover {
+    background: rgba(59, 130, 246, 0.08);
+  }
+
+  html[data-theme="dark"] .usage-mail-page .usage-error-chip {
+    background: rgba(127, 29, 29, 0.28);
+    color: #fecaca;
+  }
+
+  html[data-theme="dark"] .usage-mail-page .alert-success {
+    background: rgba(6, 78, 59, 0.45);
+    color: #d1fae5;
+  }
+
+  html[data-theme="dark"] .usage-mail-page .alert-danger {
+    background: rgba(127, 29, 29, 0.38);
+    color: #fecaca;
+  }
+
   @media (max-width: 991.98px) {
     .usage-mail-page .usage-detail-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -1,0 +1,79 @@
+/* =====================================================================
+   iMPAZAMON reusable Blade components — design-system stylesheet.
+   Loaded globally from layouts/admin.blade.php so every component is
+   styled regardless of how/where it is rendered. All colors use the
+   global --impaza-* tokens, so components are dark-mode safe.
+   ===================================================================== */
+
+/* ---- stat-card (x-stat-card) — compact KPI card ---- */
+.impaza-stat { position: relative; display: flex; flex-direction: column; gap: 8px; text-decoration: none; padding: 16px 18px; border-radius: var(--impaza-radius); background: var(--impaza-card); border: 1px solid var(--impaza-border); box-shadow: var(--impaza-shadow-sm); color: var(--impaza-text); overflow: hidden; transition: transform .2s ease, box-shadow .2s ease; height: 100%; }
+a.impaza-stat:hover { transform: translateY(-3px); box-shadow: var(--impaza-shadow); color: var(--impaza-text); text-decoration: none; }
+.impaza-stat::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--impaza-stat-accent, var(--impaza-primary)); }
+.impaza-stat-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.impaza-stat-icon { width: 40px; height: 40px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 1rem; background: var(--impaza-stat-accent, var(--impaza-primary)); flex: 0 0 auto; }
+.impaza-stat-title { color: var(--impaza-muted); font-weight: 600; font-size: .82rem; text-align: right; }
+.impaza-stat-body { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.impaza-stat-metric { min-width: 0; }
+.impaza-stat-value { color: var(--impaza-text); font-weight: 800; font-size: 1.75rem; line-height: 1.05; }
+.impaza-stat-subline { display: flex; align-items: center; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.impaza-stat-sublabel { font-size: .7rem; color: var(--impaza-muted); }
+.impaza-stat-sub { color: var(--impaza-muted); font-size: .72rem; margin-top: 6px; }
+.impaza-stat-trend { display: inline-flex; align-items: center; gap: 4px; font-size: .72rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; line-height: 1.4; }
+.impaza-stat-trend--up   { color: var(--impaza-success); background: rgba(16,185,129,.14); }
+.impaza-stat-trend--down { color: var(--impaza-danger);  background: rgba(239,68,68,.14); }
+.impaza-stat-trend--flat { color: var(--impaza-muted);   background: rgba(148,163,184,.16); }
+.impaza-stat-spark { flex: 1 1 52%; min-width: 0; max-width: 60%; align-self: center; }
+.impaza-stat-spark .kpi-spark { width: 100%; }
+
+/* ---- page-header (x-page-header) ---- */
+.impaza-page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+.impaza-page-header .ph-title { display: flex; align-items: center; gap: 10px; font-size: 1.25rem; font-weight: 700; color: var(--impaza-text); margin: 0; }
+.impaza-page-header .ph-title .ph-icon { width: 36px; height: 36px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; background: rgba(99,102,241,.12); color: var(--impaza-primary); border: 1px solid rgba(99,102,241,.18); font-size: 1rem; }
+.impaza-page-header .ph-subtitle { color: var(--impaza-muted); font-size: .8rem; margin: 4px 0 0; }
+.impaza-page-header .ph-actions { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* ---- filter-bar (x-filter-bar) ---- */
+.impaza-filter-bar { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; padding: 12px 14px; background: var(--impaza-card); border: 1px solid var(--impaza-border); border-radius: var(--impaza-radius); box-shadow: var(--impaza-shadow-sm); }
+.impaza-filter-bar.is-sticky { position: sticky; top: 6px; z-index: 20; }
+.impaza-filter-bar .form-label { font-size: .72rem; font-weight: 600; color: var(--impaza-muted); margin-bottom: 4px; }
+.impaza-filter-bar .form-control, .impaza-filter-bar .form-select { background: var(--impaza-card); border-color: var(--impaza-border); color: var(--impaza-text); }
+.impaza-filter-bar .form-control:focus, .impaza-filter-bar .form-select:focus { border-color: var(--impaza-primary); box-shadow: 0 0 0 4px rgba(99,102,241,.15); }
+.impaza-filter-bar .filter-actions { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; }
+
+/* ---- status-badge (x-status-badge) ---- */
+.impaza-badge { display: inline-flex; align-items: center; gap: 4px; font-size: .72rem; font-weight: 600; padding: .35rem .6rem; border-radius: 999px; letter-spacing: .01em; line-height: 1; white-space: nowrap; }
+
+/* ---- data-table (x-data-table) ---- */
+.impaza-table-card { background: var(--impaza-card); border: 1px solid var(--impaza-border); border-radius: var(--impaza-radius); box-shadow: var(--impaza-shadow-sm); overflow: hidden; }
+.impaza-table-card .itc-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 16px; border-bottom: 1px solid var(--impaza-border); }
+.impaza-table-card .itc-title { font-size: .95rem; font-weight: 700; color: var(--impaza-text); margin: 0; }
+.impaza-table-card .itc-subtitle { font-size: .75rem; color: var(--impaza-muted); margin: 2px 0 0; }
+.impaza-table-card .itc-actions { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.impaza-table-card .table { --bs-table-bg: transparent; --bs-table-color: var(--impaza-text); --bs-table-hover-bg: rgba(99,102,241,.06); --bs-table-hover-color: var(--impaza-text); margin: 0; color: var(--impaza-text); background-color: transparent; }
+.impaza-table-card .table thead th { font-size: .72rem; color: var(--impaza-muted); font-weight: 600; background: var(--impaza-card); border-bottom: 1px solid var(--impaza-border); white-space: nowrap; }
+.impaza-table-card .table tbody > tr > * { background-color: transparent; }
+.impaza-table-card .table tbody td { font-size: .8rem; vertical-align: middle; border-color: var(--impaza-border); }
+.impaza-table-card .table tbody tr:hover { background: rgba(99,102,241,.05); }
+.impaza-table-card.has-sticky thead th { position: sticky; top: 0; z-index: 2; }
+.impaza-table-card .itc-body.is-scroll { overflow: auto; }
+
+/* ---- form-section (x-form-section) ---- */
+.impaza-form-section { margin-bottom: 20px; }
+.impaza-form-section .ifs-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.impaza-form-section .ifs-icon { width: 34px; height: 34px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; background: rgba(99,102,241,.12); color: var(--impaza-primary); border: 1px solid rgba(99,102,241,.18); font-size: .9rem; }
+.impaza-form-section .ifs-title { font-size: .95rem; font-weight: 700; color: var(--impaza-text); margin: 0; }
+.impaza-form-section .ifs-subtitle { font-size: .75rem; color: var(--impaza-muted); margin: 1px 0 0; }
+.impaza-form-section .ifs-body { background: var(--impaza-card); border: 1px solid var(--impaza-border); border-radius: var(--impaza-radius); box-shadow: var(--impaza-shadow-sm); padding: 16px; }
+.impaza-form-section .ifs-body .form-label { font-size: .75rem; font-weight: 600; color: var(--impaza-muted); }
+.impaza-form-section .ifs-body .form-control, .impaza-form-section .ifs-body .form-select { background: var(--impaza-card); border-color: var(--impaza-border); color: var(--impaza-text); }
+.impaza-form-section .ifs-body .form-control:focus, .impaza-form-section .ifs-body .form-select:focus { border-color: var(--impaza-primary); box-shadow: 0 0 0 4px rgba(99,102,241,.15); }
+
+/* ---- modal (x-modal) ---- */
+.impaza-modal .modal-content { border: 1px solid var(--impaza-border); border-radius: var(--impaza-radius); box-shadow: var(--impaza-shadow); background: var(--impaza-card); color: var(--impaza-text); }
+.impaza-modal .modal-header { border-bottom: 1px solid var(--impaza-border); align-items: center; }
+.impaza-modal .modal-title { display: inline-flex; align-items: center; gap: 10px; font-size: 1rem; font-weight: 700; color: var(--impaza-text); }
+.impaza-modal .modal-title .imh-icon { width: 32px; height: 32px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; background: rgba(99,102,241,.12); color: var(--impaza-primary); border: 1px solid rgba(99,102,241,.18); font-size: .85rem; }
+.impaza-modal .modal-footer { border-top: 1px solid var(--impaza-border); }
+.impaza-modal .form-label { font-size: .75rem; font-weight: 600; color: var(--impaza-muted); }
+.impaza-modal .form-control, .impaza-modal .form-select { background: var(--impaza-card); border-color: var(--impaza-border); color: var(--impaza-text); }
+.impaza-modal .form-control:focus, .impaza-modal .form-select:focus { border-color: var(--impaza-primary); box-shadow: 0 0 0 4px rgba(99,102,241,.15); }

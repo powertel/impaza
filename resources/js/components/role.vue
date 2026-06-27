@@ -8,33 +8,50 @@
                     name="name"
                     placeholder="Role Name"
                     class="form-control"
-                    :class="{ 'is-invaild': form.errors.has('name') }"
+                    :class="{ 'is-invalid': form.errors.has('name') }"
                 />
                 <has-error :form="form" field="name"></has-error>
             </div>
 
-            <b-form-group label="Assign Permissions">
-                <b-form-checkbox
-                    v-for="option in permissions"
-                    v-model="form.permissions"
-                    :key="option.name"
-                    :value="option.name"
-                    name="flavour-3a"
-                >
-                    {{ option.name }}
-                </b-form-checkbox>
-            </b-form-group>
+            <div class="mb-3">
+                <label class="form-label">Assign Permissions</label>
+                <div class="d-flex flex-column gap-2">
+                    <div
+                        v-for="(option, index) in permissions"
+                        :key="option.name"
+                        class="form-check"
+                    >
+                        <input
+                            class="form-check-input"
+                            type="checkbox"
+                            :id="'role-perm-' + index"
+                            v-model="form.permissions"
+                            :value="option.name"
+                        />
+                        <label
+                            class="form-check-label"
+                            :for="'role-perm-' + index"
+                        >
+                            {{ option.name }}
+                        </label>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="modal-footer justify-content-between">
-            <b-button
-                type="submit"
-                variant="primary"
-                class="btn-lg btn-primary"
+            <button
+                type="button"
+                class="btn btn-lg btn-primary"
                 v-if="!dis"
                 disabled
-                ><b-spinner small type="grow"></b-spinner>Creating
-                Role</b-button
             >
+                <span
+                    class="spinner-grow spinner-grow-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                ></span>
+                Creating Role
+            </button>
             <button
                 type="submit"
                 v-if="dis"

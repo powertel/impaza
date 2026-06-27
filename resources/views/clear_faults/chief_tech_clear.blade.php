@@ -8,26 +8,22 @@ Rectified Faults
 
 @section('content')
 
-<section class="content">
-
-<div class="card">
-
-    <!--Card Header-->
-    <div class="card-header">
-        <h3 class="card-title">Rectified Faults</h3>
-        <div class="card-tools">
-
+<section class="content workflow-faults-page">
+<div class="card faults-panel">
+    <div class="faults-panel-header">
+        <div class="faults-panel-copy">
+            <h3 class="faults-panel-title">Rectified Faults</h3>
+            <div class="faults-panel-subtitle">Track faults awaiting final chief technician review from the same workspace pattern used across the faults module.</div>
         </div>
+        <div class="faults-panel-actions"></div>
     </div>
-    <!-- /.card-header -->
-    <div class="card-body">
-        <div class="table-responsive">
-            <div class="filter-toolbar d-flex justify-content-end align-items-center gap-2 mb-2">
-                <div class="input-group input-group-sm" style="width: 170px;">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text"><i class="fas fa-list me-1"></i> Show</span>
-                    </div>
-                    <select id="chiefTechClearPageSize" class="form-select form-select-sm" style="width:auto;">
+
+    <div class="faults-toolbar">
+        <div class="faults-toolbar-grid">
+            <div class="faults-toolbar-field">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="fas fa-list"></i></span>
+                    <select id="chiefTechClearPageSize" class="form-select form-select-sm" aria-label="Rows per page">
                         <option value="10">10</option>
                         <option value="20" selected>20</option>
                         <option value="50">50</option>
@@ -35,12 +31,25 @@ Rectified Faults
                         <option value="all">All</option>
                     </select>
                 </div>
-                <div class="input-group input-group-sm" style="width: 220px;">
+            </div>
+            <div class="faults-toolbar-field faults-toolbar-search" style="grid-column: span 3;">
+                <div class="input-group input-group-sm">
                     <span class="input-group-text"><i class="fas fa-search"></i></span>
-                    <input type="text" id="chiefTechClearSearch" class="form-control" placeholder="Search faults">
+                    <input type="text" id="chiefTechClearSearch" class="form-control" placeholder="Search faults, customers, links, and statuses...">
                 </div>
             </div>
-            <table  class="table table-hover js-paginated-table" data-page-size="20" data-page-size-control="#chiefTechClearPageSize" data-pager="#chiefTechClearPager" data-search="#chiefTechClearSearch">
+            <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 faults-toolbar-submit" id="chiefTechClearSearchTrigger">
+                <i class="fas fa-search me-1"></i> Search
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 faults-toolbar-reset" id="chiefTechClearReset">
+                <i class="fas fa-rotate-left me-1"></i> Reset
+            </button>
+        </div>
+    </div>
+
+    <div class="faults-table-shell">
+        <div class="table-responsive impaza-table-wrap faults-table-wrap">
+            <table class="table table-hover align-middle impaza-table faults-table js-paginated-table" data-page-size="20" data-page-size-control="#chiefTechClearPageSize" data-pager="#chiefTechClearPager" data-search="#chiefTechClearSearch">
                 <thead>
                     <tr>
                         <th>No.</th>
@@ -54,43 +63,49 @@ Rectified Faults
                 </thead>
                 <tbody>
                     @foreach ( $faults as $fault )
-                    <tr >
-                        <td>{{ ++$i }}</td>
-                        <td>{{ $fault->fault_ref_number}}</td>
-                        <td>{{ $fault->customer }}</td>
-                        <td>{{ $fault->link }}</td>
-                        <td class="text-nowrap">
-                            <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
-                                {{$fault->description}}
-                            </span>
+                    <tr>
+                        <td data-label="No.">{{ ++$i }}</td>
+                        <td data-label="Ref No.">
+                            <div class="faults-ref">
+                                <span class="faults-cell-main">{{ $fault->fault_ref_number }}</span>
+                                <span class="faults-cell-sub">Fault record</span>
+                            </div>
                         </td>
-                        <td>
-                            <span class="badge rounded-pill bg-light text-danger age-ticker fs-6" data-started-at="{{ $fault->stage_started_at ?? '' }}"></span>
+                        <td data-label="Customer">
+                            <div class="faults-cell-main">{{ $fault->customer }}</div>
                         </td>
-                        <td>
-                            @can('chief-tech-clear-faults-clear')
-                                <!-- <button type="button" class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#chiefTechClearModal-{{ $fault->id }}">
-                                    <i class="fas fa-save me-1"></i> Clear
-                                </button> -->
-                            @endcan
-                            <button type="button" class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
-                                <i class="fas fa-eye me-1"></i> View
-                            </button>
+                        <td data-label="Link Name">
+                            <div class="faults-cell-main">{{ $fault->link }}</div>
+                        </td>
+                        <td class="text-nowrap" data-label="Status">
+                            <x-status-badge :label="$fault->description" :color="\App\Models\Status::STATUS_COLOR[$fault->description] ?? '#64748B'" :soft="true" />
+                        </td>
+                        <td data-label="Fault Age">
+                            <span class="faults-age-pill age-ticker" data-started-at="{{ $fault->stage_started_at ?? '' }}"></span>
+                        </td>
+                        <td data-label="Action(s)">
+                            <div class="faults-actions">
+                                <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                                    <i class="fas fa-eye me-1"></i> View
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     @endforeach
                     @if ($faults->isEmpty())
                         <tr>
-                            <td colspan="7" class="text-center text-muted">No Rectified Faults</td>
+                            <td colspan="7" class="text-center text-muted py-5">No rectified faults</td>
                         </tr>
                     @endif
-                </tbody> 
+                </tbody>
             </table>
-            <div id="chiefTechClearPager" class="mt-2"></div>
         </div>
-     </div>
-     <!-- /.card-body -->
- </div>
+        <div class="faults-table-footer">
+            <small class="text-muted">Showing the current rectification queue for chief technician review</small>
+            <div id="chiefTechClearPager"></div>
+        </div>
+    </div>
+</div>
  
   
  {{-- {{$section->section}}
@@ -118,11 +133,28 @@ Rectified Faults
     @include('partials.scripts')
     <script>
         window.currentUserName = "{{ auth()->user()->name }}";
+        document.getElementById('chiefTechClearSearchTrigger')?.addEventListener('click', function () {
+            const input = document.getElementById('chiefTechClearSearch');
+            if (!input) return;
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.focus();
+        });
+        document.getElementById('chiefTechClearReset')?.addEventListener('click', function () {
+            const input = document.getElementById('chiefTechClearSearch');
+            const perPage = document.getElementById('chiefTechClearPageSize');
+            if (input) {
+                input.value = '';
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            if (perPage) {
+                perPage.value = '20';
+                perPage.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
     </script>
     <!-- Per-row Chief Tech Clear confirmation modals using partial -->
     @foreach ($faults as $fault)
         @include('clear_faults.chief_tech_clear_modal', ['fault' => $fault])
     @endforeach
 @endsection
-
 

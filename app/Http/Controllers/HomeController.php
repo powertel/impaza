@@ -106,6 +106,28 @@ class HomeController extends Controller
             }
         };
 
+        $buildFaultMetricQuery = function ($rangeFrom = null, $rangeTo = null) use ($applyRealFaultFilter, $selectedRegion) {
+            $query = DB::table('faults');
+            $applyRealFaultFilter($query);
+            if ($selectedRegion !== null) {
+                $query->leftJoin('cities', 'faults.city_id', '=', 'cities.id')
+                    ->where('cities.region', '=', $selectedRegion);
+            }
+            if ($rangeFrom && $rangeTo) {
+                $query->whereBetween('faults.created_at', [$rangeFrom, $rangeTo]);
+            }
+
+            return $query;
+        };
+
+        $toTrendPercent = function (int $current, int $previous) {
+            if ($previous > 0) {
+                return (int) round((($current - $previous) / $previous) * 100);
+            }
+
+            return $current > 0 ? 100 : 0;
+        };
+
         // Base counts respecting selected period
         $faultsQuery = DB::table('faults');
         $applyRealFaultFilter($faultsQuery);
@@ -165,6 +187,7 @@ class HomeController extends Controller
             ->orderBy('faults.updated_at','desc')
             ->limit(10)
             ->get(['faults.fault_ref_number','faults.status_id','customers.customer','links.link','faults.updated_at',
+                'faults.created_at as date_logged','faults.priorityLevel as priority',
                 'statuses.status_code as status_code','statuses.description as status_description',
                 'assigned_users.name as assignedTo',
                 'reported_users.name as reportedBy',
@@ -294,6 +317,86 @@ class HomeController extends Controller
         $todayFaultsQuery->whereDate('faults.created_at', Carbon::today());
         $todayFaultsCount = $todayFaultsQuery->count();
 
+        if ($fromDate && $toDate) {
+            $periodSeconds = $fromDate->diffInSeconds($toDate) + 1;
+            $previousPeriodEnd = (clone $fromDate)->subSecond();
+            $previousPeriodStart = (clone $previousPeriodEnd)->subSeconds(max(0, $periodSeconds - 1));
+            $periodTrendLabel = 'vs previous period';
+        } else {
+            $previousPeriodStart = Carbon::now()->startOfMonth()->subMonth();
+            $previousPeriodEnd = Carbon::now()->startOfMonth()->subSecond();
+            $periodTrendLabel = 'vs last month';
+        }
+
+        $previousFaultCount = $buildFaultMetricQuery($previousPeriodStart, $previousPeriodEnd)->count();
+        $previousRectificationCount = $buildFaultMetricQuery($previousPeriodStart, $previousPeriodEnd)
+            ->where('status_id', '=', $rectificationId)
+            ->count();
+        $previousResolvedCount = $buildFaultMetricQuery($previousPeriodStart, $previousPeriodEnd)
+            ->where('status_id', '=', $nocClearedId)
+            ->count();
+        $yesterdayFaultsCount = $buildFaultMetricQuery()
+            ->whereDate('faults.created_at', Carbon::yesterday())
+            ->count();
+
+        $totalTrendPct = $toTrendPercent($faultCount, $previousFaultCount);
+        $rectTrendPct = $toTrendPercent($inProgressFaultsCount, $previousRectificationCount);
+        $resolvedTrendPct = $toTrendPercent($resolvedFaultsCount, $previousResolvedCount);
+        $todayTrendPct = $toTrendPercent($todayFaultsCount, $yesterdayFaultsCount);
+        $totalTrendLabel = $periodTrendLabel;
+        $rectTrendLabel = $periodTrendLabel;
+        $resolvedTrendLabel = $periodTrendLabel;
+        $todayTrendLabel = 'vs yesterday';
+
+        // --- Additive dashboard metrics (read-only; no existing logic changed) ---
+        // SLA proxy using the app's established 72h convention (see FaultController
+        // open_lt72 / open_gt72): of currently OPEN faults, how many are within vs
+        // beyond 72 hours of being logged.
+        $within72Query = DB::table('faults')->where('status_id','!=',$nocClearedId)
+            ->where('faults.created_at','>=', Carbon::now()->subHours(72));
+        $applyRealFaultFilter($within72Query);
+        if ($selectedRegion !== null) {
+            $within72Query->leftJoin('cities','faults.city_id','=','cities.id')->where('cities.region','=',$selectedRegion);
+        }
+        $within72Count = $within72Query->count();
+
+        $over72Query = DB::table('faults')->where('status_id','!=',$nocClearedId)
+            ->where('faults.created_at','<', Carbon::now()->subHours(72));
+        $applyRealFaultFilter($over72Query);
+        if ($selectedRegion !== null) {
+            $over72Query->leftJoin('cities','faults.city_id','=','cities.id')->where('cities.region','=',$selectedRegion);
+        }
+        $over72Count = $over72Query->count();
+
+        // Monthly RESOLVED counts, parallel to $monthlyCounts/$monthlyLabels, for the
+        // "Logged vs Resolved" trend chart. Mirrors the existing logged-count buckets.
+        $monthlyResolvedCounts = [];
+        if ($selectedYear !== null) {
+            foreach (range(1,12) as $m) {
+                $rq = DB::table('faults')->where('status_id', $nocClearedId)
+                    ->whereYear('faults.created_at', $selectedYear)
+                    ->whereMonth('faults.created_at', $m);
+                $applyRealFaultFilter($rq);
+                if ($selectedRegion !== null) {
+                    $rq->leftJoin('cities','faults.city_id','=','cities.id')->where('cities.region','=',$selectedRegion);
+                }
+                $monthlyResolvedCounts[] = (int) $rq->count();
+            }
+        } else {
+            $cursor = Carbon::now()->startOfMonth()->subMonths(11);
+            for ($i = 0; $i < 12; $i++) {
+                $next = (clone $cursor)->endOfMonth();
+                $rq = DB::table('faults')->where('status_id', $nocClearedId)
+                    ->whereBetween('faults.created_at', [$cursor, $next]);
+                $applyRealFaultFilter($rq);
+                if ($selectedRegion !== null) {
+                    $rq->leftJoin('cities','faults.city_id','=','cities.id')->where('cities.region','=',$selectedRegion);
+                }
+                $monthlyResolvedCounts[] = (int) $rq->count();
+                $cursor->addMonth();
+            }
+        }
+
         $waitingAssessmentQuery = DB::table('faults')->where('status_id', '=', $waitingAssessmentId);
         $applyRealFaultFilter($waitingAssessmentQuery);
         if ($selectedRegion !== null) {
@@ -369,10 +472,13 @@ class HomeController extends Controller
             'openFaultsCount','inProgressFaultsCount','resolvedFaultsCount','todayFaultsCount','avgOpenAgeSec','maxOpenAgeSec','avgResolutionSec','techResolutionAverages',
             'availableYears','availableMonths','selectedYear','selectedMonth',
             'myAssignedCount','myResolvedCount','myAvgResolutionSec','myCompletionRate',
-            'monthlyLabels','monthlyCounts','statusLabels','statusValues',
+            'monthlyLabels','monthlyCounts','monthlyResolvedCounts','statusLabels','statusValues',
             'topCustomerLabels','topCustomerCounts',
             'availableRegions','selectedRegion',
             'nocClearedId','waitingAssessmentId','rectificationId','waitingAssessmentCount',
+            'within72Count','over72Count',
+            'totalTrendPct','rectTrendPct','resolvedTrendPct','todayTrendPct',
+            'totalTrendLabel','rectTrendLabel','resolvedTrendLabel','todayTrendLabel',
             'allStatuses'
         ));
     }

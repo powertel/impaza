@@ -1,87 +1,18 @@
 <script>
-$(document).off('change', '#city').on('change', '#city', function () {
-        var CityID = $(this).val();
-        if (CityID) {
-            $.ajax({
-                url : '/suburb/' +CityID,
-                type: "GET",
-                dataType: "json",
-                success: function (res) {
-                    if (res) {
-                        $("#suburb").empty();
-                        $("#pop").empty();
-                        $("#suburb").append('<option  selected Disabled>Select Suburb</option>');
-                        $("#pop").append('<option  selected Disabled>Select Pop</option>');
-                        $.each(res, function (key, value) {
-                            $("#suburb").append('<option value="' + key + '">' + value + '</option>');
-                        });
-
-                    } else {
-                        $("#suburb").empty();
-                        $("#pop").empty();
-                    }
-                }
-            });
-        } else {
-            $("#suburb").empty();
-            $("#pop").empty();
-        }
+document.addEventListener('DOMContentLoaded', function () {
+  [
+    '#createFaultModal',
+    '[id^="editFaultModal-"]',
+    '[id^="showFaultModal-"]',
+    '[id^="PicModal-"]'
+  ].forEach(function(selector){
+    document.querySelectorAll(selector).forEach(function(modal){
+      if (modal && modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+      }
     });
-    $(document).off('change', '#suburb').on('change', '#suburb', function () {
-        var suburbID = $(this).val();
-        if (suburbID) {
-            $.ajax({
-                url : '/pop/' +suburbID,
-                type: "GET",
-                dataType: "json",
-                success: function (res) {
-                    if (res) {
-                        $("#pop").empty();
-                        $("#pop").append('<option  selected Disabled>Select Pop</option>');
-                        $.each(res, function (key, value) {
-                            $("#pop").append('<option value="' + key + '">' + value + '</option>');
-                        });
-
-                    } else {
-                        $("#pop").empty();
-                    }
-                }
-            });
-        } else {
-            $("#pop").empty();
-        }
-    });
-</script>
-
-
-<script type="text/javascript">
-    $(document).off('change', '#customer').on('change', '#customer', function () {
-        var customerID = $(this).val();
-        if (customerID) {
-            $.ajax({
-                type: "GET",
-                url : '/link/' +customerID,
-                dataType: "json",
-                success: function (res) {
-                    if (res) {
-                        $("#link").empty();
-                        $("#link").append('<option  selected Disabled>Select Link</option>');
-                        $.each(res, function (key, value) {
-                            // value is now an object with id, link, city, suburb
-                            var text = value.link + ' - ' + (value.city || '') + ' - ' + (value.suburb || '');
-                            $("#link").append('<option value="' + value.id + '">' + text + '</option>');
-                        });
-
-                    } else {
-                        $("#link").empty().append('<option selected disabled>No links found for this customer</option>');
-                    }
-                }
-            });
-        } else {
-            $("#link").empty().append('<option selected disabled>Select Link</option>');
-        }
-    });
-</script>
+  });
+});
 </script>
 
 <script>
@@ -141,7 +72,11 @@ $(document).off('change', '.customer-select').on('change', '.customer-select', f
       type: 'GET',
       dataType: 'json',
       success: function(res){
-        $link.empty().append('<option selected disabled>Select Link</option>');
+        if ($link.hasClass('select2-hidden-accessible')) {
+          $link.empty().append('<option value=""></option>');
+        } else {
+          $link.empty().append('<option selected disabled>Select Link</option>');
+        }
         $.each(res, function(key, value){
           var text = (value && typeof value === 'object')
             ? ((value.link || '') + ' - ' + (value.city || '') + ' - ' + (value.suburb || ''))
@@ -149,24 +84,40 @@ $(document).off('change', '.customer-select').on('change', '.customer-select', f
           $link.append('<option value="'+key+'">'+text+'</option>');
         });
         var lsel = $link.data('selected');
-        if (lsel) { $link.val(String(lsel)); }
+        if (lsel) {
+          $link.val(String(lsel));
+        }
+        if ($link.hasClass('select2-hidden-accessible')) {
+          $link.trigger('change.select2');
+        }
       }
     });
   } else {
-    $link.empty();
+    if ($link.hasClass('select2-hidden-accessible')) {
+      $link.empty().append('<option value=""></option>');
+    } else {
+      $link.empty().append('<option selected disabled>Select Link</option>');
+    }
+    if ($link.hasClass('select2-hidden-accessible')) {
+      $link.trigger('change.select2');
+    }
   }
 });
 </script>
 
 <script>
-// Disable Save until all required fields in the create modal are valid
+// Create modal: initialize controls and keep submit disabled until required fields are valid
 $(function(){
+  var $modal = $('#createFaultModal');
   var $saveBtn = $('button[form="UF"][type="submit"]');
-  function computeValidity(mark){
+  function computeCreateValidity(mark){
     var requiredSelectors = [
-      '#customer', 'input[name="contactName"]', 'input[name="phoneNumber"]',
-      '#link', 'select[name="suspectedRfo_id"]',
-      'textarea[name="remark"]'
+      '#createFaultModal #customer',
+      '#createFaultModal input[name="contactName"]',
+      '#createFaultModal input[name="phoneNumber"]',
+      '#createFaultModal #link',
+      '#createFaultModal select[name="suspectedRfo_id"]',
+      '#createFaultModal textarea[name="remark"]'
     ];
     var allValid = true;
     requiredSelectors.forEach(function(sel){
@@ -183,32 +134,69 @@ $(function(){
         $el.removeClass('is-invalid');
       }
     });
-    var phoneEl = $('input[name="phoneNumber"]');
+    var phoneEl = $('#createFaultModal input[name="phoneNumber"]');
     var phone = (phoneEl.val()||'').trim();
-    if(mark){
-      var ok = /^2637\d{8}$/.test(phone);
-      if(!ok){ allValid = false; phoneEl.addClass('is-invalid'); } else { phoneEl.removeClass('is-invalid'); }
+    if (phone && !/^2637\d{8}$/.test(phone)) {
+      allValid = false;
+      if (mark) {
+        phoneEl.addClass('is-invalid');
+      }
+    } else if (mark) {
+      phoneEl.removeClass('is-invalid');
     }
     $saveBtn.prop('disabled', !allValid);
   }
-  $saveBtn.prop('disabled', true);
-  // On modal open: compute validity without marking fields invalid
-  $('#createFaultModal').on('shown.bs.modal', function(){ computeValidity(false); });
-  // When user interacts: compute and mark invalids
-  $(document).on('input change', '#createFaultModal input, #createFaultModal select, #createFaultModal textarea', function(){ computeValidity(true); });
 
-  // Normalize phone input to digits only
-  $(document).on('input', 'input[name="phoneNumber"]', function(){
+  function initCreateSelects() {
+    [
+      { selector: '#customer', placeholder: 'Select Customer' },
+      { selector: '#link', placeholder: 'Select Link' },
+      { selector: '#suspectedRFO', placeholder: 'Select RFO' }
+    ].forEach(function(item){
+      var $el = $modal.find(item.selector);
+      if ($el.length && !$el.hasClass('select2-hidden-accessible')) {
+        $el.select2({
+          placeholder: item.placeholder,
+          width: '100%',
+          dropdownParent: $modal
+        });
+      }
+    });
+  }
+
+  $saveBtn.prop('disabled', true);
+  $modal.on('shown.bs.modal', function(){
+    initCreateSelects();
+    computeCreateValidity(false);
+  });
+
+  $(document).on('input change', '#createFaultModal input, #createFaultModal select, #createFaultModal textarea', function(){
+    computeCreateValidity(true);
+  });
+
+  $(document).on('input', '#createFaultModal input[name="phoneNumber"]', function(){
     var v = (this.value||'').replace(/\D+/g,'');
     this.value = v;
   });
 
-  // Enhance the Customer select with Select2 inside the modal
-  if($('#customer').length){
-    $('#customer').select2({
-      placeholder: 'Select Customer',
-      width: '100%',
-      dropdownParent: $('#createFaultModal')
+  var dz = document.querySelector('#createFaultModal [data-impaza-dropzone]');
+  var attachmentInput = document.getElementById('attachment');
+  if (dz && attachmentInput) {
+    function stop(e){ e.preventDefault(); e.stopPropagation(); }
+    dz.addEventListener('dragenter', function(e){ stop(e); dz.classList.add('is-dragover'); });
+    dz.addEventListener('dragover', function(e){ stop(e); dz.classList.add('is-dragover'); });
+    dz.addEventListener('dragleave', function(e){ stop(e); dz.classList.remove('is-dragover'); });
+    dz.addEventListener('drop', function(e){
+      stop(e);
+      dz.classList.remove('is-dragover');
+      var files = e.dataTransfer && e.dataTransfer.files ? e.dataTransfer.files : null;
+      if (!files || !files.length) return;
+      if (window.DataTransfer) {
+        var dt = new DataTransfer();
+        dt.items.add(files[0]);
+        attachmentInput.files = dt.files;
+      }
+      attachmentInput.dispatchEvent(new Event('change', { bubbles: true }));
     });
   }
 });

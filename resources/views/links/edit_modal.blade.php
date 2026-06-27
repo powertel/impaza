@@ -10,17 +10,36 @@
     ->select('links.id','links.link','links.customer_id','links.city_id','links.suburb_id','links.pop_id','links.linkType_id','links.contract_number','links.jcc_number','links.sapcodes','links.comment','links.quantity','links.service_type','links.capacity')
     ->first();
 @endphp
-<div class="modal fade" id="linkEditModal{{ $link->id }}" tabindex="-1" aria-labelledby="linkEditModalLabel{{ $link->id }}" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
+<div class="modal custom-modal fade" id="linkEditModal{{ $link->id }}" tabindex="-1" aria-labelledby="linkEditModalLabel{{ $link->id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="linkEditModalLabel{{ $link->id }}">Edit Link</h5>
+        <div class="fault-modal-header-copy">
+          <h5 class="modal-title" id="linkEditModalLabel{{ $link->id }}"><i class="fas fa-pen-to-square me-2"></i>Edit Link</h5>
+          <div class="text-muted small mt-1">Update service, customer, and mapping details for this link using the refreshed business modal layout.</div>
+          <div class="fault-modal-meta">
+            <span class="fault-modal-meta-item"><i class="fas fa-link"></i> {{ $link->link }}</span>
+          </div>
+        </div>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form action="{{ route('links.update', $link->id) }}" method="POST">
         @csrf
         @method('PUT')
         <div class="modal-body">
+          <div class="fault-modal-note mb-3">
+            <i class="fas fa-circle-info"></i>
+            <div>Changes here affect reporting, customer views, and link lifecycle actions, so keep the mapping and service details accurate.</div>
+          </div>
+          <div class="fault-modal-section">
+            <div class="fault-modal-section-header">
+              <span class="fault-modal-section-icon"><i class="fas fa-link"></i></span>
+              <div>
+                <div class="fault-modal-section-title">Link Details</div>
+                <div class="fault-modal-section-subtitle">Update customer ownership, service details, and network location mapping.</div>
+              </div>
+            </div>
+            <div class="fault-modal-section-body">
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label">Customer</label>
@@ -111,12 +130,14 @@
               </select>
             </div>
           </div>
+          </div>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
             <i class="fas fa-times me-1"></i> Cancel
           </button>
-          <button type="submit" class="btn btn-outline-success btn-sm">
+          <button type="submit" class="btn btn-primary btn-sm">
             <i class="fas fa-save me-1"></i> Save
           </button>
         </div>

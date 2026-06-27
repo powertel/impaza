@@ -1,40 +1,69 @@
 @can('link-edit')
-<div class="modal fade" id="editExistingLinksModal" tabindex="-1" aria-labelledby="editExistingLinksLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl">
+<div class="modal custom-modal fade" id="editExistingLinksModal" tabindex="-1" aria-labelledby="editExistingLinksLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl  modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="editExistingLinksLabel">Edit Existing Links</h5>
+        <div class="fault-modal-header-copy">
+          <h5 class="modal-title" id="editExistingLinksLabel"><i class="fas fa-pen-to-square me-2"></i>Edit Existing Links</h5>
+          <div class="text-muted small mt-1">Load customer links into the bulk edit workspace and update service records without leaving the page.</div>
+        </div>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label">Customer</label>
-          <select id="editLinksCustomer" class="form-select select2">
-            <option  selected disabled>Select Customer</option>
-            @foreach($customers as $cust)
-              <option value="{{ $cust->id }}">{{ $cust->customer }}</option>
-            @endforeach
-          </select>
+        <div class="fault-modal-note mb-3">
+          <i class="fas fa-circle-info"></i>
+          <div>Select a customer to load all associated links into the editable bulk table below.</div>
+        </div>
+        <div class="fault-modal-section mb-3">
+          <div class="fault-modal-section-header">
+            <span class="fault-modal-section-icon"><i class="fas fa-users"></i></span>
+            <div>
+              <div class="fault-modal-section-title">Customer Selection</div>
+              <div class="fault-modal-section-subtitle">Choose the customer whose links you want to edit in bulk.</div>
+            </div>
+          </div>
+          <div class="fault-modal-section-body">
+            <div class="mb-0">
+              <label class="form-label">Customer</label>
+              <select id="editLinksCustomer" class="form-select select2">
+                <option selected disabled>Select Customer</option>
+                @foreach($customers as $cust)
+                  <option value="{{ $cust->id }}">{{ $cust->customer }}</option>
+                @endforeach
+              </select>
+            </div>
+          </div>
         </div>
 
-        <div class="table-responsive">
-          <table class="table table-sm align-middle">
-            <thead>
-              <tr>
-                <th style="width: 24%">Link</th>
-                <th style="width: 14%">City/Town</th>
-                <th style="width: 14%">Location</th>
-                <th style="width: 14%">Pop</th>
-                <th style="width: 13%">Service Type</th>
-                <th style="width: 11%">Capacity</th>
-                <th style="width: 10%">Link Type</th>
-                <th style="width: 6%">#</th>
-              </tr>
-            </thead>
-            <tbody id="editExistingLinksBody">
-              <tr class="text-center text-muted"><td colspan="8">Select a customer to load links…</td></tr>
-            </tbody>
-          </table>
+        <div class="fault-modal-section">
+          <div class="fault-modal-section-header">
+            <span class="fault-modal-section-icon"><i class="fas fa-table"></i></span>
+            <div>
+              <div class="fault-modal-section-title">Bulk Edit Table</div>
+              <div class="fault-modal-section-subtitle">Loaded link records appear here for in-place updates.</div>
+            </div>
+          </div>
+          <div class="fault-modal-section-body p-0">
+            <div class="table-responsive">
+              <table class="table table-sm align-middle">
+                <thead>
+                  <tr>
+                    <th style="width: 24%">Link</th>
+                    <th style="width: 14%">City/Town</th>
+                    <th style="width: 14%">Location</th>
+                    <th style="width: 14%">Pop</th>
+                    <th style="width: 13%">Service Type</th>
+                    <th style="width: 11%">Capacity</th>
+                    <th style="width: 10%">Link Type</th>
+                    <th style="width: 6%">#</th>
+                  </tr>
+                </thead>
+                <tbody id="editExistingLinksBody">
+                  <tr class="text-center text-muted"><td colspan="8">Select a customer to load links…</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         <!-- Hidden templates for select options -->
@@ -63,7 +92,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-light border btn-sm" data-bs-dismiss="modal" onclick="location.reload()">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal" onclick="location.reload()">
           <i class="fas fa-times me-1"></i> Close
         </button>
       </div>

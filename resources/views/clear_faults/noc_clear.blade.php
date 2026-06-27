@@ -7,26 +7,22 @@ Clear Faults
 @include('partials.css')
 @section('content')
 
-<section class="content">
-
-<div class="card">
-
-    <!--Card Header-->
-    <div class="card-header">
-        <h3 class="card-title">Clear Faults</h3>
-        <div class="card-tools">
-
+<section class="content workflow-faults-page">
+<div class="card faults-panel">
+    <div class="faults-panel-header">
+        <div class="faults-panel-copy">
+            <h3 class="faults-panel-title">Clear Faults</h3>
+            <div class="faults-panel-subtitle">Review faults ready for NOC clearance, verify the update trail, and either clear or return them from one workspace.</div>
         </div>
+        <div class="faults-panel-actions"></div>
     </div>
-    <!-- /.card-header -->
-    <div class="card-body">
-        <div class="table-responsive">
-            <div class="filter-toolbar d-flex justify-content-end align-items-center gap-2 mb-2">
-                <div class="input-group input-group-sm" style="width: 170px;">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text"><i class="fas fa-list me-1"></i> Show</span>
-                    </div>
-                    <select id="nocClearPageSize" class="form-select form-select-sm" style="width:auto;">
+
+    <div class="faults-toolbar">
+        <div class="faults-toolbar-grid">
+            <div class="faults-toolbar-field">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text"><i class="fas fa-list"></i></span>
+                    <select id="nocClearPageSize" class="form-select form-select-sm" aria-label="Rows per page">
                         <option value="10">10</option>
                         <option value="20" selected>20</option>
                         <option value="50">50</option>
@@ -34,12 +30,25 @@ Clear Faults
                         <option value="all">All</option>
                     </select>
                 </div>
-                <div class="input-group input-group-sm" style="width: 220px;">
+            </div>
+            <div class="faults-toolbar-field faults-toolbar-search" style="grid-column: span 3;">
+                <div class="input-group input-group-sm">
                     <span class="input-group-text"><i class="fas fa-search"></i></span>
-                    <input type="text" id="nocClearSearch" class="form-control" placeholder="Search faults">
+                    <input type="text" id="nocClearSearch" class="form-control" placeholder="Search faults, customers, links, and managers...">
                 </div>
             </div>
-            <table  class="table table-hover js-paginated-table" data-page-size="20" data-page-size-control="#nocClearPageSize" data-pager="#nocClearPager" data-search="#nocClearSearch">
+            <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 faults-toolbar-submit" id="nocClearSearchTrigger">
+                <i class="fas fa-search me-1"></i> Search
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 faults-toolbar-reset" id="nocClearReset">
+                <i class="fas fa-rotate-left me-1"></i> Reset
+            </button>
+        </div>
+    </div>
+
+    <div class="faults-table-shell">
+        <div class="table-responsive impaza-table-wrap faults-table-wrap">
+            <table class="table table-hover align-middle impaza-table faults-table js-paginated-table" data-page-size="20" data-page-size-control="#nocClearPageSize" data-pager="#nocClearPager" data-search="#nocClearSearch">
                 <thead>
                     <tr>
                         <th>No.</th>
@@ -54,50 +63,61 @@ Clear Faults
                 </thead>
                 <tbody>
                     @foreach ( $faults as $fault )
-                    <tr >
-                        <td>{{ ++$i }}</td>
-                        <td>{{$fault->fault_ref_number}}</td>
-                        <td>{{ $fault->customer }}</td>
-                        <td>{{ $fault->accountManager }}</td>
-                        <td>{{ $fault->link }}</td>
-                        <td class="text-nowrap">
-                            <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
-                                {{$fault->description}}
-                            </span>
+                    <tr>
+                        <td data-label="No.">{{ ++$i }}</td>
+                        <td data-label="Ref No.">
+                            <div class="faults-ref">
+                                <span class="faults-cell-main">{{ $fault->fault_ref_number }}</span>
+                                <span class="faults-cell-sub">Fault record</span>
+                            </div>
                         </td>
-                        <td>
-                            <span class="badge rounded-pill bg-light text-danger age-ticker" fs-6 data-started-at="{{ $fault->stage_started_at ?? '' }}"></span>
+                        <td data-label="Customer">
+                            <div class="faults-cell-main">{{ $fault->customer }}</div>
                         </td>
-
-                        <td>
-                            @can('noc-clear-faults-clear')
-                                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#nocClearModal-{{ $fault->id }}">
-                                    <i class="fas fa-save me-1"></i> Clear
+                        <td data-label="Account Manager">
+                            <div class="faults-cell-main">{{ $fault->accountManager ?: 'N/A' }}</div>
+                        </td>
+                        <td data-label="Link Name">
+                            <div class="faults-cell-main">{{ $fault->link }}</div>
+                        </td>
+                        <td class="text-nowrap" data-label="Status">
+                            <x-status-badge :label="$fault->description" :color="\App\Models\Status::STATUS_COLOR[$fault->description] ?? '#64748B'" :soft="true" />
+                        </td>
+                        <td data-label="Fault Age">
+                            <span class="faults-age-pill age-ticker" data-started-at="{{ $fault->stage_started_at ?? '' }}"></span>
+                        </td>
+                        <td data-label="Action(s)">
+                            <div class="faults-actions">
+                                @can('noc-clear-faults-clear')
+                                    <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#nocClearModal-{{ $fault->id }}">
+                                        <i class="fas fa-save me-1"></i> Clear
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#nocRevokeModal-{{ $fault->id }}">
+                                        <i class="fas fa-undo me-1"></i> Revoke
+                                    </button>
+                                @endcan
+                                <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                                    <i class="fas fa-eye me-1"></i> View
                                 </button>
-                                <button type="button" class="btn  btn-outline-danger" data-bs-toggle="modal" data-bs-target="#nocRevokeModal-{{ $fault->id }}">
-                                    <i class="fas fa-undo me-1"></i> Revoke
-                                </button>
-                            @endcan
-                            <button type="button" class="btn  btn-outline-success" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
-                                <i class="fas fa-eye me-1"></i> View
-                            </button>
+                            </div>
                         </td>
-
                     </tr>
                     @endforeach
                     @if ($faults->isEmpty())
                         <tr>
-                            <td colspan="7" class="text-center text-muted">No faults to clear at the moment</td>
+                            <td colspan="8" class="text-center text-muted py-5">No faults to clear at the moment</td>
                         </tr>
                     @endif
-                </tbody> 
+                </tbody>
             </table>
-            <div id="nocClearPager" class="mt-2"></div>
+        </div>
+        <div class="faults-table-footer">
+            <small class="text-muted">Showing the current NOC clearance queue</small>
+            <div id="nocClearPager"></div>
         </div>
     </div>
-    <!-- /.card-body -->
 </div>
- 
+
 </section>
 @endsection
 
@@ -105,6 +125,24 @@ Clear Faults
     @include('partials.scripts')
     <script>
       window.currentUserName = @json(optional(auth()->user())->name);
+      document.getElementById('nocClearSearchTrigger')?.addEventListener('click', function () {
+        const input = document.getElementById('nocClearSearch');
+        if (!input) return;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.focus();
+      });
+      document.getElementById('nocClearReset')?.addEventListener('click', function () {
+        const input = document.getElementById('nocClearSearch');
+        const perPage = document.getElementById('nocClearPageSize');
+        if (input) {
+          input.value = '';
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        if (perPage) {
+          perPage.value = '20';
+          perPage.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
     </script>
 
     <!-- Include per-row View Fault modal with conversation -->

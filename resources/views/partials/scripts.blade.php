@@ -2,6 +2,23 @@
 
 <script>
 (function(){
+  function moveInlineModalsToBody() {
+    document.querySelectorAll('.modal').forEach(function(modal){
+      if (modal && modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+      }
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', moveInlineModalsToBody);
+  } else {
+    moveInlineModalsToBody();
+  }
+})();
+</script>
+
+<script>
+(function(){
   var baseModal = 1055;
   var baseBackdrop = 1040;
   function updateStack(){
@@ -233,19 +250,17 @@ $('#city').on('change',function () {
       // Match the faults.show conversation layout
       const isSelf = (r?.name && r.name === (window.currentUserName || ''));
       const wrapper = document.createElement('div');
-      wrapper.className = `d-flex ${isSelf ? 'justify-content-end' : 'justify-content-start'} mb-3`;
+      wrapper.className = `legacy-remark-row ${isSelf ? 'legacy-remark-row-self' : 'legacy-remark-row-other'}`;
       const bubble = document.createElement('div');
-      bubble.className = 'rounded-3 shadow-sm px-3 py-2';
-      bubble.style.maxWidth = '75%';
-      bubble.style.backgroundColor = isSelf ? '#e8f5e9' : '#eef5ff';
+      bubble.className = `legacy-remark-bubble ${isSelf ? 'legacy-remark-bubble-self' : 'legacy-remark-bubble-other'}`;
       const meta = document.createElement('div');
-      meta.className = 'd-flex align-items-center gap-2 mb-1';
+      meta.className = 'legacy-remark-meta';
       const created = r?.created_at ? new Date(r.created_at) : new Date();
       meta.innerHTML = `<span class="badge ${isSelf ? 'bg-success' : 'bg-secondary'}">${r?.name || 'You'}</span>`+
         ` <small class="text-muted">${created.toLocaleString()}</small>`+
         (r?.activity ? ` <small class="text-muted">• ${r.activity}</small>` : '');
       const body = document.createElement('div');
-      body.className = 'fw-normal';
+      body.className = 'legacy-remark-body';
       body.textContent = r?.remark || '';
       bubble.appendChild(meta);
       bubble.appendChild(body);

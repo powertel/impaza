@@ -5,134 +5,129 @@ Department Faults
 @endsection
 @include('partials.css')
 @section('content')
-<section class="content">
+<section class="content workflow-faults-page">
 
-<div class="row row-cols-4 g-3 mb-3">
-  <div class="col">
-    <a href="#" class="text-decoration-none deptFaultsAgeStat" data-age="" data-status="lt4">
-      <div class="card shadow-sm border-0">
-        <div class="rounded-top" style="height:6px; background:#6c757d"></div>
-        <div class="card-body d-flex justify-content-between align-items-center py-3">
-          <div class="d-flex align-items-center gap-3">
-            <span class="badge bg-secondary"><i class="fas fa-clipboard-list"></i></span>
-            <div>
-              <div class="text-muted small">All Open</div>
-              <div class="fw-semibold">Faults</div>
-            </div>
+<div class="faults-kpi-grid mb-4">
+  <a href="#" class="faults-kpi-link deptFaultsAgeStat" data-age="" data-status="lt4">
+    <div class="faults-kpi-card" style="--faults-kpi-color:#94A3B8;">
+      <div class="faults-kpi-body">
+        <div class="faults-kpi-copy">
+          <span class="faults-kpi-icon"><i class="fas fa-clipboard-list"></i></span>
+          <div>
+            <div class="faults-kpi-label">All Open Faults</div>
+            <div class="faults-kpi-title">View all open faults</div>
           </div>
-          <div class="fs-5 fw-bold text-dark">{{ (int)($ageStats['open_total'] ?? 0) }}</div>
         </div>
+        <div class="faults-kpi-value">{{ (int) ($ageStats['open_total'] ?? 0) }}</div>
       </div>
-    </a>
-  </div>
-  <div class="col">
-    <a href="#" class="text-decoration-none deptFaultsAgeStat" data-age="today" data-status="lt4">
-      <div class="card shadow-sm border-0">
-        <div class="rounded-top" style="height:6px; background:#0d6efd"></div>
-        <div class="card-body d-flex justify-content-between align-items-center py-3">
-          <div class="d-flex align-items-center gap-3">
-            <span class="badge bg-primary"><i class="fas fa-calendar-day"></i></span>
-            <div>
-              <div class="text-muted small">Logged</div>
-              <div class="fw-semibold">Today</div>
-            </div>
+    </div>
+  </a>
+  <a href="#" class="faults-kpi-link deptFaultsAgeStat" data-age="today" data-status="lt4">
+    <div class="faults-kpi-card" style="--faults-kpi-color:#2563EB;">
+      <div class="faults-kpi-body">
+        <div class="faults-kpi-copy">
+          <span class="faults-kpi-icon"><i class="fas fa-calendar-day"></i></span>
+          <div>
+            <div class="faults-kpi-label">Logged Today</div>
+            <div class="faults-kpi-title">View today's faults</div>
           </div>
-          <div class="fs-5 fw-bold text-dark">{{ (int)($ageStats['open_today'] ?? 0) }}</div>
         </div>
+        <div class="faults-kpi-value">{{ (int) ($ageStats['open_today'] ?? 0) }}</div>
       </div>
-    </a>
-  </div>
-  <div class="col">
-    <a href="#" class="text-decoration-none deptFaultsAgeStat" data-age="lt72" data-status="lt4">
-      <div class="card shadow-sm border-0">
-        <div class="rounded-top" style="height:6px; background:#20c997"></div>
-        <div class="card-body d-flex justify-content-between align-items-center py-3">
-          <div class="d-flex align-items-center gap-3">
-            <span class="badge bg-success"><i class="fas fa-hourglass-half"></i></span>
-            <div>
-              <div class="text-muted small">Within</div>
-              <div class="fw-semibold">72 Hours</div>
-            </div>
+    </div>
+  </a>
+  <a href="#" class="faults-kpi-link deptFaultsAgeStat" data-age="lt72" data-status="lt4">
+    <div class="faults-kpi-card" style="--faults-kpi-color:#10B981;">
+      <div class="faults-kpi-body">
+        <div class="faults-kpi-copy">
+          <span class="faults-kpi-icon"><i class="fas fa-hourglass-half"></i></span>
+          <div>
+            <div class="faults-kpi-label">Within 72 Hours</div>
+            <div class="faults-kpi-title">View within 72 hours</div>
           </div>
-          <div class="fs-5 fw-bold text-dark">{{ (int)($ageStats['open_lt72'] ?? 0) }}</div>
         </div>
+        <div class="faults-kpi-value">{{ (int) ($ageStats['open_lt72'] ?? 0) }}</div>
       </div>
-    </a>
-  </div>
-  <div class="col">
-    <a href="#" class="text-decoration-none deptFaultsAgeStat" data-age="gt72" data-status="lt4">
-      <div class="card shadow-sm border-0">
-        <div class="rounded-top" style="height:6px; background:#ffc107"></div>
-        <div class="card-body d-flex justify-content-between align-items-center py-3">
-          <div class="d-flex align-items-center gap-3">
-            <span class="badge bg-warning text-dark"><i class="fas fa-hourglass-end"></i></span>
-            <div>
-              <div class="text-muted small">Over</div>
-              <div class="fw-semibold">72 Hours</div>
-            </div>
+    </div>
+  </a>
+  <a href="#" class="faults-kpi-link deptFaultsAgeStat" data-age="gt72" data-status="lt4">
+    <div class="faults-kpi-card" style="--faults-kpi-color:#F59E0B;">
+      <div class="faults-kpi-body">
+        <div class="faults-kpi-copy">
+          <span class="faults-kpi-icon"><i class="fas fa-hourglass-end"></i></span>
+          <div>
+            <div class="faults-kpi-label">Over 72 Hours</div>
+            <div class="faults-kpi-title">View overdue faults</div>
           </div>
-          <div class="fs-5 fw-bold text-dark">{{ (int)($ageStats['open_gt72'] ?? 0) }}</div>
         </div>
+        <div class="faults-kpi-value">{{ (int) ($ageStats['open_gt72'] ?? 0) }}</div>
       </div>
-    </a>
-  </div>
+    </div>
+  </a>
 </div>
 
-<div class="card">
-
-    <!--Card Header-->
-    <div class="card-header">
-        <h3 class="card-title">Department Faults</h3>
-        <div class="card-tools">
+<div class="card faults-panel">
+    <div class="faults-panel-header">
+        <div class="faults-panel-copy">
+            <h3 class="faults-panel-title">Department Faults</h3>
+            <div class="faults-panel-subtitle">Search, filter, and review faults assigned to your department from one responsive workspace.</div>
         </div>
+        <div class="faults-panel-actions"></div>
     </div>
-    <!-- /.card-header -->
-    <div class="card-body">
-        <div class="table-responsive">
-            <div class="filter-toolbar d-flex justify-content-end align-items-center gap-2 mb-2">
-                <div class="input-group input-group-sm" style="width: 200px;">
-                    <div class="input-group-prepend"><span class="input-group-text"><i class="fas fa-list me-1"></i> Show</span></div>
-                    <select id="departmentFaultsPageSize" class="form-select form-select-sm" style="width:auto;">
-                        <option value="10"  {{ (int)$perPage===10 ? 'selected' : '' }}>10</option>
-                        <option value="20"  {{ (int)$perPage===20 ? 'selected' : '' }}>20</option>
-                        <option value="50"  {{ (int)$perPage===50 ? 'selected' : '' }}>50</option>
-                        <option value="100" {{ (int)$perPage===100 ? 'selected' : '' }}>100</option>
-                    </select>
+    <div class="faults-toolbar">
+        <form method="GET" action="{{ route('department_faults.index') }}" class="m-0">
+            <div class="faults-toolbar-grid">
+                <div class="faults-toolbar-field">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="fas fa-list"></i></span>
+                        <select id="departmentFaultsPageSize" class="form-select form-select-sm" aria-label="Rows per page">
+                            <option value="10"  {{ (int)$perPage===10 ? 'selected' : '' }}>10</option>
+                            <option value="20"  {{ (int)$perPage===20 ? 'selected' : '' }}>20</option>
+                            <option value="50"  {{ (int)$perPage===50 ? 'selected' : '' }}>50</option>
+                            <option value="100" {{ (int)$perPage===100 ? 'selected' : '' }}>100</option>
+                        </select>
+                    </div>
                 </div>
-                <form method="GET" action="{{ route('department_faults.index') }}" class="m-0">
-                    <div class="input-group input-group-sm" style="width: 760px; max-width: 100%;">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text"><i class="fas fa-filter me-1"></i> Status</span>
-                        </div>
-                        @php $statusFilter = request('status', 'all'); @endphp
-                        <select name="status" id="deptFaultsStatusFilter" class="form-select form-select-sm" style="width:auto;">
-                            <option value="all"   {{ $statusFilter === 'all' ? 'selected' : '' }}>All</option>
+                <div class="faults-toolbar-field">
+                    @php $statusFilter = request('status', 'all'); @endphp
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="fas fa-filter"></i></span>
+                        <select name="status" id="deptFaultsStatusFilter" class="form-select form-select-sm" aria-label="Status filter">
+                            <option value="all"   {{ $statusFilter === 'all' ? 'selected' : '' }}>All Statuses</option>
                             <option value="lt4"   {{ $statusFilter === 'lt4' ? 'selected' : '' }}>Open Faults</option>
                             @foreach(($openStatuses ?? collect()) as $st)
                                 <option value="{{ $st->id }}" {{ $statusFilter == (string)$st->id ? 'selected' : '' }}>{{ $st->description }}</option>
                             @endforeach
                         </select>
-
-                        <div class="input-group-prepend ms-2">
-                            <span class="input-group-text"><i class="fas fa-clock me-1"></i> Age</span>
-                        </div>
-                        @php $ageFilter = request('age', 'all'); @endphp
-                        <select name="age" id="deptFaultsAgeFilter" class="form-select form-select-sm me-1" style="width:50px;">
-                            <option value="all"    {{ $ageFilter === 'all' ? 'selected' : '' }}>All</option>
-                            <option value="today"  {{ $ageFilter === 'today' ? 'selected' : '' }}>Today</option>
-                            <option value="lt72"   {{ $ageFilter === 'lt72' ? 'selected' : '' }}>Within 72 hours</option>
-                            <option value="gt72"   {{ $ageFilter === 'gt72' ? 'selected' : '' }}>Over 72 hours</option>
-                        </select>
-
-                        <span class="input-group-text"><i class="fas fa-search"></i></span>
-                        <input type="text" name="q" value="{{ request('q','') }}" class="form-control" placeholder="Search faults (all records)">
-                        <input type="hidden" name="per_page" value="{{ $perPage }}">
-                        <button type="submit" class="btn btn-outline-primary"><i class="fas fa-search me-1"></i>Search</button>
-                        <a href="{{ route('department_faults.index', ['per_page' => $perPage]) }}" class="btn btn-outline-secondary"><i class="fas fa-rotate-left me-1"></i>Reset</a>
                     </div>
-                </form>
+                </div>
+                <div class="faults-toolbar-field">
+                    @php $ageFilter = request('age', 'all'); @endphp
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                        <select name="age" id="deptFaultsAgeFilter" class="form-select form-select-sm" aria-label="Age filter">
+                            <option value="all"    {{ $ageFilter === 'all' ? 'selected' : '' }}>All Ages</option>
+                            <option value="today"  {{ $ageFilter === 'today' ? 'selected' : '' }}>Today</option>
+                            <option value="lt72"   {{ $ageFilter === 'lt72' ? 'selected' : '' }}>Within 72 Hours</option>
+                            <option value="gt72"   {{ $ageFilter === 'gt72' ? 'selected' : '' }}>Over 72 Hours</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="faults-toolbar-field faults-toolbar-search">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" name="q" value="{{ request('q','') }}" class="form-control" placeholder="Search faults, customers, links, managers...">
+                        <input type="hidden" name="per_page" value="{{ $perPage }}">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3 faults-toolbar-submit"><i class="fas fa-search me-1"></i> Search</button>
+                <a href="{{ route('department_faults.index', ['per_page' => $perPage]) }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 faults-toolbar-reset"><i class="fas fa-rotate-left me-1"></i> Reset</a>
             </div>
-            <table class="table table-hover align-middle">
+        </form>
+    </div>
+    <div class="faults-table-shell">
+        <div class="table-responsive impaza-table-wrap faults-table-wrap">
+            <table class="table table-hover align-middle impaza-table faults-table">
                 <thead>
                     <tr>
                         <th>No.</th>
@@ -148,22 +143,21 @@ Department Faults
                 <tbody>
                     @foreach ( $faults as $fault )
                     <tr>
-                        <td>{{ $faults->firstItem() + $loop->index }}</td>
-                        <td>{{$fault->fault_ref_number}}</td>
-                        <td>{{ $fault->customer }}</td>
-                        <td>{{ $fault->accountManager }}</td>
-                        <td>{{ $fault->link }}</td>
-                        <td class="{{ $fault->name ? 'fw-bold' : 'text-muted' }}">{{ $fault->name ?: 'Not yet assigned' }}</td>
-                        <td class="text-nowrap">
-                            <span class="badge rounded-pill" style="background-color: {{ App\Models\Status::STATUS_COLOR[ $fault->description ] ?? '#6c757d' }}; color: black; padding: 0.5rem 0.75rem; font-weight: 600;">
-                                {{$fault->description}}
-                            </span>
+                        <td data-label="No.">{{ $faults->firstItem() + $loop->index }}</td>
+                        <td data-label="Ref No.">{{$fault->fault_ref_number}}</td>
+                        <td data-label="Customer">{{ $fault->customer }}</td>
+                        <td data-label="Account Manager">{{ $fault->accountManager }}</td>
+                        <td data-label="Link Name">{{ $fault->link }}</td>
+                        <td class="{{ $fault->name ? 'fw-bold' : 'text-muted' }}" data-label="Assigned To">{{ $fault->name ?: 'Not yet assigned' }}</td>
+                        <td class="text-nowrap" data-label="Status">
+                            <x-status-badge :label="$fault->description" :color="\App\Models\Status::STATUS_COLOR[$fault->description] ?? '#64748B'" :soft="true" />
                         </td>
-                        <td>
-                            <button class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
-                                <i class="fas fa-eye me-1"></i>View
-                            </button>
-                        
+                        <td data-label="Action(s)">
+                            <div class="faults-actions">
+                                <button class="btn btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                                    <i class="fas fa-eye me-1"></i>View
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     @endforeach
@@ -174,21 +168,7 @@ Department Faults
                     @endif
                 </tbody> 
             </table>
-            @foreach ($faults as $fault)
-                @include('faults.show', [
-                    'fault' => $fault,
-                    'remarks' => ($remarksByFault[$fault->id] ?? collect()),
-                    'ageText' => ($faultAges[$fault->id] ?? ''),
-                    'ageStart' => ($faultAgeStart[$fault->id] ?? null),
-                    'ageEnd' => ($faultAgeEnd[$fault->id] ?? null),
-                ])
-            @endforeach
-            @foreach ($faults as $fault)
-              @if(!empty($fault->referral_id))
-                @include('department_faults.complete_referral_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
-              @endif
-            @endforeach
-            <div class="d-flex justify-content-between align-items-center mt-2">
+            <div class="d-flex justify-content-between align-items-center mt-2 faults-table-footer">
                 <div class="text-muted">
                     Showing {{ $faults->firstItem() ?? 0 }} to {{ $faults->lastItem() ?? 0 }} of {{ $faults->total() }} results
                     @if (request('q'))
@@ -199,10 +179,22 @@ Department Faults
                     {{ $faults->links('pagination::bootstrap-5') }}
                 </div>
             </div>
-        </div>
     </div>
-    <!-- /.card-body -->
 </div>
+@foreach ($faults as $fault)
+    @include('faults.show', [
+        'fault' => $fault,
+        'remarks' => ($remarksByFault[$fault->id] ?? collect()),
+        'ageText' => ($faultAges[$fault->id] ?? ''),
+        'ageStart' => ($faultAgeStart[$fault->id] ?? null),
+        'ageEnd' => ($faultAgeEnd[$fault->id] ?? null),
+    ])
+@endforeach
+@foreach ($faults as $fault)
+  @if(!empty($fault->referral_id))
+    @include('department_faults.complete_referral_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
+  @endif
+@endforeach
  
 {{-- {{$section->section}}
 

@@ -3,14 +3,8 @@ import "./bootstrap";
 //window.Vue = require("vue");
 //window.Fire = new Vue();
 import Vue from "vue";
-import { BootstrapVue, IconsPlugin } from "bootstrap-vue";
 
 //import Vue from "vue";
-
-// Make BootstrapVue available throughout your project
-Vue.use(BootstrapVue);
-// Optionally install the BootstrapVue icon components plugin
-Vue.use(IconsPlugin);
 
 // ES6 Modules or TypeScript
 import Swal from "sweetalert2";

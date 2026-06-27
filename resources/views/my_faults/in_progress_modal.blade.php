@@ -1,4 +1,4 @@
-<div class="modal fade" id="inProgressModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="inProgressModalLabel-{{ $fault->id }}" aria-hidden="true">
+<div class="modal custom-modal fade" id="inProgressModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="inProgressModalLabel-{{ $fault->id }}" aria-hidden="true">
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
       <div class="modal-header">
@@ -26,22 +26,22 @@
               <h6 class="mb-0 text-secondary">Conversation</h6>
             </div>
             <!-- Scrollable chat-style conversation -->
-            <div id="inProgressRemarksScroller-{{ $fault->id }}" class="js-remarks-list" style="max-height: 420px; overflow-y: auto; padding-right: 6px;">
+            <div id="inProgressRemarksScroller-{{ $fault->id }}" class="js-remarks-list legacy-remarks-list" style="max-height: 420px;">
               @foreach($remarks->sortBy('created_at') as $remark)
                 @php
                   $currentName = optional(auth()->user())->name;
                   $isOwn = $currentName && (strtolower(trim($remark->name)) === strtolower(trim($currentName)));
                 @endphp
-                <div class="d-flex {{ $isOwn ? 'justify-content-end' : 'justify-content-start' }} mb-3">
-                  <div class="rounded-3 shadow-sm px-3 py-2" style="max-width: 75%; background-color: {{ $isOwn ? '#e8f5e9' : '#eef5ff' }};">
-                    <div class="d-flex align-items-center gap-2 mb-1">
+                <div class="legacy-remark-row {{ $isOwn ? 'legacy-remark-row-self' : 'legacy-remark-row-other' }}">
+                  <div class="legacy-remark-bubble {{ $isOwn ? 'legacy-remark-bubble-self' : 'legacy-remark-bubble-other' }}">
+                    <div class="legacy-remark-meta">
                       <span class="badge {{ $isOwn ? 'bg-success' : 'bg-secondary' }}">{{ $remark->name ?? 'User' }}</span>
                       <small class="text-muted">{{ Carbon\Carbon::parse($remark->created_at)->diffForHumans() }}</small>
                       @if(!empty($remark->activity))
                         <small class="text-muted">• {{ $remark->activity }}</small>
                       @endif
                     </div>
-                    <div class="fw-normal">{{ $remark->remark }}</div>
+                    <div class="legacy-remark-body">{{ $remark->remark }}</div>
                     @if($remark->file_path)
                       <div class="mt-2">
                         <img src="{{ asset('storage/'.$remark->file_path) }}" alt="Attachment" class="img-fluid rounded" style="max-height: 160px; object-fit: cover;">

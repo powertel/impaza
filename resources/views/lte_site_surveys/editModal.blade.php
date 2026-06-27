@@ -1,17 +1,17 @@
-<div class="modal custom-modal fade" id="lteSurveyEditModal-{{ $survey->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="lteSurveyEditModalLabel-{{ $survey->id }}" aria-hidden="true">
+<div class="modal custom-modal fade lte-modal" id="lteSurveyEditModal-{{ $survey->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="lteSurveyEditModalLabel-{{ $survey->id }}" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
     <div class="modal-content rounded-4 border-0 shadow-lg">
-      <div class="modal-header border-0">
+      <div class="modal-header lte-modal-header">
         <div class="d-flex align-items-center">
-          <span class="badge bg-secondary me-2"><i class="fas fa-edit"></i></span>
+          <span class="badge bg-light text-primary me-2"><i class="fas fa-edit"></i></span>
           <div>
             <h5 class="modal-title mb-0" id="lteSurveyEditModalLabel-{{ $survey->id }}">Edit LTE Site Survey</h5>
-            <small class="text-muted">#{{ $survey->id }} • {{ $survey->site_name ?: 'Untitled' }}</small>
+            <div class="lte-modal-subtitle small">#{{ $survey->id }} • {{ $survey->site_name ?: 'Untitled' }}</div>
           </div>
         </div>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close lte-modal-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body pt-0">
+      <div class="modal-body lte-modal-body pt-0">
         @php
           $p = is_array($survey->payload) ? $survey->payload : (array) $survey->payload;
           $meta = $p['meta'] ?? [];
