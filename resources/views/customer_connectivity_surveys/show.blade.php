@@ -481,17 +481,17 @@ Connectivity Survey #{{ $survey->id }}
 </section>
 
 @can('survey-edit')
-  <div class="modal fade" id="ccSurveyEditModal" tabindex="-1" aria-hidden="true">
+  <div class="modal fade custom-modal cc-edit-modal" id="ccSurveyEditModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered modal-fullscreen-md-down">
-      <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
-        <div class="modal-header" style="background: var(--bs-primary); color: #fff; border-bottom: 0;">
+      <div class="modal-content border-0 shadow-lg cc-edit-modal-content" style="border-radius: 16px; overflow: hidden;">
+        <div class="modal-header cc-edit-modal-header" style="background: var(--bs-primary); color: #fff; border-bottom: 0;">
           <div>
             <h5 class="modal-title mb-0">Edit Customer Connectivity Survey</h5>
             <div class="small" style="color: rgba(255,255,255,0.85);">Progressive form (step-by-step)</div>
           </div>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1); opacity: 0.9;"></button>
         </div>
-        <div class="modal-body" style="background:#f7f9fc;">
+        <div class="modal-body cc-edit-modal-body" style="background:#f7f9fc;">
           @if (session('error') || $errors->any())
             <div class="alert alert-danger">
               <div class="fw-semibold">Unable to save. Please fix the following and try again.</div>
@@ -508,7 +508,7 @@ Connectivity Survey #{{ $survey->id }}
             </div>
           @endif
 
-          <div class="mb-3" style="background:#fff; border: 1px solid #eef2f7; border-radius: 14px; padding: 14px;">
+          <div class="mb-3 cc-edit-top" style="background:#fff; border: 1px solid #eef2f7; border-radius: 14px; padding: 14px;">
             <div class="d-flex align-items-center justify-content-between">
               <div class="fw-semibold" id="ccEditStepTitle">General</div>
               <div class="text-muted small"><span id="ccEditStepNo">1</span> / <span id="ccEditStepTotal">8</span></div>
@@ -534,8 +534,8 @@ Connectivity Survey #{{ $survey->id }}
             <input type="hidden" name="status" id="ccEditSurveyStatus" value="draft">
 
             <div class="cc-edit-step" data-step="0">
-              <div class="card" style="border: 1px solid #eef2f7; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04);">
-                <div class="card-header" style="border-bottom: 1px solid #d2e4ff; font-weight: 700; background: #eaf2ff;">General</div>
+              <div class="card cc-edit-card" style="border: 1px solid #eef2f7; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04);">
+                <div class="card-header cc-edit-card-header" style="border-bottom: 1px solid #d2e4ff; font-weight: 700; background: #eaf2ff;">General</div>
                 <div class="card-body">
                   <div class="row">
                     <div class="col-md-4">
@@ -547,7 +547,22 @@ Connectivity Survey #{{ $survey->id }}
                     <div class="col-md-8">
                       <div class="mb-3">
                         <label class="form-label">Survey Performed By</label>
-                        <input type="text" name="meta[surveyPerformedBy]" class="form-control form-control-sm" value="{{ old('meta.surveyPerformedBy', $performedBy) }}" readonly>
+                        @php
+                          $performedByNameVal = trim((string) old('meta.surveyPerformedBy', $performedBy));
+                          if ($performedByNameVal === '-') $performedByNameVal = '';
+                          $performedByUserId = (int) old('meta.surveyPerformedByUserId', data_get($meta, 'surveyPerformedByUserId', 0));
+                          if ($performedByUserId <= 0 && $performedByNameVal !== '' && isset($users)) {
+                            $match = collect($users)->firstWhere('name', $performedByNameVal);
+                            if ($match) $performedByUserId = (int) $match->id;
+                          }
+                        @endphp
+                        <select name="meta[surveyPerformedByUserId]" class="form-select form-select-sm js-select2 cc-edit-performed-by-user" data-placeholder="Select user">
+                          <option value=""></option>
+                          @foreach(($users ?? []) as $u)
+                            <option value="{{ $u->id }}" {{ (int)$performedByUserId === (int)$u->id ? 'selected' : '' }}>{{ $u->name }}</option>
+                          @endforeach
+                        </select>
+                        <input type="hidden" name="meta[surveyPerformedBy]" class="cc-edit-performed-by-name" value="{{ $performedByNameVal }}">
                       </div>
                     </div>
                     <div class="col-md-6">
@@ -614,8 +629,8 @@ Connectivity Survey #{{ $survey->id }}
             </div>
 
             <div class="cc-edit-step d-none" data-step="1">
-              <div class="card" style="border: 1px solid #eef2f7; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04);">
-                <div class="card-header" style="border-bottom: 1px solid #d2e4ff; font-weight: 700; background: #eaf2ff;">Service Requirements</div>
+              <div class="card cc-edit-card" style="border: 1px solid #eef2f7; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04);">
+                <div class="card-header cc-edit-card-header" style="border-bottom: 1px solid #d2e4ff; font-weight: 700; background: #eaf2ff;">Service Requirements</div>
                 <div class="card-body">
                   <div class="row">
                     <div class="col-md-4">
@@ -701,8 +716,8 @@ Connectivity Survey #{{ $survey->id }}
             </div>
 
             <div class="cc-edit-step d-none" data-step="2">
-              <div class="card" style="border: 1px solid #eef2f7; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04);">
-                <div class="card-header" style="border-bottom: 1px solid #d2e4ff; font-weight: 700; background: #eaf2ff;">Site Access & Permissions</div>
+              <div class="card cc-edit-card" style="border: 1px solid #eef2f7; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04);">
+                <div class="card-header cc-edit-card-header" style="border-bottom: 1px solid #d2e4ff; font-weight: 700; background: #eaf2ff;">Site Access & Permissions</div>
                 <div class="card-body">
                   <div class="row">
                     <div class="col-md-6">
@@ -741,8 +756,8 @@ Connectivity Survey #{{ $survey->id }}
             </div>
 
             <div class="cc-edit-step d-none" data-step="3">
-              <div class="card" style="border: 1px solid #eef2f7; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04);">
-                <div class="card-header" style="border-bottom: 1px solid #d2e4ff; font-weight: 700; background: #eaf2ff;">Outdoor Connectivity</div>
+              <div class="card cc-edit-card" style="border: 1px solid #eef2f7; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04);">
+                <div class="card-header cc-edit-card-header" style="border-bottom: 1px solid #d2e4ff; font-weight: 700; background: #eaf2ff;">Outdoor Connectivity</div>
                 <div class="card-body">
                   <div class="row">
                     <div class="col-md-6">
@@ -828,8 +843,8 @@ Connectivity Survey #{{ $survey->id }}
             </div>
 
             <div class="cc-edit-step d-none" data-step="4">
-              <div class="card" style="border: 1px solid #eef2f7; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04);">
-                <div class="card-header" style="border-bottom: 1px solid #d2e4ff; font-weight: 700; background: #eaf2ff;">Indoor Assessment</div>
+              <div class="card cc-edit-card" style="border: 1px solid #eef2f7; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04);">
+                <div class="card-header cc-edit-card-header" style="border-bottom: 1px solid #d2e4ff; font-weight: 700; background: #eaf2ff;">Indoor Assessment</div>
                 <div class="card-body">
                   <div class="row">
                     <div class="col-md-6">
@@ -935,8 +950,8 @@ Connectivity Survey #{{ $survey->id }}
             </div>
 
             <div class="cc-edit-step d-none" data-step="5">
-              <div class="card" style="border: 1px solid #eef2f7; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04);">
-                <div class="card-header" style="border-bottom: 1px solid #d2e4ff; font-weight: 700; background: #eaf2ff;">BoQ (Civils + NTE)</div>
+              <div class="card cc-edit-card" style="border: 1px solid #eef2f7; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04);">
+                <div class="card-header cc-edit-card-header" style="border-bottom: 1px solid #d2e4ff; font-weight: 700; background: #eaf2ff;">BoQ (Civils + NTE)</div>
                 <div class="card-body">
                   @php
                     $civilsQtyByDesc = [];
@@ -1062,16 +1077,61 @@ Connectivity Survey #{{ $survey->id }}
             </div>
 
             <div class="cc-edit-step d-none" data-step="6">
-              <div class="card" style="border: 1px solid #eef2f7; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04);">
-                <div class="card-header" style="border-bottom: 1px solid #d2e4ff; font-weight: 700; background: #eaf2ff;">Photos</div>
+              <div class="card cc-edit-card" style="border: 1px solid #eef2f7; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04);">
+                <div class="card-header cc-edit-card-header" style="border-bottom: 1px solid #d2e4ff; font-weight: 700; background: #eaf2ff;">Photos</div>
                 <div class="card-body">
-                  <div class="alert alert-info">Uploading here adds new files. Existing uploads remain.</div>
+                  <div class="alert alert-info">Uploading here adds new files. Use the red X to remove an existing upload.</div>
+
                   <div class="row">
+                    @php $photosByLabel = collect($survey->photos ?? [])->groupBy('label'); @endphp
                     @foreach (($photoLabels ?? []) as $key => $label)
                       <div class="col-md-6">
                         <div class="mb-3">
                           <label class="form-label">{{ $label }}</label>
                           <input type="file" name="photos[{{ $key }}][]" class="form-control form-control-sm" multiple accept="image/*,application/pdf">
+                          @php $items = $photosByLabel->get($key, collect()); @endphp
+                          @if($items->count())
+                            <div class="d-flex flex-wrap gap-2 mt-2">
+                              @foreach($items as $ph)
+                                @php
+                                  $isImage = str_starts_with((string)($ph->mime_type ?? ''), 'image/');
+                                  $fileUrl = route('customer-connectivity-surveys.photos.file', $ph->id);
+                                  $delUrl = route('customer-connectivity-surveys.photos.destroy', $ph->id);
+                                @endphp
+                                @if($isImage)
+                                  <div class="d-inline-block" style="position:relative" data-cc-photo-item>
+                                    <a href="{{ $fileUrl }}" target="_blank" class="d-inline-block">
+                                      <img src="{{ $fileUrl }}" alt="" style="width:90px;height:68px;object-fit:cover;border-radius:10px;border:1px solid #e5e7eb;">
+                                    </a>
+                                    <button
+                                      type="button"
+                                      class="btn btn-danger btn-sm"
+                                      style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:999px;padding:0;display:flex;align-items:center;justify-content:center"
+                                      data-cc-photo-delete
+                                      data-url="{{ $delUrl }}"
+                                    >
+                                      <i class="fas fa-times" style="font-size:11px"></i>
+                                    </button>
+                                  </div>
+                                @else
+                                  <div class="d-inline-block" style="position:relative" data-cc-photo-item>
+                                    <a href="{{ $fileUrl }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                      <i class="fas fa-paperclip me-1"></i> Open
+                                    </a>
+                                    <button
+                                      type="button"
+                                      class="btn btn-danger btn-sm"
+                                      style="position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:999px;padding:0;display:flex;align-items:center;justify-content:center"
+                                      data-cc-photo-delete
+                                      data-url="{{ $delUrl }}"
+                                    >
+                                      <i class="fas fa-times" style="font-size:11px"></i>
+                                    </button>
+                                  </div>
+                                @endif
+                              @endforeach
+                            </div>
+                          @endif
                         </div>
                       </div>
                     @endforeach
@@ -1081,42 +1141,42 @@ Connectivity Survey #{{ $survey->id }}
             </div>
 
             <div class="cc-edit-step d-none" data-step="7">
-              <div class="card" style="border: 1px solid #eef2f7; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04);">
-                <div class="card-header" style="border-bottom: 1px solid #d2e4ff; font-weight: 700; background: #eaf2ff;">Overview</div>
+              <div class="card cc-edit-card" style="border: 1px solid #eef2f7; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04);">
+                <div class="card-header cc-edit-card-header" style="border-bottom: 1px solid #d2e4ff; font-weight: 700; background: #eaf2ff;">Overview</div>
                 <div class="card-body">
                   <div class="row g-3">
                     <div class="col-md-4">
-                      <div class="p-3 border rounded-3 bg-white">
+                      <div class="p-3 border rounded-3 bg-white cc-edit-overview-tile">
                         <div class="text-muted small">Customer</div>
                         <div class="fw-bold" id="ccEditOvCustomer">-</div>
                       </div>
                     </div>
                     <div class="col-md-4">
-                      <div class="p-3 border rounded-3 bg-white">
+                      <div class="p-3 border rounded-3 bg-white cc-edit-overview-tile">
                         <div class="text-muted small">Site</div>
                         <div class="fw-bold" id="ccEditOvSite">-</div>
                       </div>
                     </div>
                     <div class="col-md-4">
-                      <div class="p-3 border rounded-3 bg-white">
+                      <div class="p-3 border rounded-3 bg-white cc-edit-overview-tile">
                         <div class="text-muted small">Account/JC</div>
                         <div class="fw-bold" id="ccEditOvAccount">-</div>
                       </div>
                     </div>
                     <div class="col-md-4">
-                      <div class="p-3 border rounded-3 bg-white">
+                      <div class="p-3 border rounded-3 bg-white cc-edit-overview-tile">
                         <div class="text-muted small">Date</div>
                         <div class="fw-bold" id="ccEditOvDate">-</div>
                       </div>
                     </div>
                     <div class="col-md-4">
-                      <div class="p-3 border rounded-3 bg-white">
+                      <div class="p-3 border rounded-3 bg-white cc-edit-overview-tile">
                         <div class="text-muted small">Performed By</div>
                         <div class="fw-bold" id="ccEditOvPerformedBy">-</div>
                       </div>
                     </div>
                     <div class="col-md-4">
-                      <div class="p-3 border rounded-3 bg-white">
+                      <div class="p-3 border rounded-3 bg-white cc-edit-overview-tile">
                         <div class="text-muted small">New Attachments</div>
                         <div class="fw-bold" id="ccEditOvPhotos">0</div>
                       </div>
@@ -1126,7 +1186,7 @@ Connectivity Survey #{{ $survey->id }}
               </div>
             </div>
 
-            <div class="d-flex align-items-center justify-content-between mt-3" style="position: sticky; bottom: 0; background: rgba(247,249,252,0.95); backdrop-filter: blur(6px); border-top: 1px solid #e5e7eb; padding-top: 12px; padding-bottom: 12px;">
+            <div class="d-flex align-items-center justify-content-between mt-3 cc-edit-footerbar" style="position: sticky; bottom: 0; background: rgba(247,249,252,0.95); backdrop-filter: blur(6px); border-top: 1px solid #e5e7eb; padding-top: 12px; padding-bottom: 12px;">
               <button type="button" class="btn btn-outline-secondary btn-sm" id="ccEditPrevBtn">
                 <i class="fas fa-chevron-left"></i> Back
               </button>
@@ -1207,8 +1267,108 @@ Connectivity Survey #{{ $survey->id }}
 <script src="{{ asset('js/survey-pdf.js') }}?v={{ file_exists(public_path('js/survey-pdf.js')) ? filemtime(public_path('js/survey-pdf.js')) : time() }}"></script>
 @can('survey-edit')
 <style>
+  .cc-edit-modal .swal2-popup {
+    border-radius: 18px;
+  }
   .cc-edit-step-btn { border-radius: 999px; border: 1px solid #e5e7eb; background: #fff; color: #111827; font-weight: 600; }
   .cc-edit-step-btn.is-active { background: rgba(10, 126, 164, 0.12); border-color: rgba(10, 126, 164, 0.35); color: #0a7ea4; }
+  html[data-theme="dark"] .cc-edit-modal .modal-content,
+  html[data-theme="dark"] .cc-edit-modal .cc-edit-modal-content {
+    background: linear-gradient(180deg, #0b1220 0%, #101a31 100%);
+    color: #e5eefb;
+  }
+  html[data-theme="dark"] .cc-edit-modal .cc-edit-modal-body {
+    background: linear-gradient(180deg, #0b1220 0%, #101a31 100%) !important;
+  }
+  html[data-theme="dark"] .cc-edit-modal .cc-edit-top {
+    background: rgba(15, 23, 42, 0.94) !important;
+    border-color: rgba(148, 163, 184, 0.18) !important;
+  }
+  html[data-theme="dark"] .cc-edit-modal .text-muted,
+  html[data-theme="dark"] .cc-edit-modal .small {
+    color: #94a3b8 !important;
+  }
+  html[data-theme="dark"] .cc-edit-modal .cc-edit-step-btn {
+    background: #0b1220;
+    border-color: rgba(148, 163, 184, 0.18);
+    color: #dbe5f6;
+  }
+  html[data-theme="dark"] .cc-edit-modal .cc-edit-step-btn.is-active {
+    background: rgba(37, 99, 235, 0.2);
+    border-color: rgba(96, 165, 250, 0.35);
+    color: #bfdbfe;
+  }
+  html[data-theme="dark"] .cc-edit-modal .cc-edit-card {
+    border-color: rgba(148, 163, 184, 0.16) !important;
+    background: linear-gradient(180deg, #0f172a 0%, #111c33 100%) !important;
+    color: #e5eefb;
+  }
+  html[data-theme="dark"] .cc-edit-modal .cc-edit-card-header {
+    background: linear-gradient(180deg, #172554 0%, #1e3a8a 100%) !important;
+    border-bottom-color: rgba(148, 163, 184, 0.16) !important;
+    color: #e5eefb;
+  }
+  html[data-theme="dark"] .cc-edit-modal .form-control,
+  html[data-theme="dark"] .cc-edit-modal .form-select,
+  html[data-theme="dark"] .cc-edit-modal textarea,
+  html[data-theme="dark"] .cc-edit-modal input[type="file"] {
+    background: rgba(2, 6, 23, 0.45);
+    border-color: rgba(148, 163, 184, 0.18);
+    color: #e2e8f0;
+  }
+  html[data-theme="dark"] .cc-edit-modal .form-control:focus,
+  html[data-theme="dark"] .cc-edit-modal .form-select:focus,
+  html[data-theme="dark"] .cc-edit-modal textarea:focus,
+  html[data-theme="dark"] .cc-edit-modal input[type="file"]:focus {
+    background: rgba(2, 6, 23, 0.62);
+    border-color: rgba(96, 165, 250, 0.45);
+    color: #f8fafc;
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.18);
+  }
+  html[data-theme="dark"] .cc-edit-modal .form-control::placeholder,
+  html[data-theme="dark"] .cc-edit-modal textarea::placeholder {
+    color: rgba(148, 163, 184, 0.75);
+  }
+  html[data-theme="dark"] .cc-edit-modal .table,
+  html[data-theme="dark"] .cc-edit-modal .table > :not(caption) > * > * {
+    color: #e2e8f0;
+    --bs-table-bg: transparent;
+    --bs-table-color: #e2e8f0;
+  }
+  html[data-theme="dark"] .cc-edit-modal .table thead th {
+    background: rgba(30, 41, 59, 0.9);
+    border-bottom-color: rgba(148, 163, 184, 0.16);
+    color: #cbd5e1;
+  }
+  html[data-theme="dark"] .cc-edit-modal .table tbody td {
+    border-top-color: rgba(148, 163, 184, 0.12);
+  }
+  html[data-theme="dark"] .cc-edit-modal .alert-info {
+    background: rgba(8, 145, 178, 0.16);
+    border-color: rgba(34, 211, 238, 0.2);
+    color: #c8f1ff;
+  }
+  html[data-theme="dark"] .cc-edit-modal .cc-edit-overview-tile {
+    background: rgba(15, 23, 42, 0.92) !important;
+    border-color: rgba(148, 163, 184, 0.16) !important;
+    color: #e5eefb;
+  }
+  html[data-theme="dark"] .cc-edit-modal .cc-edit-footerbar {
+    background: rgba(11, 18, 32, 0.95) !important;
+    border-top-color: rgba(148, 163, 184, 0.18) !important;
+  }
+  html[data-theme="dark"] .swal2-popup {
+    background: linear-gradient(180deg, #0f172a 0%, #111c33 100%);
+    color: #e5eefb;
+  }
+  html[data-theme="dark"] .swal2-title,
+  html[data-theme="dark"] .swal2-html-container {
+    color: #e5eefb;
+  }
+  html[data-theme="dark"] .swal2-icon.swal2-warning {
+    border-color: rgba(251, 191, 36, 0.8);
+    color: #fbbf24;
+  }
 </style>
 <script>
   (function () {
@@ -1256,6 +1416,115 @@ Connectivity Survey #{{ $survey->id }}
       var lng = lngEl ? (lngEl.value || '').trim() : '';
       if (lat !== '' && lng !== '') coordsEl.value = lat + ', ' + lng;
     }
+
+    function syncPerformedByName() {
+      if (!formEl) return;
+      var sel = formEl.querySelector('select[name="meta[surveyPerformedByUserId]"]');
+      var hid = formEl.querySelector('input[name="meta[surveyPerformedBy]"]');
+      if (!sel || !hid) return;
+      var opt = sel.options && sel.selectedIndex >= 0 ? sel.options[sel.selectedIndex] : null;
+      hid.value = opt ? (opt.text || '').trim() : '';
+    }
+
+    if (formEl) {
+      var perfSel = formEl.querySelector('select[name="meta[surveyPerformedByUserId]"]');
+      if (perfSel) {
+        perfSel.addEventListener('change', syncPerformedByName);
+        syncPerformedByName();
+      }
+    }
+
+    function getCsrfToken() {
+      var el = document.querySelector('meta[name="csrf-token"]');
+      return el ? el.getAttribute('content') : '';
+    }
+
+    function isDarkTheme() {
+      var html = document.documentElement;
+      return !!html && html.getAttribute('data-theme') === 'dark';
+    }
+
+    function showDeleteConfirm() {
+      if (window.swal && typeof window.swal.fire === 'function') {
+        return window.swal.fire({
+          title: 'Remove Attachment?',
+          text: 'This file will be deleted from the survey immediately.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, remove it',
+          cancelButtonText: 'Cancel',
+          reverseButtons: true,
+          confirmButtonColor: '#dc3545',
+          cancelButtonColor: isDarkTheme() ? '#475569' : '#cbd5e1',
+          background: isDarkTheme() ? '#0f172a' : '#ffffff',
+          color: isDarkTheme() ? '#e5eefb' : '#111827',
+        }).then(function (res) {
+          return !!res && !!res.isConfirmed;
+        });
+      }
+      return Promise.resolve(window.confirm('Remove this image/attachment?'));
+    }
+
+    function showMessage(title, text, icon) {
+      if (window.swal && typeof window.swal.fire === 'function') {
+        return window.swal.fire({
+          title: title,
+          text: text,
+          icon: icon,
+          confirmButtonColor: '#2563eb',
+          background: isDarkTheme() ? '#0f172a' : '#ffffff',
+          color: isDarkTheme() ? '#e5eefb' : '#111827',
+        });
+      }
+      window.alert(text || title);
+      return Promise.resolve();
+    }
+
+    document.addEventListener('click', function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest('[data-cc-photo-delete]') : null;
+      if (!btn) return;
+      e.preventDefault();
+
+      var url = btn.getAttribute('data-url') || '';
+      if (!url) return;
+      if (btn.dataset.busy === '1') return;
+
+      showDeleteConfirm().then(function (ok) {
+        if (!ok) return;
+
+        btn.dataset.busy = '1';
+        btn.disabled = true;
+
+        return fetch(url, {
+          method: 'DELETE',
+          headers: {
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': getCsrfToken(),
+          },
+        })
+          .then(function (res) {
+            return res.json().catch(function () { return null; }).then(function (json) {
+              return { ok: res.ok, json: json };
+            });
+          })
+          .then(function (out) {
+            if (!out.ok || !out.json || out.json.success !== true) {
+              var msg = out && out.json && out.json.message ? out.json.message : 'Failed to remove image.';
+              return showMessage('Delete Failed', msg, 'error');
+            }
+            var wrap = btn.closest('[data-cc-photo-item]');
+            if (wrap && wrap.parentNode) wrap.parentNode.removeChild(wrap);
+            return null;
+          })
+          .catch(function () {
+            return showMessage('Delete Failed', 'Failed to remove image.', 'error');
+          })
+          .finally(function () {
+            btn.disabled = false;
+            btn.dataset.busy = '0';
+          });
+      });
+    });
 
     function countSelectedFiles() {
       var total = 0;

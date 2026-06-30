@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CustomerConnectivitySurvey;
 use App\Models\CustomerConnectivitySurveyPhoto;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -58,6 +59,7 @@ class CustomerConnectivitySurveyController extends Controller
         ];
 
         $photoLabels = $this->photoLabels();
+        $users = User::query()->where('is_access', 0)->orderBy('name')->get(['id', 'name']);
 
         return view('customer_connectivity_surveys.index', [
             'surveys' => $surveys,
@@ -66,6 +68,7 @@ class CustomerConnectivitySurveyController extends Controller
             'perPage' => $perPage,
             'stats' => $stats,
             'photoLabels' => $photoLabels,
+            'users' => $users,
         ]);
     }
 
@@ -77,11 +80,13 @@ class CustomerConnectivitySurveyController extends Controller
         }
 
         $survey->load(['user:id,name', 'photos']);
+        $users = User::query()->where('is_access', 0)->orderBy('name')->get(['id', 'name']);
 
         return view('customer_connectivity_surveys.show', [
             'survey' => $survey,
             'payload' => is_array($survey->payload) ? $survey->payload : [],
             'photoLabels' => $this->photoLabels(),
+            'users' => $users,
         ]);
     }
 
@@ -93,8 +98,9 @@ class CustomerConnectivitySurveyController extends Controller
         }
 
         $photoLabels = $this->photoLabels();
+        $users = User::query()->where('is_access', 0)->orderBy('name')->get(['id', 'name']);
 
-        return view('customer_connectivity_surveys.create', compact('photoLabels'));
+        return view('customer_connectivity_surveys.create', compact('photoLabels', 'users'));
     }
 
     public function store(Request $request)
@@ -108,6 +114,7 @@ class CustomerConnectivitySurveyController extends Controller
             'status' => 'required|string|in:draft,submitted',
             'meta' => 'nullable|array',
             'meta.date' => 'nullable|string|max:50',
+            'meta.surveyPerformedByUserId' => 'nullable|integer|exists:users,id',
             'meta.surveyPerformedBy' => 'nullable|string|max:255',
 
             'general' => 'nullable|array',
@@ -195,8 +202,18 @@ class CustomerConnectivitySurveyController extends Controller
         $status = $data['status'] ?? 'draft';
 
         $surveyDate = data_get($payload, 'meta.date');
-        $surveyPerformedBy = data_get($payload, 'meta.surveyPerformedBy');
-        $surveyPerformedBy = trim((string) $surveyPerformedBy) !== '' ? trim((string) $surveyPerformedBy) : $user->name;
+        $performedByUserId = (int) data_get($payload, 'meta.surveyPerformedByUserId', 0);
+        $surveyPerformedBy = trim((string) data_get($payload, 'meta.surveyPerformedBy', ''));
+        if ($performedByUserId > 0) {
+            $u = User::query()->find($performedByUserId);
+            if ($u && $u->name) {
+                $surveyPerformedBy = (string) $u->name;
+            }
+        }
+        if ($surveyPerformedBy === '') {
+            $surveyPerformedBy = (string) $user->name;
+        }
+        data_set($payload, 'meta.surveyPerformedByUserId', $performedByUserId > 0 ? $performedByUserId : null);
         data_set($payload, 'meta.surveyPerformedBy', $surveyPerformedBy);
 
         $customerName = data_get($payload, 'general.customerName');
@@ -300,6 +317,7 @@ class CustomerConnectivitySurveyController extends Controller
             'status' => 'required|string|in:draft,submitted',
             'meta' => 'nullable|array',
             'meta.date' => 'nullable|string|max:50',
+            'meta.surveyPerformedByUserId' => 'nullable|integer|exists:users,id',
             'meta.surveyPerformedBy' => 'nullable|string|max:255',
 
             'general' => 'nullable|array',
@@ -387,8 +405,18 @@ class CustomerConnectivitySurveyController extends Controller
         $status = $data['status'] ?? ($survey->status ?: 'draft');
 
         $surveyDate = data_get($payload, 'meta.date');
-        $surveyPerformedBy = data_get($payload, 'meta.surveyPerformedBy');
-        $surveyPerformedBy = trim((string) $surveyPerformedBy) !== '' ? trim((string) $surveyPerformedBy) : $user->name;
+        $performedByUserId = (int) data_get($payload, 'meta.surveyPerformedByUserId', 0);
+        $surveyPerformedBy = trim((string) data_get($payload, 'meta.surveyPerformedBy', ''));
+        if ($performedByUserId > 0) {
+            $u = User::query()->find($performedByUserId);
+            if ($u && $u->name) {
+                $surveyPerformedBy = (string) $u->name;
+            }
+        }
+        if ($surveyPerformedBy === '') {
+            $surveyPerformedBy = (string) $user->name;
+        }
+        data_set($payload, 'meta.surveyPerformedByUserId', $performedByUserId > 0 ? $performedByUserId : null);
         data_set($payload, 'meta.surveyPerformedBy', $surveyPerformedBy);
 
         $customerName = data_get($payload, 'general.customerName');
@@ -507,6 +535,55 @@ class CustomerConnectivitySurveyController extends Controller
             'Content-Type' => $mime,
             'Content-Disposition' => 'inline; filename="' . addslashes($photo->original_name ?: basename($filePath)) . '"',
         ]);
+    }
+
+    public function destroyPhoto(Request $request, CustomerConnectivitySurveyPhoto $photo)
+    {
+        $user = $request->user();
+        if (!$user || !$user->can('survey-edit')) {
+            abort(403);
+        }
+
+        $survey = CustomerConnectivitySurvey::query()->find($photo->customer_connectivity_survey_id);
+        if (!$survey) {
+            abort(404);
+        }
+
+        $disk = Storage::disk('public');
+        $filePath = (string) ($photo->file_path ?? '');
+
+        DB::beginTransaction();
+        try {
+            $photo->delete();
+            if ($filePath !== '' && $disk->exists($filePath)) {
+                $disk->delete($filePath);
+            }
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            $logRef = (string) Str::uuid();
+            Log::error('Customer connectivity survey photo delete failed', [
+                'ref' => $logRef,
+                'route' => optional($request->route())->getName(),
+                'user_id' => optional($user)->id,
+                'survey_id' => optional($survey)->id,
+                'photo_id' => $photo->id,
+                'ip' => $request->ip(),
+                'message' => $e->getMessage(),
+                'exception' => get_class($e),
+            ]);
+            Log::error($e);
+
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Failed to remove image. Ref: ' . $logRef], 500);
+            }
+            return back()->with('error', 'Failed to remove image. Ref: ' . $logRef);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+        return back()->with('success', 'Image removed.');
     }
 
     private function photoLabels()

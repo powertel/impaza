@@ -58,7 +58,13 @@ New Customer Connectivity Survey
               <div class="col-md-8">
                 <div class="mb-3">
                   <label class="form-label">Survey Performed By</label>
-                  <input type="text" name="meta[surveyPerformedBy]" class="form-control form-control-sm" value="{{ old('meta.surveyPerformedBy', optional(auth()->user())->name) }}" readonly>
+                  <select name="meta[surveyPerformedByUserId]" class="form-select form-select-sm js-select2 cc-performed-by-user" data-placeholder="Select user">
+                    <option value=""></option>
+                    @foreach(($users ?? []) as $u)
+                      <option value="{{ $u->id }}" {{ (int)old('meta.surveyPerformedByUserId', optional(auth()->user())->id) === (int)$u->id ? 'selected' : '' }}>{{ $u->name }}</option>
+                    @endforeach
+                  </select>
+                  <input type="hidden" name="meta[surveyPerformedBy]" class="cc-performed-by-name" value="{{ old('meta.surveyPerformedBy', optional(auth()->user())->name) }}">
                 </div>
               </div>
             </div>
@@ -494,6 +500,20 @@ New Customer Connectivity Survey
         if (on) el.setAttribute('required', 'required');
         else el.removeAttribute('required');
       });
+    }
+
+    function syncPerformedByName() {
+      var sel = form.querySelector('select[name="meta[surveyPerformedByUserId]"]');
+      var hid = form.querySelector('input[name="meta[surveyPerformedBy]"]');
+      if (!sel || !hid) return;
+      var opt = sel.options && sel.selectedIndex >= 0 ? sel.options[sel.selectedIndex] : null;
+      hid.value = opt ? (opt.text || '').trim() : '';
+    }
+
+    var perfSel = form.querySelector('select[name="meta[surveyPerformedByUserId]"]');
+    if (perfSel) {
+      perfSel.addEventListener('change', syncPerformedByName);
+      syncPerformedByName();
     }
 
     document.querySelectorAll('[data-cc-status]').forEach(function (btn) {
