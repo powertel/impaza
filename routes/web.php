@@ -95,6 +95,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('customer-connectivity-surveys/{survey}', [CustomerConnectivitySurveyController::class, 'show'])->name('customer-connectivity-surveys.show');
     Route::put('customer-connectivity-surveys/{survey}', [CustomerConnectivitySurveyController::class, 'update'])->name('customer-connectivity-surveys.update');
     Route::get('customer-connectivity-surveys/photos/{photo}', [CustomerConnectivitySurveyController::class, 'servePhoto'])->name('customer-connectivity-surveys.photos.file');
+    Route::delete('customer-connectivity-surveys/photos/{photo}', [CustomerConnectivitySurveyController::class, 'destroyPhoto'])->name('customer-connectivity-surveys.photos.destroy');
     // Toggle user access (enable/disable)
     Route::patch('users/{user}/access', [UserController::class, 'updateAccess'])->name('users.access');
     // Admin change password for a specific user

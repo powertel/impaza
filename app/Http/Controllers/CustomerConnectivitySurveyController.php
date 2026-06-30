@@ -390,9 +390,6 @@ class CustomerConnectivitySurveyController extends Controller
             'photos' => 'nullable|array',
             'photos.*' => 'nullable|array',
             'photos.*.*' => 'nullable|file|mimetypes:image/jpeg,image/png,image/gif,image/webp,image/heic,image/heif,application/pdf',
-
-            'remove_photo_ids' => 'nullable|array',
-            'remove_photo_ids.*' => 'integer|exists:customer_connectivity_survey_photos,id',
         ]);
 
         $payload = [
@@ -459,24 +456,6 @@ class CustomerConnectivitySurveyController extends Controller
         try {
             $logRef = (string) Str::uuid();
 
-            $removeIds = $data['remove_photo_ids'] ?? [];
-            if (is_array($removeIds) && count($removeIds)) {
-                $removeIds = array_values(array_unique(array_map('intval', $removeIds)));
-                $photosToRemove = CustomerConnectivitySurveyPhoto::query()
-                    ->where('customer_connectivity_survey_id', $survey->id)
-                    ->whereIn('id', $removeIds)
-                    ->get();
-
-                $disk = Storage::disk('public');
-                foreach ($photosToRemove as $ph) {
-                    $filePath = (string) ($ph->file_path ?? '');
-                    $ph->delete();
-                    if ($filePath !== '' && $disk->exists($filePath)) {
-                        $disk->delete($filePath);
-                    }
-                }
-            }
-
             $survey->update([
                 'status' => $status,
                 'survey_date' => $parsedSurveyDate,
@@ -494,7 +473,6 @@ class CustomerConnectivitySurveyController extends Controller
 
             $files = $request->file('photos') ?: [];
             if (is_array($files)) {
-                $disk = $disk ?? Storage::disk('public');
                 foreach ($files as $label => $file) {
                     if (!$file) continue;
 
@@ -557,6 +535,55 @@ class CustomerConnectivitySurveyController extends Controller
             'Content-Type' => $mime,
             'Content-Disposition' => 'inline; filename="' . addslashes($photo->original_name ?: basename($filePath)) . '"',
         ]);
+    }
+
+    public function destroyPhoto(Request $request, CustomerConnectivitySurveyPhoto $photo)
+    {
+        $user = $request->user();
+        if (!$user || !$user->can('survey-edit')) {
+            abort(403);
+        }
+
+        $survey = CustomerConnectivitySurvey::query()->find($photo->customer_connectivity_survey_id);
+        if (!$survey) {
+            abort(404);
+        }
+
+        $disk = Storage::disk('public');
+        $filePath = (string) ($photo->file_path ?? '');
+
+        DB::beginTransaction();
+        try {
+            $photo->delete();
+            if ($filePath !== '' && $disk->exists($filePath)) {
+                $disk->delete($filePath);
+            }
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            $logRef = (string) Str::uuid();
+            Log::error('Customer connectivity survey photo delete failed', [
+                'ref' => $logRef,
+                'route' => optional($request->route())->getName(),
+                'user_id' => optional($user)->id,
+                'survey_id' => optional($survey)->id,
+                'photo_id' => $photo->id,
+                'ip' => $request->ip(),
+                'message' => $e->getMessage(),
+                'exception' => get_class($e),
+            ]);
+            Log::error($e);
+
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Failed to remove image. Ref: ' . $logRef], 500);
+            }
+            return back()->with('error', 'Failed to remove image. Ref: ' . $logRef);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true]);
+        }
+        return back()->with('success', 'Image removed.');
     }
 
     private function photoLabels()
