@@ -547,7 +547,22 @@ Connectivity Survey #{{ $survey->id }}
                     <div class="col-md-8">
                       <div class="mb-3">
                         <label class="form-label">Survey Performed By</label>
-                        <input type="text" name="meta[surveyPerformedBy]" class="form-control form-control-sm" value="{{ old('meta.surveyPerformedBy', $performedBy) }}" readonly>
+                        @php
+                          $performedByNameVal = trim((string) old('meta.surveyPerformedBy', $performedBy));
+                          if ($performedByNameVal === '-') $performedByNameVal = '';
+                          $performedByUserId = (int) old('meta.surveyPerformedByUserId', data_get($meta, 'surveyPerformedByUserId', 0));
+                          if ($performedByUserId <= 0 && $performedByNameVal !== '' && isset($users)) {
+                            $match = collect($users)->firstWhere('name', $performedByNameVal);
+                            if ($match) $performedByUserId = (int) $match->id;
+                          }
+                        @endphp
+                        <select name="meta[surveyPerformedByUserId]" class="form-select form-select-sm js-select2 cc-edit-performed-by-user" data-placeholder="Select user">
+                          <option value=""></option>
+                          @foreach(($users ?? []) as $u)
+                            <option value="{{ $u->id }}" {{ (int)$performedByUserId === (int)$u->id ? 'selected' : '' }}>{{ $u->name }}</option>
+                          @endforeach
+                        </select>
+                        <input type="hidden" name="meta[surveyPerformedBy]" class="cc-edit-performed-by-name" value="{{ $performedByNameVal }}">
                       </div>
                     </div>
                     <div class="col-md-6">
@@ -1065,7 +1080,57 @@ Connectivity Survey #{{ $survey->id }}
               <div class="card" style="border: 1px solid #eef2f7; border-radius: 14px; box-shadow: 0 1px 2px rgba(16,24,40,.04);">
                 <div class="card-header" style="border-bottom: 1px solid #d2e4ff; font-weight: 700; background: #eaf2ff;">Photos</div>
                 <div class="card-body">
-                  <div class="alert alert-info">Uploading here adds new files. Existing uploads remain.</div>
+                  <div class="alert alert-info">Uploading here adds new files. To remove an existing upload, tick Remove then save.</div>
+
+                  @if(($survey->photos ?? collect())->count())
+                    <div class="mb-3">
+                      <div class="fw-semibold mb-2">Existing uploads</div>
+                      @foreach (($photoLabels ?? []) as $key => $label)
+                        @php $existingForLabel = ($survey->photos ?? collect())->where('label', $key); @endphp
+                        @if($existingForLabel->count())
+                          <div class="mb-2">
+                            <div class="text-muted small mb-1">{{ $label }}</div>
+                            <div class="d-flex flex-wrap gap-2">
+                              @foreach($existingForLabel as $ph)
+                                @php
+                                  $url = route('customer-connectivity-surveys.photos.file', $ph->id);
+                                  $isImg = str_starts_with((string) ($ph->mime_type ?? ''), 'image/');
+                                  $isPdf = (string) ($ph->mime_type ?? '') === 'application/pdf';
+                                @endphp
+                                <div class="cc-existing-photo-card border rounded-3 p-2 bg-white" style="width: 240px;">
+                                  <a href="{{ $url }}" target="_blank" class="text-decoration-none">
+                                    @if($isImg)
+                                      <img src="{{ $url }}" alt="{{ $ph->original_name ?: 'photo' }}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 10px;">
+                                    @elseif($isPdf)
+                                      <div class="d-flex align-items-center justify-content-center border rounded-3" style="height: 120px; background: #f8fafc;">
+                                        <div class="text-center">
+                                          <div class="fw-bold">PDF</div>
+                                          <div class="text-muted small">Click to open</div>
+                                        </div>
+                                      </div>
+                                    @else
+                                      <div class="d-flex align-items-center justify-content-center border rounded-3" style="height: 120px; background: #f8fafc;">
+                                        <div class="text-center">
+                                          <div class="fw-bold">FILE</div>
+                                          <div class="text-muted small">Click to open</div>
+                                        </div>
+                                      </div>
+                                    @endif
+                                    <div class="mt-2 small text-truncate" title="{{ $ph->original_name ?: '' }}">{{ $ph->original_name ?: 'Attachment' }}</div>
+                                  </a>
+                                  <div class="form-check mt-2">
+                                    <input class="form-check-input cc-remove-photo" type="checkbox" name="remove_photo_ids[]" value="{{ $ph->id }}" id="ccRmPhoto{{ $ph->id }}">
+                                    <label class="form-check-label text-danger" for="ccRmPhoto{{ $ph->id }}">Remove</label>
+                                  </div>
+                                </div>
+                              @endforeach
+                            </div>
+                          </div>
+                        @endif
+                      @endforeach
+                    </div>
+                  @endif
+
                   <div class="row">
                     @foreach (($photoLabels ?? []) as $key => $label)
                       <div class="col-md-6">
@@ -1256,6 +1321,36 @@ Connectivity Survey #{{ $survey->id }}
       var lng = lngEl ? (lngEl.value || '').trim() : '';
       if (lat !== '' && lng !== '') coordsEl.value = lat + ', ' + lng;
     }
+
+    function syncPerformedByName() {
+      if (!formEl) return;
+      var sel = formEl.querySelector('select[name="meta[surveyPerformedByUserId]"]');
+      var hid = formEl.querySelector('input[name="meta[surveyPerformedBy]"]');
+      if (!sel || !hid) return;
+      var opt = sel.options && sel.selectedIndex >= 0 ? sel.options[sel.selectedIndex] : null;
+      hid.value = opt ? (opt.text || '').trim() : '';
+    }
+
+    if (formEl) {
+      var perfSel = formEl.querySelector('select[name="meta[surveyPerformedByUserId]"]');
+      if (perfSel) {
+        perfSel.addEventListener('change', syncPerformedByName);
+        syncPerformedByName();
+      }
+    }
+
+    function syncRemovePhotoCardState(chk) {
+      if (!chk || !chk.closest) return;
+      var card = chk.closest('.cc-existing-photo-card');
+      if (!card) return;
+      card.classList.toggle('opacity-50', !!chk.checked);
+      card.classList.toggle('border-danger', !!chk.checked);
+    }
+
+    modalEl.querySelectorAll('.cc-remove-photo').forEach(function (chk) {
+      chk.addEventListener('change', function () { syncRemovePhotoCardState(chk); });
+      syncRemovePhotoCardState(chk);
+    });
 
     function countSelectedFiles() {
       var total = 0;

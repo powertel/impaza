@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CustomerConnectivitySurvey;
 use App\Models\CustomerConnectivitySurveyPhoto;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -58,6 +59,7 @@ class CustomerConnectivitySurveyController extends Controller
         ];
 
         $photoLabels = $this->photoLabels();
+        $users = User::query()->where('is_access', 0)->orderBy('name')->get(['id', 'name']);
 
         return view('customer_connectivity_surveys.index', [
             'surveys' => $surveys,
@@ -66,6 +68,7 @@ class CustomerConnectivitySurveyController extends Controller
             'perPage' => $perPage,
             'stats' => $stats,
             'photoLabels' => $photoLabels,
+            'users' => $users,
         ]);
     }
 
@@ -77,11 +80,13 @@ class CustomerConnectivitySurveyController extends Controller
         }
 
         $survey->load(['user:id,name', 'photos']);
+        $users = User::query()->where('is_access', 0)->orderBy('name')->get(['id', 'name']);
 
         return view('customer_connectivity_surveys.show', [
             'survey' => $survey,
             'payload' => is_array($survey->payload) ? $survey->payload : [],
             'photoLabels' => $this->photoLabels(),
+            'users' => $users,
         ]);
     }
 
@@ -93,8 +98,9 @@ class CustomerConnectivitySurveyController extends Controller
         }
 
         $photoLabels = $this->photoLabels();
+        $users = User::query()->where('is_access', 0)->orderBy('name')->get(['id', 'name']);
 
-        return view('customer_connectivity_surveys.create', compact('photoLabels'));
+        return view('customer_connectivity_surveys.create', compact('photoLabels', 'users'));
     }
 
     public function store(Request $request)
@@ -108,6 +114,7 @@ class CustomerConnectivitySurveyController extends Controller
             'status' => 'required|string|in:draft,submitted',
             'meta' => 'nullable|array',
             'meta.date' => 'nullable|string|max:50',
+            'meta.surveyPerformedByUserId' => 'nullable|integer|exists:users,id',
             'meta.surveyPerformedBy' => 'nullable|string|max:255',
 
             'general' => 'nullable|array',
@@ -195,8 +202,18 @@ class CustomerConnectivitySurveyController extends Controller
         $status = $data['status'] ?? 'draft';
 
         $surveyDate = data_get($payload, 'meta.date');
-        $surveyPerformedBy = data_get($payload, 'meta.surveyPerformedBy');
-        $surveyPerformedBy = trim((string) $surveyPerformedBy) !== '' ? trim((string) $surveyPerformedBy) : $user->name;
+        $performedByUserId = (int) data_get($payload, 'meta.surveyPerformedByUserId', 0);
+        $surveyPerformedBy = trim((string) data_get($payload, 'meta.surveyPerformedBy', ''));
+        if ($performedByUserId > 0) {
+            $u = User::query()->find($performedByUserId);
+            if ($u && $u->name) {
+                $surveyPerformedBy = (string) $u->name;
+            }
+        }
+        if ($surveyPerformedBy === '') {
+            $surveyPerformedBy = (string) $user->name;
+        }
+        data_set($payload, 'meta.surveyPerformedByUserId', $performedByUserId > 0 ? $performedByUserId : null);
         data_set($payload, 'meta.surveyPerformedBy', $surveyPerformedBy);
 
         $customerName = data_get($payload, 'general.customerName');
@@ -300,6 +317,7 @@ class CustomerConnectivitySurveyController extends Controller
             'status' => 'required|string|in:draft,submitted',
             'meta' => 'nullable|array',
             'meta.date' => 'nullable|string|max:50',
+            'meta.surveyPerformedByUserId' => 'nullable|integer|exists:users,id',
             'meta.surveyPerformedBy' => 'nullable|string|max:255',
 
             'general' => 'nullable|array',
@@ -372,6 +390,9 @@ class CustomerConnectivitySurveyController extends Controller
             'photos' => 'nullable|array',
             'photos.*' => 'nullable|array',
             'photos.*.*' => 'nullable|file|mimetypes:image/jpeg,image/png,image/gif,image/webp,image/heic,image/heif,application/pdf',
+
+            'remove_photo_ids' => 'nullable|array',
+            'remove_photo_ids.*' => 'integer|exists:customer_connectivity_survey_photos,id',
         ]);
 
         $payload = [
@@ -387,8 +408,18 @@ class CustomerConnectivitySurveyController extends Controller
         $status = $data['status'] ?? ($survey->status ?: 'draft');
 
         $surveyDate = data_get($payload, 'meta.date');
-        $surveyPerformedBy = data_get($payload, 'meta.surveyPerformedBy');
-        $surveyPerformedBy = trim((string) $surveyPerformedBy) !== '' ? trim((string) $surveyPerformedBy) : $user->name;
+        $performedByUserId = (int) data_get($payload, 'meta.surveyPerformedByUserId', 0);
+        $surveyPerformedBy = trim((string) data_get($payload, 'meta.surveyPerformedBy', ''));
+        if ($performedByUserId > 0) {
+            $u = User::query()->find($performedByUserId);
+            if ($u && $u->name) {
+                $surveyPerformedBy = (string) $u->name;
+            }
+        }
+        if ($surveyPerformedBy === '') {
+            $surveyPerformedBy = (string) $user->name;
+        }
+        data_set($payload, 'meta.surveyPerformedByUserId', $performedByUserId > 0 ? $performedByUserId : null);
         data_set($payload, 'meta.surveyPerformedBy', $surveyPerformedBy);
 
         $customerName = data_get($payload, 'general.customerName');
@@ -428,6 +459,24 @@ class CustomerConnectivitySurveyController extends Controller
         try {
             $logRef = (string) Str::uuid();
 
+            $removeIds = $data['remove_photo_ids'] ?? [];
+            if (is_array($removeIds) && count($removeIds)) {
+                $removeIds = array_values(array_unique(array_map('intval', $removeIds)));
+                $photosToRemove = CustomerConnectivitySurveyPhoto::query()
+                    ->where('customer_connectivity_survey_id', $survey->id)
+                    ->whereIn('id', $removeIds)
+                    ->get();
+
+                $disk = Storage::disk('public');
+                foreach ($photosToRemove as $ph) {
+                    $filePath = (string) ($ph->file_path ?? '');
+                    $ph->delete();
+                    if ($filePath !== '' && $disk->exists($filePath)) {
+                        $disk->delete($filePath);
+                    }
+                }
+            }
+
             $survey->update([
                 'status' => $status,
                 'survey_date' => $parsedSurveyDate,
@@ -445,6 +494,7 @@ class CustomerConnectivitySurveyController extends Controller
 
             $files = $request->file('photos') ?: [];
             if (is_array($files)) {
+                $disk = $disk ?? Storage::disk('public');
                 foreach ($files as $label => $file) {
                     if (!$file) continue;
 
