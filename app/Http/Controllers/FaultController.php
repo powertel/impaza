@@ -899,6 +899,7 @@ class FaultController extends Controller
             if($fault && $remark && $fault_section)
             {
                 DB::commit();
+                FaultLifecycle::sendReceiptEmail($fault);
             }
             else
             {
@@ -1250,6 +1251,7 @@ class FaultController extends Controller
             if($fault && $remark && $fault_section)
             {
                 DB::commit();
+                FaultLifecycle::sendReceiptEmail($fault);
             }
             else
             {
