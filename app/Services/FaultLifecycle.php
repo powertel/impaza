@@ -754,6 +754,39 @@ class FaultLifecycle
         }
     }
 
+    public static function sendReceiptEmail(Fault $fault): void
+    {
+        if (!empty($fault->root_fault_id)) {
+            return;
+        }
+
+        $to = trim((string) ($fault->contactEmail ?? ''));
+        if ($to === '') {
+            return;
+        }
+
+        $customerModel = $fault->customer_id ? Customer::find($fault->customer_id) : null;
+        $customerName = $customerModel ? ($customerModel->customer ?? 'N/A') : 'N/A';
+
+        $data = [
+            'fault_ref' => $fault->fault_ref_number,
+            'customer' => $customerName,
+            'service_type' => $fault->serviceType ?: 'N/A',
+            'received_at' => now()->toDateTimeString(),
+        ];
+
+        $subject = "Fault Received: {$fault->fault_ref_number}";
+
+        try {
+            Mail::send('emails.fault_received', $data, function ($message) use ($to, $subject) {
+                $message->to($to)->subject($subject);
+            });
+            Log::info("Notify: Receipt email sent to customer for fault {$fault->fault_ref_number}", ['to' => $to]);
+        } catch (\Exception $e) {
+            Log::error("Notify: Error sending receipt email: " . $e->getMessage(), ['fault_ref' => $fault->fault_ref_number, 'to' => $to]);
+        }
+    }
+
     protected static function sendClearedEmail(Fault $fault): void
     {
         $to = 'powercallcentre@powertel.co.zw';
