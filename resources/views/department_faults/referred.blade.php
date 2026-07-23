@@ -53,6 +53,8 @@ Department Faults
                         <th>Ref No.</th>
                         <th>Customer</th>
                         <th>Link Name</th>
+                        <th>Switch</th>
+                        <th>Port</th>
                         <th>Assigned To</th>
                         <th>Status</th>
                         <th>Fault Age</th>
@@ -61,6 +63,9 @@ Department Faults
                 </thead>
                 <tbody>
                     @foreach ( $faults as $fault )
+                    @php
+                        $latestRemark = ($remarksByFault[$fault->id] ?? collect())->first();
+                    @endphp
                     <tr>
                         <td data-label="No.">{{ $faults->firstItem() + $loop->index }}</td>
                         <td data-label="Ref No.">
@@ -74,6 +79,12 @@ Department Faults
                         </td>
                         <td data-label="Link Name">
                             <div class="faults-cell-main">{{ $fault->link }}</div>
+                        </td>
+                        <td data-label="Switch">
+                            <div class="faults-cell-main">{{ $latestRemark->switch_name ?? 'N/A' }}</div>
+                        </td>
+                        <td data-label="Port">
+                            <div class="faults-cell-main">{{ $latestRemark->port ?? 'N/A' }}</div>
                         </td>
                         <td data-label="Assigned To">
                             <div class="faults-cell-main {{ $fault->assignedTo ? '' : 'text-muted fw-normal' }}">{{ $fault->assignedTo ?: 'Not yet assigned' }}</div>
@@ -103,7 +114,7 @@ Department Faults
                     @endforeach
                     @if ($faults->count() === 0)
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-5">No referred faults</td>
+                            <td colspan="10" class="text-center text-muted py-5">No referred faults</td>
                         </tr>
                     @endif
                 </tbody>
@@ -131,7 +142,7 @@ Department Faults
     ])
     @if(!empty($fault->referral_id))
         @include('department_faults.complete_referral_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
-        @include('department_faults.reassign_referral_modal', [ 'fault' => $fault, 'technicians' => $technicians ])
+        @include('department_faults.reassign_referral_modal', [ 'fault' => $fault, 'technicians' => $technicians, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
     @endif
 @endforeach
  

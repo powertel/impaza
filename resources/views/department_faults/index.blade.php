@@ -133,8 +133,9 @@ Department Faults
                         <th>No.</th>
                         <th>Ref No.</th>
                         <th>Customer</th>
-                        <th>Account Manager</th>
                         <th>Link Name</th>
+                        <th>Switch</th>
+                        <th>Port</th>
                         <th>Assigned To</th>
                         <th>Status</th>
                         <th>Action(s)</th>
@@ -142,12 +143,16 @@ Department Faults
                 </thead>
                 <tbody>
                     @foreach ( $faults as $fault )
+                    @php
+                        $latestRemark = ($remarksByFault[$fault->id] ?? collect())->first();
+                    @endphp
                     <tr>
                         <td data-label="No.">{{ $faults->firstItem() + $loop->index }}</td>
                         <td data-label="Ref No.">{{$fault->fault_ref_number}}</td>
                         <td data-label="Customer">{{ $fault->customer }}</td>
-                        <td data-label="Account Manager">{{ $fault->accountManager }}</td>
                         <td data-label="Link Name">{{ $fault->link }}</td>
+                        <td data-label="Switch">{{ $latestRemark->switch_name ?? 'N/A' }}</td>
+                        <td data-label="Port">{{ $latestRemark->port ?? 'N/A' }}</td>
                         <td class="{{ $fault->name ? 'fw-bold' : 'text-muted' }}" data-label="Assigned To">{{ $fault->name ?: 'Not yet assigned' }}</td>
                         <td class="text-nowrap" data-label="Status">
                             <x-status-badge :label="$fault->description" :color="\App\Models\Status::STATUS_COLOR[$fault->description] ?? '#64748B'" :soft="true" />
