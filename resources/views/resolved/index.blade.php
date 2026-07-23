@@ -55,16 +55,19 @@ Cleared
             <tr>
               <th>Ref. No.</th>
               <th>Customer</th>
-              <th>Account Manager</th>
               <th>Link</th>
+              <th>Switch</th>
+              <th>Port</th>
               <th>Assigned To</th>
-              <th>Logged By</th>
               <th>Cleared At</th>
               <th>Action(s)</th>
             </tr>
           </thead>
           <tbody>
             @foreach ($faults as $fault)
+            @php
+              $latestRemark = ($remarksByFault[$fault->id] ?? collect())->first();
+            @endphp
             <tr>
               <td data-label="Ref. No.">
                 <div class="faults-ref">
@@ -75,17 +78,17 @@ Cleared
               <td data-label="Customer">
                 <div class="faults-cell-main">{{ $fault->customer }}</div>
               </td>
-              <td data-label="Account Manager">
-                <div class="faults-cell-main">{{ $fault->accountManager ?: 'N/A' }}</div>
-              </td>
               <td data-label="Link">
                 <div class="faults-cell-main">{{ $fault->link }}</div>
               </td>
+              <td data-label="Switch">
+                <div class="faults-cell-main">{{ $latestRemark->switch_name ?? 'N/A' }}</div>
+              </td>
+              <td data-label="Port">
+                <div class="faults-cell-main">{{ $latestRemark->port ?? 'N/A' }}</div>
+              </td>
               <td data-label="Assigned To">
                 <div class="faults-cell-main {{ $fault->assignedTo ? '' : 'text-muted fw-normal' }}">{{ $fault->assignedTo ?: 'Not assigned' }}</div>
-              </td>
-              <td data-label="Logged By">
-                <div class="faults-cell-main">{{ $fault->reportedBy ?: 'N/A' }}</div>
               </td>
               <td data-label="Cleared At">
                 <div class="faults-cell-main">{{ \Carbon\Carbon::parse($fault->updated_at)->format('d M Y') }}</div>
@@ -120,6 +123,9 @@ Cleared
   </div>
 
   @foreach ($faults as $fault)
+  @php
+    $latestRemark = ($remarksByFault[$fault->id] ?? collect())->first();
+  @endphp
   <div class="modal custom-modal fade" id="resolvedRevoke-{{ $fault->id }}" tabindex="-1" aria-labelledby="resolvedRevokeLabel-{{ $fault->id }}" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
@@ -150,6 +156,16 @@ Cleared
                 </div>
               </div>
               <div class="fault-modal-section-body">
+                <div class="row g-2 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label">Switch</label>
+                    <input type="text" name="switch_name" class="form-control" value="{{ old('switch_name', $latestRemark->switch_name ?? '') }}" placeholder="Enter switch name or identifier">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Port</label>
+                    <input type="text" name="port" class="form-control" value="{{ old('port', $latestRemark->port ?? '') }}" placeholder="Enter port number or label">
+                  </div>
+                </div>
                 <label class="form-label">Remark</label>
                 <textarea name="remark" class="form-control" rows="3" required></textarea>
               </div>
