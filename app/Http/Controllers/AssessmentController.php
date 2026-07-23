@@ -105,6 +105,8 @@ class AssessmentController extends Controller
                 'remarks.fault_id',
                 'remarks.created_at',
                 'remarks.remark',
+                'remarks.switch_name',
+                'remarks.port',
                 'remarks.file_path',
                 'users.name',
                 'remark_activities.activity'
@@ -276,7 +278,7 @@ class AssessmentController extends Controller
         ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
         ->leftjoin('users','remarks.user_id','=','users.id')
         ->where('remarks.fault_id','=',$id)
-        ->get(['remarks.id','remarks.created_at','remarks.remark','remarks.file_path','users.name','remark_activities.activity']);
+        ->get(['remarks.id','remarks.created_at','remarks.remark','remarks.switch_name','remarks.port','remarks.file_path','users.name','remark_activities.activity']);
 
         $cities = City::all();
         $customers = Customer::all();
@@ -310,6 +312,8 @@ class AssessmentController extends Controller
                 'priorityLevel' => ['required'],
                 'faultType' => ['required'],
                 'remark' => ['required','string'],
+                'switch_name' => ['nullable','string','max:255'],
+                'port' => ['nullable','string','max:255'],
             ]);
 
             $fault = Fault::find($id);
@@ -350,6 +354,8 @@ class AssessmentController extends Controller
                 'fault_id' => $fault->id,
                 'user_id' => $request->user()->id,
                 'remark' => $validated['remark'],
+                'switch_name' => $request->input('switch_name'),
+                'port' => $request->input('port'),
                 'remarkActivity_id' => $remarkActivityId,
                 'file_path' => null,
             ]);

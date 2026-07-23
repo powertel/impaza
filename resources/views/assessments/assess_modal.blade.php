@@ -1,4 +1,7 @@
 <!-- Assess Fault Modal -->
+@php
+  $latestRemarkForAssess = collect($remarks ?? [])->sortByDesc('created_at')->first();
+@endphp
 <div class="modal custom-modal fade" id="assessFaultModal-{{ $fault->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="assessFaultModalLabel-{{ $fault->id }}" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content rounded-4 border-0 shadow-lg">
@@ -168,6 +171,14 @@
                         <option value="Critical" {{ old('priorityLevel', $fault->priorityLevel ?? '') === 'Critical' ? 'selected' : '' }}>Critical</option>
                       </select>
                     </div>
+                    <div class="col-md-6">
+                      <label class="form-label" for="switch_name-{{ $fault->id }}">Switch</label>
+                      <input id="switch_name-{{ $fault->id }}" type="text" class="form-control @error('switch_name') is-invalid @enderror" name="switch_name" value="{{ old('switch_name', $latestRemarkForAssess->switch_name ?? '') }}" placeholder="Enter switch name or identifier">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label" for="port-{{ $fault->id }}">Port</label>
+                      <input id="port-{{ $fault->id }}" type="text" class="form-control @error('port') is-invalid @enderror" name="port" value="{{ old('port', $latestRemarkForAssess->port ?? '') }}" placeholder="Enter port number or label">
+                    </div>
                     <div class="col-12">
                       <label class="form-label required" for="remark-{{ $fault->id }}">Remarks</label>
                       <textarea id="remark-{{ $fault->id }}" class="form-control @error('remark') is-invalid @enderror" name="remark" rows="7" placeholder="Describe symptoms, checks performed, and next action." required>{{ old('remark', '') }}</textarea>
@@ -214,6 +225,16 @@
                     @endif
                   </div>
                   <div class="chat-msg-body">{{ $r->remark }}</div>
+                  @if(!empty($r->switch_name) || !empty($r->port))
+                    <div class="mt-2 d-flex flex-wrap gap-2">
+                      @if(!empty($r->switch_name))
+                        <span class="badge rounded-pill bg-light text-dark border">Switch: {{ $r->switch_name }}</span>
+                      @endif
+                      @if(!empty($r->port))
+                        <span class="badge rounded-pill bg-light text-dark border">Port: {{ $r->port }}</span>
+                      @endif
+                    </div>
+                  @endif
                   @if($r->file_path)
                     <div class="fault-modal-attachment">
                       @if($attachmentUrl)
