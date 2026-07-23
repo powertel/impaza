@@ -694,11 +694,11 @@ Faults
           <tr>
             <th>Ref. No.</th>
             <th>Customer</th>
-            <th>Account Manager</th>
             <th>Link</th>
+            <th>Switch</th>
+            <th>Port</th>
             <th>Assigned To</th>
             <th>Date Reported</th>
-            <th>Logged By</th>
             <th>Status</th>
             <th>Age</th>
             <th class="text-end">Action(s)</th>
@@ -713,6 +713,7 @@ Faults
               $ageText = $faultAges[$fault->id] ?? '';
               $ageStart = $faultAgeStart[$fault->id] ?? null;
               $ageEnd = $faultAgeEnd[$fault->id] ?? null;
+              $latestRemark = ($remarksByFault[$fault->id] ?? collect())->first();
             @endphp
             <tr>
               <td data-label="Ref. No.">
@@ -724,11 +725,14 @@ Faults
               <td data-label="Customer">
                 <div class="faults-cell-main">{{ Str::limit($fault->customer, 26) }}</div>
               </td>
-              <td data-label="Account Manager">
-                <div class="faults-cell-main">{{ $fault->accountManager ?: 'Unassigned' }}</div>
-              </td>
               <td data-label="Link">
                 <div class="faults-cell-main">{{ Str::limit($fault->link, 34) }}</div>
+              </td>
+              <td data-label="Switch">
+                <div class="faults-cell-main">{{ $latestRemark->switch_name ?? 'N/A' }}</div>
+              </td>
+              <td data-label="Port">
+                <div class="faults-cell-main">{{ $latestRemark->port ?? 'N/A' }}</div>
               </td>
               <td data-label="Assigned To">
                 <div class="faults-cell-main {{ $fault->assignedTo ? '' : 'text-muted' }}">{{ $fault->assignedTo ?: 'Not yet assigned' }}</div>
@@ -736,9 +740,6 @@ Faults
               <td data-label="Date Reported">
                 <div class="faults-cell-main">{{ Carbon\Carbon::parse($fault->created_at)->format('d M Y') }}</div>
                 <div class="faults-cell-sub">{{ Carbon\Carbon::parse($fault->created_at)->format('h:i a') }}</div>
-              </td>
-              <td data-label="Logged By">
-                <div class="faults-cell-main">{{ $fault->reportedBy }}</div>
               </td>
               <td class="text-nowrap" data-label="Status">
                 <a href="{{ route('faults.index', ['status' => $fault->status_id]) }}" class="faults-status-link">

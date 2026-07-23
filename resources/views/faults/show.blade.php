@@ -199,6 +199,16 @@
                                             @endif
                                         </div>
                                         <div class="chat-msg-body">{{ $remark->remark }}</div>
+                                        @if(!empty($remark->switch_name) || !empty($remark->port))
+                                            <div class="mt-2 d-flex flex-wrap gap-2">
+                                                @if(!empty($remark->switch_name))
+                                                    <span class="badge rounded-pill bg-light text-dark border">Switch: {{ $remark->switch_name }}</span>
+                                                @endif
+                                                @if(!empty($remark->port))
+                                                    <span class="badge rounded-pill bg-light text-dark border">Port: {{ $remark->port }}</span>
+                                                @endif
+                                            </div>
+                                        @endif
                                         @if($remark->file_path)
                                             <div class="fault-modal-attachment">
                                                 @if($attachmentUrl)
