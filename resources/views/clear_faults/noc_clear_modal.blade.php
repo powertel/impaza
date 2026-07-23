@@ -1,4 +1,7 @@
 @can('noc-clear-faults-clear')
+@php
+  $latestRemark = collect($remarks ?? [])->sortByDesc('created_at')->first();
+@endphp
 <div class="modal custom-modal fade" id="nocClearModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="nocClearModalLabel-{{ $fault->id }}" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content">
@@ -71,6 +74,16 @@
                       @endif
                     </div>
                     <div class="legacy-remark-body">{{ $remark->remark }}</div>
+                    @if(!empty($remark->switch_name) || !empty($remark->port))
+                      <div class="d-flex flex-wrap gap-2 mt-2">
+                        @if(!empty($remark->switch_name))
+                          <span class="badge rounded-pill bg-light text-dark border">Switch: {{ $remark->switch_name }}</span>
+                        @endif
+                        @if(!empty($remark->port))
+                          <span class="badge rounded-pill bg-light text-dark border">Port: {{ $remark->port }}</span>
+                        @endif
+                      </div>
+                    @endif
                     @if($remark->file_path)
                       <div class="mt-2">
                         <img src="{{ asset('storage/'.$remark->file_path) }}" alt="Attachment" class="img-fluid rounded" style="max-height: 160px; object-fit: cover;">
@@ -103,6 +116,16 @@
           @endif
 
           <div class="mt-3">
+            <div class="row g-2 mb-2">
+              <div class="col-md-6">
+                <label class="form-label">Switch</label>
+                <input type="text" name="switch_name" class="form-control" value="{{ old('switch_name', $latestRemark->switch_name ?? '') }}" placeholder="Enter switch name or identifier">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Port</label>
+                <input type="text" name="port" class="form-control" value="{{ old('port', $latestRemark->port ?? '') }}" placeholder="Enter port number or label">
+              </div>
+            </div>
             <label class="form-label">Remark</label>
             <textarea name="remark" class="form-control" rows="3" placeholder="Enter remark to clear fault..." required></textarea>
             <input type="hidden" name="activity" value="ON NOC CLEAR">
