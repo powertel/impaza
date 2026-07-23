@@ -12,6 +12,8 @@ class Remark extends Model
     protected $fillable = [
 
         'remark',
+        'switch_name',
+        'port',
         'user_id',
         'fault_id',
         'remarkActivity_id',

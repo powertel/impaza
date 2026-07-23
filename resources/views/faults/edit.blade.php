@@ -190,6 +190,16 @@
                                                 @endif
                                             </div>
                                             <div class="chat-msg-body">{{ $remark->remark }}</div>
+                                            @if(!empty($remark->switch_name) || !empty($remark->port))
+                                                <div class="mt-2 d-flex flex-wrap gap-2">
+                                                    @if(!empty($remark->switch_name))
+                                                        <span class="badge rounded-pill bg-light text-dark border">Switch: {{ $remark->switch_name }}</span>
+                                                    @endif
+                                                    @if(!empty($remark->port))
+                                                        <span class="badge rounded-pill bg-light text-dark border">Port: {{ $remark->port }}</span>
+                                                    @endif
+                                                </div>
+                                            @endif
                                             @if($remark->file_path)
                                                 <div class="fault-modal-attachment">
                                                     @if($attachmentUrl)
@@ -231,8 +241,22 @@
                         </div>
                         <div class="fault-modal-section-body">
                             <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="switch_name-edit-{{ $fault->id }}" class="form-label">Switch</label>
+                                    <input id="switch_name-edit-{{ $fault->id }}" type="text" class="form-control @error('switch_name') is-invalid @enderror" name="switch_name" value="{{ old('switch_name') }}" placeholder="Enter switch name or identifier">
+                                    @error('switch_name')
+                                        <div class="invalid-feedback d-block"><strong>{{ $message }}</strong></div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="port-edit-{{ $fault->id }}" class="form-label">Port</label>
+                                    <input id="port-edit-{{ $fault->id }}" type="text" class="form-control @error('port') is-invalid @enderror" name="port" value="{{ old('port') }}" placeholder="Enter port number or label">
+                                    @error('port')
+                                        <div class="invalid-feedback d-block"><strong>{{ $message }}</strong></div>
+                                    @enderror
+                                </div>
                                 <div class="col-md-12">
-                                    <label for="remark-edit-{{ $fault->id }}" class="form-label">Remarks (Issue, port and Switch)</label>
+                                    <label for="remark-edit-{{ $fault->id }}" class="form-label">Remarks</label>
                                     <textarea name="remark" required class="form-control @error('remark') is-invalid @enderror edit-remark" data-fault-id="{{ $fault->id }}" placeholder="Enter any additional comments" rows="4">{{ $fault->remark ?? old('remark') }}</textarea>
                                     <input type="hidden" name="activity" value="ON EDIT">
                                 </div>

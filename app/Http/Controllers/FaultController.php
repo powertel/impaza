@@ -140,6 +140,8 @@ class FaultController extends Controller
                 'remarks.fault_id',
                 'remarks.created_at',
                 'remarks.remark',
+                'remarks.switch_name',
+                'remarks.port',
                 'remarks.file_path',
                 'users.name',
                 'remark_activities.activity'
@@ -477,6 +479,8 @@ class FaultController extends Controller
                 'remarks.fault_id',
                 'remarks.created_at',
                 'remarks.remark',
+                'remarks.switch_name',
+                'remarks.port',
                 'remarks.file_path',
                 'users.name',
                 'remark_activities.activity'
@@ -643,6 +647,8 @@ class FaultController extends Controller
                 'remarks.fault_id',
                 'remarks.created_at',
                 'remarks.remark',
+                'remarks.switch_name',
+                'remarks.port',
                 'remarks.file_path',
                 'users.name',
                 'remark_activities.activity'
@@ -684,6 +690,8 @@ class FaultController extends Controller
                 'phoneNumber'=> ['required','string','size:12','regex:/^2637\d{8}$/'],
                 'contactEmail'=> 'nullable|email|max:255',
                 'address'=> 'nullable|string',
+                'switch_name'=> 'nullable|string|max:255',
+                'port'=> 'nullable|string|max:255',
                 'link_id'=> 'required|exists:links,id',
                 'suspectedRfo_id'=> 'required|exists:reasons_for_outages,id',
                 'remark'=> 'required|string',
@@ -775,6 +783,8 @@ class FaultController extends Controller
                     'fault_id'=> $fault->id,
                     'user_id' => $request->user()->id,
                     'remark' => $request['remark'],
+                    'switch_name' => $request->input('switch_name'),
+                    'port' => $request->input('port'),
                     'remarkActivity_id'=>$remarkActivity_id->id,
                     'file_path'=>$path
                 ]
@@ -886,6 +896,8 @@ class FaultController extends Controller
                         'fault_id' => $childFault->id,
                         'user_id' => $request->user()->id,
                         'remark' => $request['remark'] . " (Auto-linked to POP fault {$fault->fault_ref_number})",
+                        'switch_name' => $request->input('switch_name'),
+                        'port' => $request->input('port'),
                         'remarkActivity_id' => $remarkActivity_id->id,
                         'file_path' => null,
                     ]);
@@ -949,7 +961,7 @@ class FaultController extends Controller
             ->leftjoin('remark_activities','remarks.remarkActivity_id','=','remark_activities.id')
             ->leftjoin('users','remarks.user_id','=','users.id')
             ->where('remarks.fault_id','=',$id)
-            ->get(['remarks.id','remarks.created_at','remarks.remark','remarks.file_path','users.name','remark_activities.activity']);
+            ->get(['remarks.id','remarks.created_at','remarks.remark','remarks.switch_name','remarks.port','remarks.file_path','users.name','remark_activities.activity']);
             
             $cities = City::all();
             $customers = Customer::all();
@@ -986,7 +998,9 @@ class FaultController extends Controller
         $data = $request->all();
 
         $request->validate([
-            'attachment' => 'nullable|mimes:png,jpg,jpeg|max:2048'
+            'attachment' => 'nullable|mimes:png,jpg,jpeg|max:2048',
+            'switch_name' => 'nullable|string|max:255',
+            'port' => 'nullable|string|max:255',
         ]);
 
         // If customer changed, derive Account Manager from the selected customer
@@ -1060,6 +1074,8 @@ class FaultController extends Controller
                 'fault_id'=> $fault->id,
                 'user_id' => $request->user()->id,
                 'remark' => $request->input('remark'),
+                'switch_name' => $request->input('switch_name'),
+                'port' => $request->input('port'),
                 'remarkActivity_id' => $actId,
                 'file_path' => $path,
              ]);
@@ -1147,6 +1163,8 @@ class FaultController extends Controller
                 'phoneNumber'=> ['required','string','size:12','regex:/^2637\d{8}$/'],
                 'contactEmail'=> 'nullable|email|max:255',
                 'address'=> 'nullable|string',
+                'switch_name'=> 'nullable|string|max:255',
+                'port'=> 'nullable|string|max:255',
                 'link_id'=> 'required|exists:links,id',
                 'suspectedRfo_id'=> 'required|exists:reasons_for_outages,id',
                 'remark'=> 'required|string',
@@ -1235,6 +1253,8 @@ class FaultController extends Controller
                     'fault_id'=> $fault->id,
                     'user_id' => $request->user()->id,
                     'remark' => $request['remark'],
+                    'switch_name' => $request->input('switch_name'),
+                    'port' => $request->input('port'),
                     'remarkActivity_id'=>$remarkActivity_id->id,
                     'file_path'=>$path
                 ]

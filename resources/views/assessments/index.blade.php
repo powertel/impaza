@@ -53,8 +53,9 @@ Assess Faults
                         <th>No.</th>
                         <th>Ref. No.</th>
                         <th>Customer</th>
-                        <th>Account Manager</th>
                         <th>Link Name</th>
+                        <th>Switch</th>
+                        <th>Port</th>
                         <th>Status</th>
                         <th>Fault Age</th>
                             <th>Action(s)</th>
@@ -62,12 +63,16 @@ Assess Faults
                 </thead>
                 <tbody>
                     @foreach ($faults as $fault)
+                    @php
+                        $latestRemark = ($remarksByFault[$fault->id] ?? collect())->first();
+                    @endphp
                     <tr >
                         <td data-label="No.">{{ ++$i }}</td>
                         <td data-label="Ref. No.">{{$fault->fault_ref_number}}</td>
                         <td data-label="Customer">{{ $fault->customer }}</td>
-                        <td data-label="Account Manager">{{ $fault->accountManager }}</td>
                         <td data-label="Link Name">{{ $fault->link }}</td>
+                        <td data-label="Switch">{{ $latestRemark->switch_name ?? 'N/A' }}</td>
+                        <td data-label="Port">{{ $latestRemark->port ?? 'N/A' }}</td>
                         <td class="text-nowrap" data-label="Status">
                             <x-status-badge :label="$fault->description" :color="\App\Models\Status::STATUS_COLOR[$fault->description] ?? '#64748B'" :soft="true" />
                         </td>
@@ -102,7 +107,7 @@ Assess Faults
                     @endforeach
                     @if ($faults->isEmpty())
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-5">No faults to assess at the moment</td>
+                            <td colspan="9" class="text-center text-muted py-5">No faults to assess at the moment</td>
                         </tr>
                     @endif
                 </tbody> 

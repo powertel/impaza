@@ -179,6 +179,8 @@ class NocClearFaultsController extends Controller
         $validated = $request->validate([
             'remark' => ['required', 'string'],
             'confirmedRfo_id' => ['nullable', 'integer', 'exists:reasons_for_outages,id'],
+            'switch_name' => ['nullable', 'string', 'max:255'],
+            'port' => ['nullable', 'string', 'max:255'],
         ]);
 
         $fault = Fault::findOrFail($id);
@@ -199,6 +201,8 @@ class NocClearFaultsController extends Controller
             'fault_id' => $fault->id,
             'user_id' => $request->user()->id,
             'remark' => $validated['remark'],
+            'switch_name' => $request->input('switch_name'),
+            'port' => $request->input('port'),
             'remarkActivity_id' => $remarkActivityId,
             'file_path' => null,
         ]);

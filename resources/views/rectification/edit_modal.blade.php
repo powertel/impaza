@@ -1,4 +1,7 @@
 @can('rectify-fault')
+@php
+  $latestRemarkForRectify = collect($remarks ?? [])->sortByDesc('created_at')->first();
+@endphp
 <div class="modal custom-modal fade" id="rectifyEditModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="rectifyEditModalLabel-{{ $fault->id }}" aria-hidden="true">
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
@@ -51,6 +54,16 @@
                     @endif
                   </div>
                   <div class="legacy-remark-body">{{ $remark->remark }}</div>
+                  @if(!empty($remark->switch_name) || !empty($remark->port))
+                    <div class="mt-2 d-flex flex-wrap gap-2">
+                      @if(!empty($remark->switch_name))
+                        <span class="badge rounded-pill bg-light text-dark border">Switch: {{ $remark->switch_name }}</span>
+                      @endif
+                      @if(!empty($remark->port))
+                        <span class="badge rounded-pill bg-light text-dark border">Port: {{ $remark->port }}</span>
+                      @endif
+                    </div>
+                  @endif
                   @if($remark->file_path)
                     <div class="mt-2">
                       <img src="{{ asset('storage/'.$remark->file_path) }}" alt="Attachment" class="img-fluid rounded" style="max-height: 160px; object-fit: cover;">
@@ -86,6 +99,14 @@
           <form action="/faults/{{ $fault->id }}/remarks" method="POST" enctype="multipart/form-data" class="js-remark-form" data-remarks-target="#remarksScroller-{{ $fault->id }}">
             {{ csrf_field() }}
             <div class="row g-2 align-items-end">
+              <div class="col-md-6">
+                <label class="form-label">Switch</label>
+                <input type="text" name="switch_name" class="form-control" value="{{ old('switch_name', $latestRemarkForRectify->switch_name ?? '') }}" placeholder="Enter switch name or identifier">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Port</label>
+                <input type="text" name="port" class="form-control" value="{{ old('port', $latestRemarkForRectify->port ?? '') }}" placeholder="Enter port number or label">
+              </div>
               <div class="col-md-12">
                 <label class="form-label">Add Remark</label>
                 <textarea name="remark" class="form-control @error('remark') is-invalid @enderror" rows="2" placeholder="Enter your message" id="rectifyRemark-{{ $fault->id }}"></textarea>

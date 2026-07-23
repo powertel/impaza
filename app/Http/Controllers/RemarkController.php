@@ -47,7 +47,9 @@ class RemarkController extends Controller
             'attachments' => 'nullable|array',
             'attachments.*' => 'nullable|mimes:png,jpg,jpeg|max:2048',
             'activity' => 'nullable|string',
-            'url' => 'nullable|string'
+            'url' => 'nullable|string',
+            'switch_name' => 'nullable|string|max:255',
+            'port' => 'nullable|string|max:255',
         ]);
 
         // Resolve activity: prefer explicit, fallback based on URL context
@@ -83,6 +85,8 @@ class RemarkController extends Controller
                     'fault_id' => $fault->id,
                     'user_id' => $request->user()->id,
                     'remark' => $validated['remark'],
+                    'switch_name' => $request->input('switch_name'),
+                    'port' => $request->input('port'),
                     'remarkActivity_id' => $remarkActivityId,
                     'file_path' => $p,
                 ]);
@@ -96,6 +100,8 @@ class RemarkController extends Controller
                 'fault_id' => $fault->id,
                 'user_id' => $request->user()->id,
                 'remark' => $validated['remark'],
+                'switch_name' => $request->input('switch_name'),
+                'port' => $request->input('port'),
                 'remarkActivity_id' => $remarkActivityId,
                 'file_path' => $path,
             ]);
@@ -117,6 +123,8 @@ class RemarkController extends Controller
                         'remarks.fault_id',
                         'remarks.created_at',
                         'remarks.remark',
+                        'remarks.switch_name',
+                        'remarks.port',
                         'remarks.file_path',
                         'users.name',
                         'remark_activities.activity'

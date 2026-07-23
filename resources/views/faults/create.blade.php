@@ -136,9 +136,23 @@
                         </div>
                         <div class="fault-modal-section-body">
                             <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="switch_name" class="form-label">Switch</label>
+                                    <input id="switch_name" type="text" class="form-control @error('switch_name') is-invalid @enderror" name="switch_name" value="{{ old('switch_name') }}" placeholder="Enter switch name or identifier">
+                                    @error('switch_name')
+                                        <div class="invalid-feedback d-block"><strong>{{ $message }}</strong></div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="port" class="form-label">Port</label>
+                                    <input id="port" type="text" class="form-control @error('port') is-invalid @enderror" name="port" value="{{ old('port') }}" placeholder="Enter port number or label">
+                                    @error('port')
+                                        <div class="invalid-feedback d-block"><strong>{{ $message }}</strong></div>
+                                    @enderror
+                                </div>
                                 <div class="col-md-12">
-                                    <label for="remark" class="form-label">Remarks (Issue, port and switch)</label>
-                                    <textarea id="remark" name="remark" required class="form-control @error('remark') is-invalid @enderror" rows="4" placeholder="Enter the current issue, troubleshooting notes, port details, and switch details">{{ old('remark') }}</textarea>
+                                    <label for="remark" class="form-label">Remarks</label>
+                                    <textarea id="remark" name="remark" required class="form-control @error('remark') is-invalid @enderror" rows="4" placeholder="Enter the current issue and troubleshooting notes">{{ old('remark') }}</textarea>
                                     @error('remark')
                                         <div class="invalid-feedback d-block"><strong>{{ $message }}</strong></div>
                                     @enderror
