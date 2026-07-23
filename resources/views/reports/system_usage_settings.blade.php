@@ -677,6 +677,16 @@ System Usage Report Settings
                 <small class="text-muted">Leave the dates empty to send the previous full Monday to Sunday week.</small>
               </div>
               <div class="col-12 d-flex justify-content-end gap-2">
+                <button
+                  type="submit"
+                  class="btn btn-outline-danger rounded-pill px-4"
+                  formaction="{{ route('system-usage-settings.export-pdf') }}"
+                  formmethod="GET"
+                  formnovalidate
+                >
+                  <i class="fas fa-file-pdf me-1"></i>
+                  Export PDF
+                </button>
                 <button type="submit" class="btn btn-outline-primary rounded-pill px-4">
                   <i class="fas fa-paper-plane me-1"></i>
                   Send Test Email

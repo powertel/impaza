@@ -178,4 +178,37 @@ class SystemUsageReportController extends Controller
                 ->with('error', 'Failed to send test report: ' . $exception->getMessage());
         }
     }
+
+    public function exportPdf(Request $request, SystemUsageReportService $reportService)
+    {
+        $data = $request->validate([
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
+        ]);
+
+        [$start, $end] = $reportService->resolvePeriod(
+            $data['start_date'] ?? null,
+            $data['end_date'] ?? null
+        );
+
+        if (!class_exists('Barryvdh\\DomPDF\\Facade\\Pdf')) {
+            return redirect()
+                ->route('system-usage-settings.edit')
+                ->with('error', 'PDF export requires barryvdh/laravel-dompdf. Please install the dependency.');
+        }
+
+        $report = $reportService->buildReport($start, $end);
+        $filename = sprintf(
+            'system_usage_report_%s_to_%s.pdf',
+            $start->format('Ymd'),
+            $end->format('Ymd')
+        );
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('emails.system_usage_report', [
+            'report' => $report,
+            'isPdf' => true,
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download($filename);
+    }
 }

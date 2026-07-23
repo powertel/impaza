@@ -1,3 +1,6 @@
+@php
+    $isPdf = (bool) ($isPdf ?? false);
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +10,9 @@
     <meta name="supported-color-schemes" content="light dark">
     <title>{{ $report['period']['report_title'] }}</title>
     <style>
+        @page {
+            margin: 14px 16px;
+        }
         body {
             margin: 0;
             padding: 24px 12px;
@@ -343,6 +349,214 @@
             font-size: 13px;
             line-height: 1.6;
         }
+        body.pdf-mode {
+            padding: 0 !important;
+            background: #ffffff !important;
+            color: #142033 !important;
+            font-size: 11px !important;
+        }
+        body.pdf-mode .container {
+            max-width: none !important;
+            width: 100% !important;
+            border-radius: 0 !important;
+            border: 1px solid #d7e3f1 !important;
+            box-shadow: none !important;
+            background: #ffffff !important;
+        }
+        body.pdf-mode .hero {
+            padding: 18px 22px 14px !important;
+            border-top-width: 4px !important;
+            background: linear-gradient(180deg, #f8fbff 0%, #eef5ff 100%) !important;
+            border-bottom: 1px solid #d9e6f4 !important;
+        }
+        body.pdf-mode .eyebrow {
+            margin-bottom: 8px !important;
+            padding: 4px 9px !important;
+            font-size: 8px !important;
+            letter-spacing: 0.08em !important;
+            background: #e0ecff !important;
+            border-color: #bfd7ff !important;
+            color: #1d4ed8 !important;
+        }
+        body.pdf-mode .hero h1 {
+            font-size: 22px !important;
+            margin-bottom: 6px !important;
+            line-height: 1.15 !important;
+            color: #12366f !important;
+        }
+        body.pdf-mode .hero p,
+        body.pdf-mode .section-copy,
+        body.pdf-mode .panel-header p,
+        body.pdf-mode .micro,
+        body.pdf-mode .muted-empty,
+        body.pdf-mode .note-list li,
+        body.pdf-mode .observation-list li,
+        body.pdf-mode .footer {
+            font-size: 10px !important;
+            line-height: 1.45 !important;
+        }
+        body.pdf-mode .content {
+            padding: 18px 22px 20px !important;
+            background: #ffffff !important;
+        }
+        body.pdf-mode .footer {
+            padding: 14px 22px 18px !important;
+            background: #f8fbff !important;
+            border-top: 1px solid #d9e6f4 !important;
+        }
+        body.pdf-mode .section {
+            margin-bottom: 16px !important;
+            padding: 12px 14px !important;
+            border: 1px solid #dde7f2 !important;
+            border-radius: 12px !important;
+            background: #ffffff !important;
+            page-break-inside: avoid;
+        }
+        body.pdf-mode .section-title {
+            font-size: 14px !important;
+            margin-bottom: 8px !important;
+            padding-bottom: 6px !important;
+            border-bottom: 2px solid #e7eef7 !important;
+            color: #0f4aa1 !important;
+        }
+        body.pdf-mode .hero-meta,
+        body.pdf-mode .summary-grid,
+        body.pdf-mode .profile-kpis {
+            border-spacing: 6px !important;
+        }
+        body.pdf-mode .hero-meta {
+            margin-top: 10px !important;
+        }
+        body.pdf-mode .hero-meta td,
+        body.pdf-mode .summary-card,
+        body.pdf-mode .profile-kpis td,
+        body.pdf-mode .region-card,
+        body.pdf-mode .subregion-card,
+        body.pdf-mode .note-panel {
+            padding: 9px 10px !important;
+            border-radius: 10px !important;
+            background: #fbfdff !important;
+            border: 1px solid #dbe7f3 !important;
+        }
+        body.pdf-mode .hero-meta .meta-label,
+        body.pdf-mode .summary-card .label,
+        body.pdf-mode .profile-kpis .kpi-label {
+            font-size: 8px !important;
+            margin-bottom: 3px !important;
+            color: #5b6b81 !important;
+        }
+        body.pdf-mode .hero-meta .meta-value {
+            font-size: 11px !important;
+            line-height: 1.35 !important;
+            color: #163b7a !important;
+        }
+        body.pdf-mode .summary-card .value {
+            font-size: 18px !important;
+            color: #0f4aa1 !important;
+        }
+        body.pdf-mode .metric-grid {
+            margin-bottom: 14px !important;
+        }
+        body.pdf-mode .metric-grid td {
+            padding: 0 6px 8px 0 !important;
+        }
+        body.pdf-mode .metric-pill {
+            padding: 8px 10px !important;
+            border-radius: 10px !important;
+            box-shadow: none !important;
+            background: #f8fbff !important;
+            border: 1px solid #dbe7f3 !important;
+        }
+        body.pdf-mode .metric-pill strong,
+        body.pdf-mode .profile-kpis .kpi-value {
+            font-size: 15px !important;
+            margin-bottom: 2px !important;
+            color: #163b7a !important;
+        }
+        body.pdf-mode .metric-pill span {
+            font-size: 9px !important;
+            line-height: 1.3 !important;
+            color: #64748b !important;
+        }
+        body.pdf-mode .panel {
+            margin-bottom: 14px !important;
+            border-radius: 12px !important;
+            box-shadow: none !important;
+            page-break-inside: avoid;
+            border: 1px solid #dbe7f3 !important;
+            background: #ffffff !important;
+        }
+        body.pdf-mode .panel-header {
+            padding: 10px 12px !important;
+            background: linear-gradient(180deg, #f8fbff 0%, #f3f8ff 100%) !important;
+            border-bottom: 1px solid #dbe7f3 !important;
+        }
+        body.pdf-mode .panel-header h3,
+        body.pdf-mode .region-title {
+            font-size: 12px !important;
+            color: #0f4aa1 !important;
+        }
+        body.pdf-mode .panel-body {
+            padding: 12px !important;
+            background: #ffffff !important;
+        }
+        body.pdf-mode .badge {
+            padding: 4px 7px !important;
+            font-size: 9px !important;
+            background: #e8f1ff !important;
+            color: #0f4aa1 !important;
+        }
+        body.pdf-mode .table-wrap {
+            overflow: visible !important;
+            border: 1px solid #dbe7f3 !important;
+            border-radius: 8px !important;
+            background: #ffffff !important;
+        }
+        body.pdf-mode table.data-table {
+            border-radius: 8px !important;
+            border: none !important;
+        }
+        body.pdf-mode .data-table th,
+        body.pdf-mode .data-table td {
+            padding: 7px 8px !important;
+            font-size: 9px !important;
+            line-height: 1.35 !important;
+        }
+        body.pdf-mode .data-table th {
+            font-size: 8px !important;
+            background: #edf4ff !important;
+            color: #355070 !important;
+            border-bottom: 1px solid #d7e3f0 !important;
+        }
+        body.pdf-mode .data-table td {
+            color: #1f2937 !important;
+            border-bottom: 1px solid #e9f0f6 !important;
+            background: #ffffff !important;
+        }
+        body.pdf-mode .data-table tr:nth-child(even) td {
+            background: #f8fbff !important;
+        }
+        body.pdf-mode .data-table td strong {
+            color: #12366f !important;
+        }
+        body.pdf-mode .note-list,
+        body.pdf-mode .observation-list {
+            padding-left: 14px !important;
+        }
+        body.pdf-mode .note-list li,
+        body.pdf-mode .observation-list li {
+            margin-bottom: 5px !important;
+        }
+        body.pdf-mode .summary-card,
+        body.pdf-mode .metric-pill,
+        body.pdf-mode .panel,
+        body.pdf-mode .region-card,
+        body.pdf-mode .subregion-card,
+        body.pdf-mode .note-panel,
+        body.pdf-mode .table-wrap {
+            page-break-inside: avoid;
+        }
+        @if(!$isPdf)
         @media (prefers-color-scheme: dark) {
             body {
                 background: #0f172a !important;
@@ -428,6 +642,7 @@
                 background: #1d4ed8 !important;
             }
         }
+        @endif
         @media only screen and (max-width: 680px) {
             .hero,
             .content,
@@ -469,13 +684,21 @@
         }
     </style>
 </head>
-<body>
+<body class="{{ $isPdf ? 'pdf-mode' : '' }}">
     @php
-        $tableWrapStyle = 'border:1px solid #dbe5f0; border-radius:14px; overflow:hidden; background:#ffffff;';
+        $tableWrapStyle = $isPdf
+            ? 'border:1px solid #dbe5f0; border-radius:8px; overflow:hidden; background:#ffffff;'
+            : 'border:1px solid #dbe5f0; border-radius:14px; overflow:hidden; background:#ffffff;';
         $tableStyle = 'width:100%; border-collapse:separate; border-spacing:0; background:#ffffff;';
-        $thStyle = 'padding:12px 14px; background:#f5f9ff; color:#475569; font-size:13px; font-weight:700; text-align:left; border-bottom:1px solid #dbe5f0; border-right:1px solid #e5edf5;';
-        $tdStyle = 'padding:12px 14px; color:#1f2937; font-size:13px; text-align:left; vertical-align:top; border-bottom:1px solid #ebf1f7; border-right:1px solid #eef3f8; background:#ffffff;';
-        $tdAltStyle = 'padding:12px 14px; color:#1f2937; font-size:13px; text-align:left; vertical-align:top; border-bottom:1px solid #ebf1f7; border-right:1px solid #eef3f8; background:#fbfdff;';
+        $thStyle = $isPdf
+            ? 'padding:7px 8px; background:#f5f9ff; color:#475569; font-size:9px; font-weight:700; text-align:left; border-bottom:1px solid #dbe5f0; border-right:1px solid #e5edf5;'
+            : 'padding:12px 14px; background:#f5f9ff; color:#475569; font-size:13px; font-weight:700; text-align:left; border-bottom:1px solid #dbe5f0; border-right:1px solid #e5edf5;';
+        $tdStyle = $isPdf
+            ? 'padding:7px 8px; color:#1f2937; font-size:9px; text-align:left; vertical-align:top; border-bottom:1px solid #ebf1f7; border-right:1px solid #eef3f8; background:#ffffff;'
+            : 'padding:12px 14px; color:#1f2937; font-size:13px; text-align:left; vertical-align:top; border-bottom:1px solid #ebf1f7; border-right:1px solid #eef3f8; background:#ffffff;';
+        $tdAltStyle = $isPdf
+            ? 'padding:7px 8px; color:#1f2937; font-size:9px; text-align:left; vertical-align:top; border-bottom:1px solid #ebf1f7; border-right:1px solid #eef3f8; background:#fbfdff;'
+            : 'padding:12px 14px; color:#1f2937; font-size:13px; text-align:left; vertical-align:top; border-bottom:1px solid #ebf1f7; border-right:1px solid #eef3f8; background:#fbfdff;';
         $lastCellStyle = 'border-right:none;';
         $lastRowStyle = 'border-bottom:none;';
     @endphp
