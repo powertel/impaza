@@ -54,6 +54,8 @@ Assign Faults
                             <th>Ref. No.</th>
                             <th>Customer</th>
                             <th>Link</th>
+                            <th>Switch</th>
+                            <th>Port</th>
                             <th>Priority</th>
                             <th>Status</th>
                             <th>Fault Age</th>
@@ -63,10 +65,15 @@ Assign Faults
                     </thead>
                     <tbody>
                         @foreach ($faults as $fault)
+                            @php
+                                $latestRemark = ($remarksByFault[$fault->id] ?? collect())->first();
+                            @endphp
                             <tr data-fault-id="{{ $fault->id }}">
                                 <td data-label="Ref. No.">{{ $fault->fault_ref_number }}</td>
                                 <td data-label="Customer">{{ $fault->customer }}</td>
                                 <td data-label="Link">{{ $fault->link }}</td>
+                                <td data-label="Switch">{{ $latestRemark->switch_name ?? 'N/A' }}</td>
+                                <td data-label="Port">{{ $latestRemark->port ?? 'N/A' }}</td>
                                 <td data-label="Priority">
                                     @php
                                         $priorityColors = [
@@ -109,7 +116,7 @@ Assign Faults
                         @endforeach
                         @if ($faults->isEmpty())
                             <tr>
-                                <td colspan="12" class="text-center text-muted py-5">No faults assigned at the moment</td>
+                                <td colspan="10" class="text-center text-muted py-5">No faults assigned at the moment</td>
                             </tr>
                         @endif
                     </tbody>

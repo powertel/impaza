@@ -54,8 +54,9 @@ Clear Faults
                         <th>No.</th>
                         <th>Ref No.</th>
                         <th>Customer</th>
-                        <th>Account Manager</th>
                         <th>Link Name</th>
+                        <th>Switch</th>
+                        <th>Port</th>
                         <th>Status</th>
                         <th>Fault Age</th>
                         <th>Action(s)</th>
@@ -63,6 +64,9 @@ Clear Faults
                 </thead>
                 <tbody>
                     @foreach ( $faults as $fault )
+                    @php
+                        $latestRemark = ($remarksByFault[$fault->id] ?? collect())->first();
+                    @endphp
                     <tr>
                         <td data-label="No.">{{ ++$i }}</td>
                         <td data-label="Ref No.">
@@ -74,11 +78,14 @@ Clear Faults
                         <td data-label="Customer">
                             <div class="faults-cell-main">{{ $fault->customer }}</div>
                         </td>
-                        <td data-label="Account Manager">
-                            <div class="faults-cell-main">{{ $fault->accountManager ?: 'N/A' }}</div>
-                        </td>
                         <td data-label="Link Name">
                             <div class="faults-cell-main">{{ $fault->link }}</div>
+                        </td>
+                        <td data-label="Switch">
+                            <div class="faults-cell-main">{{ $latestRemark->switch_name ?? 'N/A' }}</div>
+                        </td>
+                        <td data-label="Port">
+                            <div class="faults-cell-main">{{ $latestRemark->port ?? 'N/A' }}</div>
                         </td>
                         <td class="text-nowrap" data-label="Status">
                             <x-status-badge :label="$fault->description" :color="\App\Models\Status::STATUS_COLOR[$fault->description] ?? '#64748B'" :soft="true" />
@@ -105,7 +112,7 @@ Clear Faults
                     @endforeach
                     @if ($faults->isEmpty())
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-5">No faults to clear at the moment</td>
+                            <td colspan="9" class="text-center text-muted py-5">No faults to clear at the moment</td>
                         </tr>
                     @endif
                 </tbody>

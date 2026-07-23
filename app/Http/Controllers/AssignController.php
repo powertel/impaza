@@ -84,6 +84,8 @@ class AssignController extends Controller
                 'remarks.fault_id',
                 'remarks.created_at',
                 'remarks.remark',
+                'remarks.switch_name',
+                'remarks.port',
                 'remarks.file_path',
                 'users.name',
                 'remark_activities.activity'
@@ -182,6 +184,8 @@ class AssignController extends Controller
                 'remarks.fault_id',
                 'remarks.created_at',
                 'remarks.remark',
+                'remarks.switch_name',
+                'remarks.port',
                 'remarks.file_path',
                 'users.name',
                 'remark_activities.activity'
@@ -366,6 +370,8 @@ class AssignController extends Controller
                 'remarks.fault_id',
                 'remarks.created_at',
                 'remarks.remark',
+                'remarks.switch_name',
+                'remarks.port',
                 'remarks.file_path',
                 'users.name',
                 'remark_activities.activity'
@@ -390,6 +396,8 @@ class AssignController extends Controller
             $validated = $request->validate([
                 'assignedTo' => ['required'],
                 'remark' => ['required','string'],
+                'switch_name' => ['nullable','string','max:255'],
+                'port' => ['nullable','string','max:255'],
             ]);
         } catch (ValidationException $e) {
             Log::warning('Re-assign validation failed', [
@@ -439,6 +447,8 @@ class AssignController extends Controller
                 'fault_id' => $fault->id,
                 'user_id' => $request->user()->id,
                 'remark' => $validated['remark'],
+                'switch_name' => $request->input('switch_name'),
+                'port' => $request->input('port'),
                 'remarkActivity_id' => $remarkActivityId,
                 'file_path' => null,
             ]);
@@ -480,6 +490,8 @@ public function assignFault(Request $request)
                 'fault_id' => 'required|integer|exists:faults,id',
                 'assignedTo' => 'required|integer|exists:users,id',
                 'remark' => 'required|string',
+                'switch_name' => ['nullable','string','max:255'],
+                'port' => ['nullable','string','max:255'],
             ]);
         } catch (ValidationException $e) {
             Log::warning('Assign validation failed', [
@@ -585,6 +597,8 @@ public function assignFault(Request $request)
             'fault_id' => $fault->id,
             'user_id' => $userId,
             'remark' => $validated['remark'],
+            'switch_name' => $request->input('switch_name'),
+            'port' => $request->input('port'),
             'remarkActivity_id' => $remarkActivityId,
             'file_path' => null,
         ]);

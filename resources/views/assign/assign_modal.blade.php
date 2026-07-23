@@ -1,3 +1,6 @@
+@php
+  $latestRemarkForAssign = collect($remarks ?? [])->sortByDesc('created_at')->first();
+@endphp
 <div class="modal custom-modal fade" id="assignModal-{{ $fault->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="assignModalLabel-{{ $fault->id }}" aria-hidden="true">
   <div class="modal-dialog modal-xl">
     <div class="modal-content rounded-4 border-0 shadow-lg">
@@ -142,6 +145,18 @@
                       </select>
                     </div>
                     <div class="col-12">
+                      <div class="row g-3">
+                        <div class="col-md-6">
+                          <label class="form-label" for="switch_name-assign-{{ $fault->id }}">Switch</label>
+                          <input id="switch_name-assign-{{ $fault->id }}" type="text" name="switch_name" class="form-control @error('switch_name') is-invalid @enderror" value="{{ old('switch_name', $latestRemarkForAssign->switch_name ?? '') }}" placeholder="Enter switch name or identifier">
+                        </div>
+                        <div class="col-md-6">
+                          <label class="form-label" for="port-assign-{{ $fault->id }}">Port</label>
+                          <input id="port-assign-{{ $fault->id }}" type="text" name="port" class="form-control @error('port') is-invalid @enderror" value="{{ old('port', $latestRemarkForAssign->port ?? '') }}" placeholder="Enter port number or label">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-12">
                       <label class="form-label required" for="remark-assign-{{ $fault->id }}">Remarks</label>
                       <textarea id="remark-assign-{{ $fault->id }}" name="remark" class="form-control @error('remark') is-invalid @enderror" rows="7" placeholder="Reason for assignment and any context for the technician." required>{{ old('remark', '') }}</textarea>
                       <div class="form-text text-muted">This is saved to the conversation.</div>
@@ -182,6 +197,16 @@
                     @endif
                   </div>
                   <div class="chat-msg-body">{{ $r->remark }}</div>
+                  @if(!empty($r->switch_name) || !empty($r->port))
+                    <div class="mt-2 d-flex flex-wrap gap-2">
+                      @if(!empty($r->switch_name))
+                        <span class="badge rounded-pill bg-light text-dark border">Switch: {{ $r->switch_name }}</span>
+                      @endif
+                      @if(!empty($r->port))
+                        <span class="badge rounded-pill bg-light text-dark border">Port: {{ $r->port }}</span>
+                      @endif
+                    </div>
+                  @endif
                 </div>
               @endforeach
             </div>

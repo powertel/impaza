@@ -91,6 +91,8 @@ class NocClearFaultsController extends Controller
                 'remarks.fault_id',
                 'remarks.created_at',
                 'remarks.remark',
+                'remarks.switch_name',
+                'remarks.port',
                 'remarks.file_path',
                 'users.name',
                 'remark_activities.activity'

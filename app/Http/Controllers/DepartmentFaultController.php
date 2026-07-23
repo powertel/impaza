@@ -167,6 +167,8 @@ class DepartmentFaultController extends Controller
                 'remarks.fault_id',
                 'remarks.created_at',
                 'remarks.remark',
+                'remarks.switch_name',
+                'remarks.port',
                 'remarks.file_path',
                 'users.name',
                 'remark_activities.activity'
@@ -288,7 +290,9 @@ class DepartmentFaultController extends Controller
     public function completeReferral(Request $request, $referralId)
     {
         $request->validate([
-            'remark' => ['required','string']
+            'remark' => ['required','string'],
+            'switch_name' => ['nullable','string','max:255'],
+            'port' => ['nullable','string','max:255'],
         ]);
 
         $ref = \App\Models\FaultReferral::find($referralId);
@@ -312,6 +316,8 @@ class DepartmentFaultController extends Controller
             'fault_id' => $fault->id,
             'user_id' => $request->user()->id,
             'remark' => 'Referral completed: '.$request->input('remark'),
+            'switch_name' => $request->input('switch_name'),
+            'port' => $request->input('port'),
         ]);
 
         return back()->with('success', 'Referral work completed and fault returned');
@@ -409,6 +415,8 @@ class DepartmentFaultController extends Controller
                 'remarks.fault_id',
                 'remarks.created_at',
                 'remarks.remark',
+                'remarks.switch_name',
+                'remarks.port',
                 'remarks.file_path',
                 'users.name',
                 'remark_activities.activity'
@@ -464,7 +472,9 @@ class DepartmentFaultController extends Controller
 
         $request->validate([
             'assignedTo' => ['required', 'exists:users,id'],
-            'remark' => ['required', 'string']
+            'remark' => ['required', 'string'],
+            'switch_name' => ['nullable','string','max:255'],
+            'port' => ['nullable','string','max:255'],
         ]);
 
         DB::beginTransaction();
@@ -507,7 +517,9 @@ class DepartmentFaultController extends Controller
             Remark::create([
                 'fault_id' => $id,
                 'user_id' => auth()->user()->id,
-                'remark' => 'Referral accepted and reassigned: ' . $request->input('remark')
+                'remark' => 'Referral accepted and reassigned: ' . $request->input('remark'),
+                'switch_name' => $request->input('switch_name'),
+                'port' => $request->input('port'),
             ]);
             
             FaultLifecycle::recordStatusChange($fault, 3, auth()->user()->id);
@@ -583,6 +595,8 @@ class DepartmentFaultController extends Controller
             'remarks.fault_id',
             'remarks.created_at',
             'remarks.remark',
+            'remarks.switch_name',
+            'remarks.port',
             'remarks.file_path',
             'users.name',
             'remark_activities.activity'
@@ -674,4 +688,3 @@ class DepartmentFaultController extends Controller
     }
 
 }
-

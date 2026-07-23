@@ -52,6 +52,7 @@ My Faults
                 <thead>
                     <tr>
                         <th>No.</th>
+                        <th>Ref. No.</th>
                         <th>Customer</th>
                         <th>Link Name</th>
                         <th>Switch</th>
@@ -68,6 +69,7 @@ My Faults
                     @endphp
                     <tr >
                     <td data-label="No.">{{ ++$i }}</td>
+                        <td data-label="Ref. No.">{{ $fault->fault_ref_number ?? 'N/A' }}</td>
                         <td data-label="Customer">{{ $fault->customer }}</td>
                         <td data-label="Link Name">{{ $fault->link }}</td>
                         <td data-label="Switch">{{ $latestRemark->switch_name ?? 'N/A' }}</td>
@@ -127,7 +129,7 @@ My Faults
                     @endforeach
                     @if ($faults->isEmpty())
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-5">No faults assigned</td>
+                            <td colspan="9" class="text-center text-muted py-5">No faults assigned</td>
                         </tr>
                     @endif
                 </tbody>

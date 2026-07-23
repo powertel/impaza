@@ -58,6 +58,7 @@ class MyFaultController extends Controller
                 ->where('faults.assignedTo','=',auth()->user()->id)
                 ->get([
                     'faults.id',
+                    'faults.fault_ref_number',
                     'customers.customer',
                     'faults.contactName',
                     'faults.phoneNumber',

@@ -1,3 +1,6 @@
+@php
+  $latestRemarkForReassignReferral = collect($remarks ?? [])->sortByDesc('created_at')->first();
+@endphp
 <div class="modal custom-modal fade" id="reassignReferralModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="reassignReferralModalLabel-{{ $fault->id }}" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
@@ -40,9 +43,19 @@
                 @endif
               </div>
 
-              <div class="mb-0">
-                <label for="remark-{{ $fault->id }}" class="form-label">Remark</label>
-                <textarea class="form-control" id="remark-{{ $fault->id }}" name="remark" rows="3" required placeholder="Enter remark for reassignment..."></textarea>
+              <div class="row g-2">
+                <div class="col-md-6">
+                  <label class="form-label" for="switch_name-{{ $fault->id }}">Switch</label>
+                  <input id="switch_name-{{ $fault->id }}" type="text" class="form-control" name="switch_name" value="{{ old('switch_name', $latestRemarkForReassignReferral->switch_name ?? '') }}" placeholder="Enter switch name or identifier">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label" for="port-{{ $fault->id }}">Port</label>
+                  <input id="port-{{ $fault->id }}" type="text" class="form-control" name="port" value="{{ old('port', $latestRemarkForReassignReferral->port ?? '') }}" placeholder="Enter port number or label">
+                </div>
+                <div class="col-md-12">
+                  <label for="remark-{{ $fault->id }}" class="form-label">Remark</label>
+                  <textarea class="form-control" id="remark-{{ $fault->id }}" name="remark" rows="3" required placeholder="Enter remark for reassignment..."></textarea>
+                </div>
               </div>
             </div>
           </div>
