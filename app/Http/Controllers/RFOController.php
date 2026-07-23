@@ -123,18 +123,22 @@ class RFOController extends Controller
         Log::info('RFO update request received', [
             'rfo_id' => $rfo->id,
             'http_method' => $request->method(),
+            'payload' => ['RFO' => $request->input('RFO')],
         ]);
-        $request->validate([
+
+        $validated = $request->validate([
             'RFO' => 'required|string|unique:reasons_for_outages,RFO,' . $rfo->id . ',id',
         ]);
 
 
         try {
-            $rfo->RFO = $request->input('RFO');
-            $rfo->save();
+            $rfo->update([
+                'RFO' => $validated['RFO'],
+            ]);
 
             Log::info('RFO update succeeded', [
                 'rfo_id' => $rfo->id,
+                'payload' => $validated,
             ]);
 
             return redirect()->route('rfos.index')
@@ -144,7 +148,7 @@ class RFOController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'user_id' => auth()->id(),
-                'rfo_id' => $id,
+                'rfo_id' => $rfo->id,
                 'payload' => ['RFO' => $request->input('RFO')],
             ]);
 

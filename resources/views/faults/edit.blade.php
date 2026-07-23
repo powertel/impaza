@@ -16,6 +16,7 @@
         default => $editStatusRaw !== '' ? $editStatusRaw : 'Open',
     };
     $editStatusColor = \App\Models\Status::STATUS_COLOR[$editStatusRaw] ?? \App\Models\Status::STATUS_COLOR[$editStatusLabel] ?? '#64748B';
+    $latestRemark = collect($remarks ?? [])->sortByDesc('created_at')->first();
 @endphp
 <div class="modal custom-modal fade" id="editFaultModal-{{ $fault->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editFaultModalLabel-{{ $fault->id }}" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
@@ -243,14 +244,14 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label for="switch_name-edit-{{ $fault->id }}" class="form-label">Switch</label>
-                                    <input id="switch_name-edit-{{ $fault->id }}" type="text" class="form-control @error('switch_name') is-invalid @enderror" name="switch_name" value="{{ old('switch_name') }}" placeholder="Enter switch name or identifier">
+                                    <input id="switch_name-edit-{{ $fault->id }}" type="text" class="form-control @error('switch_name') is-invalid @enderror" name="switch_name" value="{{ old('switch_name', $latestRemark->switch_name ?? '') }}" placeholder="Enter switch name or identifier">
                                     @error('switch_name')
                                         <div class="invalid-feedback d-block"><strong>{{ $message }}</strong></div>
                                     @enderror
                                 </div>
                                 <div class="col-md-6">
                                     <label for="port-edit-{{ $fault->id }}" class="form-label">Port</label>
-                                    <input id="port-edit-{{ $fault->id }}" type="text" class="form-control @error('port') is-invalid @enderror" name="port" value="{{ old('port') }}" placeholder="Enter port number or label">
+                                    <input id="port-edit-{{ $fault->id }}" type="text" class="form-control @error('port') is-invalid @enderror" name="port" value="{{ old('port', $latestRemark->port ?? '') }}" placeholder="Enter port number or label">
                                     @error('port')
                                         <div class="invalid-feedback d-block"><strong>{{ $message }}</strong></div>
                                     @enderror

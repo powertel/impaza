@@ -74,7 +74,6 @@ RFO
                             </div>
                         </td>
                     </tr>
-                    @include('RFO.edit', ['rfo' => $rfo])
                     @endforeach
                 </tbody>
             </table>
@@ -83,6 +82,9 @@ RFO
             <small class="text-muted">Showing the current outage reason library</small>
             <div id="rfosPager"></div>
         </div>
+        @foreach ($rfos as $rfo)
+            @include('RFO.edit', ['rfo' => $rfo])
+        @endforeach
         @include('RFO.create')
     </div>
 </div>
