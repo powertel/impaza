@@ -1,3 +1,6 @@
+@php
+  $latestRemarkForEscalation = collect($remarks ?? [])->sortByDesc('created_at')->first();
+@endphp
 <div class="modal custom-modal fade" id="escalateModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="escalateModalLabel-{{ $fault->id }}" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -8,9 +11,19 @@
       <form action="{{ route('my_faults.escalate', $fault->id) }}" method="POST">
         @csrf
         <div class="modal-body">
-          <div class="mb-3">
-            <label class="form-label">Reason / Context</label>
-            <textarea name="remark" class="form-control" rows="3" placeholder="Provide context for escalation" required></textarea>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Switch</label>
+              <input type="text" name="switch_name" class="form-control" value="{{ old('switch_name', $latestRemarkForEscalation->switch_name ?? '') }}" placeholder="Enter switch name or identifier">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Port</label>
+              <input type="text" name="port" class="form-control" value="{{ old('port', $latestRemarkForEscalation->port ?? '') }}" placeholder="Enter port number or label">
+            </div>
+            <div class="col-md-12">
+              <label class="form-label">Reason / Context</label>
+              <textarea name="remark" class="form-control" rows="3" placeholder="Provide context for escalation" required></textarea>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
@@ -45,6 +58,16 @@
                   @endif
                 </div>
                 <div class="legacy-remark-body">{{ $remark->remark }}</div>
+                @if(!empty($remark->switch_name) || !empty($remark->port))
+                  <div class="mt-2 d-flex flex-wrap gap-2">
+                    @if(!empty($remark->switch_name))
+                      <span class="badge rounded-pill bg-light text-dark border">Switch: {{ $remark->switch_name }}</span>
+                    @endif
+                    @if(!empty($remark->port))
+                      <span class="badge rounded-pill bg-light text-dark border">Port: {{ $remark->port }}</span>
+                    @endif
+                  </div>
+                @endif
                 @if(!empty($remark->file_path))
                   <div class="mt-2">
                     <img src="{{ asset('storage/'.$remark->file_path) }}" alt="Attachment" class="img-fluid rounded" style="max-height: 160px; object-fit: cover;">
