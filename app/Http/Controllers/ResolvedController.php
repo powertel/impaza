@@ -96,7 +96,17 @@ class ResolvedController extends Controller
             ->leftjoin('users','remarks.user_id','=','users.id')
             ->whereIn('remarks.fault_id', $faultIds)
             ->orderBy('remarks.created_at', 'desc')
-            ->get(['remarks.id','remarks.fault_id','remarks.created_at','remarks.remark','remarks.file_path','users.name','remark_activities.activity']);
+            ->get([
+                'remarks.id',
+                'remarks.fault_id',
+                'remarks.created_at',
+                'remarks.remark',
+                'remarks.switch_name',
+                'remarks.port',
+                'remarks.file_path',
+                'users.name',
+                'remark_activities.activity'
+            ]);
         $remarksByFault = $remarksRecords->groupBy('fault_id');
 
          // Compute Age for each fault: from logged date to NOC-cleared date (status 6), otherwise to now
@@ -138,7 +148,9 @@ class ResolvedController extends Controller
     public function revoke(Request $request, Fault $fault)
     {
         $validated = $request->validate([
-            'remark' => ['required','string']
+            'remark' => ['required','string'],
+            'switch_name' => ['nullable', 'string', 'max:255'],
+            'port' => ['nullable', 'string', 'max:255'],
         ]);
 
         $fault->update(['status_id' => 4]);
@@ -150,6 +162,8 @@ class ResolvedController extends Controller
             'fault_id' => $fault->id,
             'user_id' => $request->user()->id,
             'remark' => 'Resolved revoke: '.$validated['remark'],
+            'switch_name' => $request->input('switch_name'),
+            'port' => $request->input('port'),
         ]);
 
         return back()->with('success', 'Fault has been Reopened');
