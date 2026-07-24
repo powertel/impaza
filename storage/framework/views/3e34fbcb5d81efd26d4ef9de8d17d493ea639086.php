@@ -1,6 +1,6 @@
-@php
+<?php
     $isPdf = (bool) ($isPdf ?? false);
-@endphp
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
     <meta name="supported-color-schemes" content="light dark">
-    <title>{{ $report['period']['report_title'] }}</title>
+    <title><?php echo e($report['period']['report_title']); ?></title>
     <style>
         @page {
             margin: 14px 16px;
@@ -634,7 +634,7 @@
         body.pdf-mode .table-wrap {
             page-break-inside: avoid;
         }
-        @if(!$isPdf)
+        <?php if(!$isPdf): ?>
         @media (prefers-color-scheme: dark) {
             body {
                 background: #0f172a !important;
@@ -720,7 +720,7 @@
                 background: #1d4ed8 !important;
             }
         }
-        @endif
+        <?php endif; ?>
         @media only screen and (max-width: 680px) {
             .hero,
             .content,
@@ -762,8 +762,8 @@
         }
     </style>
 </head>
-<body class="{{ $isPdf ? 'pdf-mode' : '' }}">
-    @php
+<body class="<?php echo e($isPdf ? 'pdf-mode' : ''); ?>">
+    <?php
         $tableWrapStyle = $isPdf
             ? 'border:1px solid #dbe5f0; border-radius:8px; overflow:hidden; background:#ffffff;'
             : 'border:1px solid #dbe5f0; border-radius:14px; overflow:hidden; background:#ffffff;';
@@ -779,21 +779,21 @@
             : 'padding:12px 14px; color:#1f2937; font-size:13px; text-align:left; vertical-align:top; border-bottom:1px solid #ebf1f7; border-right:1px solid #eef3f8; background:#fbfdff;';
         $lastCellStyle = 'border-right:none;';
         $lastRowStyle = 'border-bottom:none;';
-    @endphp
+    ?>
     <div class="container">
         <div class="hero" style="background:#eef5ff; color:#142033; padding:38px 42px 30px; border-bottom:1px solid #d7e5ff; border-top:6px solid #1f6feb;">
             <span class="eyebrow" style="display:inline-block; margin-bottom:12px; padding:6px 12px; border-radius:999px; background:#dbeafe; border:1px solid #bfdbfe; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:#1e40af;">Management Report</span>
-            <h1 style="margin:0 0 10px; font-size:30px; line-height:1.18; color:#0f172a;">{{ $report['period']['report_title'] }}</h1>
+            <h1 style="margin:0 0 10px; font-size:30px; line-height:1.18; color:#0f172a;"><?php echo e($report['period']['report_title']); ?></h1>
             <p style="margin:0; font-size:15px; line-height:1.7; color:#425166;"></p>
             <table class="hero-meta" role="presentation" style="width:100%; margin-top:18px; border-collapse:separate; border-spacing:10px;">
                 <tr>
                     <td style="width:33.33%; padding:14px 16px; border-radius:16px; background:#ffffff; border:1px solid #d7e5ff; vertical-align:top;">
                         <span class="meta-label" style="display:block; font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#5b6b81; margin-bottom:5px;">Reporting Period</span>
-                        <span class="meta-value" style="display:block; font-size:15px; font-weight:700; color:#0f172a; line-height:1.5;">{{ $report['period']['label'] }}</span>
+                        <span class="meta-value" style="display:block; font-size:15px; font-weight:700; color:#0f172a; line-height:1.5;"><?php echo e($report['period']['label']); ?></span>
                     </td>
                     <td style="width:33.33%; padding:14px 16px; border-radius:16px; background:#ffffff; border:1px solid #d7e5ff; vertical-align:top;">
                         <span class="meta-label" style="display:block; font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#5b6b81; margin-bottom:5px;">Generated</span>
-                        <span class="meta-value" style="display:block; font-size:15px; font-weight:700; color:#0f172a; line-height:1.5;">{{ $report['generated_at']->format('d M Y H:i') }}</span>
+                        <span class="meta-value" style="display:block; font-size:15px; font-weight:700; color:#0f172a; line-height:1.5;"><?php echo e($report['generated_at']->format('d M Y H:i')); ?></span>
                     </td>
                     <td style="width:33.33%; padding:14px 16px; border-radius:16px; background:#ffffff; border:1px solid #d7e5ff; vertical-align:top;">
                         <span class="meta-label" style="display:block; font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#5b6b81; margin-bottom:5px;">Coverage</span>
@@ -812,48 +812,48 @@
                     <tr>
                         <td class="summary-card">
                             <span class="label">Monitored Users</span>
-                            <span class="value">{{ number_format($report['summary']['monitored_users']) }}</span>
+                            <span class="value"><?php echo e(number_format($report['summary']['monitored_users'])); ?></span>
                         </td>
                         <td class="summary-card">
                             <span class="label">Active Users</span>
-                            <span class="value">{{ number_format($report['summary']['active_users']) }}</span>
+                            <span class="value"><?php echo e(number_format($report['summary']['active_users'])); ?></span>
                         </td>
                         <td class="summary-card">
                             <span class="label">Regions</span>
-                            <span class="value">{{ number_format($report['summary']['regions']) }}</span>
+                            <span class="value"><?php echo e(number_format($report['summary']['regions'])); ?></span>
                         </td>
                         <td class="summary-card">
                             <span class="label">Total Actions</span>
-                            <span class="value">{{ number_format($report['summary']['total_actions']) }}</span>
+                            <span class="value"><?php echo e(number_format($report['summary']['total_actions'])); ?></span>
                         </td>
                     </tr>
                 </table>
 
                 <table class="metric-grid" role="presentation">
                     <tr>
-                        @foreach($report['metric_labels'] as $metricKey => $metricLabel)
+                        <?php $__currentLoopData = $report['metric_labels']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $metricKey => $metricLabel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <td>
                                 <div class="metric-pill">
-                                    <strong>{{ number_format($report['summary']['metrics'][$metricKey] ?? 0) }}</strong>
-                                    <span>{{ $metricLabel }}</span>
+                                    <strong><?php echo e(number_format($report['summary']['metrics'][$metricKey] ?? 0)); ?></strong>
+                                    <span><?php echo e($metricLabel); ?></span>
                                 </div>
                             </td>
-                            @if(($loop->iteration % 3) === 0 && !$loop->last)
+                            <?php if(($loop->iteration % 3) === 0 && !$loop->last): ?>
                                 </tr><tr>
-                            @endif
-                        @endforeach
+                            <?php endif; ?>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </tr>
                 </table>
 
-                @if(!empty($report['executive_observations']))
+                <?php if(!empty($report['executive_observations'])): ?>
                     <div class="note-panel">
                         <ul class="observation-list">
-                            @foreach($report['executive_observations'] as $observation)
-                                <li>{{ $observation }}</li>
-                            @endforeach
+                            <?php $__currentLoopData = $report['executive_observations']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $observation): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <li><?php echo e($observation); ?></li>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </ul>
                     </div>
-                @endif
+                <?php endif; ?>
             </div>
 
            <!--  <div class="section">
@@ -861,9 +861,9 @@
                 <p class="section-copy">This report follows a formal operational reporting approach by distinguishing user scope, regional coverage, lifecycle status transitions, and role-specific actions captured in the system.</p>
                 <div class="note-panel">
                     <ul class="note-list">
-                        @foreach($report['methodology'] as $note)
-                            <li>{{ $note }}</li>
-                        @endforeach
+                        <?php $__currentLoopData = $report['methodology']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $note): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <li><?php echo e($note); ?></li>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </ul>
                 </div>
             </div>
@@ -872,240 +872,244 @@
                 <h2 class="section-title">Operational Performance by Role</h2>
                 <p class="section-copy"></p>
 
-                @forelse($report['operational_profiles'] as $profile)
+                <?php $__empty_1 = true; $__currentLoopData = $report['operational_profiles']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $profile): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <div class="panel">
                         <div class="panel-header">
-                            <h3>{{ $profile['title'] }}</h3>
-                            <p><strong>{{ $profile['subtitle'] }}.</strong> {{ $profile['description'] }}</p>
+                            <h3><?php echo e($profile['title']); ?></h3>
+                            <p><strong><?php echo e($profile['subtitle']); ?>.</strong> <?php echo e($profile['description']); ?></p>
                         </div>
                         <div class="panel-body">
                             <table class="profile-kpis" role="presentation">
                                 <tr>
-                                    @foreach($profile['metric_labels'] as $metricKey => $metricLabel)
+                                    <?php $__currentLoopData = $profile['metric_labels']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $metricKey => $metricLabel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <td>
-                                            <span class="kpi-label">{{ $metricLabel }}</span>
-                                            <span class="kpi-value">{{ number_format($profile['metrics'][$metricKey] ?? 0) }}</span>
+                                            <span class="kpi-label"><?php echo e($metricLabel); ?></span>
+                                            <span class="kpi-value"><?php echo e(number_format($profile['metrics'][$metricKey] ?? 0)); ?></span>
                                         </td>
-                                        @if(($loop->iteration % 4) === 0 && !$loop->last)
+                                        <?php if(($loop->iteration % 4) === 0 && !$loop->last): ?>
                                             </tr><tr>
-                                        @endif
-                                    @endforeach
+                                        <?php endif; ?>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </tr>
                             </table>
 
-                            @if(!empty($profile['regional_profiles']))
-                                @foreach($profile['regional_profiles'] as $regionalProfile)
+                            <?php if(!empty($profile['regional_profiles'])): ?>
+                                <?php $__currentLoopData = $profile['regional_profiles']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $regionalProfile): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <div class="subregion-card">
-                                        <p class="region-title">{{ $regionalProfile['region'] }} Region</p>
+                                        <p class="region-title"><?php echo e($regionalProfile['region']); ?> Region</p>
                                         <p class="micro">
-                                            <strong>Monitored Users:</strong> {{ number_format($regionalProfile['monitored_users']) }} |
-                                            <strong>Active Users:</strong> {{ number_format($regionalProfile['active_users']) }} |
-                                            <strong>Total Actions:</strong> {{ number_format($regionalProfile['metrics']['total_actions'] ?? 0) }}
+                                            <strong>Monitored Users:</strong> <?php echo e(number_format($regionalProfile['monitored_users'])); ?> |
+                                            <strong>Active Users:</strong> <?php echo e(number_format($regionalProfile['active_users'])); ?> |
+                                            <strong>Total Actions:</strong> <?php echo e(number_format($regionalProfile['metrics']['total_actions'] ?? 0)); ?>
+
                                         </p>
 
                                         <table class="metric-grid" role="presentation" style="margin-bottom: 14px;">
                                             <tr>
-                                                @foreach($profile['metric_labels'] as $metricKey => $metricLabel)
+                                                <?php $__currentLoopData = $profile['metric_labels']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $metricKey => $metricLabel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                     <td>
                                                         <div class="metric-pill">
-                                                            <strong>{{ number_format($regionalProfile['metrics'][$metricKey] ?? 0) }}</strong>
-                                                            <span>{{ $metricLabel }}</span>
+                                                            <strong><?php echo e(number_format($regionalProfile['metrics'][$metricKey] ?? 0)); ?></strong>
+                                                            <span><?php echo e($metricLabel); ?></span>
                                                         </div>
                                                     </td>
-                                                    @if(($loop->iteration % 3) === 0 && !$loop->last)
+                                                    <?php if(($loop->iteration % 3) === 0 && !$loop->last): ?>
                                                         </tr><tr>
-                                                    @endif
-                                                @endforeach
+                                                    <?php endif; ?>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                             </tr>
                                         </table>
 
-                                        @if(!empty($regionalProfile['top_users']))
-                                            <div class="table-wrap" style="{{ $tableWrapStyle }}">
-                                                <table class="data-table" style="{{ $tableStyle }}">
+                                        <?php if(!empty($regionalProfile['top_users'])): ?>
+                                            <div class="table-wrap" style="<?php echo e($tableWrapStyle); ?>">
+                                                <table class="data-table" style="<?php echo e($tableStyle); ?>">
                                                     <thead>
                                                         <tr>
-                                                            <th style="{{ $thStyle }}">Officer</th>
-                                                            @foreach($regionalProfile['detail_columns'] as $column)
-                                                                <th style="{{ $thStyle }}{{ $loop->last ? ' ' . $lastCellStyle : '' }}">{{ $column['label'] }}</th>
-                                                            @endforeach
+                                                            <th style="<?php echo e($thStyle); ?>">Officer</th>
+                                                            <?php $__currentLoopData = $regionalProfile['detail_columns']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $column): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                                <th style="<?php echo e($thStyle); ?><?php echo e($loop->last ? ' ' . $lastCellStyle : ''); ?>"><?php echo e($column['label']); ?></th>
+                                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        @foreach($regionalProfile['top_users'] as $user)
+                                                        <?php $__currentLoopData = $regionalProfile['top_users']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                             <tr>
-                                                                <td style="{{ $loop->odd ? $tdStyle : $tdAltStyle }}">
-                                                                    <strong>{{ $user['name'] }}</strong><br>
-                                                                    {{ $user['email'] }}
+                                                                <td style="<?php echo e($loop->odd ? $tdStyle : $tdAltStyle); ?>">
+                                                                    <strong><?php echo e($user['name']); ?></strong><br>
+                                                                    <?php echo e($user['email']); ?>
+
                                                                 </td>
-                                                                @foreach($regionalProfile['detail_columns'] as $column)
-                                                                    <td style="{{ ($loop->parent->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastCellStyle : '') . ($loop->parent->last ? ' ' . $lastRowStyle : '') }}">
-                                                                        {{ number_format($user[$column['key']] ?? 0) }}
+                                                                <?php $__currentLoopData = $regionalProfile['detail_columns']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $column): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                                    <td style="<?php echo e(($loop->parent->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastCellStyle : '') . ($loop->parent->last ? ' ' . $lastRowStyle : '')); ?>">
+                                                                        <?php echo e(number_format($user[$column['key']] ?? 0)); ?>
+
                                                                     </td>
-                                                                @endforeach
+                                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                             </tr>
-                                                        @endforeach
+                                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                     </tbody>
                                                 </table>
                                             </div>
-                                        @else
+                                        <?php else: ?>
                                             <p class="muted-empty">No activity was recorded for this region in the selected reporting period.</p>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
-                                @endforeach
-                            @else
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            <?php else: ?>
                                 <p class="muted-empty">No activity was recorded for this operational profile in the selected reporting period.</p>
-                            @endif
+                            <?php endif; ?>
                         </div>
                     </div>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <p class="muted-empty">No role-based operational activity was available for the selected reporting period.</p>
-                @endforelse
+                <?php endif; ?>
             </div>
 
             <div class="section">
                 <h2 class="section-title">Section and Role Governance View</h2>
                 <p class="section-copy">This section summarises monitored usage by operational section, then shows the role composition within each section together with the regional distribution of recorded activity.</p>
 
-                @forelse($report['groups'] as $group)
+                <?php $__empty_1 = true; $__currentLoopData = $report['groups']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $group): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <div class="panel">
                         <div class="panel-header">
-                            <h3>{{ $group['label'] }}</h3>
-                            <p>Monitored users: {{ number_format($group['monitored_users']) }} | Active users: {{ number_format($group['active_users']) }} | Total actions: {{ number_format($group['total_actions']) }}</p>
+                            <h3><?php echo e($group['label']); ?></h3>
+                            <p>Monitored users: <?php echo e(number_format($group['monitored_users'])); ?> | Active users: <?php echo e(number_format($group['active_users'])); ?> | Total actions: <?php echo e(number_format($group['total_actions'])); ?></p>
                         </div>
                         <div class="panel-body">
                             <table class="metric-grid" role="presentation" style="margin-bottom: 16px;">
                                 <tr>
-                                    @foreach($report['metric_labels'] as $metricKey => $metricLabel)
+                                    <?php $__currentLoopData = $report['metric_labels']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $metricKey => $metricLabel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <td>
                                             <div class="metric-pill">
-                                                <strong>{{ number_format($group['metrics'][$metricKey] ?? 0) }}</strong>
-                                                <span>{{ $metricLabel }}</span>
+                                                <strong><?php echo e(number_format($group['metrics'][$metricKey] ?? 0)); ?></strong>
+                                                <span><?php echo e($metricLabel); ?></span>
                                             </div>
                                         </td>
-                                        @if(($loop->iteration % 3) === 0 && !$loop->last)
+                                        <?php if(($loop->iteration % 3) === 0 && !$loop->last): ?>
                                             </tr><tr>
-                                        @endif
-                                    @endforeach
+                                        <?php endif; ?>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </tr>
                             </table>
 
-                            @if(!empty($group['roles']))
-                                <div class="table-wrap" style="margin-bottom: 16px; {{ $tableWrapStyle }}">
-                                    <table class="data-table" style="{{ $tableStyle }}">
+                            <?php if(!empty($group['roles'])): ?>
+                                <div class="table-wrap" style="margin-bottom: 16px; <?php echo e($tableWrapStyle); ?>">
+                                    <table class="data-table" style="<?php echo e($tableStyle); ?>">
                                         <thead>
                                             <tr>
-                                                <th style="{{ $thStyle }}">Role</th>
-                                                <th style="{{ $thStyle }}">Monitored Users</th>
-                                                <th style="{{ $thStyle }}">Active Users</th>
-                                                <th style="{{ $thStyle }}">Total Actions</th>
-                                                <th style="{{ $thStyle }}{{ $lastCellStyle }}">Leading User</th>
+                                                <th style="<?php echo e($thStyle); ?>">Role</th>
+                                                <th style="<?php echo e($thStyle); ?>">Monitored Users</th>
+                                                <th style="<?php echo e($thStyle); ?>">Active Users</th>
+                                                <th style="<?php echo e($thStyle); ?>">Total Actions</th>
+                                                <th style="<?php echo e($thStyle); ?><?php echo e($lastCellStyle); ?>">Leading User</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach($group['roles'] as $role)
+                                            <?php $__currentLoopData = $group['roles']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $role): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                 <tr>
-                                                    <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ $role['label'] }}</td>
-                                                    <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ number_format($role['monitored_users']) }}</td>
-                                                    <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ number_format($role['active_users']) }}</td>
-                                                    <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ number_format($role['total_actions']) }}</td>
-                                                    <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ' ' . $lastCellStyle . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ data_get($role, 'top_users.0.name', 'No activity') }}</td>
+                                                    <td style="<?php echo e(($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '')); ?>"><?php echo e($role['label']); ?></td>
+                                                    <td style="<?php echo e(($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '')); ?>"><?php echo e(number_format($role['monitored_users'])); ?></td>
+                                                    <td style="<?php echo e(($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '')); ?>"><?php echo e(number_format($role['active_users'])); ?></td>
+                                                    <td style="<?php echo e(($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '')); ?>"><?php echo e(number_format($role['total_actions'])); ?></td>
+                                                    <td style="<?php echo e(($loop->odd ? $tdStyle : $tdAltStyle) . ' ' . $lastCellStyle . ($loop->last ? ' ' . $lastRowStyle : '')); ?>"><?php echo e(data_get($role, 'top_users.0.name', 'No activity')); ?></td>
                                                 </tr>
-                                            @endforeach
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </tbody>
                                     </table>
                                 </div>
-                            @endif
+                            <?php endif; ?>
 
-                            @if(!empty($group['regions']))
-                                <div class="table-wrap" style="{{ $tableWrapStyle }}">
-                                    <table class="data-table" style="{{ $tableStyle }}">
+                            <?php if(!empty($group['regions'])): ?>
+                                <div class="table-wrap" style="<?php echo e($tableWrapStyle); ?>">
+                                    <table class="data-table" style="<?php echo e($tableStyle); ?>">
                                         <thead>
                                             <tr>
-                                                <th style="{{ $thStyle }}">Region</th>
-                                                <th style="{{ $thStyle }}">Monitored Users</th>
-                                                <th style="{{ $thStyle }}">Active Users</th>
-                                                <th style="{{ $thStyle }}">Total Actions</th>
-                                                <th style="{{ $thStyle }}{{ $lastCellStyle }}">Leading User</th>
+                                                <th style="<?php echo e($thStyle); ?>">Region</th>
+                                                <th style="<?php echo e($thStyle); ?>">Monitored Users</th>
+                                                <th style="<?php echo e($thStyle); ?>">Active Users</th>
+                                                <th style="<?php echo e($thStyle); ?>">Total Actions</th>
+                                                <th style="<?php echo e($thStyle); ?><?php echo e($lastCellStyle); ?>">Leading User</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach($group['regions'] as $region)
+                                            <?php $__currentLoopData = $group['regions']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $region): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                 <tr>
-                                                    <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ $region['region'] }}</td>
-                                                    <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ number_format($region['monitored_users']) }}</td>
-                                                    <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ number_format($region['active_users']) }}</td>
-                                                    <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ number_format($region['total_actions']) }}</td>
-                                                    <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ' ' . $lastCellStyle . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ data_get($region, 'top_users.0.name', 'No activity') }}</td>
+                                                    <td style="<?php echo e(($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '')); ?>"><?php echo e($region['region']); ?></td>
+                                                    <td style="<?php echo e(($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '')); ?>"><?php echo e(number_format($region['monitored_users'])); ?></td>
+                                                    <td style="<?php echo e(($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '')); ?>"><?php echo e(number_format($region['active_users'])); ?></td>
+                                                    <td style="<?php echo e(($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '')); ?>"><?php echo e(number_format($region['total_actions'])); ?></td>
+                                                    <td style="<?php echo e(($loop->odd ? $tdStyle : $tdAltStyle) . ' ' . $lastCellStyle . ($loop->last ? ' ' . $lastRowStyle : '')); ?>"><?php echo e(data_get($region, 'top_users.0.name', 'No activity')); ?></td>
                                                 </tr>
-                                            @endforeach
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </tbody>
                                     </table>
                                 </div>
-                            @endif
+                            <?php endif; ?>
                         </div>
                     </div>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <p class="muted-empty">No monitored groups matched the configured roles during the selected reporting period.</p>
-                @endforelse
+                <?php endif; ?>
             </div>
 
             <div class="section">
                 <h2 class="section-title">Regional Breakdown</h2>
                 <p class="section-copy">Regional categorisation is based on the monitored user profile and provides a management view of where recorded activity was concentrated during the reporting week.</p>
 
-                @forelse($report['regions'] as $region)
+                <?php $__empty_1 = true; $__currentLoopData = $report['regions']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $region): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <div class="region-card">
-                        <p class="region-title">{{ $region['region'] }}</p>
+                        <p class="region-title"><?php echo e($region['region']); ?></p>
                         <p class="micro">
-                            <strong>Monitored Users:</strong> {{ number_format($region['monitored_users']) }} |
-                            <strong>Active Users:</strong> {{ number_format($region['active_users']) }} |
-                            <strong>Total Actions:</strong> {{ number_format($region['total_actions']) }}
+                            <strong>Monitored Users:</strong> <?php echo e(number_format($region['monitored_users'])); ?> |
+                            <strong>Active Users:</strong> <?php echo e(number_format($region['active_users'])); ?> |
+                            <strong>Total Actions:</strong> <?php echo e(number_format($region['total_actions'])); ?>
+
                         </p>
 
                         <table class="metric-grid" role="presentation" style="margin-bottom: 12px;">
                             <tr>
-                                @foreach($report['metric_labels'] as $metricKey => $metricLabel)
+                                <?php $__currentLoopData = $report['metric_labels']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $metricKey => $metricLabel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <td>
                                         <div class="metric-pill">
-                                            <strong>{{ number_format($region['metrics'][$metricKey] ?? 0) }}</strong>
-                                            <span>{{ $metricLabel }}</span>
+                                            <strong><?php echo e(number_format($region['metrics'][$metricKey] ?? 0)); ?></strong>
+                                            <span><?php echo e($metricLabel); ?></span>
                                         </div>
                                     </td>
-                                    @if(($loop->iteration % 3) === 0 && !$loop->last)
+                                    <?php if(($loop->iteration % 3) === 0 && !$loop->last): ?>
                                         </tr><tr>
-                                    @endif
-                                @endforeach
+                                    <?php endif; ?>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </tr>
                         </table>
 
-                        @if(!empty($region['top_users']))
-                            <div class="table-wrap" style="{{ $tableWrapStyle }}">
-                                <table class="data-table" style="{{ $tableStyle }}">
+                        <?php if(!empty($region['top_users'])): ?>
+                            <div class="table-wrap" style="<?php echo e($tableWrapStyle); ?>">
+                                <table class="data-table" style="<?php echo e($tableStyle); ?>">
                                     <thead>
                                         <tr>
-                                            <th style="{{ $thStyle }}">User</th>
-                                            <th style="{{ $thStyle }}">Section</th>
-                                            <th style="{{ $thStyle }}">Email</th>
-                                            <th style="{{ $thStyle }}{{ $lastCellStyle }}">Total Actions</th>
+                                            <th style="<?php echo e($thStyle); ?>">User</th>
+                                            <th style="<?php echo e($thStyle); ?>">Section</th>
+                                            <th style="<?php echo e($thStyle); ?>">Email</th>
+                                            <th style="<?php echo e($thStyle); ?><?php echo e($lastCellStyle); ?>">Total Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach($region['top_users'] as $user)
+                                        <?php $__currentLoopData = $region['top_users']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <tr>
-                                                <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ $user['name'] }}</td>
-                                                <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ $user['section_label'] }}</td>
-                                                <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ $user['email'] }}</td>
-                                                <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ' ' . $lastCellStyle . ($loop->last ? ' ' . $lastRowStyle : '') }}"><span class="badge">{{ number_format($user['total_actions']) }}</span></td>
+                                                <td style="<?php echo e(($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '')); ?>"><?php echo e($user['name']); ?></td>
+                                                <td style="<?php echo e(($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '')); ?>"><?php echo e($user['section_label']); ?></td>
+                                                <td style="<?php echo e(($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '')); ?>"><?php echo e($user['email']); ?></td>
+                                                <td style="<?php echo e(($loop->odd ? $tdStyle : $tdAltStyle) . ' ' . $lastCellStyle . ($loop->last ? ' ' . $lastRowStyle : '')); ?>"><span class="badge"><?php echo e(number_format($user['total_actions'])); ?></span></td>
                                             </tr>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </tbody>
                                 </table>
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <p class="muted-empty">No regional activity was captured in this reporting period.</p>
-                @endforelse
+                <?php endif; ?>
             </div>
 
             <div class="section">
@@ -1113,27 +1117,27 @@
                 <p class="section-copy">The following ranked view shows the monitored users with the highest total recorded action volume during the reporting period.</p>
                 <div class="panel">
                     <div class="panel-body">
-                        <div class="table-wrap" style="{{ $tableWrapStyle }}">
-                            <table class="data-table" style="{{ $tableStyle }}">
+                        <div class="table-wrap" style="<?php echo e($tableWrapStyle); ?>">
+                            <table class="data-table" style="<?php echo e($tableStyle); ?>">
                                 <thead>
                                     <tr>
-                                        <th style="{{ $thStyle }}">User</th>
-                                        <th style="{{ $thStyle }}">Region</th>
-                                        <th style="{{ $thStyle }}{{ $lastCellStyle }}">Total Actions</th>
+                                        <th style="<?php echo e($thStyle); ?>">User</th>
+                                        <th style="<?php echo e($thStyle); ?>">Region</th>
+                                        <th style="<?php echo e($thStyle); ?><?php echo e($lastCellStyle); ?>">Total Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse($report['top_users'] as $user)
+                                    <?php $__empty_1 = true; $__currentLoopData = $report['top_users']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                         <tr>
-                                            <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ $user['name'] }}</td>
-                                            <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '') }}">{{ $user['region'] }}</td>
-                                            <td style="{{ ($loop->odd ? $tdStyle : $tdAltStyle) . ' ' . $lastCellStyle . ($loop->last ? ' ' . $lastRowStyle : '') }}"><span class="badge">{{ number_format($user['total_actions']) }}</span></td>
+                                            <td style="<?php echo e(($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '')); ?>"><?php echo e($user['name']); ?></td>
+                                            <td style="<?php echo e(($loop->odd ? $tdStyle : $tdAltStyle) . ($loop->last ? ' ' . $lastRowStyle : '')); ?>"><?php echo e($user['region']); ?></td>
+                                            <td style="<?php echo e(($loop->odd ? $tdStyle : $tdAltStyle) . ' ' . $lastCellStyle . ($loop->last ? ' ' . $lastRowStyle : '')); ?>"><span class="badge"><?php echo e(number_format($user['total_actions'])); ?></span></td>
                                         </tr>
-                                    @empty
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                         <tr>
-                                            <td colspan="3" style="{{ $tdStyle }} {{ $lastCellStyle }} {{ $lastRowStyle }}">No activity recorded for the selected period.</td>
+                                            <td colspan="3" style="<?php echo e($tdStyle); ?> <?php echo e($lastCellStyle); ?> <?php echo e($lastRowStyle); ?>">No activity recorded for the selected period.</td>
                                         </tr>
-                                    @endforelse
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
@@ -1150,3 +1154,4 @@
     </div>
 </body>
 </html>
+<?php /**PATH /var/www/html/resources/views/emails/system_usage_report.blade.php ENDPATH**/ ?>

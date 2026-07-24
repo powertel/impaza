@@ -1,0 +1,1605 @@
+
+
+<script>
+(function(){
+  function moveInlineModalsToBody() {
+    document.querySelectorAll('.modal').forEach(function(modal){
+      if (modal && modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+      }
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', moveInlineModalsToBody);
+  } else {
+    moveInlineModalsToBody();
+  }
+})();
+</script>
+
+<script>
+(function(){
+  var baseModal = 1055;
+  var baseBackdrop = 1040;
+  function updateStack(){
+    var modals = Array.prototype.slice.call(document.querySelectorAll('.modal.show'));
+    var backs = Array.prototype.slice.call(document.querySelectorAll('.modal-backdrop'));
+    modals.forEach(function(m, i){ m.style.zIndex = String(baseModal + i*10); });
+    backs.forEach(function(b, i){ b.style.zIndex = String(baseBackdrop + i*10); });
+    if (modals.length > 0) { document.body.classList.add('modal-open'); }
+    else { document.body.classList.remove('modal-open'); }
+  }
+  document.addEventListener('shown.bs.modal', updateStack);
+  document.addEventListener('hidden.bs.modal', updateStack);
+})();
+</script>
+
+<script type="text/javascript">
+
+    $('.show_confirm').click(function(event) {
+var form =  $(this).closest("form");
+var name = $(this).data("name");
+event.preventDefault();
+new swal({
+    title: `Are you sure you want to delete this record?`,
+    text: "If you delete this, it will be gone forever.",
+    icon: "warning",
+    buttons: true,
+    showCancelButton: true,
+    dangerMode: true,}).then((willDelete) => {
+  if (willDelete.isConfirmed) {
+    form.submit();
+
+    new swal('Deleted','','success')
+  } 
+   else{
+    new swal('File not Deleted','','info')
+    location.reload();
+            } 
+
+});});
+</script>
+<script>
+  $(document).on('click','.confirm_disconnect', function(e){
+    e.preventDefault();
+    var form = $(this).closest('form');
+    new swal({
+      title: 'Disconnect link?',
+      text: 'This will mark the link as Disconnected.',
+      icon: 'warning',
+      buttons: true,
+      showCancelButton: true,
+      dangerMode: true,
+    }).then(function(res){ if (res.isConfirmed) form.submit(); });
+  });
+  $(document).on('click','.confirm_decommission', function(e){
+    e.preventDefault();
+    var form = $(this).closest('form');
+    new swal({
+      title: 'Decommission link?',
+      text: 'This will mark the link as Decommissioned.',
+      icon: 'warning',
+      buttons: true,
+      showCancelButton: true,
+      dangerMode: true,
+    }).then(function(res){ if (res.isConfirmed) form.submit(); });
+  });
+</script>
+<script>
+    function inlineSave(){
+
+       new swal({
+            icon: 'success',
+            title: 'Saved',
+            showConfirmButton: false,
+            timer: 1000
+        })
+       };
+       </script>
+<script>
+     function submitResult(){
+        event.preventDefault();
+        new swal ({
+                    title: 'Do you want to save the changes?',
+                    showDenyButton: true,
+                    showCancelButton: true,
+                    confirmButtonText: 'Save',
+                    denyButtonText: `Don't save`,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '##3085d6'
+        }).then((submitResult) => {
+        if (submitResult.isConfirmed) {
+             $('#UF').submit();
+            swal.fire('Saved!',  '', 'success')
+        } else if (submitResult.isDenied) {
+            $('#UF').submit();
+            swal.fire('Changes are not saved', '', 'info');
+        }
+        else{
+            location.reload();
+        }
+        });
+            }
+        </script>
+<script>
+$('#city').on('change',function () {
+        var CityID = $(this).val();
+        if (CityID) {
+            $.ajax({
+                url : '/suburb/' +CityID,
+                type: "GET",
+                dataType: "json",
+                success: function (res) {
+                    if (res) {
+                        $("#suburb").empty();
+                        $("#pop").empty();
+                        $("#suburb").append('<option  selected Disabled>Select Suburb</option>');
+                        $("#pop").append('<option  selected Disabled>Select Pop</option>');
+                        $.each(res, function (key, value) {
+                            $("#suburb").append('<option value="' + key + '">' + value + '</option>');
+                        });
+
+                    } else {
+                        $("#suburb").empty();
+                    }
+                }
+            });
+        } else {
+            $("#suburb").empty();
+            $("#city").empty();
+        }
+    });
+    $('#suburb').on('change', function () {
+        var suburbID = $(this).val();
+        if (suburbID) {
+            $.ajax({
+                url : '/pop/' +suburbID,
+                type: "GET",
+                dataType: "json",
+                success: function (res) {
+                    if (res) {
+                        $("#pop").empty();
+                        $("#pop").append('<option  selected Disabled>Select Pop</option>');
+                        $.each(res, function (key, value) {
+                            $("#pop").append('<option value="' + key + '">' + value + '</option>');
+                        });
+
+                    } else {
+                        $("#pop").empty();
+                    }
+                }
+            });
+        } else {
+            $("#pop").empty();
+        }
+    });
+</script>
+
+
+
+<script type="text/javascript">
+    $('#customer').on('change',function () {
+
+    });
+</script>
+
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const repeater = document.getElementById('departmentRepeater');
+    if (!repeater) return;
+    const itemsContainer = repeater.querySelector('.repeater-items');
+    const addBtn = document.getElementById('addRepeaterItem');
+    const removeBtn = document.getElementById('removeRepeaterItem');
+    let index = itemsContainer.querySelectorAll('.repeater-item').length - 1;
+
+    function createItem(idx) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'repeater-item border rounded p-3 mb-3';
+      wrapper.innerHTML = `
+        <div class="row g-3 align-items-end">
+          <div class="col-12">
+            <label class="form-label">Department</label>
+            <input type="text" name="items[${idx}][department]" class="form-control" placeholder="e.g. Operations" required>
+          </div>
+        </div>
+      `;
+      return wrapper;
+    }
+
+    addBtn?.addEventListener('click', function() {
+      index += 1;
+      itemsContainer.appendChild(createItem(index));
+    });
+
+    removeBtn?.addEventListener('click', function() {
+      const items = itemsContainer.querySelectorAll('.repeater-item');
+      if (items.length > 1) {
+        items[items.length - 1].remove();
+        index -= 1;
+      }
+    });
+  });
+</script>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+    const csrf = csrfMeta ? csrfMeta.getAttribute('content') : '';
+
+    async function postForm(url, form) {
+      const fd = new FormData(form);
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+        body: fd,
+      });
+      const text = await res.text();
+      let json = {};
+      try { json = JSON.parse(text); } catch (e) {}
+      if (!res.ok) {
+        console.error('Remark save failed', text);
+        if (window.swal) { new swal('Save failed', 'Please try again', 'error'); }
+      }
+      return json;
+    }
+
+    function renderRemarkBubble(r) {
+      // Match the faults.show conversation layout
+      const isSelf = (r?.name && r.name === (window.currentUserName || ''));
+      const wrapper = document.createElement('div');
+      wrapper.className = `legacy-remark-row ${isSelf ? 'legacy-remark-row-self' : 'legacy-remark-row-other'}`;
+      const bubble = document.createElement('div');
+      bubble.className = `legacy-remark-bubble ${isSelf ? 'legacy-remark-bubble-self' : 'legacy-remark-bubble-other'}`;
+      const meta = document.createElement('div');
+      meta.className = 'legacy-remark-meta';
+      const created = r?.created_at ? new Date(r.created_at) : new Date();
+      meta.innerHTML = `<span class="badge ${isSelf ? 'bg-success' : 'bg-secondary'}">${r?.name || 'You'}</span>`+
+        ` <small class="text-muted">${created.toLocaleString()}</small>`+
+        (r?.activity ? ` <small class="text-muted">• ${r.activity}</small>` : '');
+      const body = document.createElement('div');
+      body.className = 'legacy-remark-body';
+      body.textContent = r?.remark || '';
+      bubble.appendChild(meta);
+      bubble.appendChild(body);
+      if (r?.file_path) {
+        const imgWrap = document.createElement('div');
+        imgWrap.className = 'mt-2';
+        const img = document.createElement('img');
+        img.className = 'img-fluid rounded';
+        img.style.maxHeight = '160px';
+        img.style.objectFit = 'cover';
+        img.alt = 'Attachment';
+        img.title = 'Attachment';
+        img.src = `/storage/${r.file_path}`;
+        imgWrap.appendChild(img);
+        bubble.appendChild(imgWrap);
+      }
+      wrapper.appendChild(bubble);
+      return wrapper;
+    }
+
+    // Capture submit for all remark forms
+    document.querySelectorAll('.js-remark-form').forEach(form => {
+      if (form.dataset.bound === '1') return; // guard against double-binding
+      form.dataset.bound = '1';
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const targetSel = form.dataset.remarksTarget;
+        const list = targetSel ? document.querySelector(targetSel) : null;
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending...'; }
+        const url = form.getAttribute('action');
+        const json = await postForm(url, form);
+        if (json && json.status === 'ok') {
+          const items = Array.isArray(json.remarks) ? json.remarks : (json.remark ? [json.remark] : []);
+          items.forEach(function(rem){
+            const bubble = renderRemarkBubble(rem);
+            if (list) {
+              list.appendChild(bubble);
+              list.scrollTop = list.scrollHeight;
+            }
+          });
+          // Reset inputs
+          const ta = form.querySelector('textarea[name="remark"]');
+          if (ta) ta.value = '';
+          const fileSingle = form.querySelector('input[type="file"][name="attachment"]');
+          const fileMulti = form.querySelector('input[type="file"][name="attachments[]"]');
+          if (fileSingle) fileSingle.value = '';
+          if (fileMulti) fileMulti.value = '';
+        }
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Send'; }
+      });
+    });
+  });
+</script>
+
+
+<script>
+(function(){
+  if (window.__ageTickerInit) return; // guard against double init across partial includes
+  window.__ageTickerInit = true;
+
+  function parseStartedAt(val) {
+    if (!val) return null;
+    // Normalize common "YYYY-MM-DD HH:mm:ss" to ISO by replacing space with 'T'
+    const iso = String(val).replace(' ', 'T');
+    const d = new Date(iso);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function formatDuration(ms) {
+    if (ms < 0) ms = 0;
+    const totalSec = Math.floor(ms / 1000);
+    let rem = totalSec;
+    const days = Math.floor(rem / 86400); rem %= 86400;
+    const hours = Math.floor(rem / 3600); rem %= 3600;
+    const minutes = Math.floor(rem / 60); const seconds = rem % 60;
+    const parts = [];
+    if (days) parts.push(days + ' day' + (days !== 1 ? 's' : ''));
+    if (hours || days) parts.push(hours + ' hour' + (hours !== 1 ? 's' : ''));
+    parts.push(minutes + ' minute' + (minutes !== 1 ? 's' : ''));
+    parts.push(seconds + ' second' + (seconds !== 1 ? 's' : ''));
+    return parts.join(' ');
+  }
+
+  function updateAll() {
+    const nodes = document.querySelectorAll('.age-ticker');
+    const now = Date.now();
+    nodes.forEach(function(el){
+      const startedRaw = el.dataset.startedAt || el.getAttribute('data-started-at');
+      const start = parseStartedAt(startedRaw);
+      if (!start) { el.textContent = '—'; return; }
+      const ms = now - start.getTime();
+      el.textContent = formatDuration(ms);
+      if (!el.title) { el.title = 'Started at: ' + start.toLocaleString(); }
+    });
+  }
+
+  function initAgeTicker(){
+    updateAll();
+    // Refresh once per second
+    if (!window.__ageTickerInterval) {
+      window.__ageTickerInterval = setInterval(updateAll, 1000);
+    }
+    // Recalculate when modals open (content may be injected dynamically)
+    document.querySelectorAll('.modal').forEach(function(m){
+      m.addEventListener('shown.bs.modal', updateAll);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAgeTicker);
+  } else {
+    initAgeTicker();
+  }
+})();
+</script>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const repeater = document.getElementById('customerRepeater');
+    if (!repeater) return;
+    const itemsContainer = repeater.querySelector('.repeater-items');
+    const addBtn = document.getElementById('addCustomerRepeaterItem');
+    const removeBtn = document.getElementById('removeCustomerRepeaterItem');
+    let index = itemsContainer.querySelectorAll('.repeater-item').length - 1;
+
+    function createItem(idx) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'repeater-item border rounded p-3 mb-3';
+      wrapper.innerHTML = `
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Customer</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-building"></i></span>
+              <input type="text" name="items[${idx}][customer]" class="form-control customer-name-input" placeholder="e.g. Acme Corp" required>
+            </div>
+            <div class="invalid-feedback">This customer name already exists.</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Account Number</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
+              <input type="text" name="items[${idx}][account_number]" class="form-control account-number-input" placeholder="e.g. 123456789" required>
+            </div>
+            <div class="invalid-feedback">This account number already exists.</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Contract Number</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-file-contract"></i></span>
+              <input type="text" name="items[${idx}][contract_number]" class="form-control" placeholder="e.g. CTR-00001">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Account Manager</label>
+            <select name="items[${idx}][account_manager_id]" class="form-select">
+              <option value="">None</option>
+              <?php if(isset($accountManagers)): ?>
+                <?php $__currentLoopData = $accountManagers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $am): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                  <option value="<?php echo e($am->am_id); ?>"><?php echo e($am->name ?? ('User #'.$am->user_id)); ?></option>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+              <?php endif; ?>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Address</label>
+            <input type="text" name="items[${idx}][address]" class="form-control" placeholder="Address">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Contact Number</label>
+            <input type="text" name="items[${idx}][contact_number]" class="form-control" placeholder="Contact Number">
+          </div>
+        </div>
+      `;
+      return wrapper;
+    }
+
+    addBtn?.addEventListener('click', function() {
+      index += 1;
+      const item = createItem(index);
+      itemsContainer.appendChild(item);
+      window.bindAccountNumberValidation?.(item);
+      window.bindCustomerNameValidation?.(item);
+    });
+
+    removeBtn?.addEventListener('click', function() {
+      const items = itemsContainer.querySelectorAll('.repeater-item');
+      if (items.length > 1) {
+        items[items.length - 1].remove();
+        index -= 1;
+      }
+    });
+  });
+</script>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const repeater = document.getElementById('linkRepeater');
+    if (!repeater) return;
+    if (repeater.dataset.initialized === '1') return; // guard against double-binding
+    repeater.dataset.initialized = '1';
+    const itemsContainer = repeater.querySelector('.repeater-items');
+    const addBtn = document.getElementById('addLinkRepeaterItem');
+    const removeBtn = document.getElementById('removeLinkRepeaterItem');
+    let index = itemsContainer.querySelectorAll('.repeater-item').length;
+
+    function createItem(idx) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'repeater-item border rounded p-3 mb-3 position-relative';
+      wrapper.innerHTML = `
+        <button type="button" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 mt-2 me-2 remove-item-btn"><i class="fas fa-times"></i> </button>
+        <div class="row g-3 align-items-end">
+          <div class="col-md-6">
+            <label class="form-label">Link</label>
+            <input type="text" name="items[${idx}][link]" class="form-control link-name-input" placeholder="e.g. HRE-ZB-Magetsi" required>
+          </div>
+          <div class="col-md-6 d-none d-md-block"></div>
+          <div class="w-100"></div>
+          <div class="col-md-4">
+            <label class="form-label">JCC Number</label>
+            <input type="text" name="items[${idx}][jcc_number]" class="form-control jcc-number-input" placeholder="e.g. JCC-12345">
+            <div class="invalid-feedback">JCC number already exists.</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Service Type</label>
+            <select name="items[${idx}][service_type]" class="form-select">
+              <option value="" selected disabled>Select Service Type</option>
+              <option value="Internet">Internet</option>
+              <option value="Metro VPN">Metro VPN</option>
+              <option value="Intercity VPN">Intercity VPN</option>
+              <option value="Carrier Services">Carrier Services</option>
+              <option value="E-Vending">E-Vending</option>
+              <option value="Dark-Fibre">Dark-Fibre</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Capacity</label>
+            <input type="text" name="items[${idx}][capacity]" class="form-control" placeholder="e.g. 100Mbps">
+          </div>
+          <div class="w-100"></div>
+          <div class="col-md-3">
+            <label class="form-label">Contract Number</label>
+            <input type="text" name="items[${idx}][contract_number]" class="form-control" placeholder="e.g. CTR-2025-001">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">SAP Codes</label>
+            <input type="text" name="items[${idx}][sapcodes]" class="form-control" placeholder="e.g. SAP-ABC-123">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Quantity</label>
+            <input type="number" name="items[${idx}][quantity]" class="form-control" min="0" placeholder="e.g. 1">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Comment</label>
+            <input type="text" name="items[${idx}][comment]" class="form-control" placeholder="Optional notes">
+          </div>
+          <div class="w-100"></div>
+          <div class="col-md-3">
+            <label class="form-label">City/Town</label>
+            <select name="items[${idx}][city_id]" class="form-select" required>
+              <option value="" disabled selected>Select City</option>
+              ${Array.from(document.querySelectorAll('#linkCitiesTemplate option')).map(o => `<option value="${o.value}">${o.text}</option>`).join('')}
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Location</label>
+            <select name="items[${idx}][suburb_id]" class="form-select" required>
+              <option value="" disabled selected>Select Location</option>
+              ${Array.from(document.querySelectorAll('#linkSuburbsTemplate option')).map(o => `<option value="${o.value}">${o.text}</option>`).join('')}
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Pop</label>
+            <select name="items[${idx}][pop_id]" class="form-select" required>
+              <option value="" disabled selected>Select Pop</option>
+              ${Array.from(document.querySelectorAll('#linkPopsTemplate option')).map(o => `<option value="${o.value}">${o.text}</option>`).join('')}
+            </select>
+          </div>
+          <div class="col-md-3 d-none d-md-block"></div>
+          <div class="w-100"></div>
+          <div class="col-md-3">
+            <label class="form-label">Link Type</label>
+            <select name="items[${idx}][linkType_id]" class="form-select" required>
+              <option value="" disabled selected>Select Type</option>
+              ${Array.from(document.querySelectorAll('#linkTypesTemplate option')).map(o => `<option value="${o.value}">${o.text}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+      `;
+      return wrapper;
+    }
+
+    addBtn?.addEventListener('click', function() {
+      index += 1;
+      const item = createItem(index);
+      itemsContainer.appendChild(item);
+      bindLinkCascades(itemsContainer);
+      if (window.bindLinkNameValidation) window.bindLinkNameValidation(item);
+    });
+
+    removeBtn?.addEventListener('click', function() {
+      const items = itemsContainer.querySelectorAll('.repeater-item');
+      if (items.length > 1) {
+        items[items.length - 1].remove();
+        index -= 1;
+      }
+    });
+    repeater.addEventListener('click', function(e){
+      const btn = e.target.closest('.remove-item-btn');
+      if (!btn) return;
+      const item = btn.closest('.repeater-item');
+      const items = itemsContainer.querySelectorAll('.repeater-item');
+      if (items.length > 1 && item) {
+        item.remove();
+        index = itemsContainer.querySelectorAll('.repeater-item').length;
+      }
+    });
+    bindContractNumberAutofill(repeater);
+  });
+</script>
+<script>
+  window.bindContractNumberAutofill = function(root) {
+    const scope = root || document;
+    const customerSelect = scope.querySelector('#customer_id, select[name="customer_id"]');
+    if (!customerSelect) return;
+    function updateContractNumber() {
+      const opt = customerSelect.options[customerSelect.selectedIndex];
+      const cn = opt ? (opt.getAttribute('data-contract-number') || '') : '';
+      scope.querySelectorAll('input[name="contract_number"], input[name^="items"][name$="[contract_number]"]').forEach(function(inp){
+        inp.value = cn;
+        inp.readOnly = true;
+      });
+    }
+    customerSelect.addEventListener('change', updateContractNumber);
+    updateContractNumber();
+  };
+  document.addEventListener('DOMContentLoaded', function() {
+    window.bindContractNumberAutofill(document);
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const accCheckUrl = "<?php echo e(route('customers.check-account-number')); ?>";
+    const nameCheckUrl = "<?php echo e(route('customers.check-customer-name')); ?>";
+    const linkCheckUrl = "<?php echo e(route('links.check-link-name')); ?>";
+    const jccCheckUrl = "<?php echo e(route('links.check-jcc-number')); ?>";
+
+    const debounceTimers = new WeakMap();
+
+    function setSubmitDisabled(form, disabled) {
+      const submitBtn = form?.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.disabled = !!disabled;
+    }
+
+    function refreshFormSubmitState(form) {
+      const hasInvalidAcc = form.querySelectorAll('.account-number-input.is-invalid').length > 0;
+      const hasInvalidName = form.querySelectorAll('.customer-name-input.is-invalid').length > 0;
+      const hasInvalidLink = form.querySelectorAll('.link-name-input.is-invalid').length > 0;
+      const hasInvalidJcc = form.querySelectorAll('.jcc-number-input.is-invalid').length > 0;
+      setSubmitDisabled(form, hasInvalidAcc || hasInvalidName || hasInvalidLink || hasInvalidJcc);
+    }
+
+    function validateInput(input) {
+      const value = (input.value || '').trim();
+      const form = input.closest('form');
+      const ignoreId = input.dataset.ignoreId || '';
+      if (value === '') {
+        input.classList.remove('is-invalid');
+        input.classList.remove('is-valid');
+        refreshFormSubmitState(form);
+        return;
+      }
+
+      $.get(accCheckUrl, { account_number: value, ignore_id: ignoreId })
+        .done(function(res) {
+          if (res && res.available === true) {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (fb) fb.classList.remove('d-block');
+          } else {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (fb) fb.classList.add('d-block');
+          }
+          refreshFormSubmitState(form);
+        })
+        .fail(function() {
+          // On error, do not block user; clear validity
+          input.classList.remove('is-invalid');
+          input.classList.remove('is-valid');
+          const fb = input.parentElement.querySelector('.invalid-feedback');
+          if (fb) fb.classList.remove('d-block');
+          refreshFormSubmitState(form);
+        });
+    }
+
+    function bindValidationToInput(input) {
+      function debouncedValidate() {
+        const existing = debounceTimers.get(input);
+        if (existing) clearTimeout(existing);
+        const t = setTimeout(() => validateInput(input), 350);
+        debounceTimers.set(input, t);
+      }
+      input.addEventListener('input', debouncedValidate);
+      input.addEventListener('blur', () => validateInput(input));
+    }
+
+    window.bindAccountNumberValidation = function(root) {
+      const scope = root || document;
+      const inputs = scope.querySelectorAll('.account-number-input');
+      inputs.forEach(bindValidationToInput);
+    };
+
+    // Customer name validation
+    function validateNameInput(input) {
+      const value = (input.value || '').trim();
+      const form = input.closest('form');
+      const ignoreId = input.dataset.ignoreId || '';
+      if (value === '') {
+        input.classList.remove('is-invalid');
+        input.classList.remove('is-valid');
+        refreshFormSubmitState(form);
+        return;
+      }
+
+      $.get(nameCheckUrl, { customer: value, ignore_id: ignoreId })
+        .done(function(res) {
+          if (res && res.available === true) {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (fb) fb.classList.remove('d-block');
+          } else {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (fb) fb.classList.add('d-block');
+          }
+          refreshFormSubmitState(form);
+        })
+        .fail(function() {
+          input.classList.remove('is-invalid');
+          input.classList.remove('is-valid');
+          const fb = input.parentElement.querySelector('.invalid-feedback');
+          if (fb) fb.classList.remove('d-block');
+          refreshFormSubmitState(form);
+        });
+    }
+
+    function bindNameValidationToInput(input) {
+      function debouncedValidate() {
+        const existing = debounceTimers.get(input);
+        if (existing) clearTimeout(existing);
+        const t = setTimeout(() => validateNameInput(input), 350);
+        debounceTimers.set(input, t);
+      }
+      input.addEventListener('input', debouncedValidate);
+      input.addEventListener('blur', () => validateNameInput(input));
+    }
+
+    window.bindCustomerNameValidation = function(root) {
+      const scope = root || document;
+      const inputs = scope.querySelectorAll('.customer-name-input');
+      inputs.forEach(bindNameValidationToInput);
+    };
+
+    // Link name validation
+    function validateLinkInput(input) {
+      const value = (input.value || '').trim();
+      const form = input.closest('form');
+      const ignoreId = input.dataset.ignoreId || '';
+      if (value === '') {
+        input.classList.remove('is-invalid');
+        input.classList.remove('is-valid');
+        refreshFormSubmitState(form);
+        return;
+      }
+
+      $.get(linkCheckUrl, { link: value, ignore_id: ignoreId })
+        .done(function(res) {
+          if (res && res.available === true) {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (fb) fb.classList.remove('d-block');
+          } else {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (fb) fb.classList.add('d-block');
+          }
+          refreshFormSubmitState(form);
+        })
+        .fail(function() {
+          input.classList.remove('is-invalid');
+          input.classList.remove('is-valid');
+          const fb = input.parentElement.querySelector('.invalid-feedback');
+          if (fb) fb.classList.remove('d-block');
+          refreshFormSubmitState(form);
+        });
+    }
+
+    function bindLinkValidationToInput(input) {
+      function debouncedValidate() {
+        const existing = debounceTimers.get(input);
+        if (existing) clearTimeout(existing);
+        const t = setTimeout(() => validateLinkInput(input), 350);
+        debounceTimers.set(input, t);
+      }
+      input.addEventListener('input', debouncedValidate);
+      input.addEventListener('blur', () => validateLinkInput(input));
+    }
+
+    window.bindLinkNameValidation = function(root) {
+      const scope = root || document;
+      const inputs = scope.querySelectorAll('.link-name-input');
+      inputs.forEach(bindLinkValidationToInput);
+    };
+
+    // JCC number validation (optional field)
+    function validateJccInput(input) {
+      const value = (input.value || '').trim();
+      const form = input.closest('form');
+      const ignoreId = input.dataset.ignoreId || '';
+      if (value === '') {
+        input.classList.remove('is-invalid');
+        input.classList.remove('is-valid');
+        refreshFormSubmitState(form);
+        return;
+      }
+
+      $.get(jccCheckUrl, { jcc_number: value, ignore_id: ignoreId })
+        .done(function(res) {
+          if (res && res.available === true) {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (fb) fb.classList.remove('d-block');
+          } else {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (fb) fb.classList.add('d-block');
+          }
+          refreshFormSubmitState(form);
+        })
+        .fail(function() {
+          input.classList.remove('is-invalid');
+          input.classList.remove('is-valid');
+          const fb = input.parentElement.querySelector('.invalid-feedback');
+          if (fb) fb.classList.remove('d-block');
+          refreshFormSubmitState(form);
+        });
+    }
+
+    function bindJccValidationToInput(input) {
+      function debouncedValidate() {
+        const existing = debounceTimers.get(input);
+        if (existing) clearTimeout(existing);
+        const t = setTimeout(() => validateJccInput(input), 350);
+        debounceTimers.set(input, t);
+      }
+      input.addEventListener('input', debouncedValidate);
+      input.addEventListener('blur', () => validateJccInput(input));
+    }
+
+    window.bindJccNumberValidation = function(root) {
+      const scope = root || document;
+      const inputs = scope.querySelectorAll('.jcc-number-input');
+      inputs.forEach(bindJccValidationToInput);
+    };
+
+    // Bind on load for existing inputs (create & edit modals)
+    window.bindAccountNumberValidation(document);
+    window.bindCustomerNameValidation(document);
+    window.bindLinkNameValidation(document);
+    window.bindJccNumberValidation && window.bindJccNumberValidation(document);
+
+    // Also re-bind when a Bootstrap modal is shown, to make sure dynamic content is wired
+    document.querySelectorAll('.modal').forEach(function(modalEl) {
+      modalEl.addEventListener('shown.bs.modal', function() {
+        window.bindAccountNumberValidation(modalEl);
+        window.bindCustomerNameValidation(modalEl);
+        window.bindLinkNameValidation(modalEl);
+        if (window.bindJccNumberValidation) window.bindJccNumberValidation(modalEl);
+        if (window.bindLinkCascades) window.bindLinkCascades(modalEl);
+        if (window.bindSimpleLinkCascades) window.bindSimpleLinkCascades(modalEl);
+      });
+    });
+
+    // Final guard: check on submit and block if any are taken
+    function checkAvailabilityValue(value, ignoreId) {
+      return new Promise(function(resolve) {
+        $.get(accCheckUrl, { account_number: value, ignore_id: ignoreId })
+          .done(function(res){
+            resolve(!!(res && res.available === true));
+          })
+          .fail(function(){
+            // Fail-closed: treat as not available to prevent reload and keep modal open
+            resolve(false);
+          });
+      });
+    }
+
+    function checkNameAvailabilityValue(value, ignoreId) {
+      return new Promise(function(resolve) {
+        $.get(nameCheckUrl, { customer: value, ignore_id: ignoreId })
+          .done(function(res){
+            resolve(!!(res && res.available === true));
+          })
+          .fail(function(){
+            resolve(false);
+          });
+      });
+    }
+
+    function checkLinkAvailabilityValue(value, ignoreId) {
+      return new Promise(function(resolve) {
+        $.get(linkCheckUrl, { link: value, ignore_id: ignoreId })
+          .done(function(res){
+            resolve(!!(res && res.available === true));
+          })
+          .fail(function(){
+            resolve(false);
+          });
+      });
+    }
+
+    function checkJccAvailabilityValue(value, ignoreId) {
+      return new Promise(function(resolve) {
+        $.get(jccCheckUrl, { jcc_number: value, ignore_id: ignoreId })
+          .done(function(res){
+            resolve(!!(res && res.available === true));
+          })
+          .fail(function(){
+            resolve(false);
+          });
+      });
+    }
+
+    function handleFormSubmit(e) {
+      const form = e.target;
+      // First use native HTML5 validation
+      if (!form.checkValidity()) {
+        e.preventDefault();
+        form.reportValidity();
+        return;
+      }
+
+      const accInputs = form.querySelectorAll('.account-number-input');
+      const nameInputs = form.querySelectorAll('.customer-name-input');
+      const linkInputs = form.querySelectorAll('.link-name-input');
+      const jccInputs = form.querySelectorAll('.jcc-number-input');
+      if (!accInputs.length && !nameInputs.length && !linkInputs.length && !jccInputs.length) {
+        // No relevant fields; let native submission proceed
+        return;
+      }
+
+      e.preventDefault();
+      setSubmitDisabled(form, true);
+
+      const checks = [
+        ...Array.from(accInputs).map(function(input){
+          const value = (input.value || '').trim();
+          const ignoreId = input.dataset.ignoreId || '';
+          if (!value) return Promise.resolve(true);
+          return checkAvailabilityValue(value, ignoreId).then(function(available){
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (available) {
+              input.classList.remove('is-invalid');
+              input.classList.add('is-valid');
+              if (fb) fb.classList.remove('d-block');
+            } else {
+              input.classList.add('is-invalid');
+              input.classList.remove('is-valid');
+              if (fb) fb.classList.add('d-block');
+            }
+            return available;
+          });
+        }),
+        ...Array.from(nameInputs).map(function(input){
+          const value = (input.value || '').trim();
+          const ignoreId = input.dataset.ignoreId || '';
+          if (!value) return Promise.resolve(true);
+          return checkNameAvailabilityValue(value, ignoreId).then(function(available){
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (available) {
+              input.classList.remove('is-invalid');
+              input.classList.add('is-valid');
+              if (fb) fb.classList.remove('d-block');
+            } else {
+              input.classList.add('is-invalid');
+              input.classList.remove('is-valid');
+              if (fb) fb.classList.add('d-block');
+            }
+            return available;
+          });
+        }),
+        ...Array.from(linkInputs).map(function(input){
+          const value = (input.value || '').trim();
+          const ignoreId = input.dataset.ignoreId || '';
+          if (!value) return Promise.resolve(true);
+          return checkLinkAvailabilityValue(value, ignoreId).then(function(available){
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (available) {
+              input.classList.remove('is-invalid');
+              input.classList.add('is-valid');
+              if (fb) fb.classList.remove('d-block');
+            } else {
+              input.classList.add('is-invalid');
+              input.classList.remove('is-valid');
+              if (fb) fb.classList.add('d-block');
+            }
+            return available;
+          });
+        }),
+        ...Array.from(jccInputs).map(function(input){
+          const value = (input.value || '').trim();
+          const ignoreId = input.dataset.ignoreId || '';
+          if (!value) return Promise.resolve(true); // optional field
+          return checkJccAvailabilityValue(value, ignoreId).then(function(available){
+            const fb = input.parentElement.querySelector('.invalid-feedback');
+            if (available) {
+              input.classList.remove('is-invalid');
+              input.classList.add('is-valid');
+              if (fb) fb.classList.remove('d-block');
+            } else {
+              input.classList.add('is-invalid');
+              input.classList.remove('is-valid');
+              if (fb) fb.classList.add('d-block');
+            }
+            return available;
+          });
+        })
+      ];
+
+      Promise.all(checks).then(function(results){
+        const anyTaken = results.some(function(r){ return r === false; }) ||
+          form.querySelectorAll('.account-number-input.is-invalid').length > 0 ||
+          form.querySelectorAll('.customer-name-input.is-invalid').length > 0 ||
+          form.querySelectorAll('.link-name-input.is-invalid').length > 0 ||
+          form.querySelectorAll('.jcc-number-input.is-invalid').length > 0;
+        if (anyTaken) {
+          setSubmitDisabled(form, false); // keep enabled to allow corrections
+          // Focus the first invalid field
+          const firstInvalid = form.querySelector('.account-number-input.is-invalid, .customer-name-input.is-invalid, .link-name-input.is-invalid, .jcc-number-input.is-invalid');
+          if (firstInvalid) firstInvalid.focus();
+          return; // do not submit
+        }
+        // Re-check native validity before final submit
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          setSubmitDisabled(form, false);
+          return;
+        }
+        form.submit();
+      }).catch(function(){
+        // If endpoint fails, keep form open and allow corrections
+        setSubmitDisabled(form, false);
+        const firstInvalid = form.querySelector('.customer-name-input.is-invalid, .account-number-input.is-invalid, .link-name-input.is-invalid, .jcc-number-input.is-invalid')
+          || form.querySelector('.customer-name-input, .account-number-input, .link-name-input, .jcc-number-input');
+      if (firstInvalid) firstInvalid.focus();
+      // Do not submit on failure of availability check
+    });
+    }
+
+    document.querySelectorAll('.modal form:not(.js-remark-form)').forEach(function(form){
+      form.addEventListener('submit', handleFormSubmit);
+    });
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const repeater = document.getElementById('sectionRepeater');
+    if (!repeater) return;
+    if (repeater.dataset.bound === 'true') return; // guard against duplicate bindings
+    const itemsContainer = repeater.querySelector('.repeater-items');
+    const addBtn = document.getElementById('addSectionRepeaterItem');
+    const removeBtn = document.getElementById('removeSectionRepeaterItem');
+    let index = itemsContainer.querySelectorAll('.repeater-item').length - 1;
+
+    function createItem(idx) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'repeater-item border rounded p-3 mb-3';
+      wrapper.innerHTML = `
+        <div class="row g-3 align-items-end">
+          <div class="col-12">
+            <label class="form-label">Section</label>
+            <input type="text" name="items[${idx}][section]" class="form-control" placeholder="e.g. Network Ops" required>
+          </div>
+        </div>
+      `;
+      return wrapper;
+    }
+
+    addBtn?.addEventListener('click', function() {
+      index += 1;
+      itemsContainer.appendChild(createItem(index));
+    });
+
+    removeBtn?.addEventListener('click', function() {
+      const items = itemsContainer.querySelectorAll('.repeater-item');
+      if (items.length > 1) {
+        items[items.length - 1].remove();
+        index -= 1;
+      }
+    });
+    repeater.dataset.bound = 'true';
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const repeater = document.getElementById('cityRepeater');
+    if (!repeater) return;
+    if (repeater.dataset.bound === 'true') return; // guard against duplicate bindings
+    const itemsContainer = repeater.querySelector('.repeater-items');
+    const addBtn = document.getElementById('addCityRepeaterItem');
+    const removeBtn = document.getElementById('removeCityRepeaterItem');
+    let index = itemsContainer.querySelectorAll('.repeater-item').length - 1;
+
+    function createItem(idx) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'repeater-item border rounded p-3 mb-3';
+      wrapper.innerHTML = `
+        <div class="row g-3 align-items-end">
+          <div class="col-md-6">
+            <label class="form-label">City/Town</label>
+            <input type="text" name="items[${idx}][city]" class="form-control" placeholder="e.g. Harare" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Region</label>
+            <select name="items[${idx}][region]" class="form-select" required>
+              <option value="" disabled selected>Select Region</option>
+              <option value="North">North</option>
+              <option value="West">West</option>
+              <option value="East">East</option>
+              <option value="South">South</option>
+            </select>
+          </div>
+        </div>
+      `;
+      return wrapper;
+    }
+
+    addBtn?.addEventListener('click', function() {
+      index += 1;
+      itemsContainer.appendChild(createItem(index));
+    });
+
+    removeBtn?.addEventListener('click', function() {
+      const items = itemsContainer.querySelectorAll('.repeater-item');
+      if (items.length > 1) {
+        items[items.length - 1].remove();
+        index -= 1;
+      }
+    });
+    repeater.dataset.bound = 'true';
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const repeater = document.getElementById('locationRepeater');
+    if (!repeater) return;
+    if (repeater.dataset.bound === 'true') return; // guard against duplicate bindings
+    const itemsContainer = repeater.querySelector('.repeater-items');
+    const addBtn = document.getElementById('addLocationRepeaterItem');
+    const removeBtn = document.getElementById('removeLocationRepeaterItem');
+    let index = itemsContainer.querySelectorAll('.repeater-item').length - 1;
+
+    function createItem(idx) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'repeater-item border rounded p-3 mb-3';
+      wrapper.innerHTML = `
+        <div class="row g-3 align-items-end">
+          <div class="col-md-12">
+            <label class="form-label">Location</label>
+            <input type="text" name="items[${idx}][suburb]" class="form-control" placeholder="Location" required>
+          </div>
+        </div>
+      `;
+      return wrapper;
+    }
+
+    addBtn?.addEventListener('click', function() {
+      index += 1;
+      itemsContainer.appendChild(createItem(index));
+    });
+
+    removeBtn?.addEventListener('click', function() {
+      const items = itemsContainer.querySelectorAll('.repeater-item');
+      if (items.length > 1) {
+        items[items.length - 1].remove();
+        index -= 1;
+      }
+    });
+    repeater.dataset.bound = 'true';
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const citySel = document.getElementById('popCreateCity');
+    const suburbSel = document.getElementById('popCreateSuburb');
+    const repeater = document.querySelector('.js-repeater-pops');
+    const list = repeater ? repeater.querySelector('.js-repeater-list') : null;
+    const addBtn = document.querySelector('.js-repeater-add');
+
+    // Filter suburb options by selected city (using data-city attribute)
+    function filterSuburbs() {
+      if (!citySel || !suburbSel) return;
+      const cityId = citySel.value;
+      const options = suburbSel.querySelectorAll('option');
+      let hasVisible = false;
+      options.forEach(function(opt){
+        const c = opt.getAttribute('data-city');
+        if (!c) return; // skip placeholder
+        const visible = String(c) === String(cityId);
+        opt.style.display = visible ? '' : 'none';
+        if (visible) hasVisible = true;
+      });
+      // Reset selection if current selection is hidden
+      if (suburbSel.value) {
+        const selectedOpt = suburbSel.querySelector('option[value="'+suburbSel.value+'"]');
+        if (selectedOpt && selectedOpt.style.display === 'none') {
+          suburbSel.value = '';
+        }
+      }
+      // If no visible options, ensure placeholder is selected
+      if (!hasVisible) {
+        suburbSel.value = '';
+      }
+    }
+
+    citySel?.addEventListener('change', filterSuburbs);
+    // Initialize filter on load if a city is preselected
+    if (citySel && citySel.value) { filterSuburbs(); }
+
+    // Simple repeater: add/remove POP inputs
+    let index = list ? list.querySelectorAll('.js-repeater-item').length : 0;
+    function createItem(idx) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'list-group-item d-flex align-items-center gap-2 js-repeater-item';
+      wrapper.innerHTML = `
+        <div class="flex-grow-1">
+          <input type="text" class="form-control" name="items[${idx}][pop]" placeholder="Pop name" required>
+        </div>
+        <button type="button" class="btn btn-sm btn-danger js-repeater-remove" title="Remove">&times;</button>
+      `;
+      return wrapper;
+    }
+
+    addBtn?.addEventListener('click', function(){
+      if (!list) return;
+      const item = createItem(index);
+      list.appendChild(item);
+      index += 1;
+    });
+
+    list?.addEventListener('click', function(e){
+      const btn = e.target.closest('.js-repeater-remove');
+      if (!btn) return;
+      const item = btn.closest('.js-repeater-item');
+      if (!item) return;
+      // keep at least one row
+      const items = list.querySelectorAll('.js-repeater-item');
+      if (items.length > 1) {
+        item.remove();
+      }
+    });
+
+    // Validate city & suburb selected before submit
+    const createForm = document.querySelector('.js-pops-create-form');
+    createForm?.addEventListener('submit', function(e){
+      if (!citySel?.value || !suburbSel?.value) {
+        e.preventDefault();
+        alert('Please select City/Town and Location first.');
+      }
+    });
+
+    // Re-apply filter when modal opens (ensure visibility state correct)
+    const popCreateModal = document.getElementById('popCreateModal');
+    popCreateModal?.addEventListener('shown.bs.modal', function(){
+      filterSuburbs();
+    });
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const modals = document.querySelectorAll('.js-location-view-modal');
+    modals.forEach(function(modal){
+      if (modal.dataset.bound === 'true') return;
+      modal.addEventListener('shown.bs.modal', function(ev) {
+        const suburbId = modal.getAttribute('data-suburb-id');
+        const tbody = modal.querySelector(`#viewPopsBody${suburbId}`);
+        if (!tbody) return;
+        // Show loading state
+        tbody.innerHTML = `<tr><td colspan="2" class="text-muted">Loading POPs...</td></tr>`;
+        // Fetch pops for this suburb (location)
+        $.ajax({
+          url: `/pop/${suburbId}`,
+          type: 'GET',
+          dataType: 'json',
+          success: function(res){
+            const entries = Object.entries(res || {});
+            if (!entries.length) {
+              tbody.innerHTML = `<tr><td colspan="2" class="text-muted">No POPs found for this location.</td></tr>`;
+              return;
+            }
+            let i = 0;
+            tbody.innerHTML = entries.map(function([id, name]){ i++; return `<tr><td>${i}</td><td>${name}</td></tr>`; }).join('');
+          },
+          error: function(){
+            tbody.innerHTML = `<tr><td colspan="2" class="text-danger">Failed to load POPs.</td></tr>`;
+          }
+        });
+      });
+      modal.dataset.bound = 'true';
+    });
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const repeater = document.getElementById('positionRepeater');
+    if (!repeater) return;
+    if (repeater.dataset.bound === 'true') return; // guard against duplicate bindings
+    const itemsContainer = repeater.querySelector('.repeater-items');
+    const addBtn = document.getElementById('addPositionRepeaterItem');
+    const removeBtn = document.getElementById('removePositionRepeaterItem');
+    let index = itemsContainer.querySelectorAll('.repeater-item').length - 1;
+
+    function createItem(idx) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'repeater-item border rounded p-3 mb-3';
+      wrapper.innerHTML = `
+        <div class="row g-3 align-items-end">
+          <div class="col-12">
+            <label class="form-label">Position</label>
+            <input type="text" name="items[${idx}][position]" class="form-control" placeholder="e.g. Senior Engineer" required>
+          </div>
+        </div>
+      `;
+      return wrapper;
+    }
+
+    addBtn?.addEventListener('click', function() {
+      index += 1;
+      itemsContainer.appendChild(createItem(index));
+    });
+
+    removeBtn?.addEventListener('click', function() {
+      const items = itemsContainer.querySelectorAll('.repeater-item');
+      if (items.length > 1) {
+        items[items.length - 1].remove();
+        index -= 1;
+      }
+    });
+    repeater.dataset.bound = 'true';
+  });
+</script>
+
+
+<script>
+  document.addEventListener('submit', function(ev) {
+    if (ev.defaultPrevented) return;
+
+    var form = ev.target;
+    // Prefer the actual clicked submit button; fallback to first submit control
+    var submitter = ev.submitter || form.querySelector('button[type="submit"], input[type="submit"]');
+    if (!submitter) return;
+
+    var processingText = submitter.getAttribute('data-processing-text') || 'Processing';
+
+    if (submitter.tagName && submitter.tagName.toLowerCase() === 'button') {
+      submitter.dataset.originalText = submitter.textContent;
+      submitter.textContent = processingText;
+    } else {
+      submitter.dataset.originalText = submitter.value;
+      submitter.value = processingText;
+    }
+
+    // Prevent double-submits
+    submitter.disabled = true;
+  });
+</script>
+
+
+
+<script>
+// Enable show/hide password toggles globally where elements exist
+(function(){
+  var init = function() {
+    var toggles = document.querySelectorAll('.toggle-password[data-toggle-target]');
+    if (!toggles || toggles.length === 0) return;
+    toggles.forEach(function(toggle){
+      var inputId = toggle.getAttribute('data-toggle-target');
+      var input = document.getElementById(inputId);
+      if (!input) return;
+      // Remove existing listener to prevent duplicates if init called twice
+      var newToggle = toggle.cloneNode(true);
+      toggle.parentNode.replaceChild(newToggle, toggle);
+      toggle = newToggle;
+      
+      var eyeOn = toggle.querySelector('.eye-on');
+      var eyeOff = toggle.querySelector('.eye-off');
+      
+      toggle.addEventListener('click', function(e){
+        e.preventDefault(); // Prevent form submit if button type not explicitly set (though it is button type=button)
+        var input = document.getElementById(inputId); // Re-fetch input
+        if(!input) return;
+        var showing = input.type === 'text';
+        input.type = showing ? 'password' : 'text';
+        toggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+        if (eyeOn && eyeOff) {
+          eyeOn.style.display = showing ? '' : 'none';
+          eyeOff.style.display = showing ? 'none' : '';
+        }
+      });
+    });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+<script>
+// Client-side password strength and match validation (non-intrusive)
+// Applies only to inputs that declare a strong pattern attribute
+// so login page is unaffected.
+(function(){
+  var STRONG_RE = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+
+  function isStrongPatternAttr(el){
+    var pat = el.getAttribute('pattern') || '';
+    // Heuristic: if pattern includes the lookaheads we use, treat as strong
+            return /\(\?\=\.\*\[a\-z\]\)/.test(pat) &&
+                   /\(\?\=\.\*\[A\-Z\]\)/.test(pat) &&
+                   ( /\(\?\=\.\*\\d\)/.test(pat) || /\(\?\=\.\*\\\\d\)/.test(pat) ) &&
+                   /\(\?\=\.\*\[\^A\-Za\-z0\-9\]\)/.test(pat);
+  }
+
+  function findOrCreateFeedback(container){
+    // Prefer an existing invalid-feedback element, otherwise create one
+    var fb = container.querySelector('.invalid-feedback');
+    if (!fb){
+      fb = document.createElement('div');
+      fb.className = 'invalid-feedback';
+      container.appendChild(fb);
+    }
+    return fb;
+  }
+
+  function validateGroup(form){
+    var pwInputs = Array.prototype.slice.call(form.querySelectorAll('input[type="password"]'));
+    // Identify primary (non-confirm) and confirm(s)
+    var primary = pwInputs.find(function(inp){
+      var nm = (inp.name || '') + ' ' + (inp.id || '');
+      return !/confirm|confirmation/i.test(nm) && isStrongPatternAttr(inp);
+    });
+    if (!primary) return; // No strong password field in this form
+
+    function calculateStrength(val) {
+      var score = 0;
+      if (!val) return 0;
+      if (val.length >= 8) score++;
+      if (/[a-z]/.test(val)) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/\d/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+      return score;
+    }
+
+    function updateMeter(input, score) {
+      var wrapper = input.closest('.password-wrapper') || input.parentElement;
+      // Look for meter siblings
+      var meter = wrapper.nextElementSibling;
+      while (meter && !meter.classList.contains('password-strength-meter')) {
+        meter = meter.nextElementSibling;
+      }
+      var text = wrapper.nextElementSibling;
+      while (text && !text.classList.contains('password-strength-text')) {
+        text = text.nextElementSibling;
+      }
+
+      if (meter) {
+        meter.style.display = input.value.length > 0 ? 'block' : 'none';
+        var bar = meter.querySelector('.strength-bar');
+        var width = (score / 5) * 100;
+        bar.style.width = width + '%';
+        
+        // Remove old classes
+        bar.classList.remove('strength-weak', 'strength-fair', 'strength-good', 'strength-strong');
+        
+        if (score < 3) bar.classList.add('strength-weak');
+        else if (score < 4) bar.classList.add('strength-fair');
+        else if (score < 5) bar.classList.add('strength-good');
+        else bar.classList.add('strength-strong');
+      }
+
+      if (text) {
+        text.style.display = input.value.length > 0 ? 'block' : 'none';
+        text.classList.remove('text-weak', 'text-fair', 'text-good', 'text-strong');
+        
+        var label = '';
+        if (score < 3) { label = 'Weak'; text.classList.add('text-weak'); }
+        else if (score < 4) { label = 'Fair'; text.classList.add('text-fair'); }
+        else if (score < 5) { label = 'Good'; text.classList.add('text-good'); }
+        else { label = 'Strong'; text.classList.add('text-strong'); }
+        
+        text.textContent = 'Strength: ' + label;
+      }
+    }
+
+    function updatePrimary(){
+      var value = primary.value || '';
+      var ok = STRONG_RE.test(value);
+      var score = calculateStrength(value);
+      
+      updateMeter(primary, score);
+
+      primary.classList.toggle('is-invalid', !ok && value.length > 0);
+      primary.classList.toggle('is-valid', ok);
+      var container = primary.closest('.password-wrapper') || primary.parentElement;
+      var fb = findOrCreateFeedback(container);
+      fb.textContent = ok ? '' : 'Password must be at least 8 chars and include uppercase, lowercase, number, and special character.';
+      fb.style.display = ok ? 'none' : '';
+    }
+
+    function updateConfirm(inp){
+      var match = inp.value === primary.value;
+      inp.classList.toggle('is-invalid', !match && inp.value.length > 0);
+      inp.classList.toggle('is-valid', match && STRONG_RE.test(primary.value));
+      var container = inp.closest('.password-wrapper') || inp.parentElement;
+      var fb = findOrCreateFeedback(container);
+      fb.textContent = match ? '' : 'Passwords do not match.';
+      fb.style.display = match ? 'none' : '';
+    }
+
+    function allConfirmsMatch(){
+      var ok = true;
+      pwInputs.forEach(function(inp){
+        var nm = (inp.name || '') + ' ' + (inp.id || '');
+        if (/confirm|confirmation/i.test(nm)){
+          if (inp.value !== primary.value) ok = false;
+        }
+      });
+      return ok;
+    }
+
+    function updateSubmitControls(){
+      var strongOk = STRONG_RE.test(primary.value);
+      var confirmOk = allConfirmsMatch();
+      var show = strongOk && confirmOk;
+      var submitters = Array.prototype.slice.call(form.querySelectorAll('button[type="submit"], input[type="submit"]'));
+      submitters.forEach(function(sub){
+        sub.disabled = !show;
+        sub.classList.toggle('d-none', !show);
+      });
+    }
+
+    // Attach listeners
+    primary.addEventListener('input', function(){
+      updatePrimary();
+      pwInputs.forEach(function(inp){
+        var nm = (inp.name || '') + ' ' + (inp.id || '');
+        if (/confirm|confirmation/i.test(nm)) updateConfirm(inp);
+      });
+      updateSubmitControls();
+    });
+
+    pwInputs.forEach(function(inp){
+      var nm = (inp.name || '') + ' ' + (inp.id || '');
+      if (/confirm|confirmation/i.test(nm)){
+        inp.addEventListener('input', function(){ updateConfirm(inp); updateSubmitControls(); });
+      }
+    });
+
+    // Initial state
+    updatePrimary();
+    pwInputs.forEach(function(inp){
+      var nm = (inp.name || '') + ' ' + (inp.id || '');
+      if (/confirm|confirmation/i.test(nm)) updateConfirm(inp);
+    });
+    updateSubmitControls();
+
+    // Guard submit to prevent weak/mismatch
+    form.addEventListener('submit', function(e){
+      var strongOk = STRONG_RE.test(primary.value);
+      var confirmOk = true;
+      pwInputs.forEach(function(inp){
+        var nm = (inp.name || '') + ' ' + (inp.id || '');
+        if (/confirm|confirmation/i.test(nm)){
+          var match = inp.value === primary.value;
+          if (!match) confirmOk = false;
+        }
+      });
+      if (!strongOk || !confirmOk){
+        e.preventDefault();
+        e.stopPropagation();
+        updatePrimary();
+        pwInputs.forEach(function(inp){
+          var nm = (inp.name || '') + ' ' + (inp.id || '');
+          if (/confirm|confirmation/i.test(nm)) updateConfirm(inp);
+        });
+      }
+    });
+  }
+
+  var init = function() {
+    // Initialize for all forms present
+    Array.prototype.slice.call(document.querySelectorAll('form')).forEach(validateGroup);
+
+    // Reinitialize inside modals when shown
+    document.querySelectorAll('.modal').forEach(function(modal){
+      modal.addEventListener('shown.bs.modal', function(){
+        Array.prototype.slice.call(modal.querySelectorAll('form')).forEach(validateGroup);
+      });
+    });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+<?php /**PATH /var/www/html/resources/views/partials/scripts.blade.php ENDPATH**/ ?>
