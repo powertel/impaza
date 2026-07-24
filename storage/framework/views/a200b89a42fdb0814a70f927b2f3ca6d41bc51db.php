@@ -1,0 +1,286 @@
+<!-- Show Fault Modal (Modernized) -->
+<?php
+    $faultRefNumber = data_get($fault, 'fault_ref_number', data_get($fault, 'ref_number', 'N/A'));
+    $faultCustomer = data_get($fault, 'customer', 'N/A');
+    $faultAccountManager = data_get($fault, 'accountManager', 'N/A');
+    $faultCity = data_get($fault, 'city', 'N/A');
+    $faultSuburb = data_get($fault, 'suburb', 'N/A');
+    $faultLink = data_get($fault, 'link', 'N/A');
+    $faultPop = data_get($fault, 'pop', 'N/A');
+    $faultServiceType = data_get($fault, 'serviceType', 'N/A');
+    $faultAddress = data_get($fault, 'address', 'N/A');
+    $faultAssignedTo = data_get($fault, 'assignedTo', data_get($fault, 'name', 'Not yet assigned'));
+    $faultAssessedBy = data_get($fault, 'assessedBy', 'N/A');
+    $faultContactName = data_get($fault, 'contactName', 'N/A');
+    $faultPhoneNumber = data_get($fault, 'phoneNumber', 'N/A');
+    $faultContactEmail = data_get($fault, 'contactEmail', 'N/A');
+    $faultReportedBy = data_get($fault, 'reportedBy', 'N/A');
+    $faultSuspectedRFO = data_get($fault, 'RFO', 'N/A');
+    $faultConfirmedRFO = data_get($fault, 'confirmedRFO', 'N/A');
+    $showStatusRaw = trim((string) ($fault->description ?? ''));
+    $showStatusLabel = match (strtolower($showStatusRaw)) {
+        'fault has been restored', 'resolved' => 'Fault Restored',
+        'fault is under rectification', 'under rectification' => 'Under Rectification',
+        'waiting for assessment', 'waiting assessment' => 'Waiting Assessment',
+        'fault has been assessed', 'assessed' => 'Assessed',
+        'fault has been rectified', 'rectified' => 'Rectified',
+        'fault has been cleared by ct', 'cleared by ct' => 'Cleared by CT',
+        'fault has been refered', 'fault has been referred', 'referred' => 'Referred',
+        'fault has been parked', 'parked' => 'Parked',
+        'fault has been revoked', 'revoked' => 'Revoked',
+        'fault  escalated to chief technician', 'fault escalated to chief technician', 'escalated to chief technician' => 'Escalated',
+        'impacted by pop outage' => 'POP Outage',
+        default => $showStatusRaw !== '' ? $showStatusRaw : 'Open',
+    };
+    $showStatusColor = \App\Models\Status::STATUS_COLOR[$showStatusRaw] ?? \App\Models\Status::STATUS_COLOR[$showStatusLabel] ?? '#64748B';
+?>
+<div class="modal custom-modal fade" id="showFaultModal-<?php echo e($fault->id); ?>" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="showFaultModalLabel-<?php echo e($fault->id); ?>" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="fault-modal-header-copy">
+                    <h5 class="modal-title mb-0" id="showFaultModalLabel-<?php echo e($fault->id); ?>">
+                        <i class="fas fa-eye me-2"></i>View Fault
+                    </h5>
+                    <div class="text-muted small mt-1">Full fault profile, service details, and conversation history for <?php echo e($faultRefNumber); ?>.</div>
+                    <div class="fault-modal-meta">
+                        <span class="fault-modal-meta-item"><i class="fas fa-hashtag"></i> <?php echo e($faultRefNumber); ?></span>
+                        <span class="fault-modal-meta-item">
+                            <?php if (isset($component)) { $__componentOriginalc254754b9d5db91d5165876f9d051922ca0066f4 = $component; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.status-badge','data' => ['label' => $showStatusLabel,'color' => $showStatusColor,'soft' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('status-badge'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['label' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($showStatusLabel),'color' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($showStatusColor),'soft' => true]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc254754b9d5db91d5165876f9d051922ca0066f4)): ?>
+<?php $component = $__componentOriginalc254754b9d5db91d5165876f9d051922ca0066f4; ?>
+<?php unset($__componentOriginalc254754b9d5db91d5165876f9d051922ca0066f4); ?>
+<?php endif; ?>
+                        </span>
+                        <span class="fault-modal-meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span class="fault-age" data-age-start="<?php echo e($ageStart ?? ''); ?>" data-age-end="<?php echo e($ageEnd ?? ''); ?>"><?php echo e($ageText ?? ''); ?></span>
+                        </span>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="fault-modal-note mb-4">
+                    <i class="fas fa-circle-info"></i>
+                    <div>This view keeps the full service profile, outage context, and chronological updates in one place so teams can review the fault without switching screens.</div>
+                </div>
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <div class="fault-modal-section h-100">
+                            <div class="fault-modal-section-header">
+                                <span class="fault-modal-section-icon"><i class="fas fa-info-circle"></i></span>
+                                <div>
+                                    <div class="fault-modal-section-title">Fault Details</div>
+                                    <div class="fault-modal-section-subtitle">Service context, location, and ownership information.</div>
+                                </div>
+                            </div>
+                            <div class="fault-modal-section-body">
+                                <div class="fault-modal-grid">
+                                    <div class="fault-modal-kv">
+                                        <span class="fault-modal-kv-label">Customer</span>
+                                        <div class="fault-modal-kv-value"><?php echo e($faultCustomer); ?></div>
+                                    </div>
+                                    <div class="fault-modal-kv">
+                                        <span class="fault-modal-kv-label">Account Manager</span>
+                                        <div class="fault-modal-kv-value"><?php echo e($faultAccountManager); ?></div>
+                                    </div>
+                                    <div class="fault-modal-kv">
+                                        <span class="fault-modal-kv-label">City/Town</span>
+                                        <div class="fault-modal-kv-value"><?php echo e($faultCity); ?></div>
+                                    </div>
+                                    <div class="fault-modal-kv">
+                                        <span class="fault-modal-kv-label">Location</span>
+                                        <div class="fault-modal-kv-value"><?php echo e($faultSuburb); ?></div>
+                                    </div>
+                                    <div class="fault-modal-kv">
+                                        <span class="fault-modal-kv-label">Link</span>
+                                        <div class="fault-modal-kv-value"><?php echo e($faultLink); ?></div>
+                                    </div>
+                                    <div class="fault-modal-kv">
+                                        <span class="fault-modal-kv-label">POP</span>
+                                        <div class="fault-modal-kv-value"><?php echo e($faultPop); ?></div>
+                                    </div>
+                                    <div class="fault-modal-kv">
+                                        <span class="fault-modal-kv-label">Service Type</span>
+                                        <div class="fault-modal-kv-value"><span class="badge rounded-pill bg-secondary-subtle text-secondary border"><?php echo e($faultServiceType); ?></span></div>
+                                    </div>
+                                    <div class="fault-modal-kv">
+                                        <span class="fault-modal-kv-label">Age</span>
+                                        <div class="fault-modal-kv-value">
+                                            <span class="faults-age-pill fault-age" data-age-start="<?php echo e($ageStart ?? ''); ?>" data-age-end="<?php echo e($ageEnd ?? ''); ?>"><?php echo e($ageText ?? ''); ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="fault-modal-kv">
+                                        <span class="fault-modal-kv-label">Address</span>
+                                        <div class="fault-modal-kv-value"><?php echo e($faultAddress); ?></div>
+                                    </div>
+                                    <div class="fault-modal-kv">
+                                        <span class="fault-modal-kv-label">Assigned To</span>
+                                        <div class="fault-modal-kv-value"><?php echo e($faultAssignedTo); ?></div>
+                                    </div>
+                                    <div class="fault-modal-kv">
+                                        <span class="fault-modal-kv-label">Assessed By</span>
+                                        <div class="fault-modal-kv-value"><?php echo e($faultAssessedBy); ?></div>
+                                    </div>
+                                    <div class="fault-modal-kv">
+                                        <span class="fault-modal-kv-label">Ref. No.</span>
+                                        <div class="fault-modal-kv-value"><?php echo e($faultRefNumber); ?></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="fault-modal-section h-100">
+                            <div class="fault-modal-section-header">
+                                <span class="fault-modal-section-icon"><i class="fas fa-user-circle"></i></span>
+                                <div>
+                                    <div class="fault-modal-section-title">Contact & RFO</div>
+                                    <div class="fault-modal-section-subtitle">Caller details, outage reason, and escalation context.</div>
+                                </div>
+                            </div>
+                            <div class="fault-modal-section-body">
+                                <div class="fault-modal-grid">
+                                    <div class="fault-modal-kv">
+                                        <span class="fault-modal-kv-label">Contact Name</span>
+                                        <div class="fault-modal-kv-value"><?php echo e($faultContactName); ?></div>
+                                    </div>
+                                    <div class="fault-modal-kv">
+                                        <span class="fault-modal-kv-label">Phone Number</span>
+                                        <div class="fault-modal-kv-value"><?php echo e($faultPhoneNumber); ?></div>
+                                    </div>
+                                    <div class="fault-modal-kv">
+                                        <span class="fault-modal-kv-label">Email Address</span>
+                                        <div class="fault-modal-kv-value"><?php echo e($faultContactEmail); ?></div>
+                                    </div>
+                                    <div class="fault-modal-kv">
+                                        <span class="fault-modal-kv-label">Reported By</span>
+                                        <div class="fault-modal-kv-value"><?php echo e($faultReportedBy); ?></div>
+                                    </div>
+                                    <div class="fault-modal-kv">
+                                        <span class="fault-modal-kv-label">Suspected RFO</span>
+                                        <div class="fault-modal-kv-value"><?php echo e($faultSuspectedRFO); ?></div>
+                                    </div>
+                                    <div class="fault-modal-kv">
+                                        <span class="fault-modal-kv-label">Confirmed RFO</span>
+                                        <div class="fault-modal-kv-value"><?php echo e($faultConfirmedRFO); ?></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <?php if(isset($remarks) && count($remarks)): ?>
+                <div class="mt-4">
+                    <div class="fault-modal-section">
+                        <div class="fault-modal-section-header">
+                            <span class="fault-modal-section-icon"><i class="fas fa-comments"></i></span>
+                            <div>
+                                <div class="fault-modal-section-title">Conversation</div>
+                                <div class="fault-modal-section-subtitle">Chronological updates, ownership actions, and attachments.</div>
+                            </div>
+                        </div>
+                        <div class="fault-modal-section-body">
+                            <div id="remarksScroller-<?php echo e($fault->id); ?>" class="chat-messages fault-modal-stream">
+                                <?php $__currentLoopData = $remarks->sortBy('created_at'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $remark): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php
+                                        $currentName = optional(auth()->user())->name;
+                                        $isOwn = $currentName && (strtolower(trim($remark->name)) === strtolower(trim($currentName)));
+                                        $attachmentPath = (string) ($remark->file_path ?? '');
+                                        $attachmentExists = $attachmentPath !== '' && \Illuminate\Support\Facades\Storage::disk('public')->exists($attachmentPath);
+                                        $attachmentUrl = $attachmentExists ? \Illuminate\Support\Facades\Storage::disk('public')->url($attachmentPath) : null;
+                                    ?>
+                                    <div class="chat-msg <?php echo e($isOwn ? 'chat-msg-self ms-auto' : 'chat-msg-other'); ?>">
+                                        <div class="chat-msg-meta">
+                                            <strong><?php echo e($remark->name ?? 'User'); ?></strong>
+                                            <span class="mx-1">•</span><?php echo e(Carbon\Carbon::parse($remark->created_at)->diffForHumans()); ?>
+
+                                            <?php if(!empty($remark->activity)): ?>
+                                                <span class="mx-1">•</span><?php echo e($remark->activity); ?>
+
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="chat-msg-body"><?php echo e($remark->remark); ?></div>
+                                        <?php if(!empty($remark->switch_name) || !empty($remark->port)): ?>
+                                            <div class="mt-2 d-flex flex-wrap gap-2">
+                                                <?php if(!empty($remark->switch_name)): ?>
+                                                    <span class="badge rounded-pill bg-light text-dark border">Switch: <?php echo e($remark->switch_name); ?></span>
+                                                <?php endif; ?>
+                                                <?php if(!empty($remark->port)): ?>
+                                                    <span class="badge rounded-pill bg-light text-dark border">Port: <?php echo e($remark->port); ?></span>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if($remark->file_path): ?>
+                                            <div class="fault-modal-attachment">
+                                                <?php if($attachmentUrl): ?>
+                                                    <a href="#" class="fault-modal-attachment-thumb" data-bs-toggle="modal" data-bs-target="#PicModal-<?php echo e($remark->id); ?>" aria-controls="PicModal-<?php echo e($remark->id); ?>" title="View attachment">
+                                                        <img src="<?php echo e($attachmentUrl); ?>" alt="Attachment" class="img-fluid rounded" style="cursor: pointer;">
+                                                    </a>
+                                                    <div class="fault-modal-attachment-actions">
+                                                        <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#PicModal-<?php echo e($remark->id); ?>">
+                                                            <i class="fas fa-expand me-1"></i> Preview
+                                                        </button>
+                                                        <a href="<?php echo e($attachmentUrl); ?>" class="btn btn-outline-secondary btn-sm" download>
+                                                            <i class="fas fa-download me-1"></i> Download
+                                                        </a>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <div class="fault-modal-attachment-missing">
+                                                        <i class="fas fa-paperclip"></i>
+                                                        <span>Attachment unavailable</span>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+
+                                            <?php if($attachmentUrl): ?>
+                                                <div class="modal custom-modal fade" id="PicModal-<?php echo e($remark->id); ?>" data-bs-backdrop="false" data-bs-keyboard="true" tabindex="-1" aria-labelledby="PicModalLabel-<?php echo e($remark->id); ?>" aria-hidden="true">
+                                                    <div class="modal-dialog modal-xl modal-dialog-centered">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="PicModalLabel-<?php echo e($remark->id); ?>"><i class="fas fa-paperclip me-2"></i>Attachment</h5>
+                                                                <button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <img src="<?php echo e($attachmentUrl); ?>" alt="Attachment" class="img-fluid rounded">
+                                                            </div>
+                                                            <div class="modal-footer fault-modal-footer">
+                                                                <a href="<?php echo e($attachmentUrl); ?>" class="btn btn-outline-primary btn-sm rounded-pill" download><i class="fas fa-download me-1"></i>Download</a>
+                                                                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill" data-bs-dismiss="modal">Close</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <div class="modal-footer fault-modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill" data-bs-dismiss="modal">
+                  <i class="fas fa-times me-1"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<?php /**PATH /var/www/html/resources/views/faults/show.blade.php ENDPATH**/ ?>
