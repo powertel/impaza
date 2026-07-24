@@ -1,0 +1,364 @@
+<!-- Edit Fault Modal -->
+<?php
+    $editStatusRaw = trim((string) ($fault->description ?? ''));
+    $editStatusLabel = match (strtolower($editStatusRaw)) {
+        'fault has been restored', 'resolved' => 'Fault Restored',
+        'fault is under rectification', 'under rectification' => 'Under Rectification',
+        'waiting for assessment', 'waiting assessment' => 'Waiting Assessment',
+        'fault has been assessed', 'assessed' => 'Assessed',
+        'fault has been rectified', 'rectified' => 'Rectified',
+        'fault has been cleared by ct', 'cleared by ct' => 'Cleared by CT',
+        'fault has been refered', 'fault has been referred', 'referred' => 'Referred',
+        'fault has been parked', 'parked' => 'Parked',
+        'fault has been revoked', 'revoked' => 'Revoked',
+        'fault  escalated to chief technician', 'fault escalated to chief technician', 'escalated to chief technician' => 'Escalated',
+        'impacted by pop outage' => 'POP Outage',
+        default => $editStatusRaw !== '' ? $editStatusRaw : 'Open',
+    };
+    $editStatusColor = \App\Models\Status::STATUS_COLOR[$editStatusRaw] ?? \App\Models\Status::STATUS_COLOR[$editStatusLabel] ?? '#64748B';
+    $latestRemark = collect($remarks ?? [])->sortByDesc('created_at')->first();
+?>
+<div class="modal custom-modal fade" id="editFaultModal-<?php echo e($fault->id); ?>" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="editFaultModalLabel-<?php echo e($fault->id); ?>" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="fault-modal-header-copy">
+                    <h5 class="modal-title" id="editFaultModalLabel-<?php echo e($fault->id); ?>">
+                        <i class="fas fa-edit me-2"></i>Edit Fault
+                    </h5>
+                    <div class="text-muted small mt-1">Update customer details, remarks, and attachments for <?php echo e($fault->fault_ref_number); ?>.</div>
+                    <div class="fault-modal-meta">
+                        <span class="fault-modal-meta-item"><i class="fas fa-hashtag"></i> <?php echo e($fault->fault_ref_number); ?></span>
+                        <span class="fault-modal-meta-item">
+                            <?php if (isset($component)) { $__componentOriginalc254754b9d5db91d5165876f9d051922ca0066f4 = $component; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.status-badge','data' => ['label' => $editStatusLabel,'color' => $editStatusColor,'soft' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('status-badge'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['label' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($editStatusLabel),'color' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($editStatusColor),'soft' => true]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc254754b9d5db91d5165876f9d051922ca0066f4)): ?>
+<?php $component = $__componentOriginalc254754b9d5db91d5165876f9d051922ca0066f4; ?>
+<?php unset($__componentOriginalc254754b9d5db91d5165876f9d051922ca0066f4); ?>
+<?php endif; ?>
+                        </span>
+                        <span class="fault-modal-meta-item"><i class="fas fa-link"></i> <?php echo e($fault->link ?: 'Current Link'); ?></span>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="UF-edit-<?php echo e($fault->id); ?>" action="<?php echo e(route('faults.update', $fault->id )); ?>" method="POST" enctype="multipart/form-data">
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('PUT'); ?>
+                    <div class="fault-modal-note mb-3">
+                        <i class="fas fa-pen-to-square"></i>
+                        <div>Use this workspace to update contact details, review the conversation history, and append the latest technical action without losing the original audit trail.</div>
+                    </div>
+                    <div class="fault-modal-section mb-3">
+                        <div class="fault-modal-section-header">
+                            <span class="fault-modal-section-icon"><i class="fas fa-network-wired"></i></span>
+                            <div>
+                                <div class="fault-modal-section-title">Customer & Link</div>
+                                <div class="fault-modal-section-subtitle">Core service details for the affected fault.</div>
+                            </div>
+                        </div>
+                        <div class="fault-modal-section-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Customer Name</label>
+                                    <input type="text" class="form-control" value="<?php echo e(!empty($fault->customer) ? $fault->customer : 'Current Customer'); ?>" disabled>
+                                    <input type="hidden" name="customer_id" value="<?php echo e($fault->customer_id ?? ''); ?>">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="link-<?php echo e($fault->id); ?>" class="form-label">Link</label>
+                                    <select class="form-select link-select" id="link-<?php echo e($fault->id); ?>" name="link_id" data-selected="<?php echo e($fault->link_id ?? ''); ?>">
+                                        <?php if(isset($fault->link_id)): ?>
+                                            <option selected="selected" value="<?php echo e($fault->link_id); ?>"><?php echo e($fault->link ?? 'Current Link'); ?></option>
+                                        <?php else: ?>
+                                            <option selected disabled>Select Link</option>
+                                        <?php endif; ?>
+                                        <?php $__currentLoopData = $links; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $l): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <?php if(isset($fault->customer_id) && $l->customer_id == $fault->customer_id): ?>
+                                                <option value="<?php echo e($l->id); ?>" <?php if(isset($fault->link_id) && $fault->link_id == $l->id): ?> selected <?php endif; ?>><?php echo e($l->link); ?></option>
+                                            <?php endif; ?>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="city-<?php echo e($fault->id); ?>" class="form-label">City/Town</label>
+                                    <select class="form-select city-select" id="city-<?php echo e($fault->id); ?>" name="city_id" disabled>
+                                        <?php if(isset($fault->city_id)): ?>
+                                            <option selected="selected" value="<?php echo e($fault->city_id); ?>"><?php echo e(!empty($fault->city) ? $fault->city : 'Current City'); ?></option>
+                                        <?php else: ?>
+                                            <option selected disabled>Derived from Link</option>
+                                        <?php endif; ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="suburb-<?php echo e($fault->id); ?>" class="form-label">Location</label>
+                                    <select class="form-select suburb-select" id="suburb-<?php echo e($fault->id); ?>" name="suburb_id" data-selected="<?php echo e($fault->suburb_id ?? ''); ?>" disabled>
+                                        <?php if(isset($fault->suburb_id)): ?>
+                                            <option selected="selected" value="<?php echo e($fault->suburb_id); ?>"><?php echo e(!empty($fault->suburb) ? $fault->suburb : 'Current Suburb'); ?></option>
+                                        <?php else: ?>
+                                            <option selected disabled>Derived from Link</option>
+                                        <?php endif; ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="pop-<?php echo e($fault->id); ?>" class="form-label">POP</label>
+                                    <select class="form-select pop-select" id="pop-<?php echo e($fault->id); ?>" name="pop_id" data-selected="<?php echo e($fault->pop_id ?? ''); ?>" disabled>
+                                        <?php if(isset($fault->pop_id)): ?>
+                                            <option selected="selected" value="<?php echo e($fault->pop_id); ?>"><?php echo e(!empty($fault->pop) ? $fault->pop : 'Current Pop'); ?></option>
+                                        <?php else: ?>
+                                            <option selected disabled>Derived from Link</option>
+                                        <?php endif; ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="service-<?php echo e($fault->id); ?>" class="form-label">Service Type</label>
+                                    <select class="form-select" name="serviceType" disabled>
+                                        <?php if(isset($fault->serviceType)): ?>
+                                            <option selected="selected"><?php echo e($fault->serviceType); ?></option>
+                                        <?php else: ?>
+                                            <option selected disabled>Derived from Link</option>
+                                        <?php endif; ?>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="fault-modal-section mb-3">
+                        <div class="fault-modal-section-header">
+                            <span class="fault-modal-section-icon"><i class="fas fa-address-book"></i></span>
+                            <div>
+                                <div class="fault-modal-section-title">Contact & Address</div>
+                                <div class="fault-modal-section-subtitle">Update the caller and address details for follow-up.</div>
+                            </div>
+                        </div>
+                        <div class="fault-modal-section-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="phone-<?php echo e($fault->id); ?>" class="form-label">Phone Number</label>
+                                    <input type="text" class="form-control" value="<?php echo e($fault->phoneNumber ?? ''); ?>" name="phoneNumber" placeholder="e.g. 263776123456">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="contactName-<?php echo e($fault->id); ?>" class="form-label">Contact Name</label>
+                                    <input type="text" class="form-control" value="<?php echo e($fault->contactName ?? ''); ?>" name="contactName" placeholder="Contact Name">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="contactEmail-<?php echo e($fault->id); ?>" class="form-label">Contact Email (optional)</label>
+                                    <input type="email" class="form-control" value="<?php echo e($fault->contactEmail ?? ''); ?>" name="contactEmail" placeholder="e.g. name@example.com">
+                                </div>
+                                <div class="col-md-12">
+                                    <label for="address-<?php echo e($fault->id); ?>" class="form-label">Address</label>
+                                    <input type="text" class="form-control" value="<?php echo e($fault->address ?? ''); ?>" name="address" placeholder="Address">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="suspectedRfo-<?php echo e($fault->id); ?>" class="form-label">Suspected Reason For Outage</label>
+                                    <select class="form-select" id="suspectedRFO-<?php echo e($fault->id); ?>" name="suspectedRfo_id">
+                                        <?php if(isset($fault->suspectedRfo_id)): ?>
+                                            <option selected="selected" value="<?php echo e($fault->suspectedRfo_id); ?>"><?php echo e($fault->RFO ?? 'Current Suspected RFO'); ?></option>
+                                        <?php endif; ?>
+                                        <?php $__currentLoopData = $suspectedRFO; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $suspected_rfo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <?php if(!isset($fault->suspectedRfo_id) || $suspected_rfo->id !== $fault->suspectedRfo_id): ?>
+                                                <option value="<?php echo e($suspected_rfo->id); ?>"><?php echo e($suspected_rfo->RFO); ?></option>
+                                            <?php endif; ?>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="fault-modal-section mb-3">
+                        <div class="fault-modal-section-header">
+                            <span class="fault-modal-section-icon"><i class="fas fa-comments"></i></span>
+                            <div>
+                                <div class="fault-modal-section-title">Conversation History</div>
+                                <div class="fault-modal-section-subtitle">Previous remarks, ownership trail, and attachments.</div>
+                            </div>
+                        </div>
+                        <div class="fault-modal-section-body">
+                            <div id="remarksScroller-edit-<?php echo e($fault->id); ?>" class="chat-messages fault-modal-stream">
+                                <?php if(isset($remarks) && count($remarks) > 0): ?>
+                                    <?php $__currentLoopData = $remarks->sortBy('created_at'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $remark): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php
+                                            $currentName = optional(auth()->user())->name;
+                                            $isOwn = $currentName && (strtolower(trim($remark->name)) === strtolower(trim($currentName)));
+                                            $attachmentPath = (string) ($remark->file_path ?? '');
+                                            $attachmentUrl = ($attachmentPath !== '' && \Illuminate\Support\Facades\Storage::disk('public')->exists($attachmentPath))
+                                                ? \Illuminate\Support\Facades\Storage::disk('public')->url($attachmentPath)
+                                                : null;
+                                        ?>
+                                        <div class="chat-msg <?php echo e($isOwn ? 'chat-msg-self ms-auto' : 'chat-msg-other'); ?>">
+                                            <div class="chat-msg-meta">
+                                                <strong><?php echo e($remark->name ?? 'User'); ?></strong>
+                                                <span class="mx-1">•</span><?php echo e(Carbon\Carbon::parse($remark->created_at)->diffForHumans()); ?>
+
+                                                <?php if(!empty($remark->activity)): ?>
+                                                    <span class="mx-1">•</span><?php echo e($remark->activity); ?>
+
+                                                <?php endif; ?>
+                                            </div>
+                                            <div class="chat-msg-body"><?php echo e($remark->remark); ?></div>
+                                            <?php if(!empty($remark->switch_name) || !empty($remark->port)): ?>
+                                                <div class="mt-2 d-flex flex-wrap gap-2">
+                                                    <?php if(!empty($remark->switch_name)): ?>
+                                                        <span class="badge rounded-pill bg-light text-dark border">Switch: <?php echo e($remark->switch_name); ?></span>
+                                                    <?php endif; ?>
+                                                    <?php if(!empty($remark->port)): ?>
+                                                        <span class="badge rounded-pill bg-light text-dark border">Port: <?php echo e($remark->port); ?></span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            <?php endif; ?>
+                                            <?php if($remark->file_path): ?>
+                                                <div class="fault-modal-attachment">
+                                                    <?php if($attachmentUrl): ?>
+                                                        <a href="<?php echo e($attachmentUrl); ?>" target="_blank" class="fault-modal-attachment-thumb" title="View attachment">
+                                                            <img src="<?php echo e($attachmentUrl); ?>" alt="Attachment" class="img-fluid rounded">
+                                                        </a>
+                                                        <div class="fault-modal-attachment-actions">
+                                                            <a href="<?php echo e($attachmentUrl); ?>" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                                <i class="fas fa-up-right-from-square me-1"></i> Open
+                                                            </a>
+                                                            <a href="<?php echo e($attachmentUrl); ?>" class="btn btn-outline-secondary btn-sm" download>
+                                                                <i class="fas fa-download me-1"></i> Download
+                                                            </a>
+                                                        </div>
+                                                    <?php else: ?>
+                                                        <div class="fault-modal-attachment-missing">
+                                                            <i class="fas fa-paperclip"></i>
+                                                            <span>Attachment unavailable</span>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                <?php else: ?>
+                                    <div class="fault-modal-empty">No remarks found.</div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="fault-modal-section">
+                        <div class="fault-modal-section-header">
+                            <span class="fault-modal-section-icon"><i class="fas fa-clipboard-check"></i></span>
+                            <div>
+                                <div class="fault-modal-section-title">Remarks & Resolution</div>
+                                <div class="fault-modal-section-subtitle">Capture the latest technical update and any supporting evidence.</div>
+                            </div>
+                        </div>
+                        <div class="fault-modal-section-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="switch_name-edit-<?php echo e($fault->id); ?>" class="form-label">Switch</label>
+                                    <input id="switch_name-edit-<?php echo e($fault->id); ?>" type="text" class="form-control <?php $__errorArgs = ['switch_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" name="switch_name" value="<?php echo e(old('switch_name', $latestRemark->switch_name ?? '')); ?>" placeholder="Enter switch name or identifier">
+                                    <?php $__errorArgs = ['switch_name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="invalid-feedback d-block"><strong><?php echo e($message); ?></strong></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="port-edit-<?php echo e($fault->id); ?>" class="form-label">Port</label>
+                                    <input id="port-edit-<?php echo e($fault->id); ?>" type="text" class="form-control <?php $__errorArgs = ['port'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" name="port" value="<?php echo e(old('port', $latestRemark->port ?? '')); ?>" placeholder="Enter port number or label">
+                                    <?php $__errorArgs = ['port'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="invalid-feedback d-block"><strong><?php echo e($message); ?></strong></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                                </div>
+                                <div class="col-md-12">
+                                    <label for="remark-edit-<?php echo e($fault->id); ?>" class="form-label">Remarks</label>
+                                    <textarea name="remark" required class="form-control <?php $__errorArgs = ['remark'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?> edit-remark" data-fault-id="<?php echo e($fault->id); ?>" placeholder="Enter any additional comments" rows="4"><?php echo e($fault->remark ?? old('remark')); ?></textarea>
+                                    <input type="hidden" name="activity" value="ON EDIT">
+                                </div>
+                                <div class="col-md-12">
+                                    <label for="attachment-edit-<?php echo e($fault->id); ?>" class="form-label">Image attachment (optional)</label>
+                                    <input type="file" class="form-control <?php $__errorArgs = ['attachment'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?> edit-attachment" id="attachment-edit-<?php echo e($fault->id); ?>" name="attachment" accept="image/*" data-fault-id="<?php echo e($fault->id); ?>">
+                                    <?php $__errorArgs = ['attachment'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="invalid-feedback d-block"><strong><?php echo e($message); ?></strong></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                                    <div class="form-text">You can also paste an image into the remarks field.</div>
+                                    <div class="mt-2 edit-attachment-preview-container" data-fault-id="<?php echo e($fault->id); ?>" style="display:none;">
+                                        <img class="img-thumbnail edit-attachment-preview" data-fault-id="<?php echo e($fault->id); ?>" style="max-height:200px;">
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="fault-modal-toggle">
+                                        <div class="form-check mt-2">
+                                        <input class="form-check-input me-1" type="checkbox" id="resolvedOnCall-edit-<?php echo e($fault->id); ?>" name="resolved_on_call" value="1" <?php echo e(old('resolved_on_call') ? 'checked' : ''); ?>>
+                                        <label class="form-check-label fw-semibold ms-1" for="resolvedOnCall-edit-<?php echo e($fault->id); ?>">Resolved on call</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer fault-modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill" data-bs-dismiss="modal">
+                  <i class="fas fa-times me-1"></i> Cancel
+                </button>
+                <button type="submit" form="UF-edit-<?php echo e($fault->id); ?>" class="btn btn-primary btn-sm rounded-pill">
+                  <i class="fas fa-save me-1"></i> Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<?php /**PATH /var/www/html/resources/views/faults/edit.blade.php ENDPATH**/ ?>

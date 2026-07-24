@@ -1,4 +1,4 @@
-@php
+<?php
     $title = 'Faults Export';
     $search = trim((string) ($filters['search'] ?? ''));
     $statusFilter = (string) ($filters['status'] ?? 'all');
@@ -19,12 +19,12 @@
 
     $assignedCount = $faults->filter(fn ($fault) => !empty($fault->assignedTo))->count();
     $unassignedCount = max($faults->count() - $assignedCount, 0);
-@endphp
+?>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>{{ $title }}</title>
+    <title><?php echo e($title); ?></title>
     <style>
         @page {
             margin: 18px 20px 22px;
@@ -216,12 +216,12 @@
             <table class="header-table">
                 <tr>
                     <td>
-                        <div class="header-title">{{ $title }}</div>
+                        <div class="header-title"><?php echo e($title); ?></div>
                         <div class="header-subtitle">Compact operational export aligned to the current faults table.</div>
                     </td>
                     <td class="header-meta">
-                        <div><strong>Generated:</strong> {{ $generatedAt }}</div>
-                        <div><strong>Total Faults:</strong> {{ $faults->count() }}</div>
+                        <div><strong>Generated:</strong> <?php echo e($generatedAt); ?></div>
+                        <div><strong>Total Faults:</strong> <?php echo e($faults->count()); ?></div>
                     </td>
                 </tr>
             </table>
@@ -232,29 +232,29 @@
                 <td>
                     <div class="stat-card blue">
                         <div class="stat-label">Exported Faults</div>
-                        <div class="stat-value">{{ $faults->count() }}</div>
+                        <div class="stat-value"><?php echo e($faults->count()); ?></div>
                         <div class="stat-note">Rows included in this document</div>
                     </div>
                 </td>
                 <td>
                     <div class="stat-card green">
                         <div class="stat-label">Assigned</div>
-                        <div class="stat-value">{{ $assignedCount }}</div>
+                        <div class="stat-value"><?php echo e($assignedCount); ?></div>
                         <div class="stat-note">Faults with an assignee</div>
                     </div>
                 </td>
                 <td>
                     <div class="stat-card purple">
                         <div class="stat-label">Unassigned</div>
-                        <div class="stat-value">{{ $unassignedCount }}</div>
+                        <div class="stat-value"><?php echo e($unassignedCount); ?></div>
                         <div class="stat-note">Still awaiting allocation</div>
                     </div>
                 </td>
                 <td>
                     <div class="stat-card amber">
                         <div class="stat-label">View Scope</div>
-                        <div class="stat-value" style="font-size: 12px;">{{ $statusLabel }}</div>
-                        <div class="stat-note">{{ $ageLabel }}</div>
+                        <div class="stat-value" style="font-size: 12px;"><?php echo e($statusLabel); ?></div>
+                        <div class="stat-note"><?php echo e($ageLabel); ?></div>
                     </div>
                 </td>
             </tr>
@@ -266,15 +266,15 @@
                 <tr>
                     <td>
                         <span class="filter-label">Search</span>
-                        <span class="filter-value">{{ $search !== '' ? $search : 'None' }}</span>
+                        <span class="filter-value"><?php echo e($search !== '' ? $search : 'None'); ?></span>
                     </td>
                     <td>
                         <span class="filter-label">Status</span>
-                        <span class="filter-value">{{ $statusLabel }}</span>
+                        <span class="filter-value"><?php echo e($statusLabel); ?></span>
                     </td>
                     <td>
                         <span class="filter-label">Age</span>
-                        <span class="filter-value">{{ $ageLabel }}</span>
+                        <span class="filter-value"><?php echo e($ageLabel); ?></span>
                     </td>
                 </tr>
             </table>
@@ -296,30 +296,31 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($faults as $fault)
-                        @php($latestRemark = $remarksByFault->get($fault->id))
+                    <?php $__empty_1 = true; $__currentLoopData = $faults; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $fault): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <?php ($latestRemark = $remarksByFault->get($fault->id)); ?>
                         <tr>
-                            <td><span class="cell-strong">{{ $fault->fault_ref_number }}</span></td>
-                            <td>{{ $fault->customer ?: 'N/A' }}</td>
-                            <td>{{ $fault->link ?: 'N/A' }}</td>
-                            <td>{{ $latestRemark->switch_name ?? 'N/A' }}</td>
-                            <td>{{ $latestRemark->port ?? 'N/A' }}</td>
-                            <td>{{ $fault->assignedTo ?: 'Not yet assigned' }}</td>
+                            <td><span class="cell-strong"><?php echo e($fault->fault_ref_number); ?></span></td>
+                            <td><?php echo e($fault->customer ?: 'N/A'); ?></td>
+                            <td><?php echo e($fault->link ?: 'N/A'); ?></td>
+                            <td><?php echo e($latestRemark->switch_name ?? 'N/A'); ?></td>
+                            <td><?php echo e($latestRemark->port ?? 'N/A'); ?></td>
+                            <td><?php echo e($fault->assignedTo ?: 'Not yet assigned'); ?></td>
                             <td>
-                                <span class="cell-strong">{{ \Carbon\Carbon::parse($fault->created_at)->format('d M Y') }}</span><br>
-                                <span class="cell-muted">{{ \Carbon\Carbon::parse($fault->created_at)->format('H:i') }}</span>
+                                <span class="cell-strong"><?php echo e(\Carbon\Carbon::parse($fault->created_at)->format('d M Y')); ?></span><br>
+                                <span class="cell-muted"><?php echo e(\Carbon\Carbon::parse($fault->created_at)->format('H:i')); ?></span>
                             </td>
-                            <td>{{ $fault->description ?: 'N/A' }}</td>
-                            <td>{{ $faultAges[$fault->id] ?? 'N/A' }}</td>
+                            <td><?php echo e($fault->description ?: 'N/A'); ?></td>
+                            <td><?php echo e($faultAges[$fault->id] ?? 'N/A'); ?></td>
                         </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
                             <td colspan="9" class="empty-state">No faults matched the selected filters.</td>
                         </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
 </body>
 </html>
+<?php /**PATH /var/www/html/resources/views/faults/export_pdf.blade.php ENDPATH**/ ?>

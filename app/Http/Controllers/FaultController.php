@@ -24,12 +24,97 @@ use Carbon\Carbon;
 
 class FaultController extends Controller
 {
+    protected ?int $popImpactedStatusIdCache = null;
+
     function __construct()
     {
          $this->middleware('permission:fault-list|fault-create|fault-edit|fault-delete', ['only' => ['index','store']]);
          $this->middleware('permission:fault-create', ['only' => ['create','store']]);
          $this->middleware('permission:fault-edit', ['only' => ['edit','update']]);
          $this->middleware('permission:fault-delete', ['only' => ['destroy']]);
+    }
+
+    protected function popImpactedStatusId(): int
+    {
+        if ($this->popImpactedStatusIdCache !== null) {
+            return $this->popImpactedStatusIdCache;
+        }
+
+        $this->popImpactedStatusIdCache = (int) (DB::table('statuses')
+            ->where('status_code', 'POI')
+            ->value('id') ?? 0);
+
+        return $this->popImpactedStatusIdCache;
+    }
+
+    protected function applyOpenFaultScope($query, string $statusColumn = 'faults.status_id', ?int $nocClearedId = null): void
+    {
+        $nocClearedId = $nocClearedId ?? (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
+        $popImpactedStatusId = $this->popImpactedStatusId();
+
+        $query->where($statusColumn, '!=', $nocClearedId);
+
+        if ($popImpactedStatusId > 0) {
+            $query->where($statusColumn, '!=', $popImpactedStatusId);
+        }
+    }
+
+    protected function latestRemarksByFault($faultIds)
+    {
+        $faultIds = collect($faultIds)->filter()->values();
+
+        if ($faultIds->isEmpty()) {
+            return collect();
+        }
+
+        return DB::table('remarks')
+            ->leftJoin('users', 'remarks.user_id', '=', 'users.id')
+            ->whereIn('remarks.fault_id', $faultIds)
+            ->orderBy('remarks.created_at', 'desc')
+            ->get([
+                'remarks.id',
+                'remarks.fault_id',
+                'remarks.created_at',
+                'remarks.remark',
+                'remarks.switch_name',
+                'remarks.port',
+                'users.name',
+            ])
+            ->groupBy('fault_id')
+            ->map(fn ($group) => $group->first());
+    }
+
+    protected function buildFaultAgeMap($faults)
+    {
+        $faultAges = [];
+        $faultIdsList = collect($faults)->pluck('id')->all();
+
+        if (empty($faultIdsList)) {
+            return $faultAges;
+        }
+
+        $nocClearedId = (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
+        $clearedLogs = DB::table('fault_stage_logs')
+            ->whereIn('fault_id', $faultIdsList)
+            ->where('status_id', $nocClearedId)
+            ->select('fault_id', 'started_at')
+            ->get()
+            ->keyBy('fault_id');
+
+        foreach ($faults as $fault) {
+            $start = Carbon::parse($fault->created_at);
+            $end = ((int) $fault->status_id === $nocClearedId && isset($clearedLogs[$fault->id]))
+                ? Carbon::parse($clearedLogs[$fault->id]->started_at)
+                : Carbon::now();
+
+            $days = $start->diffInDays($end);
+            $hours = $start->copy()->addDays($days)->diffInHours($end) % 24;
+            $minutes = $start->copy()->addDays($days)->addHours($hours)->diffInMinutes($end) % 60;
+
+            $faultAges[$fault->id] = ($days > 0 ? ($days . 'd ') : '') . ($hours . 'h ') . ($minutes . 'm');
+        }
+
+        return $faultAges;
     }
     /**
      * Display a listing of the resource.
@@ -112,7 +197,7 @@ class FaultController extends Controller
 
         // Status filter: 'lt4' or specific status id
         if ($statusFilter === 'lt4') {
-            $faultsQuery->where('faults.status_id', '!=',6);
+            $this->applyOpenFaultScope($faultsQuery, 'faults.status_id');
         } elseif (ctype_digit((string) $statusFilter)) {
             $faultsQuery->where('faults.status_id', '=', (int)$statusFilter);
         }
@@ -198,11 +283,13 @@ class FaultController extends Controller
             ->get(['id','description']);
 
         // Age stats for open faults (status_id < 4)
+        $openFaultsBase = DB::table('faults');
+        $this->applyOpenFaultScope($openFaultsBase, 'status_id', $nocClearedId);
         $ageStats = [
-            'open_total' => DB::table('faults')->where('status_id','!=',$nocClearedId)->count(),
-            'open_today' => DB::table('faults')->where('status_id','!=',$nocClearedId)->whereDate('created_at', Carbon::today())->count(),
-            'open_lt72'  => DB::table('faults')->where('status_id','!=',$nocClearedId)->where('created_at', '>=', Carbon::now()->subHours(72))->count(),
-            'open_gt72'  => DB::table('faults')->where('status_id','!=',$nocClearedId)->where('created_at', '<', Carbon::now()->subHours(72))->count(),
+            'open_total' => (clone $openFaultsBase)->count(),
+            'open_today' => (clone $openFaultsBase)->whereDate('created_at', Carbon::today())->count(),
+            'open_lt72'  => (clone $openFaultsBase)->where('created_at', '>=', Carbon::now()->subHours(72))->count(),
+            'open_gt72'  => (clone $openFaultsBase)->where('created_at', '<', Carbon::now()->subHours(72))->count(),
         ];
 
         return view('faults.index',compact('faults','customer','city','accountManager','location','link','pop','suspectedRFO','remarksByFault','openStatuses','ageStats','faultAges','faultAgeStart','faultAgeEnd'))
@@ -284,7 +371,7 @@ class FaultController extends Controller
 
         // Status filter: 'lt4' or specific status id
         if ($statusFilter === 'lt4') {
-            $faultsQuery->where('faults.status_id', '<', 4);
+            $this->applyOpenFaultScope($faultsQuery, 'faults.status_id');
         } elseif (ctype_digit((string) $statusFilter)) {
             $faultsQuery->where('faults.status_id', '=', (int)$statusFilter);
         }
@@ -307,6 +394,8 @@ class FaultController extends Controller
     public function exportCsv(Request $request)
     {
         $faults = $this->buildFilteredFaultsQuery($request)->get();
+        $remarksByFault = $this->latestRemarksByFault($faults->pluck('id'));
+        $faultAges = $this->buildFaultAgeMap($faults);
 
         $filename = 'faults_'.date('Ymd_His').'.csv';
 
@@ -316,25 +405,27 @@ class FaultController extends Controller
         ];
 
         $columns = [
-            'Ref No', 'Customer', 'Account Manager', 'Link', 'Assigned To',
-            'Date Reported', 'Logged By', 'Status'
+            'Ref No', 'Customer', 'Link', 'Switch', 'Port', 'Assigned To',
+            'Date Reported', 'Status', 'Age'
         ];
 
-        $callback = function() use ($faults, $columns) {
+        $callback = function() use ($faults, $remarksByFault, $faultAges, $columns) {
             $out = fopen('php://output', 'w');
             // UTF-8 BOM for Excel
             fwrite($out, "\xEF\xBB\xBF");
             fputcsv($out, $columns);
             foreach ($faults as $f) {
+                $latestRemark = $remarksByFault->get($f->id);
                 fputcsv($out, [
                     $f->fault_ref_number,
                     $f->customer,
-                    $f->accountManager,
                     $f->link,
+                    $latestRemark->switch_name ?? 'N/A',
+                    $latestRemark->port ?? 'N/A',
                     $f->assignedTo,
                     \Carbon\Carbon::parse($f->created_at)->format('Y-m-d H:i'),
-                    $f->reportedBy,
                     $f->description,
+                    $faultAges[$f->id] ?? '',
                 ]);
             }
             fclose($out);
@@ -349,6 +440,8 @@ class FaultController extends Controller
     public function exportPdf(Request $request)
     {
         $faults = $this->buildFilteredFaultsQuery($request)->get();
+        $remarksByFault = $this->latestRemarksByFault($faults->pluck('id'));
+        $faultAges = $this->buildFaultAgeMap($faults);
         $filename = 'faults_'.date('Ymd_His').'.pdf';
 
         // If Dompdf not installed, provide a helpful error
@@ -360,7 +453,14 @@ class FaultController extends Controller
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('faults.export_pdf', [
             'faults' => $faults,
+            'remarksByFault' => $remarksByFault,
+            'faultAges' => $faultAges,
             'generatedAt' => now()->format('Y-m-d H:i'),
+            'filters' => [
+                'search' => trim((string) $request->query('q', '')),
+                'status' => $request->query('status', 'all'),
+                'age' => $request->query('age', 'all'),
+            ],
         ])->setPaper('a4', 'landscape');
 
         return $pdf->download($filename);
@@ -451,7 +551,7 @@ class FaultController extends Controller
 
         // Status filter: 'lt4' or specific status id
         if ($statusFilter === 'lt4') {
-            $faultsQuery->where('faults.status_id', '!=',6);
+            $this->applyOpenFaultScope($faultsQuery, 'faults.status_id');
         } elseif (ctype_digit((string) $statusFilter)) {
             $faultsQuery->where('faults.status_id', '=', (int)$statusFilter);
         }
@@ -536,12 +636,14 @@ class FaultController extends Controller
             ->orderBy('id','asc')
             ->get(['id','description']);
 
-        // Age stats for open faults (status_id < 4)
+        // Age stats for open faults
+        $openFaultsBase = DB::table('faults');
+        $this->applyOpenFaultScope($openFaultsBase, 'status_id', $nocClearedId);
         $ageStats = [
-            'open_total' => DB::table('faults')->where('status_id','!=',$nocClearedId)->count(),
-            'open_today' => DB::table('faults')->where('status_id','!=',$nocClearedId)->whereDate('created_at', Carbon::today())->count(),
-            'open_lt72'  => DB::table('faults')->where('status_id','!=',$nocClearedId)->where('created_at', '>=', Carbon::now()->subHours(72))->count(),
-            'open_gt72'  => DB::table('faults')->where('status_id','!=',$nocClearedId)->where('created_at', '<', Carbon::now()->subHours(72))->count(),
+            'open_total' => (clone $openFaultsBase)->count(),
+            'open_today' => (clone $openFaultsBase)->whereDate('created_at', Carbon::today())->count(),
+            'open_lt72'  => (clone $openFaultsBase)->where('created_at', '>=', Carbon::now()->subHours(72))->count(),
+            'open_gt72'  => (clone $openFaultsBase)->where('created_at', '<', Carbon::now()->subHours(72))->count(),
         ];
 
         return view('faults.index',compact('faults','customer','city','accountManager','location','link','pop','suspectedRFO','remarksByFault','openStatuses','ageStats','faultAges','faultAgeStart','faultAgeEnd'))
