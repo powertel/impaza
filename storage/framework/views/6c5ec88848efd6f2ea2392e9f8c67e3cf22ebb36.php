@@ -1,12 +1,10 @@
-@extends('layouts.admin')
-
-@section('title')
+<?php $__env->startSection('title'); ?>
 System Usage Report Settings
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
-<link href="{{ asset('css/call_centre.css') }}?v={{ @filemtime(public_path('css/call_centre.css')) }}" rel="stylesheet">
-@php
+<?php $__env->startSection('content'); ?>
+<link href="<?php echo e(asset('css/call_centre.css')); ?>?v=<?php echo e(@filemtime(public_path('css/call_centre.css'))); ?>" rel="stylesheet">
+<?php
     $latestStatus = $latestDelivery->status ?? null;
     $statusClass = $latestStatus === 'sent' ? 'success' : ($latestStatus === 'failed' ? 'danger' : 'secondary');
     $deliveryCount = $deliveryCount ?? collect($deliveries ?? [])->count();
@@ -18,7 +16,7 @@ System Usage Report Settings
         'manual_test' => ['label' => 'Manual Test', 'icon' => 'fas fa-flask', 'class' => 'usage-trigger--manual'],
         'cli_override' => ['label' => 'CLI Override', 'icon' => 'fas fa-terminal', 'class' => 'usage-trigger--cli'],
     ];
-@endphp
+?>
 <style>
   .usage-mail-page .usage-hero {
     background: linear-gradient(135deg, #0f4aa1 0%, #2563eb 55%, #60a5fa 100%);
@@ -417,23 +415,23 @@ System Usage Report Settings
 
 <section class="content ux-unified usage-mail-page">
   <div class="container-fluid">
-    @if(session('success'))
-      <div class="alert alert-success border-0 shadow-sm rounded-3">{{ session('success') }}</div>
-    @endif
+    <?php if(session('success')): ?>
+      <div class="alert alert-success border-0 shadow-sm rounded-3"><?php echo e(session('success')); ?></div>
+    <?php endif; ?>
 
-    @if(session('error'))
-      <div class="alert alert-danger border-0 shadow-sm rounded-3">{{ session('error') }}</div>
-    @endif
+    <?php if(session('error')): ?>
+      <div class="alert alert-danger border-0 shadow-sm rounded-3"><?php echo e(session('error')); ?></div>
+    <?php endif; ?>
 
-    @if($errors->any())
+    <?php if($errors->any()): ?>
       <div class="alert alert-danger border-0 shadow-sm rounded-3 mb-4">
         <ul class="mb-0 ps-3">
-          @foreach($errors->all() as $error)
-            <li>{{ $error }}</li>
-          @endforeach
+          <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <li><?php echo e($error); ?></li>
+          <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </ul>
       </div>
-    @endif
+    <?php endif; ?>
 
     <div class="usage-hero mb-4">
       <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-start gap-4 position-relative" style="z-index:1;">
@@ -446,23 +444,27 @@ System Usage Report Settings
           <div class="d-flex flex-wrap gap-2">
             <span class="usage-pill">
               <i class="fas fa-clock"></i>
-              Weekly Time: {{ \Carbon\Carbon::parse($settings->send_time ?? '07:00')->format('h:i A') }}
+              Weekly Time: <?php echo e(\Carbon\Carbon::parse($settings->send_time ?? '07:00')->format('h:i A')); ?>
+
             </span>
             <span class="usage-pill">
               <i class="fas fa-user-friends"></i>
-              Recipients: {{ number_format($recipientCount) }}
+              Recipients: <?php echo e(number_format($recipientCount)); ?>
+
             </span>
             <span class="usage-pill">
               <i class="fas fa-shield-alt"></i>
-              Status: {{ ($settings->enabled ?? false) ? 'Enabled' : 'Disabled' }}
+              Status: <?php echo e(($settings->enabled ?? false) ? 'Enabled' : 'Disabled'); ?>
+
             </span>
           </div>
         </div>
         <div class="text-lg-end">
           <div class="usage-meta small mb-2">Latest delivery snapshot</div>
-          <div class="fs-5 fw-bold">{{ $latestDelivery ? ucfirst($latestDelivery->status ?? 'unknown') : 'No delivery yet' }}</div>
+          <div class="fs-5 fw-bold"><?php echo e($latestDelivery ? ucfirst($latestDelivery->status ?? 'unknown') : 'No delivery yet'); ?></div>
           <div class="usage-meta small mt-1">
-            {{ $latestDelivery && $latestDelivery->started_at ? \Carbon\Carbon::parse($latestDelivery->started_at)->format('d M Y H:i') : 'Waiting for first run' }}
+            <?php echo e($latestDelivery && $latestDelivery->started_at ? \Carbon\Carbon::parse($latestDelivery->started_at)->format('d M Y H:i') : 'Waiting for first run'); ?>
+
           </div>
         </div>
       </div>
@@ -475,7 +477,7 @@ System Usage Report Settings
             <div class="cc-kpi-icon"><i class="fas fa-stream"></i></div>
             <div class="cc-kpi-title">Deliveries Logged</div>
           </div>
-          <div class="cc-kpi-value">{{ number_format($deliveryCount) }}</div>
+          <div class="cc-kpi-value"><?php echo e(number_format($deliveryCount)); ?></div>
           <div class="cc-kpi-sub">Recent report runs recorded</div>
         </div>
       </div>
@@ -485,7 +487,7 @@ System Usage Report Settings
             <div class="cc-kpi-icon"><i class="fas fa-check-circle"></i></div>
             <div class="cc-kpi-title">Successful Sends</div>
           </div>
-          <div class="cc-kpi-value">{{ number_format($successCount) }}</div>
+          <div class="cc-kpi-value"><?php echo e(number_format($successCount)); ?></div>
           <div class="cc-kpi-sub">Completed without SMTP errors</div>
         </div>
       </div>
@@ -495,7 +497,7 @@ System Usage Report Settings
             <div class="cc-kpi-icon"><i class="fas fa-exclamation-circle"></i></div>
             <div class="cc-kpi-title">Failed Sends</div>
           </div>
-          <div class="cc-kpi-value">{{ number_format($failedCount) }}</div>
+          <div class="cc-kpi-value"><?php echo e(number_format($failedCount)); ?></div>
           <div class="cc-kpi-sub">Need attention and retry</div>
         </div>
       </div>
@@ -505,7 +507,7 @@ System Usage Report Settings
             <div class="cc-kpi-icon"><i class="fas fa-user-clock"></i></div>
             <div class="cc-kpi-title">Test Recipient</div>
           </div>
-          <div class="cc-kpi-value" style="font-size:1rem; line-height:1.4;">{{ $settings->test_recipient ?? 'Not set' }}</div>
+          <div class="cc-kpi-value" style="font-size:1rem; line-height:1.4;"><?php echo e($settings->test_recipient ?? 'Not set'); ?></div>
           <div class="cc-kpi-sub">Default manual test destination</div>
         </div>
       </div>
@@ -516,76 +518,81 @@ System Usage Report Settings
         <div class="cc-chart-card mb-4">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="fw-semibold">Delivery Status</div>
-            @if($latestDelivery)
-              <span class="badge rounded-pill bg-{{ $statusClass }}">{{ ucfirst($latestDelivery->status ?? 'unknown') }}</span>
-            @endif
+            <?php if($latestDelivery): ?>
+              <span class="badge rounded-pill bg-<?php echo e($statusClass); ?>"><?php echo e(ucfirst($latestDelivery->status ?? 'unknown')); ?></span>
+            <?php endif; ?>
           </div>
 
-          @if($latestDelivery)
-            @php
+          <?php if($latestDelivery): ?>
+            <?php
               $latestTrigger = $triggerMeta[$latestDelivery->trigger_type ?? ''] ?? [
                   'label' => ucwords(str_replace('_', ' ', $latestDelivery->trigger_type ?? 'unknown')),
                   'icon' => 'fas fa-bell',
                   'class' => 'usage-trigger--default',
               ];
-            @endphp
+            ?>
             <div class="usage-detail-grid">
               <div class="usage-detail-item">
                 <small class="text-muted d-block">Last Trigger</small>
                 <strong>
-                  <span class="usage-trigger-badge {{ $latestTrigger['class'] }}">
-                    <i class="{{ $latestTrigger['icon'] }}"></i>
-                    {{ $latestTrigger['label'] }}
+                  <span class="usage-trigger-badge <?php echo e($latestTrigger['class']); ?>">
+                    <i class="<?php echo e($latestTrigger['icon']); ?>"></i>
+                    <?php echo e($latestTrigger['label']); ?>
+
                   </span>
                 </strong>
               </div>
               <div class="usage-detail-item">
                 <small class="text-muted d-block">Started</small>
-                <strong>{{ $latestDelivery->started_at ? \Carbon\Carbon::parse($latestDelivery->started_at)->format('d M Y H:i') : 'N/A' }}</strong>
+                <strong><?php echo e($latestDelivery->started_at ? \Carbon\Carbon::parse($latestDelivery->started_at)->format('d M Y H:i') : 'N/A'); ?></strong>
               </div>
               <div class="usage-detail-item">
                 <small class="text-muted d-block">Primary Recipient</small>
-                <strong>{{ $latestDelivery->primary_recipient ?: 'Not available' }}</strong>
+                <strong><?php echo e($latestDelivery->primary_recipient ?: 'Not available'); ?></strong>
               </div>
               <div class="usage-detail-item">
                 <small class="text-muted d-block">Reporting Period</small>
                 <strong>
-                  {{ $latestDelivery->period_start ? \Carbon\Carbon::parse($latestDelivery->period_start)->format('d M Y') : 'N/A' }}
+                  <?php echo e($latestDelivery->period_start ? \Carbon\Carbon::parse($latestDelivery->period_start)->format('d M Y') : 'N/A'); ?>
+
                   -
-                  {{ $latestDelivery->period_end ? \Carbon\Carbon::parse($latestDelivery->period_end)->format('d M Y') : 'N/A' }}
+                  <?php echo e($latestDelivery->period_end ? \Carbon\Carbon::parse($latestDelivery->period_end)->format('d M Y') : 'N/A'); ?>
+
                 </strong>
               </div>
               <div class="usage-detail-item">
                 <small class="text-muted d-block">Initiated By</small>
-                <strong>{{ $latestDelivery->initiated_by_name ?: 'Background scheduler' }}</strong>
+                <strong><?php echo e($latestDelivery->initiated_by_name ?: 'Background scheduler'); ?></strong>
               </div>
               <div class="usage-detail-item">
                 <small class="text-muted d-block">Finished</small>
-                <strong>{{ $latestDelivery->finished_at ? \Carbon\Carbon::parse($latestDelivery->finished_at)->format('d M Y H:i') : 'Pending' }}</strong>
+                <strong><?php echo e($latestDelivery->finished_at ? \Carbon\Carbon::parse($latestDelivery->finished_at)->format('d M Y H:i') : 'Pending'); ?></strong>
               </div>
             </div>
 
-            @if(!empty($latestDelivery->error_message))
+            <?php if(!empty($latestDelivery->error_message)): ?>
               <div class="alert alert-danger border-0 rounded-3 mt-3 mb-0">
                 <strong class="d-block mb-1">Latest Error</strong>
-                {{ $latestDelivery->error_message }}
+                <?php echo e($latestDelivery->error_message); ?>
+
               </div>
-            @endif
-          @else
+            <?php endif; ?>
+          <?php else: ?>
             <div class="text-muted">No delivery history yet. Send a test email or wait for the scheduled run.</div>
-          @endif
+          <?php endif; ?>
         </div>
 
         <div class="cc-chart-card usage-form-card mb-4">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="fw-semibold">Weekly Email Settings</div>
-            <span class="badge rounded-pill {{ ($settings->enabled ?? false) ? 'bg-success' : 'bg-secondary' }}">
-              {{ ($settings->enabled ?? false) ? 'Enabled' : 'Disabled' }}
+            <span class="badge rounded-pill <?php echo e(($settings->enabled ?? false) ? 'bg-success' : 'bg-secondary'); ?>">
+              <?php echo e(($settings->enabled ?? false) ? 'Enabled' : 'Disabled'); ?>
+
             </span>
           </div>
 
-          <form action="{{ route('system-usage-settings.update') }}" method="POST">
-            @csrf
+          <form action="<?php echo e(route('system-usage-settings.update')); ?>" method="POST">
+            <?php echo csrf_field(); ?>
             <div class="row g-4">
               <div class="col-md-6">
                 <label class="form-label">Scheduled Send Time</label>
@@ -593,7 +600,7 @@ System Usage Report Settings
                   type="time"
                   name="send_time"
                   class="form-control"
-                  value="{{ old('send_time', \Carbon\Carbon::parse($settings->send_time ?? '07:00')->format('H:i')) }}"
+                  value="<?php echo e(old('send_time', \Carbon\Carbon::parse($settings->send_time ?? '07:00')->format('H:i'))); ?>"
                   required
                 >
                 <small class="text-muted d-block mt-2">Runs weekly every Monday using the saved time.</small>
@@ -611,7 +618,8 @@ System Usage Report Settings
                       id="enabled"
                       name="enabled"
                       value="1"
-                      {{ old('enabled', ($settings->enabled ?? false)) ? 'checked' : '' }}
+                      <?php echo e(old('enabled', ($settings->enabled ?? false)) ? 'checked' : ''); ?>
+
                     >
                   </div>
                 </div>
@@ -623,7 +631,7 @@ System Usage Report Settings
                   rows="6"
                   class="form-control"
                   placeholder="manager1@powertel.co.zw&#10;manager2@powertel.co.zw"
-                >{{ old('recipients', $settings->recipients ?? '') }}</textarea>
+                ><?php echo e(old('recipients', $settings->recipients ?? '')); ?></textarea>
                 <small class="text-muted d-block mt-2">Use commas, spaces, or one email per line.</small>
               </div>
               <div class="col-md-6">
@@ -632,7 +640,7 @@ System Usage Report Settings
                   type="email"
                   name="test_recipient"
                   class="form-control"
-                  value="{{ old('test_recipient', $settings->test_recipient ?? 'fjatakalula@powertel.co.zw') }}"
+                  value="<?php echo e(old('test_recipient', $settings->test_recipient ?? 'fjatakalula@powertel.co.zw')); ?>"
                   placeholder="fjatakalula@powertel.co.zw"
                 >
               </div>
@@ -652,8 +660,8 @@ System Usage Report Settings
             <span class="badge rounded-pill bg-primary-subtle text-primary">Manual Send</span>
           </div>
 
-          <form action="{{ route('system-usage-settings.send-test') }}" method="POST">
-            @csrf
+          <form action="<?php echo e(route('system-usage-settings.send-test')); ?>" method="POST">
+            <?php echo csrf_field(); ?>
             <div class="row g-4">
               <div class="col-md-6">
                 <label class="form-label">Test Recipient</label>
@@ -661,17 +669,17 @@ System Usage Report Settings
                   type="email"
                   name="test_recipient"
                   class="form-control"
-                  value="{{ old('test_recipient', $settings->test_recipient ?? 'fjatakalula@powertel.co.zw') }}"
+                  value="<?php echo e(old('test_recipient', $settings->test_recipient ?? 'fjatakalula@powertel.co.zw')); ?>"
                   required
                 >
               </div>
               <div class="col-md-3">
                 <label class="form-label">Start Date</label>
-                <input type="date" name="start_date" class="form-control" value="{{ old('start_date') }}">
+                <input type="date" name="start_date" class="form-control" value="<?php echo e(old('start_date')); ?>">
               </div>
               <div class="col-md-3">
                 <label class="form-label">End Date</label>
-                <input type="date" name="end_date" class="form-control" value="{{ old('end_date') }}">
+                <input type="date" name="end_date" class="form-control" value="<?php echo e(old('end_date')); ?>">
               </div>
               <div class="col-12">
                 <small class="text-muted">Leave the dates empty to send the previous full Monday to Sunday week.</small>
@@ -680,7 +688,7 @@ System Usage Report Settings
                 <button
                   type="submit"
                   class="btn btn-outline-danger rounded-pill px-4"
-                  formaction="{{ route('system-usage-settings.export-pdf') }}"
+                  formaction="<?php echo e(route('system-usage-settings.export-pdf')); ?>"
                   formmethod="GET"
                   formnovalidate
                 >
@@ -699,7 +707,7 @@ System Usage Report Settings
         <div class="cc-chart-card">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="fw-semibold">Delivery History</div>
-            <span class="badge rounded-pill bg-dark">{{ number_format($deliveryCount) }} Logged</span>
+            <span class="badge rounded-pill bg-dark"><?php echo e(number_format($deliveryCount)); ?> Logged</span>
           </div>
 
           <div class="table-responsive">
@@ -715,42 +723,44 @@ System Usage Report Settings
                 </tr>
               </thead>
               <tbody>
-                @forelse(($deliveries ?? collect()) as $delivery)
-                  @php
+                <?php $__empty_1 = true; $__currentLoopData = ($deliveries ?? collect()); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $delivery): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                  <?php
                     $deliveryTrigger = $triggerMeta[$delivery->trigger_type ?? ''] ?? [
                         'label' => ucwords(str_replace('_', ' ', $delivery->trigger_type ?? 'unknown')),
                         'icon' => 'fas fa-bell',
                         'class' => 'usage-trigger--default',
                     ];
-                  @endphp
+                  ?>
                   <tr>
-                    <td data-order="{{ $delivery->started_at ? \Carbon\Carbon::parse($delivery->started_at)->format('Y-m-d H:i:s') : '' }}">{{ $delivery->started_at ? \Carbon\Carbon::parse($delivery->started_at)->format('d M Y H:i') : 'N/A' }}</td>
+                    <td data-order="<?php echo e($delivery->started_at ? \Carbon\Carbon::parse($delivery->started_at)->format('Y-m-d H:i:s') : ''); ?>"><?php echo e($delivery->started_at ? \Carbon\Carbon::parse($delivery->started_at)->format('d M Y H:i') : 'N/A'); ?></td>
                     <td>
-                      <span class="usage-trigger-badge {{ $deliveryTrigger['class'] }}">
-                        <i class="{{ $deliveryTrigger['icon'] }}"></i>
-                        {{ $deliveryTrigger['label'] }}
+                      <span class="usage-trigger-badge <?php echo e($deliveryTrigger['class']); ?>">
+                        <i class="<?php echo e($deliveryTrigger['icon']); ?>"></i>
+                        <?php echo e($deliveryTrigger['label']); ?>
+
                       </span>
                     </td>
                     <td>
-                      <span class="badge rounded-pill {{ ($delivery->status ?? '') === 'sent' ? 'bg-success' : (($delivery->status ?? '') === 'failed' ? 'bg-danger' : 'bg-secondary') }}">
-                        {{ ucfirst($delivery->status ?? 'unknown') }}
+                      <span class="badge rounded-pill <?php echo e(($delivery->status ?? '') === 'sent' ? 'bg-success' : (($delivery->status ?? '') === 'failed' ? 'bg-danger' : 'bg-secondary')); ?>">
+                        <?php echo e(ucfirst($delivery->status ?? 'unknown')); ?>
+
                       </span>
                     </td>
-                    <td>{{ $delivery->primary_recipient ?: 'N/A' }}</td>
-                    <td>{{ $delivery->initiated_by_name ?: 'Background scheduler' }}</td>
+                    <td><?php echo e($delivery->primary_recipient ?: 'N/A'); ?></td>
+                    <td><?php echo e($delivery->initiated_by_name ?: 'Background scheduler'); ?></td>
                     <td>
-                      @if($delivery->error_message)
-                        <span class="usage-error-chip">{{ $delivery->error_message }}</span>
-                      @else
+                      <?php if($delivery->error_message): ?>
+                        <span class="usage-error-chip"><?php echo e($delivery->error_message); ?></span>
+                      <?php else: ?>
                         <span class="text-muted">-</span>
-                      @endif
+                      <?php endif; ?>
                     </td>
                   </tr>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                   <tr>
                     <td colspan="6" class="text-center text-muted py-5">No delivery history recorded yet.</td>
                   </tr>
-                @endforelse
+                <?php endif; ?>
               </tbody>
             </table>
           </div>
@@ -762,9 +772,9 @@ System Usage Report Settings
           <div class="usage-stat-label">Included Groups</div>
           <div class="usage-stat-sub mb-2">Monitored teams covered by the weekly report.</div>
           <ul class="usage-list">
-            @foreach($monitoredGroups as $group)
-              <li>{{ $group }}</li>
-            @endforeach
+            <?php $__currentLoopData = $monitoredGroups; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $group): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+              <li><?php echo e($group); ?></li>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
           </ul>
         </div>
 
@@ -772,9 +782,9 @@ System Usage Report Settings
           <div class="usage-stat-label">Usage Metrics</div>
           <div class="usage-stat-sub mb-2">Activity signals currently included in the email summary.</div>
           <ul class="usage-list">
-            @foreach($defaultMetrics as $metric)
-              <li>{{ $metric }}</li>
-            @endforeach
+            <?php $__currentLoopData = $defaultMetrics; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $metric): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+              <li><?php echo e($metric); ?></li>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
           </ul>
         </div>
 
@@ -788,10 +798,10 @@ System Usage Report Settings
     </div>
   </div>
 </section>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('scripts')
-@parent
+<?php $__env->startSection('scripts'); ?>
+<?php echo \Illuminate\View\Factory::parentPlaceholder('scripts'); ?>
 <script>
   $(function () {
     var table = $('#usageDeliveryHistoryTable');
@@ -816,4 +826,6 @@ System Usage Report Settings
     });
   });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.admin', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /var/www/html/resources/views/reports/system_usage_settings.blade.php ENDPATH**/ ?>

@@ -79,6 +79,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('/reports/system-usage-settings', [SystemUsageReportController::class, 'edit'])->name('system-usage-settings.edit');
     Route::post('/reports/system-usage-settings', [SystemUsageReportController::class, 'update'])->name('system-usage-settings.update');
     Route::post('/reports/system-usage-settings/send-test', [SystemUsageReportController::class, 'sendTest'])->name('system-usage-settings.send-test');
+    Route::get('/reports/system-usage-settings/export-pdf', [SystemUsageReportController::class, 'exportPdf'])->name('system-usage-settings.export-pdf');
     // Performance Dashboard
     Route::get('/performance', [PerformanceController::class, 'index'])->name('performance.index');
     Route::resource('users', UserController::class);
