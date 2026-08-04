@@ -83,6 +83,7 @@ Route::group(['middleware' => ['auth']], function() {
     // Performance Dashboard
     Route::get('/performance', [PerformanceController::class, 'index'])->name('performance.index');
     Route::resource('users', UserController::class);
+    Route::get('users/{user}/login-history', [UserController::class, 'loginHistory'])->name('users.login-history');
     Route::get('lte-site-surveys/reports', [LteSiteSurveyController::class, 'reports'])->name('lte-site-surveys.reports');
     Route::get('lte-site-surveys/map', [LteSiteSurveyController::class, 'map'])->name('lte-site-surveys.map');
     Route::resource('lte-site-surveys', LteSiteSurveyController::class)->only(['index', 'create', 'store', 'show', 'update']);

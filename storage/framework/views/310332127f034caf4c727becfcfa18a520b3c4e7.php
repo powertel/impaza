@@ -108,33 +108,27 @@
                 <h6 class="mb-0 text-secondary"><i class="fas fa-clock me-2 text-primary"></i>Login History</h6>
               </div>
               <div class="card-body pt-0">
-                <?php if(isset($loginAudits) && $loginAudits->count()): ?>
-                  <div class="table-responsive">
-                    <table class="table table-sm mb-0">
-                      <thead>
-                        <tr>
-                          <th style="width: 180px;">When</th>
-                          <th>Details</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <?php $__currentLoopData = $loginAudits->take(10); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $audit): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                          <tr>
-                            <td class="text-nowrap">
-                              <?php echo e(\Illuminate\Support\Carbon::parse($audit->created_at)->format('d M Y, H:i')); ?>
-
-                            </td>
-                            <td>
-                              <div class="text-muted small"><?php echo e($audit->notes); ?></div>
-                            </td>
-                          </tr>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                      </tbody>
-                    </table>
-                  </div>
-                <?php else: ?>
-                  <div class="text-muted">No login activity recorded yet.</div>
-                <?php endif; ?>
+                <div class="table-responsive">
+                  <table class="table table-sm mb-0">
+                    <thead>
+                      <tr>
+                        <th style="width: 180px;">When</th>
+                        <th>Details</th>
+                      </tr>
+                    </thead>
+                    <tbody id="loginHistoryBody-<?php echo e($user->id); ?>" data-user-id="<?php echo e($user->id); ?>"></tbody>
+                  </table>
+                </div>
+                <div class="d-flex justify-content-end mt-2">
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary btn-sm login-history-load-more"
+                    data-user-id="<?php echo e($user->id); ?>"
+                    data-initial-url="<?php echo e(route('users.login-history', $user->id)); ?>"
+                  >
+                    <i class="fas fa-plus me-1"></i> Load more
+                  </button>
+                </div>
               </div>
             </div>
           </div>

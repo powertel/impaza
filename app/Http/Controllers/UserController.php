@@ -23,6 +23,7 @@ class UserController extends Controller
          $this->middleware('permission:user-create', ['only' => ['create','store']]);
          $this->middleware('permission:user-edit', ['only' => ['edit','update','changePassword','updateAccess']]);
          $this->middleware('permission:user-delete', ['only' => ['destroy']]);
+         $this->middleware('permission:user-list', ['only' => ['loginHistory']]);
     }
     /**
      * Display a listing of the resource.
@@ -73,19 +74,6 @@ class UserController extends Controller
         }
 
         $users = $usersQuery->paginate($perPage)->withQueryString();
-
-        $visibleUserIds = $users->getCollection()->pluck('id')->filter()->values()->all();
-        $loginAuditsByUser = collect();
-        if ($visibleUserIds) {
-            $loginAuditsByUser = DB::table('audits')
-                ->where('entity_type', 'user')
-                ->where('action', 'login')
-                ->whereIn('entity_id', $visibleUserIds)
-                ->orderByDesc('created_at')
-                ->limit(count($visibleUserIds) * 10)
-                ->get(['entity_id', 'notes', 'created_at'])
-                ->groupBy('entity_id');
-        }
         
         // Provide supporting datasets for modal-based create/edit in index
         $roles = Role::pluck('name','name')->all();
@@ -97,8 +85,29 @@ class UserController extends Controller
         $regions = DB::table('cities')->select('region')->whereNotNull('region')->distinct()->orderBy('region')->pluck('region');
         $currentUserRegion = auth()->user()->region;
         
-        return view('users.index',compact('users','roles','department','section','position','user_statuses','regions','currentUserRegion','loginAuditsByUser'))
+        return view('users.index',compact('users','roles','department','section','position','user_statuses','regions','currentUserRegion'))
         ->with('i');
+    }
+
+    public function loginHistory(Request $request, $user)
+    {
+        $perPage = (int) $request->query('per_page', 10);
+        $perPage = $perPage > 0 ? $perPage : 10;
+        $perPage = min($perPage, 50);
+
+        $userModel = User::findOrFail($user);
+
+        $audits = DB::table('audits')
+            ->where('entity_type', 'user')
+            ->where('action', 'login')
+            ->where('entity_id', $userModel->id)
+            ->orderByDesc('created_at')
+            ->simplePaginate($perPage);
+
+        return response()->json([
+            'html' => view('users.login_history_rows', ['audits' => $audits])->render(),
+            'next_page_url' => $audits->nextPageUrl(),
+        ]);
     }
     /**
      * Show the form for creating a new  resource.
