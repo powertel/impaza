@@ -1,11 +1,11 @@
 <!-- Show User Modal -->
-<div class="modal custom-modal fade" id="showUserModal-{{ $user->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="showUserModalLabel-{{ $user->id }}" aria-hidden="true">
+<div class="modal custom-modal fade" id="showUserModal-<?php echo e($user->id); ?>" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="showUserModalLabel-<?php echo e($user->id); ?>" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content rounded-4 border-0 shadow-lg">
       <div class="modal-header border-0">
         <div class="d-flex align-items-center">
           <span class="badge bg-primary me-2"><i class="fas fa-user"></i></span>
-          <h5 class="modal-title mb-0" id="showUserModalLabel-{{ $user->id }}">View User</h5>
+          <h5 class="modal-title mb-0" id="showUserModalLabel-<?php echo e($user->id); ?>">View User</h5>
         </div>
         <button type="button" class="btn-close " data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
@@ -20,37 +20,37 @@
                 <li class="list-group-item d-flex justify-content-between align-items-start">
                   <div>
                     <small class="text-muted">Name</small>
-                    <div class="fw-semibold">{{ $user->name }}</div>
+                    <div class="fw-semibold"><?php echo e($user->name); ?></div>
                   </div>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-start">
                   <div>
                     <small class="text-muted">Email</small>
-                    <div class="fw-semibold">{{ $user->email }}</div>
+                    <div class="fw-semibold"><?php echo e($user->email); ?></div>
                   </div>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-start">
                   <div>
                     <small class="text-muted">Last Login</small>
-                    <div class="fw-semibold">{{ $user->last_login_at ? $user->last_login_at->format('d M Y, H:i') : 'Never' }}</div>
+                    <div class="fw-semibold"><?php echo e($user->last_login_at ? $user->last_login_at->format('d M Y, H:i') : 'Never'); ?></div>
                   </div>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-start">
                   <div>
                     <small class="text-muted">Department</small>
-                    <div class="fw-semibold">{{ $user->department }}</div>
+                    <div class="fw-semibold"><?php echo e($user->department); ?></div>
                   </div>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-start">
                   <div>
                     <small class="text-muted">Section</small>
-                    <div class="fw-semibold">{{ $user->section }}</div>
+                    <div class="fw-semibold"><?php echo e($user->section); ?></div>
                   </div>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-start">
                   <div>
                     <small class="text-muted">Position</small>
-                    <div class="fw-semibold">{{ $user->position }}</div>
+                    <div class="fw-semibold"><?php echo e($user->position); ?></div>
                   </div>
                 </li>
               </ul>
@@ -67,11 +67,11 @@
                   <div>
                     <small class="text-muted">Roles</small>
                     <div class="fw-semibold">
-                      @if(!empty($user->getRoleNames()))
-                        @foreach($user->getRoleNames() as $v)
-                          <span class="badge bg-success me-1">{{ $v }}</span>
-                        @endforeach
-                      @endif
+                      <?php if(!empty($user->getRoleNames())): ?>
+                        <?php $__currentLoopData = $user->getRoleNames(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $v): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                          <span class="badge bg-success me-1"><?php echo e($v); ?></span>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                      <?php endif; ?>
                     </div>
                   </div>
                 </li>
@@ -79,21 +79,21 @@
                   <div>
                     <small class="text-muted">Status</small>
                     <div class="fw-semibold">
-                      <span class="badge rounded-pill" style="background-color: {{ App\Models\UserStatus::STATUS_COLOR[ $user->status_name ] ?? '#6c757d' }}; color: black;">{{ $user->status_name }}</span>
+                      <span class="badge rounded-pill" style="background-color: <?php echo e(App\Models\UserStatus::STATUS_COLOR[ $user->status_name ] ?? '#6c757d'); ?>; color: black;"><?php echo e($user->status_name); ?></span>
                     </div>
                   </div>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-start">
                   <div>
                     <small class="text-muted">Region</small>
-                    <div class="fw-semibold">{{ $user->region }}</div>
+                    <div class="fw-semibold"><?php echo e($user->region); ?></div>
                   </div>
                 </li>
 
                 <li class="list-group-item d-flex justify-content-between align-items-start">
                   <div>
                     <small class="text-muted">Phone Number</small>
-                    <div class="fw-semibold">{{ $user->phonenumber }}</div>
+                    <div class="fw-semibold"><?php echo e($user->phonenumber); ?></div>
                   </div>
                 </li>
               </ul>
@@ -108,7 +108,7 @@
                 <h6 class="mb-0 text-secondary"><i class="fas fa-clock me-2 text-primary"></i>Login History</h6>
               </div>
               <div class="card-body pt-0">
-                @if(isset($loginAudits) && $loginAudits->count())
+                <?php if(isset($loginAudits) && $loginAudits->count()): ?>
                   <div class="table-responsive">
                     <table class="table table-sm mb-0">
                       <thead>
@@ -118,22 +118,23 @@
                         </tr>
                       </thead>
                       <tbody>
-                        @foreach($loginAudits->take(10) as $audit)
+                        <?php $__currentLoopData = $loginAudits->take(10); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $audit): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                           <tr>
                             <td class="text-nowrap">
-                              {{ \Illuminate\Support\Carbon::parse($audit->created_at)->format('d M Y, H:i') }}
+                              <?php echo e(\Illuminate\Support\Carbon::parse($audit->created_at)->format('d M Y, H:i')); ?>
+
                             </td>
                             <td>
-                              <div class="text-muted small">{{ $audit->notes }}</div>
+                              <div class="text-muted small"><?php echo e($audit->notes); ?></div>
                             </td>
                           </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                       </tbody>
                     </table>
                   </div>
-                @else
+                <?php else: ?>
                   <div class="text-muted">No login activity recorded yet.</div>
-                @endif
+                <?php endif; ?>
               </div>
             </div>
           </div>
@@ -147,3 +148,4 @@
     </div>
   </div>
 </div>
+<?php /**PATH /var/www/html/resources/views/users/show_modal.blade.php ENDPATH**/ ?>

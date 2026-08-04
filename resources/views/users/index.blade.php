@@ -167,6 +167,7 @@ Users
                 <td>
                   <div class="workspace-cell-main">{{ $user->name }}</div>
                   <div class="workspace-cell-sub">{{ $user->email }}</div>
+                  <div class="workspace-cell-sub">Last login: {{ $user->last_login_at ? $user->last_login_at->format('d M Y, H:i') : 'Never' }}</div>
                 </td>
                 <td>
                   <div class="workspace-chip-stack">
@@ -241,7 +242,7 @@ Users
 @include('users.create_modal', ['roles' => $roles, 'department' => $department, 'section' => $section, 'position' => $position, 'user_statuses' => $user_statuses, 'regions' => $regions, 'currentUserRegion' => $currentUserRegion])
 
 @foreach ($users as $user)
-  @include('users.show_modal', ['user' => $user])
+  @include('users.show_modal', ['user' => $user, 'loginAudits' => $loginAuditsByUser->get($user->id, collect())])
   @include('users.edit_modal', ['user' => $user, 'department' => $department, 'section' => $section, 'position' => $position, 'roles' => $roles, 'user_statuses' => $user_statuses, 'regions' => $regions])
   @include('users.access_modal', ['user' => $user])
   @include('users.change_password_modal', ['user' => $user])
@@ -272,4 +273,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
-
