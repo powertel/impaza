@@ -51,6 +51,7 @@ class UserController extends Controller
                 'users.phonenumber',
                 'users.region',
                 'users.is_access',
+                'users.last_login_at',
                 'sections.section',
                 'departments.department',
                 'positions.position',
@@ -72,6 +73,19 @@ class UserController extends Controller
         }
 
         $users = $usersQuery->paginate($perPage)->withQueryString();
+
+        $visibleUserIds = $users->getCollection()->pluck('id')->filter()->values()->all();
+        $loginAuditsByUser = collect();
+        if ($visibleUserIds) {
+            $loginAuditsByUser = DB::table('audits')
+                ->where('entity_type', 'user')
+                ->where('action', 'login')
+                ->whereIn('entity_id', $visibleUserIds)
+                ->orderByDesc('created_at')
+                ->limit(count($visibleUserIds) * 10)
+                ->get(['entity_id', 'notes', 'created_at'])
+                ->groupBy('entity_id');
+        }
         
         // Provide supporting datasets for modal-based create/edit in index
         $roles = Role::pluck('name','name')->all();
@@ -83,7 +97,7 @@ class UserController extends Controller
         $regions = DB::table('cities')->select('region')->whereNotNull('region')->distinct()->orderBy('region')->pluck('region');
         $currentUserRegion = auth()->user()->region;
         
-        return view('users.index',compact('users','roles','department','section','position','user_statuses','regions','currentUserRegion'))
+        return view('users.index',compact('users','roles','department','section','position','user_statuses','regions','currentUserRegion','loginAuditsByUser'))
         ->with('i');
     }
     /**
