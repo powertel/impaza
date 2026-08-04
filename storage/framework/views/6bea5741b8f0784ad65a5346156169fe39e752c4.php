@@ -512,6 +512,7 @@ Faults
   $perPage = request('per_page', 20);
   $statusFilter = request('status', 'all');
   $ageFilter = request('age', 'all');
+  $regionFilter = request('region', 'all');
   $compactStatusLabel = function ($label) {
       return match (strtolower(trim((string) $label))) {
           'fault has been restored', 'resolved' => 'Fault Restored',
@@ -613,12 +614,12 @@ Faults
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
           <li>
-            <a class="dropdown-item" href="<?php echo e(route('faults.export.csv', request()->only('q','status','age'))); ?>">
+            <a class="dropdown-item" href="<?php echo e(route('faults.export.csv', request()->only('q','status','age','region'))); ?>">
               <i class="fas fa-file-excel me-2"></i>Export Excel
             </a>
           </li>
           <li>
-            <a class="dropdown-item" href="<?php echo e(route('faults.export.pdf', request()->only('q','status','age'))); ?>">
+            <a class="dropdown-item" href="<?php echo e(route('faults.export.pdf', request()->only('q','status','age','region'))); ?>">
               <i class="fas fa-file-pdf me-2"></i>Export PDF
             </a>
           </li>
@@ -666,6 +667,18 @@ Faults
               <option value="today" <?php echo e($ageFilter === 'today' ? 'selected' : ''); ?>>Today</option>
               <option value="lt72" <?php echo e($ageFilter === 'lt72' ? 'selected' : ''); ?>>Within 72 Hours</option>
               <option value="gt72" <?php echo e($ageFilter === 'gt72' ? 'selected' : ''); ?>>Over 72 Hours</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="faults-toolbar-field">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="fas fa-map-marked-alt"></i></span>
+            <select name="region" id="faultsRegionFilter" class="form-select form-select-sm" aria-label="Region filter">
+              <option value="all" <?php echo e($regionFilter === 'all' ? 'selected' : ''); ?>>All Regions</option>
+              <?php $__currentLoopData = ($regions ?? collect()); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $r): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <option value="<?php echo e($r); ?>" <?php echo e($regionFilter === (string) $r ? 'selected' : ''); ?>><?php echo e($r); ?></option>
+              <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </select>
           </div>
         </div>
@@ -851,6 +864,9 @@ Faults
           const map = { all: 'age-select-all', today: 'age-select-today', lt72: 'age-select-lt72', gt72: 'age-select-gt72' };
           if (map[el.value]) el.classList.add(map[el.value]);
         } catch (e) { /* noop */ }
+        this.form?.submit();
+      });
+      document.getElementById('faultsRegionFilter')?.addEventListener('change', function(){
         this.form?.submit();
       });
       // Initial age select coloration

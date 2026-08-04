@@ -58,6 +58,7 @@ class DepartmentFaultController extends Controller
         $q = trim((string) request('q', ''));
         $statusFilter = request('status', 'all');
         $ageFilter = request('age', 'all');
+        $regionFilter = trim((string) request('region', 'all'));
 
         // Base query scoped to the user's section
         $faultsQuery = DB::table('faults')
@@ -153,6 +154,10 @@ class DepartmentFaultController extends Controller
             $faultsQuery->where('faults.created_at', '<', \Carbon\Carbon::now()->subHours(72));
         }
 
+        if ($regionFilter !== '' && $regionFilter !== 'all') {
+            $faultsQuery->where('cities.region', '=', $regionFilter);
+        }
+
         $faults = $faultsQuery->paginate($perPage)->withQueryString();
 
         // Collect remarks for all listed faults and group by fault_id for faults.show
@@ -205,6 +210,13 @@ class DepartmentFaultController extends Controller
             ->orderBy('id','asc')
             ->get(['id','description']);
 
+        $regions = DB::table('cities')
+            ->select('region')
+            ->whereNotNull('region')
+            ->distinct()
+            ->orderBy('region')
+            ->pluck('region');
+
         // Age stats scoped to current section or referrals to it
         $sectionId = (int) (auth()->user()->section_id ?? 0);
         $base = function() use ($sectionId) {
@@ -220,6 +232,22 @@ class DepartmentFaultController extends Controller
                       ->orWhere('fr.to_section_id','=',$sectionId);
                 });
         };
+        if ($regionFilter !== '' && $regionFilter !== 'all') {
+            $base = function() use ($sectionId, $regionFilter) {
+                return DB::table('faults')
+                    ->leftjoin('fault_section','faults.id','=','fault_section.fault_id')
+                    ->leftJoin('fault_referrals as fr', function($join) {
+                        $join->on('fr.fault_id','=','faults.id');
+                        $join->whereNull('fr.completed_at');
+                    })
+                    ->leftJoin('cities','faults.city_id','=','cities.id')
+                    ->where(function($q) use ($sectionId) {
+                        $q->where('fault_section.section_id','=',$sectionId)
+                          ->orWhere('fr.to_section_id','=',$sectionId);
+                    })
+                    ->where('cities.region', '=', $regionFilter);
+            };
+        }
         $ageStats = [
             'open_total' => $base()->where('faults.status_id','!=',$nocClearedId)->count(),
             'open_today' => $base()->where('faults.status_id','!=',$nocClearedId)->whereDate('faults.created_at', \Carbon\Carbon::today())->count(),
@@ -227,7 +255,7 @@ class DepartmentFaultController extends Controller
             'open_gt72'  => $base()->where('faults.status_id','!=',$nocClearedId)->where('faults.created_at', '<', \Carbon\Carbon::now()->subHours(72))->count(),
         ];
 
-        return view('department_faults.index',compact('faults','remarksByFault','perPage','faultAges','faultAgeStart','faultAgeEnd','openStatuses','ageStats'))
+        return view('department_faults.index',compact('faults','remarksByFault','perPage','faultAges','faultAgeStart','faultAgeEnd','openStatuses','ageStats','regions','regionFilter'))
             ->with('i');
         
     }

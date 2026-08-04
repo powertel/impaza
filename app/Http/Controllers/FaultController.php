@@ -128,6 +128,7 @@ class FaultController extends Controller
         $q = trim((string) request('q', ''));
         $statusFilter = request('status', 'all');
         $ageFilter = request('age', 'all');
+        $regionFilter = trim((string) request('region', 'all'));
 
         $faultsQuery = DB::table('faults')
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
@@ -211,6 +212,10 @@ class FaultController extends Controller
             $faultsQuery->where('faults.created_at', '<', Carbon::now()->subHours(72));
         }
 
+        if ($regionFilter !== '' && $regionFilter !== 'all') {
+            $faultsQuery->where('cities.region', '=', $regionFilter);
+        }
+
         $faults = $faultsQuery->paginate($perPage)->withQueryString();
         
         // Collect remarks for all listed faults and group by fault_id
@@ -282,17 +287,27 @@ class FaultController extends Controller
             ->orderBy('id','asc')
             ->get(['id','description']);
 
+        $regions = DB::table('cities')
+            ->select('region')
+            ->whereNotNull('region')
+            ->distinct()
+            ->orderBy('region')
+            ->pluck('region');
+
         // Age stats for open faults (status_id < 4)
-        $openFaultsBase = DB::table('faults');
-        $this->applyOpenFaultScope($openFaultsBase, 'status_id', $nocClearedId);
+        $openFaultsBase = DB::table('faults')->leftJoin('cities', 'faults.city_id', '=', 'cities.id');
+        $this->applyOpenFaultScope($openFaultsBase, 'faults.status_id', $nocClearedId);
+        if ($regionFilter !== '' && $regionFilter !== 'all') {
+            $openFaultsBase->where('cities.region', '=', $regionFilter);
+        }
         $ageStats = [
             'open_total' => (clone $openFaultsBase)->count(),
-            'open_today' => (clone $openFaultsBase)->whereDate('created_at', Carbon::today())->count(),
-            'open_lt72'  => (clone $openFaultsBase)->where('created_at', '>=', Carbon::now()->subHours(72))->count(),
-            'open_gt72'  => (clone $openFaultsBase)->where('created_at', '<', Carbon::now()->subHours(72))->count(),
+            'open_today' => (clone $openFaultsBase)->whereDate('faults.created_at', Carbon::today())->count(),
+            'open_lt72'  => (clone $openFaultsBase)->where('faults.created_at', '>=', Carbon::now()->subHours(72))->count(),
+            'open_gt72'  => (clone $openFaultsBase)->where('faults.created_at', '<', Carbon::now()->subHours(72))->count(),
         ];
 
-        return view('faults.index',compact('faults','customer','city','accountManager','location','link','pop','suspectedRFO','remarksByFault','openStatuses','ageStats','faultAges','faultAgeStart','faultAgeEnd'))
+        return view('faults.index',compact('faults','customer','city','accountManager','location','link','pop','suspectedRFO','remarksByFault','openStatuses','ageStats','faultAges','faultAgeStart','faultAgeEnd','regions','regionFilter','statusFilter','ageFilter','perPage'))
         ->with('i');
 
     }
@@ -305,6 +320,7 @@ class FaultController extends Controller
         $q = trim((string) $request->query('q', ''));
         $statusFilter = $request->query('status', 'all');
         $ageFilter = $request->query('age', 'all');
+        $regionFilter = trim((string) $request->query('region', 'all'));
 
         $faultsQuery = DB::table('faults')
                 ->leftjoin('customers','faults.customer_id','=','customers.id')
@@ -385,6 +401,10 @@ class FaultController extends Controller
             $faultsQuery->where('faults.created_at', '<', \Carbon\Carbon::now()->subHours(72));
         }
 
+        if ($regionFilter !== '' && $regionFilter !== 'all') {
+            $faultsQuery->where('cities.region', '=', $regionFilter);
+        }
+
         return $faultsQuery;
     }
 
@@ -460,6 +480,7 @@ class FaultController extends Controller
                 'search' => trim((string) $request->query('q', '')),
                 'status' => $request->query('status', 'all'),
                 'age' => $request->query('age', 'all'),
+                'region' => trim((string) $request->query('region', 'all')),
             ],
         ])->setPaper('a4', 'landscape');
 
