@@ -108,32 +108,27 @@
                 <h6 class="mb-0 text-secondary"><i class="fas fa-clock me-2 text-primary"></i>Login History</h6>
               </div>
               <div class="card-body pt-0">
-                @if(isset($loginAudits) && $loginAudits->count())
-                  <div class="table-responsive">
-                    <table class="table table-sm mb-0">
-                      <thead>
-                        <tr>
-                          <th style="width: 180px;">When</th>
-                          <th>Details</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        @foreach($loginAudits->take(10) as $audit)
-                          <tr>
-                            <td class="text-nowrap">
-                              {{ \Illuminate\Support\Carbon::parse($audit->created_at)->format('d M Y, H:i') }}
-                            </td>
-                            <td>
-                              <div class="text-muted small">{{ $audit->notes }}</div>
-                            </td>
-                          </tr>
-                        @endforeach
-                      </tbody>
-                    </table>
-                  </div>
-                @else
-                  <div class="text-muted">No login activity recorded yet.</div>
-                @endif
+                <div class="table-responsive">
+                  <table class="table table-sm mb-0">
+                    <thead>
+                      <tr>
+                        <th style="width: 180px;">When</th>
+                        <th>Details</th>
+                      </tr>
+                    </thead>
+                    <tbody id="loginHistoryBody-{{ $user->id }}" data-user-id="{{ $user->id }}"></tbody>
+                  </table>
+                </div>
+                <div class="d-flex justify-content-end mt-2">
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary btn-sm login-history-load-more"
+                    data-user-id="{{ $user->id }}"
+                    data-initial-url="{{ route('users.login-history', $user->id) }}"
+                  >
+                    <i class="fas fa-plus me-1"></i> Load more
+                  </button>
+                </div>
               </div>
             </div>
           </div>
