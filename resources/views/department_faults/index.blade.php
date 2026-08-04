@@ -113,6 +113,18 @@ Department Faults
                         </select>
                     </div>
                 </div>
+                <div class="faults-toolbar-field">
+                    @php $regionFilter = request('region', 'all'); @endphp
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="fas fa-map-marked-alt"></i></span>
+                        <select name="region" id="deptFaultsRegionFilter" class="form-select form-select-sm" aria-label="Region filter">
+                            <option value="all" {{ $regionFilter === 'all' ? 'selected' : '' }}>All Regions</option>
+                            @foreach(($regions ?? collect()) as $r)
+                                <option value="{{ $r }}" {{ $regionFilter === (string) $r ? 'selected' : '' }}>{{ $r }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
                 <div class="faults-toolbar-field faults-toolbar-search">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text"><i class="fas fa-search"></i></span>
@@ -241,6 +253,9 @@ Department Faults
         this.form?.submit();
       });
       document.getElementById('deptFaultsAgeFilter')?.addEventListener('change', function(){
+        this.form?.submit();
+      });
+      document.getElementById('deptFaultsRegionFilter')?.addEventListener('change', function(){
         this.form?.submit();
       });
     </script>
