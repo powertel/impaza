@@ -49,10 +49,16 @@ class SystemUsageReportSetting extends Model
         if ($time === null) {
             $time = (string) env('SYSTEM_USAGE_REPORT_TIME', '07:00');
         }
-        if (!preg_match('/^\d{2}:\d{2}(:\d{2})?$/', (string) $time)) {
-            $time = '07:00';
+        if (preg_match('/^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/', (string) $time, $m)) {
+            $h = (int) $m[1];
+            $i = (int) $m[2];
+            if ($h < 0) { $h = 0; }
+            if ($h > 23) { $h = 23; }
+            if ($i < 0) { $i = 0; }
+            if ($i > 59) { $i = 59; }
+            return sprintf('%02d:%02d', $h, $i);
         }
-        return $time;
+        return '07:00';
     }
 
     protected static function normalizeEnabled($raw): bool

@@ -37,6 +37,7 @@ class Kernel extends ConsoleKernel
                 $schedule->command('system-usage:email')
                     ->days($fallbackDay)
                     ->at($fallbackTime)
+                    ->timezone(config('app.timezone', 'Africa/Harare'))
                     ->before(function () use ($fallbackDay, $fallbackTime) {
                         $dayLabel = SystemUsageReportSetting::dayOptions()[$fallbackDay] ?? 'Monday';
                         Log::info('Scheduler: system-usage:email STARTING (fallback schedule)', [
@@ -63,10 +64,19 @@ class Kernel extends ConsoleKernel
         $sendDay = (int) ($usageReportSettings->send_day ?? 1);
         if ($sendDay < 1) { $sendDay = 1; }
         if ($sendDay > 7) { $sendDay = 7; }
-        $sendTime = (string) ($usageReportSettings->send_time ?: env('SYSTEM_USAGE_REPORT_TIME', '07:00'));
-        if (!preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $sendTime)) {
-            $sendTime = '07:00';
+
+        $rawTime = (string) ($usageReportSettings->send_time ?: env('SYSTEM_USAGE_REPORT_TIME', '07:00'));
+        $sendTime = '07:00';
+        if (preg_match('/^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/', (string) $rawTime, $m)) {
+            $h = (int) $m[1];
+            $i = (int) $m[2];
+            if ($h < 0) { $h = 0; }
+            if ($h > 23) { $h = 23; }
+            if ($i < 0) { $i = 0; }
+            if ($i > 59) { $i = 59; }
+            $sendTime = sprintf('%02d:%02d', $h, $i);
         }
+
         $isEnabled = (bool) ($usageReportSettings->enabled ?? true);
         $dayLabel = SystemUsageReportSetting::dayOptions()[$sendDay] ?? 'Monday';
 
@@ -74,11 +84,13 @@ class Kernel extends ConsoleKernel
             $schedule->command('system-usage:email')
                 ->days($sendDay)
                 ->at($sendTime)
+                ->timezone(config('app.timezone', 'Africa/Harare'))
                 ->before(function () use ($sendDay, $dayLabel, $sendTime) {
                     Log::info('Scheduler: system-usage:email STARTING', [
                         'day_value' => $sendDay,
                         'day_label' => $dayLabel,
                         'time' => $sendTime,
+                        'app_timezone' => config('app.timezone'),
                     ]);
                 })
                 ->onSuccess(function () {
