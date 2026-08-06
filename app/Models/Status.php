@@ -15,20 +15,20 @@ class Status extends Model
     ];
     const STATUS_COLOR = [
         // Pending / triage
-        'Waiting for Assessment' => '#fd0404ff',          // gray-500
-        'Fault has been Assessed' => '#cfcf0dff',         // yellow-400
+        'Waiting for Assessment' => '#DC2626',
+        'Fault has been Assessed' => '#CA8A04',
         // In progress
-        'Fault is under Rectification' => '#d18604ff',    // amber-500
+        'Fault is under Rectification' => '#D97706',
         // Cleared states
-        'Fault has been Rectified' => '#94a3b8', // lime-500
-        'Fault has been cleared by CT' => '#22c55e',    // emerald-500
-        'Fault has been Restored' => '#16a34a',  // emerald-600
+        'Fault has been Rectified' => '#64748B',
+        'Fault has been cleared by CT' => '#16A34A',
+        'Fault has been Restored' => '#15803D',
         // Additional lifecycle
-        'Fault has been Refered' => '#a855f7',          // purple-500 (referral)
-        'Fault has been Parked' => '#94a3b8',           // slate-400 (paused)
-        'Fault has been Revoked' => '#ef4444',          // red-500 (reversed)
-        'Fault  escalated to Chief Technician' => '#548ff3ff',  // red-600 (escalated)
-        'Impacted by POP outage' => '#60a5fa',          // sky-400
+        'Fault has been Refered' => '#9333EA',
+        'Fault has been Parked' => '#64748B',
+        'Fault has been Revoked' => '#DC2626',
+        'Fault  escalated to Chief Technician' => '#2563EB',
+        'Impacted by POP outage' => '#0284C7',
     ];
 
 }
