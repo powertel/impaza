@@ -34,6 +34,7 @@ class SystemUsageReportController extends Controller
             'deliveryCount' => $deliveryCount,
             'successCount' => $successCount,
             'failedCount' => $failedCount,
+            'dayOptions' => \App\Models\SystemUsageReportSetting::dayOptions(),
             'defaultMetrics' => [
                 'Faults Logged',
                 'Remarks Added',
@@ -112,6 +113,7 @@ class SystemUsageReportController extends Controller
 
         $data = $request->validate([
             'enabled' => 'nullable|boolean',
+            'send_day' => 'required|integer|between:1,7',
             'send_time' => 'required|date_format:H:i',
             'recipients' => 'nullable|string',
             'test_recipient' => 'nullable|email',
@@ -120,6 +122,7 @@ class SystemUsageReportController extends Controller
         $settings = $reportService->currentSettings();
         $settings->fill([
             'enabled' => (bool) ($data['enabled'] ?? false),
+            'send_day' => (int) $data['send_day'],
             'send_time' => $data['send_time'],
             'recipients' => trim((string) ($data['recipients'] ?? '')),
             'test_recipient' => $data['test_recipient'] ?? null,

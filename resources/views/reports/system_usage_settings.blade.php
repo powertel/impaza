@@ -445,6 +445,10 @@ System Usage Report Settings
           <p class="mb-3 usage-panel-note">Manage the weekly report schedule, recipients, delivery monitoring, and test sends from one polished control centre.</p>
           <div class="d-flex flex-wrap gap-2">
             <span class="usage-pill">
+              <i class="fas fa-calendar-day"></i>
+              Weekly Day: {{ $settings->send_day_label ?? 'Monday' }}
+            </span>
+            <span class="usage-pill">
               <i class="fas fa-clock"></i>
               Weekly Time: {{ \Carbon\Carbon::parse($settings->send_time ?? '07:00')->format('h:i A') }}
             </span>
@@ -587,7 +591,17 @@ System Usage Report Settings
           <form action="{{ route('system-usage-settings.update') }}" method="POST">
             @csrf
             <div class="row g-4">
-              <div class="col-md-6">
+              <div class="col-md-3">
+                <label class="form-label">Scheduled Day</label>
+                <select name="send_day" class="form-select" required>
+                  @foreach($dayOptions as $value => $label)
+                    <option value="{{ $value }}" {{ (string) old('send_day', (int) ($settings->send_day ?? 1)) === (string) $value ? 'selected' : '' }}>
+                      {{ $label }}
+                    </option>
+                  @endforeach
+                </select>
+              </div>
+              <div class="col-md-3">
                 <label class="form-label">Scheduled Send Time</label>
                 <input
                   type="time"
@@ -596,13 +610,14 @@ System Usage Report Settings
                   value="{{ old('send_time', \Carbon\Carbon::parse($settings->send_time ?? '07:00')->format('H:i')) }}"
                   required
                 >
-                <small class="text-muted d-block mt-2">Runs weekly every Monday using the saved time.</small>
               </div>
               <div class="col-md-6">
                 <div class="usage-switch-wrap d-flex align-items-center justify-content-between">
                   <div>
                     <div class="fw-semibold text-dark">Background Delivery</div>
-                    <small class="text-muted">Enable or pause the scheduled weekly report.</small>
+                    <small class="text-muted">
+                      Runs weekly on <strong>{{ $settings->send_day_label ?? 'Monday' }}</strong> at the saved time.
+                    </small>
                   </div>
                   <div class="form-check form-switch m-0">
                     <input
@@ -674,7 +689,7 @@ System Usage Report Settings
                 <input type="date" name="end_date" class="form-control" value="{{ old('end_date') }}">
               </div>
               <div class="col-12">
-                <small class="text-muted">Leave the dates empty to send the previous full Monday to Sunday week.</small>
+                <small class="text-muted">Leave the dates empty to send the previous full 7-day week (Monday to Sunday).</small>
               </div>
               <div class="col-12 d-flex justify-content-end gap-2">
                 <button
@@ -781,7 +796,7 @@ System Usage Report Settings
         <div class="usage-stat-card mb-4">
           <div class="usage-stat-label">Background Behaviour</div>
           <div class="usage-stat-sub">
-            The scheduler runs every Monday using the saved time. Recipients saved here are used by the background command. If no database record exists yet, the system falls back to `.env` values.
+            The scheduler runs weekly on <strong>{{ $settings->send_day_label ?? 'Monday' }}</strong> at the saved time ({{ \Carbon\Carbon::parse($settings->send_time ?? '07:00')->format('h:i A') }}). Recipients saved here are used by the background command. If no database record exists yet, the system falls back to `.env` values (including <code>SYSTEM_USAGE_REPORT_DAY</code>).
           </div>
         </div>
       </div>
