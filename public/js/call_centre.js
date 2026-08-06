@@ -60,7 +60,7 @@
     beforeDatasetsDraw: function(chart){ var ctx = chart.ctx; ctx.save(); ctx.shadowColor = 'rgba(16,24,40,.18)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 6; },
     afterDatasetsDraw: function(chart, args, opts){
       var ctx = chart.ctx; ctx.restore();
-      if (!opts || opts.labels === false) return;
+      if (!opts || !opts.labels) return;
       ctx.save();
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -114,7 +114,8 @@
         var meta = chart.getDatasetMeta(di);
         meta.data.forEach(function(elm, idx){
           var v = ds.data[idx]; if (v == null) return;
-          var pos = elm.tooltipPosition();
+          var num = Number(v); if (!isFinite(num) || num === 0) return;
+          var pos = elm.tooltipPosition(); if (!pos || isNaN(pos.x) || isNaN(pos.y)) return;
           var text = (opts.percent ? (v + '%') : String(v));
           drawBadge(pos.x, pos.y, text, !!opts.percent);
         });
