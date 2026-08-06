@@ -70,6 +70,14 @@
                             </select>
                         </div>
                         <div class="cc-field">
+                            <label class="form-label"><i class="fas fa-bolt me-1"></i>Impact</label>
+                            <select name="impact" class="form-select form-select-sm">
+                                <option value="all" <?php echo e(($selectedImpact ?? 'all') === 'all' ? 'selected' : ''); ?>>All Faults</option>
+                                <option value="direct" <?php echo e(($selectedImpact ?? 'all') === 'direct' ? 'selected' : ''); ?>>Direct Faults</option>
+                                <option value="pop" <?php echo e(($selectedImpact ?? 'all') === 'pop' ? 'selected' : ''); ?>>POP Impacted Faults</option>
+                            </select>
+                        </div>
+                        <div class="cc-field">
                             <label class="form-label"><i class="far fa-play-circle me-1"></i>Start Date</label>
                             <input type="date" name="start_date" class="form-control form-control-sm" value="<?php echo e($startDate ?? request('start_date')); ?>">
                         </div>
