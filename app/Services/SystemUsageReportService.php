@@ -124,12 +124,27 @@ class SystemUsageReportService
             'period_end' => $end,
         ]);
 
+        $pdfFilename = sprintf(
+            'system_usage_report_%s_to_%s.pdf',
+            $start->format('Ymd'),
+            $end->format('Ymd')
+        );
+
+        $pdfData = $this->generatePdf($report);
+
         try {
             foreach ($allRecipients as $recipient) {
-                Mail::send('emails.system_usage_report', [
-                    'report' => $report,
-                ], function ($message) use ($recipient, $subject) {
+                Mail::send('emails.system_usage_report_notification', [
+                    'subject' => $subject,
+                    'period_label' => $report['period']['label'],
+                    'period_start' => $start->format('d M Y'),
+                    'period_end' => $end->format('d M Y'),
+                    'pdf_filename' => $pdfFilename,
+                ], function ($message) use ($recipient, $subject, $pdfData, $pdfFilename) {
                     $message->to($recipient)->subject($subject);
+                    $message->attachData($pdfData, $pdfFilename, [
+                        'mime' => 'application/pdf',
+                    ]);
                 });
             }
         } catch (\Throwable $exception) {
@@ -144,7 +159,22 @@ class SystemUsageReportService
             'subject' => $subject,
             'primary_recipient' => $primaryRecipient,
             'recipients' => $allRecipients,
+            'pdf_filename' => $pdfFilename,
         ];
+    }
+
+    protected function generatePdf(array $report): string
+    {
+        if (!class_exists('Barryvdh\\DomPDF\\Facade\\Pdf')) {
+            throw new \RuntimeException('PDF generation requires barryvdh/laravel-dompdf. Please install the dependency.');
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('emails.system_usage_report', [
+            'report' => $report,
+            'isPdf' => true,
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->output();
     }
 
     protected function startDeliveryLog(array $attributes): ?SystemUsageReportDelivery
