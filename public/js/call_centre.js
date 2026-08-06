@@ -60,37 +60,62 @@
     beforeDatasetsDraw: function(chart){ var ctx = chart.ctx; ctx.save(); ctx.shadowColor = 'rgba(16,24,40,.18)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 6; },
     afterDatasetsDraw: function(chart, args, opts){
       var ctx = chart.ctx; ctx.restore();
-      if (!opts || opts.labels === false) return;
+      if (!opts || !opts.labels) return;
       ctx.save();
-      ctx.fillStyle = (opts.labelColor || '#111827');
-      ctx.font = (opts.font || '11px Inter, system-ui, sans-serif');
       ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      var isDark = (function(){ try { var bg = getComputedStyle(document.documentElement).getPropertyValue('--data-theme'); return (bg && bg.indexOf('dark') >= 0) || document.documentElement.classList.contains('dark') || document.body.classList.contains('dark-mode'); } catch(_){ return false; } })();
       function drawBadge(x,y,text,percent){
         var ca = chart.chartArea;
-        var padX = 8, r = 10, h = 22;
+        var padX = 10, r = 11, h = 26;
+        var fontSize = 13;
+        ctx.font = '700 ' + fontSize + 'px Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
         var w = ctx.measureText(text).width + padX*2;
-        var top = Math.max(ca.top + 10, y - h - 6);
+        if (w < h + 4) w = h + 4;
+        var top = Math.max(ca.top + 8, y - h - 8);
         var bottom = top + h;
+        var left = x - w/2;
+        var right = x + w/2;
+        ctx.save();
+        ctx.shadowColor = 'rgba(15,23,42,0.18)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 3;
+        ctx.shadowOffsetX = 0;
+        var bgFill = percent ? (isDark ? 'rgba(16,185,129,0.18)' : 'rgba(16,185,129,0.12)') : (isDark ? 'rgba(99,102,241,0.18)' : 'rgba(99,102,241,0.12)');
+        var strokeColor = percent ? (isDark ? '#34d399' : '#059669') : (isDark ? '#a5b4fc' : '#4f46e5');
+        var fillColor = isDark ? '#f8fafc' : '#0f172a';
         ctx.beginPath();
-        ctx.moveTo(x - w/2 + r, top);
-        ctx.lineTo(x + w/2 - r, top);
-        ctx.arc(x + w/2 - r, top + r, r, -Math.PI/2, 0);
-        ctx.lineTo(x + w/2, bottom - r);
-        ctx.arc(x + w/2 - r, bottom - r, r, 0, Math.PI/2);
-        ctx.lineTo(x - w/2 + r, bottom);
-        ctx.arc(x - w/2 + r, bottom - r, r, Math.PI/2, Math.PI);
-        ctx.lineTo(x - w/2, top + r);
-        ctx.arc(x - w/2 + r, top + r, r, Math.PI, 3*Math.PI/2);
-        ctx.fillStyle = percent ? 'rgba(16,185,129,0.14)' : 'rgba(79,70,229,0.14)';
+        ctx.moveTo(left + r, top);
+        ctx.lineTo(right - r, top);
+        ctx.arc(right - r, top + r, r, -Math.PI/2, 0);
+        ctx.lineTo(right, bottom - r);
+        ctx.arc(right - r, bottom - r, r, 0, Math.PI/2);
+        ctx.lineTo(left + r, bottom);
+        ctx.arc(left + r, bottom - r, r, Math.PI/2, Math.PI);
+        ctx.lineTo(left, top + r);
+        ctx.arc(left + r, top + r, r, Math.PI, 3*Math.PI/2);
+        ctx.closePath();
+        ctx.fillStyle = isDark ? '#0b1220' : '#ffffff';
         ctx.fill();
-        ctx.fillStyle = '#111827';
-        ctx.fillText(text, x, top + h/2);
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.fillStyle = bgFill;
+        ctx.fill();
+        ctx.lineWidth = 1.25;
+        ctx.strokeStyle = strokeColor;
+        ctx.stroke();
+        ctx.fillStyle = fillColor;
+        ctx.fillText(text, x, top + h/2 + 0.5);
+        ctx.restore();
       }
       chart.data.datasets.forEach(function(ds, di){
         var meta = chart.getDatasetMeta(di);
         meta.data.forEach(function(elm, idx){
           var v = ds.data[idx]; if (v == null) return;
-          var pos = elm.tooltipPosition();
+          var num = Number(v); if (!isFinite(num) || num === 0) return;
+          var pos = elm.tooltipPosition(); if (!pos || isNaN(pos.x) || isNaN(pos.y)) return;
           var text = (opts.percent ? (v + '%') : String(v));
           drawBadge(pos.x, pos.y, text, !!opts.percent);
         });
@@ -223,7 +248,8 @@
         maintainAspectRatio: false,
         plugins: {
           legend: { display: true, position: 'top', labels: { usePointStyle: true, boxWidth: 10 } },
-          tooltip: { backgroundColor: 'rgba(31,41,55,0.95)', titleColor: '#fff', bodyColor: '#fff', cornerRadius: 10 }
+          tooltip: { backgroundColor: 'rgba(31,41,55,0.95)', titleColor: '#fff', bodyColor: '#fff', cornerRadius: 10 },
+          modernStyle: { labels: true }
         },
         scales: {
           x: { stacked: true, grid: { display: false }, ticks: { color: ticksColor } },
@@ -274,7 +300,7 @@
     return {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(31,41,55,0.95)', titleColor: '#fff', bodyColor: '#fff', cornerRadius: 10 } },
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(31,41,55,0.95)', titleColor: '#fff', bodyColor: '#fff', cornerRadius: 10 }, modernStyle: { labels: true } },
       scales: { x: { grid: { color: gridColor }, ticks: { color: ticksColor } }, y: { beginAtZero: true, grid: { color: gridColor, drawBorder: false }, ticks: { color: ticksColor, callback: function(v){ return formatNumber(v); } } } },
       elements: { point: { radius: 5, borderWidth: 2, borderColor: '#fff' } },
       interaction: { mode: 'index', intersect: false }
