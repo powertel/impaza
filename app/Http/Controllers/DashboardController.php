@@ -22,6 +22,11 @@ class DashboardController extends Controller
     {
         $period = $request->string('period')->toString() ?: 'this_month';
 
+        $impact = strtolower(trim((string) $request->input('impact', 'all')));
+        if (!in_array($impact, ['all', 'direct', 'pop'], true)) {
+            $impact = 'all';
+        }
+
         $availableYears = DB::table('faults')
             ->selectRaw('YEAR(created_at) as y')
             ->distinct()
@@ -167,6 +172,8 @@ class DashboardController extends Controller
                     $q->where('region', $selectedRegion);
                 });
             }
+            if ($impact === 'direct') $faultsThisMonthQuery->whereNull('root_fault_id');
+            elseif ($impact === 'pop') $faultsThisMonthQuery->whereNotNull('root_fault_id');
             $faultsThisMonth = $faultsThisMonthQuery->count();
 
             $faultsLastMonthQuery = Fault::query()->whereMonth('created_at', $prevMonthNum);
@@ -175,6 +182,8 @@ class DashboardController extends Controller
                     $q->where('region', $selectedRegion);
                 });
             }
+            if ($impact === 'direct') $faultsLastMonthQuery->whereNull('root_fault_id');
+            elseif ($impact === 'pop') $faultsLastMonthQuery->whereNotNull('root_fault_id');
             $faultsLastMonth = $faultsLastMonthQuery->count();
         } elseif (!$allTime) {
             $faultsThisMonthQuery = Fault::whereBetween('created_at', [$currentStart, $currentEnd]);
@@ -183,6 +192,8 @@ class DashboardController extends Controller
                     $q->where('region', $selectedRegion);
                 });
             }
+            if ($impact === 'direct') $faultsThisMonthQuery->whereNull('root_fault_id');
+            elseif ($impact === 'pop') $faultsThisMonthQuery->whereNotNull('root_fault_id');
             $faultsThisMonth = $faultsThisMonthQuery->count();
 
             $faultsLastMonthQuery = Fault::whereBetween('created_at', [$prevStart, $prevEnd]);
@@ -191,6 +202,8 @@ class DashboardController extends Controller
                     $q->where('region', $selectedRegion);
                 });
             }
+            if ($impact === 'direct') $faultsLastMonthQuery->whereNull('root_fault_id');
+            elseif ($impact === 'pop') $faultsLastMonthQuery->whereNotNull('root_fault_id');
             $faultsLastMonth = $faultsLastMonthQuery->count();
         } else {
             $faultsThisMonthQuery = Fault::query();
@@ -199,6 +212,8 @@ class DashboardController extends Controller
                     $q->where('region', $selectedRegion);
                 });
             }
+            if ($impact === 'direct') $faultsThisMonthQuery->whereNull('root_fault_id');
+            elseif ($impact === 'pop') $faultsThisMonthQuery->whereNotNull('root_fault_id');
             $faultsThisMonth = $faultsThisMonthQuery->count();
 
             $faultsLastMonthQuery = Fault::whereBetween('created_at', [$lastMonthStart, $lastMonthEnd]);
@@ -207,6 +222,8 @@ class DashboardController extends Controller
                     $q->where('region', $selectedRegion);
                 });
             }
+            if ($impact === 'direct') $faultsLastMonthQuery->whereNull('root_fault_id');
+            elseif ($impact === 'pop') $faultsLastMonthQuery->whereNotNull('root_fault_id');
             $faultsLastMonth = $faultsLastMonthQuery->count();
         }
 
@@ -234,6 +251,8 @@ class DashboardController extends Controller
                     $q->where('region', $selectedRegion);
                 });
             }
+            if ($impact === 'direct') $mttrThisMonthQuery->whereNull('root_fault_id');
+            elseif ($impact === 'pop') $mttrThisMonthQuery->whereNotNull('root_fault_id');
             $mttrThisMonth = $mttrThisMonthQuery
                 ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as val')
                 ->value('val') ?? 0;
@@ -245,6 +264,8 @@ class DashboardController extends Controller
                     $q->where('region', $selectedRegion);
                 });
             }
+            if ($impact === 'direct') $mttrLastMonthQuery->whereNull('root_fault_id');
+            elseif ($impact === 'pop') $mttrLastMonthQuery->whereNotNull('root_fault_id');
             $mttrLastMonth = $mttrLastMonthQuery
                 ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as val')
                 ->value('val') ?? 0;
@@ -256,6 +277,8 @@ class DashboardController extends Controller
                     $q->where('region', $selectedRegion);
                 });
             }
+            if ($impact === 'direct') $mttrThisMonthQuery->whereNull('root_fault_id');
+            elseif ($impact === 'pop') $mttrThisMonthQuery->whereNotNull('root_fault_id');
             $mttrThisMonth = $mttrThisMonthQuery
                 ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as val')
                 ->value('val') ?? 0;
@@ -267,6 +290,8 @@ class DashboardController extends Controller
                     $q->where('region', $selectedRegion);
                 });
             }
+            if ($impact === 'direct') $mttrLastMonthQuery->whereNull('root_fault_id');
+            elseif ($impact === 'pop') $mttrLastMonthQuery->whereNotNull('root_fault_id');
             $mttrLastMonth = $mttrLastMonthQuery
                 ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as val')
                 ->value('val') ?? 0;
@@ -277,6 +302,8 @@ class DashboardController extends Controller
                     $q->where('region', $selectedRegion);
                 });
             }
+            if ($impact === 'direct') $mttrThisMonthQuery->whereNull('root_fault_id');
+            elseif ($impact === 'pop') $mttrThisMonthQuery->whereNotNull('root_fault_id');
             $mttrThisMonth = $mttrThisMonthQuery
                 ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as val')
                 ->value('val') ?? 0;
@@ -288,6 +315,8 @@ class DashboardController extends Controller
                     $q->where('region', $selectedRegion);
                 });
             }
+            if ($impact === 'direct') $mttrLastMonthQuery->whereNull('root_fault_id');
+            elseif ($impact === 'pop') $mttrLastMonthQuery->whereNotNull('root_fault_id');
             $mttrLastMonth = $mttrLastMonthQuery
                 ->selectRaw('AVG(TIMESTAMPDIFF(SECOND, created_at, updated_at)) as val')
                 ->value('val') ?? 0;
@@ -306,6 +335,8 @@ class DashboardController extends Controller
                 $q->where('region', $selectedRegion);
             });
         }
+        if ($impact === 'direct') $slaQuery->whereNull('root_fault_id');
+        elseif ($impact === 'pop') $slaQuery->whereNotNull('root_fault_id');
         $slaCount = $slaQuery->count();
         $slaMetCount = (clone $slaQuery)->whereRaw('TIMESTAMPDIFF(SECOND, created_at, updated_at) <= ?', [$slaThreshold])->count();
         $slaCompliance = $slaCount > 0 ? round(($slaMetCount / $slaCount) * 100, 1) : 0;
@@ -326,6 +357,8 @@ class DashboardController extends Controller
                     $q->where('region', $selectedRegion);
                 });
             }
+            if ($impact === 'direct') $monthlyQuery->whereNull('root_fault_id');
+            elseif ($impact === 'pop') $monthlyQuery->whereNotNull('root_fault_id');
             $count = $monthlyQuery->count();
             $monthlyLabels[] = $label;
             $monthlyCounts[] = $count;
@@ -346,6 +379,8 @@ class DashboardController extends Controller
                 $q->where('region', $selectedRegion);
             });
         }
+        if ($impact === 'direct') $statusBreakdownQuery->whereNull('root_fault_id');
+        elseif ($impact === 'pop') $statusBreakdownQuery->whereNotNull('root_fault_id');
         $statusBreakdown = $statusBreakdownQuery->groupBy('status_id')->get();
         $statusLabels = [];
         $statusValues = [];
@@ -376,9 +411,19 @@ class DashboardController extends Controller
             });
         }
 
-        $faultCategoryTotal = (clone $faultCategoryBase)->count();
-        $popImpactedCount = (clone $faultCategoryBase)->whereNotNull('root_fault_id')->count();
-        $directFaultCount = max(0, $faultCategoryTotal - $popImpactedCount);
+        if ($impact === 'direct') {
+            $faultCategoryTotal = (clone $faultCategoryBase)->whereNull('root_fault_id')->count();
+            $directFaultCount = $faultCategoryTotal;
+            $popImpactedCount = 0;
+        } elseif ($impact === 'pop') {
+            $faultCategoryTotal = (clone $faultCategoryBase)->whereNotNull('root_fault_id')->count();
+            $popImpactedCount = $faultCategoryTotal;
+            $directFaultCount = 0;
+        } else {
+            $faultCategoryTotal = (clone $faultCategoryBase)->count();
+            $popImpactedCount = (clone $faultCategoryBase)->whereNotNull('root_fault_id')->count();
+            $directFaultCount = max(0, $faultCategoryTotal - $popImpactedCount);
+        }
         $faultCategoryLabels = ['Direct Faults', 'POP Impacted Faults'];
         $faultCategoryValues = [$directFaultCount, $popImpactedCount];
 
@@ -399,10 +444,20 @@ class DashboardController extends Controller
                 });
             }
 
-            $monthPop = (clone $monthBase)->whereNotNull('root_fault_id')->count();
-            $monthTotal = (clone $monthBase)->count();
-            $faultCategoryMonthlyPop[] = (int) $monthPop;
-            $faultCategoryMonthlyDirect[] = (int) max(0, $monthTotal - $monthPop);
+            if ($impact === 'direct') {
+                $monthTotal = (clone $monthBase)->whereNull('root_fault_id')->count();
+                $faultCategoryMonthlyPop[] = 0;
+                $faultCategoryMonthlyDirect[] = (int) $monthTotal;
+            } elseif ($impact === 'pop') {
+                $monthTotal = (clone $monthBase)->whereNotNull('root_fault_id')->count();
+                $faultCategoryMonthlyPop[] = (int) $monthTotal;
+                $faultCategoryMonthlyDirect[] = 0;
+            } else {
+                $monthPop = (clone $monthBase)->whereNotNull('root_fault_id')->count();
+                $monthTotal = (clone $monthBase)->count();
+                $faultCategoryMonthlyPop[] = (int) $monthPop;
+                $faultCategoryMonthlyDirect[] = (int) max(0, $monthTotal - $monthPop);
+            }
         }
 
         // RFO distribution (confirmed)
@@ -420,6 +475,8 @@ class DashboardController extends Controller
                 $q->where('region', $selectedRegion);
             });
         }
+        if ($impact === 'direct') $rfoBreakdownQuery->whereNull('root_fault_id');
+        elseif ($impact === 'pop') $rfoBreakdownQuery->whereNotNull('root_fault_id');
         $rfoBreakdown = $rfoBreakdownQuery->groupBy('confirmedRfo_id')->get();
         $rfoLabels = [];
         $rfoValues = [];
@@ -448,6 +505,8 @@ class DashboardController extends Controller
                 $q->where('region', $selectedRegion);
             });
         }
+        if ($impact === 'direct') $suspectedRfoBreakdownQuery->whereNull('root_fault_id');
+        elseif ($impact === 'pop') $suspectedRfoBreakdownQuery->whereNotNull('root_fault_id');
         $suspectedRfoBreakdown = $suspectedRfoBreakdownQuery->groupBy('suspectedRfo_id')->get();
         $suspectedRfoLabels = [];
         $suspectedRfoValues = [];
@@ -475,6 +534,8 @@ class DashboardController extends Controller
                     $q->where('region', $selectedRegion);
                 });
             }
+            if ($impact === 'direct') $rfoMonthlyQuery->whereNull('root_fault_id');
+            elseif ($impact === 'pop') $rfoMonthlyQuery->whereNotNull('root_fault_id');
             $rfoMonthlyCounts[] = $rfoMonthlyQuery->count();
         }
 
@@ -495,8 +556,23 @@ class DashboardController extends Controller
         $linkValues = $linkInventory->pluck('c')->map(fn($x) => (int) $x)->toArray();
 
         // Priority × FaultType heatmap
-        $priorityHeatmapRaw = Fault::select('faultType','priorityLevel', DB::raw('COUNT(*) as c'))
-            ->groupBy('faultType','priorityLevel')->get();
+        $priorityHeatmapRaw = Fault::select('faultType','priorityLevel', DB::raw('COUNT(*) as c'));
+        if ($hasDateRange || $hasQuarter) {
+            $priorityHeatmapRaw->whereBetween('created_at', [$currentStart, $currentEnd]);
+        } elseif ($selectedMonth !== null && $selectedYear === null) {
+            $priorityHeatmapRaw->whereMonth('created_at', $selectedMonth);
+        } elseif ($selectedYear !== null || $selectedMonth !== null) {
+            if ($selectedYear !== null) $priorityHeatmapRaw->whereYear('created_at', $selectedYear);
+            if ($selectedMonth !== null) $priorityHeatmapRaw->whereMonth('created_at', $selectedMonth);
+        }
+        if ($selectedRegion) {
+            $priorityHeatmapRaw->whereHas('city', function ($q) use ($selectedRegion) {
+                $q->where('region', $selectedRegion);
+            });
+        }
+        if ($impact === 'direct') $priorityHeatmapRaw->whereNull('root_fault_id');
+        elseif ($impact === 'pop') $priorityHeatmapRaw->whereNotNull('root_fault_id');
+        $priorityHeatmapRaw = $priorityHeatmapRaw->groupBy('faultType','priorityLevel')->get();
         $faultTypeLabels = $priorityHeatmapRaw->pluck('faultType')->unique()->values()->all();
         $priorityLabelsHeat = $priorityHeatmapRaw->pluck('priorityLevel')->unique()->values()->all();
         $priorityMatrix = [];
@@ -524,6 +600,8 @@ class DashboardController extends Controller
                 $q->where('region', $selectedRegion);
             });
         }
+        if ($impact === 'direct') $customerImpactCountQuery->whereNull('root_fault_id');
+        elseif ($impact === 'pop') $customerImpactCountQuery->whereNotNull('root_fault_id');
         $customerImpactCountRaw = $customerImpactCountQuery->groupBy('customer_id')->orderByDesc('c')->limit(10)->get();
         $customerImpactCountLabels = [];$customerImpactCountValues = [];
         foreach ($customerImpactCountRaw as $row) {
@@ -548,6 +626,8 @@ class DashboardController extends Controller
                 $q->where('region', $selectedRegion);
             });
         }
+        if ($impact === 'direct') $customerImpactDurationQuery->whereNull('root_fault_id');
+        elseif ($impact === 'pop') $customerImpactDurationQuery->whereNotNull('root_fault_id');
         $customerImpactDurationRaw = $customerImpactDurationQuery->groupBy('customer_id')->orderByDesc('sec')->limit(10)->get();
         $customerImpactDurationLabels = [];$customerImpactDurationValues = [];
         foreach ($customerImpactDurationRaw as $row) {
@@ -571,6 +651,8 @@ class DashboardController extends Controller
                 $q->where('region', $selectedRegion);
             });
         }
+        if ($impact === 'direct') $serviceTypeBreakdownQuery->whereNull('root_fault_id');
+        elseif ($impact === 'pop') $serviceTypeBreakdownQuery->whereNotNull('root_fault_id');
         $serviceTypeBreakdown = $serviceTypeBreakdownQuery->groupBy('serviceType')->orderByDesc('c')->get();
         $serviceTypeLabels = $serviceTypeBreakdown->pluck('serviceType')->map(fn($x) => $x ?? 'N/A')->toArray();
         $serviceTypeValues = $serviceTypeBreakdown->pluck('c')->map(fn($x) => (int) $x)->toArray();
@@ -590,7 +672,9 @@ class DashboardController extends Controller
         if ($selectedRegion) {
             $regionFaultsQuery->where('cities.region', $selectedRegion);
         }
-        
+        if ($impact === 'direct') $regionFaultsQuery->whereNull('faults.root_fault_id');
+        elseif ($impact === 'pop') $regionFaultsQuery->whereNotNull('faults.root_fault_id');
+
         $regionFaultsRaw = $regionFaultsQuery->groupBy('cities.region')
             ->orderByDesc('c')
             ->limit(10)
@@ -621,6 +705,8 @@ class DashboardController extends Controller
                 $q->where('region', $selectedRegion);
             });
         }
+        if ($impact === 'direct') $amFaultsQuery->whereNull('root_fault_id');
+        elseif ($impact === 'pop') $amFaultsQuery->whereNotNull('root_fault_id');
         $amFaultsRaw = $amFaultsQuery->groupBy('accountManager_id')->orderByDesc('c')->limit(10)->get();
         $amLabels = [];$amFaultsValues = [];
         foreach ($amFaultsRaw as $row) {
@@ -644,6 +730,8 @@ class DashboardController extends Controller
                 $q->where('region', $selectedRegion);
             });
         }
+        if ($impact === 'direct') $amMttrQuery->whereNull('root_fault_id');
+        elseif ($impact === 'pop') $amMttrQuery->whereNotNull('root_fault_id');
         
         $amMttrRaw = $amMttrQuery->groupBy('accountManager_id')->get();
         $amMttrMap = [];
@@ -656,6 +744,11 @@ class DashboardController extends Controller
         if ($selectedRegion) {
             $mttaBaseQuery->join('cities','faults.city_id','=','cities.id')
                 ->where('cities.region', $selectedRegion);
+        }
+        if ($impact === 'direct') {
+            $mttaBaseQuery->whereNull('faults.root_fault_id');
+        } elseif ($impact === 'pop') {
+            $mttaBaseQuery->whereNotNull('faults.root_fault_id');
         }
 
         if ($selectedMonth !== null && $selectedYear === null && !$hasQuarter && !$hasDateRange) {
@@ -699,6 +792,8 @@ class DashboardController extends Controller
                 $q->where('region', $selectedRegion);
             });
         }
+        if ($impact === 'direct') $sumsQuery->whereNull('root_fault_id');
+        elseif ($impact === 'pop') $sumsQuery->whereNotNull('root_fault_id');
         
         $sums = $sumsQuery->get();
         $slaPriorityTotals = [];$slaPriorityMet = [];
@@ -786,6 +881,8 @@ class DashboardController extends Controller
             $openFaultsByCustomerQuery->join('cities', 'faults.city_id', '=', 'cities.id')
                 ->where('cities.region', $selectedRegion);
         }
+        if ($impact === 'direct') $openFaultsByCustomerQuery->whereNull('faults.root_fault_id');
+        elseif ($impact === 'pop') $openFaultsByCustomerQuery->whereNotNull('faults.root_fault_id');
         $openFaultsByCustomer = $openFaultsByCustomerQuery->groupBy('faults.customer_id')->get()->keyBy('customer_id');
 
         $recentRfoByCustomerQuery = Fault::whereNotNull('confirmedRfo_id')
@@ -800,6 +897,8 @@ class DashboardController extends Controller
                 $q->where('region', $selectedRegion);
             });
         }
+        if ($impact === 'direct') $recentRfoByCustomerQuery->whereNull('root_fault_id');
+        elseif ($impact === 'pop') $recentRfoByCustomerQuery->whereNotNull('root_fault_id');
         $recentRfoByCustomer = $recentRfoByCustomerQuery->groupBy('customer_id')->get()->keyBy('customer_id');
         $portfolioRows = [];
         foreach ($linksByCustomer as $cid => $row) {
@@ -827,6 +926,13 @@ class DashboardController extends Controller
             $custFaultsLastQuery->whereHas('city', function ($q) use ($selectedRegion) {
                 $q->where('region', $selectedRegion);
             });
+        }
+        if ($impact === 'direct') {
+            $custFaultsThisQuery->whereNull('root_fault_id');
+            $custFaultsLastQuery->whereNull('root_fault_id');
+        } elseif ($impact === 'pop') {
+            $custFaultsThisQuery->whereNotNull('root_fault_id');
+            $custFaultsLastQuery->whereNotNull('root_fault_id');
         }
         $custFaultsThis = $custFaultsThisQuery->groupBy('customer_id')->get()->keyBy('customer_id');
         $custFaultsLast = $custFaultsLastQuery->groupBy('customer_id')->get()->keyBy('customer_id');
@@ -866,9 +972,24 @@ class DashboardController extends Controller
         }
 
         // Link health
-        $linkHealthRaw = Fault::whereNotNull('link_id')
-            ->select('link_id', DB::raw('COUNT(*) as c'))
-            ->groupBy('link_id')->orderByDesc('c')->limit(10)->get();
+        $linkHealthQuery = Fault::whereNotNull('link_id')
+            ->select('link_id', DB::raw('COUNT(*) as c'));
+        if ($hasDateRange || $hasQuarter) {
+            $linkHealthQuery->whereBetween('created_at', [$currentStart, $currentEnd]);
+        } elseif ($selectedMonth !== null && $selectedYear === null) {
+            $linkHealthQuery->whereMonth('created_at', $selectedMonth);
+        } elseif ($selectedYear !== null || $selectedMonth !== null) {
+            if ($selectedYear !== null) $linkHealthQuery->whereYear('created_at', $selectedYear);
+            if ($selectedMonth !== null) $linkHealthQuery->whereMonth('created_at', $selectedMonth);
+        }
+        if ($selectedRegion) {
+            $linkHealthQuery->whereHas('city', function ($q) use ($selectedRegion) {
+                $q->where('region', $selectedRegion);
+            });
+        }
+        if ($impact === 'direct') $linkHealthQuery->whereNull('root_fault_id');
+        elseif ($impact === 'pop') $linkHealthQuery->whereNotNull('root_fault_id');
+        $linkHealthRaw = $linkHealthQuery->groupBy('link_id')->orderByDesc('c')->limit(10)->get();
         $linkHealthLabels = $linkHealthRaw->pluck('link_id')->map(fn($id) => 'Link ' . $id)->toArray();
         $linkHealthValues = $linkHealthRaw->pluck('c')->map(fn($x) => (int) $x)->toArray();
 
@@ -919,6 +1040,8 @@ class DashboardController extends Controller
                 $q->where('region', $selectedRegion);
             });
         }
+        if ($impact === 'direct') $recentFaultsQuery->whereNull('faults.root_fault_id');
+        elseif ($impact === 'pop') $recentFaultsQuery->whereNotNull('faults.root_fault_id');
         $recentFaults = $recentFaultsQuery->get();
 
 
@@ -931,6 +1054,7 @@ class DashboardController extends Controller
             'selectedMonth' => $selectedMonth,
             'selectedRegion' => $selectedRegion,
             'selectedQuarter' => $selectedQuarter,
+            'selectedImpact' => $impact,
             'startDate' => $startDateInput,
             'endDate' => $endDateInput,
             'periodStart' => $periodStart,
