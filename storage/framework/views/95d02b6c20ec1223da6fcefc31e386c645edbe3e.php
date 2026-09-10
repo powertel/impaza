@@ -1,10 +1,10 @@
-@extends('layouts.admin')
 
-@section('title')
+
+<?php $__env->startSection('title'); ?>
 My Faults
-@endsection
-@include('partials.css')
-@section('content')
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('partials.css', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+<?php $__env->startSection('content'); ?>
 
 <section class="content workflow-faults-page">
 
@@ -63,75 +63,89 @@ My Faults
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($faults as $fault)
-                    @php
+                    <?php $__currentLoopData = $faults; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $fault): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php
                         $latestRemark = ($remarksByFault[$fault->id] ?? collect())->first();
-                    @endphp
+                    ?>
                     <tr >
-                    <td data-label="No.">{{ ++$i }}</td>
-                        <td data-label="Ref. No.">{{ $fault->fault_ref_number ?? 'N/A' }}</td>
-                        <td data-label="Customer">{{ $fault->customer }}</td>
-                        <td data-label="Link Name">{{ $fault->link }}</td>
-                        <td data-label="Switch">{{ $latestRemark->switch_name ?? 'N/A' }}</td>
-                        <td data-label="Port">{{ $latestRemark->port ?? 'N/A' }}</td>
+                    <td data-label="No."><?php echo e(++$i); ?></td>
+                        <td data-label="Ref. No."><?php echo e($fault->fault_ref_number ?? 'N/A'); ?></td>
+                        <td data-label="Customer"><?php echo e($fault->customer); ?></td>
+                        <td data-label="Link Name"><?php echo e($fault->link); ?></td>
+                        <td data-label="Switch"><?php echo e($latestRemark->switch_name ?? 'N/A'); ?></td>
+                        <td data-label="Port"><?php echo e($latestRemark->port ?? 'N/A'); ?></td>
                         <td class="text-nowrap" data-label="Status">
-                            <x-status-badge :label="$fault->description" :color="\App\Models\Status::STATUS_COLOR[$fault->description] ?? '#64748B'" :soft="true" />
+                            <?php if (isset($component)) { $__componentOriginalc254754b9d5db91d5165876f9d051922ca0066f4 = $component; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.status-badge','data' => ['label' => $fault->description,'color' => \App\Models\Status::STATUS_COLOR[$fault->description] ?? '#64748B','soft' => true]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component->withName('status-badge'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
+<?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['label' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($fault->description),'color' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(\App\Models\Status::STATUS_COLOR[$fault->description] ?? '#64748B'),'soft' => true]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalc254754b9d5db91d5165876f9d051922ca0066f4)): ?>
+<?php $component = $__componentOriginalc254754b9d5db91d5165876f9d051922ca0066f4; ?>
+<?php unset($__componentOriginalc254754b9d5db91d5165876f9d051922ca0066f4); ?>
+<?php endif; ?>
                         </td>
                         <td data-label="Fault Age">
-                            <span class="faults-age-pill age-ticker" data-started-at="{{ $fault->stage_started_at ?? '' }}"></span>
+                            <span class="faults-age-pill age-ticker" data-started-at="<?php echo e($fault->stage_started_at ?? ''); ?>"></span>
                         </td>
                         <td data-label="Action(s)">
                         <div class="faults-actions">
-                        @if ($fault->description==='Fault is under Rectification')
-                            @can('noc-clear-faults-clear')
-                                <button class="btn btn-sm btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#nocClearModal-{{ $fault->id }}">
+                        <?php if($fault->description==='Fault is under Rectification'): ?>
+                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('noc-clear-faults-clear')): ?>
+                                <button class="btn btn-sm btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#nocClearModal-<?php echo e($fault->id); ?>">
                                     <i class="fas fa-save me-1"></i>Clear
                                 </button>
-                                <button class="btn btn-sm btn-outline-success"  data-bs-toggle="modal" data-bs-target="#inProgressModal-{{ $fault->id }}">
+                                <button class="btn btn-sm btn-outline-success"  data-bs-toggle="modal" data-bs-target="#inProgressModal-<?php echo e($fault->id); ?>">
                                     <i class="fas fa-save me-1"></i>In Progress
                                 </button>
-                            @endcan
-                            <!-- @can('chief-tech-clear-faults-clear')
-                                <button class="btn btn-sm btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#chiefTechClearModal-{{ $fault->id }}">
+                            <?php endif; ?>
+                            <!-- <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('chief-tech-clear-faults-clear')): ?>
+                                <button class="btn btn-sm btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#chiefTechClearModal-<?php echo e($fault->id); ?>">
                                     <i class="fas fa-save me-1"></i>Clear
                                 </button>
-                            @endcan -->
+                            <?php endif; ?> -->
 
-                            <!--<a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>-->
+                            <!--<a href="<?php echo e(route('faults.show',$fault->id)); ?>" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>-->
                             
 
-                            @can('rectify-fault')
-                                <button class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#rectifyEditModal-{{ $fault->id }}">
+                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('rectify-fault')): ?>
+                                <button class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#rectifyEditModal-<?php echo e($fault->id); ?>">
                                     <i class="fas fa-save me-1"></i>Rectify
                                 </button>
-                            @endcan  
-                            @can('request-permit')
-                                <button class="btn btn-outline-warning"  data-bs-toggle="modal" data-bs-target="#requestPermitEditModal-{{ $fault->id }}">
+                            <?php endif; ?>  
+                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('request-permit')): ?>
+                                <button class="btn btn-outline-warning"  data-bs-toggle="modal" data-bs-target="#requestPermitEditModal-<?php echo e($fault->id); ?>">
                                     <i class="fas fa-pencil me-1"></i>Request Permit
                                 </button>
-                            @endcan
-                            @can('request-material')
-                                <button class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#requestMaterialCreateModal-{{ $fault->id }}">
+                            <?php endif; ?>
+                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('request-material')): ?>
+                                <button class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#requestMaterialCreateModal-<?php echo e($fault->id); ?>">
                                     <i class="fas fa-pencil me-1"></i>Request Material
                                 </button>
-                            @endcan
-                            <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#escalateModal-{{ $fault->id }}">
+                            <?php endif; ?>
+                            <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#escalateModal-<?php echo e($fault->id); ?>">
                                 <i class="fas fa-level-up-alt me-1"></i>Escalate
                             </button>
                             
-                        @endif
-                            <button class="btn  btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                        <?php endif; ?>
+                            <button class="btn  btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-<?php echo e($fault->id); ?>">
                                 <i class="fas fa-eye me-1"></i>View
                             </button>
                         </div>
                         </td>
                     </tr>
-                    @endforeach
-                    @if ($faults->isEmpty())
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    <?php if($faults->isEmpty()): ?>
                         <tr>
                             <td colspan="9" class="text-center text-muted py-5">No faults assigned</td>
                         </tr>
-                    @endif
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -142,30 +156,30 @@ My Faults
     </div>
 </div>
 
-@foreach ($faults as $fault)
-    @include('my_faults.in_progress_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
-    @include('rectification.noc_clear_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
-    @include('clear_faults.chief_tech_clear_modal', [ 'fault' => $fault ])
-    @include('rectification.edit_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()), 'confirmedRFO' => ($confirmedRFO ?? collect()) ])
-    @include('permits.requested-permits.edit_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
-    @include('stores.create_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()), 'materials' => ($materials ?? collect()), 'pendingRequests' => collect() ])
-    @include('my_faults.escalate_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
-    @include('faults.show', [
+<?php $__currentLoopData = $faults; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $fault): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+    <?php echo $__env->make('my_faults.in_progress_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+    <?php echo $__env->make('rectification.noc_clear_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+    <?php echo $__env->make('clear_faults.chief_tech_clear_modal', [ 'fault' => $fault ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+    <?php echo $__env->make('rectification.edit_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()), 'confirmedRFO' => ($confirmedRFO ?? collect()) ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+    <?php echo $__env->make('permits.requested-permits.edit_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+    <?php echo $__env->make('stores.create_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()), 'materials' => ($materials ?? collect()), 'pendingRequests' => collect() ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+    <?php echo $__env->make('my_faults.escalate_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+    <?php echo $__env->make('faults.show', [
         'fault' => $fault,
         'remarks' => ($remarksByFault[$fault->id] ?? collect()),
         'ageText' => ($faultAges[$fault->id] ?? ''),
         'ageStart' => ($faultAgeStart[$fault->id] ?? null),
         'ageEnd' => ($faultAgeEnd[$fault->id] ?? null),
-    ])
-@endforeach
+    ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
 </section>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('scripts')
-    @include('partials.scripts')
+<?php $__env->startSection('scripts'); ?>
+    <?php echo $__env->make('partials.scripts', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <script>
-      window.currentUserName = @json(optional(auth()->user())->name);
+      window.currentUserName = <?php echo json_encode(optional(auth()->user())->name, 15, 512) ?>;
       document.getElementById('myFaultsSearchTrigger')?.addEventListener('click', function () {
         const input = document.getElementById('myFaultsSearch');
         if (!input) return;
@@ -350,5 +364,7 @@ My Faults
         window.__matReqInitResults = results;
       })();
     </script>
-@endsection
+<?php $__env->stopSection(); ?>
 
+
+<?php echo $__env->make('layouts.admin', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH /var/www/html/resources/views/my_faults/index.blade.php ENDPATH**/ ?>

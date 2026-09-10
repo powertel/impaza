@@ -54,6 +54,21 @@ class Fault extends Model
         return $this->belongsTo(Pop::class);
     }
 
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function link()
+    {
+        return $this->belongsTo(Link::class);
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(Status::class);
+    }
+
     public function remarks()
     {
         return $this->hasMany(Remark::class);
@@ -81,5 +96,15 @@ class Fault extends Model
     public function childFaults()
     {
         return $this->hasMany(self::class, 'root_fault_id');
+    }
+
+    public function materialRequests()
+    {
+        return $this->hasMany(MaterialRequest::class);
+    }
+
+    public function pendingMaterialRequests()
+    {
+        return $this->hasMany(MaterialRequest::class)->pending();
     }
 }

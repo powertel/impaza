@@ -30,6 +30,7 @@ use App\Http\Controllers\ChiefTechEscalationsController;
 use App\Http\Controllers\NocClearFaultsController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\StoreController;
+use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\RFOController;
 use App\Http\Controllers\TechnicianConfigController;
 use App\Http\Controllers\DashboardController;
@@ -103,6 +104,7 @@ Route::group(['middleware' => ['auth']], function() {
     // Admin change password for a specific user
     Route::put('users/{user}/change-password', [UserController::class, 'changePassword'])->name('users.change-password');
     Route::resource('roles', RoleController::class);
+    Route::post('permission-bulk', [PermissionController::class,'storeBulk'])->name('permission.storeBulk');
     Route::resource('permission',PermissionController::class);
     Route::resource('departments', DepartmentController::class);
     Route::resource('sections', SectionController::class);
@@ -157,6 +159,11 @@ Route::group(['middleware' => ['auth']], function() {
     Route::resource('rfos', RFOController::class);
     Route::resource('request-permit', RequestPermitController::class);
     Route::resource('stores', StoreController::class);
+    Route::get('stores-requests', [StoreController::class, 'requests'])->name('stores.requests');
+    Route::get('stores-issue/{id}', [StoreController::class, 'issue'])->name('stores.issue');
+    Route::post('stores-process/{id}', [StoreController::class, 'process'])->name('stores.process');
+    Route::resource('materials', MaterialController::class);
+    Route::get('api/materials/list', [MaterialController::class, 'ajaxList'])->name('materials.ajax');
     Route::put('disconnect/{id}/disconnect', [FinanceController::class,'disconnect'])->name('disconnect');
     Route::put('reconnect/{id}/reconnect', [FinanceController::class,'reconnect'])->name('reconnect');
     Route::put('decommission/{id}/decommission', [FinanceController::class,'decommission'])->name('decommission');

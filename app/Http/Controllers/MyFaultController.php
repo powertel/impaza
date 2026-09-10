@@ -106,6 +106,9 @@ class MyFaultController extends Controller
 
         $confirmedRFO = \App\Models\ReasonsForOutage::all();
         $sections = Section::all();
+        $materials = \App\Models\Material::active()->orderBy('name')->get([
+            'id', 'name', 'sku', 'category', 'unit', 'quantity_on_hand',
+        ]);
 
         $faultAges = [];$faultAgeStart = [];$faultAgeEnd = [];
         $nocClearedId = (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
@@ -129,7 +132,7 @@ class MyFaultController extends Controller
             }
         }
 
-        return view('my_faults.index',compact('faults','remarksByFault','confirmedRFO','sections','faultAges','faultAgeStart','faultAgeEnd'))
+        return view('my_faults.index',compact('faults','remarksByFault','confirmedRFO','sections','faultAges','faultAgeStart','faultAgeEnd','materials'))
         ->with('i');
     }
 
