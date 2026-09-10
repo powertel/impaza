@@ -52,7 +52,7 @@
                     <div class="fault-modal-kv-value">{{ optional(optional($mr->fault)->pop)->pop ?: '—' }}</div>
                   </div>
                 </div>
-                @can('fault-list')
+               <!--  @can('fault-list')
                     @if($mr->fault)
                     <div class="mt-2">
                         <a href="{{ route('faults.show', $mr->fault->id) }}" target="_blank" class="small text-primary">
@@ -60,7 +60,7 @@
                         </a>
                     </div>
                     @endif
-                @endcan
+                @endcan -->
               </div>
             </div>
           </div>

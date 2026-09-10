@@ -66,7 +66,7 @@
                     <div class="fault-modal-kv-value"><?php echo e(optional(optional($mr->fault)->pop)->pop ?: '—'); ?></div>
                   </div>
                 </div>
-                <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('fault-list')): ?>
+               <!--  <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('fault-list')): ?>
                     <?php if($mr->fault): ?>
                     <div class="mt-2">
                         <a href="<?php echo e(route('faults.show', $mr->fault->id)); ?>" target="_blank" class="small text-primary">
@@ -74,7 +74,7 @@
                         </a>
                     </div>
                     <?php endif; ?>
-                <?php endif; ?>
+                <?php endif; ?> -->
               </div>
             </div>
           </div>
