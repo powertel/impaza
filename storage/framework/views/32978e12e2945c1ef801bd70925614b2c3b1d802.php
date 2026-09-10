@@ -151,8 +151,8 @@ Stores — Material Requests
                             </button>
                             <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('stores-process')): ?>
                                 <?php if($mr->isPending() || $mr->status===\App\Models\MaterialRequest::STATUS_PROCESSING): ?>
-                                    <a href="<?php echo e(route('stores.issue', $mr->id)); ?>" class="btn btn-sm btn-primary rounded-pill ms-1" title="Issue / Process">
-                                        <i class="fas fa-check-double me-1"></i>Process
+                                    <a href="<?php echo e(route('stores.issue', $mr->id)); ?>" class="btn btn-sm btn-outline-primary rounded-pill ms-1" title="Issue items for this request (Stores / Technician acknowledgement)" style="min-width:7.5rem;">
+                                        <i class="fas fa-boxes-packing me-1"></i>Process
                                     </a>
                                 <?php endif; ?>
                             <?php endif; ?>
