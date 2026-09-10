@@ -23,27 +23,59 @@ Stores — Material Requests
     <div class="faults-toolbar">
         <div class="row g-3 mb-3">
             <div class="col-sm-6 col-md-3">
-                <div class="stat-card h-100" style="--card-accent:#F59E0B;">
-                    <div class="stat-card-label">Pending</div>
-                    <div class="stat-card-value"><?php echo e($stats['pending']); ?></div>
+                <div class="impaza-stat h-100" style="--impaza-stat-accent:#F59E0B;">
+                    <div class="impaza-stat-head">
+                        <div class="impaza-stat-icon"><i class="fas fa-hourglass-half"></i></div>
+                        <div class="impaza-stat-title">Pending</div>
+                    </div>
+                    <div class="impaza-stat-body">
+                        <div class="impaza-stat-metric">
+                            <div class="impaza-stat-value"><?php echo e(number_format($stats['pending'])); ?></div>
+                            <div class="impaza-stat-sub">Awaiting Stores review &amp; processing</div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-sm-6 col-md-3">
-                <div class="stat-card h-100" style="--card-accent:#8B5CF6;">
-                    <div class="stat-card-label">Partial</div>
-                    <div class="stat-card-value"><?php echo e($stats['partial']); ?></div>
+                <div class="impaza-stat h-100" style="--impaza-stat-accent:#8B5CF6;">
+                    <div class="impaza-stat-head">
+                        <div class="impaza-stat-icon"><i class="fas fa-boxes-stacked"></i></div>
+                        <div class="impaza-stat-title">Partial</div>
+                    </div>
+                    <div class="impaza-stat-body">
+                        <div class="impaza-stat-metric">
+                            <div class="impaza-stat-value"><?php echo e(number_format($stats['partial'])); ?></div>
+                            <div class="impaza-stat-sub">Some lines issued; remainder pending stock</div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-sm-6 col-md-3">
-                <div class="stat-card h-100" style="--card-accent:#10B981;">
-                    <div class="stat-card-label">Issued</div>
-                    <div class="stat-card-value"><?php echo e($stats['issued']); ?></div>
+                <div class="impaza-stat h-100" style="--impaza-stat-accent:#10B981;">
+                    <div class="impaza-stat-head">
+                        <div class="impaza-stat-icon"><i class="fas fa-circle-check"></i></div>
+                        <div class="impaza-stat-title">Issued</div>
+                    </div>
+                    <div class="impaza-stat-body">
+                        <div class="impaza-stat-metric">
+                            <div class="impaza-stat-value"><?php echo e(number_format($stats['issued'])); ?></div>
+                            <div class="impaza-stat-sub">All items dispatched from Stores</div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-sm-6 col-md-3">
-                <div class="stat-card h-100" style="--card-accent:#3B82F6;">
-                    <div class="stat-card-label">Total</div>
-                    <div class="stat-card-value"><?php echo e($stats['total']); ?></div>
+                <div class="impaza-stat h-100" style="--impaza-stat-accent:#3B82F6;">
+                    <div class="impaza-stat-head">
+                        <div class="impaza-stat-icon"><i class="fas fa-file-lines"></i></div>
+                        <div class="impaza-stat-title">Total</div>
+                    </div>
+                    <div class="impaza-stat-body">
+                        <div class="impaza-stat-metric">
+                            <div class="impaza-stat-value"><?php echo e(number_format($stats['total'])); ?></div>
+                            <div class="impaza-stat-sub">All material requests (all statuses)</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

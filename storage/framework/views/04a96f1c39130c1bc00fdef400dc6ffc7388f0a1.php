@@ -23,27 +23,59 @@ Materials Inventory
     <div class="faults-toolbar">
         <div class="row g-3 mb-3">
             <div class="col-sm-6 col-md-3">
-                <div class="stat-card h-100" style="--card-accent:#3B82F6;">
-                    <div class="stat-card-label">Total SKUs</div>
-                    <div class="stat-card-value"><?php echo e(number_format($stats['total'])); ?></div>
+                <div class="impaza-stat h-100" style="--impaza-stat-accent:#3B82F6;">
+                    <div class="impaza-stat-head">
+                        <div class="impaza-stat-icon"><i class="fas fa-cubes"></i></div>
+                        <div class="impaza-stat-title">Total SKUs</div>
+                    </div>
+                    <div class="impaza-stat-body">
+                        <div class="impaza-stat-metric">
+                            <div class="impaza-stat-value"><?php echo e(number_format($stats['total'])); ?></div>
+                            <div class="impaza-stat-sub">Unique stock items on inventory register</div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-sm-6 col-md-3">
-                <div class="stat-card h-100" style="--card-accent:#10B981;">
-                    <div class="stat-card-label">Active</div>
-                    <div class="stat-card-value"><?php echo e(number_format($stats['active'])); ?></div>
+                <div class="impaza-stat h-100" style="--impaza-stat-accent:#10B981;">
+                    <div class="impaza-stat-head">
+                        <div class="impaza-stat-icon"><i class="fas fa-circle-check"></i></div>
+                        <div class="impaza-stat-title">Active</div>
+                    </div>
+                    <div class="impaza-stat-body">
+                        <div class="impaza-stat-metric">
+                            <div class="impaza-stat-value"><?php echo e(number_format($stats['active'])); ?></div>
+                            <div class="impaza-stat-sub">Items currently available for requisition</div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-sm-6 col-md-3">
-                <div class="stat-card h-100" style="--card-accent:#F59E0B;">
-                    <div class="stat-card-label">Low Stock</div>
-                    <div class="stat-card-value"><?php echo e(number_format($stats['lowStock'])); ?></div>
+                <div class="impaza-stat h-100" style="--impaza-stat-accent:#F59E0B;">
+                    <div class="impaza-stat-head">
+                        <div class="impaza-stat-icon"><i class="fas fa-triangle-exclamation"></i></div>
+                        <div class="impaza-stat-title">Low Stock</div>
+                    </div>
+                    <div class="impaza-stat-body">
+                        <div class="impaza-stat-metric">
+                            <div class="impaza-stat-value"><?php echo e(number_format($stats['lowStock'])); ?></div>
+                            <div class="impaza-stat-sub">Below reorder threshold — procure soon</div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-sm-6 col-md-3">
-                <div class="stat-card h-100" style="--card-accent:#EF4444;">
-                    <div class="stat-card-label">Out of Stock</div>
-                    <div class="stat-card-value"><?php echo e(number_format($stats['outOfStock'])); ?></div>
+                <div class="impaza-stat h-100" style="--impaza-stat-accent:#EF4444;">
+                    <div class="impaza-stat-head">
+                        <div class="impaza-stat-icon"><i class="fas fa-circle-xmark"></i></div>
+                        <div class="impaza-stat-title">Out of Stock</div>
+                    </div>
+                    <div class="impaza-stat-body">
+                        <div class="impaza-stat-metric">
+                            <div class="impaza-stat-value"><?php echo e(number_format($stats['outOfStock'])); ?></div>
+                            <div class="impaza-stat-sub">Zero on-hand — cannot issue right now</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
