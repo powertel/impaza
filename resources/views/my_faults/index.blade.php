@@ -88,7 +88,8 @@ My Faults
                                 @if ($fault->description==='Fault is under Rectification')
                                 @php
                                     $mrState = $latestMrByFault[(int)$fault->id] ?? null;
-                                    $mrEditable = $mrState && ($mrState->isPending() || $mrState->status === \App\Models\MaterialRequest::STATUS_PARTIAL);
+                                    $mrEditable = $mrState && $mrState->isPending();
+                                    $mrPartial = $mrState && $mrState->status === \App\Models\MaterialRequest::STATUS_PARTIAL;
                                     $mrIssued = $mrState && $mrState->isIssued();
                                 @endphp
                                 <div class="btn-group dropstart">
@@ -136,6 +137,17 @@ My Faults
                                                     <i class="fas fa-box-circle-check fa-fw"></i><span>Materials Requested (Issued)</span>
                                                 </button>
                                             </li>
+                                            @elseif($mrPartial && $mrState)
+                                            <li>
+                                                <button type="button" class="dropdown-item d-flex align-items-center gap-2 text-muted" data-bs-toggle="modal" data-bs-target="#viewMRModal-{{ $mrState->id }}">
+                                                    <i class="fas fa-box-open fa-fw"></i>
+                                                    <span class="d-inline-flex align-items-center gap-1 flex-wrap">
+                                                        View Material Request
+                                                        <span class="badge" style="background:#F5F3FF; color:#6D28D9; border:1px solid #DDD6FE;">Partial</span>
+                                                        <span class="badge bg-light text-dark border ms-1">{{ $mrState->request_number }}</span>
+                                                    </span>
+                                                </button>
+                                            </li>
                                             @elseif($mrEditable && $mrState)
                                             <li>
                                                 <button type="button" class="dropdown-item d-flex align-items-center gap-2" style="color:#4F46E5;" data-bs-toggle="modal" data-bs-target="#requestMaterialCreateModal-{{ $fault->id }}">
@@ -179,14 +191,14 @@ My Faults
 @foreach ($faults as $fault)
     @php
         $fault_mrEdit = null;
-        $fault_mrIssued = null;
+        $fault_mrView = null;
         if (isset($latestMrByFault) && is_array($latestMrByFault)) {
             $l = $latestMrByFault[(int)$fault->id] ?? null;
             if ($l) {
-                if ($l->isPending() || $l->status === \App\Models\MaterialRequest::STATUS_PARTIAL) {
+                if ($l->isPending()) {
                     $fault_mrEdit = $l;
-                } elseif ($l->isIssued()) {
-                    $fault_mrIssued = $l;
+                } elseif ($l->status === \App\Models\MaterialRequest::STATUS_PARTIAL || $l->isIssued()) {
+                    $fault_mrView = $l;
                 }
             }
         }
@@ -202,8 +214,8 @@ My Faults
         'pendingRequests' => collect(),
         'editingMr' => $fault_mrEdit,
     ])
-    @if($fault_mrIssued)
-        @include('stores.show_modal', [ 'mr' => $fault_mrIssued ])
+    @if($fault_mrView)
+        @include('stores.show_modal', [ 'mr' => $fault_mrView ])
     @endif
     @include('my_faults.escalate_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
     @include('faults.show', [

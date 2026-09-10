@@ -202,7 +202,7 @@
         $unitVal = $editItem->unit ?? 'pcs';
         $qtyVal = $editItem->quantity_requested ?? 0;
         $remarkVal = $editItem->remark ?? '';
-        $isCustom = $selectedMatId === null && !empty($customName);
+        $stockMat = null;
         $stockText = '';
         $stockClass = 'ok';
         $stockIcon = 'fa-circle-check';
@@ -221,6 +221,8 @@
                 }
             }
         }
+        $hasValidStockMat = (bool) $stockMat;
+        $isCustom = !$hasValidStockMat && !empty($customName);
         ob_start();
         ?>
         <div class="mr-row mat-row d-flex align-items-end gap-3 flex-nowrap" data-row="<?= $idx ?>">
@@ -251,7 +253,7 @@
                   </div>
                   <div class="col-md-6 col-sm-12">
                     <label class="mr-field-label"><i class="fas fa-cube"></i>Material Name</label>
-                    <input type="text" class="form-control form-control-sm mat-name-input<?= !empty($selectedMatId) ? ' bg-light' : '' ?>" name="items[<?= $idx ?>][material_name]" placeholder="Name (auto-filled, or type custom)" value="<?= e($customName) ?>"<?= !empty($selectedMatId) ? ' readonly' : '' ?> required>
+                    <input type="text" class="form-control form-control-sm mat-name-input<?= $hasValidStockMat ? ' bg-light' : '' ?>" name="items[<?= $idx ?>][material_name]" placeholder="Name (auto-filled, or type custom)" value="<?= e($customName) ?>"<?= $hasValidStockMat ? ' readonly' : '' ?> required>
                   </div>
                 </div>
               </div>

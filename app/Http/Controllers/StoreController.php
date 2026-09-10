@@ -105,9 +105,9 @@ class StoreController extends Controller
                 $replaceId = (int) $request->input('_replace_mr_id');
                 $replaceMr = MaterialRequest::with('items')->findOrFail($replaceId);
                 abort_if(
-                    !$replaceMr->isPending() && $replaceMr->status !== MaterialRequest::STATUS_PARTIAL,
+                    !$replaceMr->isPending(),
                     403,
-                    'Only pending or partial material requests can be updated.'
+                    'Only pending material requests can be updated.'
                 );
                 abort_if(
                     (int)$replaceMr->fault_id !== (int)$fault->id,
