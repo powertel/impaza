@@ -101,6 +101,23 @@ class StoreController extends Controller
         $fault = Fault::findOrFail($validated['fault_id']);
 
         DB::transaction(function () use ($validated, $fault, $request) {
+            if ($request->filled('_replace_mr_id')) {
+                $replaceId = (int) $request->input('_replace_mr_id');
+                $replaceMr = MaterialRequest::with('items')->findOrFail($replaceId);
+                abort_if(
+                    !$replaceMr->isPending() && $replaceMr->status !== MaterialRequest::STATUS_PARTIAL,
+                    403,
+                    'Only pending or partial material requests can be updated.'
+                );
+                abort_if(
+                    (int)$replaceMr->fault_id !== (int)$fault->id,
+                    403,
+                    'Requested replacement does not belong to the current fault.'
+                );
+                $replaceMr->items()->delete();
+                $replaceMr->delete();
+            }
+
             $mr = MaterialRequest::create([
                 'request_number' => MaterialRequest::generateRequestNumber(),
                 'fault_id' => $fault->id,
@@ -127,10 +144,14 @@ class StoreController extends Controller
         $back = url()->previous();
         if (str_contains($back, 'my_faults')) {
             return redirect()->route('my_faults.index')
-                ->with('success', 'Material request submitted successfully. It has been sent to Stores.');
+                ->with('success', $request->filled('_replace_mr_id')
+                    ? 'Material request updated successfully. Your updated request has been re-sent to Stores.'
+                    : 'Material request submitted successfully. It has been sent to Stores.');
         }
         return redirect()->route('faults.show', $fault->id)
-            ->with('success', 'Material request submitted successfully. It has been sent to Stores.');
+            ->with('success', $request->filled('_replace_mr_id')
+                ? 'Material request updated successfully. Your updated request has been re-sent to Stores.'
+                : 'Material request submitted successfully. It has been sent to Stores.');
     }
 
     public function show($id)

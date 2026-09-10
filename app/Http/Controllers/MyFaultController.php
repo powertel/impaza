@@ -113,6 +113,23 @@ class MyFaultController extends Controller
         $faultAges = [];$faultAgeStart = [];$faultAgeEnd = [];
         $nocClearedId = (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
         $faultIdsList = $faults->pluck('id')->all();
+
+        $latestMrByFault = [];
+        if (!empty($faultIdsList)) {
+            $mrs = \App\Models\MaterialRequest::query()
+                ->whereIn('fault_id', $faultIdsList)
+                ->where('status', '!=', \App\Models\MaterialRequest::STATUS_CANCELLED)
+                ->with(['items'])
+                ->orderByDesc('created_at')
+                ->get();
+            $seen = [];
+            foreach ($mrs as $mr) {
+                if (isset($seen[$mr->fault_id])) continue;
+                $seen[$mr->fault_id] = true;
+                $latestMrByFault[(int)$mr->fault_id] = $mr;
+            }
+        }
+
         if (!empty($faultIdsList)) {
             $clearedLogs = DB::table('fault_stage_logs')
                 ->whereIn('fault_id', $faultIdsList)
@@ -132,7 +149,7 @@ class MyFaultController extends Controller
             }
         }
 
-        return view('my_faults.index',compact('faults','remarksByFault','confirmedRFO','sections','faultAges','faultAgeStart','faultAgeEnd','materials'))
+        return view('my_faults.index',compact('faults','remarksByFault','confirmedRFO','sections','faultAges','faultAgeStart','faultAgeEnd','materials','latestMrByFault'))
         ->with('i');
     }
 

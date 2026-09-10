@@ -94,50 +94,84 @@ My Faults
                         <td data-label="Fault Age">
                             <span class="faults-age-pill age-ticker" data-started-at="<?php echo e($fault->stage_started_at ?? ''); ?>"></span>
                         </td>
-                        <td data-label="Action(s)">
-                        <div class="faults-actions">
-                        <?php if($fault->description==='Fault is under Rectification'): ?>
-                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('noc-clear-faults-clear')): ?>
-                                <button class="btn btn-sm btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#nocClearModal-<?php echo e($fault->id); ?>">
-                                    <i class="fas fa-save me-1"></i>Clear
+                        <td data-label="Action(s)" class="text-end">
+                            <div class="d-inline-flex flex-column align-items-end gap-2">
+                                <button class="btn btn-sm btn-outline-success rounded-pill" data-bs-toggle="modal" data-bs-target="#showFaultModal-<?php echo e($fault->id); ?>">
+                                    <i class="fas fa-eye me-1"></i>View
                                 </button>
-                                <button class="btn btn-sm btn-outline-success"  data-bs-toggle="modal" data-bs-target="#inProgressModal-<?php echo e($fault->id); ?>">
-                                    <i class="fas fa-save me-1"></i>In Progress
-                                </button>
-                            <?php endif; ?>
-                            <!-- <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('chief-tech-clear-faults-clear')): ?>
-                                <button class="btn btn-sm btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#chiefTechClearModal-<?php echo e($fault->id); ?>">
-                                    <i class="fas fa-save me-1"></i>Clear
-                                </button>
-                            <?php endif; ?> -->
-
-                            <!--<a href="<?php echo e(route('faults.show',$fault->id)); ?>" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>-->
-                            
-
-                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('rectify-fault')): ?>
-                                <button class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#rectifyEditModal-<?php echo e($fault->id); ?>">
-                                    <i class="fas fa-save me-1"></i>Rectify
-                                </button>
-                            <?php endif; ?>  
-                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('request-permit')): ?>
-                                <button class="btn btn-outline-warning"  data-bs-toggle="modal" data-bs-target="#requestPermitEditModal-<?php echo e($fault->id); ?>">
-                                    <i class="fas fa-pencil me-1"></i>Request Permit
-                                </button>
-                            <?php endif; ?>
-                            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('request-material')): ?>
-                                <button class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#requestMaterialCreateModal-<?php echo e($fault->id); ?>">
-                                    <i class="fas fa-pencil me-1"></i>Request Material
-                                </button>
-                            <?php endif; ?>
-                            <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#escalateModal-<?php echo e($fault->id); ?>">
-                                <i class="fas fa-level-up-alt me-1"></i>Escalate
-                            </button>
-                            
-                        <?php endif; ?>
-                            <button class="btn  btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-<?php echo e($fault->id); ?>">
-                                <i class="fas fa-eye me-1"></i>View
-                            </button>
-                        </div>
+                                <?php if($fault->description==='Fault is under Rectification'): ?>
+                                <?php
+                                    $mrState = $latestMrByFault[(int)$fault->id] ?? null;
+                                    $mrEditable = $mrState && ($mrState->isPending() || $mrState->status === \App\Models\MaterialRequest::STATUS_PARTIAL);
+                                    $mrIssued = $mrState && $mrState->isIssued();
+                                ?>
+                                <div class="btn-group dropstart">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" title="More actions for this fault">
+                                        <i class="fas fa-ellipsis-v me-1"></i>Actions
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow p-2" style="min-width: 16rem;">
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('noc-clear-faults-clear')): ?>
+                                        <li>
+                                            <button type="button" class="dropdown-item d-flex align-items-center gap-2 text-primary" data-bs-toggle="modal" data-bs-target="#nocClearModal-<?php echo e($fault->id); ?>">
+                                                <i class="fas fa-check-circle fa-fw"></i><span>Clear Fault</span>
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="dropdown-item d-flex align-items-center gap-2 text-success" data-bs-toggle="modal" data-bs-target="#inProgressModal-<?php echo e($fault->id); ?>">
+                                                <i class="fas fa-play-circle fa-fw"></i><span>Mark In Progress</span>
+                                            </button>
+                                        </li>
+                                        <?php endif; ?>
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('rectify-fault')): ?>
+                                        <li>
+                                            <button type="button" class="dropdown-item d-flex align-items-center gap-2" style="color:#4F46E5;" data-bs-toggle="modal" data-bs-target="#rectifyEditModal-<?php echo e($fault->id); ?>">
+                                                <i class="fas fa-wrench fa-fw"></i><span>Rectify</span>
+                                            </button>
+                                        </li>
+                                        <?php endif; ?>
+                                        <li>
+                                            <button type="button" class="dropdown-item d-flex align-items-center gap-2 text-danger" data-bs-toggle="modal" data-bs-target="#escalateModal-<?php echo e($fault->id); ?>">
+                                                <i class="fas fa-level-up-alt fa-fw"></i><span>Escalate to Chief Tech</span>
+                                            </button>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('request-permit')): ?>
+                                        <li>
+                                            <button type="button" class="dropdown-item d-flex align-items-center gap-2" style="color:#D97706;" data-bs-toggle="modal" data-bs-target="#requestPermitEditModal-<?php echo e($fault->id); ?>">
+                                                <i class="fas fa-file-signature fa-fw"></i><span>Request Permit</span>
+                                            </button>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <?php endif; ?>
+                                        <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check('request-material')): ?>
+                                            <?php if($mrIssued && $mrState): ?>
+                                            <li>
+                                                <button type="button" class="dropdown-item d-flex align-items-center gap-2 text-muted" data-bs-toggle="modal" data-bs-target="#viewMRModal-<?php echo e($mrState->id); ?>">
+                                                    <i class="fas fa-box-circle-check fa-fw"></i><span>Materials Requested (Issued)</span>
+                                                </button>
+                                            </li>
+                                            <?php elseif($mrEditable && $mrState): ?>
+                                            <li>
+                                                <button type="button" class="dropdown-item d-flex align-items-center gap-2" style="color:#4F46E5;" data-bs-toggle="modal" data-bs-target="#requestMaterialCreateModal-<?php echo e($fault->id); ?>">
+                                                    <i class="fas fa-pen-to-square fa-fw"></i>
+                                                    <span class="d-inline-flex align-items-center gap-1 flex-wrap">
+                                                        Edit Material Request
+                                                        <span class="badge bg-light text-dark border"><?php echo e($mrState->request_number); ?></span>
+                                                    </span>
+                                                </button>
+                                            </li>
+                                            <?php else: ?>
+                                            <li>
+                                                <button type="button" class="dropdown-item d-flex align-items-center gap-2" style="color:#4F46E5;" data-bs-toggle="modal" data-bs-target="#requestMaterialCreateModal-<?php echo e($fault->id); ?>">
+                                                    <i class="fas fa-box-open fa-fw"></i><span>Request Material</span>
+                                                </button>
+                                            </li>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
+                                    </ul>
+                                </div>
+                                <?php endif; ?>
+                            </div>
                         </td>
                     </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -157,12 +191,34 @@ My Faults
 </div>
 
 <?php $__currentLoopData = $faults; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $fault): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+    <?php
+        $fault_mrEdit = null;
+        $fault_mrIssued = null;
+        if (isset($latestMrByFault) && is_array($latestMrByFault)) {
+            $l = $latestMrByFault[(int)$fault->id] ?? null;
+            if ($l) {
+                if ($l->isPending() || $l->status === \App\Models\MaterialRequest::STATUS_PARTIAL) {
+                    $fault_mrEdit = $l;
+                } elseif ($l->isIssued()) {
+                    $fault_mrIssued = $l;
+                }
+            }
+        }
+    ?>
     <?php echo $__env->make('my_faults.in_progress_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <?php echo $__env->make('rectification.noc_clear_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <?php echo $__env->make('clear_faults.chief_tech_clear_modal', [ 'fault' => $fault ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <?php echo $__env->make('rectification.edit_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()), 'confirmedRFO' => ($confirmedRFO ?? collect()) ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <?php echo $__env->make('permits.requested-permits.edit_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
-    <?php echo $__env->make('stores.create_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()), 'materials' => ($materials ?? collect()), 'pendingRequests' => collect() ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+    <?php echo $__env->make('stores.create_modal', [
+        'fault' => $fault,
+        'materials' => ($materials ?? collect()),
+        'pendingRequests' => collect(),
+        'editingMr' => $fault_mrEdit,
+    ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+    <?php if($fault_mrIssued): ?>
+        <?php echo $__env->make('stores.show_modal', [ 'mr' => $fault_mrIssued ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+    <?php endif; ?>
     <?php echo $__env->make('my_faults.escalate_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <?php echo $__env->make('faults.show', [
         'fault' => $fault,
@@ -214,6 +270,35 @@ My Faults
           });
         }
 
+        function applyStockChip(chipEl, stock, unit) {
+          if (!chipEl) return;
+          const iconEl = chipEl.querySelector('i');
+          const textEl = chipEl.querySelector('span') || chipEl;
+          const qty = parseFloat(stock || 0);
+          chipEl.classList.remove('ok', 'low', 'out', 'd-none');
+          let label = '';
+          if (!isFinite(qty) || isNaN(qty) || (unit == null && stock == null)) {
+            chipEl.classList.add('d-none');
+            return;
+          }
+          const pretty = Math.abs(qty - Math.floor(qty)) < 1e-9 ? String(Math.floor(qty)) : String(parseFloat(qty.toFixed(2)));
+          if (qty <= 0) {
+            chipEl.classList.add('out');
+            if (iconEl) { iconEl.className = 'fas fa-circle-xmark'; }
+            label = 'Out: 0 ' + (unit || '');
+          } else if (qty <= 10) {
+            chipEl.classList.add('low');
+            if (iconEl) { iconEl.className = 'fas fa-triangle-exclamation'; }
+            label = 'Low: ' + pretty + ' ' + (unit || '');
+          } else {
+            chipEl.classList.add('ok');
+            if (iconEl) { iconEl.className = 'fas fa-circle-check'; }
+            label = 'Stock: ' + pretty + ' ' + (unit || '');
+          }
+          if (textEl !== chipEl) textEl.textContent = label;
+          else chipEl.textContent = label;
+        }
+
         function bindRow(row, idx) {
           const sel = row.querySelector('.mat-select');
           const nameInput = row.querySelector('.mat-name-input');
@@ -229,7 +314,7 @@ My Faults
                 nameInput.value = opt.dataset.name || '';
                 unitInput.value = opt.dataset.unit || unitInput.value || 'pcs';
                 const stock = parseFloat(opt.dataset.stock || 0);
-                if (stockHint) stockHint.textContent = 'In stock: ' + stock + ' ' + (opt.dataset.unit || '');
+                applyStockChip(stockHint, stock, opt.dataset.unit || unitInput.value || '');
                 nameInput.readOnly = true;
                 nameInput.classList.add('bg-light');
               } else if (opt.value === '__custom__') {
@@ -237,11 +322,11 @@ My Faults
                 nameInput.readOnly = false;
                 nameInput.classList.remove('bg-light');
                 nameInput.focus();
-                if (stockHint) stockHint.textContent = '';
+                if (stockHint) stockHint.classList.add('d-none');
               } else {
                 nameInput.readOnly = false;
                 nameInput.classList.remove('bg-light');
-                if (stockHint) stockHint.textContent = '';
+                if (stockHint) stockHint.classList.add('d-none');
               }
             });
           }
@@ -265,6 +350,8 @@ My Faults
             r.querySelectorAll('[data-row]').forEach(el => {
               el.setAttribute('data-row', i);
             });
+            const idxBadge = r.querySelector('.mr-row-index');
+            if (idxBadge) idxBadge.textContent = String(i + 1);
           });
           rowIndex = rows.length;
         }
@@ -293,7 +380,7 @@ My Faults
               const sel = row.querySelector('.mat-select');
               if (sel) sel.value = '';
               row.querySelectorAll('.mat-name-input, .mat-unit-input, .mat-qty-input, .mat-stock-hint').forEach(el => {
-                if (el.classList && el.classList.contains('mat-stock-hint')) { el.textContent = ''; return; }
+                if (el.classList && el.classList.contains('mat-stock-hint')) { return; }
                 if (el.tagName === 'INPUT' && el.type === 'number') el.value = '';
                 else if (el.classList && el.classList.contains('mat-name-input')) { el.value = ''; el.readOnly = false; el.classList.remove('bg-light'); }
                 else if (el.classList && el.classList.contains('mat-unit-input')) el.value = 'pcs';
@@ -307,6 +394,18 @@ My Faults
             row.querySelectorAll('[data-row]').forEach(el => {
               el.setAttribute('data-row', idx);
             });
+            const idxBadge = row.querySelector('.mr-row-index');
+            if (idxBadge) idxBadge.textContent = String(idx + 1);
+            row.querySelectorAll('.mr-row-index').forEach(el => {
+              if (el.textContent.indexOf('ROW_IDX_PLUSONE') !== -1) el.textContent = String(idx + 1);
+            });
+            if (row.innerHTML.indexOf('ROW_IDX_PLUSONE') !== -1) {
+              row.innerHTML = row.innerHTML.replace(/ROW_IDX_PLUSONE/g, String(idx + 1));
+            }
+            const chip = row.querySelector('.mat-stock-hint');
+            if (chip) applyStockChip(chip, null, null);
+            const nameInp = row.querySelector('.mat-name-input');
+            if (nameInp && !nameInp.value) { nameInp.readOnly = false; nameInp.classList.remove('bg-light'); }
             container.appendChild(row);
             const appended = container.querySelectorAll('.mat-row')[container.querySelectorAll('.mat-row').length - 1];
             bindRow(appended, idx);
