@@ -18,6 +18,9 @@ class Fault extends Model
         'root_fault_id',
         'customer_id',
 		'fault_ref_number',
+        'channel',
+        'channel_reference',
+        'channel_meta',
         'contactName',
         'phoneNumber',
         'contactEmail',
@@ -37,6 +40,10 @@ class Fault extends Model
         'priorityLevel',
         'assignedTo',
         'user_id'
+    ];
+
+    protected $casts = [
+        'channel_meta' => 'array',
     ];
 
     public function city()
