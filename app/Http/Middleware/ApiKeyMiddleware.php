@@ -24,6 +24,9 @@ class ApiKeyMiddleware
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
+        // Expose the matched key so controllers can apply per-key rules (e.g. channel binding).
+        $request->attributes->set('api_key', $key);
+
         return $next($request);
     }
 }

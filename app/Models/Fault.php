@@ -18,6 +18,9 @@ class Fault extends Model
         'root_fault_id',
         'customer_id',
 		'fault_ref_number',
+        'channel',
+        'channel_reference',
+        'channel_meta',
         'contactName',
         'phoneNumber',
         'contactEmail',
@@ -39,6 +42,10 @@ class Fault extends Model
         'user_id'
     ];
 
+    protected $casts = [
+        'channel_meta' => 'array',
+    ];
+
     public function city()
     {
         return $this->belongsTo(City::class);
@@ -52,6 +59,21 @@ class Fault extends Model
     public function pop()
     {
         return $this->belongsTo(Pop::class);
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function link()
+    {
+        return $this->belongsTo(Link::class);
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(Status::class);
     }
 
     public function remarks()
@@ -81,5 +103,15 @@ class Fault extends Model
     public function childFaults()
     {
         return $this->hasMany(self::class, 'root_fault_id');
+    }
+
+    public function materialRequests()
+    {
+        return $this->hasMany(MaterialRequest::class);
+    }
+
+    public function pendingMaterialRequests()
+    {
+        return $this->hasMany(MaterialRequest::class)->pending();
     }
 }

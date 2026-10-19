@@ -1,116 +1,405 @@
-@can('materials')
-<div class="modal custom-modal fade" id="requestMaterialCreateModal-{{ $fault->id }}" tabindex="-1" aria-labelledby="requestMaterialCreateModalLabel-{{ $fault->id }}" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="requestMaterialCreateModalLabel-{{ $fault->id }}">Request Material</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+@can('request-material')
+<style>
+  .mr-row {
+    position: relative;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 1rem;
+    padding: 0.7rem 0.7rem 0.7rem 0.85rem;
+    margin-bottom: 0.7rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.03);
+    overflow: hidden;
+  }
+  .mr-row::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #6366F1 0%, #8B5CF6 50%, #A855F7 100%);
+  }
+  .mr-row-index {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; min-width: 28px;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+    color: #fff; font-size: 0.78rem; font-weight: 700;
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.25);
+    letter-spacing: -0.01em;
+    flex-shrink: 0;
+  }
+  .mr-row-remove {
+    width: 32px; height: 32px; min-width: 32px;
+    display: inline-flex !important; align-items: center !important; justify-content: center !important;
+    border-radius: 9999px !important;
+    border: 1px solid #FEE2E2 !important;
+    background: #FEF2F2 !important;
+    color: #B91C1C !important;
+    transition: all 150ms ease;
+    padding: 0 !important;
+    flex-shrink: 0;
+    align-self: center;
+  }
+  .mr-row-remove:hover:not(:disabled) {
+    background: #DC2626 !important;
+    color: #fff !important;
+    border-color: #DC2626 !important;
+    transform: scale(1.05);
+  }
+  .mr-row-remove:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .mr-field-label {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    font-size: 0.68rem; font-weight: 600;
+    color: #64748B;
+    margin-bottom: 0.18rem;
+    letter-spacing: 0.01em;
+  }
+  .mr-field-label i {
+    font-size: 0.65rem;
+    color: #6366F1;
+    opacity: 0.85;
+  }
+  .mr-row .form-control,
+  .mr-row .form-select {
+    border-color: #E2E8F0;
+    border-radius: 0.6rem;
+    font-size: 0.8rem;
+    line-height: 1.15;
+    padding-top: 0.32rem;
+    padding-bottom: 0.32rem;
+    transition: all 150ms ease;
+    background: #FCFCFD;
+  }
+  .mr-row .form-control:focus,
+  .mr-row .form-select:focus {
+    border-color: #6366F1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+    background: #fff;
+  }
+  .mr-row .form-control.bg-light,
+  .mr-row input[readonly].mat-name-input {
+    background: #F8FAFC !important;
+    color: #334155 !important;
+    font-weight: 500;
+    border-color: #E2E8F0;
+  }
+  .mr-stock-chip {
+    display: inline-flex; align-items: center; gap: 0.25rem;
+    padding: 0.14rem 0.48rem;
+    border-radius: 9999px;
+    font-size: 0.66rem;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-top: 0.2rem;
+    white-space: nowrap;
+  }
+  .mr-stock-chip.ok { background: #ECFDF5; color: #047857; border: 1px solid #A7F3D0; }
+  .mr-stock-chip.low { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
+  .mr-stock-chip.out { background: #FEF2F2; color: #B91C1C; border: 1px solid #FECACA; }
+  .mr-section-card {
+    background: #FAFBFF;
+    border: 1px solid #EEF2FF;
+    border-radius: 0.9rem;
+    padding: 0.85rem 1rem;
+  }
+  .mr-section-title {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-weight: 700;
+    color: #1E293B;
+    font-size: 0.9rem;
+  }
+  .mr-section-title .icon-box {
+    width: 26px; height: 26px;
+    border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-size: 0.72rem;
+  }
+  .mr-section-title.icon-amber .icon-box { background: linear-gradient(135deg, #F59E0B, #D97706); }
+  .mr-section-title.icon-indigo .icon-box { background: linear-gradient(135deg, #6366F1, #8B5CF6); }
+  .mr-fault-note {
+    background: linear-gradient(135deg, #EEF2FF 0%, #F5F3FF 100%);
+    border: 1px solid #E0E7FF;
+    border-radius: 0.85rem;
+    padding: 0.7rem 0.9rem;
+  }
+  .mr-fault-note i { color: #6366F1; }
+</style>
+@php
+    $faultRef = data_get($fault, 'fault_ref_number', 'N/A');
+    $pendingReqs = $pendingRequests ?? collect();
+    $matList = $materials ?? collect();
+    $editingMr = $editingMr ?? null;
+    $isEdit = (bool) $editingMr;
+    if ($isEdit) {
+        $editItems = $editingMr->items->values()->all();
+        $rowCount = max(1, count($editItems));
+    } else {
+        $editItems = [];
+        $rowCount = 1;
+    }
+    $mrBadge = $isEdit ? $editingMr->statusBadge() : null;
+@endphp
+<script type="text/template" id="matReqRowTpl-{{ $fault->id }}">
+  <div class="mr-row mat-row d-flex align-items-end gap-3 flex-nowrap" data-row="ROW_IDX">
+    <div class="d-flex align-self-center pe-1">
+      <span class="mr-row-index">ROW_IDX_PLUSONE</span>
+    </div>
+    <div class="flex-grow-1 min-w-0">
+      <div class="row gx-2 gy-1 align-items-end">
+        <div class="col-xl-5 col-lg-5 col-md-5 col-sm-12">
+          <div class="row gx-2 gy-1 align-items-end">
+            <div class="col-md-6 col-sm-12">
+              <label class="mr-field-label"><i class="fas fa-list"></i>From Stock</label>
+              <select class="form-select form-select-sm mat-select" name="items[ROW_IDX][material_id]" data-row="ROW_IDX" data-fault="{{ $fault->id }}">
+                <option value="">— Select SKU —</option>
+                @foreach($matList as $m)
+                  <option value="{{ $m->id }}"
+                    data-name="{{ e($m->name) }}"
+                    data-unit="{{ e($m->unit) }}"
+                    data-stock="{{ $m->quantity_on_hand }}">
+                    {{ $m->name }}@if($m->sku) ({{ $m->sku }})@endif @if($m->category) · {{ $m->category }}@endif
+                  </option>
+                @endforeach
+                <option value="" disabled>──────────────────────────────</option>
+                <option value="__custom__">✏️  Custom</option>
+              </select>
+            </div>
+            <div class="col-md-6 col-sm-12">
+              <label class="mr-field-label"><i class="fas fa-cube"></i>Material Name</label>
+              <input type="text" class="form-control form-control-sm mat-name-input" name="items[ROW_IDX][material_name]" placeholder="Name (auto-filled, or type custom)" required>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-6">
+          <label class="mr-field-label"><i class="fas fa-ruler-combined"></i>Unit</label>
+          <input type="text" class="form-control form-control-sm mat-unit-input" name="items[ROW_IDX][unit]" placeholder="pcs" value="pcs" required>
+        </div>
+        <div class="col-xl-2 col-lg-2 col-md-2 col-sm-6">
+          <label class="mr-field-label"><i class="fas fa-hashtag"></i>Qty / Metres</label>
+          <input type="number" step="0.01" min="0" class="form-control form-control-sm mat-qty-input" name="items[ROW_IDX][quantity_requested]" placeholder="0" required>
+          <span class="mr-stock-chip ok mat-stock-hint d-none" data-stock-chip="1"><i class="fas fa-circle-check"></i><span></span></span>
+        </div>
+        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
+          <label class="mr-field-label"><i class="fas fa-comment-dots"></i>Remark</label>
+          <input type="text" class="form-control form-control-sm" name="items[ROW_IDX][remark]" placeholder="Optional: colour, spec, supplier">
+        </div>
       </div>
-      <form action="{{ route('stores.store') }}" method="POST">
-        @csrf
-        <div class="modal-body">
-          <div class="mb-3">
-            <label class="form-label">Sap Ref. No.</label>
-            <input type="text" class="form-control" name="sap-ref-no" placeholder="Enter SAP reference">
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Material</label>
-            <input type="text" class="form-control" name="request-material" placeholder="Enter material">
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary btn-sm">Request</button>
-        </div>
-      </form>
+    </div>
+    <button type="button" class="mr-row-remove remove-mat-row align-self-center" title="Remove this row" disabled>
+      <i class="fas fa-trash"></i>
+    </button>
+  </div>
+</script>
 
-      <!-- Conversation (Remarks) -->
-      @if(isset($remarks) && count($remarks))
-      <div class="px-3 pb-2">
-        <div class="d-flex align-items-center mb-2">
-          <span class="badge bg-info me-2"><i class="fas fa-comments"></i></span>
-          <h6 class="mb-0 text-secondary">Conversation</h6>
-        </div>
-        <div id="remarksScroller-{{ $fault->id }}" class="js-remarks-list legacy-remarks-list" style="max-height: 420px;">
-          @foreach($remarks->sortBy('created_at') as $remark)
-            @php
-              $currentName = optional(auth()->user())->name;
-              $isOwn = $currentName && (strtolower(trim($remark->name)) === strtolower(trim($currentName)));
-            @endphp
-            <div class="legacy-remark-row {{ $isOwn ? 'legacy-remark-row-self' : 'legacy-remark-row-other' }}">
-              <div class="legacy-remark-bubble {{ $isOwn ? 'legacy-remark-bubble-self' : 'legacy-remark-bubble-other' }}">
-                <div class="legacy-remark-meta">
-                  <span class="badge {{ $isOwn ? 'bg-success' : 'bg-secondary' }}">{{ $remark->name ?? 'User' }}</span>
-                  <small class="text-muted">{{ Carbon\Carbon::parse($remark->created_at)->diffForHumans() }}</small>
-                  @if(!empty($remark->activity))
-                    <small class="text-muted">• {{ $remark->activity }}</small>
-                  @endif
+@php
+    if (!function_exists('renderMatReqRow_editAware')) {
+    function renderMatReqRow_editAware(int $idx, $matList, $editItem = null) {
+        $selectedMatId = $editItem->material_id ?? null;
+        $customName = $editItem->material_name ?? '';
+        $unitVal = $editItem->unit ?? 'pcs';
+        $qtyVal = $editItem->quantity_requested ?? 0;
+        $remarkVal = $editItem->remark ?? '';
+        $stockMat = null;
+        $stockText = '';
+        $stockClass = 'ok';
+        $stockIcon = 'fa-circle-check';
+        if (!empty($selectedMatId)) {
+            $stockMat = $matList->firstWhere('id', $selectedMatId);
+            if ($stockMat) {
+                $qoh = (float)($stockMat->quantity_on_hand ?? 0);
+                if ($qoh <= 0) {
+                    $stockClass = 'out'; $stockIcon = 'fa-circle-xmark';
+                    $stockText = 'Out: 0 '.$stockMat->unit;
+                } elseif ($qoh <= 10) {
+                    $stockClass = 'low'; $stockIcon = 'fa-triangle-exclamation';
+                    $stockText = 'Low: '.rtrim(rtrim(number_format($qoh, 2), '0'), '.').' '.$stockMat->unit;
+                } else {
+                    $stockText = 'Stock: '.rtrim(rtrim(number_format($qoh, 2), '0'), '.').' '.$stockMat->unit;
+                }
+            }
+        }
+        $hasValidStockMat = (bool) $stockMat;
+        $isCustom = !$hasValidStockMat && !empty($customName);
+        ob_start();
+        ?>
+        <div class="mr-row mat-row d-flex align-items-end gap-3 flex-nowrap" data-row="<?= $idx ?>">
+          <div class="d-flex align-self-center pe-1">
+            <span class="mr-row-index"><?= ($idx + 1) ?></span>
+          </div>
+          <div class="flex-grow-1 min-w-0">
+            <div class="row gx-2 gy-1 align-items-end">
+              <div class="col-xl-5 col-lg-5 col-md-5 col-sm-12">
+                <div class="row gx-2 gy-1 align-items-end">
+                  <div class="col-md-6 col-sm-12">
+                    <label class="mr-field-label"><i class="fas fa-list"></i>From Stock</label>
+                    <select class="form-select form-select-sm mat-select" name="items[<?= $idx ?>][material_id]" data-row="<?= $idx ?>" data-fault="<?= $GLOBALS['__faultIdForRow'] ?? 0 ?>">
+                      <option value="">— Select SKU —</option>
+                      <?php foreach($matList as $m):
+                          $sel = ((string)$selectedMatId === (string)$m->id) ? ' selected' : '';
+                          ?>
+                        <option value="<?= $m->id ?>"
+                          data-name="<?= e($m->name) ?>"
+                          data-unit="<?= e($m->unit) ?>"
+                          data-stock="<?= $m->quantity_on_hand ?>"<?= $sel ?>>
+                          <?= $m->name ?><?php if($m->sku): ?> (<?= $m->sku ?>)<?php endif ?><?php if($m->category): ?> · <?= $m->category ?><?php endif ?>
+                        </option>
+                      <?php endforeach ?>
+                      <option value="" disabled>──────────────────────────────</option>
+                      <option value="__custom__"<?= $isCustom ? ' selected' : '' ?>>✏️  Custom</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 col-sm-12">
+                    <label class="mr-field-label"><i class="fas fa-cube"></i>Material Name</label>
+                    <input type="text" class="form-control form-control-sm mat-name-input<?= $hasValidStockMat ? ' bg-light' : '' ?>" name="items[<?= $idx ?>][material_name]" placeholder="Name (auto-filled, or type custom)" value="<?= e($customName) ?>"<?= $hasValidStockMat ? ' readonly' : '' ?> required>
+                  </div>
                 </div>
-                <div class="legacy-remark-body">{{ $remark->remark }}</div>
-                @if($remark->file_path)
-                  <div class="mt-2">
-                    <img src="{{ asset('storage/'.$remark->file_path) }}" alt="Attachment" class="img-fluid rounded" style="max-height: 160px; object-fit: cover;">
-                    <button type="button" class="btn btn-link btn-sm text-decoration-none" data-bs-toggle="modal" data-bs-target="#PicModal-{{ $remark->id }}">View</button>
-                  </div>
-                  <div class="modal custom-modal fade" id="PicModal-{{ $remark->id }}" data-bs-backdrop="false" data-bs-keyboard="true" tabindex="-1" aria-labelledby="PicModalLabel-{{ $remark->id }}" aria-hidden="true">
-                    <div class="modal-dialog modal-xl modal-dialog-centered">
-                      <div class="modal-content rounded-4 border-0 shadow-lg">
-                        <div class="modal-header border-0">
-                          <h5 class="modal-title" id="PicModalLabel-{{ $remark->id }}"><i class="fas fa-paperclip me-2"></i>Attachment</h5>
-                          <button type="button" class="btn-close custom-btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                          <img src="{{ asset('storage/'.$remark->file_path) }}" alt="Attachment" class="img-fluid rounded">
-                        </div>
-                        <div class="modal-footer border-0">
-                          <a href="{{ asset('storage/'.$remark->file_path) }}" class="btn btn-outline-primary" download><i class="fas fa-download me-1"></i>Download</a>
-                          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                @endif
+              </div>
+              <div class="col-xl-2 col-lg-2 col-md-2 col-sm-6">
+                <label class="mr-field-label"><i class="fas fa-ruler-combined"></i>Unit</label>
+                <input type="text" class="form-control form-control-sm mat-unit-input" name="items[<?= $idx ?>][unit]" placeholder="pcs" value="<?= e($unitVal) ?>" required>
+              </div>
+              <div class="col-xl-2 col-lg-2 col-md-2 col-sm-6">
+                <label class="mr-field-label"><i class="fas fa-hashtag"></i>Qty / Metres</label>
+                <input type="number" step="0.01" min="0" class="form-control form-control-sm mat-qty-input" name="items[<?= $idx ?>][quantity_requested]" placeholder="0" value="<?= e($qtyVal) ?>" required>
+                <?php if ($stockText !== ''): ?>
+                <span class="mr-stock-chip <?= $stockClass ?> mat-stock-hint">
+                  <i class="fas <?= $stockIcon ?>"></i><?= $stockText ?>
+                </span>
+                <?php else: ?>
+                <span class="mr-stock-chip ok mat-stock-hint d-none" data-stock-chip="1"><i class="fas fa-circle-check"></i><span></span></span>
+                <?php endif ?>
+              </div>
+              <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
+                <label class="mr-field-label"><i class="fas fa-comment-dots"></i>Remark</label>
+                <input type="text" class="form-control form-control-sm" name="items[<?= $idx ?>][remark]" placeholder="Optional: colour, spec, supplier" value="<?= e($remarkVal) ?>">
               </div>
             </div>
-          @endforeach
+          </div>
+          <button type="button" class="mr-row-remove remove-mat-row align-self-center" title="Remove this row"<?= $idx === 0 ? ' disabled' : '' ?>>
+            <i class="fas fa-trash"></i>
+          </button>
         </div>
-      </div>
-      @endif
+        <?php
+        return ob_get_clean();
+    }
+    }
+    $GLOBALS['__faultIdForRow'] = $fault->id;
+@endphp
 
-      <!-- Add Remark Form -->
-      <div class="px-3 pb-3">
-        <form action="/faults/{{ $fault->id }}/remarks" method="POST" enctype="multipart/form-data" class="js-remark-form" data-remarks-target="#remarksScroller-{{ $fault->id }}">
-          {{ csrf_field() }}
-          <div class="row g-2 align-items-end">
-            <div class="col-md-8">
-              <label class="form-label">Add Remark</label>
-              <textarea name="remark" class="form-control @error('remark') is-invalid @enderror" rows="2" placeholder="Enter your message"></textarea>
-              <input type="hidden" name="activity" value="ON MATERIAL REQUEST">
-              <input type="hidden" name="url" value="{{ url()->current() }}">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label">Attachments (optional)</label>
-              <input type="file" name="attachments[]" multiple class="form-control @error('attachments') is-invalid @enderror" accept="image/png,image/jpg,image/jpeg">
-            </div>
-          </div>
-          <div class="mt-2">
-            <button type="submit" class="btn btn-success btn-sm float-end">Send</button>
-          </div>
-        </form>
+<div class="modal custom-modal fade" id="requestMaterialCreateModal-{{ $fault->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="requestMaterialCreateModalLabel-{{ $fault->id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title mb-0" id="requestMaterialCreateModalLabel-{{ $fault->id }}">
+          @if($isEdit)
+            <i class="fas fa-pen-to-square me-2"></i>Update Material Request
+          @else
+            <i class="fas fa-boxes-packing me-2"></i>Request Materials
+          @endif
+        </h5>
+        <div class="text-muted small mt-1">
+          @if($isEdit)
+            Editing existing request <span class="font-monospace">{{ $editingMr->request_number }}</span> — your previous values are pre-loaded below. Changes replace the open request.
+          @else
+            Select materials you need for this fault and specify quantities or metres. Request will be sent to Stores.
+          @endif
+        </div>
+        @if($isEdit && $mrBadge)
+        <div class="mt-2">
+          <x-status-badge :label="$mrBadge['label']" :color="$mrBadge['color']" :soft="true" />
+        </div>
+        @endif
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+
+      <form action="{{ route('stores.store') }}" method="POST" id="matReqForm-{{ $fault->id }}" class="mat-req-form">
+        @csrf
+        <input type="hidden" name="fault_id" value="{{ $fault->id }}">
+        @if($isEdit)
+        <input type="hidden" name="_replace_mr_id" value="{{ $editingMr->id }}">
+        @endif
+
+        <div class="modal-body">
+          <div class="mr-fault-note mb-4 d-flex align-items-start gap-2">
+            <i class="fas fa-circle-info mt-0.5 fa-fw"></i>
+            <div>
+              Requesting for <strong>{{ $faultRef }}</strong>. Include UTP cable (meters), RJ45 connectors, splice protectors, etc. Your name will be logged automatically.
+            </div>
+          </div>
+
+          <div class="mr-section-card mb-4">
+            <label class="mr-section-title icon-amber">
+              <span class="icon-box"><i class="fas fa-sticky-note"></i></span>
+              Note to Stores <span class="text-muted fw-normal ms-1" style="font-size:0.78rem;">(optional)</span>
+            </label>
+            <textarea name="technician_note" class="form-control form-control-sm mt-2" rows="2" placeholder="Any additional context or special request, e.g. Urgent same-day dispatch, outdoor rated only...">{{ old('technician_note', $isEdit ? e($editingMr->technician_note ?? '') : '') }}</textarea>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mb-3 pe-1">
+            <label class="mr-section-title icon-indigo">
+              <span class="icon-box"><i class="fas fa-list-check"></i></span>
+              Materials Required
+            </label>
+            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill add-mat-row-btn" data-fault="{{ $fault->id }}" id="addRowBtn-{{ $fault->id }}" style="border-radius:9999px;padding:.35rem .85rem;font-weight:600;font-size:.8rem;">
+              <i class="fas fa-plus me-1"></i>Add Row
+            </button>
+          </div>
+
+          <div class="mat-req-items mat-req-items-{{ $fault->id }}">
+            @for($r = 0; $r < $rowCount; $r++)
+              {!! renderMatReqRow_editAware($r, $matList, $editItems[$r] ?? null) !!}
+            @endfor
+          </div>
+
+          @if($pendingReqs->count() > 0)
+          <div class="mt-4">
+            <div class="d-flex align-items-center mb-2">
+              <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis border me-2"><i class="fas fa-clock-rotate-left"></i> Pending Requests</span>
+              <small class="text-muted">This fault already has open material requests.</small>
+            </div>
+            @foreach($pendingReqs as $pr)
+              @if($isEdit && (int)$pr->id === (int)$editingMr->id) @continue @endif
+              <div class="card mb-2 border-warning-subtle">
+                <div class="card-body py-2 px-3">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <strong class="small">{{ $pr->request_number }}</strong>
+                    <span class="badge" style="background:#F59E0B22;color:#B45309;">{{ $pr->statusBadge()['label'] }}</span>
+                  </div>
+                  <ul class="list-unstyled small mb-0">
+                    @foreach($pr->items as $itm)
+                      <li class="d-flex justify-content-between py-1 border-top">
+                        <span>{{ $itm->material_name }}</span>
+                        <span class="text-muted">{{ $itm->quantity_requested }} {{ $itm->unit }}</span>
+                      </li>
+                    @endforeach
+                  </ul>
+                </div>
+              </div>
+            @endforeach
+          </div>
+          @endif
+
+        </div>
+
+        <div class="modal-footer fault-modal-footer">
+          <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill" data-bs-dismiss="modal">
+            <i class="fas fa-times me-1"></i>Cancel
+          </button>
+          <button type="submit" class="btn btn-primary btn-sm rounded-pill mat-req-submit" data-fault="{{ $fault->id }}">
+            @if($isEdit)
+              <i class="fas fa-save me-1"></i>Update Request
+            @else
+              <i class="fas fa-paper-plane me-1"></i>Submit Request to Stores
+            @endif
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
 @endcan
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  var modalEl = document.getElementById('requestMaterialCreateModal-{{ $fault->id }}');
-  if (modalEl) {
-    modalEl.addEventListener('shown.bs.modal', function () {
-      var scroller = document.getElementById('remarksScroller-{{ $fault->id }}');
-      if (scroller) { scroller.scrollTop = scroller.scrollHeight; }
-    });
-  }
-});
-</script>

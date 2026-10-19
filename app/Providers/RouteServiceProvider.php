@@ -48,5 +48,12 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
+
+        // Fault intake: one bot/USSD gateway serves many customers from a single IP,
+        // so limit per API key rather than per IP.
+        RateLimiter::for('intake', function (Request $request) {
+            $key = (string) ($request->header('X-API-Key') ?: $request->header('Authorization') ?: $request->ip());
+            return Limit::perMinute((int) env('FAULT_INTAKE_RATE_LIMIT', 600))->by('intake|' . sha1($key));
+        });
     }
 }

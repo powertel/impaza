@@ -10,6 +10,7 @@ use App\Http\Controllers\Mobile\StatsController;
 use App\Http\Controllers\Mobile\ProfileController;
 use App\Http\Controllers\Mobile\NotificationController;
 use App\Http\Controllers\Api\CustomerFaultsController;
+use App\Http\Controllers\Api\FaultIntakeController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -99,3 +100,18 @@ Route::prefix('mobile')->group(function () {
 
 // Customer faults lookup by account and contract
 Route::middleware('api_key')->get('customer-faults', [CustomerFaultsController::class, 'index']);
+
+// Channel-agnostic fault intake (WhatsApp, USSD, web, mobile, call centre).
+// See docs/FAULT_INTAKE_API.md
+Route::prefix('v1/intake')
+    ->withoutMiddleware('throttle:api')
+    ->middleware(['api_key', 'throttle:intake'])
+    ->group(function () {
+        Route::get('fault-categories', [FaultIntakeController::class, 'categories']);
+        Route::get('customers/lookup', [FaultIntakeController::class, 'lookupCustomer']);
+        Route::get('links', [FaultIntakeController::class, 'links']);
+        Route::get('links/{link}', [FaultIntakeController::class, 'link'])->whereNumber('link');
+        Route::get('faults', [FaultIntakeController::class, 'index']);
+        Route::post('faults', [FaultIntakeController::class, 'store']);
+        Route::get('faults/{reference}', [FaultIntakeController::class, 'show']);
+    });

@@ -80,50 +80,96 @@ My Faults
                         <td data-label="Fault Age">
                             <span class="faults-age-pill age-ticker" data-started-at="{{ $fault->stage_started_at ?? '' }}"></span>
                         </td>
-                        <td data-label="Action(s)">
-                        <div class="faults-actions">
-                        @if ($fault->description==='Fault is under Rectification')
-                            @can('noc-clear-faults-clear')
-                                <button class="btn btn-sm btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#nocClearModal-{{ $fault->id }}">
-                                    <i class="fas fa-save me-1"></i>Clear
+                        <td data-label="Action(s)" class="text-end">
+                            <div class="d-inline-flex flex-column align-items-end gap-2">
+                                <button class="btn btn-sm btn-outline-success rounded-pill" data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
+                                    <i class="fas fa-eye me-1"></i>View
                                 </button>
-                                <button class="btn btn-sm btn-outline-success"  data-bs-toggle="modal" data-bs-target="#inProgressModal-{{ $fault->id }}">
-                                    <i class="fas fa-save me-1"></i>In Progress
-                                </button>
-                            @endcan
-                            <!-- @can('chief-tech-clear-faults-clear')
-                                <button class="btn btn-sm btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#chiefTechClearModal-{{ $fault->id }}">
-                                    <i class="fas fa-save me-1"></i>Clear
-                                </button>
-                            @endcan -->
-
-                            <!--<a href="{{ route('faults.show',$fault->id) }}" class="btn btn-sm btn-success" style="padding:0px 2px; color:#fff;" >View</a>-->
-                            
-
-                            @can('rectify-fault')
-                                <button class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#rectifyEditModal-{{ $fault->id }}">
-                                    <i class="fas fa-save me-1"></i>Rectify
-                                </button>
-                            @endcan  
-                            @can('request-permit')
-                                <button class="btn btn-outline-warning"  data-bs-toggle="modal" data-bs-target="#requestPermitEditModal-{{ $fault->id }}">
-                                    <i class="fas fa-pencil me-1"></i>Request Permit
-                                </button>
-                            @endcan
-                            @can('materials')
-                                <button class="btn btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#requestMaterialCreateModal-{{ $fault->id }}">
-                                    <i class="fas fa-pencil me-1"></i>Request Material
-                                </button>
-                            @endcan
-                            <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#escalateModal-{{ $fault->id }}">
-                                <i class="fas fa-level-up-alt me-1"></i>Escalate
-                            </button>
-                            
-                        @endif
-                            <button class="btn  btn-outline-success"  data-bs-toggle="modal" data-bs-target="#showFaultModal-{{ $fault->id }}">
-                                <i class="fas fa-eye me-1"></i>View
-                            </button>
-                        </div>
+                                @if ($fault->description==='Fault is under Rectification')
+                                @php
+                                    $mrState = $latestMrByFault[(int)$fault->id] ?? null;
+                                    $mrEditable = $mrState && $mrState->isPending();
+                                    $mrPartial = $mrState && $mrState->status === \App\Models\MaterialRequest::STATUS_PARTIAL;
+                                    $mrIssued = $mrState && $mrState->isIssued();
+                                @endphp
+                                <div class="btn-group dropstart">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" title="More actions for this fault">
+                                        <i class="fas fa-ellipsis-v me-1"></i>Actions
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow p-2" style="min-width: 16rem;">
+                                        @can('noc-clear-faults-clear')
+                                        <li>
+                                            <button type="button" class="dropdown-item d-flex align-items-center gap-2 text-primary" data-bs-toggle="modal" data-bs-target="#nocClearModal-{{ $fault->id }}">
+                                                <i class="fas fa-check-circle fa-fw"></i><span>Clear Fault</span>
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="dropdown-item d-flex align-items-center gap-2 text-success" data-bs-toggle="modal" data-bs-target="#inProgressModal-{{ $fault->id }}">
+                                                <i class="fas fa-play-circle fa-fw"></i><span>Mark In Progress</span>
+                                            </button>
+                                        </li>
+                                        @endcan
+                                        @can('rectify-fault')
+                                        <li>
+                                            <button type="button" class="dropdown-item d-flex align-items-center gap-2" style="color:#4F46E5;" data-bs-toggle="modal" data-bs-target="#rectifyEditModal-{{ $fault->id }}">
+                                                <i class="fas fa-wrench fa-fw"></i><span>Rectify</span>
+                                            </button>
+                                        </li>
+                                        @endcan
+                                        <li>
+                                            <button type="button" class="dropdown-item d-flex align-items-center gap-2 text-danger" data-bs-toggle="modal" data-bs-target="#escalateModal-{{ $fault->id }}">
+                                                <i class="fas fa-level-up-alt fa-fw"></i><span>Escalate to Chief Tech</span>
+                                            </button>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        @can('request-permit')
+                                        <li>
+                                            <button type="button" class="dropdown-item d-flex align-items-center gap-2" style="color:#D97706;" data-bs-toggle="modal" data-bs-target="#requestPermitEditModal-{{ $fault->id }}">
+                                                <i class="fas fa-file-signature fa-fw"></i><span>Request Permit</span>
+                                            </button>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        @endcan
+                                        @can('request-material')
+                                            @if($mrIssued && $mrState)
+                                            <li>
+                                                <button type="button" class="dropdown-item d-flex align-items-center gap-2 text-muted" data-bs-toggle="modal" data-bs-target="#viewMRModal-{{ $mrState->id }}">
+                                                    <i class="fas fa-box-circle-check fa-fw"></i><span>Materials Requested (Issued)</span>
+                                                </button>
+                                            </li>
+                                            @elseif($mrPartial && $mrState)
+                                            <li>
+                                                <button type="button" class="dropdown-item d-flex align-items-center gap-2 text-muted" data-bs-toggle="modal" data-bs-target="#viewMRModal-{{ $mrState->id }}">
+                                                    <i class="fas fa-box-open fa-fw"></i>
+                                                    <span class="d-inline-flex align-items-center gap-1 flex-wrap">
+                                                        View Material Request
+                                                        <span class="badge" style="background:#F5F3FF; color:#6D28D9; border:1px solid #DDD6FE;">Partial</span>
+                                                        <span class="badge bg-light text-dark border ms-1">{{ $mrState->request_number }}</span>
+                                                    </span>
+                                                </button>
+                                            </li>
+                                            @elseif($mrEditable && $mrState)
+                                            <li>
+                                                <button type="button" class="dropdown-item d-flex align-items-center gap-2" style="color:#4F46E5;" data-bs-toggle="modal" data-bs-target="#requestMaterialCreateModal-{{ $fault->id }}">
+                                                    <i class="fas fa-pen-to-square fa-fw"></i>
+                                                    <span class="d-inline-flex align-items-center gap-1 flex-wrap">
+                                                        Edit Material Request
+                                                        <span class="badge bg-light text-dark border">{{ $mrState->request_number }}</span>
+                                                    </span>
+                                                </button>
+                                            </li>
+                                            @else
+                                            <li>
+                                                <button type="button" class="dropdown-item d-flex align-items-center gap-2" style="color:#4F46E5;" data-bs-toggle="modal" data-bs-target="#requestMaterialCreateModal-{{ $fault->id }}">
+                                                    <i class="fas fa-box-open fa-fw"></i><span>Request Material</span>
+                                                </button>
+                                            </li>
+                                            @endif
+                                        @endcan
+                                    </ul>
+                                </div>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @endforeach
@@ -143,12 +189,34 @@ My Faults
 </div>
 
 @foreach ($faults as $fault)
+    @php
+        $fault_mrEdit = null;
+        $fault_mrView = null;
+        if (isset($latestMrByFault) && is_array($latestMrByFault)) {
+            $l = $latestMrByFault[(int)$fault->id] ?? null;
+            if ($l) {
+                if ($l->isPending()) {
+                    $fault_mrEdit = $l;
+                } elseif ($l->status === \App\Models\MaterialRequest::STATUS_PARTIAL || $l->isIssued()) {
+                    $fault_mrView = $l;
+                }
+            }
+        }
+    @endphp
     @include('my_faults.in_progress_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
     @include('rectification.noc_clear_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
     @include('clear_faults.chief_tech_clear_modal', [ 'fault' => $fault ])
     @include('rectification.edit_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()), 'confirmedRFO' => ($confirmedRFO ?? collect()) ])
     @include('permits.requested-permits.edit_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
-    @include('stores.create_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
+    @include('stores.create_modal', [
+        'fault' => $fault,
+        'materials' => ($materials ?? collect()),
+        'pendingRequests' => collect(),
+        'editingMr' => $fault_mrEdit,
+    ])
+    @if($fault_mrView)
+        @include('stores.show_modal', [ 'mr' => $fault_mrView ])
+    @endif
     @include('my_faults.escalate_modal', [ 'fault' => $fault, 'remarks' => ($remarksByFault[$fault->id] ?? collect()) ])
     @include('faults.show', [
         'fault' => $fault,
@@ -184,6 +252,214 @@ My Faults
           perPage.dispatchEvent(new Event('change', { bubbles: true }));
         }
       });
+
+      window.initMaterialRequestModal = function (faultId) {
+        const prefix = 'mat-req-items-' + faultId;
+        const container = document.querySelector('.' + prefix);
+        const tpl = document.getElementById('matReqRowTpl-' + faultId);
+        if (!container) return { faultId, skipped: true, reason: 'no-container' };
+        let rowIndex = 1;
+
+        function updateRemoveButtons() {
+          const rows = container.querySelectorAll('.mat-row');
+          rows.forEach(r => {
+            const rb = r.querySelector('.remove-mat-row');
+            if (rb) rb.disabled = rows.length <= 1;
+          });
+        }
+
+        function applyStockChip(chipEl, stock, unit) {
+          if (!chipEl) return;
+          const iconEl = chipEl.querySelector('i');
+          const textEl = chipEl.querySelector('span') || chipEl;
+          const qty = parseFloat(stock || 0);
+          chipEl.classList.remove('ok', 'low', 'out', 'd-none');
+          let label = '';
+          if (!isFinite(qty) || isNaN(qty) || (unit == null && stock == null)) {
+            chipEl.classList.add('d-none');
+            return;
+          }
+          const pretty = Math.abs(qty - Math.floor(qty)) < 1e-9 ? String(Math.floor(qty)) : String(parseFloat(qty.toFixed(2)));
+          if (qty <= 0) {
+            chipEl.classList.add('out');
+            if (iconEl) { iconEl.className = 'fas fa-circle-xmark'; }
+            label = 'Out: 0 ' + (unit || '');
+          } else if (qty <= 10) {
+            chipEl.classList.add('low');
+            if (iconEl) { iconEl.className = 'fas fa-triangle-exclamation'; }
+            label = 'Low: ' + pretty + ' ' + (unit || '');
+          } else {
+            chipEl.classList.add('ok');
+            if (iconEl) { iconEl.className = 'fas fa-circle-check'; }
+            label = 'Stock: ' + pretty + ' ' + (unit || '');
+          }
+          if (textEl !== chipEl) textEl.textContent = label;
+          else chipEl.textContent = label;
+        }
+
+        function bindRow(row, idx) {
+          const sel = row.querySelector('.mat-select');
+          const nameInput = row.querySelector('.mat-name-input');
+          const unitInput = row.querySelector('.mat-unit-input');
+          const qtyInput = row.querySelector('.mat-qty-input');
+          const stockHint = row.querySelector('.mat-stock-hint');
+          const removeBtn = row.querySelector('.remove-mat-row');
+          if (sel) {
+            sel.addEventListener('change', function () {
+              const opt = sel.selectedOptions[0];
+              if (!opt) return;
+              if (opt.value && opt.value !== '__custom__') {
+                nameInput.value = opt.dataset.name || '';
+                unitInput.value = opt.dataset.unit || unitInput.value || 'pcs';
+                const stock = parseFloat(opt.dataset.stock || 0);
+                applyStockChip(stockHint, stock, opt.dataset.unit || unitInput.value || '');
+                nameInput.readOnly = true;
+                nameInput.classList.add('bg-light');
+              } else if (opt.value === '__custom__') {
+                nameInput.value = '';
+                nameInput.readOnly = false;
+                nameInput.classList.remove('bg-light');
+                nameInput.focus();
+                if (stockHint) stockHint.classList.add('d-none');
+              } else {
+                nameInput.readOnly = false;
+                nameInput.classList.remove('bg-light');
+                if (stockHint) stockHint.classList.add('d-none');
+              }
+            });
+          }
+          if (removeBtn) {
+            removeBtn.addEventListener('click', function () {
+              const rows = container.querySelectorAll('.mat-row');
+              if (rows.length <= 1) return;
+              row.remove();
+              renumber();
+              updateRemoveButtons();
+            });
+          }
+        }
+
+        function renumber() {
+          const rows = container.querySelectorAll('.mat-row');
+          rows.forEach((r, i) => {
+            r.querySelectorAll('[name^="items["]').forEach(el => {
+              el.name = el.name.replace(/items\[\d+\]/, 'items[' + i + ']');
+            });
+            r.querySelectorAll('[data-row]').forEach(el => {
+              el.setAttribute('data-row', i);
+            });
+            const idxBadge = r.querySelector('.mr-row-index');
+            if (idxBadge) idxBadge.textContent = String(i + 1);
+          });
+          rowIndex = rows.length;
+        }
+
+        container.querySelectorAll('.mat-row').forEach((r, i) => bindRow(r, i));
+        updateRemoveButtons();
+
+        const addBtn = document.getElementById('addRowBtn-' + faultId) || document.querySelector('.add-mat-row-btn[data-fault="' + faultId + '"]');
+        let tplHTML = null;
+        if (tpl) {
+          if (tpl.tagName === 'SCRIPT') tplHTML = tpl.textContent;
+          else if (tpl.content && tpl.content.cloneNode) tplHTML = tpl.innerHTML;
+        }
+        if (addBtn) {
+          addBtn.addEventListener('click', function () {
+            let row = null;
+            if (tplHTML) {
+              const wrap = document.createElement('div');
+              wrap.innerHTML = tplHTML;
+              row = wrap.querySelector('.mat-row');
+            }
+            if (!row) {
+              const refRow = container.querySelector('.mat-row');
+              if (!refRow) return;
+              row = refRow.cloneNode(true);
+              const sel = row.querySelector('.mat-select');
+              if (sel) sel.value = '';
+              row.querySelectorAll('.mat-name-input, .mat-unit-input, .mat-qty-input, .mat-stock-hint').forEach(el => {
+                if (el.classList && el.classList.contains('mat-stock-hint')) { return; }
+                if (el.tagName === 'INPUT' && el.type === 'number') el.value = '';
+                else if (el.classList && el.classList.contains('mat-name-input')) { el.value = ''; el.readOnly = false; el.classList.remove('bg-light'); }
+                else if (el.classList && el.classList.contains('mat-unit-input')) el.value = 'pcs';
+              });
+            }
+            const idx = rowIndex++;
+            row.querySelectorAll('[name^="items["]').forEach(el => {
+              el.name = el.name.replace(/items\[ROW_IDX\]/g, 'items[' + idx + ']');
+              el.name = el.name.replace(/items\[\d+\]/, 'items[' + idx + ']');
+            });
+            row.querySelectorAll('[data-row]').forEach(el => {
+              el.setAttribute('data-row', idx);
+            });
+            const idxBadge = row.querySelector('.mr-row-index');
+            if (idxBadge) idxBadge.textContent = String(idx + 1);
+            row.querySelectorAll('.mr-row-index').forEach(el => {
+              if (el.textContent.indexOf('ROW_IDX_PLUSONE') !== -1) el.textContent = String(idx + 1);
+            });
+            if (row.innerHTML.indexOf('ROW_IDX_PLUSONE') !== -1) {
+              row.innerHTML = row.innerHTML.replace(/ROW_IDX_PLUSONE/g, String(idx + 1));
+            }
+            const chip = row.querySelector('.mat-stock-hint');
+            if (chip) applyStockChip(chip, null, null);
+            const nameInp = row.querySelector('.mat-name-input');
+            if (nameInp && !nameInp.value) { nameInp.readOnly = false; nameInp.classList.remove('bg-light'); }
+            container.appendChild(row);
+            const appended = container.querySelectorAll('.mat-row')[container.querySelectorAll('.mat-row').length - 1];
+            bindRow(appended, idx);
+            renumber();
+            updateRemoveButtons();
+            const qty = appended.querySelector('.mat-qty-input');
+            if (qty) setTimeout(() => qty.focus(), 30);
+          });
+        }
+
+        const form = document.getElementById('matReqForm-' + faultId);
+        if (form) {
+          form.addEventListener('submit', function (ev) {
+            let valid = true;
+            const rows = container.querySelectorAll('.mat-row');
+            let anyFilled = false;
+            rows.forEach(r => {
+              const name = r.querySelector('.mat-name-input');
+              const qty = r.querySelector('.mat-qty-input');
+              const sel = r.querySelector('.mat-select');
+              if (sel && sel.value === '__custom__') sel.value = '';
+              if (name && name.value.trim() && qty && parseFloat(qty.value) > 0) {
+                anyFilled = true;
+                name.required = true;
+                qty.required = true;
+              } else {
+                name.required = false;
+                qty.required = false;
+                if (name && !name.value.trim() && qty && !parseFloat(qty.value)) {
+                  const u = r.querySelector('.mat-unit-input');
+                  const rem = r.querySelector('[name$="[remark]"]');
+                  if (u) u.required = false;
+                  if (rem) rem.required = false;
+                }
+              }
+            });
+            if (!anyFilled) {
+              ev.preventDefault();
+              alert('Please add at least one material with quantity.');
+              valid = false;
+            }
+            return valid;
+          });
+        }
+        return { faultId, ok: true, initialRows: container.querySelectorAll('.mat-row').length };
+      };
+
+      (function autoInitMatReqModals() {
+        const tpls = document.querySelectorAll('script[type="text/template"][id^="matReqRowTpl-"]');
+        const results = [];
+        tpls.forEach(function (t) {
+          const m = t.id.match(/matReqRowTpl-(\d+)/);
+          if (m && m[1]) results.push(window.initMaterialRequestModal(parseInt(m[1], 10)));
+        });
+        window.__matReqInitResults = results;
+      })();
     </script>
 @endsection
 

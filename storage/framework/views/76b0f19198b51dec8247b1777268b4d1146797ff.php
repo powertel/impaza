@@ -156,6 +156,26 @@
               </li>
             <?php endif; ?>
 
+            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->any(['stores-list','stores-process','materials','material-list','material-create','material-edit','material-delete'])): ?>
+              <li class="nav-header">Stores</li>
+            <?php endif; ?>
+            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->any(['stores-list','stores-process','materials'])): ?>
+              <li class="nav-item">
+                <a href="<?php echo e(route('stores.requests')); ?>" class="nav-link <?php echo e(request()->routeIs('stores.*') ? 'active' : ''); ?>">
+                  <i class="nav-icon fas fa-dolly"></i>
+                  <p>Material Requests</p>
+                </a>
+              </li>
+            <?php endif; ?>
+            <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->any(['material-list','material-create','material-edit','material-delete'])): ?>
+              <li class="nav-item">
+                <a href="<?php echo e(route('materials.index')); ?>" class="nav-link <?php echo e(request()->routeIs('materials.*') ? 'active' : ''); ?>">
+                  <i class="nav-icon fas fa-warehouse"></i>
+                  <p>Inventory</p>
+                </a>
+              </li>
+            <?php endif; ?>
+
             <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->any(['permit-list'])): ?>
               <li class="nav-header">Permits</li>
             <?php endif; ?>

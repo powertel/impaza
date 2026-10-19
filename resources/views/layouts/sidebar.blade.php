@@ -156,6 +156,26 @@
               </li>
             @endcan
 
+            @canany(['stores-list','stores-process','materials','material-list','material-create','material-edit','material-delete'])
+              <li class="nav-header">Stores</li>
+            @endcanany
+            @canany(['stores-list','stores-process','materials'])
+              <li class="nav-item">
+                <a href="{{ route('stores.requests') }}" class="nav-link {{ request()->routeIs('stores.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-dolly"></i>
+                  <p>Material Requests</p>
+                </a>
+              </li>
+            @endcanany
+            @canany(['material-list','material-create','material-edit','material-delete'])
+              <li class="nav-item">
+                <a href="{{ route('materials.index') }}" class="nav-link {{ request()->routeIs('materials.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-warehouse"></i>
+                  <p>Inventory</p>
+                </a>
+              </li>
+            @endcanany
+
             @canany(['permit-list'])
               <li class="nav-header">Permits</li>
             @endcanany
