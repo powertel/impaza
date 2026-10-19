@@ -2,6 +2,11 @@
 
 return [
 
+    // Keys accepted by the api_key middleware (X-API-Key header), comma separated.
+    'external_api' => [
+        'keys' => env('EXTERNAL_API_KEYS', env('API_KEY', '')),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Third Party Services

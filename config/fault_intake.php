@@ -91,6 +91,9 @@ return [
     // link_status ids hidden from link search (4 = Decommissioned).
     'hidden_link_statuses' => [4],
 
+    // Requests per minute per API key on /api/v1/intake.
+    'rate_limit' => (int) env('FAULT_INTAKE_RATE_LIMIT', 600),
+
     // Max links returned by a search (keeps WhatsApp/USSD menus short).
     'max_link_results' => (int) env('FAULT_INTAKE_MAX_LINKS', 20),
 ];

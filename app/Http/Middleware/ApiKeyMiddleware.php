@@ -9,7 +9,8 @@ class ApiKeyMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        $configured = env('EXTERNAL_API_KEYS', env('API_KEY', ''));
+        // Read via config so it still works after `php artisan config:cache`.
+        $configured = (string) config('services.external_api.keys', '');
         $validKeys = array_values(array_filter(array_map('trim', preg_split('/[,\s]+/', (string) $configured))));
 
         $key = $request->header('X-API-Key');
