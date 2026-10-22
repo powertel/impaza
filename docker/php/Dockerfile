@@ -1,5 +1,7 @@
 # PHP-FPM for Laravel
-FROM php:8.2-fpm
+# Pinned to a patch release: 8.4.27 fixes CVE-2026-109618 / CVE-2026-109619 (critical RCE in PHP-FPM).
+# Bump this tag for future PHP security releases.
+FROM php:8.4.27-fpm
 
 # System dependencies
 RUN apt-get update && apt-get install -y \
@@ -7,7 +9,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libpng-dev \
     libjpeg-dev \
-    libfreetype6-dev \
+    libfreetype-dev \
     libzip-dev \
     tzdata \
     && rm -rf /var/lib/apt/lists/*

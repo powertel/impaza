@@ -6,7 +6,9 @@ RUN npm install
 COPY . .
 RUN npm run prod
 
-FROM php:8.2-fpm
+# Pinned to a patch release: 8.4.27 fixes CVE-2026-109618 / CVE-2026-109619 (critical RCE in PHP-FPM).
+# Bump this tag for future PHP security releases.
+FROM php:8.4.27-fpm
 
 # System dependencies
 RUN apt-get update && apt-get install -y \
@@ -14,7 +16,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libpng-dev \
     libjpeg-dev \
-    libfreetype6-dev \
+    libfreetype-dev \
     libzip-dev \
     tzdata \
     && rm -rf /var/lib/apt/lists/*
@@ -44,6 +46,10 @@ RUN pecl install redis \
 # Enable OPcache for performance
 RUN docker-php-ext-install opcache
 COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+
+# Production error handling: log errors, never print them into responses.
+# Hides PHP 8.4 "implicitly nullable" deprecation notices from Laravel 9-era packages.
+COPY docker/php/errors.ini /usr/local/etc/php/conf.d/errors.ini
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer

@@ -128,7 +128,7 @@ class FaultLifecycle
         }
     }
 
-    public static function isOffHours(Carbon $when = null): bool
+    public static function isOffHours(?Carbon $when = null): bool
     {
         $when = $when ?: now();
         $settings = AutoAssignSetting::query()->first();
