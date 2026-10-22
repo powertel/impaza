@@ -53,7 +53,7 @@ class RouteServiceProvider extends ServiceProvider
         // so limit per API key rather than per IP.
         RateLimiter::for('intake', function (Request $request) {
             $key = (string) ($request->header('X-API-Key') ?: $request->header('Authorization') ?: $request->ip());
-            return Limit::perMinute((int) env('FAULT_INTAKE_RATE_LIMIT', 600))->by('intake|' . sha1($key));
+            return Limit::perMinute((int) config('fault_intake.rate_limit', 600))->by('intake|' . sha1($key));
         });
     }
 }
