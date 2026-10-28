@@ -1184,7 +1184,8 @@ class DashboardController extends Controller
      *   from, to (Y-m-d)  period on faults.created_at   | month (Y-m) overrides from/to
      *   region, impact (direct|pop), category (direct|pop), customer_id
      *   rfo (comma-separated confirmed RFO ids; 0 = not yet confirmed)
-     *   status_group (open|restored)
+     *   status_group (open|restored|resolved|pending|overdue)
+     *   assigned_to (user id), assigned_only (1), section_id, department_id   [Performance dashboard]
      */
     public function drilldown(Request $request)
     {
@@ -1248,11 +1249,46 @@ class DashboardController extends Controller
             });
         }
 
+        $assignedTo = (int) $request->query('assigned_to', 0);
+        if ($assignedTo > 0) {
+            $q->where('faults.assignedTo', $assignedTo);
+        } elseif ($request->boolean('assigned_only')) {
+            $q->whereNotNull('faults.assignedTo');
+        }
+
+        $sectionId = (int) $request->query('section_id', 0);
+        if ($sectionId > 0) {
+            $q->whereExists(function ($w) use ($sectionId) {
+                $w->selectRaw('1')->from('fault_section')
+                    ->whereColumn('fault_section.fault_id', 'faults.id')
+                    ->where('fault_section.section_id', $sectionId);
+            });
+        }
+        $departmentId = (int) $request->query('department_id', 0);
+        if ($departmentId > 0) {
+            $q->whereExists(function ($w) use ($departmentId) {
+                $w->selectRaw('1')->from('fault_section')
+                    ->join('sections', 'sections.id', '=', 'fault_section.section_id')
+                    ->whereColumn('fault_section.fault_id', 'faults.id')
+                    ->where('sections.department_id', $departmentId);
+            });
+        }
+
+        // "Resolved" in the Performance sense = Rectified, Cleared by CT or Restored
+        $fixedIds = DB::table('statuses')->whereIn('status_code', ['CLT', 'CLC', 'CLN'])->pluck('id')->all() ?: [4, 5, 6];
+
         $statusGroup = strtolower((string) $request->query('status_group', ''));
         if ($statusGroup === 'restored') {
             $q->where('faults.status_id', $nocClearedId);
         } elseif ($statusGroup === 'open') {
             $q->whereNotIn('faults.status_id', [$nocClearedId, $revokedId]);
+        } elseif ($statusGroup === 'resolved') {
+            $q->whereIn('faults.status_id', $fixedIds);
+        } elseif ($statusGroup === 'pending') {
+            $q->whereNotIn('faults.status_id', $fixedIds);
+        } elseif ($statusGroup === 'overdue') {
+            $q->whereNotIn('faults.status_id', $fixedIds)
+              ->where('faults.created_at', '<', $now->copy()->subHours(72));
         }
 
         // Summary over the whole matching set
@@ -1280,6 +1316,12 @@ class DashboardController extends Controller
             ->selectRaw("COALESCE(cities.region, 'Unknown') as label, COUNT(*) as c")
             ->groupBy('label')->orderByDesc('c')->limit(8)->get()
             ->map(fn ($r) => ['label' => $r->label, 'count' => (int) $r->c])->values();
+
+        $byAssignee = $assignedTo > 0 ? collect() : (clone $q)
+            ->whereNotNull('faults.assignedTo')
+            ->selectRaw("faults.assignedTo as id, COALESCE(au.name, 'Unknown') as label, COUNT(*) as c")
+            ->groupBy('id', 'label')->orderByDesc('c')->limit(8)->get()
+            ->map(fn ($r) => ['id' => (int) $r->id, 'label' => $r->label, 'count' => (int) $r->c])->values();
 
         $rows = (clone $q)
             ->orderByDesc('faults.created_at')
@@ -1353,6 +1395,7 @@ class DashboardController extends Controller
             'by_rfo' => $byRfo,
             'by_customer' => $byCustomer,
             'by_region' => $byRegion,
+            'by_assignee' => $byAssignee,
             'rows' => $items,
             'truncated' => $total > $limit,
             'limit' => $limit,

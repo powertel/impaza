@@ -1,6 +1,7 @@
 
 
 <?php $__env->startSection('styles'); ?>
+<link href="<?php echo e(asset('css/fault-drill.css')); ?>?v=<?php echo e(@filemtime(public_path('css/fault-drill.css'))); ?>" rel="stylesheet">
 <style>
   .rpt-filter-bar { overflow: visible !important; display: block; padding: 14px 16px; }
   .rpt-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
@@ -39,67 +40,6 @@
   html[data-theme="dark"] .rpt-combo-list li.active, html[data-theme="dark"] .rpt-combo-list li:hover { background: #1e293b; color: #93c5fd; }
   html[data-theme="dark"] .rpt-chip { background: rgba(99, 102, 241, .15); color: #a5b4fc; }
   html[data-theme="dark"] .rpt-chip-period { background: rgba(16, 185, 129, .15); color: #6ee7b7; }
-  /* ---- drill-down ---- */
-  .drill-hint { font-size: .72rem; color: #6b7280; background: #f1f5f9; border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
-  .drill-hint i { font-size: .65rem; margin-right: 3px; }
-  .chart-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-  .chart-subtitle { font-size: .75rem; color: #6b7280; margin-top: 2px; }
-  .is-drillable { cursor: pointer; transition: transform .15s ease, box-shadow .15s ease; }
-  .is-drillable:hover, .is-drillable:focus-visible { transform: translateY(-2px); box-shadow: 0 12px 24px rgba(37, 99, 235, .14); outline: none; }
-  .drill-modal .modal-header { align-items: flex-start; border-bottom: 1px solid #eef2f7; }
-  .drill-crumbs { font-size: .78rem; color: #6b7280; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-  .drill-crumbs a { color: #2563eb; text-decoration: none; }
-  .drill-crumbs a:hover { text-decoration: underline; }
-  .drill-crumb-sep { font-size: .6rem; color: #cbd5e1; }
-  .drill-crumb-current { color: #111827; font-weight: 600; }
-  .drill-period { font-size: .75rem; font-weight: 600; color: #047857; background: #ecfdf5; border-radius: 999px; padding: 3px 10px; }
-  .drill-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
-  .drill-stat { border-radius: 12px; padding: 12px 14px; border: 1px solid #e5e7eb; background: #fff; }
-  .drill-stat.is-clickable { cursor: pointer; }
-  .drill-stat.is-clickable:hover { border-color: #93c5fd; box-shadow: 0 6px 16px rgba(37, 99, 235, .12); }
-  .drill-stat-value { font-size: 1.45rem; font-weight: 800; color: #111827; line-height: 1.1; }
-  .drill-stat-label { font-size: .75rem; color: #6b7280; text-transform: uppercase; letter-spacing: .03em; margin-top: 4px; }
-  .ds-total { background: #eff6ff; border-color: #bfdbfe; }
-  .ds-open { background: #fffbeb; border-color: #fde68a; }
-  .ds-restored { background: #ecfdf5; border-color: #a7f3d0; }
-  .ds-mttr { background: #f5f3ff; border-color: #ddd6fe; }
-  .drill-bds { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 16px; }
-  .drill-bd { border: 1px solid #eef2f7; border-radius: 12px; padding: 10px 12px; }
-  .drill-bd-title { font-size: .75rem; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 6px; }
-  .drill-bd-row { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 8px; font-size: .8rem; }
-  .drill-bd-row.is-clickable { cursor: pointer; }
-  .drill-bd-row.is-clickable:hover { background: #eff6ff; }
-  .drill-bd-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1f2937; }
-  .drill-bd-bar { height: 8px; background: #f1f5f9; border-radius: 999px; overflow: hidden; }
-  .drill-bd-bar span { display: block; height: 100%; background: linear-gradient(90deg, #60a5fa, #2563eb); border-radius: 999px; }
-  .drill-bd-count { font-weight: 700; color: #111827; min-width: 28px; text-align: right; }
-  .drill-table-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
-  .drill-count { font-size: .8rem; color: #6b7280; }
-  .drill-search { position: relative; width: 280px; max-width: 100%; }
-  .drill-search i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: .75rem; }
-  .drill-search input { padding-left: 28px; border-radius: 8px; }
-  .drill-table-wrap { border: 1px solid #eef2f7; border-radius: 12px; max-height: 52vh; }
-  .drill-table thead th { position: sticky; top: 0; background: #f8fafc; font-size: .72rem; text-transform: uppercase; letter-spacing: .03em; color: #6b7280; border-bottom: 1px solid #e5e7eb; white-space: nowrap; z-index: 1; }
-  .drill-table td { font-size: .82rem; vertical-align: top; padding-top: 8px; padding-bottom: 8px; }
-  .drill-link { min-width: 200px; max-width: 280px; }
-  .drill-ref { font-weight: 700; color: #1d4ed8; text-decoration: none; white-space: nowrap; }
-  .drill-ref i { font-size: .6rem; opacity: .6; }
-  .drill-cause.is-clickable, .drill-cust.is-clickable { cursor: pointer; border-bottom: 1px dashed #93c5fd; }
-  .drill-cause.is-clickable:hover, .drill-cust.is-clickable:hover { color: #1d4ed8; }
-  .drill-tag { display: inline-block; margin-top: 3px; font-size: .65rem; font-weight: 700; color: #7c3aed; background: #f5f3ff; border-radius: 999px; padding: 1px 7px; }
-  .drill-status { display: inline-block; font-size: .72rem; font-weight: 700; border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
-  .st-restored { background: #d1fae5; color: #047857; }
-  .st-closed { background: #e5e7eb; color: #4b5563; }
-  .st-waiting { background: #fef3c7; color: #b45309; }
-  .st-pop { background: #ede9fe; color: #6d28d9; }
-  .st-escalated { background: #fee2e2; color: #b91c1c; }
-  .st-progress { background: #dbeafe; color: #1d4ed8; }
-  @media (max-width: 767.98px) { .drill-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  html[data-theme="dark"] .drill-stat, html[data-theme="dark"] .drill-bd, html[data-theme="dark"] .drill-table-wrap { background: #0f172a; border-color: #334155; }
-  html[data-theme="dark"] .drill-stat-value, html[data-theme="dark"] .drill-bd-count, html[data-theme="dark"] .drill-bd-label, html[data-theme="dark"] .drill-crumb-current { color: #e2e8f0; }
-  html[data-theme="dark"] .drill-table thead th { background: #1e293b; color: #94a3b8; border-color: #334155; }
-  html[data-theme="dark"] .drill-bd-row.is-clickable:hover { background: #1e293b; }
-  html[data-theme="dark"] .drill-hint { background: #1e293b; color: #94a3b8; }
 </style>
 <?php $__env->stopSection(); ?>
 
@@ -523,58 +463,7 @@
         </div>
     </section>
 
-<div class="modal fade drill-modal" id="drillModal" tabindex="-1" aria-labelledby="drillTitle" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="flex-grow-1 min-w-0">
-                    <div class="drill-crumbs" id="drillCrumbs"></div>
-                    <div class="d-flex align-items-center flex-wrap gap-2 mt-1">
-                        <button type="button" class="btn btn-sm btn-light drill-back d-none" id="drillBack" title="Back"><i class="fas fa-arrow-left"></i></button>
-                        <h5 class="modal-title mb-0" id="drillTitle">Faults</h5>
-                        <span class="drill-period" id="drillPeriod"></span>
-                    </div>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div id="drillLoading" class="text-center text-muted py-5">
-                    <div class="spinner-border spinner-border-sm me-2" role="status"></div> Loading faults…
-                </div>
-                <div id="drillError" class="alert alert-danger d-none"></div>
-                <div id="drillContent" class="d-none">
-                    <div class="drill-stats" id="drillStats"></div>
-                    <div class="drill-bds" id="drillBreakdowns"></div>
-                    <div class="drill-table-head">
-                        <div class="drill-count" id="drillCount"></div>
-                        <div class="drill-search">
-                            <i class="fas fa-search"></i>
-                            <input type="search" id="drillSearch" class="form-control form-control-sm" placeholder="Filter these faults…">
-                        </div>
-                    </div>
-                    <div class="table-responsive drill-table-wrap">
-                        <table class="table table-sm align-middle drill-table mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Ref</th><th>Customer</th><th>Link / location</th><th>Root cause</th><th>Status</th><th>Reported</th><th>Duration</th>
-                                </tr>
-                            </thead>
-                            <tbody id="drillRows"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer justify-content-between">
-                <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Click a root cause, customer or region to drill further. Click a reference to open it in Faults.</small>
-                <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="drillCsv"><i class="fas fa-file-csv me-1"></i>Download CSV</button>
-                    <button type="button" class="btn btn-outline-danger btn-sm" id="drillPdf"><i class="fas fa-file-pdf me-1"></i>Download PDF</button>
-                    <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<?php echo $__env->make('partials.fault_drill_modal', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 <div class="modal fade" id="customerRootCauseModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
