@@ -51,6 +51,24 @@ class DashboardController extends Controller
         $selectedRegion = $selectedRegionRaw === '' ? null : $selectedRegionRaw;
         $availableRegions = DB::table('cities')->select('region')->whereNotNull('region')->distinct()->orderBy('region')->pluck('region')->toArray();
 
+        // Customer filter: scopes every Fault and Link query on this page to one customer.
+        $selectedCustomerId = (int) $request->input('customer_id', 0);
+        $selectedCustomer = $selectedCustomerId > 0 ? Customer::find($selectedCustomerId) : null;
+        if ($selectedCustomer) {
+            $cid = (int) $selectedCustomer->id;
+            Fault::addGlobalScope('reports_customer', function ($q) use ($cid) {
+                $q->where($q->getModel()->getTable() . '.customer_id', $cid);
+            });
+            Link::addGlobalScope('reports_customer', function ($q) use ($cid) {
+                $q->where($q->getModel()->getTable() . '.customer_id', $cid);
+            });
+        }
+        $customerOptions = Customer::query()
+            ->orderBy('customer')
+            ->get(['id', 'customer', 'account_number'])
+            ->map(fn ($c) => ['id' => (int) $c->id, 'name' => (string) $c->customer, 'account' => (string) ($c->account_number ?? '')])
+            ->values();
+
         $now = Carbon::now();
         $hasAnyFilter =
             $request->has('year')
@@ -344,6 +362,7 @@ class DashboardController extends Controller
         // Faults per past 12 months (labels and counts)
         $monthlyLabels = [];
         $monthlyCounts = [];
+        $monthlyKeys = [];
 
         $trendEnd = $periodEnd->copy()->endOfMonth();
         for ($i = 11; $i >= 0; $i--) {
@@ -360,6 +379,7 @@ class DashboardController extends Controller
             if ($impact === 'direct') $monthlyQuery->whereNull('root_fault_id');
             elseif ($impact === 'pop') $monthlyQuery->whereNotNull('root_fault_id');
             $count = $monthlyQuery->count();
+            $monthlyKeys[] = $from->format('Y-m');
             $monthlyLabels[] = $label;
             $monthlyCounts[] = $count;
         }
@@ -480,8 +500,10 @@ class DashboardController extends Controller
         $rfoBreakdown = $rfoBreakdownQuery->groupBy('confirmedRfo_id')->get();
         $rfoLabels = [];
         $rfoValues = [];
+        $rfoIds = [];
         foreach ($rfoBreakdown as $row) {
-            $label = 'RFO ' . ($row->confirmedRfo_id ?? 'N/A');
+            $rfoIds[] = (int) ($row->confirmedRfo_id ?? 0);
+            $label = $row->confirmedRfo_id ? ('RFO ' . $row->confirmedRfo_id) : 'Not yet confirmed';
             if ($row->confirmedRfo_id) {
                 $rfo = ReasonsForOutage::find($row->confirmedRfo_id);
                 if ($rfo) $label = $rfo->RFO ?? $label;
@@ -741,6 +763,9 @@ class DashboardController extends Controller
 
         $mttaBaseQuery = DB::table('fault_assignments')
             ->join('faults','fault_assignments.fault_id','=','faults.id');
+        if ($selectedCustomer) {
+            $mttaBaseQuery->where('faults.customer_id', $selectedCustomer->id);
+        }
         if ($selectedRegion) {
             $mttaBaseQuery->join('cities','faults.city_id','=','cities.id')
                 ->where('cities.region', $selectedRegion);
@@ -874,6 +899,9 @@ class DashboardController extends Controller
         $openFaultsByCustomerQuery = FaultAssignment::whereNull('fault_assignments.resolved_at')
             ->join('faults', 'fault_assignments.fault_id', '=', 'faults.id')
             ->select('faults.customer_id', DB::raw('COUNT(DISTINCT fault_assignments.fault_id) as c'));
+        if ($selectedCustomer) {
+            $openFaultsByCustomerQuery->where('faults.customer_id', $selectedCustomer->id);
+        }
         if (!$allTime) {
             $openFaultsByCustomerQuery->whereBetween('faults.created_at', [$currentStart, $currentEnd]);
         }
@@ -1055,6 +1083,18 @@ class DashboardController extends Controller
             'selectedRegion' => $selectedRegion,
             'selectedQuarter' => $selectedQuarter,
             'selectedImpact' => $impact,
+            'selectedCustomer' => $selectedCustomer,
+            'monthlyKeys' => $monthlyKeys,
+            'rfoIds' => $rfoIds,
+            'drillContext' => [
+                'from' => $allTime ? null : $periodStart->toDateString(),
+                'to' => $allTime ? null : $periodEnd->toDateString(),
+                'period_label' => $allTime ? 'All time' : ($periodStart->format('d M Y') . ' – ' . $periodEnd->format('d M Y')),
+                'region' => $selectedRegion,
+                'impact' => $impact,
+                'customer_id' => $selectedCustomer ? (int) $selectedCustomer->id : null,
+            ],
+            'customerOptions' => $customerOptions,
             'startDate' => $startDateInput,
             'endDate' => $endDateInput,
             'periodStart' => $periodStart,
@@ -1135,6 +1175,188 @@ class DashboardController extends Controller
             ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
             ->header('Pragma', 'no-cache')
             ->header('Expires', '0');
+    }
+
+    /**
+     * Drill-down: the faults behind any number on the reports dashboard.
+     *
+     * Filters (all optional, combinable):
+     *   from, to (Y-m-d)  period on faults.created_at   | month (Y-m) overrides from/to
+     *   region, impact (direct|pop), category (direct|pop), customer_id
+     *   rfo (comma-separated confirmed RFO ids; 0 = not yet confirmed)
+     *   status_group (open|restored)
+     */
+    public function drilldown(Request $request)
+    {
+        $limit = 500;
+        $now = Carbon::now();
+        $nocClearedId = (int) (DB::table('statuses')->where('status_code', 'CLN')->value('id') ?? 6);
+        $revokedId = (int) (DB::table('statuses')->where('status_code', 'RVK')->value('id') ?? 9);
+
+        $q = DB::table('faults')
+            ->leftJoin('customers', 'faults.customer_id', '=', 'customers.id')
+            ->leftJoin('links', 'faults.link_id', '=', 'links.id')
+            ->leftJoin('cities', 'faults.city_id', '=', 'cities.id')
+            ->leftJoin('statuses', 'faults.status_id', '=', 'statuses.id')
+            ->leftJoin('reasons_for_outages as crfo', 'faults.confirmedRfo_id', '=', 'crfo.id')
+            ->leftJoin('reasons_for_outages as srfo', 'faults.suspectedRfo_id', '=', 'srfo.id')
+            ->leftJoin('users as au', 'faults.assignedTo', '=', 'au.id');
+
+        $parseDate = function ($v, bool $end) {
+            if (!$v) return null;
+            try { $d = Carbon::createFromFormat('Y-m-d', (string) $v); } catch (\Throwable $e) { return null; }
+            return $end ? $d->endOfDay() : $d->startOfDay();
+        };
+
+        $month = (string) $request->query('month', '');
+        if (preg_match('/^\d{4}-\d{2}$/', $month)) {
+            $m = Carbon::createFromFormat('Y-m-d', $month . '-01');
+            $from = $m->copy()->startOfMonth();
+            $to = $m->copy()->endOfMonth();
+        } else {
+            $from = $parseDate($request->query('from'), false);
+            $to = $parseDate($request->query('to'), true);
+        }
+        if ($from) $q->where('faults.created_at', '>=', $from);
+        if ($to) $q->where('faults.created_at', '<=', $to);
+
+        $region = trim((string) $request->query('region', ''));
+        if ($region !== '') {
+            $q->where('cities.region', $region);
+        }
+
+        foreach (['impact', 'category'] as $key) {
+            $v = strtolower((string) $request->query($key, ''));
+            if ($v === 'direct') $q->whereNull('faults.root_fault_id');
+            elseif ($v === 'pop') $q->whereNotNull('faults.root_fault_id');
+        }
+
+        $customerId = (int) $request->query('customer_id', 0);
+        if ($customerId > 0) {
+            $q->where('faults.customer_id', $customerId);
+        }
+
+        $rfoRaw = trim((string) $request->query('rfo', ''));
+        if ($rfoRaw !== '') {
+            $ids = array_values(array_unique(array_map('intval', array_filter(explode(',', $rfoRaw), fn ($x) => $x !== ''))));
+            $withNull = in_array(0, $ids, true);
+            $ids = array_values(array_filter($ids, fn ($x) => $x > 0));
+            $q->where(function ($w) use ($ids, $withNull) {
+                if ($ids) $w->whereIn('faults.confirmedRfo_id', $ids);
+                if ($withNull) $w->orWhereNull('faults.confirmedRfo_id');
+                if (!$ids && !$withNull) $w->whereRaw('1 = 0');
+            });
+        }
+
+        $statusGroup = strtolower((string) $request->query('status_group', ''));
+        if ($statusGroup === 'restored') {
+            $q->where('faults.status_id', $nocClearedId);
+        } elseif ($statusGroup === 'open') {
+            $q->whereNotIn('faults.status_id', [$nocClearedId, $revokedId]);
+        }
+
+        // Summary over the whole matching set
+        $total = (clone $q)->count();
+        $restoredCount = (clone $q)->where('faults.status_id', $nocClearedId)->count();
+        $revokedCount = (clone $q)->where('faults.status_id', $revokedId)->count();
+
+        $byStatus = (clone $q)
+            ->selectRaw("COALESCE(statuses.description, 'Unknown') as label, statuses.status_code as code, COUNT(*) as c")
+            ->groupBy('label', 'code')->orderByDesc('c')->get()
+            ->map(fn ($r) => ['label' => $r->label, 'code' => $r->code, 'count' => (int) $r->c])->values();
+
+        $byRfo = (clone $q)
+            ->selectRaw("COALESCE(faults.confirmedRfo_id, 0) as id, COALESCE(crfo.RFO, 'Not yet confirmed') as label, COUNT(*) as c")
+            ->groupBy('id', 'label')->orderByDesc('c')->limit(8)->get()
+            ->map(fn ($r) => ['id' => (int) $r->id, 'label' => $r->label, 'count' => (int) $r->c])->values();
+
+        $byCustomer = $customerId > 0 ? collect() : (clone $q)
+            ->whereNotNull('faults.customer_id')
+            ->selectRaw("faults.customer_id as id, COALESCE(customers.customer, 'Unknown') as label, COUNT(*) as c")
+            ->groupBy('id', 'label')->orderByDesc('c')->limit(8)->get()
+            ->map(fn ($r) => ['id' => (int) $r->id, 'label' => $r->label, 'count' => (int) $r->c])->values();
+
+        $byRegion = $region !== '' ? collect() : (clone $q)
+            ->selectRaw("COALESCE(cities.region, 'Unknown') as label, COUNT(*) as c")
+            ->groupBy('label')->orderByDesc('c')->limit(8)->get()
+            ->map(fn ($r) => ['label' => $r->label, 'count' => (int) $r->c])->values();
+
+        $rows = (clone $q)
+            ->orderByDesc('faults.created_at')
+            ->limit($limit)
+            ->get([
+                'faults.id', 'faults.fault_ref_number', 'faults.customer_id', 'faults.created_at', 'faults.status_id',
+                'faults.root_fault_id', 'faults.confirmedRfo_id',
+                'customers.customer', 'links.link', 'cities.city', 'cities.region',
+                'statuses.description as status', 'statuses.status_code',
+                'crfo.RFO as confirmed_rfo', 'srfo.RFO as suspected_rfo', 'au.name as assigned_to',
+            ]);
+
+        // Restore time for cleared faults (start of the "cleared by NOC" stage)
+        $clearedAt = DB::table('fault_stage_logs')
+            ->whereIn('fault_id', $rows->pluck('id'))
+            ->where('status_id', $nocClearedId)
+            ->selectRaw('fault_id, MIN(started_at) as at')
+            ->groupBy('fault_id')
+            ->pluck('at', 'fault_id');
+
+        $fmtDuration = function (int $seconds): string {
+            $seconds = max(0, $seconds);
+            $d = intdiv($seconds, 86400);
+            $h = intdiv($seconds % 86400, 3600);
+            $m = intdiv($seconds % 3600, 60);
+            return $d > 0 ? "{$d}d {$h}h" : ($h > 0 ? "{$h}h {$m}m" : "{$m}m");
+        };
+
+        $restoreSeconds = [];
+        $items = $rows->map(function ($f) use ($clearedAt, $now, $nocClearedId, $fmtDuration, &$restoreSeconds) {
+            $created = Carbon::parse($f->created_at);
+            $restored = ((int) $f->status_id === $nocClearedId && isset($clearedAt[$f->id])) ? Carbon::parse($clearedAt[$f->id]) : null;
+            $secs = ($restored ?: $now)->diffInSeconds($created);
+            if ($restored) $restoreSeconds[] = $secs;
+            return [
+                'id' => (int) $f->id,
+                'ref' => $f->fault_ref_number,
+                'customer_id' => $f->customer_id ? (int) $f->customer_id : null,
+                'customer' => $f->customer ?: 'N/A',
+                'link' => $f->link ?: 'N/A',
+                'location' => trim(implode(', ', array_filter([$f->city, $f->region]))) ?: 'N/A',
+                'region' => $f->region,
+                'root_cause' => $f->confirmed_rfo ?: null,
+                'suspected' => $f->suspected_rfo ?: null,
+                'rfo_id' => (int) ($f->confirmedRfo_id ?? 0),
+                'status' => $f->status ?: 'N/A',
+                'status_code' => $f->status_code,
+                'pop' => !empty($f->root_fault_id),
+                'assigned_to' => $f->assigned_to,
+                'reported' => $created->format('d M Y H:i'),
+                'reported_iso' => $created->toIso8601String(),
+                'duration' => $fmtDuration($secs),
+                'duration_label' => $restored ? 'Restored in' : 'Open for',
+                'url' => route('faults.index', ['q' => $f->fault_ref_number, 'status' => 'all']),
+            ];
+        })->values();
+
+        return response()->json([
+            'total' => $total,
+            'open' => max(0, $total - $restoredCount - $revokedCount),
+            'restored' => $restoredCount,
+            'avg_restore' => $restoreSeconds ? $fmtDuration((int) round(array_sum($restoreSeconds) / count($restoreSeconds))) : null,
+            'period' => [
+                'from' => $from ? $from->toDateString() : null,
+                'to' => $to ? $to->toDateString() : null,
+                'label' => ($from || $to)
+                    ? (($from ? $from->format('d M Y') : '…') . ' – ' . ($to ? $to->format('d M Y') : '…'))
+                    : 'All time',
+            ],
+            'by_status' => $byStatus,
+            'by_rfo' => $byRfo,
+            'by_customer' => $byCustomer,
+            'by_region' => $byRegion,
+            'rows' => $items,
+            'truncated' => $total > $limit,
+            'limit' => $limit,
+        ]);
     }
 
     public function customerRootCauses(Request $request)

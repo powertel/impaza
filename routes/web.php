@@ -77,6 +77,7 @@ Route::group(['middleware' => ['auth']], function() {
     // Reports dashboard
     Route::get('/dashboard/reports', [DashboardController::class, 'reports'])->name('dashboard.reports');
     Route::get('/dashboard/reports/customer-root-causes', [DashboardController::class, 'customerRootCauses'])->name('dashboard.reports.customer-root-causes');
+    Route::get('/dashboard/reports/drilldown', [DashboardController::class, 'drilldown'])->name('dashboard.reports.drilldown');
     Route::get('/reports/system-usage-settings', [SystemUsageReportController::class, 'edit'])->name('system-usage-settings.edit');
     Route::post('/reports/system-usage-settings', [SystemUsageReportController::class, 'update'])->name('system-usage-settings.update');
     Route::post('/reports/system-usage-settings/send-test', [SystemUsageReportController::class, 'sendTest'])->name('system-usage-settings.send-test');
