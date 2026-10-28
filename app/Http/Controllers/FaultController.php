@@ -121,6 +121,73 @@ class FaultController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    /**
+     * Date-range filter shared by the faults list and its exports.
+     * period: all | 7d | 30d | 3m | 6m | 12m | this_month | last_month | this_year | custom (uses from/to, Y-m-d)
+     */
+    protected function resolveDateRange(): array
+    {
+        $period = (string) request('period', 'all');
+        $now = Carbon::now();
+        $from = null;
+        $to = null;
+
+        switch ($period) {
+            case '7d':  $from = $now->copy()->subDays(7)->startOfDay(); $label = 'Last 7 days'; break;
+            case '30d': $from = $now->copy()->subDays(30)->startOfDay(); $label = 'Last 30 days'; break;
+            case '3m':  $from = $now->copy()->subMonthsNoOverflow(3)->startOfDay(); $label = 'Last 3 months'; break;
+            case '6m':  $from = $now->copy()->subMonthsNoOverflow(6)->startOfDay(); $label = 'Last 6 months'; break;
+            case '12m': $from = $now->copy()->subMonthsNoOverflow(12)->startOfDay(); $label = 'Last 12 months'; break;
+            case 'this_month': $from = $now->copy()->startOfMonth(); $label = 'This month (' . $now->format('M Y') . ')'; break;
+            case 'last_month':
+                $lm = $now->copy()->subMonthNoOverflow();
+                $from = $lm->copy()->startOfMonth();
+                $to = $lm->copy()->endOfMonth();
+                $label = 'Last month (' . $lm->format('M Y') . ')';
+                break;
+            case 'this_year': $from = $now->copy()->startOfYear(); $label = 'This year (' . $now->format('Y') . ')'; break;
+            case 'custom':
+                try { $from = request()->filled('from') ? Carbon::createFromFormat('Y-m-d', (string) request('from'))->startOfDay() : null; } catch (\Throwable $e) { $from = null; }
+                try { $to = request()->filled('to') ? Carbon::createFromFormat('Y-m-d', (string) request('to'))->endOfDay() : null; } catch (\Throwable $e) { $to = null; }
+                if ($from && $to && $from->gt($to)) {
+                    [$from, $to] = [$to->copy()->startOfDay(), $from->copy()->endOfDay()];
+                }
+                if ($from && $to) {
+                    $label = $from->format('d M Y') . ' to ' . $to->format('d M Y');
+                } elseif ($from) {
+                    $label = 'From ' . $from->format('d M Y');
+                } elseif ($to) {
+                    $label = 'Up to ' . $to->format('d M Y');
+                } else {
+                    $period = 'all';
+                    $label = 'All dates';
+                }
+                break;
+            default:
+                $period = 'all';
+                $label = 'All dates';
+        }
+
+        return [
+            'period' => $period,
+            'from' => $from,
+            'to' => $to,
+            'label' => $label,
+            'from_input' => $from ? $from->format('Y-m-d') : '',
+            'to_input' => $to ? $to->format('Y-m-d') : '',
+        ];
+    }
+
+    protected function applyDateRange($query, array $range): void
+    {
+        if (!empty($range['from'])) {
+            $query->where('faults.created_at', '>=', $range['from']);
+        }
+        if (!empty($range['to'])) {
+            $query->where('faults.created_at', '<=', $range['to']);
+        }
+    }
+
     public function index()
     {
         $perPage = (int) request('per_page', 20);
@@ -216,6 +283,9 @@ class FaultController extends Controller
             $faultsQuery->where('cities.region', '=', $regionFilter);
         }
 
+        $dateRange = $this->resolveDateRange();
+        $this->applyDateRange($faultsQuery, $dateRange);
+
         $faults = $faultsQuery->paginate($perPage)->withQueryString();
         
         // Collect remarks for all listed faults and group by fault_id
@@ -307,7 +377,7 @@ class FaultController extends Controller
             'open_gt72'  => (clone $openFaultsBase)->where('faults.created_at', '<', Carbon::now()->subHours(72))->count(),
         ];
 
-        return view('faults.index',compact('faults','customer','city','accountManager','location','link','pop','suspectedRFO','remarksByFault','openStatuses','ageStats','faultAges','faultAgeStart','faultAgeEnd','regions','regionFilter','statusFilter','ageFilter','perPage'))
+        return view('faults.index',compact('faults','customer','city','accountManager','location','link','pop','suspectedRFO','remarksByFault','openStatuses','ageStats','faultAges','faultAgeStart','faultAgeEnd','regions','regionFilter','statusFilter','ageFilter','perPage','dateRange'))
         ->with('i');
 
     }
@@ -366,7 +436,9 @@ class FaultController extends Controller
                 'cities.city',
                 'suburbs.suburb',
                 'pops.pop',
-                'reasons_for_outages.RFO as RFO'
+                'reasons_for_outages.RFO as RFO',
+                'statuses.status_code',
+                'cities.region'
                 ]);
 
         if ($q !== '') {
@@ -404,6 +476,8 @@ class FaultController extends Controller
         if ($regionFilter !== '' && $regionFilter !== 'all') {
             $faultsQuery->where('cities.region', '=', $regionFilter);
         }
+
+        $this->applyDateRange($faultsQuery, $this->resolveDateRange());
 
         return $faultsQuery;
     }
@@ -455,38 +529,74 @@ class FaultController extends Controller
     }
 
     /**
-     * Export faults to PDF via Dompdf, bypassing pagination.
+     * Data for the browser-generated (jsPDF) faults report, honouring the same filters as the list.
      */
-    public function exportPdf(Request $request)
+    public function exportData(Request $request)
     {
-        $faults = $this->buildFilteredFaultsQuery($request)->get();
+        $maxRows = 5000;
+        $all = $this->buildFilteredFaultsQuery($request)->limit($maxRows + 1)->get();
+        $truncated = $all->count() > $maxRows;
+        $faults = $all->take($maxRows)->values();
+
         $remarksByFault = $this->latestRemarksByFault($faults->pluck('id'));
         $faultAges = $this->buildFaultAgeMap($faults);
-        $filename = 'faults_'.date('Ymd_His').'.pdf';
+        $range = $this->resolveDateRange();
 
-        // If Dompdf not installed, provide a helpful error
-        if (!class_exists('Barryvdh\\DomPDF\\Facade\\Pdf')) {
-            return response()->json([
-                'message' => 'PDF export requires barryvdh/laravel-dompdf. Please install the dependency.',
-            ], 500);
+        $statusFilter = (string) $request->query('status', 'all');
+        if ($statusFilter === 'lt4') {
+            $statusLabel = 'Open faults';
+        } elseif (ctype_digit($statusFilter)) {
+            $statusLabel = (string) (DB::table('statuses')->where('id', (int) $statusFilter)->value('description') ?? 'Status #' . $statusFilter);
+        } else {
+            $statusLabel = 'All statuses';
         }
+        $ageLabel = [
+            'today' => 'Logged today',
+            'lt72' => 'Within 72 hours',
+            'gt72' => 'Over 72 hours',
+        ][(string) $request->query('age', 'all')] ?? 'All ages';
+        $region = trim((string) $request->query('region', 'all'));
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('faults.export_pdf', [
-            'faults' => $faults,
-            'remarksByFault' => $remarksByFault,
-            'faultAges' => $faultAges,
-            'generatedAt' => now()->format('Y-m-d H:i'),
+        $closedCodes = ['CLN', 'RVK'];
+        $rows = $faults->map(function ($f) use ($remarksByFault, $faultAges) {
+            $remark = $remarksByFault->get($f->id);
+            return [
+                'ref' => $f->fault_ref_number,
+                'customer' => $f->customer ?: 'N/A',
+                'link' => $f->link ?: 'N/A',
+                'location' => trim(implode(', ', array_filter([$f->city ?? null, $f->region ?? null]))) ?: 'N/A',
+                'switch' => $remark->switch_name ?? 'N/A',
+                'port' => $remark->port ?? 'N/A',
+                'assigned_to' => $f->assignedTo ?: 'Not yet assigned',
+                'reported_at' => Carbon::parse($f->created_at)->format('d M Y H:i'),
+                'status' => $f->description ?: 'N/A',
+                'status_code' => $f->status_code ?? null,
+                'age' => $faultAges[$f->id] ?? 'N/A',
+            ];
+        })->all();
+
+        return response()->json([
+            'generated_at' => now()->format('d M Y H:i'),
+            'generated_by' => optional($request->user())->name,
             'filters' => [
+                'period' => $range['label'],
+                'status' => $statusLabel,
+                'age' => $ageLabel,
+                'region' => ($region === '' || $region === 'all') ? 'All regions' : $region,
                 'search' => trim((string) $request->query('q', '')),
-                'status' => $request->query('status', 'all'),
-                'age' => $request->query('age', 'all'),
-                'region' => trim((string) $request->query('region', 'all')),
             ],
-        ])->setPaper('a4', 'landscape');
-
-        return $pdf->download($filename);
+            'totals' => [
+                'faults' => count($rows),
+                'open' => $faults->filter(fn ($f) => !in_array($f->status_code ?? '', $closedCodes, true))->count(),
+                'restored' => $faults->filter(fn ($f) => ($f->status_code ?? '') === 'CLN')->count(),
+                'assigned' => $faults->filter(fn ($f) => !empty($f->assignedTo))->count(),
+                'unassigned' => $faults->filter(fn ($f) => empty($f->assignedTo))->count(),
+            ],
+            'truncated' => $truncated,
+            'max_rows' => $maxRows,
+            'rows' => $rows,
+        ]);
     }
-
 
     public function managedCustomers(Request $request)
     {
