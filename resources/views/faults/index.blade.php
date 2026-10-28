@@ -160,9 +160,48 @@ Faults
 
   .faults-toolbar-grid {
     display: grid;
-    grid-template-columns: 116px minmax(170px, 1fr) minmax(150px, 1fr) minmax(240px, 1.35fr) auto auto;
+    grid-template-columns: 116px repeat(4, minmax(140px, 1fr)) minmax(220px, 1.35fr);
     gap: 12px;
     align-items: center;
+  }
+
+  .faults-toolbar-row2 {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .faults-toolbar-range {
+    flex: 0 1 460px;
+    min-width: 260px;
+  }
+
+  .faults-toolbar-range .range-sep {
+    background: transparent;
+    border-left: 0;
+    border-right: 0;
+    min-width: 0 !important;
+    font-size: 12px;
+  }
+
+  .faults-toolbar-buttons {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+  }
+
+  .faults-range-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--impaza-primary, #4f46e5) 10%, transparent);
+    color: var(--impaza-primary, #4f46e5);
+    font-weight: 600;
   }
 
   .faults-toolbar-field {
@@ -352,7 +391,7 @@ Faults
 
   @media (max-width: 1399.98px) {
     .faults-toolbar-grid {
-      grid-template-columns: 110px minmax(150px, 1fr) minmax(140px, 1fr) minmax(220px, 1.2fr) auto auto;
+      grid-template-columns: 110px repeat(4, minmax(130px, 1fr)) minmax(200px, 1.2fr);
     }
   }
 
@@ -614,14 +653,15 @@ Faults
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
           <li>
-            <a class="dropdown-item" href="{{ route('faults.export.csv', request()->only('q','status','age','region')) }}">
+            <a class="dropdown-item" href="{{ route('faults.export.csv', request()->only('q','status','age','region','period','from','to')) }}">
               <i class="fas fa-file-excel me-2"></i>Export Excel
             </a>
           </li>
           <li>
-            <a class="dropdown-item" href="{{ route('faults.export.pdf', request()->only('q','status','age','region')) }}">
-              <i class="fas fa-file-pdf me-2"></i>Export PDF
-            </a>
+            <button type="button" class="dropdown-item" id="faultsExportPdfBtn"
+                    data-url="{{ route('faults.export.data', request()->only('q','status','age','region','period','from','to')) }}">
+              <i class="fas fa-file-pdf me-2"></i><span class="label">Export PDF</span>
+            </button>
           </li>
         </ul>
       </div>
@@ -682,6 +722,32 @@ Faults
           </div>
         </div>
 
+        @php
+          $period = $dateRange['period'] ?? 'all';
+          $periodOptions = [
+            'all' => 'All Dates',
+            '7d' => 'Last 7 Days',
+            '30d' => 'Last 30 Days',
+            '3m' => 'Last 3 Months',
+            '6m' => 'Last 6 Months',
+            '12m' => 'Last 12 Months',
+            'this_month' => 'This Month',
+            'last_month' => 'Last Month',
+            'this_year' => 'This Year',
+            'custom' => 'Custom Range...',
+          ];
+        @endphp
+        <div class="faults-toolbar-field">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+            <select name="period" id="faultsPeriodFilter" class="form-select form-select-sm" aria-label="Date range">
+              @foreach($periodOptions as $pv => $pl)
+                <option value="{{ $pv }}" {{ $period === $pv ? 'selected' : '' }}>{{ $pl }}</option>
+              @endforeach
+            </select>
+          </div>
+        </div>
+
         <div class="faults-toolbar-field faults-toolbar-search">
           <div class="input-group input-group-sm">
             <span class="input-group-text"><i class="fas fa-search"></i></span>
@@ -690,12 +756,27 @@ Faults
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3 faults-toolbar-submit">
-          <i class="fas fa-search me-1"></i> Search
-        </button>
-        <a href="{{ route('faults.index', ['per_page' => $perPage]) }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 faults-toolbar-reset">
-          <i class="fas fa-rotate-left me-1"></i> Reset
-        </a>
+        <div class="faults-toolbar-row2">
+          <div id="faultsCustomRange" class="faults-toolbar-range {{ $period === 'custom' ? '' : 'd-none' }}">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text"><i class="fas fa-calendar-day"></i></span>
+              <input type="date" name="from" id="faultsFrom" class="form-control" value="{{ $dateRange['from_input'] ?? '' }}" max="{{ now()->format('Y-m-d') }}" aria-label="From date" {{ $period === 'custom' ? '' : 'disabled' }}>
+              <span class="input-group-text range-sep">to</span>
+              <input type="date" name="to" id="faultsTo" class="form-control" value="{{ $dateRange['to_input'] ?? '' }}" max="{{ now()->format('Y-m-d') }}" aria-label="To date" {{ $period === 'custom' ? '' : 'disabled' }}>
+            </div>
+          </div>
+          @if($period !== 'all')
+            <span class="faults-range-chip"><i class="fas fa-calendar-check"></i> {{ $dateRange['label'] }}</span>
+          @endif
+          <div class="faults-toolbar-buttons">
+            <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3 faults-toolbar-submit">
+              <i class="fas fa-search me-1"></i> Search
+            </button>
+            <a href="{{ route('faults.index', ['per_page' => $perPage]) }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 faults-toolbar-reset">
+              <i class="fas fa-rotate-left me-1"></i> Reset
+            </a>
+          </div>
+        </div>
       </div>
     </form>
   </div>
@@ -853,6 +934,29 @@ Faults
       document.getElementById('faultsRegionFilter')?.addEventListener('change', function(){
         this.form?.submit();
       });
+      // Date range: presets submit immediately; "Custom" reveals the from/to dates
+      (function(){
+        const sel = document.getElementById('faultsPeriodFilter');
+        const box = document.getElementById('faultsCustomRange');
+        const from = document.getElementById('faultsFrom');
+        const to = document.getElementById('faultsTo');
+        if (!sel || !box) return;
+        sel.addEventListener('change', function(){
+          const custom = this.value === 'custom';
+          box.classList.toggle('d-none', !custom);
+          [from, to].forEach(function(i){ if (i) i.disabled = !custom; });
+          if (custom) { from?.focus(); return; }
+          this.form?.submit();
+        });
+        [from, to].forEach(function(i){
+          i?.addEventListener('change', function(){
+            if (from && to && from.value && to.value) {
+              if (from.value > to.value) { const t = from.value; from.value = to.value; to.value = t; }
+              sel.form?.submit();
+            }
+          });
+        });
+      })();
       // Initial age select coloration
       (function(){
         const el = document.getElementById('faultsAgeFilter');
@@ -901,6 +1005,14 @@ Faults
       updateAges();
       setInterval(updateAges, 60000);
     </script>
+    <script>
+      window.__FAULTS_PDF_ASSETS__ = {
+        logoUrl: @json(asset('images/powertel.png')),
+        jspdfChunkUrl: @json(asset('js/node_modules_jspdf_dist_jspdf_es_min_js.js')),
+        autotableChunkUrl: @json(asset('js/node_modules_jspdf-autotable_dist_jspdf_plugin_autotable_js.js')),
+      };
+    </script>
+    <script src="{{ asset('js/faults-pdf.js') }}?v={{ file_exists(public_path('js/faults-pdf.js')) ? filemtime(public_path('js/faults-pdf.js')) : time() }}"></script>
 @endsection
 
 
