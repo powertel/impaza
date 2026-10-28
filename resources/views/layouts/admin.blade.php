@@ -33,9 +33,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Styles -->
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/dashboard.css') }}" rel="stylesheet">
-    <link href="{{ asset('css/faults.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) }}" rel="stylesheet">
+    <link href="{{ asset('css/dashboard.css') }}?v={{ @filemtime(public_path('css/dashboard.css')) }}" rel="stylesheet">
+    <link href="{{ asset('css/faults.css') }}?v={{ @filemtime(public_path('css/faults.css')) }}" rel="stylesheet">
     <link href="{{ asset('css/impaza-components.css') }}?v={{ @filemtime(public_path('css/impaza-components.css')) }}" rel="stylesheet">
     @yield('styles')
 
@@ -671,11 +671,11 @@
     @endsection
 
     <!-- All vendor scripts/styles are bundled locally via Mix -->
-    <script src="{{ asset('js/app.js') }}"></script>
-    <script src="{{ asset('js/modals-bridge.js') }}"></script>
-    <script src="{{ asset('js/faults-modals.js') }}"></script>
+    <script src="{{ asset('js/app.js') }}?v={{ @filemtime(public_path('js/app.js')) }}"></script>
+    <script src="{{ asset('js/modals-bridge.js') }}?v={{ @filemtime(public_path('js/modals-bridge.js')) }}"></script>
+    <script src="{{ asset('js/faults-modals.js') }}?v={{ @filemtime(public_path('js/faults-modals.js')) }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{{ asset('js/reports.js') }}"></script>
+    <script src="{{ asset('js/reports.js') }}?v={{ @filemtime(public_path('js/reports.js')) }}"></script>
 
     
 
