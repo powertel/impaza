@@ -20,6 +20,7 @@
       statusValues: parse('statusValues'),
       rfoLabels: parse('rfoLabels'),
       rfoValues: parse('rfoValues'),
+      rfoIds: parse('rfoIds'),
       suspectedRfoLabels: parse('suspectedRfoLabels'),
       suspectedRfoValues: parse('suspectedRfoValues'),
       rfoMonthlyLabels: parse('rfoMonthlyLabels'),
@@ -489,6 +490,124 @@
     };
   }
 
+  // Ranked horizontal bars with "count · pct%" printed at the end of each bar.
+  // Keeps the top N and folds the rest into "Other". Each bar carries the ids it
+  // represents (dataset.drillIds) so the drill-down can use them.
+  // Distinct colours, assigned by rank so the bars on screen never share a colour.
+  const RANKED_PALETTE = ['#2563eb', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#6366f1', '#14b8a6', '#a855f7'];
+
+  function buildRankedBarConfig({ labels, values, ids = null, maxBars = 10, palette = RANKED_PALETTE, neutralLabels = [], otherColor = '#cbd5e1', unit = 'faults' }) {
+    const rows = (labels || []).map((label, i) => ({
+      label: String(label ?? 'N/A'),
+      value: Number(values?.[i] ?? 0) || 0,
+      ids: ids ? [ids[i]] : null
+    })).filter(r => r.value > 0).sort((a, b) => b.value - a.value);
+
+    const total = rows.reduce((s, r) => s + r.value, 0) || 1;
+    let shown = rows;
+    if (rows.length > maxBars) {
+      const top = rows.slice(0, maxBars - 1);
+      const rest = rows.slice(maxBars - 1);
+      top.push({
+        label: `Other (${rest.length})`,
+        value: rest.reduce((s, r) => s + r.value, 0),
+        ids: ids ? rest.flatMap(r => r.ids) : null,
+        other: true
+      });
+      shown = top;
+    }
+
+    // Each bar its own colour; "Other" and neutral entries (e.g. "Not yet confirmed") in greys.
+    let next = 0;
+    const colors = shown.map((row) => {
+      if (row.other) return otherColor;
+      if (neutralLabels.indexOf(row.label) !== -1) return '#64748b';
+      return palette[next++ % palette.length];
+    });
+    const hexToRgba = (h, a) => { const n = parseInt(h.replace('#', ''), 16); return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`; };
+
+    const valueLabels = {
+      id: 'rankedValueLabels',
+      afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        const meta = chart.getDatasetMeta(0);
+        ctx.save();
+        ctx.font = "600 11px Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+        ctx.textBaseline = 'middle';
+        meta.data.forEach((bar, i) => {
+          const v = shown[i].value;
+          const pct = (v / total) * 100;
+          const text = `${v.toLocaleString()} · ${pct < 1 ? pct.toFixed(1) : Math.round(pct)}%`;
+          const w = ctx.measureText(text).width;
+          const overflow = bar.x + 6 + w > chart.width - 4;
+          const inside = overflow && (bar.x - chart.chartArea.left > w + 12);
+          ctx.fillStyle = inside ? '#ffffff' : '#374151';
+          ctx.textAlign = inside ? 'right' : 'left';
+          ctx.fillText(text, inside ? bar.x - 6 : bar.x + 6, bar.y);
+        });
+        ctx.restore();
+      }
+    };
+
+    return {
+      type: 'bar',
+      data: {
+        labels: shown.map(r => r.label),
+        datasets: [{
+          label: unit,
+          data: shown.map(r => r.value),
+          backgroundColor: colors.map(c => hexToRgba(c, 0.88)),
+          hoverBackgroundColor: colors,
+          borderRadius: 6,
+          borderSkipped: false,
+          barPercentage: 0.78,
+          maxBarThickness: 30,
+          categoryPercentage: 0.9,
+          drillIds: shown.map(r => r.ids),
+          drillOther: shown.map(r => !!r.other)
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { right: 70 } },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (c) => ` ${c.raw.toLocaleString()} ${unit} (${((c.raw / total) * 100).toFixed(1)}%)`,
+              footer: () => 'Click to see these faults'
+            }
+          }
+        },
+        scales: {
+          x: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { color: '#9ca3af', precision: 0 }, border: { display: false } },
+          y: {
+            grid: { display: false },
+            border: { display: false },
+            ticks: {
+              color: '#1f2937',
+              font: { size: 12, weight: '600' },
+              autoSkip: false,
+              callback: function (v) { const l = this.getLabelForValue(v); return l.length > 28 ? l.slice(0, 27) + '…' : l; }
+            }
+          }
+        }
+      },
+      plugins: [valueLabels],
+      _rowCount: shown.length
+    };
+  }
+
+  function sizeForBars(canvasId, rowCount, perRow = 34, min = 220) {
+    const c = el(canvasId);
+    if (!c || !c.parentElement) return;
+    const h = Math.max(min, rowCount * perRow + 40);
+    c.parentElement.style.height = h + 'px';
+    c.parentElement.style.flex = '0 0 ' + h + 'px';
+  }
+
   function buildPieConfig(opts) {
     const cfg = buildDonutConfig(opts);
     cfg.type = 'pie';
@@ -611,7 +730,8 @@
                 color: '#9ca3af',
                 font: { size: 12, family: 'Inter' },
                 padding: 10,
-                stepSize: 2
+                precision: 0,
+                maxTicksLimit: 7
               },
               border: { display: false }
             } 
@@ -713,18 +833,16 @@
       options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
     });
 
-    // RFO
+    // Root causes: ranked bars (top 10 + Other), easier to read than a crowded donut
     if (has('chartRFO')) {
-      const cfg = buildDonutConfig({
+      const cfg = buildRankedBarConfig({
         labels: data.rfoLabels,
         values: data.rfoValues,
-        palette: ['#3b82f6', '#ef4444', '#f59e0b', '#84cc16', '#14b8a6', '#60a5fa', '#a78bfa'],
-        maxSlices: null,
-        groupOther: false,
-        showLegend: false,
-        calloutTextMinPct: 3,
-        calloutLabelMaxChars: 16
+        ids: (data.rfoIds && data.rfoIds.length === data.rfoLabels.length) ? data.rfoIds : null,
+        maxBars: 10,
+        neutralLabels: ['Not yet confirmed']
       });
+      sizeForBars('chartRFO', cfg._rowCount);
       new Chart(el('chartRFO'), cfg);
     }
 
@@ -774,7 +892,11 @@
 
     // Service type & city faults
     if (has('chartServiceType')) new Chart(el('chartServiceType'), { type: 'bar', data: { labels: data.serviceTypeLabels, datasets: [{ label: 'Faults', data: data.serviceTypeValues, backgroundColor: '#36b9cc' }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
-    if (has('chartCityFaults')) new Chart(el('chartCityFaults'), { type: 'bar', data: { labels: data.cityFaultsLabels, datasets: [{ label: 'Faults', data: data.cityFaultsValues, backgroundColor: '#858796' }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+    if (has('chartCityFaults')) {
+      const cfg = buildRankedBarConfig({ labels: data.cityFaultsLabels, values: data.cityFaultsValues, maxBars: 10, palette: ['#0d9488', '#f59e0b', '#6366f1', '#ec4899', '#84cc16', '#06b6d4', '#ef4444', '#8b5cf6'], neutralLabels: ['Unknown Region'] });
+      sizeForBars('chartCityFaults', cfg._rowCount, 44);
+      new Chart(el('chartCityFaults'), cfg);
+    }
 
     // Account managers
     if (has('chartAMFaults')) new Chart(el('chartAMFaults'), { type: 'bar', data: { labels: data.amLabels, datasets: [{ label: 'Faults', data: data.amFaultsValues, backgroundColor: '#5a5c69' }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
