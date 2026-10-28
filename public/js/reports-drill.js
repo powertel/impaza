@@ -116,7 +116,7 @@
   }
 
   function breakdown(title, icon, items, kind) {
-    if (!items || !items.length) return '';
+    if (!items || items.length < 2) return '';  // a single entry adds nothing
     var max = Math.max.apply(null, items.map(function (i) { return i.count; })) || 1;
     var rows = items.map(function (i) {
       var clickable = kind && !(kind === 'region' && i.label === 'Unknown');

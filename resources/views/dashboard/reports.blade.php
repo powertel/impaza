@@ -565,6 +565,7 @@
                 <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Click a root cause, customer or region to drill further. Click a reference to open it in Faults.</small>
                 <div class="d-flex gap-2">
                     <button type="button" class="btn btn-outline-secondary btn-sm" id="drillCsv"><i class="fas fa-file-csv me-1"></i>Download CSV</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" id="drillPdf"><i class="fas fa-file-pdf me-1"></i>Download PDF</button>
                     <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -607,6 +608,7 @@
      data-rfo-ids='@json($rfoIds ?? [])'
      data-monthly-keys='@json($monthlyKeys ?? [])'
      data-drill-context='@json($drillContext ?? [])'
+     data-user-name="{{ optional(auth()->user())->name }}"
      data-drill-url="{{ route('dashboard.reports.drilldown') }}"
      data-city-faults-labels='@json($cityFaultsLabels)'
      data-city-faults-values='@json($cityFaultsValues)'></div>
@@ -617,6 +619,14 @@
 @endsection
 
 @section('scripts')
+<script>
+  window.__FAULTS_PDF_ASSETS__ = {
+    logoUrl: @json(asset('images/powertel.png')),
+    jspdfChunkUrl: @json(asset('js/node_modules_jspdf_dist_jspdf_es_min_js.js')),
+    autotableChunkUrl: @json(asset('js/node_modules_jspdf-autotable_dist_jspdf_plugin_autotable_js.js')),
+  };
+</script>
+<script src="{{ asset('js/faults-pdf.js') }}?v={{ @filemtime(public_path('js/faults-pdf.js')) }}"></script>
 <script src="{{ asset('js/reports-drill.js') }}?v={{ @filemtime(public_path('js/reports-drill.js')) }}"></script>
 <script>
   // Customer search (type-ahead over all customers; selecting one applies the filter)

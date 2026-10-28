@@ -568,6 +568,7 @@
                 <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Click a root cause, customer or region to drill further. Click a reference to open it in Faults.</small>
                 <div class="d-flex gap-2">
                     <button type="button" class="btn btn-outline-secondary btn-sm" id="drillCsv"><i class="fas fa-file-csv me-1"></i>Download CSV</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" id="drillPdf"><i class="fas fa-file-pdf me-1"></i>Download PDF</button>
                     <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -610,6 +611,7 @@
      data-rfo-ids='<?php echo json_encode($rfoIds ?? [], 15, 512) ?>'
      data-monthly-keys='<?php echo json_encode($monthlyKeys ?? [], 15, 512) ?>'
      data-drill-context='<?php echo json_encode($drillContext ?? [], 15, 512) ?>'
+     data-user-name="<?php echo e(optional(auth()->user())->name); ?>"
      data-drill-url="<?php echo e(route('dashboard.reports.drilldown')); ?>"
      data-city-faults-labels='<?php echo json_encode($cityFaultsLabels, 15, 512) ?>'
      data-city-faults-values='<?php echo json_encode($cityFaultsValues, 15, 512) ?>'></div>
@@ -620,6 +622,14 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('scripts'); ?>
+<script>
+  window.__FAULTS_PDF_ASSETS__ = {
+    logoUrl: <?php echo json_encode(asset('images/powertel.png'), 15, 512) ?>,
+    jspdfChunkUrl: <?php echo json_encode(asset('js/node_modules_jspdf_dist_jspdf_es_min_js.js'), 15, 512) ?>,
+    autotableChunkUrl: <?php echo json_encode(asset('js/node_modules_jspdf-autotable_dist_jspdf_plugin_autotable_js.js'), 15, 512) ?>,
+  };
+</script>
+<script src="<?php echo e(asset('js/faults-pdf.js')); ?>?v=<?php echo e(@filemtime(public_path('js/faults-pdf.js'))); ?>"></script>
 <script src="<?php echo e(asset('js/reports-drill.js')); ?>?v=<?php echo e(@filemtime(public_path('js/reports-drill.js'))); ?>"></script>
 <script>
   // Customer search (type-ahead over all customers; selecting one applies the filter)
