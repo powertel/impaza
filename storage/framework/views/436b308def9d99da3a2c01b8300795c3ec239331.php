@@ -33,9 +33,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Styles -->
-    <link href="<?php echo e(asset('css/app.css')); ?>" rel="stylesheet">
-    <link href="<?php echo e(asset('css/dashboard.css')); ?>" rel="stylesheet">
-    <link href="<?php echo e(asset('css/faults.css')); ?>" rel="stylesheet">
+    <link href="<?php echo e(asset('css/app.css')); ?>?v=<?php echo e(@filemtime(public_path('css/app.css'))); ?>" rel="stylesheet">
+    <link href="<?php echo e(asset('css/dashboard.css')); ?>?v=<?php echo e(@filemtime(public_path('css/dashboard.css'))); ?>" rel="stylesheet">
+    <link href="<?php echo e(asset('css/faults.css')); ?>?v=<?php echo e(@filemtime(public_path('css/faults.css'))); ?>" rel="stylesheet">
     <link href="<?php echo e(asset('css/impaza-components.css')); ?>?v=<?php echo e(@filemtime(public_path('css/impaza-components.css'))); ?>" rel="stylesheet">
     <?php echo $__env->yieldContent('styles'); ?>
 
@@ -671,11 +671,11 @@
     <?php $__env->stopSection(); ?>
 
     <!-- All vendor scripts/styles are bundled locally via Mix -->
-    <script src="<?php echo e(asset('js/app.js')); ?>"></script>
-    <script src="<?php echo e(asset('js/modals-bridge.js')); ?>"></script>
-    <script src="<?php echo e(asset('js/faults-modals.js')); ?>"></script>
+    <script src="<?php echo e(asset('js/app.js')); ?>?v=<?php echo e(@filemtime(public_path('js/app.js'))); ?>"></script>
+    <script src="<?php echo e(asset('js/modals-bridge.js')); ?>?v=<?php echo e(@filemtime(public_path('js/modals-bridge.js'))); ?>"></script>
+    <script src="<?php echo e(asset('js/faults-modals.js')); ?>?v=<?php echo e(@filemtime(public_path('js/faults-modals.js'))); ?>"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="<?php echo e(asset('js/reports.js')); ?>"></script>
+    <script src="<?php echo e(asset('js/reports.js')); ?>?v=<?php echo e(@filemtime(public_path('js/reports.js'))); ?>"></script>
 
     
 

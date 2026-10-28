@@ -153,6 +153,7 @@
     var bds = breakdown('Root causes', 'fa-search', d.by_rfo, params.rfo ? null : 'rfo') +
       breakdown('Customers', 'fa-building', d.by_customer, 'customer') +
       breakdown('Regions', 'fa-map-marker-alt', d.by_region, 'region') +
+      breakdown('Technicians', 'fa-user-cog', d.by_assignee, 'assignee') +
       breakdown('Status', 'fa-tasks', d.by_status, null);
     $('drillBreakdowns').innerHTML = bds;
 
@@ -201,6 +202,7 @@
     if (kind === 'rfo') openDrill('Root cause: ' + label, { rfo: String(id) });
     else if (kind === 'customer') openDrill(label, { customer_id: String(id) });
     else if (kind === 'region') openDrill('Region: ' + label, { region: label });
+    else if (kind === 'assignee') openDrill('Technician: ' + label, { assigned_to: String(id) });
   }
 
   function exportCsv() {
@@ -218,6 +220,53 @@
     document.body.appendChild(a);
     a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+
+  function visibleRows() {
+    var q = $('drillSearch').value.trim().toLowerCase();
+    if (!current) return [];
+    return !q ? current.rows : current.rows.filter(function (r) {
+      return [r.ref, r.customer, r.link, r.location, r.root_cause, r.suspected, r.status, r.assigned_to]
+        .some(function (v) { return v && String(v).toLowerCase().indexOf(q) !== -1; });
+    });
+  }
+
+  function exportPdf() {
+    if (!current) return;
+    var btn = $('drillPdf');
+    if (!window.ImpazaFaultsPdf) { alert('PDF export is not available on this page.'); return; }
+    if (btn.dataset.busy === '1') return;
+    btn.dataset.busy = '1';
+    var original = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Preparing…';
+
+    var q = $('drillSearch').value.trim();
+    var labels = stack.map(function (x) { return x.label; });
+    var d = current;
+    var notes = [];
+    if (ctx.region) notes.push('Region: ' + ctx.region);
+    if (ctx.impact && ctx.impact !== 'all') notes.push(ctx.impact === 'pop' ? 'POP impacted only' : 'Direct faults only');
+    if (q) notes.push('Filtered by "' + q + '"');
+    var spec = {
+      title: labels.length ? labels[labels.length - 1] : 'Faults',
+      trail: labels.length > 1 ? 'Drill path: ' + labels.join(' > ') : '',
+      period: d.period.label,
+      generatedBy: dataEl.getAttribute('data-user-name') || '',
+      filterNote: notes.join('   |   '),
+      stats: { total: d.total, open: d.open, restored: d.restored, avg_restore: d.avg_restore },
+      breakdowns: [
+        { title: 'Root causes', items: d.by_rfo },
+        { title: 'Customers', items: d.by_customer },
+        { title: 'Regions', items: d.by_region },
+        { title: 'Technicians', items: d.by_assignee },
+        { title: 'Status', items: d.by_status },
+      ],
+      rows: visibleRows(),
+      truncatedNote: d.truncated ? ('Only the newest ' + d.limit + ' of ' + d.total.toLocaleString() + ' faults are listed. Drill further to narrow the selection.') : '',
+    };
+    window.ImpazaFaultsPdf.downloadDrill(spec)
+      .catch(function (e) { console.error('[drill-pdf]', e); alert('Could not generate the PDF: ' + (e && e.message ? e.message : e)); })
+      .finally(function () { btn.dataset.busy = '0'; btn.innerHTML = original; });
   }
 
   /* ---------- wire up charts, KPI cards, tables ---------- */
@@ -323,6 +372,7 @@
 
     $('drillSearch').addEventListener('input', renderRows);
     $('drillCsv').addEventListener('click', exportCsv);
+    if ($('drillPdf')) $('drillPdf').addEventListener('click', exportPdf);
     $('drillBack').addEventListener('click', function () { if (stack.length > 1) goTo(stack.length - 2); });
     modalEl.addEventListener('shown.bs.modal', function () { $('drillBack').classList.toggle('d-none', stack.length < 2); });
     var obs = new MutationObserver(function () { $('drillBack').classList.toggle('d-none', stack.length < 2); });
@@ -330,13 +380,16 @@
   }
 
   function init() {
-    dataEl = $('reportsData');
+    // Operations Analytics uses #reportsData; other pages (Performance) use #drillConfig.
+    dataEl = $('drillConfig') || $('reportsData');
     modalEl = $('drillModal');
     if (!dataEl || !modalEl) return;
     url = dataEl.getAttribute('data-drill-url');
     ctx = parse('data-drill-context', {});
     monthKeys = parse('data-monthly-keys', []);
     wirePage();
+    // Public API so other page scripts can open the panel: ImpazaDrill.open('Label', { assigned_to: 5 })
+    window.ImpazaDrill = { open: function (label, params) { openDrill(label, params || {}, true); } };
     // Charts are created by reports.js on DOMContentLoaded; wire them right after.
     setTimeout(wireCharts, 0);
   }
